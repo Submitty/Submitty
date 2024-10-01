@@ -3232,13 +3232,11 @@ function refreshGradedComponentHeader(component_id, showMarkList) {
 /**
  * Resolves all version conflicts for the gradeable by re-submitting the current marks for every component
  */
-function updateAllComponentVersions() {
+async function updateAllComponentVersions() {
     if (confirm('Are you sure you want to update the version for all components without separately inspecting each component?')) {
-        ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), getAllComponentsFromDOM().map((x) => x.id)).then(() => {
-            Promise.all(getAllComponentsFromDOM().map((x) => reloadGradingComponent(x.id, false, false))).then(() => {
-                $('#change-graded-version').hide();
-            });
-        });
+        await ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), getAllComponentsFromDOM().map((x) => x.id));
+        await Promise.all(getAllComponentsFromDOM().map((x) => reloadGradingComponent(x.id, false, false)));
+        $('#change-graded-version').hide();
     }
 }
 
