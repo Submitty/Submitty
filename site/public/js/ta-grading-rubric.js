@@ -2781,13 +2781,19 @@ function scrollToPage(page_num) {
  * Opens the requested component
  * Note: This does not close the currently open component
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function openComponent(component_id) {
+async function openComponent(component_id) {
     setComponentInProgress(component_id);
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
-    return (isInstructorEditEnabled() ? openComponentInstructorEdit(component_id) : openComponentGrading(component_id))
-        .then(resizeNoScrollTextareas);
+    if (isInstructorEditEnabled()) {
+        await openComponentInstructorEdit(component_id);
+    }
+    else {
+        await openComponentGrading(component_id);
+    }
+    resizeNoScrollTextareas();
 }
 
 /**
