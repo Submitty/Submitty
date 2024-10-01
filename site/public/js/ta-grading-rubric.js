@@ -3027,54 +3027,51 @@ function marksEqual(mark0, mark1) {
 /**
  * Determines what to do when trying to save a mark provided the mark
  *  before edits, the DOM mark, and the server's up-to-date mark
- *  @return {Promise<boolean>} Resolves true on success, false on conflict
+ *  @async
+ *  @return {boolean} Resolves true on success, false on conflict
  */
-function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
+async function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
     const markDeleted = isMarkDeleted(domMark.id);
     if (oldServerMark !== null) {
         if (serverMark !== null) {
             // Mark edited under normal conditions
             if ((marksEqual(domMark, serverMark) || marksEqual(domMark, oldServerMark)) && !markDeleted) {
                 // If the domMark is not unique, then we don't need to do anything
-                return Promise.resolve(true);
+                return true;
             }
             else if (!marksEqual(serverMark, oldServerMark)) {
                 // The domMark is unique, and the serverMark is also unique,
                 // which means all 3 versions are different, which is a conflict state
-                return Promise.resolve(false);
+                return false;
             }
             else if (markDeleted) {
                 // domMark was deleted and serverMark hasn't changed from oldServerMark,
                 //  so try to delete the mark
-                return ajaxDeleteMark(gradeable_id, component_id, domMark.id)
-                    .catch((err) => {
-                        err.message = `Could not delete mark: ${err.message}`;
-                        throw err;
-                    })
-                    .then(() => {
-                        // Success, then resolve success
-                        return Promise.resolve(true);
-                    });
+                try {
+                    await ajaxDeleteMark(gradeable_id, component_id, domMark.id);
+                }
+                catch (err) {
+                    err.message = `Could not delete mark: ${err.message}`;
+                    throw err;
+                }
+                return true;
             }
             else {
                 // The domMark is unique and the serverMark is the same as the oldServerMark
                 //  so we should save the domMark to the server
-                return ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.title, domMark.points, domMark.publish)
-                    .then(() => {
-                        // Success, then resolve success
-                        return Promise.resolve(true);
-                    });
+                await ajaxSaveMark(gradeable_id, component_id, domMark.id, domMark.title, domMark.points, domMark.publish);
+                return true;
             }
         }
         else {
             // This means it was deleted from the server.
             if (!marksEqual(domMark, oldServerMark) && !markDeleted) {
                 // And the mark changed and wasn't deleted, which is a conflict state
-                return Promise.resolve(false);
+                return false;
             }
             else {
                 // And the mark didn't change or it was deleted, so don't do anything
-                return Promise.resolve(domMark.id);
+                return domMark.id;
             }
         }
     }
@@ -3082,21 +3079,21 @@ function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, old
         // This means it didn't exist when we started editing, so serverMark must also be null
         if (markDeleted) {
             // The mark was marked for deletion, but never existed... so do nothing
-            return Promise.resolve(true);
+            return true;
         }
         else {
             // The mark never existed and isn't deleted, so its new
-            return ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points, domMark.publish)
-                .then((data) => {
-                    // Success, then resolve true
-                    domMark.id = data.mark_id;
-                    return Promise.resolve(true);
-                })
-                .catch((err) => {
-                    // This means the user's mark was invalid
-                    err.message = `Failed to add mark: ${err.message}`;
-                    throw err;
-                });
+            try {
+                const data = await ajaxAddNewMark(gradeable_id, component_id, domMark.title, domMark.points, domMark.publish);
+                // Success, then resolve true
+                domMark.id = data.mark_id;
+                return true;
+            }
+            catch (err) {
+                // This means the user's mark was invalid
+                err.message = `Failed to add mark: ${err.message}`;
+                throw err;
+            }
         }
     }
 }
