@@ -1849,24 +1849,22 @@ async function onDeleteComponent(me) {
 /**
  * Called when the 'add new component' button is pressed
  */
-function onAddComponent(peer) {
-    addComponent(peer)
-        .catch((err) => {
-            console.error(err);
-            alert(`Failed to add component! ${err.message}`);
-        })
-        .then(() => {
-            return closeAllComponents(true, true);
-        })
-        .then(() => {
-            return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
-        })
-        .then(() => {
-            return openComponent(getComponentIdByOrder(getComponentCount() - 1));
-        })
-        .catch((err) => {
-            alert(`Failed to reload rubric! ${err.message}`);
-        });
+async function onAddComponent(peer) {
+    try {
+        await addComponent(peer);
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Failed to add component! ${err.message}`);
+    }
+    try {
+        await closeAllComponents(true, true);
+        await reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
+        await openComponent(getComponentIdByOrder(getComponentCount() - 1));
+    }
+    catch (err) {
+        alert(`Failed to reload rubric! ${err.message}`);
+    }
 }
 
 /**
