@@ -2689,19 +2689,15 @@ function toggleCustomMark(component_id) {
  * Opens a component for instructor edit mode
  * NOTE: don't call this function on its own.  Call 'openComponent' Instead
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function openComponentInstructorEdit(component_id) {
+async function openComponentInstructorEdit(component_id) {
     const gradeable_id = getGradeableId();
-    return ajaxGetComponentRubric(gradeable_id, component_id)
-        .then((component) => {
-            // Set the global mark list data for this component for conflict resolution
-            OLD_MARK_LIST[component_id] = component.marks;
-
-            // Render the component in instructor edit mode
-            //  and 'true' to show the mark list
-            return injectInstructorEditComponent(component, true, true);
-        });
+    const component = await ajaxGetComponentRubric(gradeable_id, component_id);
+    // Set the global mark list data for this component for conflict resolution
+    OLD_MARK_LIST[component_id] = component.marks;
+    await injectInstructorEditComponent(component, true, true);
 }
 
 /**
