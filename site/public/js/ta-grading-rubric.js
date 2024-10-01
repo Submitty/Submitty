@@ -3388,13 +3388,12 @@ async function injectTotalScoreBox(scores) {
 /**
  * Renders the rubric total box (instructor edit mode)
  * @param {Object} scores
- * @returns {Promise<string>}
+ * @async
+ * @returns {string}
  */
-function injectRubricTotalBox(scores) {
-    return renderRubricTotalBox(scores)
-        .then((elements) => {
-            setRubricTotalBoxContents(elements);
-        });
+async function injectRubricTotalBox(scores) {
+    const elements = await renderRubricTotalBox(scores);
+    setRubricTotalBoxContents(elements);
 }
 
 function addItempoolOptions(componentId) {
