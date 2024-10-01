@@ -1913,12 +1913,14 @@ async function importComponentsFromFile() {
  * Called when the point value of a common mark changes
  * @param me DOM Element of the mark point entry
  */
-function onMarkPointsChange(me) {
-    refreshComponentHeader(getComponentIdFromDOMElement(me), true)
-        .catch((err) => {
-            console.error(err);
-            alert(`Error updating component! ${err.message}`);
-        });
+async function onMarkPointsChange(me) {
+    try {
+        await refreshComponentHeader(getComponentIdFromDOMElement(me), true);
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error updating component! ${err.message}`);
+    }
 }
 
 /**
