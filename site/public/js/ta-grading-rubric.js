@@ -2315,21 +2315,17 @@ function deleteComponent(component_id) {
 /**
  * Sets the gradeable-wide page setting
  * @param {int} page PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, or PDF_PAGE_NONE
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function setPdfPageAssignment(page) {
+async function setPdfPageAssignment(page) {
     if (page === PDF_PAGE_INSTRUCTOR) {
         page = 1;
     }
 
-    return closeAllComponents(true, true)
-        .then(() => {
-            return ajaxSaveComponentPages(getGradeableId(), { page: page });
-        })
-        .then(() => {
-            // Reload the gradeable to refresh all the component's display
-            return reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
-        });
+    await closeAllComponents(true, true);
+    await ajaxSaveComponentPages(getGradeableId(), { page: page });
+    await reloadInstructorEditRubric(getGradeableId(), isItempoolAvailable(), getItempoolOptions());
 }
 
 /**
