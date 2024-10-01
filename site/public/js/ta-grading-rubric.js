@@ -2001,7 +2001,7 @@ function onCancelEditRubricComponent(me) {
 /**
  * Called when the overall comment box is changed
  */
-function onChangeOverallComment() {
+async function onChangeOverallComment() {
     // Get the current grader so that we can get their comment from the dom.
     const grader = getGraderId();
     const currentOverallComment = $(`textarea#overall-comment-${grader}`).val();
@@ -2010,13 +2010,15 @@ function onChangeOverallComment() {
     if (currentOverallComment !== previousOverallComment && currentOverallComment !== undefined) {
         $('.overall-comment-status').text('Saving Changes...');
         // If anything has changed, save the changes.
-        ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment).then(() => {
+        try {
+            await ajaxSaveOverallComment(getGradeableId(), getAnonId(), currentOverallComment);
             $('.overall-comment-status').text('All Changes Saved');
             // Update the current comment in the DOM.
             $(`textarea#overall-comment-${grader}`).data('previous-comment', currentOverallComment);
-        }).catch(() => {
+        }
+        catch {
             $('.overall-comment-status').text('Error Saving Changes');
-        });
+        }
     }
 }
 
