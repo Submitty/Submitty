@@ -731,11 +731,14 @@ async function ajaxDeleteComponent(gradeable_id, component_id) {
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {string} anon_id
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: true,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
@@ -744,21 +747,19 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
                 component_id: component_id,
                 anon_id: anon_id,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong verifying the component: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong verifying the component: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
