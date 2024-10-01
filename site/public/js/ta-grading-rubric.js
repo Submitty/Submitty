@@ -595,11 +595,14 @@ async function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
  * ajax call to update the pages of components in the gradeable
  * @param {string} gradeable_id
  * @param {*} pages format: { <component0-id> : <page0>, <component1-id> : <page1>, ... } OR { page } to set all
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxSaveComponentPages(gradeable_id, pages) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxSaveComponentPages(gradeable_id, pages) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
@@ -607,21 +610,19 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
                 csrf_token: csrfToken,
                 pages: JSON.stringify(pages),
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong saving the component pages: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong saving the component pages: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
