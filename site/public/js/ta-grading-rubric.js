@@ -2515,17 +2515,16 @@ async function reloadGradingComponent(component_id, editable = false, showMarkLi
 
 /**
  * Opens the component in the cookie
- * @returns {Promise}
+ * @async
+ * @returns {void}
  */
-function openCookieComponent() {
+async function openCookieComponent() {
     const cookieComponent = getOpenComponentIdFromCookie();
     if (!componentExists(cookieComponent)) {
-        return Promise.resolve();
+        return;
     }
-    return toggleComponent(cookieComponent, false)
-        .then(() => {
-            scrollToComponent(cookieComponent);
-        });
+    await toggleComponent(cookieComponent, false);
+    scrollToComponent(cookieComponent);
 }
 
 /**
