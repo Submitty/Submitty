@@ -2203,14 +2203,16 @@ function onClickCountDown(me) {
  * Does not change point value if not divisible by precision
  * @param me DOM element of the input box
  */
-function onComponentPointsChange(me) {
+async function onComponentPointsChange(me) {
     if (dividesEvenly($(me).val(), getPointPrecision())) {
         $(me).css('background-color', 'var(--standard-input-background)');
-        refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true)
-            .catch((err) => {
-                console.error(err);
-                alert(`Failed to refresh component! ${err.message}`);
-            });
+        try {
+            await refreshInstructorEditComponentHeader(getComponentIdFromDOMElement(me), true);
+        }
+        catch (err) {
+            console.error(err);
+            alert(`Failed to refresh component! ${err.message}`);
+        }
     }
     else {
         // Make box red to indicate error
