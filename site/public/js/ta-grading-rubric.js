@@ -2104,12 +2104,14 @@ async function onVerifyComponent(me) {
 /**
  * Callback for the 'verify all' button
  */
-function onVerifyAll() {
-    verifyAllComponents()
-        .catch((err) => {
-            console.error(err);
-            alert(`Error verifying all components! ${err.message}`);
-        });
+async function onVerifyAll() {
+    try {
+        await verifyAllComponents();
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error verifying all components! ${err.message}`);
+    }
 }
 
 /**
