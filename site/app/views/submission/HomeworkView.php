@@ -274,7 +274,8 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_day_budget
+                    'remaining' => $late_day_budget,
+                    'allowed_remaining' => $late_days_allowed - $active_days_charged
                 ]];
             }
             if ($error) {
