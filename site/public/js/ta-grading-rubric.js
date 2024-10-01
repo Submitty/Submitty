@@ -1947,14 +1947,16 @@ async function onGetMarkStats(me) {
  * @param me DOM Element of the component header div
  * @param edit_mode editing from ta grading page or instructor edit gradeable page
  */
-function onClickComponent(me, edit_mode = false) {
+async function onClickComponent(me, edit_mode = false) {
     const component_id = getComponentIdFromDOMElement(me);
-    toggleComponent(component_id, true, edit_mode)
-        .catch((err) => {
-            console.error(err);
-            setComponentInProgress(component_id, false);
-            alert(`Error opening/closing component! ${err.message}`);
-        });
+    try {
+        await toggleComponent(component_id, true, edit_mode);
+    }
+    catch (err) {
+        console.error(err);
+        setComponentInProgress(component_id, false);
+        alert(`Error opening/closing component! ${err.message}`);
+    }
 }
 
 /**
