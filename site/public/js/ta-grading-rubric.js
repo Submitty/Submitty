@@ -485,11 +485,14 @@ async function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
  * @param {string} title
  * @param {number} points
  * @param {boolean} publish
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publish) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publish) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
@@ -501,21 +504,19 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
                 title: title,
                 publish: publish,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong saving the mark: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong saving the mark: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
