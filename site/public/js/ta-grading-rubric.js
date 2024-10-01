@@ -2704,19 +2704,18 @@ async function openComponentInstructorEdit(component_id) {
  * Opens a component for grading mode (including normal edit mode)
  * NOTE: don't call this function on its own.  Call 'openComponent' Instead
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function openComponentGrading(component_id) {
+async function openComponentGrading(component_id) {
     OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id];
     OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
 
-    return injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], isEditModeEnabled(), true)
-        .then(() => {
-            const page = getComponentPageNumber(component_id);
-            if (page) {
-                scrollToPage(page);
-            }
-        });
+    await injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], isEditModeEnabled(), true);
+    const page = getComponentPageNumber(component_id);
+    if (page) {
+        scrollToPage(page);
+    }
 }
 
 /**
