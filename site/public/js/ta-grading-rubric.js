@@ -2433,32 +2433,34 @@ async function updateTotals(gradeable_id, anon_id) {
  *  in the 'PeerPanel.twig' server template
  * @param {string} gradeable_id
  * @param {string} anon_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function reloadPeerRubric(gradeable_id, anon_id) {
+async function reloadPeerRubric(gradeable_id, anon_id) {
     TA_GRADING_PEER = true;
-    let gradeable_tmp = null;
-    return ajaxGetGradeableRubric(gradeable_id)
-        .catch((err) => {
-            alert(`Could not fetch gradeable rubric: ${err.message}`);
-        })
-        .then((gradeable) => {
-            gradeable_tmp = gradeable;
-            return ajaxGetGradedGradeable(gradeable_id, anon_id, true);
-        })
-        .catch((err) => {
-            alert(`Could not fetch graded gradeable: ${err.message}`);
-        })
-        .then((graded_gradeable) => {
-            const elements = renderPeerGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
-                true, false, getDisplayVersion());
-            const gradingBox = $('#peer-grading-box');
-            gradingBox.html(elements);
-        })
-        .catch((err) => {
-            alert(`Could not render gradeable: ${err.message}`);
-            console.error(err);
-        });
+    let gradeable, graded_gradeable;
+    try {
+        gradeable = await ajaxGetGradeableRubric(gradeable_id);
+    }
+    catch (err) {
+        alert(`Could not fetch gradeable rubric: ${err.message}`);
+    }
+    try {
+        await ajaxGetGradedGradeable(gradeable_id, anon_id, true);
+    }
+    catch (err) {
+        alert(`Could not fetch graded gradeable: ${err.message}`);
+    }
+    try {
+        const elements = renderPeerGradeable(getGraderId(), gradeable, graded_gradeable,
+            true, false, getDisplayVersion());
+        const gradingBox = $('#peer-grading-box');
+        gradingBox.html(elements);
+    }
+    catch (err) {
+        alert(`Could not render gradeable: ${err.message}`);
+        console.error(err);
+    }
 }
 
 /**
