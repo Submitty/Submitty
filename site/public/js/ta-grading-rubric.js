@@ -3181,51 +3181,39 @@ async function saveComponent(component_id) {
  * Note: if the mark was deleted remotely, but the submitter was assigned it locally, the mark
  *  will be resurrected with a new id
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function saveGradedComponent(component_id) {
+async function saveGradedComponent(component_id) {
     const gradeable_id = getGradeableId();
     const gradedComponent = getGradedComponentFromDOM(component_id);
     gradedComponent.graded_version = getDisplayVersion();
 
-    return ajaxGetComponentRubric(getGradeableId(), component_id)
-        .then((component) => {
-            const missingMarks = [];
-            const domComponent = getComponentFromDOM(component_id);
-
-            // Check each mark the submitter was assigned
-            gradedComponent.mark_ids.forEach((mark_id) => {
-                // Mark exists remotely, so no action required
-                if (getMarkFromMarkArray(component.marks, mark_id) !== null) {
-                    return;
-                }
-                missingMarks.push(getMarkFromMarkArray(domComponent.marks, mark_id));
-            });
-
-            // For each mark missing from the server, add it
-            let sequence = Promise.resolve();
-            missingMarks.forEach((mark) => {
-                sequence = sequence
-                    .then(() => {
-                        return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish);
-                    })
-                    .then((data) => {
-                        // Make sure to add it to the grade.  We don't bother removing the deleted mark ids
-                        //  however, because the server filters out non-existent mark ids
-                        gradedComponent.mark_ids.push(data.mark_id);
-                    });
-            });
-            return sequence;
-        })
-        .then(() => {
-            return ajaxSaveGradedComponent(
-                gradeable_id, component_id, getAnonId(),
-                gradedComponent.graded_version,
-                gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
-                gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
-                isSilentEditModeEnabled(),
-                gradedComponent.mark_ids);
-        });
+    const component = await ajaxGetComponentRubric(getGradeableId(), component_id);
+    const missingMarks = [];
+    const domComponent = getComponentFromDOM(component_id);
+    // Check each mark the submitter was assigned
+    gradedComponent.mark_ids.forEach((mark_id) => {
+        // Mark exists remotely, so no action required
+        if (getMarkFromMarkArray(component.marks, mark_id) !== null) {
+            return;
+        }
+        missingMarks.push(getMarkFromMarkArray(domComponent.marks, mark_id));
+    });
+    // For each mark missing from the server, add it
+    await Promise.all(missingMarks.map(async (mark) => {
+        const data = await ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish);
+        // Make sure to add it to the grade.  We don't bother removing the deleted mark ids
+        //  however, because the server filters out non-existent mark ids
+        gradedComponent.mark_ids.push(data.mark_id);
+    }));
+    await ajaxSaveGradedComponent(
+        gradeable_id, component_id, getAnonId(),
+        gradedComponent.graded_version,
+        gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
+        gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
+        isSilentEditModeEnabled(),
+        gradedComponent.mark_ids);
 }
 
 /**
