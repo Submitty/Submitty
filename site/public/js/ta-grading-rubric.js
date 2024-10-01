@@ -3331,16 +3331,13 @@ async function injectInstructorEditComponent(component, showMarkList, loadItempo
  * Renders the provided component object for instructor edit mode header
  * @param {Object} component
  * @param {boolean} showMarkList Whether to style the header like the mark list is open
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function injectInstructorEditComponentHeader(component, showMarkList) {
-    return renderEditComponentHeader(component, getPointPrecision(), showMarkList)
-        .then((elements) => {
-            setComponentHeaderContents(component.id, elements);
-        })
-        .then(() => {
-            return refreshRubricTotalBox();
-        });
+async function injectInstructorEditComponentHeader(component, showMarkList) {
+    const elements = await renderEditComponentHeader(component, getPointPrecision(), showMarkList);
+    setComponentHeaderContents(component.id, elements);
+    await refreshRubricTotalBox();
 }
 
 /**
