@@ -2619,9 +2619,10 @@ function open_overall_comment_tab(user) {
 /**
  * Adds a new mark to the DOM and refreshes the display
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function addNewMark(component_id) {
+async function addNewMark(component_id) {
     const component = getComponentFromDOM(component_id);
     component.marks.push({
         id: getNewMarkId(),
@@ -2630,19 +2631,13 @@ function addNewMark(component_id) {
         publish: false,
         order: component.marks.length,
     });
-    let promise = Promise.resolve();
     if (!isInstructorEditEnabled()) {
         const graded_component = getGradedComponentFromDOM(component_id);
-        promise = promise.then(() => {
-            return injectGradingComponent(component, graded_component, true, true);
-        });
+        await injectGradingComponent(component, graded_component, true, true);
     }
     else {
-        promise = promise.then(() => {
-            return injectInstructorEditComponent(component, true);
-        });
+        await injectInstructorEditComponent(component, true);
     }
-    return promise;
 }
 
 /**
