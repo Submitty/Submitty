@@ -2025,12 +2025,14 @@ async function onChangeOverallComment() {
 /**
  * When the component order changes, update the server
  */
-function onComponentOrderChange() {
-    ajaxSaveComponentOrder(getGradeableId(), getComponentOrders())
-        .catch((err) => {
-            console.error(err);
-            alert(`Error reordering components! ${err.message}`);
-        });
+async function onComponentOrderChange() {
+    try {
+        await ajaxSaveComponentOrder(getGradeableId(), getComponentOrders());
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error reordering components! ${err.message}`);
+    }
 }
 
 /**
