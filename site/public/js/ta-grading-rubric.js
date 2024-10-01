@@ -3372,15 +3372,17 @@ async function injectGradingComponentHeader(component, graded_component, showMar
 /**
  * Renders the total scores box
  * @param {Object} scores
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function injectTotalScoreBox(scores) {
-    return renderTotalScoreBox(scores)
-        .then((elements) => {
-            setTotalScoreBoxContents(elements);
-        }).catch((error) => {
-            console.error('Failed to render:', error);
-        });
+async function injectTotalScoreBox(scores) {
+    try {
+        const elements = await renderTotalScoreBox(scores);
+        setTotalScoreBoxContents(elements);
+    }
+    catch (error) {
+        console.error('Failed to render:', error);
+    }
 }
 
 /**
