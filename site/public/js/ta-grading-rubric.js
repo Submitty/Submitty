@@ -2284,18 +2284,15 @@ async function verifyComponent(component_id) {
 
 /**
  * Verifies all graded components and reloads the rubric
- * @returns {Promise}
+ * @async
+ * @returns {void}
  */
-function verifyAllComponents() {
+async function verifyAllComponents() {
     const gradeable_id = getGradeableId();
     const anon_id = getAnonId();
-    return ajaxVerifyAllComponents(gradeable_id, anon_id)
-        .then(() => {
-            return reloadGradingRubric(gradeable_id, anon_id);
-        })
-        .then(() => {
-            updateVerifyAllButton();
-        });
+    await ajaxVerifyAllComponents(gradeable_id, anon_id);
+    await reloadGradingRubric(gradeable_id, anon_id);
+    updateVerifyAllButton();
 }
 
 /**
