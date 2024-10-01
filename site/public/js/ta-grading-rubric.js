@@ -2349,37 +2349,34 @@ function getMarkFromMarkArray(marks, mark_id) {
  *  in the 'RubricPanel.twig' server template
  * @param {string} gradeable_id
  * @param {string} anon_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function reloadGradingRubric(gradeable_id, anon_id) {
-    let gradeable_tmp = null;
-    return ajaxGetGradeableRubric(gradeable_id)
-        .catch((err) => {
-            alert(`Could not fetch gradeable rubric: ${err.message}`);
-        })
-        .then((gradeable) => {
-            gradeable_tmp = gradeable;
-            return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
-        })
-        .catch((err) => {
-            alert(`Could not fetch graded gradeable: ${err.message}`);
-        })
-        .then((graded_gradeable) => {
-            GRADED_GRADEABLE = graded_gradeable;
-            return loadComponentData(gradeable_tmp, graded_gradeable)
-                .then(() => {
-                    return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
-                        isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
-                });
-        })
-        .then((elements) => {
-            setRubricDOMElements(elements);
-            return openCookieComponent();
-        })
-        .catch((err) => {
-            alert(`Could not render gradeable: ${err.message}`);
-            console.error(err);
-        });
+async function reloadGradingRubric(gradeable_id, anon_id) {
+    let gradeable;
+    try {
+        gradeable = await ajaxGetGradeableRubric(gradeable_id);
+    }
+    catch (err) {
+        alert(`Could not fetch gradeable rubric: ${err.message}`);
+    }
+    try {
+        GRADED_GRADEABLE = await ajaxGetGradedGradeable(gradeable_id, anon_id, false);
+    }
+    catch (err) {
+        alert(`Could not fetch graded gradeable: ${err.message}`);
+    }
+    try {
+        await loadComponentData(gradeable, GRADED_GRADEABLE);
+        const elements = await renderGradingGradeable(getGraderId(), gradeable, GRADED_GRADEABLE,
+            isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
+        setRubricDOMElements(elements);
+        await openCookieComponent();
+    }
+    catch (err) {
+        alert(`Could not render gradeable: ${err.message}`);
+        console.error(err);
+    }
 }
 /**
 * Call this to save components and graded components to global list
