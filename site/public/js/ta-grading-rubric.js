@@ -800,11 +800,14 @@ async function ajaxVerifyAllComponents(gradeable_id, anon_id) {
  * ajax call to change the graded version of the gradeable
  * @param {string} gradeable_id
  * @param {string} anon_id
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version, component_ids) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version, component_ids) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'change_grade_version']),
@@ -814,21 +817,19 @@ function ajaxChangeGradedVersion(gradeable_id, anon_id, component_version, compo
                 component_ids,
                 csrf_token: csrfToken,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong changing graded version: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong changing graded version: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
