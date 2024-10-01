@@ -2053,12 +2053,14 @@ async function onToggleMark(me) {
  * Called when one of the custom mark fields changes
  * @param me DOM Element of one of the custom mark's elements
  */
-function onCustomMarkChange(me) {
-    updateCustomMark(getComponentIdFromDOMElement(me))
-        .catch((err) => {
-            console.error(err);
-            alert(`Error updating custom mark! ${err.message}`);
-        });
+async function onCustomMarkChange(me) {
+    try {
+        await updateCustomMark(getComponentIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error updating custom mark! ${err.message}`);
+    }
 }
 
 /**
