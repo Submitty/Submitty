@@ -152,11 +152,13 @@ async function ajaxGetGradeableRubric(gradeable_id) {
  * @param {number} upper_clamp
  * @param {boolean} is_itempool_linked
  * @param {string} itempool_option
- * @returns {Promise}
+ * @async
+ * @returns {Object}
  */
-function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp, is_itempool_linked, itempool_option) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp, is_itempool_linked, itempool_option) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
@@ -175,21 +177,19 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
                 itempool_option: itempool_option === 'null' ? undefined : itempool_option,
                 peer: false,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong saving the component: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong saving the component: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
