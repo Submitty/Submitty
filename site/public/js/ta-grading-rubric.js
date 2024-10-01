@@ -2970,61 +2970,47 @@ function unCheckFirstMark(component_id) {
  * Saves the mark list to the server for a component and handles any conflicts.
  * Properties that are saved are: mark point values, mark titles, and mark order
  * @param {int} component_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function saveMarkList(component_id) {
+async function saveMarkList(component_id) {
     const gradeable_id = getGradeableId();
-    return ajaxGetComponentRubric(gradeable_id, component_id)
-        .then((component) => {
-            const domMarkList = getMarkListFromDOM(component_id);
-            const serverMarkList = component.marks;
-            const oldServerMarkList = OLD_MARK_LIST[component_id];
+    const component = await ajaxGetComponentRubric(gradeable_id, component_id);
+    const domMarkList = getMarkListFromDOM(component_id);
+    const serverMarkList = component.marks;
+    const oldServerMarkList = OLD_MARK_LIST[component_id];
 
-            // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
-            const conflictMarks = {};
+    // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
+    const conflictMarks = {};
 
-            let sequence = Promise.resolve();
+    // For each DOM mark, try to save it
+    await Promise.all(domMarkList.map(async (domMark) => {
+        const serverMark = getMarkFromMarkArray(serverMarkList, domMark.id);
+        const oldServerMark = getMarkFromMarkArray(oldServerMarkList, domMark.id);
+        const success = await tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark);
+        // success of false counts as conflict
+        if (success === false) {
+            conflictMarks[domMark.id] = {
+                domMark: domMark,
+                serverMark: serverMark,
+                oldServerMark: oldServerMark,
+                localDeleted: isMarkDeleted(domMark.id),
+            };
+        }
+    }));
+    // No conflicts, so don't open the popup
+    if (Object.keys(conflictMarks).length === 0) {
+        return;
+    }
 
-            // For each DOM mark, try to save it
-            domMarkList.forEach((domMark) => {
-                const serverMark = getMarkFromMarkArray(serverMarkList, domMark.id);
-                const oldServerMark = getMarkFromMarkArray(oldServerMarkList, domMark.id);
-                sequence = sequence
-                    .then(() => {
-                        return tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark);
-                    })
-                    .then((success) => {
-                        // success of false counts as conflict
-                        if (success === false) {
-                            conflictMarks[domMark.id] = {
-                                domMark: domMark,
-                                serverMark: serverMark,
-                                oldServerMark: oldServerMark,
-                                localDeleted: isMarkDeleted(domMark.id),
-                            };
-                        }
-                    });
-            });
-
-            return sequence
-                .then(() => {
-                    // No conflicts, so don't open the popup
-                    if (Object.keys(conflictMarks).length === 0) {
-                        return;
-                    }
-
-                    // Prompt the user with any conflicts
-                    return openMarkConflictPopup(component_id, conflictMarks);
-                })
-                .then(() => {
-                    const markOrder = {};
-                    domMarkList.forEach((mark) => {
-                        markOrder[mark.id] = mark.order;
-                    });
-                    // Finally, save the order
-                    return ajaxSaveMarkOrder(gradeable_id, component_id, markOrder);
-                });
-        });
+    // Prompt the user with any conflicts
+    await openMarkConflictPopup(component_id, conflictMarks);
+    const markOrder = {};
+    domMarkList.forEach((mark) => {
+        markOrder[mark.id] = mark.order;
+    });
+    // Finally, save the order
+    await ajaxSaveMarkOrder(gradeable_id, component_id, markOrder);
 }
 
 /**
