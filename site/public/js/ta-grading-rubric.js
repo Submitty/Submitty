@@ -2531,21 +2531,17 @@ async function openCookieComponent() {
  * Closes all open components and the overall comment
  * @param {boolean} save_changes
  * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
- * @return {Promise<void>}
+ * @async
+ * @return {void}
  */
-function closeAllComponents(save_changes, edit_mode = false) {
-    let sequence = Promise.resolve();
-
+async function closeAllComponents(save_changes, edit_mode = false) {
     // Close all open components.  There shouldn't be more than one,
     //  but just in case there is...
-    getOpenComponentIds().forEach((id) => {
-        sequence = sequence.then(() => {
-            if (isComponentOpen(id)) {
-                return closeComponent(id, save_changes, edit_mode);
-            }
-        });
-    });
-    return sequence;
+    await Promise.all(getOpenComponentIds().map(async (id) => {
+        if (isComponentOpen(id)) {
+            await closeComponent(id, save_changes, edit_mode);
+        }
+    }));
 }
 
 /**
