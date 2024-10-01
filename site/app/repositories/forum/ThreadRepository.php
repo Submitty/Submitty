@@ -64,7 +64,7 @@ class ThreadRepository extends EntityRepository {
     }
 
     
-    public function getThreadDetail(int $thread_id): Thread {
+    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): Thread {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('t')
             ->from(Thread::class, 't')
@@ -72,13 +72,56 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('pa')
             ->addSelect('ph')
             ->addSelect('u')
-            ->join('t.posts', 'p')
-            ->join('p.attachments', 'pa')
-            ->join('p.history', 'ph')
+            ->addSelect('pu')
+            ->leftJoin('t.posts', 'p')
+            ->leftJoin('p.attachments', 'pa')
+            ->leftJoin('p.history', 'ph')
             ->join('t.categories', 'c')
             ->join('t.author', 'u')
+            ->leftJoin('p.author', 'pu')
             ->andWhere('t.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
+        
+        switch ($order_posts_by) {
+            case 'alpha':
+                $qb->addOrderBy('pu.user_familyname', 'ASC')
+                    ->addOrderBy('p.timestamp', 'ASC')
+                    ->addOrderBy('p.id', 'ASC');
+                break;
+            case 'alpha_by_registration':
+                $qb->addOrderBy('pu.registration_section', 'ASC')
+                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) as user_familyname_order')
+                    ->addOrderBy('user_familyname_order', 'ASC');
+                break;
+            case 'alpha_by_registration':
+                $qb->addOrderBy('pu.rotating_section', 'ASC')
+                    ->addSelect('COALESCE(pu.user_preferred_familyname, pu.user_familyname) as user_familyname_order')
+                    ->addOrderBy('user_familyname_order', 'ASC');
+                break;
+            case 'reverse-time':
+                $qb->addOrderBy('p.timestamp', 'DESC')
+                    ->addOrderBy('p.id', 'ASC');
+                break;
+            default:
+                $qb->addOrderBy('p.timestamp', 'ASC')
+                    ->addOrderBy('p.id', 'ASC');
+                break;
+        }
+        
         return $qb->getQuery()->getSingleResult();
+    }
+
+    /**
+     * @return Thread[]
+     */
+    public function getMergeThreadOptions(Thread $thread): array {
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('t')
+            ->from(Thread::class, 't')
+            ->addSelect('p')
+            ->leftJoin('t.posts', 'p')
+            ->where('p.timestamp < :timestamp')
+            ->setParameter('timestamp', $thread->getFirstPost()->getTimestamp());
+        return $qb->getQuery()->getResult();
     }
 }

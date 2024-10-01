@@ -87,11 +87,23 @@ class Thread {
         return $this->lock_thread_date;
     }
 
+    public function isLocked(): bool {
+        return !is_null($this->lock_thread_date) && $this->lock_thread_date < date("Y-m-d H:i:S"); 
+    }
+
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $pinned_expiration;
 
     public function getPinnedExpiration(): DateTime {
         return $this->pinned_expiration;
+    }
+
+    public function isPinned(): bool {
+        return $this->pinned_expiration > date("Y-m-d H:i:s");
+    }
+
+    public function IsPinnedExpiring(): bool {
+        return $this->pinned_expiration <= date("Y-m-d H:i:s", strtotime("+7 day"));
     }
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
@@ -168,9 +180,5 @@ class Thread {
         return $this->posts->filter(function ($x) {
             return $x->getParent()->getId() == -1;
         })->first();
-    }
-
-    public function reOrderPosts(string $order): void {
-
     }
 }

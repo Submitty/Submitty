@@ -49,6 +49,13 @@ class Post {
     #[ORM\OneToMany(mappedBy: "parent", targetEntity: Post::class)]
     protected Collection $children;
 
+    /**
+     * @return Collection<Post>
+     */
+    public function getChildren(): Collection {
+        return $this->children;
+    }
+
     #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "posts")]
     #[ORM\JoinColumn(name: "author_user_id", referencedColumnName: "user_id")]
     protected UserEntity $author;
@@ -127,6 +134,13 @@ class Post {
         return $this->attachments;
     }
 
+    protected int $reply_level = 1;
+    public function getReplyLevel(): int {
+        return $this->reply_level;
+    }
+    public function setReplyLevel(int $new): void {
+        $this->reply_level = $new;
+    }
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
      * We are free to make constructors for "empty" or "junk" posts.
