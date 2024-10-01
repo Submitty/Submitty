@@ -696,11 +696,14 @@ async function ajaxAddComponent(gradeable_id, peer) {
  * ajax call to delete a component from the server
  * @param {string} gradeable_id
  * @param {int} component_id
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxDeleteComponent(gradeable_id, component_id) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxDeleteComponent(gradeable_id, component_id) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
@@ -708,21 +711,19 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
                 csrf_token: csrfToken,
                 component_id: component_id,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong deleting the component: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong deleting the component: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
