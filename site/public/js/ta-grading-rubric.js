@@ -297,11 +297,14 @@ async function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
  * @param {string} custom_message
  * @param {boolean} silent_edit True to edit marks assigned without changing the grader
  * @param {int[]} mark_ids
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status 'success'
+ * @return {Object}
  */
-function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_version, custom_points, custom_message, silent_edit, mark_ids) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
@@ -315,21 +318,19 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
                 silent_edit: silent_edit,
                 mark_ids: mark_ids,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong saving the component grade: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong saving the component grade: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
