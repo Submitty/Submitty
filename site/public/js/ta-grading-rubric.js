@@ -1791,12 +1791,14 @@ function disableEditModeBox(disabled) {
  * Called when the 'add new mark' div gets pressed
  * @param me DOM element of the 'add new mark' div
  */
-function onAddNewMark(me) {
-    addNewMark(getComponentIdFromDOMElement(me))
-        .catch((err) => {
-            console.error(err);
-            alert(`Error adding mark! ${err.message}`);
-        });
+async function onAddNewMark(me) {
+    try {
+        await addNewMark(getComponentIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error adding mark! ${err.message}`);
+    }
 }
 
 /**
