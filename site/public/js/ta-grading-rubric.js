@@ -2849,24 +2849,18 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
  * NOTE: don't call this function on its own.  Call 'closeComponent' Instead
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function closeComponentGrading(component_id, saveChanges) {
-    let sequence = Promise.resolve();
-
+async function closeComponentGrading(component_id, saveChanges) {
     GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
     COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
 
     if (saveChanges) {
-        sequence = sequence.then(() => {
-            return saveComponent(component_id);
-        });
+        await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden
-    return sequence
-        .then(() => {
-            injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], false, false);
-        });
+    injectGradingComponent(COMPONENT_RUBRIC_LIST[component_id], GRADED_COMPONENTS_LIST[component_id], false, false);
 }
 
 /**
