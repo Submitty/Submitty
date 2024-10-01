@@ -2909,12 +2909,13 @@ function scrollToOverallComment() {
  * Checks the requested mark and refreshes the component
  * @param {int} component_id
  * @param {int} mark_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function checkMark(component_id, mark_id) {
+async function checkMark(component_id, mark_id) {
     // Don't let them check a disabled mark
     if (isMarkDisabled(mark_id)) {
-        return Promise.resolve();
+        return;
     }
 
     // First fetch the necessary information from the DOM
@@ -2931,7 +2932,7 @@ function checkMark(component_id, mark_id) {
     gradedComponent.mark_ids.push(mark_id);
 
     // Finally, re-render the component
-    return injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
+    await injectGradingComponent(getComponentFromDOM(component_id), gradedComponent, false, true);
 }
 
 /**
