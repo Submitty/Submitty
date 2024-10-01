@@ -121,7 +121,8 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('p')
             ->leftJoin('t.posts', 'p')
             ->where('p.timestamp < :timestamp')
-            ->setParameter('timestamp', $thread->getFirstPost()->getTimestamp());
+            ->setParameter('timestamp', $thread->getFirstPost()->getTimestamp())
+            ->andWhere('t.merged_thread IS NULL');
         return $qb->getQuery()->getResult();
     }
 }

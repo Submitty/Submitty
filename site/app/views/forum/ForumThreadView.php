@@ -668,13 +668,13 @@ class ForumThreadView extends AbstractView {
             $first_post = $thread->getFirstPost();
             if ($first_post === false) {
                 // Thread without any posts(eg. Merged Thread)
-                $first_post = new Post();
+                $first_post = new Post($thread);
                 $date = null;
             }
             else {
                 $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($first_post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             }
-            if (!is_null($thread->getMergedThread())) {
+            if ($thread->isMergedThread()) {
                 // For the merged threads
                 $thread->setStatus(0);
             }
@@ -767,7 +767,7 @@ class ForumThreadView extends AbstractView {
                 "pinned" => $thread->isPinned(),
                 "expiring" => $thread->isPinnedExpiring(),
                 "favorite" => $favorite,
-                "merged_thread_id" => $thread->getMergedThread()->getId(),
+                "merged_thread_id" => $thread->getMergedThread()?->getId() ?? -1,
                 "status" => $thread->getStatus(),
                 "fa_icon" => $fa_icon,
                 "fa_class" => $fa_class,
@@ -927,7 +927,7 @@ class ForumThreadView extends AbstractView {
 
         $post_user_info = [];
 
-        $merged_thread = $thread->getMergedThread() === -1 && $userAccessFullGrading;
+        $merged_thread = $thread->isMergedThread() && $userAccessFullGrading;
 
         $post_button = [];
 

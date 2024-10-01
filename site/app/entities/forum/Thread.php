@@ -56,6 +56,11 @@ class Thread {
         return $this->merged_thread;
     }
 
+    public function isMergedThread(): bool {
+        //print_r($this->merged_thread?->getId());
+        return ($this->merged_thread?->getId() ?? -1) !== -1; 
+    }
+
     /**
      * @var Collection<Thread>
      */

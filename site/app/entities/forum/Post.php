@@ -146,9 +146,15 @@ class Post {
      * We are free to make constructors for "empty" or "junk" posts.
      */ 
     
-    public function __construct() {
+    public function __construct(Thread $merged_thread) {
         $this->content = '';
         $this->render_markdown = false;
+        $this->author = $merged_thread->getAuthor();
+        $this->thread = $merged_thread;
+        $this->parent = null;
+        $this->deleted = false;
+        $this->anonymous = true;
+        $this->id = -1;
     }
 
     public function isUnread(ThreadAccess $view): bool {

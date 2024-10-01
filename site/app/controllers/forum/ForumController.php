@@ -1170,11 +1170,11 @@ class ForumController extends AbstractController {
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         };
-        $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
+        $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $show_merged_thread = $this->showMergedThreads($currentCourse);
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread], false, $thread_id, $categories_ids, true);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread], false, $thread_id, $category_ids, true);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -1215,7 +1215,6 @@ class ForumController extends AbstractController {
         $thread_status = $this->getSavedThreadStatus([]);
         $new_posts = [];
         $unread_threads = $this->showUnreadThreads();
-
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
 
@@ -1232,18 +1231,20 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         }
 
-        $merge_thread_options = $repo->getMergeThreadOptions($thread);
+
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
         $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
-        if ($thread->getMergedThread() === -1) {
+        if ($thread->isMergedThread()) {
             // Redirect merged thread to parent
             $this->core->addSuccessMessage("Requested thread is merged into current thread.");
             if (!empty($_REQUEST["ajax"])) {
-                return $this->core->getOutput()->renderJsonSuccess(['merged' => true, 'destination' => $this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']])]);
+                return $this->core->getOutput()->renderJsonSuccess(['merged' => true, 'destination' => $this->core->buildCourseUrl(['forum', 'threads', $thread->getMergedThread()->getId()])]);
             }
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread->getMergedThread()->getId()]));
             return;
         }
+
+        $merge_thread_options = $repo->getMergeThreadOptions($thread);
         
         $pageNumber = 0;
         $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $pageNumber);
