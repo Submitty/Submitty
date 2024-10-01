@@ -3315,20 +3315,16 @@ function refreshRubricTotalBox() {
  * @param {Object} component
  * @param {boolean} showMarkList Whether the mark list should be visible
  * @param {boolean} loadItempoolOptions whether to load the itempool options or not
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function injectInstructorEditComponent(component, showMarkList, loadItempoolOptions = false) {
-    return renderEditComponent(component, getPointPrecision(), showMarkList)
-        .then((elements) => {
-            setComponentContents(component.id, elements);
-        })
-        .then(() => {
-            return refreshRubricTotalBox();
-        }).then(() => {
-            if (isItempoolAvailable() && loadItempoolOptions) {
-                addItempoolOptions(component.id);
-            }
-        });
+async function injectInstructorEditComponent(component, showMarkList, loadItempoolOptions = false) {
+    const elements = await renderEditComponent(component, getPointPrecision(), showMarkList);
+    setComponentContents(component.id, elements);
+    await refreshRubricTotalBox();
+    if (isItempoolAvailable() && loadItempoolOptions) {
+        addItempoolOptions(component.id);
+    }
 }
 
 /**
