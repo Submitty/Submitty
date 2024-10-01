@@ -2091,12 +2091,14 @@ async function onToggleCustomMark(me) {
  * Callback for the 'verify' buttons
  * @param me DOM Element of the verify button
  */
-function onVerifyComponent(me) {
-    verifyComponent(getComponentIdFromDOMElement(me))
-        .catch((err) => {
-            console.error(err);
-            alert(`Error verifying component! ${err.message}`);
-        });
+async function onVerifyComponent(me) {
+    try {
+        await verifyComponent(getComponentIdFromDOMElement(me));
+    }
+    catch (err) {
+        console.error(err);
+        alert(`Error verifying component! ${err.message}`);
+    }
 }
 
 /**
