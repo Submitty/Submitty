@@ -2404,29 +2404,27 @@ async function loadComponentData(gradeable, graded_gradeable) {
  * Call this to update the totals and subtotals once a grader is done grading a component
  * @param {string} gradeable_id
  * @param {string} anon_id
- * @return {Promise}
+ * @async
+ * @return {void}
  */
 
-function updateTotals(gradeable_id, anon_id) {
-    let gradeable_tmp = null;
-    return ajaxGetGradeableRubric(gradeable_id)
-        .catch((err) => {
-            alert(`Could not fetch gradeable rubric: ${err.message}`);
-        })
-        .then((gradeable) => {
-            gradeable_tmp = gradeable;
-            return ajaxGetGradedGradeable(gradeable_id, anon_id, false);
-        })
-        .catch((err) => {
-            alert(`Could not fetch graded gradeable: ${err.message}`);
-        })
-        .then((graded_gradeable) => {
-            return renderGradingGradeable(getGraderId(), gradeable_tmp, graded_gradeable,
-                isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
-        })
-        .then((elements) => {
-            setRubricDOMElements(elements);
-        });
+async function updateTotals(gradeable_id, anon_id) {
+    let gradeable, graded_gradeable;
+    try {
+        gradeable = await ajaxGetGradeableRubric(gradeable_id);
+    }
+    catch (err) {
+        alert(`Could not fetch gradeable rubric: ${err.message}`);
+    }
+    try {
+        graded_gradeable = await ajaxGetGradedGradeable(gradeable_id, anon_id, false);
+    }
+    catch (err) {
+        alert(`Could not fetch graded gradeable: ${err.message}`);
+    }
+    const elements = await renderGradingGradeable(getGraderId(), gradeable, graded_gradeable,
+        isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
+    setRubricDOMElements(elements);
 }
 
 /**
