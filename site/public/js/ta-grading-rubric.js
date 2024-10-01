@@ -2496,30 +2496,21 @@ async function reloadInstructorEditRubric(gradeable_id, itempool_available, item
  * @param {int} component_id
  * @param {boolean} editable True to load component in edit mode
  * @param {boolean} showMarkList True to show mark list as open
- * @returns {Promise}
+ * @async
+ * @returns {void}
  */
-function reloadGradingComponent(component_id, editable = false, showMarkList = false) {
-    let component_tmp = null;
+async function reloadGradingComponent(component_id, editable = false, showMarkList = false) {
     const gradeable_id = getGradeableId();
     ajaxGetGradedGradeable(gradeable_id, getAnonId(), false);
-    return ajaxGetComponentRubric(gradeable_id, component_id)
-        .then((component) => {
-            // Set the global mark list data for this component for conflict resolution
-            OLD_MARK_LIST[component_id] = component.marks;
-            COMPONENT_RUBRIC_LIST[component_id] = component;
-
-            component_tmp = component;
-            return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
-        })
-        .then((graded_component) => {
-            // Set the global graded component list data for this component to detect changes
-            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-            GRADED_COMPONENTS_LIST[component_id] = graded_component;
-
-            // Render the grading component with edit mode if enabled,
-            //  and 'true' to show the mark list
-            return injectGradingComponent(component_tmp, graded_component, editable, showMarkList);
-        });
+    const component = await ajaxGetComponentRubric(gradeable_id, component_id);
+    // Set the global mark list data for this component for conflict resolution
+    OLD_MARK_LIST[component_id] = component.marks;
+    COMPONENT_RUBRIC_LIST[component_id] = component;
+    const graded_component = await ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
+    // Set the global graded component list data for this component to detect changes
+    OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+    GRADED_COMPONENTS_LIST[component_id] = graded_component;
+    return await injectGradingComponent(component, graded_component, editable, showMarkList);
 }
 
 /**
