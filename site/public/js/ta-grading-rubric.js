@@ -1870,7 +1870,7 @@ async function onAddComponent(peer) {
 /**
  * Called when the 'Import Components' button is pressed
  */
-function importComponentsFromFile() {
+async function importComponentsFromFile() {
     const submit_url = buildCourseUrl(['gradeable', getGradeableId(), 'components', 'import']);
     const formData = new FormData();
 
@@ -1887,27 +1887,26 @@ function importComponentsFromFile() {
 
     formData.append('csrf_token', csrfToken);
 
-    $.getJSON({
-        url: submit_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function (response, reject) {
-            if (response.status !== 'success') {
-                console.error(`Something went wrong importing components: ${response.message}`);
-                reject(new Error(response.message));
-            }
-            else {
-                location.reload();
-            }
-        },
-        error: function (e) {
-            console.log(e);
-            alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-            + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
-        },
-    });
+    try {
+        const response = await $.getJSON({
+            url: submit_url,
+            data: formData,
+            processData: false,
+            contentType: false,
+            type: 'POST',
+        });
+        if (response.status !== 'success') {
+            console.error(`Something went wrong importing components: ${response.message}`);
+        }
+        else {
+            location.reload();
+        }
+    }
+    catch (err) {
+        console.log(err);
+        alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+        + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+    }
 }
 
 /**
