@@ -446,11 +446,14 @@ async function ajaxAddNewMark(gradeable_id, component_id, title, points, publish
  * @param {string} gradeable_id
  * @param {int} component_id
  * @param {int} mark_id
- * @return {Promise} Rejects except when the response returns status 'success'
+ * @async
+ * @throws {Error} Throws except when the response returns status
+ * @return {Object}
  */
-function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
-    return new Promise((resolve, reject) => {
-        $.getJSON({
+async function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
+    let response;
+    try {
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
@@ -459,21 +462,19 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
                 component_id: component_id,
                 mark_id: mark_id,
             },
-            success: function (response) {
-                if (response.status !== 'success') {
-                    console.error(`Something went wrong deleting the mark: ${response.message}`);
-                    reject(new Error(response.message));
-                }
-                else {
-                    resolve(response.data);
-                }
-            },
-            error: function (err) {
-                displayAjaxError(err);
-                reject(err);
-            },
         });
-    });
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong deleting the mark: ${response.message}`);
+        throw new Error(response.message);
+    }
+    else {
+        return response.data;
+    }
 }
 
 /**
