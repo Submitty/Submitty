@@ -2888,7 +2888,8 @@ function closeComponentGrading(component_id, saveChanges) {
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
  * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
- * @return {Promise}
+ * @async
+ * @return {void}
  */
 async function closeComponent(component_id, saveChanges = true, edit_mode = false) {
     setComponentInProgress(component_id);
