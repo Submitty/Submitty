@@ -129,7 +129,7 @@ class UserEntity {
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, bool|string>
      */
     public function getDisplayInfo(): array {
         $out = [];

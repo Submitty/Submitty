@@ -57,7 +57,7 @@ class Post {
     }
 
     #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "posts")]
-    #[ORM\JoinColumn(name: "author_user_id", referencedColumnName: "user_id")]
+    #[ORM\JoinColumn(name: "author_user_id", referencedColumnName: "user_id", nullable: false)]
     protected UserEntity $author;
 
     public function getAuthor(): UserEntity {

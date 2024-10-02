@@ -30,7 +30,7 @@ class Thread {
     }
 
     #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "threads")]
-    #[ORM\JoinColumn(name: "created_by", referencedColumnName: "user_id")]
+    #[ORM\JoinColumn(name: "created_by", referencedColumnName: "user_id", nullable: false)]
     protected UserEntity $author;
 
     public function getAuthor(): UserEntity {
@@ -83,7 +83,7 @@ class Thread {
         $this->status = $newStatus;
     }
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $lock_thread_date;
 
     public function getLockDate(): ?DateTime {
@@ -181,7 +181,7 @@ class Thread {
 
     public function getFirstPost(): Post|false {
         return $this->posts->filter(function ($x) {
-            return $x->getParent()->getId() == -1;
+            return $x->getParent()->getId() === -1;
         })->first();
     }
 }
