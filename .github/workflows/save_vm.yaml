@@ -15,8 +15,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install virtualbox and vagrant
-        run: brew install virtualbox vagrant
+      - name: Install vagrant
+        run: brew install vagrant
+      - name: install virtual box 7.0.20
+        run: |
+          curl -LO https://download.virtualbox.org/virtualbox/7.0.20/VirtualBox-7.0.20-163906-OSX.dmg
+          hdiutil mount VirtualBox-7.0.20-163906-OSX.dmg
+          sudo installer -pkg /Volumes/VirtualBox/VirtualBox.pkg -target /
+          hdiutil unmount /Volumes/VirtualBox
       - name: Get latest version
         id: get-version
         run: |
