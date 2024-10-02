@@ -8,14 +8,19 @@ use DateTime;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use app\repositories\forum\PostRepository;
+use app\entities\UserEntity;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ORM\Table(name: "posts")]
 class Post {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
     protected int $id;
 
+    public function getId(): int {
+        return $this->id;
+    }
     /**
      * @var Collection<Thread>
      */
@@ -26,9 +31,17 @@ class Post {
     #[ORM\JoinColumn(name: "thread_id", referencedColumnName: "id", nullable: false)]
     protected Thread $thread;
 
+    public function getThread(): Thread {
+        return $this->thread;
+    }
+
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
     protected ?Post $parent;
+    
+    public function getParent(): ?Post {
+        return $this->parent;
+    }
 
     /**
      * @var Collection<Post>
@@ -36,20 +49,48 @@ class Post {
     #[ORM\OneToMany(mappedBy: "parent", targetEntity: Post::class)]
     protected Collection $children;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $author_user_id;
+    /**
+     * @return Collection<Post>
+     */
+    public function getChildren(): Collection {
+        return $this->children;
+    }
+
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "posts")]
+    #[ORM\JoinColumn(name: "author_user_id", referencedColumnName: "user_id")]
+    protected UserEntity $author;
+
+    public function getAuthor(): UserEntity {
+        return $this->author;
+    }
 
     #[ORM\Column(type: Types::TEXT)]
     protected string $content;
 
+    public function getContent(): string {
+        return $this->content;
+    }
+
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $timestamp;
+
+    public function getTimestamp(): DateTime {
+        return $this->timestamp;
+    }
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $anonymous;
 
+    public function isAnonymous(): bool {
+        return $this->anonymous;
+    }
+
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $deleted;
+
+    public function isDeleted(): bool {
+        return $this->deleted;
+    }
 
     #[ORM\Column(type: Types::STRING)]
     protected string $endorsed_by;
@@ -63,9 +104,80 @@ class Post {
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $render_markdown;
 
+    public function isRenderMarkdown(): bool {
+        return $this->render_markdown;
+    }
+
     /**
      * @var Collection<PostHistory>
      */
     #[ORM\OneToMany(mappedBy: "post", targetEntity: PostHistory::class)]
     protected Collection $history;
+
+    /**
+     * @return Collection<PostHistory>
+     */
+    public function getHistory(): Collection {
+        return $this->history;
+    }
+
+    /**
+     * @var Collection<PostAttachment>
+     */
+    #[ORM\OneToMany(mappedBy: "post", targetEntity: PostAttachment::class)]
+    protected Collection $attachments;
+
+    /**
+     * @return Collection<PostAttachment>
+     */
+    public function getAttachments(): Collection {
+        return $this->attachments;
+    }
+
+    /**
+     * @var Collection<UserEntity>
+     */
+    #[ORM\ManyToMany(targetEntity: UserEntity::class, inversedBy: "upducks")]
+    #[ORM\JoinTable(name: "forum_upducks")]
+    #[ORM\JoinColumn(name: "post_id", referencedColumnName:"id")]
+    #[ORM\InverseJoinColumn(name:"user_id", referencedColumnName:"user_id")]
+    protected Collection $upduckers;
+
+    /**
+     * @return Collection<UserEntity>
+     */
+    public function getUpduckers(): Collection {
+        return $this->upduckers;
+    }
+
+    protected int $reply_level = 1;
+    public function getReplyLevel(): int {
+        return $this->reply_level;
+    }
+    public function setReplyLevel(int $new): void {
+        $this->reply_level = $new;
+    }
+    /**
+     * Doctrine ORM does not use constructors, instead filling properties from database.
+     * We are free to make constructors for "empty" or "junk" posts.
+     */ 
+    
+    public function __construct(Thread $merged_thread) {
+        $this->content = '';
+        $this->render_markdown = false;
+        $this->author = $merged_thread->getAuthor();
+        $this->thread = $merged_thread;
+        $this->deleted = false;
+        $this->anonymous = true;
+        $this->id = -1;
+    }
+
+    public function isUnread(ThreadAccess $view): bool {
+        if ($this->history->isEmpty()) {
+            return $view->getTimestamp() < $this->getTimestamp();
+        }
+        return $view->getTimestamp() < max($this->history->map(function ($x) {
+            return $x->getEditTimestamp();
+        })->toArray());
+    }
 }
