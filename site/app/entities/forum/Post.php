@@ -38,7 +38,7 @@ class Post {
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
     protected ?Post $parent;
-    
+
     public function getParent(): ?Post {
         return $this->parent;
     }
@@ -160,8 +160,8 @@ class Post {
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
      * We are free to make constructors for "empty" or "junk" posts.
-     */ 
-    
+     */
+
     public function __construct(Thread $merged_thread) {
         $this->content = '';
         $this->render_markdown = false;

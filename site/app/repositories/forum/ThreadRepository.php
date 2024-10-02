@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace app\repositories\forum;
 
 use app\entities\forum\Thread;
-use app\entities\forum\Category;
-use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\EntityRepository;
 
 class ThreadRepository extends EntityRepository {
@@ -63,7 +61,7 @@ class ThreadRepository extends EntityRepository {
         return $result;
     }
 
-    
+
     public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): Thread {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('t')
@@ -83,7 +81,7 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('p.upduckers', 'ud')
             ->andWhere('t.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
-        
+
         switch ($order_posts_by) {
             case 'alpha':
                 $qb->addOrderBy('pu.user_familyname', 'ASC')
@@ -109,7 +107,7 @@ class ThreadRepository extends EntityRepository {
                     ->addOrderBy('p.id', 'ASC');
                 break;
         }
-        
+
         return $qb->getQuery()->getSingleResult();
     }
 

@@ -56,7 +56,7 @@ class Thread {
     }
 
     public function isMergedThread(): bool {
-        return ($this->merged_thread?->getId() ?? -1) !== -1; 
+        return ($this->merged_thread?->getId() ?? -1) !== -1;
     }
 
     /**
@@ -91,7 +91,7 @@ class Thread {
     }
 
     public function isLocked(): bool {
-        return !is_null($this->lock_thread_date) && $this->lock_thread_date < date("Y-m-d H:i:S"); 
+        return !is_null($this->lock_thread_date) && $this->lock_thread_date < date("Y-m-d H:i:S");
     }
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
