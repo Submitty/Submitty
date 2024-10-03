@@ -426,6 +426,7 @@
     $(document).ready(function() {
         setEventHandlers();
         $("#new-poll-form").on("change click", submitErrorChecks);
+        
         let submit_form = false;
         $("#new-poll-form").submit(function(event) {
             if (!submit_form && {{ poll is not null ? "true" : "false" }} && !$(`#poll-type-${ poll_type }`).is(':checked')) {
