@@ -51,9 +51,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getCourse()),
+            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
             'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
-            'default_section'               => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -191,7 +191,7 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'all_self_registration') {
-            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
+            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
             $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $_POST['default_section']);
             $name = 'self_registration_type';
             $entry = $entry === 'true' ? ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER;
@@ -212,7 +212,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_json = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_json['course_details'][$name]) && $name !== 'self_registration' && $name !== 'default_section_id') {
+        if (!isset($config_json['course_details'][$name]) && !str_contains($name, 'self_registration') && $name !== 'default_section_id') {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );

@@ -5207,13 +5207,13 @@ SQL;
         return $return;
     }
 
-    public function getSelfRegistrationType(string $course): int {
-        $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=?", [$course]);
+    public function getSelfRegistrationType(string $term, string $course): int {
+        $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=? AND term=?", [$course, $term]);
         return $this->submitty_db->row()['self_registration_type'];
     }
 
-    public function setSelfRegistrationType(string $course, int $self_registration_type): void {
-        $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=?", [$self_registration_type, $course]);
+    public function setSelfRegistrationType(string $term, string $course, int $self_registration_type): void {
+        $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=? AND term=?", [$self_registration_type, $course, $term]);
     }
 
     /**

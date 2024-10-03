@@ -11,8 +11,8 @@ describe('Tests for self registering for courses', () => {
         // Testing course is on by default, but want to test unchecking and re-checking.
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
-        cy.get('[data-testid="enable-self-registration"]').uncheck();
-        cy.get('[data-testid="enable-self-registration"]').should('not.be.checked');
+        cy.get('[data-testid="all-self-registration"]').uncheck();
+        cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
         cy.get('[data-testid="default-section-id"]').select('1');
         cy.logout();
     });
@@ -27,8 +27,8 @@ describe('Tests for self registering for courses', () => {
         // Enable self-registration
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
-        cy.get('[data-testid="enable-self-registration"]').check();
-        cy.get('[data-testid="enable-self-registration"]').should('be.checked');
+        cy.get('[data-testid="all-self-registration"]').check();
+        cy.get('[data-testid="all-self-registration"]').should('be.checked');
         cy.get('[data-testid="default-section-id"]').select('5');
         cy.logout();
         cy.login();
