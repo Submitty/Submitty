@@ -13,7 +13,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
         });
 
         it('Should start at pause update', () => {
-            cy.get('#toggle-btn').should('have.text', 'Pause Update');
+            cy.get('#toggle-btsn').should('have.text', 'Pause Update');
             cy.get('#toggle-btn').click();
             cy.get('#toggle-btn').should('have.text', 'Resume Update');
             cy.get('.alert-success').invoke('text').should('contain', 'Update has been stopped');

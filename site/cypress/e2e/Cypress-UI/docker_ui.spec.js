@@ -42,7 +42,7 @@ describe('Docker UI Test', () => {
 
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
-        cy.get('#update-machines')
+        cy.get('#updates-machines')
             .should('have.text', ' Update dockers and machines')
             .click();
         // Should prompt a success message

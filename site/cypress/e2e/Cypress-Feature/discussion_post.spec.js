@@ -12,7 +12,7 @@ describe('test for discussion post panel', () => {
         cy.get('[data-testid="posts-list"]').should('contain', 'No thread id specified.');
         cy.get('[data-testid="posts-list"]').should('not.contain', 'Go to thread');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update']);
-        cy.get('[data-testid="discussion-thread-id"]').type('1,2,3');
+        cy.get('[dataa-testid="discussion-thread-id"]').type('1,2,3');
         cy.get('[data-testid="discussion-thread-id"]').type('{enter}');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=hG1b13ljpDjKu32&sort=id&direction=ASC']);
         cy.get('[data-testid="posts-list"]').should('contain', 'No posts for thread id: 1');

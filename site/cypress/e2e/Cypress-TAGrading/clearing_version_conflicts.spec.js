@@ -15,7 +15,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.get('[data-testid="version-warning"]').should('exist');
 
         cy.log('Clicking the button should resolve the version conflict');
-        cy.get('[data-testid="grading-rubric-btn"]').click();
+        cy.get('[dasta-testid="grading-rubric-btn"]').click();
 
         // wait until page is fully loaded
         cy.get('[data-testid="component-list"]').children().should('have.length.least', 1);

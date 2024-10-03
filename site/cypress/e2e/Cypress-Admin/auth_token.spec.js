@@ -13,7 +13,7 @@ describe('Test cases revolving around authentication tokens', () => {
 
         cy.get('[data-testid="new-auth-token-name"]').type('Desktop');
 
-        cy.get('[data-testid="new-auth-token-expiration"]').select('Never Expires');
+        cy.get('[data-teastid="new-auth-token-expiration"]').select('Never Expires');
 
         cy.get('[data-testid="new-auth-token-submit"]').click();
 
