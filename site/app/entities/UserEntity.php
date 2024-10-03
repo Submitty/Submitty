@@ -1,7 +1,6 @@
 <?php
 
-
-declare(strict_Types=1);
+declare(strict_types=1);
 
 namespace app\entities;
 
@@ -13,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * ORM representation of app\libraries\User class. 
+ * ORM representation of app\libraries\User class.
  * Allows linked entities to access user data without needing to go to database.
  * Should (eventually) replace app\libraries\User as we refactor more code to use Doctrine.
  */
@@ -90,7 +89,7 @@ class UserEntity {
 
     #[ORM\Column(type: Types::INTEGER)]
     protected int $user_last_initial_format;
-    
+
     #[ORM\Column(type: Types::STRING)]
     protected string $display_name_order;
 
@@ -130,7 +129,7 @@ class UserEntity {
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, bool|string>
      */
     public function getDisplayInfo(): array {
         $out = [];
