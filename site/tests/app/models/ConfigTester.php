@@ -390,8 +390,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
             "default_locale" => "default",
-            "locale" => ['modified' => false],
-            "ci" => false,
+            "locale" => ['modified' => false]
         ];
         $actual = $config->toArray();
 
