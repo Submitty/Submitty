@@ -1067,10 +1067,10 @@ SQL;
         }
     }
 
-   /**
-     * Get total likes count for each thread.
-     * @return array<int, int> array with thread_id as key and total likes_count as value.
-     */
+    /**
+    * Get total likes count for each thread.
+    * @return array<int, int> array with thread_id as key and total likes_count as value.
+    */
     public function getThreadLikesSum(): array {
         $this->course_db->query(
             "SELECT p.thread_id, COUNT(*) AS total_likes
