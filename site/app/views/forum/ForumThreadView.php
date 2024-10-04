@@ -163,35 +163,8 @@ class ForumThreadView extends AbstractView {
      * @param Thread[] $merge_thread_options
      */
     public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, int $post_content_limit, bool $ajax = false, bool $thread_announced = true) {
-        $filteredThreadExists = (count($threads) > 0);
         $currentCategoriesIds = [];
-        $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
-        $threadFiltering = !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && !empty($_COOKIE['unread_select_value']) && $_COOKIE['unread_select_value'] === 'false');
-
-        if (!$ajax) {
-            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, $use_as_heading = true);
-
-            //Body Style is necessary to make sure that the forum is still readable...
-            $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
-            $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
-            $this->core->getOutput()->addInternalCss('forum.css');
-            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
-            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
-            $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
-            $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
-            $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
-            $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
-            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
-            $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
-            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
-            $this->core->getOutput()->addInternalJs('autosave-utils.js');
-            $this->core->getOutput()->addInternalJs('websocket.js');
-            $this->core->getOutput()->addInternalJs('forum.js');
-            $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
-            $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-        }
-
         $categories = $this->core->getQueries()->getCategories();
 
         $cookieSelectedCategories = $this->getSavedForumCategories($currentCourse, $categories);
@@ -220,7 +193,7 @@ class ForumThreadView extends AbstractView {
         $activeThread = [];
         $displayThreadContent = $this->displayThreadList($threads, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $thread->getId(), $currentCategoriesIds, false);
 
-        $generatePostContent = $this->generatePostList($thread, $currentCourse, true, $display_option, $categories, $merge_thread_options, false, $thread_announced);
+        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false, $thread_announced);
     
         $this->core->getQueries()->visitThread($user, $thread->getId());
 
@@ -234,11 +207,32 @@ class ForumThreadView extends AbstractView {
         $button_params = $this->getAllForumButtons(true, $thread->getId(), $display_option, $show_deleted, $show_merged_thread);
 
         if (!$ajax) {
-            // Add breadcrumb for the current thread
-            $max_length = 25;
-            $fullTitle = $thread->getTitle();
-            $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
-            $this->core->getOutput()->addBreadcrumb("(" . $thread->getId() . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', 9]), null, $use_as_heading = true);
+            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, true);
+             // Add breadcrumb for the current thread
+             $max_length = 25;
+             $fullTitle = $thread->getTitle();
+             $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
+             $this->core->getOutput()->addBreadcrumb("(" . $thread->getId() . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', $thread->getId()]), null, true);
+
+            //Body Style is necessary to make sure that the forum is still readable...
+            $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+            $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+            $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
+            $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+            $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
+            $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
+            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+            $this->core->getOutput()->addInternalJs('autosave-utils.js');
+            $this->core->getOutput()->addInternalJs('websocket.js');
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+            $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+           
 
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
@@ -419,20 +413,14 @@ class ForumThreadView extends AbstractView {
         return $reply_hierarchy;
     }
 
-    public function generatePostList(Thread $thread, string $currentCourse, bool $includeReply, string $display_option, array $categories, array $merge_thread_options, bool $render = true, bool $thread_announced = false) {        
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false) {        
         $first = true;
         $post_data = [];
         $csrf_token = $this->core->getCsrfToken();
-
-        $totalAttachments = 0;
         $GLOBALS['totalAttachments'] = 0;
-
-        $post_ids = $thread->getPosts()->map(function ($x) {
-            return $x->getId();
-        })->toArray();
-
         $user = $this->core->getUser();
         $first_post = $thread->getFirstPost();
+
         $posts = [];
         if ($display_option == "tree") {
             $posts = $this->BuildReplyHeirarchy($first_post);
@@ -864,7 +852,6 @@ class ForumThreadView extends AbstractView {
      */
     public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $user = $this->core->getUser();
-        $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread->getId());
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($first_post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
@@ -989,7 +976,9 @@ class ForumThreadView extends AbstractView {
         $post_attachment = ForumUtils::getForumAttachments(
             $post->getId(),
             $thread->getId(),
-            $post->getAttachments()->map(function ($x) {
+            $post->getAttachments()->filter(function ($x) {
+                return $x->isCurrent();
+            })->map(function ($x) {
                 return $x->getFileName();
             })->toArray(),
             $this->core->getConfig()->getCoursePath(),
