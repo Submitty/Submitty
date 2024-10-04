@@ -1089,35 +1089,6 @@ public function getThreadLikesSum(): array {
 }
 
 
-    /**
-     * Get total likes count for each thread.
-     * @return array<int, int>  array with thread_id as key and total likes_count as value.
-     */
-    public function getThreadLikesSum(): array {
-        $this->course_db->query(
-            "SELECT id, thread_id 
-             FROM posts
-             WHERE deleted = false"
-        );
-
-        $posts = $this->course_db->rows();
-        $postLikes = $this->getPostLikes();
-        $threadLikes = [];
-
-        foreach ($posts as $post) {
-            $post_id = $post['id'];
-            $thread_id = $post['thread_id'];
-
-            $likes = $postLikes[$post_id] ?? 0;
-
-            if (!isset($threadLikes[$thread_id])) {
-                $threadLikes[$thread_id] = 0;
-            }
-
-            $threadLikes[$thread_id] += $likes;
-        }
-        return $threadLikes;
-    }
 
     /**
      * @param int[] $post_ids
