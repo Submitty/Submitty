@@ -326,7 +326,7 @@
                             <i class="{{ button.getPrefix() }} {{ button.getIcon() }}"></i>
                         {% endif %}
 
-                        <span class="icon-title"> {{ button.getTitle() }} </span>
+                        <span class="icon-title" data-testid="icon_{{button.getTitle()}}"> {{ button.getTitle() }} </span>
                     </span>
                     {% if button.getBadge() > 0 %}
                         <span class="notification-badge">{{  button.getBadge() }} </span>
