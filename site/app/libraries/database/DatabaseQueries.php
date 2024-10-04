@@ -1106,7 +1106,7 @@ SQL;
             $post_id = $post['id'];
             $thread_id = $post['thread_id'];
 
-            $likes = isset($postLikes[$post_id]) ? $postLikes[$post_id] : 0;
+            $likes = $postLikes[$post_id] ?? 0;
 
             if (!isset($threadLikes[$thread_id])) {
                 $threadLikes[$thread_id] = 0;
