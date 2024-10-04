@@ -17,7 +17,7 @@ class PostRepository extends EntityRepository {
             ->leftJoin('p.author', 'u')
             ->where('p.id = :post_id')
             ->setParameter('post_id', $post_id);
-        
+
         return $qb->getQuery()->getSingleResult();
     }
 }

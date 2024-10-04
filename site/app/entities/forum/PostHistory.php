@@ -18,27 +18,27 @@ class PostHistory {
     #[ORM\Column(type: Types::STRING)]
     protected string $edit_author;
 
-    public function getEditAuthor(): string {
-        return $this->edit_author;
-    }
-
     #[ORM\Id]
     #[ORM\Column(type: Types::TEXT)]
     protected string $content;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $edit_timestamp;
+
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $version_id;
+    
+    public function getEditAuthor(): string {
+        return $this->edit_author;
+    }
 
     public function getContent(): string {
         return $this->content;
     }
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $edit_timestamp;
-
     public function getEditTimestamp(): DateTime {
         return $this->edit_timestamp;
     }
-
-    #[ORM\Column(type: Types::INTEGER)]
-    protected int $version_id;
 
     /**
      * @return Collection<PostAttachment>
