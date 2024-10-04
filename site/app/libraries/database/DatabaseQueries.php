@@ -1067,24 +1067,26 @@ SQL;
         }
     }
 
-    /**
-     * Get likes count for each post.
-     * @return array<int, int>  array with post_id as key and likes_count as value.
-     */
-    public function getPostLikes(): array {
-        $this->course_db->query(
-            "SELECT post_id, COUNT(*) AS likes_count
-             FROM forum_upducks
-             GROUP BY post_id"
-        );
+   /**
+ * Get total likes count for each thread.
+ * @return array<int, int> array with thread_id as key and total likes_count as value.
+ */
+public function getThreadLikesSum(): array {
+    $this->course_db->query(
+        "SELECT p.thread_id, COUNT(*) AS total_likes
+         FROM posts p
+         LEFT JOIN forum_upducks f ON p.id = f.post_id
+         WHERE p.deleted = false
+         GROUP BY p.thread_id"
+    );
 
-        $likesData = $this->course_db->rows();
-        $postLikes = [];
-        foreach ($likesData as $row) {
-            $postLikes[$row['post_id']] = intval($row['likes_count']);
-        }
-        return $postLikes;  // Return array with post_id as key and likes_count as value
+    $likesData = $this->course_db->rows();
+    $threadLikes = [];
+    foreach ($likesData as $row) {
+        $threadLikes[$row['thread_id']] = intval($row['total_likes']);
     }
+    return $threadLikes; // Return array with thread_id as key and total likes_count as value
+}
 
 
     /**
