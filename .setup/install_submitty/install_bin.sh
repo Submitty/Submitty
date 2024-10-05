@@ -1,21 +1,34 @@
 #!/usr/bin/env bash
 
-
-########################################################################################################################
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
+#
+# This script has one required argument, config=<config dir>.
 
 echo -e "Copy the user scripts"
 
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${CONF_DIR}/submitty_users.json)
-CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
-DAEMON_USER=$(jq -r '.daemon_user' ${CONF_DIR}/submitty_users.json)
+# Get arguments
+for cli_arg in "$@"
+do
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    fi
+done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir>"
+    exit 1
+fi
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR}/submitty.json)
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${SUBMITTY_CONFIG_DIR}/submitty.json)
+COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_CONFIG_DIR}/submitty_users.json)
+CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_CONFIG_DIR}/submitty_users.json)
+DAEMON_USER=$(jq -r '.daemon_user' ${SUBMITTY_CONFIG_DIR}/submitty_users.json)
 DAEMON_GROUP=${DAEMON_USER}
-SUPERVISOR_USER=$(jq -r '.supervisor_user' ${CONF_DIR}/submitty_users.json)
-WORKER=$([[ $(jq -r '.worker' ${CONF_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
+SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_CONFIG_DIR}/submitty_users.json)
+WORKER=$([[ $(jq -r '.worker' ${SUBMITTY_CONFIG_DIR}/submitty.json) == "true" ]] && echo 1 || echo 0)
 
 # make the directory (has a different name)
 mkdir -p ${SUBMITTY_INSTALL_DIR}/bin
