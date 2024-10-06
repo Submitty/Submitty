@@ -373,15 +373,11 @@
             $('#date_team_lock').prop('disabled', {{ gradeable is not null and gradeable.isTeamAssignment() ? 'false' : 'true' }});
             $('#late_days').prop('disabled', $('#no_late_submission').is(':checked'));
 
-            {# Use this 'each' trick since 'no_grade_inquiry_allowed' may not be defined if grade inquiries are not enabled #}
             const [gradeInqOpenDate, gradeInqDueDate] = [$('#date_grade_inquiry_start'), $('#date_grade_inquiry_due')];
 
-            gradeInqOpenDate.prop('disabled', true);
-            gradeInqDueDate.prop('disabled', true);
-            $('#no_grade_inquiry_allowed').each(function () {
-                gradeInqOpenDate.prop('disabled', $(this).is(':checked'));
-                gradeInqDueDate.prop('disabled', $(this).is(':checked'));
-            });
+            const noGradeInquiry = $('#no_grade_inquiry_allowed');
+            gradeInqOpenDate.prop('disabled', noGradeInquiry.is(':checked'));
+            gradeInqDueDate.prop('disabled', noGradeInquiry.is(':checked'));
 
             $('#date_released').prop('disabled', !$('#has_release_date_yes').is(':checked'));
 
