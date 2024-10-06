@@ -1,1 +1,0 @@
-if (!iesg){document.f&&document.f.q.focus();document.gbqf&&document.gbqf.q.focus();}
