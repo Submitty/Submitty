@@ -3406,79 +3406,14 @@ parameters:
 			path: app/entities/Session.php
 
 		-
-			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
-			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$accesses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
-			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$sections with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
 			count: 1
 			path: app/entities/course/CourseMaterialAccess.php
 
 		-
-			message: "#^Method app\\\\entities\\\\db\\\\Table\\:\\:getColumns\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/db/Table.php
-
-		-
-			message: "#^Property app\\\\entities\\\\db\\\\Table\\:\\:\\$columns with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/db/Table.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Category\\:\\:\\$threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Category.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$children with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$history with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$merged_threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$categories with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$merged_on_this with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$posts with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$viewers with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
@@ -3551,11 +3486,6 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$access_times with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismConfig.php
-
-		-
 			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$ignore_submissions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
@@ -3596,32 +3526,12 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismRunAccess.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$user_responses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
 			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:addResponse\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getOptions\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
 			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getSelectedOptionIds\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3637,11 +3547,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$name has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$options with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3662,11 +3567,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$release_histogram has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$responses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3809,11 +3709,6 @@ parameters:
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: app/libraries/Access.php
-
-		-
-			message: "#^Class app\\\\libraries\\\\CascadingIterator implements generic interface Iterator but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/libraries/CascadingIterator.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\CascadingIterator\\:\\:seek\\(\\) has no return type specified\\.$#"
@@ -4816,21 +4711,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getCss\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getJs\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getModuleJs\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:getOutput\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -5011,22 +4891,7 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$css with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$js with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$loaded_views has no type specified\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$module_js with generic class Ds\\\\Set does not specify its types\\: TValue$#"
 			count: 1
 			path: app/libraries/Output.php
 
@@ -8086,11 +7951,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Class app\\\\libraries\\\\database\\\\DatabaseRowIterator implements generic interface Iterator but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:close\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
@@ -8327,11 +8187,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has parameter \\$annot with no type specified\\.$#"
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has parameter \\$class with generic class ReflectionClass but does not specify its types\\: T$#"
 			count: 1
 			path: app/libraries/routers/AnnotatedRouteLoader.php
 
@@ -12007,29 +11862,9 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/SessionRepository.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/repositories/SessionRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/VcsAuthTokenRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/course/CourseMaterialRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
@@ -12087,19 +11922,9 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/poll/OptionRepository.php
-
-		-
 			message: "#^Method app\\\\repositories\\\\poll\\\\OptionRepository\\:\\:findByPollWithResponseCounts\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/poll/PollRepository.php
 
 		-
 			message: "#^Method app\\\\views\\\\AuthTokenView\\:\\:showAuthTokenPage\\(\\) has no return type specified\\.$#"
