@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
+          disableElementChildren, PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
 
 let updateInProgressCount = 0;
@@ -315,7 +315,7 @@ $(document).ready(() => {
         });
 });
 
-function setGradeInquiryWarningBanner(){
+function setGradeInquiryWarningBanner() {
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
