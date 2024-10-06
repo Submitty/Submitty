@@ -206,8 +206,8 @@
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
     let poll_type = "{{ poll is not null ? poll.getQuestionType() : 'poll-type-single-response-survey' }}";
-
-    flatpickr(".date_picker", {
+    
+    flatpickr("#poll-date", {
             plugins: [ShortcutButtonsPlugin(
                     {
                         button: [
@@ -240,7 +240,6 @@
                 fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
             }
         });
-
     function changePollType() {
         let count = $(".option_id").length;
         for (let i = 0; i < count; i++) {
