@@ -420,6 +420,9 @@ class ForumThreadView extends AbstractView {
         $GLOBALS['totalAttachments'] = 0;
         $user = $this->core->getUser();
         $first_post = $thread->getFirstPost();
+        if ($first_post === false) {
+            $first_post = new Post($thread);
+        }
 
         $posts = [];
         if ($display_option == "tree") {

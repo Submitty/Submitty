@@ -14,6 +14,7 @@ use app\models\gradeable\GradeInquiry;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
+use app\entities\forum\Thread;
 use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
@@ -1347,8 +1348,6 @@ HTML;
             <span class="col grading_label">Discussion Posts</span>
 HTML;
 
-        $currentCourse = $this->core->getConfig()->getCourse();
-
         //Empty thread input
         if ($threadIds === "{}") {
             $threadIds = [];
@@ -1363,22 +1362,12 @@ HTML;
             $id = $submitter->getId();
             $submitters = [$id];
         }
-        foreach ($threadIds as $threadId) {
-            $posts = [];
-            foreach ($submitters as $s_id) {
-                $posts = array_merge($posts, $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $s_id));
-            }
-            if (count($posts) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $id);
-            }
-            else {
-                $posts_view .= <<<HTML
-                    <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
-HTML;
-            }
-
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $threads = $repo->getThreadsForGrading($threadIds, $submitters);
+        foreach ($threads as $thread) {
+            $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", []);
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $thread->getId()])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }
