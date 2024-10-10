@@ -154,10 +154,10 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.upduckers', 'postUpducker')
             ->andWhere('thread.id IN (:thread_ids)')
             ->setParameter('thread_ids', $thread_ids)
-            ->andWhere('postAuthor.id IN (:user_ids)')
+            ->andWhere('postAuthor.user_id IN (:user_ids)')
             ->setParameter('user_ids', $user_ids)
             ->addOrderBy('thread.id', 'ASC')
-            ->addOrderBy('postAuthor.id', 'ASC');
+            ->addOrderBy('postAuthor.user_id', 'ASC');
 
         return $qb->getQuery()->getResult();
     }

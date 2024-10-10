@@ -487,7 +487,7 @@ class ForumThreadView extends AbstractView {
                 "accessFullGrading" => $user->accessFullGrading(),
                 "includeReply" => $includeReply,
                 "thread_id" => $thread->getId(),
-                "first_post_id" => $thread->getFirstPost()->getId(),
+                "first_post_id" => $first_post->getId(),
                 "form_action_link" => $form_action_link,
                 "merge_thread_content" => $merge_thread_content,
                 "csrf_token" => $csrf_token,
@@ -511,7 +511,7 @@ class ForumThreadView extends AbstractView {
                 "accessFullGrading" => $user->accessFullGrading(),
                 "includeReply" => $includeReply,
                 "thread_id" => $thread->getId(),
-                "first_post_id" => $thread->getFirstPost()->getId(),
+                "first_post_id" => $first_post->getId(),
                 "form_action_link" => $form_action_link,
                 "merge_thread_content" => $merge_thread_content,
                 "csrf_token" => $csrf_token,
@@ -856,7 +856,7 @@ class ForumThreadView extends AbstractView {
     public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $user = $this->core->getUser();
         // Get formatted time stamps
-        $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($first_post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+        $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
 
         if (!$post->getHistory()->isEmpty()) {
             $edit_timestamp = max($post->getHistory()->map(function ($x) {

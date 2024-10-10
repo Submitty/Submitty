@@ -103,6 +103,7 @@ class Post {
         $this->thread = $empty_thread;
         $this->deleted = false;
         $this->anonymous = true;
+        $this->timestamp = new DateTime("0000-00-00");
         $this->id = -1;
     }
 
