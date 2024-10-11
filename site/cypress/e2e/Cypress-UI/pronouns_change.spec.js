@@ -75,7 +75,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_pronouns').should('contain', 'They/Them');
 
         // verify pronouns is shown in overall forum page
-        cy.get('#nav-sidebar-forum').click();
+        cy.visit(['sample', 'forum']);
         cy.get('.thread-list-item').should('contain', 'Test pronouns display');
         cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().parent().parent().find('.post_user_pronouns').should('contain', 'They/Them');
         cy.get('.thread_box.thread-box-full').contains('Test pronouns display').parent().parent().parent().find('.post_user_pronouns').click();
@@ -99,7 +99,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.post_user_pronouns').should('not.exist');
 
         // verify pronouns is not shown in overall forum page
-        cy.get('#nav-sidebar-forum').click();
+        cy.visit(['sample', 'forum']);
         cy.get('.thread-list-item').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().parent().parent().find('.post_user_id').should('contain', 'Anonymous');
         cy.get('.thread_box.thread-box-full').contains('Test Anonymous thread, should not show pronouns').parent().parent().parent().find('.post_user_pronouns').should('not.exist');
