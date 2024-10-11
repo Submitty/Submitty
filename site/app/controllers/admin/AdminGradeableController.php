@@ -881,10 +881,10 @@ class AdminGradeableController extends AbstractController {
         $old_components = $gradeable->getComponents();
         $num_old_components = count($old_components);
         $start_index = $num_old_components;
-    
+
         /** @var Component[] $new_components */
         $new_components = [];
-    
+
         // The electronic file mode is the least touched of them all since it will be replaced
         //  with a unified interface with TA grading and share a separate "rubric" controller for it.
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -897,10 +897,10 @@ class AdminGradeableController extends AbstractController {
             if (!isset($details['text'])) {
                 $details['text'] = [];
             }
-    
+
             $num_checkpoints = count($details['checkpoints']);
             $num_text = count($details['text']);
-    
+
             // Separate old components into checkpoints and text
             $old_checkpoints = [];
             $old_texts = [];
@@ -912,7 +912,7 @@ class AdminGradeableController extends AbstractController {
                     $old_checkpoints[] = $old_component;
                 }
             }
-    
+
             // Update existing checkpoints
             $x = 0;
             foreach ($old_checkpoints as $old_checkpoint) {
@@ -923,7 +923,7 @@ class AdminGradeableController extends AbstractController {
                 }
                 $x++;
             }
-    
+
             // Add new checkpoints
             for ($x = count($old_checkpoints); $x < $num_checkpoints; $x++) {
                 $component = $this->newComponent($gradeable);
@@ -931,7 +931,7 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
-    
+
             // Update existing text items
             $y = 0;
             foreach ($old_texts as $old_text) {
@@ -942,7 +942,7 @@ class AdminGradeableController extends AbstractController {
                 }
                 $y++;
             }
-    
+
             // Add new text items
             for ($y = count($old_texts); $y < $num_text; $y++) {
                 $component = $this->newComponent($gradeable);
@@ -958,13 +958,13 @@ class AdminGradeableController extends AbstractController {
             if (!isset($details['text'])) {
                 $details['text'] = [];
             }
-    
+
             $num_numeric = count($details['numeric']);
             $num_text = count($details['text']);
-    
+
             $start_index_numeric = 0;
             $start_index_text = 0;
-    
+
             // Load all of the old numeric/text elements into two arrays
             $old_numerics = [];
             $num_old_numerics = 0;
@@ -980,7 +980,7 @@ class AdminGradeableController extends AbstractController {
                     $num_old_numerics++;
                 }
             }
-    
+
             $x = 0;
             // Iterate through each existing numeric component and update them in the database,
             //  removing any extras
@@ -993,14 +993,14 @@ class AdminGradeableController extends AbstractController {
                 }
                 $x++;
             }
-    
+
             for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
                 $component = $this->newComponent($gradeable);
                 self::parseNumeric($component, $details['numeric'][$x]);
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
-    
+
             $z = $x;
             $x = 0;
             // Iterate through each existing text component and update them in the database,
@@ -1014,7 +1014,7 @@ class AdminGradeableController extends AbstractController {
                 }
                 $x++;
             }
-    
+
             for ($y = $start_index_text; $y < $num_text; $y++) {
                 $component = $this->newComponent($gradeable);
                 self::parseText($component, $details['text'][$y]);
@@ -1025,13 +1025,13 @@ class AdminGradeableController extends AbstractController {
         else {
             throw new \InvalidArgumentException("Invalid gradeable type");
         }
-    
+
         // Finally, Set the components and update the gradeable
         $gradeable->setComponents($new_components);
-    
+
         // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
-    }    
+    }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods: ["POST"])]
     public function updateGradersRequest($gradeable_id) {
