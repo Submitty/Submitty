@@ -160,9 +160,9 @@ class ForumThreadView extends AbstractView {
      * displayed in the left panel.
      * @param Thread[] $threads
      * @param Thread[] $merge_thread_options
+     * @return mixed[]|string
      */
-    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, int $post_content_limit, bool $ajax = false, bool $thread_announced = true) {
-        $currentCategoriesIds = [];
+    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, int $post_content_limit, bool $ajax = false, bool $thread_announced = true): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
         $categories = $this->core->getQueries()->getCategories();
 
@@ -186,11 +186,8 @@ class ForumThreadView extends AbstractView {
 
         $next_page = $initialPageNumber + 1;
         $prev_page = $initialPageNumber - 1;
-        $arrowup_visibility = ($initialPageNumber == 0) ? "display:none;" : "";
-        $activeThreadAnnouncement = false;
-        $activeThreadTitle = "";
-        $activeThread = [];
-        $displayThreadContent = $this->displayThreadList($threads, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $thread->getId(), $currentCategoriesIds, false);
+        $arrowup_visibility = ($initialPageNumber === 0) ? "display:none;" : "";
+        $displayThreadContent = $this->displayThreadList($threads, false);
 
         $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false, $thread_announced);
 
@@ -401,7 +398,7 @@ class ForumThreadView extends AbstractView {
     }
     /**
      * @param Post[] $reply_hierarchy
-     * @return Post[];
+     * @return Post[]
      */
     private function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
         $reply_hierarchy[] = $post;
@@ -412,7 +409,17 @@ class ForumThreadView extends AbstractView {
         return $reply_hierarchy;
     }
 
-    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false) {
+    /**
+     * Renders or formats a list of posts.
+     * @param Thread $thread
+     * @param bool $includeReply
+     * @param string $display_option
+     * @param Thread[] $merge_thread_options
+     * @param bool $render
+     * @param bool $thread_announced
+     * @return mixed[]|string
+     */
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false): array|string {
         $first = true;
         $post_data = [];
         $csrf_token = $this->core->getCsrfToken();
@@ -465,7 +472,7 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addInternalCss('forum.css');
             $merge_thread_content = [
-                "current_thread_date" => $first_post->getTimeStamp(),
+                "current_thread_date" => $first_post->getTimestamp(),
                 "current_thread" => $thread->getId(),
                 "possibleMerges" => $merge_thread_options
             ];
@@ -523,21 +530,13 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $ajax = false) {
-        $tempArray = [];
-        $threadAnnouncement = false;
-        $activeThreadTitle = "";
-        $thread = "";
-        if ($ajax) {
-            for ($i = 0; $i < count($threads); $i++) {
-                if ($threads[$i]->getId() == $thread_id) {
-                    $thread = $threads[$i];
-                    break;
-                }
-            }
-            $threads = [$thread];
-        }
-        return $this->displayThreadList($threads, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
+    /**
+     * Renders scroll content or new posts from websocket.
+     * @param Thread[] $threads
+     * @return string
+     */
+    public function showAlteredDisplayList(array $threads): string {
+        return $this->displayThreadList($threads, true);
     }
 
     public function contentMarkdownToPlain($str) {
@@ -547,23 +546,20 @@ class ForumThreadView extends AbstractView {
         return $str;
     }
 
-    public function showFullThreadsPage($threads, $category_ids, $show_deleted, $show_merged_threads, $page_number) {
-        $activeThreadAnnouncements = [];
-        $activeThreadTitle = "";
-        $activeThread = [];
+    /**
+     * Renders the main forum page
+     * @param Thread[] $threads
+     * @param bool $show_deleted
+     * @param bool $show_merged_threads
+     * @return string
+     */
+    public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads): string {
         $GLOBALS['totalAttachments'] = 0;
-        $thread_content =  $this->displayThreadList($threads, $activeThreadAnnouncements, $activeThreadTitle, $activeThread, null, $category_ids, false, true);
+        $thread_content =  $this->displayThreadList($threads, false, true);
         $categories = $this->core->getQueries()->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
-        $cookieSelectedCategories = $this->getSavedForumCategories($current_course, $categories);
-        $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
-        $cookieSelectedUnread = $this->getUnreadThreadStatus();
-        $next_page = 0;
-        $prev_page = 0;
         // getting the forum page buttons
-        $thread_id = -1;
-        $thread_exists = $this->core->getQueries()->threadExists();
-        $button_params = $this->getAllForumButtons($thread_exists, $thread_id, null, $show_deleted, $show_merged_threads);
+        $button_params = $this->getAllForumButtons(true, -1, null, $show_deleted, $show_merged_threads);
 
         // add css and js files
         $this->core->getOutput()->addInternalCss("forum.css");
@@ -578,20 +574,15 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
 
-        if ($thread_exists) {
-            $next_page = $page_number + 1;
-            $prev_page = $page_number - 1;
-        }
-
         $filterFormData = [
             "categories" => $categories,
-            "current_thread" => $thread_id,
+            "current_thread" => -1,
             "current_category_ids" => [],
             "current_course" => $current_course,
-            "cookie_selected_categories" => $cookieSelectedCategories,
-            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-            "cookie_selected_unread_value" => $cookieSelectedUnread,
-            "thread_exists" => $thread_exists
+            "cookie_selected_categories" => $this->getSavedForumCategories($current_course, $categories),
+            "cookie_selected_thread_status" => $this->getSavedThreadStatuses(),
+            "cookie_selected_unread_value" => $this->getUnreadThreadStatus(),
+            "thread_exists" => true
         ];
 
 
@@ -599,8 +590,8 @@ class ForumThreadView extends AbstractView {
             "thread_content" => $thread_content["thread_content"],
             "button_params" => $button_params,
             "filterFormData" => $filterFormData,
-            "next_page" => $next_page,
-            "prev_page" => $prev_page,
+            "next_page" => count($threads) > 0 ? 1 : 0,
+            "prev_page" => count($threads) > 0 ? -1 : 0,
             "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
@@ -608,7 +599,7 @@ class ForumThreadView extends AbstractView {
             "edit_url" => $this->core->buildCourseUrl(['forum']),
             "current_user" => $this->core->getUser()->getId(),
             "user_group" => $this->core->getUser()->getGroup(),
-            "thread_exists" => $thread_exists,
+            "thread_exists" => true,
             "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories'])
         ]);
     }
@@ -634,14 +625,15 @@ class ForumThreadView extends AbstractView {
         return $contentDisplay;
     }
 
-    public function displayThreadList($threads, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render, $is_full_page = false) {
-        $used_active = false; //used for the first one if there is not thread_id set
+    /**
+     * Renders or formats a list of threads.
+     * @param Thread[] $threads
+     * @param bool $render
+     * @param bool $is_full_page
+     * @return mixed[]|string
+     */
+    public function displayThreadList(array $threads, bool $render, bool $is_full_page = false): array|string {
         $current_user = $this->core->getUser()->getId();
-
-        $activeThreadAnnouncement = false;
-        $activeThreadTitle = "";
-        $activeThread = [];
-
         $thread_content = [];
 
         foreach ($threads as $thread) {
@@ -660,22 +652,8 @@ class ForumThreadView extends AbstractView {
             }
 
             $class = $is_full_page ? "thread_box thread-box-full" : "thread_box";
-            // $current_categories_ids should be subset of $thread["categories_ids"]
-            $issubset = (count(array_intersect($current_categories_ids, $thread->getCategories()->map(function ($x) {
-                return $x->getId();
-            })->toArray())) == count($current_categories_ids));
-
-            if ((($_REQUEST["thread_id"] ?? -1 === $thread->getId()) || $thread_id_p === $thread->getId() || $thread_id_p === -1) && !$used_active && $issubset) {
+            if (($_REQUEST["thread_id"] ?? -1) === $thread->getId()) {
                 $class .= " active";
-                $used_active = true;
-                $activeThreadTitle = "({$thread->getId()}) " . $thread->getTitle();
-                $activeThread = $thread;
-                if ($thread->isPinned()) {
-                    $activeThreadAnnouncement = true;
-                }
-                if ($thread_id_p == -1) {
-                    $thread_id_p = $thread->getId();
-                }
             }
             $isNewThread = $thread->isUnread($current_user);
             if ($isNewThread) {
@@ -719,7 +697,7 @@ class ForumThreadView extends AbstractView {
             $tooltip = "Thread Unresolved";
 
             if ($thread->getStatus() != 0) {
-                if ($thread->getStatus() == 1) {
+                if ($thread->getStatus() === 1) {
                     $fa_icon = "fa-check";
                     $fa_class = "thread-resolved";
                     $tooltip = "Thread Resolved";
@@ -850,8 +828,20 @@ class ForumThreadView extends AbstractView {
     }
 
     /**
+     * Renders or formats a single post.
+     * @param Post $first_post
+     * @param Thread $thread
+     * @param Post $post
+     * @param bool $first
+     * @param string $display_option
+     * @param bool $includeReply
+     * @param int $post_box_id
+     * @param bool $render
+     * @param bool $thread_announced
+     * @param bool $isCurrentFavorite
+     * @return mixed[]|string
      */
-    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
+    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false): array|string {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));

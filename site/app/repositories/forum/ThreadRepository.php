@@ -65,7 +65,7 @@ class ThreadRepository extends EntityRepository {
     }
 
 
-    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): Thread {
+    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): ?Thread {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
@@ -134,7 +134,7 @@ class ThreadRepository extends EntityRepository {
      * @return Thread[]
      */
     public function getThreadsForGrading(array $thread_ids, array $user_ids): array {
-        if (count($thread_ids) == 0 || count($user_ids) == 0) {
+        if (count($thread_ids) === 0 || count($user_ids) === 0) {
             return [];
         }
         $qb = $this->_em->createQueryBuilder();

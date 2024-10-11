@@ -1140,9 +1140,7 @@ class ForumController extends AbstractController {
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $pageNumber);
-        $currentCategoriesIds = (!empty($_POST['currentCategoriesId'])) ? explode("|", $_POST["currentCategoriesId"]) : [];
-        $currentThreadId = array_key_exists('currentThreadId', $_POST) && !empty($_POST["currentThreadId"]) && is_numeric($_POST["currentThreadId"]) ? (int) $_POST["currentThreadId"] : -1;
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJsonSuccess([
@@ -1154,7 +1152,6 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/threads/single", methods: ["POST"])]
     public function getSingleThread() {
-        $current_user = $this->core->getUser()->getId();
         $thread_id = $_POST['thread_id'];
         // Checks if thread id is empty. If so, render "fail" json response case informing that thread id is empty.
         if (empty($thread_id)) {
@@ -1170,11 +1167,7 @@ class ForumController extends AbstractController {
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         }
-        $show_deleted = $this->showDeleted();
-        $currentCourse = $this->core->getConfig()->getCourse();
-        $category_ids = $this->getSavedCategoryIds($currentCourse, []);
-        $show_merged_thread = $this->showMergedThreads($currentCourse);
-        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread], false, $thread_id, $category_ids, true);
+        $result = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showAlteredDisplayList', [$thread]);
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
@@ -1188,17 +1181,11 @@ class ForumController extends AbstractController {
         $category_ids = $this->getSavedCategoryIds($currentCourse, []);
         $thread_status = $this->getSavedThreadStatus([]);
         $unread_threads = $this->showUnreadThreads();
-
-        // Not used in the function
-        $max_threads = 0;
-        // use the default thread id
-        $thread_id = -1;
-        $pageNumber = 0;
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, 0);
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $category_ids, $show_deleted, $show_merged_thread, $pageNumber);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread);
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["GET"])]
@@ -1213,12 +1200,9 @@ class ForumController extends AbstractController {
         $category_id = in_array('thread_category', $_POST) ? [$_POST['thread_category']] : [];
         $category_ids = $this->getSavedCategoryIds($currentCourse, $category_id);
         $thread_status = $this->getSavedThreadStatus([]);
-        $new_posts = [];
         $unread_threads = $this->showUnreadThreads();
         $show_deleted = $this->showDeleted();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
-
-        $posts = null;
         $option = 'tree';
         if (!empty($_COOKIE['forum_display_option'])) {
             $option = $_COOKIE['forum_display_option'];
