@@ -3431,6 +3431,7 @@ class ElectronicGraderController extends AbstractController {
     private function getStats(Gradeable $gradeable, User $grader, bool $full_stats, &$total_graded, &$total_total) {
         $num_components = $this->core->getQueries()->getTotalComponentCount($gradeable->getId());
         $sections = [];
+    
         if ($full_stats) {
             $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
         }
@@ -3440,25 +3441,46 @@ class ElectronicGraderController extends AbstractController {
         else {
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());
         }
-
+    
         $section_key = ($gradeable->isGradeByRegistration() ? 'registration_section' : 'rotating_section');
-        $total_users       = [];
+        $total_users = [];
         $graded_components = [];
         $ta_graded_components = [];
+    
         if (count($sections) > 0) {
             $total_users = ($gradeable->isTeamAssignment()) ?
                 $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable->getId(), $sections, $section_key) :
                 $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment());
         }
-
+    
         foreach ($graded_components as $key => $value) {
             $total_graded += intval($value);
         }
         foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
         }
+    
+        $available_tabs = $gradeable->getAvailableTabs();
+        $has_autograding_results = $gradeable->hasAutogradingResults();
+        $has_manual_grading = $gradeable->hasManualGrading();
+        $grading_started = $gradeable->isGradingStarted();
+        $grades_released = $gradeable->areGradesReleased();
+    
+        return [
+            'available_tabs' => $available_tabs,
+            'has_autograding_results' => $has_autograding_results,
+            'has_manual_grading' => $has_manual_grading,
+            'grading_started' => $grading_started,
+            'grades_released' => $grades_released,
+            'total_graded' => $total_graded,
+            'total_total' => $total_total,
+            'sections' => $sections,
+            'total_users' => $total_users,
+            'graded_components' => $graded_components
+        ];
     }
+    
 
     /**
      * @param Gradeable $gradeable

@@ -2580,3 +2580,37 @@ class Gradeable extends AbstractModel {
         return !empty($autograding_config->getLeaderboards());
     }
 }
+
+// Add these new methods to the Gradeable class
+
+public function hasAutogradingResults(): bool {
+    return $this->getAutogradingConfig() !== null;
+}
+
+public function hasManualGrading(): bool {
+    return $this->isTaGrading();
+}
+
+public function isGradingStarted(): bool {
+    return $this->getGradeStartDate()->getTimestamp() <= time();
+}
+
+public function areGradesReleased(): bool {
+    return $this->getGradeReleasedDate()->getTimestamp() <= time();
+}
+
+public function getAvailableTabs(): array {
+    $tabs = ['submission'];
+    
+    if ($this->isElectronicGradeable()) {
+        $tabs[] = 'autograding';
+    }
+    
+    if ($this->hasManualGrading()) {
+        $tabs[] = 'grading';
+    }
+    
+    $tabs[] = 'statistics';
+    
+    return $tabs;
+}

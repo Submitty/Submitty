@@ -1298,30 +1298,26 @@ HTML;
      */
 
 
-    public function renderAutogradingPanel(?AutoGradedVersion $version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
+     public function renderAutogradingPanel(?AutoGradedVersion $version_instance, bool $show_hidden_cases, bool $ta_grading, GradedGradeable $graded_gradeable) {
         $this->core->getOutput()->addInternalJs('submission-page.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+    
         $gradeable = $graded_gradeable->getGradeable();
-        //get user id for regrading, if team assignment user id is the id of the first team member, team id and who id will be determined later
-        if ($gradeable->isTeamAssignment()) {
-            $id = $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId();
-        }
-        else {
-            $id = $graded_gradeable->getSubmitter()->getId();
-        }
-
-        // TODO: this is duplicated in Homework View
+        $id = $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberUsers()[0]->getId() : $graded_gradeable->getSubmitter()->getId();
+    
         $version_data = array_map(function (AutoGradedVersion $version) {
             return [
                 'points' => $version->getNonHiddenPoints(),
             ];
         }, $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersions());
-
-        //sort array by version number after values have been mapped
+    
         ksort($version_data);
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
-
+    
+        $has_autograding_results = $gradeable->hasAutogradingResults();
+        $grading_started = $gradeable->isGradingStarted();
+    
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/AutogradingPanel.twig", [
             "version_instance" => $version_instance,
             "show_hidden_cases" => $show_hidden_cases,
@@ -1334,9 +1330,12 @@ HTML;
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
             "can_regrade" => $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
-            "ta_grading" => $ta_grading
+            "ta_grading" => $ta_grading,
+            "has_autograding_results" => $has_autograding_results,
+            "grading_started" => $grading_started
         ]);
     }
+    
 
     public function renderDiscussionForum($threadIds, $submitter, $isTeam = false) {
         $posts_view = <<<HTML

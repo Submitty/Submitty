@@ -194,6 +194,25 @@ $(() => {
         }
     }
 
+// Handle display of autograding results
+function updateAutogradingPanel() {
+    const autogradingPanel = document.getElementById('autograding_results');
+    const hasResults = autogradingPanel.dataset.hasAutogradingResults === 'true';
+    const gradingStarted = autogradingPanel.dataset.gradingStarted === 'true';
+
+    if (!hasResults) {
+        const messageElement = document.createElement('h4');
+        messageElement.textContent = gradingStarted ? 
+            'Autograding is in progress. Results will be displayed here once available.' : 
+            'Autograding has not started yet.';
+        autogradingPanel.querySelector('.inner-container').appendChild(messageElement);
+    }
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', updateAutogradingPanel);
+
+
     // Remove the select options which are open
     // eslint-disable-next-line no-unused-vars
     function hidePanelPositionSelect() {
