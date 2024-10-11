@@ -10,7 +10,12 @@ let previous_gradeable = '';
 let gradeable = '';
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
-        $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        let errorMessages = '<span style="color: red">Some Changes Failed!</span><br/><ul>';
+        for (const [key, error] of Object.entries(errors)) {
+            errorMessages += `<li>Error in ${key}: ${error}</li>`;
+        }
+        errorMessages += '</ul>';
+        $('#save_status').html(errorMessages);
     }
     else {
         if (updateInProgressCount === 0) {
