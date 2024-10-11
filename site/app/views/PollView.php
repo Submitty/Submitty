@@ -100,6 +100,7 @@ class PollView extends AbstractView {
             'poll' => $poll,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'is_survey' => $is_survey,
+
         ]);
     }
 }
