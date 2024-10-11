@@ -27,7 +27,7 @@ class PostHistory {
 
     #[ORM\Column(type: Types::INTEGER)]
     protected int $version_id;
-    
+
     public function getEditAuthor(): string {
         return $this->edit_author;
     }

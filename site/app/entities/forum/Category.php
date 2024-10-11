@@ -35,7 +35,7 @@ class Category {
     public function getDescription(): string {
         return $this->category_desc;
     }
-    
+
     public function getColor(): string {
         return $this->color;
     }

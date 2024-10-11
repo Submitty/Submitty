@@ -7,7 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\models\User;
-use app\controllers\forum\ForumController;
 use app\entities\forum\Thread;
 use app\entities\forum\Post;
 
@@ -194,7 +193,7 @@ class ForumThreadView extends AbstractView {
         $displayThreadContent = $this->displayThreadList($threads, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $thread->getId(), $currentCategoriesIds, false);
 
         $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false, $thread_announced);
-    
+
         $this->core->getQueries()->visitThread($user, $thread->getId());
 
         $return = "";
@@ -232,7 +231,7 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addInternalJs('forum.js');
             $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
             $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
-           
+
 
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
@@ -407,13 +406,13 @@ class ForumThreadView extends AbstractView {
     private function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
         $reply_hierarchy[] = $post;
         $post->setReplyLevel($reply_level);
-        foreach($post->getChildren() as $child) {
+        foreach ($post->getChildren() as $child) {
             $this->BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
         }
         return $reply_hierarchy;
     }
 
-    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false) {        
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false) {
         $first = true;
         $post_data = [];
         $csrf_token = $this->core->getCsrfToken();
@@ -430,7 +429,7 @@ class ForumThreadView extends AbstractView {
         }
         else {
             // posts were ordered at query-time by repository
-           $posts = $thread->getPosts()->toArray();
+            $posts = $thread->getPosts()->toArray();
         }
         $post_box_id = 2;
         foreach ($posts as $post) {
@@ -665,7 +664,7 @@ class ForumThreadView extends AbstractView {
             $issubset = (count(array_intersect($current_categories_ids, $thread->getCategories()->map(function ($x) {
                 return $x->getId();
             })->toArray())) == count($current_categories_ids));
-            
+
             if ((($_REQUEST["thread_id"] ?? -1 === $thread->getId()) || $thread_id_p === $thread->getId() || $thread_id_p === -1) && !$used_active && $issubset) {
                 $class .= " active";
                 $used_active = true;
@@ -730,7 +729,6 @@ class ForumThreadView extends AbstractView {
             $categories_content = [];
             foreach ($thread->getCategories() as $category) {
                 $categories_content[] = [$category->getDescription(), $category->getColor()];
-
             }
 
             $date_content = ["not_null" => !is_null($date)];
@@ -876,7 +874,7 @@ class ForumThreadView extends AbstractView {
         if ($thread->getNewPosts($user->getId())->contains($post) || $user->getId() === $post->getAuthor()->getId()) {
             $classes[] = "new_post";
             $isNewPost = true;
-            if($post->getAuthor()->accessGrading()) {
+            if ($post->getAuthor()->accessGrading()) {
                 $classes[] = "important new_post important-new";
             }
         }
@@ -957,7 +955,7 @@ class ForumThreadView extends AbstractView {
         ];
 
         $author_display_info = $post->getAuthor()->getDisplayInfo();
-        $visible_username = $author_display_info["given_name"] . " ". substr($author_display_info["family_name"], 0 , 1) . ".";
+        $visible_username = $author_display_info["given_name"] . " " . substr($author_display_info["family_name"], 0, 1) . ".";
 
         if ($post->getAuthor()->accessFullGrading()) {
             $visible_username = $author_display_info["given_name"] . " " . $author_display_info["family_name"];

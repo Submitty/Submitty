@@ -110,15 +110,15 @@ class Post {
     public function getId(): int {
         return $this->id;
     }
-    
+
     public function getThread(): Thread {
         return $this->thread;
     }
-    
+
     public function getParent(): ?Post {
         return $this->parent;
     }
-    
+
     /**
      * @return Collection<Post>
      */
@@ -129,7 +129,7 @@ class Post {
     public function getAuthor(): UserEntity {
         return $this->author;
     }
-    
+
     public function getContent(): string {
         return $this->content;
     }
@@ -137,11 +137,11 @@ class Post {
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
-    
+
     public function isAnonymous(): bool {
         return $this->anonymous;
     }
-    
+
     public function isDeleted(): bool {
         return $this->deleted;
     }
@@ -163,14 +163,14 @@ class Post {
     public function getAttachments(): Collection {
         return $this->attachments;
     }
-    
+
     /**
      * @return Collection<UserEntity>
      */
     public function getUpduckers(): Collection {
         return $this->upduckers;
     }
-    
+
     public function getReplyLevel(): int {
         return $this->reply_level;
     }

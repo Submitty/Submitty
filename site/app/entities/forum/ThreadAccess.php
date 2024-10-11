@@ -24,7 +24,7 @@ class ThreadAccess {
     public function getUserId(): string {
         return $this->user_id;
     }
-    
+
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }

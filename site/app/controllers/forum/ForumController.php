@@ -1169,7 +1169,7 @@ class ForumController extends AbstractController {
         // Checks if no threads were found. If so, render "fail" json response case informing that the no threads were found with the given ID.
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
-        };
+        }
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_ids = $this->getSavedCategoryIds($currentCourse, []);
@@ -1224,7 +1224,7 @@ class ForumController extends AbstractController {
             $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
-         
+
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $option);
         if (is_null($thread)) {
@@ -1245,7 +1245,7 @@ class ForumController extends AbstractController {
         }
 
         $merge_thread_options = $repo->getMergeThreadOptions($thread);
-        
+
         $pageNumber = 0;
         $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $pageNumber);
         if (!empty($_REQUEST["ajax"])) {

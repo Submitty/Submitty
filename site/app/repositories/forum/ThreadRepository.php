@@ -139,7 +139,7 @@ class ThreadRepository extends EntityRepository {
         }
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
-            ->from(Thread::class,'thread')
+            ->from(Thread::class, 'thread')
             ->addSelect('post')
             ->addSelect('threadAuthor')
             ->addSelect('postAuthor')
