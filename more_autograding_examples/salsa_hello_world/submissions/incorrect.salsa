@@ -1,0 +1,6 @@
+behavior HelloWorld {
+    void act(String[] argv) {
+        standardOutput<-print("Hello")@
+        standardOutput<-print("World!");
+    }
+}

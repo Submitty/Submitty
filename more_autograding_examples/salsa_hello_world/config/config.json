@@ -1,0 +1,50 @@
+{
+    "required_capabilities" : "default",
+    "autograding_method" : "docker",
+    "container_options" : {
+        "container_image" : "submitty/salsa:1.1.6"
+    },
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 5,
+        "AUTO_POINTS" : 5
+    },
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 1000,
+        "RLIMIT_SIGPENDING" : 100,
+        "RLIMIT_NOFILE" : 1000
+    },
+    "autograding" : {
+        "submission_to_compilation" : [
+            "**/*.salsa"
+        ],
+        "compilation_to_runner" : [
+            "**/*.class"
+        ]
+    },
+    "assignment_message" : "Place your code in HelloWorld.salsa",
+    "testcases" : [
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : [ 
+                "java -cp /usr/local/lib/salsa/salsa1.1.6.jar:. salsac.SalsaCompiler *.salsa", 
+                "javac -classpath /usr/local/lib/salsa/salsa1.1.6.jar:. HelloWorld.java"
+            ],
+            "executable_name" : "HelloWorld.class",
+            "points" : 2
+        },
+        {
+            "title" : "Output Check",
+            "command" : "java -cp /usr/local/lib/salsa/salsa1.1.6.jar:. HelloWorld",
+            "points" : 3,
+            "validation" : [
+                {
+                    "actual_file" : "STDOUT.txt",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
+                    "expected_string" : "hello world\n"
+                }
+            ]
+        }
+    ]
+}
