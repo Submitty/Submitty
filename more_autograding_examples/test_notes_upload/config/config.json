@@ -16,7 +16,7 @@
 
     "autograding_method": "docker",
     "container_options": {
-        "container_image": "submitty/pdflatex:2021"
+        "container_image": "submitty/pdflatex:latest"
     },
 
     "autograding" : {
