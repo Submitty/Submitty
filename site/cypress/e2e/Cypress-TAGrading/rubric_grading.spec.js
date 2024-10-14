@@ -11,7 +11,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-container"]').eq(2).should('contain', 'Documentation');
         cy.get('[data-testid="component-container"]').eq(3).should('contain', 'Extra Credit');
         cy.get('[data-testid="component-64"]').should('contain', 'Read Me');
-        cy.get('[data-testid="component-64"]').click();
+        cy.get('[data-testid="component-64"]').click(25,20);
         cy.get('[data-testid="component-64"]')
             .should('contain', 'Full Credit')
             .and('contain', 'Minor errors in Read Me')
@@ -21,7 +21,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-65"]').should('contain', 'Coding Style');
-        cy.get('[data-testid="component-65"]').click();
+        cy.get('[data-testid="component-65"]').click(25,20);
         cy.get('[data-testid="component-65"]')
             .should('contain', 'Full Credit')
             .and('contain', 'Code is unreadable')
@@ -32,7 +32,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-66"]').should('contain', 'Documentation');
-        cy.get('[data-testid="component-66"]').click();
+        cy.get('[data-testid="component-66"]').click(25,20);
         cy.get('[data-testid="component-66"]')
             .should('contain', 'Full Credit')
             .and('contain', 'No documentation')
@@ -43,7 +43,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').should('contain', 'Save');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-67"]').should('contain', 'Extra Credit');
-        cy.get('[data-testid="component-67"]').click();
+        cy.get('[data-testid="component-67"]').click(25,20);
         cy.get('[data-testid="component-67"]')
             .should('contain', 'Full Credit')
             .and('contain', 'Extra credit done poorly')
