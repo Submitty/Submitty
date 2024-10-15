@@ -1,4 +1,4 @@
-/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents GetPotentialAlternates LoadAlternates */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
@@ -103,6 +103,51 @@ function ResetPerGradeablePercents(bucket) {
         const textbox = $(percentInput).children().first();
         textbox.val('').blur(); // If the textbox is empty, it resets to an even split onblur
     });
+}
+
+// Returns the list of gradeables that may be alternates in a given bucket (those that are unchecked)
+function GetPotentialAlternates(el, gradeables) {
+    // Remove all options except the first (which is the disabled default option) from the dropdown
+    for (let i = el.options.length - 1; i > 0; i--) {
+        el.removeChild(el.options[i]);
+    }
+
+    // Creates an option for every unchecked gradeable in the bucket
+    gradeables.forEach((gradeable) => {
+        const selectedAsAlternate = $(`input[id^="alternate-checkbox-${gradeable['id']}"]`).is(':checked');
+        if (!selectedAsAlternate) {
+            const option = document.createElement('option');
+            option.value = `${gradeable['id']}`;
+            option.text = `${gradeable['title']}`;
+            el.appendChild(option);
+        }
+    });
+}
+
+// Load alternate gradeable when page is loaded
+function LoadAlternate(el, gradeables, dropdownGradeable) {
+    // If alternate is null, no alternate had been selected
+    if (typeof dropdownGradeable['alternate'] !== 'undefined') {
+        let title = '';
+        // Find the title of the alternate
+        gradeables.forEach((gradeable) => {
+            if (gradeable['id'] === dropdownGradeable['alternate']) {
+                title = gradeable['title'];
+            }
+        });
+
+        // Create option representing the alternate
+        const option = document.createElement('option');
+        option.value = dropdownGradeable['alternate'];
+        option.text = title;
+        el.appendChild(option);
+        // Select the option in the dropdown
+        $(el).val(dropdownGradeable['alternate']).change();
+
+        // Check the checkboxes to make the alternate dropdown visible
+        $('#enable-alternates').prop('checked', true);
+        $(`#alternate-checkbox-${dropdownGradeable['id']}`).prop('checked', true);
+    }
 }
 
 // Updates the sum of percentage points accounted for by the buckets being used
@@ -250,6 +295,7 @@ function getGradeableBuckets() {
                 const children = $(this).children();
                 // children[0] represents <div id="gradeable-pts-div-*">
                 // children[1] represents <div id="gradeable-percents-div-*">
+                // children[4] represents <select id="alternate-dropdown-*">
                 // replace divs with inputs
                 children[0] = children[0].children[0];
                 children[1] = children[1].children[0];
@@ -260,6 +306,12 @@ function getGradeableBuckets() {
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(children[1]).is(':visible')) {
                     gradeable.percent = parseFloat(children[1].value) / 100.0;
+                }
+
+                // Get alternate gradeable
+                const alternate_value = $(children[4]).find(':selected').val();
+                if ($(children[4]).is(':visible') && alternate_value !== '') {
+                    gradeable.alternate = alternate_value;
                 }
 
                 // Get gradeable release date
@@ -797,7 +849,7 @@ $(document).ready(() => {
         saveChanges();
     });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
-    $('#gradeables').find('input, textarea').on('focusout', () => {
+    $('#gradeables').find('input, textarea, select').on('focusout', () => {
         saveChanges();
     });
 
@@ -1166,6 +1218,39 @@ $(document).ready(() => {
             resetButtonInBucket.each((index, resetButton) => {
                 $(resetButton).toggle(isChecked);
             });
+        });
+    });
+
+    // Load alternates from customization.json
+    const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
+    alternateDropdowns.each((index, alternateDropdownDOMElement) => {
+        const alternateDropdown = $(alternateDropdownDOMElement);
+        LoadAlternate(alternateDropdownDOMElement, alternateDropdown.data('gradeables'), alternateDropdown.data('gradeable'));
+    });
+
+    // Control visibility of gradeable alternate checkboxes
+    const enableAlternatesCheckbox = $('#enable-alternates');
+    const alternateCheckboxes = $('label[id^="alternate-checkbox-label-"]');
+    const alternatesEnabled = enableAlternatesCheckbox.is(':checked');
+    alternateCheckboxes.each((index, alternateCheckbox) => {
+        $(alternateCheckbox).toggle(alternatesEnabled);
+    });
+    enableAlternatesCheckbox.change((event) => {
+        const alternatesEnabled = enableAlternatesCheckbox.is(':checked');
+        alternateCheckboxes.each((index, alternateCheckbox) => {
+            $(alternateCheckbox).toggle(alternatesEnabled);
+        });
+    });
+
+    // Control visibility of gradeable alternate dropdowns
+    alternateDropdowns.each((index, alternateDropdown) => {
+        const gradeableID = alternateDropdown.id.match(/^alternate-dropdown-(.+)$/)[1];
+        const gradeableAlternate = $(`#alternate-checkbox-${gradeableID}`);
+        const gradeableAlternateChecked = gradeableAlternate.is(':checked');
+        $(alternateDropdown).toggle(gradeableAlternateChecked);
+        gradeableAlternate.change((event) => {
+            const gradeableAlternateChecked = gradeableAlternate.is(':checked');
+            $(alternateDropdown).toggle(gradeableAlternateChecked);
         });
     });
 });
