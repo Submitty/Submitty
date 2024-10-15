@@ -6,8 +6,13 @@ $(document).ready(() => {
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
         let entry;
+        let default_section;
         if (this.type === 'checkbox') {
             entry = $(elem).is(':checked');
+            if (this.id === 'all-self-registration') {
+                default_section = $('#default-section-id').val();
+                formData.append('default_section', default_section);
+            }
         }
         else {
             entry = elem.value;
@@ -25,7 +30,6 @@ $(document).ready(() => {
                     response = JSON.parse(response);
                 }
                 catch (exc) {
-                    console.log(response);
                     response = {
                         status: 'fail',
                         message: 'invalid response received from server',
@@ -75,3 +79,12 @@ $(document).ready(() => {
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
 });
+
+function confirmSelfRegistration(element, needs_reg_sections) {
+    if (needs_reg_sections) {
+        alert('You need to create at least one registration section first');
+        return false;
+    }
+
+    return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
+}
