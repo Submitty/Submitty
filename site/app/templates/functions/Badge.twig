@@ -2,15 +2,16 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{% macro render(earned, max, extra_credit) %}
+{# @var bool active_same_as_graded If the active version is the same as the graded version, used to display version conflicts #}
+{% macro render(earned, max, extra_credit, active_same_as_graded) %}
     {% import _self as self %}
 
     {% set show = self.should_show(earned, max, extra_credit) == "true" %}
     {% if show %}
-        {% set background = self.get_style(earned, max, extra_credit) %}
+        {% set background = self.get_style(earned, max, extra_credit, active_same_as_graded) %}
         {% set text = self.format_value(earned, max, extra_credit) %}
 
-        <span class="badge {{ background }}">{{ text }}</span>
+        <span class="badge {{ background }}" data-testid="score-pill-badge">{{ text }}</span>
     {% else %}
         <div class="no-badge"></div>
     {% endif %}
@@ -20,14 +21,17 @@
 {# @var int  earned       Points earned #}
 {# @var int  max          Maximum points possible #}
 {# @var bool extra_credit If this is an extra credit component #}
-{%- macro get_style(earned, max, extra_credit) -%}
+{# @var bool active_same_as_graded If the active version is the same as the graded version, used to display version conflicts #}
+{%- macro get_style(earned, max, extra_credit, active_same_as_graded) -%}
     {%- apply spaceless -%}
         {# Color rules: #}
         {# Green is 100% or higher (for EC) #}
         {# Yellow is 51-99% #}
         {# Red is 0-50% or lower (for penalty) #}
         {# EC is gray if you didn't get any points #}
-        {% if extra_credit %}
+        {% if not active_same_as_graded %}
+            gray-background
+        {% elseif extra_credit %}
             {% if earned == 0 %}
                 gray-background
             {% else %}

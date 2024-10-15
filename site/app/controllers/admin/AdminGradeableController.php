@@ -534,7 +534,7 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-
+            'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
@@ -1386,7 +1386,15 @@ class AdminGradeableController extends AbstractController {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
 
-                if ($dates[$date_property] > DateUtils::MAX_TIME) {
+                if ($date_property === 'late_days') {
+                    if (!is_numeric($dates[$date_property])) {
+                        $errors[$date_property] = 'Late days must be a number';
+                    }
+                    elseif (intval($dates[$date_property]) < 0) {
+                        $errors[$date_property] = 'Late days must be a positive number';
+                    }
+                }
+                elseif ($dates[$date_property] > DateUtils::MAX_TIME) {
                     $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
                 }
 

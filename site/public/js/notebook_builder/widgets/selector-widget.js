@@ -19,8 +19,9 @@ class SelectorWidget extends Widget {
 
     render() {
         const interactive_container = this.getInteractiveContainer();
-        this.options.forEach(option => {
+        this.options.forEach((option) => {
             const button = this.getButton(option);
+            button.classList.add('btn', 'btn-nav', 'btn-nav-grade', 'btn-default');
             interactive_container.appendChild(button);
         });
 

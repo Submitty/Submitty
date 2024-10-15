@@ -1,0 +1,29 @@
+{
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 100,
+        "RLIMIT_DATA": 2000000
+    },
+    "autograding": {
+        "submission_to_runner": [
+            "**/*"
+        ]
+    },
+    "testcases" : [
+        {
+            "title" : "Networking with wget",
+            "command" : [ "wget -i *.url", "grep Moorthy moorthy -m1" ],
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT_1.txt",
+                    "expected_file" : "submitty.txt"
+                },
+                {
+                    "method" : "fileExists",
+                    "actual_file" : "STDERR_0.txt"
+                }
+            ]
+        }
+    ]
+}

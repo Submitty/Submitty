@@ -8,7 +8,7 @@ function newDownloadForm() {
     showPopup('#download-form');
     captureTabInModal('download-form');
     form.find('.form-body').scrollTop(0);
-    $('#download-form input:checkbox').each(function() {
+    $('#download-form input:checkbox').each(function () {
         if ($(this).val() === 'NULL') {
             $(this).prop('checked', false);
         }
@@ -38,7 +38,6 @@ function newGradeableJsonForm() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
-
 
 function newGraderListForm() {
     $('.popup-form').css('display', 'none');

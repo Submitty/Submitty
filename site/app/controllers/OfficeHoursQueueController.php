@@ -29,7 +29,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'showTheQueue',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -461,7 +462,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         //Replace whitespace with "_"
         $token = trim($_POST['token']);
-        $re = '/^[\sa-zA-Z0-9_\-]+$/m';
+        $re = '/^[\sa-zA-Z0-9_\-]*$/m';
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         if (count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue secret code must only contain letters, numbers, spaces, "_", and "-"');
@@ -576,7 +577,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderCurrentQueue',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -593,7 +595,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderQueueHistory',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -609,7 +612,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewStatus',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -671,7 +675,8 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewAnnouncement',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
@@ -689,7 +694,8 @@ class OfficeHoursQueueController extends AbstractController {
         return new WebResponse(
             'OfficeHoursQueue',
             'showQueueStudentStats',
-            $viewer->getQueueDataStudent()
+            $viewer->getQueueDataStudent(),
+            $this->core->getQueries()->getAllUsers()
         );
     }
 
@@ -707,5 +713,26 @@ class OfficeHoursQueueController extends AbstractController {
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
+    }
+
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    #[Route("/courses/{_semester}/{_course}/queue/student_search", methods: ["POST"])]
+    public function studentSearch(): JsonResponse {
+        $user_id = $_POST['student_id'];
+        $user = $this->core->getQueries()->getUserById($user_id);
+        if ($user === null) {
+            $error = "Invalid Student ID";
+            return JsonResponse::getFailResponse($error);
+        }
+
+        $result = $this->core->getQueries()->studentQueueSearch($user_id);
+        $data = [];
+        foreach ($result as $row) {
+                $data[] = $row;
+        }
+        $responseData = json_encode($data);
+        return JsonResponse::getSuccessResponse($responseData);
     }
 }

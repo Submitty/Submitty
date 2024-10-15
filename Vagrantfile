@@ -47,6 +47,9 @@ def gen_script(machine_name, worker: false, base: false)
       if no_submissions
         setup_cmd += ' --no_submissions'
       end
+      if ON_CI
+        setup_cmd += ' --ci'
+      end
     end
   else
     setup_cmd += 'install_success_from_cloud.sh'
@@ -76,20 +79,21 @@ base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
-def mount_folders(config, mount_options)
-  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
+
+def mount_folders(config, mount_options, type = nil)
+ # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
   # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type: type
 
-  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData)
+  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData DockerImages DockerImagesRPI)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type:type
     end
   }
 end
@@ -129,9 +133,9 @@ Vagrant.configure(2) do |config|
   arch = `uname -m`.chomp
   arm = arch == 'arm64' || arch == 'aarch64'
   apple_silicon = Vagrant::Util::Platform.darwin? && (arm || (`sysctl -n machdep.cpu.brand_string`.chomp.start_with? 'Apple M'))
-  
+  use_prebuilt_version = !ENV.fetch('PREBUILT_VERSION', '').empty?
   custom_box = ENV.has_key?('VAGRANT_BOX') 
-  base_box = ENV.has_key?('BASE_BOX') || apple_silicon || arm
+  base_box = ENV.has_key?('BASE_BOX') || ENV.has_key?('FROM_SCRATCH') || apple_silicon || arm
   # The time in seconds that Vagrant will wait for the machine to boot and be accessible.
   config.vm.boot_timeout = 600
 
@@ -153,7 +157,7 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
     ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7000)
+    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7001)
     ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
     ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
   end
@@ -164,6 +168,9 @@ Vagrant.configure(2) do |config|
         override.vm.box = base_boxes[:base]
       else
         config.ssh.username = 'root'
+        if use_prebuilt_version
+          override.vm.box_version = ENV.fetch('PREBUILT_VERSION')
+        end
       end
     end
 
@@ -238,12 +245,14 @@ Vagrant.configure(2) do |config|
       override.vm.box = base_boxes[:libvirt]
     end
 
+    libvirt.qemu_use_session = true
+
     libvirt.memory = 2048
     libvirt.cpus = 2
 
     libvirt.forward_ssh_port = true
 
-    mount_folders(override, [])
+    mount_folders(override, [], "rsync")
   end
 
   config.vm.provider "qemu" do |qe, override|
@@ -262,6 +271,15 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
+
+
+  # to use the command below, first install the vagrant plugin:
+  #
+  #   vagrant plugin install vagrant-timezone
+  #
+  if Vagrant.has_plugin?("vagrant-timezone")
+    config.timezone.value = "America/New_York"
+  end
 
   if ARGV.include?('ssh')
     config.ssh.username = 'root'

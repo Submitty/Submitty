@@ -7,6 +7,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\models\User;
+use app\controllers\forum\ForumController;
 
 class ForumThreadView extends AbstractView {
     private function getSavedForumCategories($current_course, $categories) {
@@ -480,33 +481,11 @@ class ForumThreadView extends AbstractView {
         $upDuckCounter_map = [];
         $upDuckCounter_map = $this->core->getQueries()->getUpduckInfoForPosts($post_ids);
         $userLiked = $this->core->getQueries()->getUserLikesForPosts($post_ids, $current_user);
-
+        $staffLiked = $this->core->getQueries()->getInstructorUpduck($post_ids);
         if ($display_option == "tree") {
-            $order_array = [];
-            $reply_level_array = [];
-            foreach ($posts as $post) {
-                if ($thread_id == -1) {
-                    $thread_id = $post["thread_id"];
-                }
-                if ($first) {
-                    $first = false;
-                    $first_post_id = $post["id"];
-                }
-                if ($post["parent_id"] > $first_post_id) {
-                    $place = array_search($post["parent_id"], $order_array);
-                    $tmp_array = [$post["id"]];
-                    $parent_reply_level = $reply_level_array[$place];
-                    while ($place !== false && $place + 1 < count($reply_level_array) && $reply_level_array[$place + 1] > $parent_reply_level) {
-                        $place++;
-                    }
-                    array_splice($order_array, $place + 1, 0, $tmp_array);
-                    array_splice($reply_level_array, $place + 1, 0, $parent_reply_level + 1);
-                }
-                else {
-                    array_push($order_array, $post["id"]);
-                    array_push($reply_level_array, 1);
-                }
-            }
+            $order_reply_level_array = ForumController::getPostsOrderAndReplies($posts, $thread_id);
+            $order_array = $order_reply_level_array[0];
+            $reply_level_array = $order_reply_level_array[1];
             $i = 0;
             $first = true;
 
@@ -524,6 +503,8 @@ class ForumThreadView extends AbstractView {
 
                         $boolLiked = in_array($post["id"], $userLiked, true);
 
+                        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
+
                         $post_data[] = $this->createPost(
                             $first_post_author_id,
                             $first_post_anonymous,
@@ -535,6 +516,7 @@ class ForumThreadView extends AbstractView {
                             $display_option,
                             $upDuckCounter_map[$post["id"]],
                             $boolLiked,
+                            $boolStaffLiked,
                             $includeReply,
                             $authors_display_info[$post['author_user_id']],
                             $post_attachments[$post["id"]][0],
@@ -558,6 +540,7 @@ class ForumThreadView extends AbstractView {
             foreach ($posts as $post) {
                 $post["author_user_group"] = $author_user_groups_map[$post["author_user_id"]];
                 $boolLiked = in_array($post["id"], $userLiked, true);
+                $boolStaffLiked = in_array($post["id"], $staffLiked, true);
                 $post_data[] = $this->createPost(
                     $first_post_author_id,
                     $first_post_anonymous,
@@ -569,6 +552,7 @@ class ForumThreadView extends AbstractView {
                     $display_option,
                     $upDuckCounter_map[$post["id"]],
                     $boolLiked,
+                    $boolStaffLiked,
                     $includeReply,
                     $authors_display_info[$post['author_user_id']],
                     $post_attachments[$post["id"]][0],
@@ -1077,8 +1061,7 @@ class ForumThreadView extends AbstractView {
      * } $author_info
      * @param string[] $post_attachments
      */
-    public function createPost(string $first_post_author_id, bool $first_post_anonymous, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
-
+    public function createPost(string $first_post_author_id, bool $first_post_anonymous, array $thread, array $post, $unviewed_posts, $first, $reply_level, $display_option, int $counter, bool $isLiked, bool $taTrue, $includeReply, array $author_info, array $post_attachments, bool $has_history, bool $is_merged_thread, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false) {
         $current_user = $this->core->getUser()->getId();
         $thread_id = $thread["id"];
         $post_id = $post["id"];
@@ -1126,12 +1109,21 @@ class ForumThreadView extends AbstractView {
                 $classes[] = "new_post";
                 $isNewPost = true;
             }
+            elseif ($current_user === $post["author_user_id"]) {
+                $classes[] = "new_post";
+                $isNewPost = true;
+            }
         }
         else {
             $classes[] = "viewed_post";
         }
         if ($author_info['is_staff']) {
-            $classes[] = "important";
+            if (in_array($post_id, $unviewed_posts, true)) {
+                $classes[] = "important new_post important-new";
+            }
+            else {
+                $classes[] = "important";
+            }
         }
         if ($post["deleted"]) {
             $classes[] = "deleted";
@@ -1203,6 +1195,7 @@ class ForumThreadView extends AbstractView {
         $post_up_duck = [
             "upduck_count" => $counter,
             "upduck_user_liked" => $isLiked,
+            "taTrue" => $taTrue
         ];
 
         if ($userGroup <= User::GROUP_STUDENT) {
@@ -1280,8 +1273,8 @@ class ForumThreadView extends AbstractView {
                 $created_post['activeThreadTitle'] = $activeThreadTitle;
                 $activeThreadAnnouncement = $thread['pinned_expiration'] > date("Y-m-d H:i:s");
                 $created_post['activeThreadAnnouncement'] = $activeThreadAnnouncement;
-                $created_post['activeThread'] = $thread;
             }
+            $created_post['activeThread'] = $thread;
             $created_post['isCurrentFavorite'] = $isCurrentFavorite;
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
@@ -1441,6 +1434,7 @@ class ForumThreadView extends AbstractView {
             $thread_ids = json_encode($details["thread_id"]);
             $thread_titles = json_encode($details["thread_title"]);
             $num_deleted = ($details["num_deleted_posts"]);
+            $total_upducks = ($details["total_upducks"]);
 
             $userData[] = [
                 "family_name" => $family_name,
@@ -1452,7 +1446,8 @@ class ForumThreadView extends AbstractView {
                 "ids" => $ids,
                 "timestamps" => $timestamps,
                 "thread_ids" => $thread_ids,
-                "thread_titles" => $thread_titles
+                "thread_titles" => $thread_titles,
+                "total_upducks" => $total_upducks
             ];
         }
 

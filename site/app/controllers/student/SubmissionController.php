@@ -360,7 +360,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $num_pages = $_POST['num_pages'];
+        $num_pages = rawurlencode($_POST['num_pages']);
 
         // making sure files have been uploaded
         if (!isset($_FILES["files1"])) {
@@ -486,7 +486,24 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
+                $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $output = curl_exec($ch);
+                curl_close($ch);
+                $response = json_decode($output);
+
+                if (!$response->success) {
+                    if (!isset($response->error_message)) {
+                        return $this->core->getOutput()->renderJsonFail("Unknown error occurred.");
+                    }
+                    return $this->core->getOutput()->renderJsonFail($response->error_message);
+                }
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT))) {

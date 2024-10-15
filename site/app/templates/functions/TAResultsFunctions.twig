@@ -2,16 +2,20 @@
 {# @var obj component     A component object #}
 {# @var bool anonymous    Whether the component should be rendered without grader info #}
 {# @var int num_decimals  The number of decimals places the score should contain #}
-{% macro renderComponent(component, anonymous, num_decimals) %}
+{# @var bool active_same_as_graded If the active version is the same as the graded version, used to display version conflicts #}
+{% macro renderComponent(component, anonymous, num_decimals, active_same_as_graded) %}
     {% import 'functions/Badge.twig' as Badge %}
-    <div class="box grade-results">
+    <div class="box grade-results" data-testid="ta-grade-results">
         <div class="box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
         </div>
         <div class="box-info">
             <h4>{{ component.title|escape }}
                 {% if component.graders|length != 0 and not anonymous %}
                     <i>(Graded by: {{ component.graders|join(' / ') }})</i>
+                {% endif %}
+                {% if component.version_graded > 0 and not active_same_as_graded %}
+                    For Version #{{ component.version_graded }}
                 {% endif %}
             </h4>
             <div style="float:left;">
