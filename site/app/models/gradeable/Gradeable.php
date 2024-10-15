@@ -839,12 +839,6 @@ class Gradeable extends AbstractModel {
             if ($this->hasReleaseDate()) {
                 $result[] = 'grade_released_date';
             }
-
-            // Only add in grade inquiry dates if its allowed
-            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$grade_inquiry_modified) {
-                $result[] = 'grade_inquiry_start_date';
-                $result[] = 'grade_inquiry_due_date';
-            }
         }
         else {
             $result = self::date_properties_simple;
@@ -928,6 +922,10 @@ class Gradeable extends AbstractModel {
         if ($this->isTeamAssignment()) {
             $skip_coercion_dates[] = "team_lock_date";
         }
+
+        // skip all grade inquiries coercion
+        $skip_coercion_dates[] = "grade_inquiry_start_date";
+        $skip_coercion_dates[] = "grade_inquiry_due_date";
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
