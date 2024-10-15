@@ -27,4 +27,16 @@ class Category {
      */
     #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
     protected Collection $threads;
+
+    public function getId(): int {
+        return $this->category_id;
+    }
+
+    public function getDescription(): string {
+        return $this->category_desc;
+    }
+
+    public function getColor(): string {
+        return $this->color;
+    }
 }
