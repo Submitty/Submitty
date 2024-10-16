@@ -72,6 +72,35 @@ function cleanupAutosaveHistory(suffix) {
     }
 }
 
+async function uploadSubmission(gradeableId, merge = null, clobber = null) {
+    const url = `/courses/xyz/abc/gradeable/${gradeableId}/upload`;
+
+    // Data to send to the server
+    const data = {
+        merge: merge ? 'true' : 'false',
+        clobber: clobber ? 'true' : 'false'
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Success:', result);
+        } else {
+            console.error('Error:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 /**
  * Event handler for the `onbeforeunload` event; saves unsaved changes to
  * localStorage (if enabled) and prompts the "Are you sure you want to exit?"
@@ -80,6 +109,8 @@ function cleanupAutosaveHistory(suffix) {
  */
 function saveAndWarnUnsubmitted(e) {
     saveNotebookToLocal();
+    uploadSubmission(USER_ID, true, false);
+
     // For Firefox
     e.preventDefault();
     // For Chrome
