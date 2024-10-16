@@ -419,6 +419,22 @@
           "type" : "string"
         }
       },
+      "instructor_solution_compile_command" : {
+        "description" : "The array of commands to compile instructor solution for the case of random input/output",
+        "type" : "array",
+        "minItems" : 1,
+        "items" : {
+          "type": "string"
+        }
+      },
+      "instructor_executable" : {
+        "description" : "The array of names of produced executables after compilation in instructor_solution_compile_command",
+        "type" : "array",
+        "minItems" : 1,
+        "items" : {
+          "type" : "string"
+        }
+      },
       "display_testcase_runtime_memory": {
         "type": "boolean",
         "description": "Specifies whether the amount of time to run/memory used by each testcase should be displayed to students"

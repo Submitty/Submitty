@@ -52,6 +52,7 @@ class SecureExecutionEnvironment():
         )
         self.directory = os.path.join(self.tmp_work, testcase_directory)
         self.instructor_solution_path = os.path.join(self.tmp_autograding, "instructor_solution")
+        self.instructor_solution_executable_path = os.path.join(self.tmp_autograding, "instructor_solution_executable")
         self.random_input_directory = os.path.join(
             self.tmp_work,
             'random_input',
@@ -294,6 +295,15 @@ class SecureExecutionEnvironment():
             self.config,
             self.job_id,
             self.instructor_solution_path,
+            directory,
+            self.tmp_logs,
+        )
+
+        # Copy any instructor solution executable to the testcase folder
+        autograding_utils.copy_contents_into(
+            self.config,
+            self.job_id,
+            self.instructor_solution_executable_path,
             directory,
             self.tmp_logs,
         )
