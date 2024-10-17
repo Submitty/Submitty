@@ -50,3 +50,7 @@
 #saml-login {
     color: var(--btn-text-white);
 }
+
+[data-theme="dark"] .table-scroll {
+    background-color: var(--background-blue);
+}

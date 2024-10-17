@@ -53,3 +53,7 @@ div.stack-trace-wrapper > .active-tab {
     background-color: var(--submitty-logo-blue);
     color: var(--btn-text-white);
 }
+
+[data-theme="dark"] .table-scroll {
+    background-color: var(--background-blue);
+}

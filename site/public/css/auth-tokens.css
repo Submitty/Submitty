@@ -15,3 +15,7 @@ form {
 #new-api-token {
     word-wrap: break-word;
 }
+
+[data-theme="dark"] .table-scroll {
+    background-color: var(--background-blue);
+}
