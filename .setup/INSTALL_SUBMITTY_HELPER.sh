@@ -311,6 +311,7 @@ mkdir -p "${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces"
 if [ "${WORKER}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/access"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/doc_to_pdf"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/emails"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/site_errors"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/socket_errors"
@@ -354,6 +355,7 @@ chown  -R "${DAEMON_USER}":"${DAEMONPHP_GROUP}"         "${SUBMITTY_DATA_DIR}/lo
 if [ "${WORKER}" == 0 ]; then
     chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/access"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/doc_to_pdf"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/emails"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/course_creation"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/rainbow_grades"
