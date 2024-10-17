@@ -2888,38 +2888,32 @@ function closeComponentGrading(component_id, saveChanges) {
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
  * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function closeComponent(component_id, saveChanges = true, edit_mode = false) {
+async function closeComponent(component_id, saveChanges = true, edit_mode = false) {
     setComponentInProgress(component_id);
     const gradeable_id = getGradeableId();
     const anon_id = getAnonId();
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     if (isInstructorEditEnabled()) {
-        return closeComponentInstructorEdit(component_id, saveChanges).then(() => {
-            setComponentInProgress(component_id, false);
-        })
-            .then(() => {
-                if (!edit_mode) {
-                    return updateTotals(gradeable_id, anon_id);
-                }
-            });
+        await closeComponentInstructorEdit(component_id, saveChanges);
+        setComponentInProgress(component_id, false);
+        if (!edit_mode) {
+            await updateTotals(gradeable_id, anon_id);
+        }
     }
     else {
-        return closeComponentGrading(component_id, saveChanges)
-            .then(() => {
-                setComponentInProgress(component_id, false);
-            })
-            .then(() => {
-                if (!edit_mode) {
-                    if (!GRADED_GRADEABLE.peer_gradeable) {
-                        return refreshTotalScoreBox();
-                    }
-                    else {
-                        return updateTotals(gradeable_id, anon_id);
-                    }
-                }
-            });
+        await closeComponentGrading(component_id, saveChanges);
+        setComponentInProgress(component_id, false);
+        if (!edit_mode) {
+            if (!GRADED_GRADEABLE.peer_gradeable) {
+                await refreshTotalScoreBox();
+            }
+            else {
+                await updateTotals(gradeable_id, anon_id);
+            }
+        }
     }
 }
 
