@@ -45,6 +45,10 @@
     font-size: 2em;
 }
 
+.table td {
+    vertical-align: middle !important; 
+}
+
 .option-btn {
     vertical-align: middle;
 }
