@@ -1,0 +1,48 @@
+{
+    "required_capabilities" : "default",
+    "autograding_method" : "docker",
+    "container_options" : {
+        "container_image" : "submitty/haskell:8.8.4"
+    },
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 5,
+        "AUTO_POINTS" : 5
+    },
+    "resource_limits" : {
+        // compiled haskell executables use timer_create(), which fails if no signal can be allocated
+        // so we need to increase the limit from the default 0
+        "RLIMIT_SIGPENDING" : 10
+    },
+    "autograding" : {
+        "submission_to_compilation" : [
+            "**/*.hs"
+        ],
+        "compilation_to_runner" : [
+            "**/a.out"
+        ]
+    },
+    "assignment_message" : "Place your main method in main.hs.",
+    "testcases" : [
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            // use -v0 so that we don't get a confusing warning for students
+            "command" : "ghc --make -v0 *.hs -o a.out",
+            "executable_name" : "a.out",
+            "points" : 2
+        },
+        {
+            "title" : "Output Check",
+            "command" : "./a.out",
+            "points" : 3,
+            "validation" : [
+                {
+                    "actual_file" : "STDOUT.txt",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
+                    "expected_string" : "hello world\n"
+                }
+            ]
+        }
+    ]
+}
