@@ -214,6 +214,37 @@ function toggleTimerInputs() {
     }
 }
 
+function updateTimer(endDate) {
+    const timerDisplayElement = $('#timerDisplay');
+    const timerElement = $('#timer');
+
+    function tick() {
+        const now = new Date();
+        const timeRemaining = endDate - now;
+
+        // Show the timer element once we're ready to start updating it
+        timerElement.show();
+
+        if (timeRemaining <= 0) {
+            timerElement.text('Poll Ended');
+            clearInterval(timerId);
+            return;
+        }
+
+        const seconds = Math.floor((timeRemaining / 1000) % 60);
+        const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+        const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+
+        const hoursUpdated = (hours < 10) ? `0${hours}` : hours;
+        const minutesUpdated = (minutes < 10) ? `0${minutes}` : minutes;
+        const secondsUpdated = (seconds < 10) ? `0${seconds}` : seconds;
+
+        timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
+    }
+
+    const timerId = setInterval(tick, 20);
+}
+
 function toggle_section(section_id) {
     $(`#${section_id}`).toggle('fast');
 }
