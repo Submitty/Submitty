@@ -336,7 +336,7 @@ gradeables:
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
-  
+
   - gradeable_config: haskell_hello_world
     components:
       - gc_lower_clamp: 0
