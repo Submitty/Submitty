@@ -15,6 +15,24 @@
             </div>
         {% endif %}
 
+        <div id="grade-report-summary" class="report-card">
+            <div class="report-title-cont">
+                Pushing this button will update the grade summary data used to generate the rainbow grades reports.
+            </div>
+            <div class="report-card-btn-cont">
+                <button id="grade-summaries-button"
+                        onclick="location.href='{{ summaries_url }}'"
+                        class="btn btn-primary"
+                        tabindex="0"
+                >
+                    Generate Grade Summaries
+                </button>
+                <div class="card-btn-info">
+                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                </div>
+            </div>
+        </div>
+
         <div id="save_status_container" class="customization_item">
             <div id="build_buttons">
                 <button
