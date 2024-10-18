@@ -61,14 +61,14 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="component-67"]').should('contain', 'Extra Credit');
         cy.get('[data-testid="component-67"]')
-            .should('contain', 'Full Credit')
+            .should('contain', 'No Credit')
             .and('contain', 'Extra credit done poorly')
             .and('contain', 'Extra credit is acceptable');
         cy.get('[data-testid="component-67"]').click(20, 25);
         cy.get('[data-testid="component-67"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
         cy.get('[data-testid="component-67"]')
-            .should('contain', 'Full Credit')
+            .should('contain', 'No Credit')
             .and('contain', 'Extra credit done poorly')
             .and('contain', 'Extra credit is acceptable');
         cy.get('body').type('{0}');
