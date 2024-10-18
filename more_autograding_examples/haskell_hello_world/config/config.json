@@ -27,13 +27,13 @@
             "type" : "Compilation",
             "title" : "Compilation",
             // use -v0 so that we don't get a confusing warning for students
-            "command" : "ghc --make -v0 main.hs -o main",
-            "executable_name" : "main",
+            "command" : "ghc --make -v0 *.hs -o a.out",
+            "executable_name" : "a.out",
             "points" : 2
         },
         {
             "title" : "Output Check",
-            "command" : "./main",
+            "command" : "./a.out",
             "points" : 3,
             "validation" : [
                 {
