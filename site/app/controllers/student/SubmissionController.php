@@ -486,7 +486,7 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = rawurlencode("/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json");
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.

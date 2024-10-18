@@ -73,6 +73,16 @@ def worker_process(
 
     while True:
         if os.path.exists(todo_queue_file):
+
+            # force cleanup docker networks at the start of autograding
+            docker_cleanup_output = os.popen("sudo /usr/local/submitty/sbin/docker_cleanup.sh "+which_untrusted).read()
+            if (docker_cleanup_output.strip() != "no docker networks to cleanup"):
+                config.logger.log_message(
+                    f"ERROR stuck docker network on {which_machine} "
+                    f"{which_untrusted}. {docker_cleanup_output}",
+                    which_untrusted=which_untrusted
+                )
+
             try:
                 # Attempt to grade the submission. Get back the location of the results.
                 results_zip_tmp = grade_item.grade_from_zip(

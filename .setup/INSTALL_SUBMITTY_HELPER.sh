@@ -929,6 +929,18 @@ done
 
 
 #############################################################################
+# An apparent bug in docker may leave stuck zombie networks after
+# autograding has finished.  This docker_cleanup script will be run by
+# the daemon user as root to detect and forceably remove any stuck
+# docker networks.
+
+if ! grep -q "${DAEMON_USER}" /etc/sudoers; then
+    echo "" >> /etc/sudoers
+    echo "#grant the submitty_daemon user ability to run docker_cleanup script as root" >> /etc/sudoers
+    echo "%${DAEMON_USER} ALL = (root) NOPASSWD: /usr/local/submitty/sbin/docker_cleanup.sh" >> /etc/sudoers
+fi
+
+#############################################################################
 # Cleanup Old Email
 
 # Will scan the emails table in the main Submitty database for email
