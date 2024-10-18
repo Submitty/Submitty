@@ -12572,11 +12572,6 @@ parameters:
 			path: app/views/admin/ReportView.php
 
 		-
-			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$grade_summaries_last_run with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/ReportView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$json with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/ReportView.php
