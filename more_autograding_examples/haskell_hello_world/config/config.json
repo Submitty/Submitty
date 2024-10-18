@@ -18,7 +18,7 @@
             "**/*.hs"
         ],
         "compilation_to_runner" : [
-            "**/main"
+            "**/a.out"
         ]
     },
     "assignment_message" : "Place your main method in main.hs.",
