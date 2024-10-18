@@ -1,0 +1,91 @@
+{
+    "required_capabilities" : "default",
+    "max_submission_size" : 3000000000,
+    "autograding_method" : "docker",
+    "container_options" : {
+        "container_image" : "temp:latest"
+    },
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 15,
+        "AUTO_POINTS" : 15
+    },
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 100000,
+        "RLIMIT_SIGPENDING" : 100000,
+        "RLIMIT_NOFILE" : 100000,
+        "RLIMIT_CORE" : 100000,
+        "RLIMIT_MSGQUEUE" : 100000,
+        "RLIMIT_RTPRIO" : 100000,
+        "RLIMIT_RTTIME" : 100000,
+	"RLIMIT_FSIZE" : 1000000000
+    },
+    "allow_system_calls": [
+  "PROCESS_CONTROL_MEMORY_ADVANCED",
+  "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+  "PROCESS_CONTROL_SYNCHRONIZATION",
+  "PROCESS_CONTROL_SCHEDULING",
+  "PROCESS_CONTROL_ADVANCED",
+  "PROCESS_CONTROL_GET_SET_USER_GROUP_ID",
+  "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+  "FILE_MANAGEMENT_PERMISSIONS",
+  "FILE_MANAGEMENT_CAPABILITIES",
+  "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
+  "FILE_MANAGEMENT_RARE",
+  "DEVICE_MANAGEMENT_ADVANCED",
+  "DEVICE_MANAGEMENT_NEW_DEVICE",
+  "INFORMATION_MAINTENANCE_ADVANCED",
+  "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+  "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+  "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+  "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+  "TGKILL",
+  "COMMUNICATIONS_AND_NETWORKING_KILL",
+  "UNKNOWN",
+  "UNKNOWN_MODULE",
+  "UNKNOWN_REMAP_PAGES"
+],
+    "autograding" : {
+        "submission_to_compilation" : [
+            "**/**"
+        ],
+        "compilation_to_runner" : [
+            "**/**"
+        ],
+	"submission_to_validation": [
+		"**/**"
+	]
+    },
+    "assignment_message" : "Place your code in hello.erl, in method hello_world.",
+    "testcases": [
+        {
+            "type": "Compilation",
+            "title": "Compilation",
+            "command": "/usr/local/erlang/26.0/bin/erlc hello.erl",
+            "details": "Compiling hello.erl",
+            "executable_name": "hello.beam",
+            "points": 15
+        },
+	{
+	   "title": "temp!",
+	   "command": ["/usr/local/erlang/26.0/bin/erl -noshell -s hello hello_world -s init stop", "cat erl_crash.dump"],
+	   "details": "no",
+
+	   "points": 0,
+		"validation": [
+                {
+                    "method" : "warnIfEmpty",
+                    "args" : "5",
+                    "actual_file" : "STDOUT.txt"
+                }
+            ]
+	},
+	{
+            "type" : "FileCheck",
+            "title" : "Submission Limit",
+            "points" : -5,
+            "max_submissions" : 100000,
+            "penalty" : -0.5
+        }
+    ]
+}
+
