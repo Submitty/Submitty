@@ -361,7 +361,6 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-
   - gradeable_config: image_diff_mirror
     components:
       - gc_lower_clamp: 0
