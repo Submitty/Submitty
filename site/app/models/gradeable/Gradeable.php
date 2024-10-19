@@ -492,8 +492,10 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_inquiry_start_date',
-        'grade_inquiry_due_date'
+
+        // don't check grade inquiry start and due dates
+        // 'grade_inquiry_start_date',
+        // 'grade_inquiry_due_date'
     ];
 
     /**
@@ -783,8 +785,6 @@ class Gradeable extends AbstractModel {
         $no_due_date_reqs = [
             'ta_view_start_date',
             'submission_open_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         $no_release_date_reqs = [
@@ -793,8 +793,6 @@ class Gradeable extends AbstractModel {
             'submission_due_date',
             'grade_start_date',
             'grade_due_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         // Now, check if they are in increasing order
@@ -922,10 +920,6 @@ class Gradeable extends AbstractModel {
         if ($this->isTeamAssignment()) {
             $skip_coercion_dates[] = "team_lock_date";
         }
-
-        // skip all grade inquiries coercion
-        $skip_coercion_dates[] = "grade_inquiry_start_date";
-        $skip_coercion_dates[] = "grade_inquiry_due_date";
 
         // First coerce in the forward direction, then in the reverse direction
         return $coerce_dates(
