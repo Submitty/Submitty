@@ -55,7 +55,7 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewGradeInquiry($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Gradeable', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
@@ -127,7 +127,7 @@ class GradeInquiryController extends AbstractController {
         try {
             $grade_inquiry_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
             $grade_inquiry_post = $this->core->getQueries()->getGradeInquiryPost($grade_inquiry_post_id);
-            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $grade_inquiry_post, $graded_gradeable);
+            $new_post = $this->core->getOutput()->renderTemplate('submission\Gradeable', 'renderSingleGradeInquiryPost', $grade_inquiry_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return MultiResponse::JsonOnlyResponse(
@@ -201,7 +201,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         return new WebResponse(
-            ['submission', 'Homework'],
+            ['submission', 'Gradeable'],
             'renderSingleGradeInquiryPost',
             $new_post,
             $graded_gradeable
@@ -265,7 +265,7 @@ class GradeInquiryController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
+            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Gradeable', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return JsonResponse::getSuccessResponse(
@@ -298,7 +298,7 @@ class GradeInquiryController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
         return MultiResponse::webOnlyResponse(
             new WebResponse(
-                ['submission', 'Homework'],
+                ['submission', 'Gradeable'],
                 'showGradeInquiryDiscussion',
                 $graded_gradeable,
                 true

@@ -1,5 +1,5 @@
 <div class="content" id="gradeInquiryBoxSection" style="display: none">
-    {{ render_template(['submission', 'Homework'], 'showGradeInquiryDiscussion', graded_gradeable, can_inquiry) }}
+    {{ render_template(['submission', 'Gradeable'], 'showGradeInquiryDiscussion', graded_gradeable, can_inquiry) }}
 </div>
 <script>
     $(initGradingInquirySocketClient);

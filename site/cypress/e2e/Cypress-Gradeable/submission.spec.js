@@ -24,7 +24,7 @@ const tests = [
 describe('Test Uploading Files', () => {
     beforeEach(() => {
         const gradeableId = 'open_homework';
-        const headingText = 'New submission for: Open Homework';
+        const headingText = 'New submission for: Open Gradeable';
         cy.login();
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('h1').contains(headingText).should('be.visible');

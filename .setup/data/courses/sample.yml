@@ -8,7 +8,7 @@ unregistered_students: 15
 make_customization: true
 gradeables:
   - g_id: future_peer_grading
-    g_title: Future Peer Homework
+    g_title: Future Peer Gradeable
     gradeable_config: python_simple_homework
     eg_peer_grading: true
     components:
@@ -80,7 +80,7 @@ gradeables:
     g_bucket: homework
 
   - g_id: future_no_tas_homework
-    g_title: Future (No TAs) Homework
+    g_title: Future (No TAs) Gradeable
     gradeable_config: python_simple_homework
     components:
       - gc_lower_clamp: 0
@@ -211,7 +211,7 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_title: Future (TAs) Homework
+    g_title: Future (TAs) Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -310,7 +310,7 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_title: Open Peer Homework
+    g_title: Open Peer Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -378,7 +378,7 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_title: Open Homework
+    g_title: Open Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -448,7 +448,7 @@ gradeables:
     eg_team_assignment: true
     eg_max_team_size: 3
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Open Team Homework
+    g_title: Open Team Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -542,7 +542,7 @@ gradeables:
     eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
     eg_using_subdirectory: false
     eg_vcs_subdirectory: ""
-    g_title: Open VCS Homework
+    g_title: Open VCS Gradeable
     gradeable_config: vcs_submissions
     g_bucket: homework
 
@@ -612,7 +612,7 @@ gradeables:
     eg_vcs_partial_path: "{$gradeable_id}/{$user_id}"
     eg_using_subdirectory: true
     eg_vcs_subdirectory: "src"
-    g_title: Subdirectory VCS Homework
+    g_title: Subdirectory VCS Gradeable
     gradeable_config: vcs_submissions
     g_bucket: homework
 
@@ -682,7 +682,7 @@ gradeables:
     eg_team_assignment: true
     eg_max_team_size: 3
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Grading Team Homework
+    g_title: Grading Team Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -757,7 +757,7 @@ gradeables:
     eg_team_assignment: true
     eg_max_team_size: 3
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Closed Peer Team Homework
+    g_title: Closed Peer Team Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -831,7 +831,7 @@ gradeables:
     eg_team_assignment: true
     eg_max_team_size: 3
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Closed Peer Team Homework
+    g_title: Closed Peer Team Gradeable
     gradeable_config: cpp_hidden_tests
     g_bucket: homework
 
@@ -904,7 +904,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Released Peer PDF Homework
+    g_title: Released Peer PDF Gradeable
     gradeable_config: multiple_pdf_annotations
     g_bucket: homework
     g_grader_assignment_method: 2
@@ -981,7 +981,7 @@ gradeables:
     eg_max_team_size: 3
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Released Peer Team PDF Homework
+    g_title: Released Peer Team PDF Gradeable
     gradeable_config: multiple_pdf_annotations
     g_bucket: homework
     g_grader_assignment_method: 2
@@ -1054,7 +1054,7 @@ gradeables:
     eg_team_assignment: true
     eg_max_team_size: 3
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Closed Team Homework
+    g_title: Closed Team Gradeable
     gradeable_config: cpp_hidden_tests
     g_bucket: homework
 
@@ -1122,7 +1122,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 9997-12-31 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Closed Homework
+    g_title: Closed Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -1144,7 +1144,7 @@ gradeables:
     eg_late_days: 1
     g_grade_start_date: 9997-12-31 23:59:59
     g_ta_view_start_date: 1970-01-01 03:59:59
-    g_title: Late Allowed Homework
+    g_title: Late Allowed Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -1212,7 +1212,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Grading Homework
+    g_title: Grading Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -1239,7 +1239,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Grades Released Homework
+    g_title: Grades Released Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework
 
@@ -1500,7 +1500,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: TA Grade Only Homework (Upload Only)
+    g_title: TA Grade Only Gradeable (Upload Only)
     gradeable_config: upload_only
     g_bucket: homework
 
@@ -1569,7 +1569,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Autograde Only Homework (Simple Python)
+    g_title: Autograde Only Gradeable (Simple Python)
     gradeable_config: 01_simple_python
     eg_use_ta_grading: False
     g_bucket: homework
@@ -1638,7 +1638,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Autograde and TA Homework (C System Calls)
+    g_title: Autograde and TA Gradeable (C System Calls)
     gradeable_config: 12_system_calls
     g_bucket: homework
 
@@ -1774,7 +1774,7 @@ gradeables:
     eg_has_release_date: true
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Grading Homework PDF
+    g_title: Grading Gradeable PDF
     gradeable_config: pdf_word_count
     g_bucket: homework
 
@@ -1844,7 +1844,7 @@ gradeables:
     eg_max_team_size: 3
     g_grade_start_date: 1973-01-01 23:59:59
     g_ta_view_start_date: 1970-01-01 23:59:59
-    g_title: Grading Homework Team PDF
+    g_title: Grading Gradeable Team PDF
     gradeable_config: pdf_word_count
     g_bucket: homework
     g_grader_assignment_method: 0

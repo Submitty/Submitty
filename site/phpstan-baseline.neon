@@ -3173,17 +3173,17 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showHomeworkPage\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showGradeablePage\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showHomeworkPage\\(\\) has parameter \\$gradeable_version with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showGradeablePage\\(\\) has parameter \\$gradeable_version with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showHomeworkPage\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:showGradeablePage\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3223,17 +3223,17 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyHomeworkPagePermissions\\(\\) has no return type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyGradeablePagePermissions\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyHomeworkPagePermissions\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyGradeablePagePermissions\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyHomeworkPagePermissions\\(\\) has parameter \\$graded_gradeable with no type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:verifyGradeablePagePermissions\\(\\) has parameter \\$graded_gradeable with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -13614,57 +13614,57 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 2
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 3
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 4
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
+			message: "#^Method app\\\\views\\\\submission\\\\GradeableView\\:\\:removeLowConfidenceDigits\\(\\) has no return type specified\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has parameter \\$confidences with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\submission\\\\GradeableView\\:\\:removeLowConfidenceDigits\\(\\) has parameter \\$confidences with no type specified\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:removeLowConfidenceDigits\\(\\) has parameter \\$id with no type specified\\.$#"
+			message: "#^Method app\\\\views\\\\submission\\\\GradeableView\\:\\:removeLowConfidenceDigits\\(\\) has parameter \\$id with no type specified\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:renderSingleGradeInquiryPost\\(\\) has parameter \\$post with no value type specified in iterable type array\\.$#"
+			message: "#^Method app\\\\views\\\\submission\\\\GradeableView\\:\\:renderSingleGradeInquiryPost\\(\\) has parameter \\$post with no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
-			message: "#^Method app\\\\views\\\\submission\\\\HomeworkView\\:\\:renderSubmissionsClosedBox\\(\\) has no return type specified\\.$#"
+			message: "#^Method app\\\\views\\\\submission\\\\GradeableView\\:\\:renderSubmissionsClosedBox\\(\\) has no return type specified\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\gradeable\\\\GradedGradeable\\|null given\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
 			count: 2
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
-			path: app/views/submission/HomeworkView.php
+			path: app/views/submission/GradeableView.php
 
 		-
 			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has no return type specified\\.$#"

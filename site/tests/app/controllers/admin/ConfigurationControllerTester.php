@@ -417,7 +417,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
                 switch ($value) {
                     case 'General Questions':
                         return true;
-                    case 'Homework Help':
+                    case 'Gradeable Help':
                         return true;
                     case 'Quizzes':
                         return true;
@@ -431,7 +431,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
                 switch ($value) {
                     case 'General Questions':
                         return 0;
-                    case 'Homework Help':
+                    case 'Gradeable Help':
                         return 1;
                     case 'Quizzes':
                         return 2;

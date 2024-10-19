@@ -387,7 +387,7 @@ class LateController extends AbstractController {
                 ];
             }
             //$fields[1] represents the gradeable id for extensions
-            if ($type === "extension" && !$this->validateHomework($fields[1])) {
+            if ($type === "extension" && !$this->validateGradeable($fields[1])) {
                 $data = null;
                 return [
                     "success" => false,
@@ -415,7 +415,7 @@ class LateController extends AbstractController {
         ];
     }
 
-    private function validateHomework(string $id): bool {
+    private function validateGradeable(string $id): bool {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
         foreach ($g_ids as $index => $value) {
             if ($id === $value['g_id']) {

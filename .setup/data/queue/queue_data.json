@@ -1,6 +1,6 @@
 {
     "queue_message": "Welcome to the Office Hours Queue page!",
-    "queue_announcement_message": "To join the queue for lab office hours, select 'Lab help' under 'Queue Name' with the code 'lab'.\nTo join the queue for homework office hours, select 'Homework Debugging' with the code 'hw_debug'.\nType your email address <your_id>@sample.edu in the contact information box so your TAs can contact you.",
+    "queue_announcement_message": "To join the queue for lab office hours, select 'Lab help' under 'Queue Name' with the code 'lab'.\nTo join the queue for homework office hours, select 'Gradeable Debugging' with the code 'hw_debug'.\nType your email address <your_id>@sample.edu in the contact information box so your TAs can contact you.",
     "queue_entries": [
         {
             "current_state": "done",
@@ -62,7 +62,7 @@
         {
             "current_state": "being_helped",
             "removal_type": null,
-            "queue_code": "Homework Debugging",
+            "queue_code": "Gradeable Debugging",
             "user_id": "aphacker",
             "name": "Alyssa P Hacker",
             "time_in": "",
@@ -100,7 +100,7 @@
         {
             "current_state": "waiting",
             "removal_type": null,
-            "queue_code": "Homework Debugging",
+            "queue_code": "Gradeable Debugging",
             "user_id": "joness",
             "name": "Sally :)))",
             "time_in": "",
@@ -119,7 +119,7 @@
         {
             "current_state": "waiting",
             "removal_type": null,
-            "queue_code": "Homework Debugging",
+            "queue_code": "Gradeable Debugging",
             "user_id": "smithj",
             "name": "John Smith",
             "time_in": "",

@@ -235,7 +235,7 @@ for key in defaults.keys():
         loaded_defaults[key] = defaults[key]
 defaults = loaded_defaults
 
-print("\nWelcome to the Submitty Homework Submission Server Configuration\n")
+print("\nWelcome to the Submitty Gradeable Submission Server Configuration\n")
 DEBUGGING_ENABLED = args.debug is True
 
 if DEBUGGING_ENABLED:
