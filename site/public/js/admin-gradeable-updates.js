@@ -319,7 +319,7 @@ function setGradeInquiryWarningBanner() {
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
-        
+
         // hide the element when the start date is before the due date
         // show the element when the start date is after the due date
         disableElementChildren($('#gradeable-dates-warnings'), grade_inquiry_start_date <= grade_inquiry_due_date);
