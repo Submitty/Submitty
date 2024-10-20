@@ -708,6 +708,7 @@ en_US
 ${SUBMISSION_URL}
 
 
+y
 sysadmin@example.com
 https://example.com
 1
