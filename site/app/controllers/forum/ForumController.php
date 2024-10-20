@@ -347,6 +347,7 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["POST"])]
     public function publishThread() {
+        //look here 
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = [];
@@ -631,14 +632,23 @@ class ForumController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]
-    public function getSinglePost() {
+    public function getSinglePost(): JsonResponse {
         $post_id = $_POST['post_id'];
+        return JsonResponse::getErrorResponse($post_id);
+        $registration = $this->core->getQueries()->getAuthorRegistrationSection($user_list)[0];
+        $rotating = $this->core->getQueries()->getAuthorRotatingSection($user_list)[0];
+
+        $registration = "0";
+        $rotating = "0";
         $reply_level = $_POST['reply_level'];
         $post = $this->core->getQueries()->getPost($post_id);
         $post_history = $this->core->getQueries()->getPostHistory($post_id);
         if (($_POST['edit']) && !empty($post_history)) {
             $post['edit_timestamp'] = $post_history[0]['edit_timestamp'];
         }
+
+        $post['author_registration_section'] = $registration;
+        $post['author_rotating_section'] = $rotating;
         $thread_id = $post['thread_id'];
         $thread = $this->core->getQueries()->getThread($thread_id);
         $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
