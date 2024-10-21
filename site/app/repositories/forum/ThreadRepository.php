@@ -34,10 +34,12 @@ class ThreadRepository extends EntityRepository {
             ->setParameter('user_id', $user_id)
             ->join('thread.author', 'author')
             ->andWhere('post.parent = -1');
+        // If given any categories, filter out posts lacking at least one of them.
         if (count($category_ids) > 0) {
             $qb->andWhere('categories.category_id IN (:category_ids)')
                 ->setParameter('category_ids', $category_ids);
         }
+        // If given any status (resolved/unresolved), filter
         if (count($status) > 0) {
             $qb->andWhere('thread.status IN (:status)')
                 ->setParameter('status', $status);
@@ -56,6 +58,7 @@ class ThreadRepository extends EntityRepository {
 
         $result = $qb->getQuery()->getResult();
 
+        // only get unread
         if ($filter_unread) {
             $result = array_filter($result, function ($x) use ($user_id) {
                 return $x->isUnread($user_id);
