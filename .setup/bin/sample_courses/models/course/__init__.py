@@ -76,6 +76,7 @@ class Course(
         self.no_registration_students: int = 10
         self.no_rotating_students: int = 10
         self.unregistered_students: int = 10
+        self.self_registration_type: int = 0
         self.archived: bool = False
         if "archived" in course:
             self.archived = course["archived"]
@@ -93,3 +94,5 @@ class Course(
             self.unregistered_students = course["unregistered_students"]
         if "make_customization" in course:
             self.make_customization = course["make_customization"]
+        if "self_registration_type" in course:
+            self.self_registration_type = course["self_registration_type"]
