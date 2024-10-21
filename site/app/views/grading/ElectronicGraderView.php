@@ -1315,7 +1315,7 @@ HTML;
             $id = $graded_gradeable->getSubmitter()->getId();
         }
 
-        // TODO: this is duplicated in Homework View
+        // TODO: this is duplicated in Gradeable View
         $version_data = array_map(function (AutoGradedVersion $version) {
             return [
                 'points' => $version->getNonHiddenPoints(),
@@ -1548,7 +1548,7 @@ HTML;
             $submission_time = $display_version_instance->getSubmissionTime();
         }
 
-        // TODO: this is duplicated in Homework View
+        // TODO: this is duplicated in Gradeable View
         $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),

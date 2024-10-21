@@ -200,18 +200,18 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // testing
         cy.get('#page_1_nav').click();
         // Locking the gradeable
-        cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
+        cy.get('#gradeable-lock').select('Autograde and TA Gradeable (C System Calls) [ grades_released_homework_autota ]');
         cy.get('#gradeable-lock-points').should('be.visible');
         // unlocking the gradeable
         cy.get('#gradeable-lock').select('');
         // Relocks the gradeable
-        cy.get('#gradeable-lock').select('Autograde and TA Homework (C System Calls) [ grades_released_homework_autota ]');
+        cy.get('#gradeable-lock').select('Autograde and TA Gradeable (C System Calls) [ grades_released_homework_autota ]');
         cy.get('#gradeable-lock-points').type('10');
         cy.get('body').click(0, 0);
 
         ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s)."]').should('have.class', 'disabled');
+            cy.get('[title="Please complete Autograde and TA Gradeable (C System Calls) first with a score of 10 point(s)."]').should('have.class', 'disabled');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);
@@ -226,7 +226,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         updateDates('#date_submit', past_date, 'All Changes Saved');
         // Should start out as viewable by student
         logoutLogin('student', ['sample']);
-        cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+        cy.get('#gradeables-content').should('contain.text', 'Open Peer Gradeable');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 
@@ -238,7 +238,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // The gradeable should be visible to everyone
         ['student', 'grader', 'ta'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Gradeable');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
@@ -254,11 +254,11 @@ describe('Tests cases revolving around modifying gradeables', () => {
         // Gradeable should not be visible to students, but visible to TA and graders
         ['ta', 'grader'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('#gradeables-content').should('contain.text', 'Open Peer Homework');
+            cy.get('#gradeables-content').should('contain.text', 'Open Peer Gradeable');
         });
 
         logoutLogin('student', ['sample']);
-        cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Homework');
+        cy.get('#gradeables-content').should('not.contain.text', 'Open Peer Gradeable');
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update?nav_tab=5']);
 

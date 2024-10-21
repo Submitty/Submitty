@@ -128,7 +128,7 @@ class Course_data:
         self.conn.execute(
             queues_table.insert(),
             open=True,
-            code="Homework Debugging",
+            code="Gradeable Debugging",
             token="hw_debug",
         )
 

@@ -109,7 +109,7 @@ describe('Tests cases for the Student API', () => {
                 },
             }).then((response) => {
                 expect(response.body.status).to.equal('success');
-                expect(response.body.data).to.contain('Successfully uploaded version').and.to.contain('for Subdirectory VCS Homework');
+                expect(response.body.data).to.contain('Successfully uploaded version').and.to.contain('for Subdirectory VCS Gradeable');
             });
             // Fail
             cy.request({

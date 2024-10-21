@@ -19,7 +19,7 @@ use app\libraries\Utils;
 /* Notebook */
 use app\models\notebook\AbstractNotebookInput;
 
-class HomeworkView extends AbstractView {
+class GradeableView extends AbstractView {
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable

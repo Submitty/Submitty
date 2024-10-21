@@ -1,6 +1,6 @@
 describe('Cyclic grading View Test', () => {
     ['ta', 'instructor'].forEach((user) => {
-        it(`${user} cyclic grading view testing for Grading Homework`, () => {
+        it(`${user} cyclic grading view testing for Grading Gradeable`, () => {
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'status']);
             cy.get('[data-testid="Grading Index"]').click();
@@ -24,7 +24,7 @@ describe('Cyclic grading View Test', () => {
         });
     });
     ['ta', 'instructor'].forEach((user) => {
-        it(`${user} cyclic grading view testing for Grading Team Homework`, () => {
+        it(`${user} cyclic grading view testing for Grading Team Gradeable`, () => {
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'grading_team_homework', 'grading', 'status']);
             cy.get('[data-testid="Grading Index"]').click();

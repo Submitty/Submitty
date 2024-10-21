@@ -71,7 +71,7 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    private function verifyHomeworkPagePermissions($gradeable_id, Gradeable $gradeable, $graded_gradeable) {
+    private function verifyGradeablePagePermissions($gradeable_id, Gradeable $gradeable, $graded_gradeable) {
         if ($graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             // FIXME if $graded_gradeable is null, the user isn't on a team, so we want to redirect
             // FIXME    to nav with an error
@@ -106,7 +106,7 @@ class SubmissionController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements: ["gradeable_version" => "\d+"])]
-    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
+    public function showGradeablePage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -114,7 +114,7 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
+        $verify_permissions = $this->verifyGradeablePagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
         }
@@ -196,7 +196,7 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->addInternalJs('websocket.js');
             $this->core->getOutput()->enableMobileViewport();
             $this->core->getOutput()->renderOutput(
-                ['submission', 'Homework'],
+                ['submission', 'Gradeable'],
                 'showGradeable',
                 $gradeable,
                 $graded_gradeable,
@@ -220,7 +220,7 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $this->core->getUser()->getId());
-        $verify_permissions = $this->verifyHomeworkPagePermissions($gradeable_id, $gradeable, $graded_gradeable);
+        $verify_permissions = $this->verifyGradeablePagePermissions($gradeable_id, $gradeable, $graded_gradeable);
         if ($verify_permissions['error']) {
             return $verify_permissions;
         }

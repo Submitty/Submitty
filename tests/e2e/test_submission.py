@@ -16,7 +16,7 @@ class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Open Homework']")):
+    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Open Gradeable']")):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)

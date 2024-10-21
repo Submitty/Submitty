@@ -1517,15 +1517,15 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
-    public function testShowHomeworkPageNoGradeable() {
+    public function testShowGradeablePageNoGradeable() {
         $controller = new SubmissionController($this->core);
-        $return = $controller->showHomeworkPage('invalid');
+        $return = $controller->showGradeablePage('invalid');
 
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
-    public function testShowHomeworkValid() {
+    public function testShowGradeableValid() {
         $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         $gradeable = $this->createMockGradeable();
@@ -1540,13 +1540,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->setQueries($database_queries);
 
         $controller = new SubmissionController($this->core);
-        $return = $controller->showHomeworkPage('test');
+        $return = $controller->showGradeablePage('test');
 
         $this->assertFalse($return['error']);
         $this->assertEquals("test", $return['id']);
     }
 
-    public function testShowHomeworkNoConfig() {
+    public function testShowGradeableNoConfig() {
         $gradeable = $this->createMockGradeable(1, 1000, false);
 
         $database_queries = $this->createMock(DatabaseQueries::class);
@@ -1554,19 +1554,19 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->setQueries($database_queries);
 
         $controller = new SubmissionController($this->core);
-        $return = $controller->showHomeworkPage('test');
+        $return = $controller->showGradeablePage('test');
 
         $this->assertEquals("test", $return['id']);
         $this->assertTrue($return['error']);
     }
 
-    public function testShowHomeworkNoAccess() {
+    public function testShowGradeableNoAccess() {
         $core = $this->createMockCore([], ['access_grading' => false]);
         $gradeable = $this->createMockGradeable(1, 1000, true, false);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $controller = new SubmissionController($core);
-        $return = $controller->showHomeworkPage('test');
+        $return = $controller->showGradeablePage('test');
 
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
