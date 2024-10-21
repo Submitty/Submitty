@@ -1,6 +1,6 @@
-<div class="multi-field-wrapper-checkpoints">
+<div class="multi-field-wrapper-checkpoints" id="gradeable_rubric">
     {# This is a layout table #}
-    <table class="table-striped checkpoints-table table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA; max-width:50% !important;">
+    <table class="table-striped checkpoints-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
         <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
         <!-- Layout Headings -->
         <tr class="rubric-layout-header">
@@ -16,9 +16,27 @@
                 <input type="checkbox" name="checkpoint_extra_0" aria-label="is checkpoint 0 counted as extra credit?" class="checkpoint_extra extra" value="true" />
             </td>
         </tr>
+        <button type="button" id="add-checkpoint_field">Add Checkpoint</button>
+        <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="display:none;">Remove Last Checkpoint</button>
+        <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+        <br />
+        <h5>Text Items</h5>
+            <table class="table-striped text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
+                <thead style="background: #E1E1E1;">
+                    <tr>
+                        <th> Label </th>
+                    </tr>
+                </thead>
+                <tbody style="background: #f9f9f9;">
+                <!-- This is a bit of a hack, but it works (^_^) -->
+                    <tr class="multi-field" id="mult-field-0" style="display:none;">
+                        <td>
+                            <input style="width: 200px" name="text_label_0" aria-label="label for text item 0" type="text" class="text_label" value="0"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
     </table>
-    <button type="button" id="add-checkpoint_field">Add Checkpoint</button>
-    <button type="button" id="remove-checkpoint_field" id="remove-checkpoint" style="display:none;">Remove Last Checkpoint</button>
 </div>
 <br />
 <!--Do you want a box for an (optional) message from the TA to the student?
@@ -29,6 +47,8 @@
 
     $(document).ready(function() {
         let numCheckpoints = 0;
+        var numText = 0;
+
 
         function addCheckpoint(label, extra_credit) {
             // Add a new checkpoint to the page
@@ -82,5 +102,38 @@
             $('#checkpoints').show();
             $('#grading_questions').show();
         }
+
+        function addText(label) {
+            var wrapper = $('.text-table');
+            numText++;
+            $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
+            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).attr('aria-label', 'label for text item ' + numText).change(() => saveRubric(false));
+            $('#mult-field-' + numText, wrapper).show();
+        }
+
+        function removeText() {
+            if (numText > 0) {
+                $('#mult-field-' + numText, '.text-table').remove();
+            }
+            --numText;
+        }
+
+        $('#numeric_num_text_items').on('change', function (e) {
+            var requestedText = this.value;
+            if (isNaN(requestedText) || requestedText < 0) {
+                requestedText = 0;
+            }
+            while (numText < requestedText) {
+                addText('');
+            }
+            while (numText > requestedText) {
+                removeText();
+            }
+
+            // When changing text item count, save the rubric
+            saveRubric(false);
+        });
+        $('#numeric_num_text_items').val({{ num_text }});
+
     });
 </script>

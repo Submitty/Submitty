@@ -894,8 +894,29 @@ class AdminGradeableController extends AbstractController {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
+            if (!isset($details['text'])) {
+                $details['text'] = [];
+            }
 
             $num_checkpoints = count($details['checkpoints']);
+            $num_text = count($details['text']);
+            $start_index_text = 0;
+
+            $old_checkpoints = [];
+            $num_old_checkpoints = 0;
+            $old_texts = [];
+            $num_old_texts = 0;
+
+            foreach ($old_components as $old_component) {
+                if ($old_component->isText() === true) {
+                    $old_texts[] = $old_component;
+                    $num_old_texts++;
+                }
+                else {
+                    $old_checkpoints[] = $old_component;
+                    $num_old_checkpoints++;
+                }
+            }
 
             // Iterate through each existing component and update them in the database,
             //  removing any extras
@@ -905,6 +926,10 @@ class AdminGradeableController extends AbstractController {
                     self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
                     $old_component->setOrder($x);
                     $new_components[] = $old_component;
+                }
+                if ($old_component->isText() === true) {
+                    $old_texts[] = $old_component;
+                    $num_old_texts++;
                 }
                 $x++;
             }
@@ -916,6 +941,29 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
+
+            $z = $x;
+            $x = 0;
+
+            // Iterate through each existing text component and update them in the database,
+            //  removing any extras
+            foreach ($old_texts as $old_text) {
+                if ($x < $num_text && $x < $num_old_texts) {
+                    self::parseText($old_text, $details['text'][$x]);
+                    $old_text->setOrder($z + $x);
+                    $new_components[] = $old_text;
+                    $start_index_text++;
+                }
+                $x++;
+            }
+
+            for ($y = $start_index_text; $y < $num_text; $y++) {
+                $component = $this->newComponent($gradeable);
+                self::parseText($component, $details['text'][$x]);
+                $component->setOrder($y + $z);
+                $new_components[] = $component;
+            }
+            
         }
         elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             if (!isset($details['numeric'])) {
