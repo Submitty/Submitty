@@ -204,6 +204,11 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#enable-timer').check();
         cy.get('#timer-inputs').should('be.visible');
         cy.get('#enable-timer').should('be.checked');
+        // Testing 'Show Answers' disappearing after poll becomes survey
+        cy.get('[data-testid="show-answer"]').should('be.visible');
+        cy.get('[data-testid="single-response-survey"]').check();
+        cy.get('[data-testid="show-answer"]').should('not.be.visible');
+        cy.get('[data-testid="single-response-multiple-answer"]').check();
         // Add 5 seconds to timer
         cy.get('#timer-inputs').within(() => {
             cy.get('#poll-hours').clear();
@@ -285,6 +290,10 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.reload(); // Will not need this after websockets.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.go('back');
+
         // Removing duration to continue testing
         // Editing the poll to remove timer
         cy.contains('Poll Cypress Test').siblings(':nth-child(1)').children().click();
@@ -422,6 +431,9 @@ describe('Test cases revolving around polls functionality', () => {
         cy.reload();
         // Validate that the poll is closed.
         cy.contains('Poll Cypress Test').siblings(':nth-child(6)').children().should('not.be.checked');
+        cy.contains('Poll Cypress Test').siblings(':nth-child(8)').click();
+        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.go('back');
 
         // log into student, now we can see the histogram on closed poll
         cy.logout();
