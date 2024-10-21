@@ -28,7 +28,6 @@ class Post {
     #[ORM\JoinColumn(name: "thread_id", referencedColumnName: "id", nullable: false)]
     protected Thread $thread;
 
-
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
     protected ?Post $parent;

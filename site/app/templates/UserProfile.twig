@@ -63,7 +63,7 @@
                         <span class="label">
                              {{ localize('My_Profile.Pronouns', "Pronouns" )}}:
                         </span>
-                        <button id='pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                        <button id='pronouns_val' data-testid="pronouns-val" class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
@@ -71,7 +71,7 @@
                         <span class="label">
                             {{ localize('My_Profile.Pronouns_Forum', "Display Pronouns in Discussion Forum" )}}:
                         </span>
-                        <button id='display_pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                        <button id='display_pronouns_val' data-testid="display-pronouns-val" class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             {% if user.getDisplayPronouns() %}
                                 <i class="fas fa-pencil-alt"></i> True
                             {% else %}
