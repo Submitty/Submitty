@@ -1,10 +1,10 @@
 @import url("google/inconsolata.css");
 
 .diff-container-box {
+    display: flex;
     overflow: auto;
     background-color: var(--standard-pale-gray);
     border: 1px solid var(--standard-light-gray);
-    align-items: flex-start;
 }
 
 .diff-code {
@@ -12,11 +12,6 @@
     color: var(--diff-char);
     background-color: var(--diff-background-all);
     line-height: 1.8;
-    width: -webkit-fill-available;
-}
-
-.highlight {
-    display: grid;
 }
 
 .diff-code .row {
