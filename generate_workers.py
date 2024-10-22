@@ -6,18 +6,13 @@ import ipaddress
 import json
 import os
 import random
-import platform
 import subprocess
 from collections import OrderedDict
 from typing import Union, cast
 from tempfile import TemporaryDirectory
 
 
-def get_args():
-    parser = argparse.ArgumentParser(
-        description='Script to generate configuration for '
-        'development worker machines', prog='vagrant workers generate')
-
+def add_args(parser):
     parser.add_argument('-n', '--num', default=1, type=int,
                         help='Number of worker machines to configure')
     parser.add_argument('--ip-range', default='192.168.{}.0/24'.format(random.randint(100, 200)), type=ipaddress.ip_network,
@@ -25,8 +20,14 @@ def get_args():
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
     parser.add_argument('--mac-prefix', default='52:54:00', type=str,
-                        help='MAC address prefix for workers (QEMU only)')
+                        help='MAC address prefix for workers (QEMU only)')   
 
+
+def get_args():
+    parser = argparse.ArgumentParser(
+        description='Script to generate configuration for '
+        'development worker machines', prog='vagrant workers generate')
+    add_args(parser)
     return parser.parse_args()
 
 
@@ -60,8 +61,7 @@ def update_bootstrap(workers):
     print('Configuration saved')
 
 
-def main():
-    args = get_args()
+def run(args):
     workers = OrderedDict()
     rootdir = os.path.dirname(os.path.realpath(__file__))
     workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
@@ -136,4 +136,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    run(get_args())
