@@ -63,10 +63,10 @@ def update_bootstrap(workers):
 
 def run(args):
     workers = OrderedDict()
-    rootdir = os.path.dirname(os.path.realpath(__file__))
+    rootdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     workerfile = os.path.join(rootdir, '.vagrant', 'workers.json')
 
-    action_provision = glob.glob(os.path.join(os.path.dirname(os.path.realpath(__file__)), '.vagrant', 'machines', 'ubuntu*', '*', 'action_provision'))
+    action_provision = glob.glob(os.path.join(rootdir, '.vagrant', 'machines', 'ubuntu*', '*', 'action_provision'))
     if not len(action_provision):
         print("\033[31mThe main virtual machine has not been configured.\033[0m")
         exit(1)
