@@ -20,7 +20,7 @@ def get_args():
     socket_subparsers = socket_parser.add_subparsers(dest='socket_command', help='Available commands')
     socket_start_parser = socket_subparsers.add_parser('start', help='Start the socket')
     socket_start_parser.add_argument('--public', default=False, action='store_true', help='Whether to expose the socket to the network')
-    socket_stop_parser = socket_subparsers.add_parser('stop', help='Stop the socket')
+    socket_subparsers.add_parser('stop', help='Stop the socket')
     socket_restart_parser = socket_subparsers.add_parser('restart', help='Stop and start the socket')
     socket_restart_parser.add_argument('--public', default=False, action='store_true', help='Whether to expose the socket to the network')
 

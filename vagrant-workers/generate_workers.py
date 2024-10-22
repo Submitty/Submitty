@@ -20,7 +20,7 @@ def add_args(parser):
     parser.add_argument('--base-port', default=2240, type=int,
                         help='Base ssh port (ports will be assigned incrementally)')
     parser.add_argument('--mac-prefix', default='52:54:00', type=str,
-                        help='MAC address prefix for workers (QEMU only)')   
+                        help='MAC address prefix for workers (QEMU only)')
 
 
 def get_args():
@@ -77,15 +77,15 @@ def run(args):
             existing_config = json.load(file, object_pairs_hook=OrderedDict)
 
         version = 1
-        if 'version' in existing_config and type(existing_config['version']) == int:
+        if 'version' in existing_config and type(existing_config['version']) is int:
             version = existing_config['version']
 
         for worker_name in (existing_config if version == 1 else existing_config['workers']):
             if len(glob.glob(os.path.join(rootdir, '.vagrant', 'machines', worker_name, '*', 'action_provision'))):
                 if input("\033[93mWarning: There are existing worker machines that may conflict with new configuration.\n"
-                        "They can be removed safely with 'vagrant workers destroy'.\n"
-                        "Are you sure you would like to proceed without removing them? [y/N]\033[0m "
-                        ).lower().strip() != 'y':
+                         "They can be removed safely with 'vagrant workers destroy'.\n"
+                         "Are you sure you would like to proceed without removing them? [y/N]\033[0m "
+                         ).lower().strip() != 'y':
                     return
                 break
 
