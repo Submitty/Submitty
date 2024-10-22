@@ -40,8 +40,7 @@ class PostRepository extends EntityRepository {
             ->leftJoin('post.thread', 'thread')
             ->leftJoin('thread.posts', 'threadPosts')
             ->leftJoin('post.upduckers', 'upduckers')
-            // We need the first post of the thread, which is where threadPost.parent == -1
-            ->where('post.id = :post_id OR threadPosts.parent = -1')
+            ->where('post.id = :post_id')
             ->setParameter('post_id', $post_id);
 
         return $qb->getQuery()->getSingleResult();
