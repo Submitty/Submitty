@@ -441,7 +441,7 @@ class DocToPDF(AbstractJob):
             submissions_dir = os.path.join(course_dir, 'submissions')
             submissions_processed_dir = os.path.join(course_dir, 'submissions_processed')
 
-            submission_path = os.path.join(submissions_dir, gradeable, user, str(version))
+            submissions_path = os.path.join(submissions_dir, gradeable, user, str(version))
             submissions_processed_path = os.path.join(submissions_processed_dir, gradeable, user, str(version), 'pdf')
 
             if not os.path.isdir(submissions_processed_path):
@@ -451,7 +451,7 @@ class DocToPDF(AbstractJob):
 
             doc_files = []
 
-            for root, _, files in os.walk(submission_path):
+            for root, _, files in os.walk(submissions_path):
                 for file in files:
                     file_path = os.path.join(root, file)
                     mimetype, _ = mimetypes.guess_type(file_path)
@@ -489,7 +489,8 @@ class DocToPDF(AbstractJob):
 
                 stat_parent = os.stat(submissions_processed_path)
                 for i in range(len(doc_files)):
-                    dest = os.path.join(submissions_processed_path, os.path.basename(doc_files[i]) + '.pdf')
+                    dest = os.path.join(submissions_processed_path, os.path.relpath(doc_files[i], submissions_path) + '.pdf')
+                    os.makedirs(os.path.dirname(dest), 0o2755, exist_ok=True)
                     out_dir = os.path.join(tmpdir, 'doc_files', str(i), 'out')
                     if not os.path.isdir(out_dir):
                         log.write(f"Failed to generate output for '{doc_files[i]}'\n")
@@ -501,6 +502,7 @@ class DocToPDF(AbstractJob):
                     src = os.path.join(out_dir, out_contents[0])
                     os.rename(src, dest)
                     os.chown(dest, stat_parent.st_uid, stat_parent.st_gid)
+                    os.chmod(dest, 0o644)
         except Exception as e:
             log.write(f"ERROR: {e}\n")
         finally:
