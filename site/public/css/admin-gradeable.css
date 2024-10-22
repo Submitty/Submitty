@@ -321,3 +321,7 @@ body::-webkit-scrollbar-track {
     color: var(--standard-vibrant-red);
     font-style: italic;
 }
+
+[data-theme="dark"] .table-scroll {
+    background-color: var(--background-blue);
+}

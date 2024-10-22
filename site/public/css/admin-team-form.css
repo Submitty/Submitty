@@ -41,3 +41,7 @@
 [data-theme="dark"] .admin-team-form-pending-conflict {
     background-color: var(--alert-danger-red) !important;
 }
+
+[data-theme="dark"] .table-scroll {
+    background-color: var(--background-blue);
+}
