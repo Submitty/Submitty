@@ -31,7 +31,32 @@
                     </div>
                 {% endif %}
             {% endfor %}
-            {% if student_download and files|length > 1 %}
+            {% if processed_files|length > 0 %}
+                <hr />
+                {% for file in processed_files %}
+                    {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
+                    {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
+                        <div class="flex-row">
+                            <span>
+                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                            </span>
+                            {# view and download icons if student is permitted to access files #}
+                            {% if student_download %}
+                                <div>
+                                    {% set extension = file.relative_name|split('.')|last|lower %}
+                                    {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
+                                        <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
+                                            <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
+                                    {% endif %}
+                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if student_download and (files|length + processed_files|length) > 1 %}
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
