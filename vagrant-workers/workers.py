@@ -11,12 +11,12 @@ import generate_workers
 
 def get_args():
     parser = argparse.ArgumentParser(description='Configure vagrant worker machines', prog='vagrant workers')
-    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    cmd_subparsers = parser.add_subparsers(dest='command', help='Available commands', required=True)
 
-    generate_parser = subparsers.add_parser('generate', help='Generate worker configuration')
+    generate_parser = cmd_subparsers.add_parser('generate', help='Generate worker configuration')
     generate_workers.add_args(generate_parser)
 
-    socket_parser = subparsers.add_parser('socket', help='Manage the networking socket for macOS with QEMU')
+    socket_parser = cmd_subparsers.add_parser('socket', help='Manage the networking socket for macOS with QEMU')
     socket_subparsers = socket_parser.add_subparsers(dest='socket_command', help='Available commands')
     socket_start_parser = socket_subparsers.add_parser('start', help='Start the socket')
     socket_start_parser.add_argument('--public', default=False, action='store_true', help='Whether to expose the socket to the network')
@@ -24,8 +24,9 @@ def get_args():
     socket_restart_parser = socket_subparsers.add_parser('restart', help='Stop and start the socket')
     socket_restart_parser.add_argument('--public', default=False, action='store_true', help='Whether to expose the socket to the network')
 
-    for command in ['up', 'halt', 'status', 'destroy', 'provision', 'ssh', 'reload', 'suspend', 'snapshot', 'resume']:
-        subparsers.add_parser(command)
+    for misc_cmd in ['up', 'halt', 'status', 'destroy', 'provision', 'ssh', 'reload', 'suspend', 'snapshot', 'resume']:
+        misc_parser = cmd_subparsers.add_parser(misc_cmd)
+        misc_parser.add_argument('remainder', nargs=argparse.REMAINDER)
 
     return parser.parse_args()
 
