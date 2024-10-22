@@ -389,10 +389,10 @@ function setupCheckboxCells() {
             },
             () => {
                 console.log('Failed to save data');
-            }
+            },
         );
     });
-    
+
     // Initialize based on cookies
     const showGradersCheckbox = $('#show-graders');
     const showDatesGradedCheckbox = $('#show-dates');

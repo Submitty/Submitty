@@ -963,7 +963,6 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
-            
         }
         elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             if (!isset($details['numeric'])) {
