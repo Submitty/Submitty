@@ -145,9 +145,9 @@ Vagrant.configure(2) do |config|
 
   if ARGV[0] == 'workers'
     if apple_silicon
-      exec("arch", "-arm64", "python3", "workers.py", *ARGV[1..])
+      exec("arch", "-arm64", "python3", "vagrant-workers/workers.py", *ARGV[1..])
     end
-    exec("python3", "workers.py", *ARGV[1..])
+    exec("python3", "vagrant-workers/workers.py", *ARGV[1..])
   end
 
   if ENV.fetch('WORKER_MODE', '0') == '1'
