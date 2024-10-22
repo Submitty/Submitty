@@ -380,8 +380,9 @@ class MiscController extends AbstractController {
         $folder_names = [];
         //See which directories we are allowed to read.
         if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
-            //These two have the same check
+            //These three have the same check
             $folder_names[] = "submissions";
+            $folder_names[] = "submissions_processed";
             $folder_names[] = "checkout";
         }
 

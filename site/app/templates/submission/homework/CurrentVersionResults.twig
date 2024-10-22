@@ -31,124 +31,32 @@
                     </div>
                 {% endif %}
             {% endfor %}
-            {% if student_download and files|length > 1 %}
-                <br />
-                <div class="flex-row">
-                    <span>Download all files:</span>
-                     <button class = 'btn btn-primary' 
-                        onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ submitter_id }}", "{{ display_version }}", "submission")'
-                        tabindex="0"
-                        aria-label="Download"
-                        > Download all files
-                        <i class="fas fa-download" title="Download zip of all files"></i></button> 
-                </div>
-            {% endif %}
-        </div>
-        <div class="box col-md-6 submission-details">
-            {% if first_access_time is defined and first_access_time is not null and first_access_time is not empty %}
-                <span class="flex-row">
-                    <span>First access timestamp:</span>
-                    <span>{{ first_access_time|date(date_time_format) }}</span>
-                </span>
-            {% endif %}
-            <span class="flex-row">
-                <span>Submission timestamp:</span>
-                <span id="submission_timestamp"> {{ submission_time|date(date_time_format) }}</span>
-            </span>
-            <span class="flex-row">
-                <span>Days late: </span>
-                <span>{{ days_late }} (before extensions)</span>
-            </span>
-            {% if results is defined %}
-                <span class="flex-row">
-                    <span>Grading time:</span>
-                    <span>{{ grade_time }} seconds</span>
-                </span>
-                <span class="flex-row">
-                    {% if autograder_machine is null %}
-                       {# unknown machine -- backwards compatible #}
-                    {% elseif autograder_machine == '(short-circuited)' %}
-                       {# short-circuited -- simple grading w/o worker machine #}
-                    {% else %}
-                       <span>Graded on machine:</span><span>{{ autograder_machine }}</span>
-                    {% endif %}
-                </span>
-                {% if num_autogrades == 1 %}
-                    <span class="flex-row">
-                        <span>Queue wait time:</span>
-                        <span>{{ wait_time }} seconds</span>
-                    </span>
-                {% endif %}
-                {% if access_duration > 3600 %}
-                    <span class="flex-row">
-                        <span>Gradeable access duration: </span>
-                        <span>{{ access_duration // 3600 }} hours {{ (access_duration // 60) % 60 }} minutes {{ access_duration % 60 }} seconds</span>
-                    </span>
-                {% elseif access_duration > 60 %}
-                    <span class="flex-row">
-                        <span>Gradeable access duration: </span>
-                        <span>{{ (access_duration // 60) }} minutes {{ access_duration % 60 }} seconds</span>
-                    </span>
-                {% elseif access_duration > 0 %}
-                    <span class="flex-row">
-                        <span>Gradeable access duration: </span>
-                        <span>{{ access_duration % 60 }} seconds</span>
-                    </span>
-                {% endif %}
-                {% if num_autogrades > 1 %}
-                    <span class="flex-row">
-                        <span>Number of re-autogrades:</span>
-                        <span>{{ num_autogrades - 1 }}</span>
-                    </span>
-                    <span class="flex-row">
-                        <span>Last re-autograde finished: </span>
-                        <span>{{ grading_finished|date(date_time_format) }}</span>
-                    </span>
-                {% endif %}
-                {% if is_vcs %}
-                    <span class="flex-row">
-                        <span>Git commit hash:</span>
-                        <span>
-                            {% if revision %}
-                                {{ revision[0:7] }}
-                            {% else %}
-                                None
+            {% if processed_files|length > 0 %}
+                <hr />
+                {% for file in processed_files %}
+                    {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
+                    {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
+                        <div class="flex-row">
+                            <span>
+                                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+                            </span>
+                            {# view and download icons if student is permitted to access files #}
+                            {% if student_download %}
+                                <div>
+                                    {% set extension = file.relative_name|split('.')|last|lower %}
+                                    {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
+                                        <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
+                                            <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
+                                    {% endif %}
+                                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                        <i class="fas fa-download" title="Download the file"></i></button>
+                                </div>
                             {% endif %}
-                        </span>
-                    </span>
-                    <br />
-                {% endif %}
-            {% else %}
-                Grading not complete
+                        </div>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
-        </div>
-    </div>
-        <h4>Processed Files</h4>
-    <div class="row">
-        <div class="box col-md-6" id="submitted-files">
-            {% for file in files %}
-                {# In a notebook, files in the root directory are server-generated. If not a notebook, all files can be seen #}
-                {% if (is_notebook and (file.relative_name|split('/'))|length > 1) or (not is_notebook) %}
-                    <div class="flex-row">
-                        <span>
-                            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
-                        </span>
-                        {# view and download icons if student is permitted to access files #}
-                        {% if student_download %}
-                            <div>
-                                {% set extension = file.relative_name|split('.')|last|lower %}
-                                {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
-                                    <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
-                                        <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
-                                {% endif %}
-                                <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
-                                    <i class="fas fa-download" title="Download the file"></i></button>
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-            {% if student_download and files|length > 1 %}
+            {% if student_download and (files|length + processed_files|length) > 1 %}
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
