@@ -635,52 +635,23 @@ class ForumController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/forum/posts/single", methods: ["POST"])]
     public function getSinglePost() {
         $post_id = $_POST['post_id'];
-        $reply_level = $_POST['reply_level'];
-        $post = $this->core->getQueries()->getPost($post_id);
-        $post_history = $this->core->getQueries()->getPostHistory($post_id);
-        if (($_POST['edit']) && !empty($post_history)) {
-            $post['edit_timestamp'] = $post_history[0]['edit_timestamp'];
-        }
-        $thread_id = $post['thread_id'];
-        $thread = $this->core->getQueries()->getThread($thread_id);
-        $first_post = $this->core->getQueries()->getFirstPostForThread($thread_id);
-        $first_post_author_id = $first_post['author_user_id'];
-        $first_post_anonymous = ($first_post['anonymous'] === true);
-        $upduck_count = $this->core->getQueries()->getUpduckInfoForPosts([$post_id])[$post_id];
-        $upduck_liked_by_user = array_key_exists($post_id, $this->core->getQueries()->getUserLikesForPosts(
-            [$post_id],
-            $this->core->getUser()->getId()
-        ));
-        $staffLiked = $this->core->getQueries()->getInstructorUpduck([$post_id]);
-        $boolStaffLiked = in_array($post["id"], $staffLiked, true);
+        $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
+        $post = $repo->getPostDetail($post_id);
+        $post->setReplyLevel($_POST['reply_level']);
         $GLOBALS['totalAttachments'] = 0;
-        $GLOBALS['post_box_id'] = $_POST['post_box_id'];
-        $unviewed_posts = [$post_id];
-        $first = $post['parent_id'] == -1;
-        $author_info = $this->core->getQueries()->getDisplayUserInfoFromUserIds([$post["author_user_id"]]);
-        $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
-        $merged_threads = $this->core->getQueries()->getMergedThreadIds([$post_id]);
+
         $result = $this->core->getOutput()->renderTemplate(
             'forum\ForumThread',
             'createPost',
-            $first_post_author_id,
-            $first_post_anonymous,
-            $thread,
+            $post->getThread()->getFirstPost(),
+            $post->getThread(),
             $post,
-            $unviewed_posts,
-            $first,
-            $reply_level,
+            $post->getParent()->getId() == -1,
             'tree',
-            $upduck_count,
-            $upduck_liked_by_user,
-            $boolStaffLiked,
             true,
-            $author_info[$post["author_user_id"]],
-            $post_attachments[$post["id"]][0],
-            count($post_history) > 0,
-            in_array($post["id"], $merged_threads, true),
+            $_POST['post_box_id'],
             true,
-            $this->core->getQueries()->existsAnnouncementsId($thread_id)
+            $this->core->getQueries()->existsAnnouncementsId($post->getThread()->getId())
         );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
