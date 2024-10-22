@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+# Get arguments
+for cli_arg in "$@"
+do
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    fi
+done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir>"
+    exit 1
+fi
+
 # This function is from https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/bash/travis_retry.bash
 ANSI_RED="\033[31;1m"
 ANSI_RESET="\033[0m"
@@ -121,7 +135,7 @@ popd
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 if [ $? -eq 1 ]; then
     echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
