@@ -110,7 +110,7 @@ class Course_create:
                 table.insert(),
                 term=self.semester,
                 course=self.code,
-                registration_section_id=str(section)
+                registration_section_id=str(section),
             )
 
         print("Creating rotating sections ", end="")

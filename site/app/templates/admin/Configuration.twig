@@ -311,8 +311,15 @@
             <h2> Danger Zone</h2>
             <hr>
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="all_self_registration" id="all-self-registration" data-testid="all-self-registration" value="true" {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
-                    onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})" />
+                    <input 
+                        type="checkbox"
+                        name="all_self_registration"
+                        id="all-self-registration"
+                        data-testid="all-self-registration"
+                        value="true"
+                        {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                        onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
+                    />
                     <div>
                         <label for="all-self-registration">
                             <span class="option-title">Enable Self Registration</span>
@@ -327,7 +334,12 @@
                         <span class="option-title">Default Section</span>
                         <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
                             {% for section in fields['registration_sections'] %}
-                                <option value="{{ section['sections_registration_id'] }}" {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}>Section: {{ section['sections_registration_id'] }}</option>
+                                <option 
+                                    value="{{ section['sections_registration_id'] }}" 
+                                    {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}
+                                >
+                                    Section: {{ section['sections_registration_id'] }}
+                                </option>
                             {% endfor %}
                         </select>
                         <br/>
