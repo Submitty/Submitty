@@ -1365,14 +1365,21 @@ HTML;
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $threads = $repo->getThreadsForGrading($threadIds, $submitters);
         foreach ($threads as $thread) {
-            $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", []);
+            if (count($thread->getPosts()) > 0) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", []);
+            }
+            else {
+                $posts_view .= <<<HTML
+                <h3 style="text-align: center;">No posts for thread id: {$thread->getId()}</h3> <br/>
+HTML;
+            }
             $posts_view .= <<<HTML
                     <a href="{$this->core->buildCourseUrl(['forum', 'threads', $thread->getId()])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }
 
-        if (empty($threadIds)) {
+        if (count($threads) === 0) {
             $posts_view .= <<<HTML
                 <h3 style="text-align: center;">No thread id specified.</h3> <br/>
 HTML;

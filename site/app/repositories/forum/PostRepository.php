@@ -6,6 +6,7 @@ namespace app\repositories\forum;
 
 use app\entities\forum\Post;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Expr;
 
 class PostRepository extends EntityRepository {
     public function getPostHistory(int $post_id): ?Post {
@@ -38,7 +39,7 @@ class PostRepository extends EntityRepository {
             ->leftJoin('post.attachments', 'attachments')
             ->leftJoin('post.author', 'author')
             ->leftJoin('post.thread', 'thread')
-            ->leftJoin('thread.posts', 'threadPosts')
+            ->leftJoin('thread.posts', 'threadPosts', Expr\Join::WITH, 'threadPosts.parent = -1')
             ->leftJoin('post.upduckers', 'upduckers')
             ->where('post.id = :post_id')
             ->setParameter('post_id', $post_id);

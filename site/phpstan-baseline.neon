@@ -12912,11 +12912,6 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$component_details might not exist\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
