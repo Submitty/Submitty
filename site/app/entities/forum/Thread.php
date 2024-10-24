@@ -136,7 +136,7 @@ class Thread {
         return $this->pinned_expiration > new DateTime("now");
     }
 
-    public function IsPinnedExpiring(): bool {
+    public function isPinnedExpiring(): bool {
         return $this->pinned_expiration <= (new DateTime("now"))->add(DateInterval::createFromDateString("7 days"));
     }
 

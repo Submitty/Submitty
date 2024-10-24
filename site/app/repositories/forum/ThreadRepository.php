@@ -32,7 +32,8 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.history', 'postHistory')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
             ->setParameter('user_id', $user_id)
-            ->join('thread.author', 'author');
+            ->join('thread.author', 'author')
+            ->andWhere('post.parent = -1');
         // If given any categories, filter out posts lacking at least one of them.
         if (count($category_ids) > 0) {
             $qb->andWhere('categories.category_id IN (:category_ids)')
@@ -67,7 +68,7 @@ class ThreadRepository extends EntityRepository {
     }
 
 
-    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): Thread {
+    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): ?Thread {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
@@ -126,7 +127,40 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('thread.posts', 'post')
             ->where('post.timestamp < :timestamp')
             ->setParameter('timestamp', $thread->getFirstPost()->getTimestamp())
-            ->andWhere('thread.merged_thread IS NULL');
+            ->andWhere('thread.merged_thread = -1');
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @param int[] $thread_ids
+     * @param string[] $user_ids
+     * @return Thread[]
+     */
+    public function getThreadsForGrading(array $thread_ids, array $user_ids): array {
+        if (count($thread_ids) === 0 || count($user_ids) === 0) {
+            return [];
+        }
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('thread')
+            ->from(Thread::class, 'thread')
+            ->addSelect('post')
+            ->addSelect('threadAuthor')
+            ->addSelect('postAuthor')
+            ->addSelect('postHistory')
+            ->addSelect('postAttachment')
+            ->addSelect('postUpducker')
+            ->leftJoin('thread.posts', 'post', Join::WITH, 'post.author IN (:user_ids)')
+            ->join('thread.author', 'threadAuthor')
+            ->leftJoin('post.author', 'postAuthor')
+            ->leftJoin('post.history', 'postHistory')
+            ->leftJoin('post.attachments', 'postAttachment')
+            ->leftJoin('post.upduckers', 'postUpducker')
+            ->andWhere('thread.id IN (:thread_ids)')
+            ->setParameter('thread_ids', $thread_ids)
+            ->setParameter('user_ids', $user_ids)
+            ->addOrderBy('thread.id', 'ASC')
+            ->addOrderBy('postAuthor.user_id', 'ASC');
+
         return $qb->getQuery()->getResult();
     }
 }
