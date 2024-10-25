@@ -803,7 +803,7 @@ class ForumThreadView extends AbstractView {
             if (empty($thread["id"])) {
                 continue;
             }
-            if (!isset($thread_duck_list[$thread["id"]])){
+            if (!isset($thread_duck_list[$thread["id"]])) {
                 $thread_duck_list[$thread["id"]] = 0;
             }
             $first_post = $first_posts[$thread['id']] ?? null;
