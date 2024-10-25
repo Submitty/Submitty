@@ -19,19 +19,20 @@ class PostAttachment {
 
     #[ORM\Column(type: TYPES::STRING)]
     protected string $file_name;
-    public function getFileName(): string {
-        return $this->file_name;
-    }
 
     #[ORM\Column(type: TYPES::INTEGER)]
     protected int $version_added;
 
+    #[ORM\Column(type: TYPES::INTEGER)]
+    protected int $version_deleted;
+
+    public function getFileName(): string {
+        return $this->file_name;
+    }
+
     public function getVersionAdded(): int {
         return $this->version_added;
     }
-
-    #[ORM\Column(type: TYPES::INTEGER)]
-    protected int $version_deleted;
 
     public function getVersionDeleted(): int {
         return $this->version_deleted;
