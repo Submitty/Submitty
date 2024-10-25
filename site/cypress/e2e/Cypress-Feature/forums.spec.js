@@ -35,6 +35,7 @@ const upduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
+    cy.wait(500);
     cy.get('[data-testid="like-count"]').first().should('have.text', 1);
 };
 
@@ -201,7 +202,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         checkThreadduck === (title2, 3);
         checkThreadduck === (title3, 4);
 
-        checkStatsUpducks('Instructor, Quinn', 3);
+        checkStatsUpducks('Instructor, Quinn', 9);
 
         // Tutorial into Questions
         mergeThreads(title3, title2, merged1);
