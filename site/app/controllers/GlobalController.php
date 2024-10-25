@@ -646,6 +646,7 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/quantum-duck-light.svg';
                 }
                 elseif ($day >= 24 && $day <= 30) {
+                    // Arbor day
                     $duck_img = 'moorthy_duck/tree_duck.svg';
                 }
                 else {
