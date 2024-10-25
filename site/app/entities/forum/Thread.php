@@ -19,10 +19,6 @@ class Thread {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $id;
 
-    public function getId(): int {
-        return $this->id;
-    }
-
     #[ORM\Column(type: Types::STRING)]
     protected string $title;
 

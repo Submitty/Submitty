@@ -1367,18 +1367,13 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
         $post_id = $_POST["post_id"];
         $output = [];
-        $post = $repo->getPostHistory($post_id);
-        $edit_author_ids = $post->getHistory()->map(function ($x) {
-            return $x->getEditAuthor();
-        })->toArray();
-        $edit_authors = $this->core->getQueries()->getUsersByIds($edit_author_ids);
-        $edit_authors_display = $this->core->getQueries()->getDisplayUserInfoFromUserIds($edit_author_ids);
+        $post = $repo->getPostWithHistory($post_id);
 
         $GLOBALS['totalAttachments'] = 0;
         $edit_id = 0;
         foreach ($post->getHistory() as $version) {
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAuthorUserId() == $version->getEditAuthor() && $post->getAnonymous()) ? '' : $version->getEditAuthor();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId()) && $post->getAuthor()->getId() == $version->getEditAuthor()->getId() && $post->isAnonymous()) ? '' : $version->getEditAuthor()->getId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $version->getContent(),
                 "render_markdown" => false,
@@ -1394,8 +1389,8 @@ class ForumController extends AbstractController {
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $emptyAuthor = $tmp['user'] === '';
-            $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $edit_authors_display[$tmp['user']];
-            $tmp['is_staff_post'] = !$emptyAuthor && $edit_authors[$version->getEditAuthor()]->accessFullGrading();
+            $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $version->getEditAuthor()->getDisplayInfo();
+            $tmp['is_staff_post'] = $version->getEditAuthor()->accessFullGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $tmp;
             $edit_id++;
@@ -1403,7 +1398,7 @@ class ForumController extends AbstractController {
         if (count($output) == 0) {
             // No history, get current post
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthorUserId()) && $post->getAnonymous()) ? '' : $post->getAuthorUserId();
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId()) && $post->isAnonymous()) ? '' : $post->getAuthor()->getId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $post->getContent(),
                 "render_markdown" => false,
@@ -1421,8 +1416,8 @@ class ForumController extends AbstractController {
                 "edit_id" => $post_id . "-" . $edit_id,
             ]);
             $emptyAuthor = $tmp['user'] === '';
-            $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $this->core->getQueries()->getDisplayUserInfoFromUserId($tmp['user']);
-            $tmp['is_staff_post'] = !$emptyAuthor && $this->core->getQueries()->getUserById($post->getAuthorUserId())?->accessFullGrading();
+            $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $post->getAuthor()->getDisplayInfo();
+            $tmp['is_staff_post'] = !$emptyAuthor && $post->getAuthor()->accessFullGrading();
             $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $output[] = $tmp;
         }

@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
+use app\entities\UserEntity;
 
 #[ORM\Entity]
 #[ORM\Table(name: "forum_posts_history")]
@@ -15,8 +16,9 @@ class PostHistory {
     protected Post $post;
 
     #[ORM\Id]
-    #[ORM\Column(type: Types::STRING)]
-    protected string $edit_author;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class)]
+    #[ORM\JoinColumn(name:"edit_author", referencedColumnName:"user_id", nullable: false)]
+    protected UserEntity $edit_author;
 
     #[ORM\Id]
     #[ORM\Column(type: Types::TEXT)]
@@ -28,7 +30,7 @@ class PostHistory {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $version_id;
 
-    public function getEditAuthor(): string {
+    public function getEditAuthor(): UserEntity {
         return $this->edit_author;
     }
 
