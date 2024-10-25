@@ -645,6 +645,9 @@ class GlobalController extends AbstractController {
                 if ($day === 5) {
                     $duck_img = 'moorthy_duck/quantum-duck-light.svg';
                 }
+                elseif ($day >= 24 && $day <= 30) {
+                    $duck_img = 'moorthy_duck/tree_duck.svg';
+                }
                 else {
                     //April (Flowers)
                     $duck_img = 'moorthy_duck/04-april.svg';
