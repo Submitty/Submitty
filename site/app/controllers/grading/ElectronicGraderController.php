@@ -2178,6 +2178,7 @@ class ElectronicGraderController extends AbstractController {
         foreach ($components as $key => $value) {
             $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
         }
+        $response_data['current_graders'] = $graded_gradeable->getGraders();
 
         return $response_data;
     }
@@ -2329,6 +2330,137 @@ class ElectronicGraderController extends AbstractController {
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/open_component", methods: ["POST"])]
+    public function ajaxOpenGradedComponent($gradeable_id) {
+        $anon_id = $_POST['anon_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        // Make sure that this gradeable is an electronic file gradeable
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            $this->core->getOutput()->renderJsonFail('This gradeable is not an electronic file gradeable');
+            return;
+        }
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
+            return;
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "OPEN_COMPONENT",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        $graders = $graded_gradeable->getGraders();
+        $timestamps = $graded_gradeable->getGradersTimestamps();
+        try {
+            $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+            $graders[$component_id][] = $grader->getId();
+            $timestamps[$component_id][] = $this->core->getDateTimeNow()->format("Y-m-d\TH:i:sP");
+        } catch (\app\exceptions\DatabaseException $e) {
+            // Ignore database exception since that just means the grader is already grading
+        }
+
+        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'timestamps' => $timestamps));
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
+    public function ajaxCloseGradedComponent($gradeable_id) {
+        $anon_id = $_POST['anon_id'] ?? '';
+        $component_id = $_POST['component_id'] ?? '';
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+        // Make sure that this gradeable is an electronic file gradeable
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            $this->core->getOutput()->renderJsonFail('This gradeable is not an electronic file gradeable');
+            return;
+        }
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return;
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        if ($submitter_id === false) {
+            return;
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+            $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
+            return;
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => "OPEN_COMPONENT",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        $graders = $graded_gradeable->getGraders();
+        $timestamps = $graded_gradeable->getGradersTimestamps();
+        $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+        for ($i = 0; $i < count($graders[$component_id]); $i++) {
+            if ($graders[$component_id][$i] === $grader->getId()) {
+                array_splice($graders[$component_id], $i, 1);
+                array_splice($timestamps[$component_id], $i, 1);
+                break;
+            }
+        }
+
+        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'timestamps' => $timestamps));
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {

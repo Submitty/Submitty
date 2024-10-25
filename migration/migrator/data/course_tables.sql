@@ -809,6 +809,42 @@ ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_ma
 
 
 --
+-- Name: current_gradable_grader; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.current_gradable_grader (
+    id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    gc_id integer NOT NULL,
+    cgg_user_id character varying(255),
+    cgg_team_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT cgg_user_team_id_check CHECK (((cgg_user_id IS NOT NULL) OR (cgg_team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: current_gradable_grader_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.current_gradable_grader_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: current_gradable_grader_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.current_gradable_grader_id_seq OWNED BY public.current_gradable_grader.id;
+
+
+--
 -- Name: electronic_gradeable; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1959,6 +1995,13 @@ ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT ne
 
 
 --
+-- Name: current_gradable_grader id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader ALTER COLUMN id SET DEFAULT nextval('public.current_gradable_grader_id_seq'::regclass);
+
+
+--
 -- Name: grade_inquiries id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2138,6 +2181,22 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT course_materials_sections_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_grader_id_g_id_gc_id_cgg_user_id_cg_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_grader_id_g_id_gc_id_cgg_user_id_cg_key UNIQUE (grader_id, g_id, gc_id, cgg_user_id, cgg_team_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_pkey PRIMARY KEY (id);
 
 
 --
@@ -2733,6 +2792,46 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials
     ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_cgg_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_cgg_team_id_fkey FOREIGN KEY (cgg_team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_cgg_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_cgg_user_id_fkey FOREIGN KEY (cgg_user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id);
 
 
 --

@@ -15,22 +15,25 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("""
-        UPDATE electronic_gradeable
-        SET eg_late_days = 0
-        WHERE eg_late_days < 0;
-    """)
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-        DROP CONSTRAINT IF EXISTS late_days_positive
-    """)
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-        ADD CONSTRAINT late_days_positive CHECK (eg_late_days >= 0)
+        CREATE TABLE IF NOT EXISTS current_gradable_grader (
+            id SERIAL PRIMARY KEY,
+            grader_id VARCHAR(255) NOT NULL,
+            gc_id integer NOT NULL,
+            cgg_user_id character varying(255),
+            cgg_team_id character varying(255),
+            timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+            FOREIGN KEY (grader_id) REFERENCES users(user_id),
+            FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id),
+            CONSTRAINT cgg_user_team_id_check CHECK (((cgg_user_id IS NOT NULL) OR (cgg_team_id IS NOT NULL))),
+            UNIQUE (grader_id, gc_id, cgg_user_id),
+            UNIQUE (grader_id, gc_id, cgg_team_id)
+        );
     """)
     pass
 
 
 def down(config, database, semester, course):
+    database.execute("DROP TABLE IF EXISTS current_gradable_grader CASCADE;")
     """
     Run down migration (rollback).
 

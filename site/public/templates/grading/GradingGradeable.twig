@@ -13,6 +13,7 @@
     {% for component in gradeable.components %}
         <div class="component-container" data-testid="component-container">
             {% set graded_component = graded_gradeable.graded_components[component.id] %}
+            {% set graders = all_graders[component.id] %}
             {% include "GradingComponent.twig" with {
                 'precision': gradeable.precision,
                 'show_mark_list': false,

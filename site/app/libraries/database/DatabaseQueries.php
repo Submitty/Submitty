@@ -8822,6 +8822,8 @@ WHERE current_state IN
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
+             gc.cgg_graders AS cgg_graders,
+             gc.cgg_timestamps AS cgg_timestamps,
 
               {$submitter_data_inject}
 
@@ -8843,6 +8845,26 @@ WHERE current_state IN
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+LEFT JOIN (
+  SELECT 
+    gc.gc_id, 
+    gc.g_id,
+    COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE cgg.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_graders,
+    COALESCE(json_object_agg(gc.gc_id, cgg.timestamps) FILTER (WHERE cgg.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_timestamps
+  FROM gradeable_component gc
+  LEFT JOIN (
+    SELECT
+      cgg_user_id,
+      cgg_team_id,
+      gc_id,
+      json_agg(grader_id) AS graders,
+      json_agg(timestamp) AS timestamps
+    FROM current_gradable_grader
+    GROUP BY cgg_user_id, cgg_team_id, gc_id
+  ) as cgg on cgg.gc_id = gc.gc_id
+  GROUP BY gc.gc_id, gc.g_id
+) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
                 SELECT
@@ -9028,7 +9050,9 @@ WHERE current_state IN
                 [
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
-                ]
+                ],
+                json_decode($row['cgg_graders'], true),
+                json_decode($row['cgg_timestamps'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
@@ -9788,5 +9812,34 @@ ORDER BY
                 (SELECT user_id FROM saml_mapped_users);
         ");
         return $this->rowsToArray($this->submitty_db->rows());
+    }
+
+    /**
+     * Adds a component grader to the current_gradable_grader table
+     *
+     * @param \app\models\gradeable\Component $component
+     * @param bool $isTeam
+     * @param string $grader_id
+     * @param string $graded_id
+     */
+    public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
+        $this->course_db->query("
+            INSERT INTO current_gradable_grader (gc_id, grader_id, cgg_user_id, cgg_team_id, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL", $this->core->getDateTimeNow()]);
+    }
+
+    /**
+     * Removes a component grader to the current_gradeable_grader table
+     * @param \app\models\gradeable\Component $component
+     * @param bool $isTeam
+     * @param string $grader_id
+     * @param string $graded_id
+     */
+    public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
+        $this->course_db->query("
+            DELETE FROM current_gradable_grader
+            WHERE gc_id = ? AND grader_id = ? AND cgg_user_id = ? AND cgg_team_id = ?
+        ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL"]);
     }
 }
