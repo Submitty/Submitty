@@ -114,9 +114,9 @@ const staffUpduckPost = (user, thread_title) => {
     checkStaffUpduck(thread_title, 'be.not.visible');
     upduckPost(thread_title);
     checkStaffUpduck(thread_title, 'be.visible');
-    
+
     // Ta will upduck reply in thread 2,3 and instructor will upduck reply in thread 1, 2 and 3
-    if (!(user == 'ta' && thread_title == title1)){
+    if (!(user === 'ta' && thread_title === title1)) {
         upduckReply(thread_title);
     }
     if (user !== 'instructor') {
@@ -131,7 +131,7 @@ const studentUpduckPost = (thread_title) => {
     checkStaffUpduck(thread_title, 'be.not.visible');
     removeUpduckPost(thread_title);
     // upduck reply, do not remove yet, for checking thread sum duck purpose
-    if (thread_title == title3){
+    if (thread_title === title3) {
         upduckReply(thread_title);
     }
 };
@@ -145,7 +145,7 @@ const checkStaffUpduck = (title, visible) => {
 const checkThreadduck = (thread_title, ducks) => {
     // thread 1 suppose to have 2 total duck, thread 2 suppose to have 3 total ducks, thread 3 suppose to have 4 total ducks
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).get('[data-testid="thread-like-count"]').should('have.text', ducks);
-}
+};
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
@@ -194,12 +194,12 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         staffUpduckPost('instructor', title1);
         staffUpduckPost('instructor', title2);
         staffUpduckPost('instructor', title3);
-        
+
         // Check thread sum duck
         cy.visit(['sample', 'forum']);
-        checkThreadduck == (title1, 2);
-        checkThreadduck == (title2, 3);
-        checkThreadduck == (title3, 4);
+        checkThreadduck === (title1, 2);
+        checkThreadduck === (title2, 3);
+        checkThreadduck === (title3, 4);
 
         checkStatsUpducks('Instructor, Quinn', 3);
 
