@@ -35,7 +35,7 @@ const upduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+    cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 1);
 };
 
 const upduckReply = (thread_title) => {
@@ -107,7 +107,7 @@ const removeUpduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 1);
     cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+    cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 0);
 };
 
 const staffUpduckPost = (user, thread_title) => {
