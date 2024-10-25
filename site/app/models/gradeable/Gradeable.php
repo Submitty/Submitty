@@ -492,10 +492,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-
-        // don't check grade inquiry start and due dates
-        // 'grade_inquiry_start_date',
-        // 'grade_inquiry_due_date'
     ];
 
     /**
