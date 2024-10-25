@@ -1,0 +1,56 @@
+{
+    "required_capabilities" : "default",
+    "autograding_method" : "docker",
+    "container_options" : {
+        "container_image" : "submitty/prolog:8"
+    },
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 5,
+        "AUTO_POINTS" : 5
+    },
+    "autograding" : {
+        "submission_to_runner" : [ "**/*.pl", "**/*.prolog" ]
+    },
+    // without this prolog gets killed for a bad syscall
+    // I plan on removing the unnecessary ones once i can do some more testing
+    "allow_system_calls": [
+        "PROCESS_CONTROL_MEMORY_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SYNCHRONIZATION",
+        "PROCESS_CONTROL_SCHEDULING",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_GET_SET_USER_GROUP_ID",
+        "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+        "FILE_MANAGEMENT_PERMISSIONS",
+        "FILE_MANAGEMENT_CAPABILITIES",
+        "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
+        "FILE_MANAGEMENT_RARE",
+        "DEVICE_MANAGEMENT_ADVANCED",
+        "DEVICE_MANAGEMENT_NEW_DEVICE",
+        "INFORMATION_MAINTENANCE_ADVANCED",
+        "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+        "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "TGKILL",
+        "COMMUNICATIONS_AND_NETWORKING_KILL",
+        "UNKNOWN",
+        "UNKNOWN_MODULE",
+        "UNKNOWN_REMAP_PAGES"
+    ],
+    "testcases" : [
+        {
+            "title" : "Output Check",
+            "command" : "swipl -q -l knowledge_base.pl -l main.pl -g goal(atom) -g print(success) -t halt",
+            "points" : 5,
+            "validation" : [
+                {
+                    "actual_file" : "STDOUT.txt",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
+                    "expected_string" : "success"
+                }
+            ]
+        }
+    ]
+}

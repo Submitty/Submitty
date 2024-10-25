@@ -1,0 +1,1 @@
+goal(X) :- fact(X),fact2(X),fact3(X).
