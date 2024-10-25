@@ -1,1 +1,3 @@
-goal(X) :- fact(X),fact2(X),fact3(X).
+:- use_module(knowledge_base).
+
+goal(X) :- fact1(X),fact2(X),fact3(X).

@@ -1,3 +1,5 @@
+:- module(knowledge_base,[fact1/1,fact2/1,fact3/1,fact4/1]).
+
 fact1(atom).
 fact1(atom2).
 fact1(atom3).

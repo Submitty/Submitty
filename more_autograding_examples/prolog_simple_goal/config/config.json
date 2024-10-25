@@ -41,7 +41,7 @@
     "testcases" : [
         {
             "title" : "Output Check",
-            "command" : "swipl -q -l knowledge_base.pl -l main.pl -g goal(atom) -g print(success) -t halt",
+            "command" : "swipl -q -l *.pl -g goal(atom) -g print(success) -t halt",
             "points" : 5,
             "validation" : [
                 {
