@@ -2179,6 +2179,7 @@ class ElectronicGraderController extends AbstractController {
             $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
         }
         $response_data['current_graders'] = $graded_gradeable->getGraders();
+        $response_data['current_graders_timestamps'] = $graded_gradeable->getGradersTimestamps();
 
         return $response_data;
     }
@@ -2394,7 +2395,7 @@ class ElectronicGraderController extends AbstractController {
             // Ignore database exception since that just means the grader is already grading
         }
 
-        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'timestamps' => $timestamps));
+        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'current_graders_timestamps' => $timestamps));
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
@@ -2460,7 +2461,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'timestamps' => $timestamps));
+        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'current_graders_timestamps' => $timestamps));
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
