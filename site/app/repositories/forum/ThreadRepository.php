@@ -32,8 +32,7 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.history', 'postHistory')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
             ->setParameter('user_id', $user_id)
-            ->join('thread.author', 'author')
-            ->andWhere('post.parent = -1');
+            ->join('thread.author', 'author');
         // If given any categories, filter out posts lacking at least one of them.
         if (count($category_ids) > 0) {
             $qb->andWhere('categories.category_id IN (:category_ids)')

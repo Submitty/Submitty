@@ -478,56 +478,32 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $return = "";
-
+        $generated_post_list = [
+            "userGroup" => $user->getGroup(),
+            "activeThread" => $thread,
+            "activeThreadAnnouncement" => $thread->isPinned(),
+            "expiring" => $thread->isPinnedExpiring(),
+            "isCurrentFavorite" => $thread->isFavorite($user->getId()),
+            "display_option" => $display_option,
+            "post_data" => $post_data,
+            "isThreadLocked" => $thread->isLocked(),
+            "accessFullGrading" => $user->accessFullGrading(),
+            "includeReply" => $includeReply,
+            "thread_id" => $thread->getId(),
+            "first_post_id" => $first_post->getId(),
+            "form_action_link" => $form_action_link,
+            "merge_thread_content" => $merge_thread_content,
+            "csrf_token" => $csrf_token,
+            "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
+            "post_box_id" => $post_box_id,
+            "total_attachments" => $GLOBALS['totalAttachments'],
+            "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+            "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
+        ];
         if ($render) {
-            $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
-                "userGroup" => $user->getGroup(),
-                "activeThread" => $thread,
-                "activeThreadAnnouncement" => $thread->isPinned(),
-                "expiring" => $thread->isPinnedExpiring(),
-                "isCurrentFavorite" => $thread->isFavorite($user->getId()),
-                "display_option" => $display_option,
-                "post_data" => $post_data,
-                "isThreadLocked" => $thread->isLocked(),
-                "accessFullGrading" => $user->accessFullGrading(),
-                "includeReply" => $includeReply,
-                "thread_id" => $thread->getId(),
-                "first_post_id" => $first_post->getId(),
-                "form_action_link" => $form_action_link,
-                "merge_thread_content" => $merge_thread_content,
-                "csrf_token" => $csrf_token,
-                "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
-                "post_box_id" => $post_box_id,
-                "total_attachments" => $GLOBALS['totalAttachments'],
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
-                "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split'])
-            ]);
+            $generated_post_list = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", $generated_post_list);
         }
-        else {
-            $return = [
-                "userGroup" => $user->getGroup(),
-                "activeThread" => $thread,
-                "activeThreadAnnouncement" => $thread->isPinned(),
-                "expiring" => $thread->isPinnedExpiring(),
-                "isCurrentFavorite" => $thread->isFavorite($user->getId()),
-                "display_option" => $display_option,
-                "post_data" => $post_data,
-                "isThreadLocked" => $thread->isLocked(),
-                "accessFullGrading" => $user->accessFullGrading(),
-                "includeReply" => $includeReply,
-                "thread_id" => $thread->getId(),
-                "first_post_id" => $first_post->getId(),
-                "form_action_link" => $form_action_link,
-                "merge_thread_content" => $merge_thread_content,
-                "csrf_token" => $csrf_token,
-                "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
-                "post_box_id" => $post_box_id,
-                "total_attachments" => $GLOBALS['totalAttachments']
-            ];
-        }
-
-        return $return;
+        return $generated_post_list;
     }
 
     /**
@@ -696,12 +672,10 @@ class ForumThreadView extends AbstractView {
             $fa_class = "thread-unresolved";
             $tooltip = "Thread Unresolved";
 
-            if ($thread->getStatus() != 0) {
-                if ($thread->getStatus() === 1) {
-                    $fa_icon = "fa-check";
-                    $fa_class = "thread-resolved";
-                    $tooltip = "Thread Resolved";
-                }
+            if ($thread->getStatus() === 1) {
+                $fa_icon = "fa-check";
+                $fa_class = "thread-resolved";
+                $tooltip = "Thread Resolved";
             }
 
             $categories_content = [];
