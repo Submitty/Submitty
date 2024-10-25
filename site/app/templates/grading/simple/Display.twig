@@ -68,14 +68,20 @@
                 <br />
             {% endif %}
 
-            {% if action == 'lab' and core.getUser().accessFullGrading() %}
-                <label for="show-graders" class="column-wrapper">Show Graders
-                    <input type="checkbox" id="show-graders">
+            {% if core.getUser().accessFullGrading() %}
+                <label for="filter-withdrawn" class="column-wrapper">Filter withdrawned Students
+                    <input type="checkbox" id="filter-withdrawn" checked>
                 </label>
-                <label for="show-dates" class="column-wrapper">Show Dates Graded
-                    <input type="checkbox" id="show-dates">
-                </label>
+                {% if action == 'lab' %}
+                    <label for="show-graders" class="column-wrapper">Show Graders
+                        <input type="checkbox" id="show-graders">
+                    </label>
+                    <label for="show-dates" class="column-wrapper">Show Dates Graded
+                        <input type="checkbox" id="show-dates">
+                    </label>
+                {% endif %}
             {% endif %}
+            
         </div>
     </div>
 
@@ -220,6 +226,11 @@
 {# Render one student's row in the table #}
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
     <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
+        {% if grade.getSubmitter().getUser().getRegistration_type() == "withdrawn"%}
+            class="simple-grade-withdrawn"
+        {% else %}
+            class="simple-grade-active"
+        {% endif %}
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             class="highlighted-row"
         {% endif %}

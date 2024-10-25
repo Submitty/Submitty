@@ -55,6 +55,11 @@
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
+                {% if filter_withdrawn_student_button %}
+                <button class="btn btn-default" id="filter-withdrawn-button" data-testid="toggle-filter-withdrawn" onclick="filter_withdrawn()">
+                    {{ filter_withdrawn_status ? "Filter Withdrawn Student: On" : "Filter Withdrawn Student: Off" }}
+                </button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -240,6 +245,11 @@
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
+        {% endif %}
+        {% if graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn"%}
+            data-student="electronic-grade-withdrawn"
+        {% else %}
+            data-student="electronic-grade-active"
         {% endif %}
     >
         {% for column in context.columns %}
@@ -741,6 +751,10 @@
         inquiry_update();
     {% endif %}
     
+    {% if filter_withdrawn_student_button %}
+        filter_withdrawn_update();
+    {% endif %}
+    
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
@@ -767,6 +781,11 @@
 
     function change_inquiry() {
         Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
+    }
+
+    function filter_withdrawn() {
+        Cookies.set('filter_withdrawn_status', '{{ filter_withdrawn_status ? "off" : "on"}}');
         location.reload();
     }
 

@@ -78,7 +78,7 @@
 }
 
 .action-btn-cont {
-    display: flex;
+    display: inline-table;
     width: 200px;
     height: 132px;
     /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */

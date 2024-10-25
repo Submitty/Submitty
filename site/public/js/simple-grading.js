@@ -624,6 +624,25 @@ function setupSimpleGrading(action) {
     else if (action === 'numeric') {
         setupNumericTextCells();
     }
+    const filterWithdrawnCheckbox = $('#filter-withdrawn');
+    if (Cookies.get('filter_student') === 'false') {
+        $('.simple-grade-withdrawn').css('display', 'contents');
+        filterWithdrawnCheckbox.prop('checked', false);
+    }
+    
+    // filter student who withdrawned from this course
+    filterWithdrawnCheckbox.on('change', function() {
+        const isWithdrawn = $('.simple-grade-withdrawn');
+        if (this.checked && isWithdrawn) {
+            $('.simple-grade-withdrawn').css('display', 'none');
+            Cookies.set('filter_student', true);
+        }
+        else {
+            console.log(this.checked);
+            $('.simple-grade-withdrawn').css('display', 'contents');
+            Cookies.set('filter_student', false);
+        }
+    });
 
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 

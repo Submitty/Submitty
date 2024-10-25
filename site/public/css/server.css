@@ -1292,7 +1292,11 @@ body.no-scroll {
 
 /* Makes the grade and time on checkpoint pages not visible at first */
 .simple-grade-grader,
-.simple-grade-date {
+.simple-grade-date{
+    display: none;
+}
+
+.simple-grade-withdrawn {
     display: none;
 }
 

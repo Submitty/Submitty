@@ -1,5 +1,5 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filter_withdrawn_update */
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -127,5 +127,24 @@ function inquiry_update() {
             $(this).closest('.grade-table').show(); // show all gradeable items
         });
         button.textContent = 'Grade Inquiry Only: Off';
+    }
+}
+
+function filter_withdrawn_update() {
+    const button = document.getElementById('filter-withdrawn-button');
+    const status = Cookies.get('filter_withdrawn_status');
+    if (status === 'on') {
+        $('.grade-table').each(function () {
+            if ($(this).attr('data-student') === 'electronic-grade-withdrawn') {
+                $(this).hide(); // hide gradeable items without active inquiries
+            }
+        });
+        button.textContent = 'Filter Withdrawn Student: On';
+    }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').show(); // show all gradeable items
+        });
+        button.textContent = 'Filter Withdrawn Student: Off';
     }
 }
