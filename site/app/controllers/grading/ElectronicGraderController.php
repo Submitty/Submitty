@@ -968,7 +968,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
-        
+
         $filter_withdrawn_status = isset($_COOKIE['filter_withdrawn_status']) && $_COOKIE['filter_withdrawn_status'] === 'on';
 
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';

@@ -629,9 +629,9 @@ function setupSimpleGrading(action) {
         $('.simple-grade-withdrawn').css('display', 'contents');
         filterWithdrawnCheckbox.prop('checked', false);
     }
-    
+
     // filter student who withdrawned from this course
-    filterWithdrawnCheckbox.on('change', function() {
+    filterWithdrawnCheckbox.on('change', function () {
         const isWithdrawn = $('.simple-grade-withdrawn');
         if (this.checked && isWithdrawn) {
             $('.simple-grade-withdrawn').css('display', 'none');

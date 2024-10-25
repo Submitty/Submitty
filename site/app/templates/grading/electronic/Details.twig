@@ -55,7 +55,7 @@
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
-                {% if filter_withdrawn_student_button %}
+                {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
                 <button class="btn btn-default" id="filter-withdrawn-button" data-testid="toggle-filter-withdrawn" onclick="filter_withdrawn()">
                     {{ filter_withdrawn_status ? "Filter Withdrawn Student: On" : "Filter Withdrawn Student: Off" }}
                 </button>
@@ -246,7 +246,7 @@
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
-        {% if graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn"%}
+        {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn"%}
             data-student="electronic-grade-withdrawn"
         {% else %}
             data-student="electronic-grade-active"
@@ -751,7 +751,7 @@
         inquiry_update();
     {% endif %}
     
-    {% if filter_withdrawn_student_button %}
+    {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
         filter_withdrawn_update();
     {% endif %}
     
