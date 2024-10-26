@@ -2333,6 +2333,10 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
+    /**
+     * @param string $gradeable_id 
+     * @return JsonResponse|void
+     */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/open_component", methods: ["POST"])]
     public function ajaxOpenGradedComponent($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';
@@ -2399,6 +2403,10 @@ class ElectronicGraderController extends AbstractController {
         return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
     }
 
+    /**
+     * @param string $gradeable_id 
+     * @return JsonResponse|void
+     */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
     public function ajaxCloseGradedComponent($gradeable_id) {
         $anon_id = $_POST['anon_id'] ?? '';

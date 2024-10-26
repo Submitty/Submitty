@@ -8846,25 +8846,25 @@ WHERE current_state IN
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
-LEFT JOIN (
-  SELECT 
-    gc.gc_id, 
-    gc.g_id,
-    COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE cgg.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_graders,
-    COALESCE(json_object_agg(gc.gc_id, cgg.timestamps) FILTER (WHERE cgg.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_timestamps
-  FROM gradeable_component gc
-  LEFT JOIN (
-    SELECT
-      cgg_user_id,
-      cgg_team_id,
-      gc_id,
-      json_agg(grader_id) AS graders,
-      json_agg(timestamp) AS timestamps
-    FROM current_gradable_grader
-    GROUP BY cgg_user_id, cgg_team_id, gc_id
-  ) as cgg on cgg.gc_id = gc.gc_id
-  GROUP BY gc.gc_id, gc.g_id
-) AS gc ON gc.g_id = g.g_id
+              LEFT JOIN (
+                SELECT 
+                  gc.gc_id, 
+                  gc.g_id,
+                  COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE cgg.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_graders,
+                  COALESCE(json_object_agg(gc.gc_id, cgg.timestamps) FILTER (WHERE cgg.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_timestamps
+                FROM gradeable_component gc
+                LEFT JOIN (
+                  SELECT
+                    cgg_user_id,
+                    cgg_team_id,
+                    gc_id,
+                    json_agg(grader_id) AS graders,
+                    json_agg(timestamp) AS timestamps
+                  FROM current_gradable_grader
+                  GROUP BY cgg_user_id, cgg_team_id, gc_id
+                ) as cgg on cgg.gc_id = gc.gc_id
+                GROUP BY gc.gc_id, gc.g_id
+              ) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
                 SELECT
@@ -9821,6 +9821,7 @@ ORDER BY
      * @param bool $isTeam
      * @param string $grader_id
      * @param string $graded_id
+     * @return void
      */
     public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         $this->course_db->query("
@@ -9835,6 +9836,7 @@ ORDER BY
      * @param bool $isTeam
      * @param string $grader_id
      * @param string $graded_id
+     * @return void
      */
     public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         $this->course_db->query("

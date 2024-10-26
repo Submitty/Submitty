@@ -50,11 +50,11 @@ class GradedGradeable extends AbstractModel {
     protected $overridden_grades = false;
 
     /** @prop
-     * @var array The graders for this graded gradeable */
+     * @var array<array<int, string>> The graders for this graded gradeable */
     protected $graders = [];
 
     /** @prop
-     * @var array The timestamps for the graders this graded gradeable */
+     * @var array<array<int, string>> The timestamps for the graders this graded gradeable */
     protected $graders_timestamps = [];
 
     /**
@@ -63,7 +63,9 @@ class GradedGradeable extends AbstractModel {
      * @param Gradeable $gradeable The gradeable associated with this grade
      * @param Submitter $submitter The user or team who submitted for this graded gradeable
      * @param array $details Other construction details (indexed by property name)
-     * @throws \InvalidArgumentException If the provided gradeable, submitter, timestamps, or graders are null
+     * @param array<array<int, string>> $graders The graders for this graded gradeable
+     * @param array<array<int, string>> $graders_timestamps The timestamps for the graders this graded gradeable
+     * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
     public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $graders, array $graders_timestamps) {
         parent::__construct($core);
@@ -85,19 +87,13 @@ class GradedGradeable extends AbstractModel {
 
         $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
 
-        if ($graders === null) {
-            throw new \InvalidArgumentException('Graders cannot be null');
-        }
         $this->graders = $graders;
-        if ($graders_timestamps === null) {
-            throw new \InvalidArgumentException('Timestamps cannot be null');
-        }
         $this->graders_timestamps = $graders_timestamps;
     }
 
     /**
      * Gets the graders for this graded gradeable
-     * @return array
+     * @return array<array<int, string>>
      */
     public function getGraders() {
         return $this->graders;
@@ -105,7 +101,7 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets the graders for this graded gradeable
-     * @return array
+     * @return array<array<int, string>>
      */
     public function getGradersTimestamps() {
         return $this->graders_timestamps;
