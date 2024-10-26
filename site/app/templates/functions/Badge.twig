@@ -11,7 +11,7 @@
         {% set background = self.get_style(earned, max, extra_credit, active_same_as_graded) %}
         {% set text = self.format_value(earned, max, extra_credit) %}
 
-        <span class="badge {{ background }}">{{ text }}</span>
+        <span class="badge {{ background }}" data-testid="score-pill-badge">{{ text }}</span>
     {% else %}
         <div class="no-badge"></div>
     {% endif %}
