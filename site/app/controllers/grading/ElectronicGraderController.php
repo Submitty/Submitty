@@ -2391,11 +2391,12 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
             $graders[$component_id][] = $grader->getId();
             $timestamps[$component_id][] = $this->core->getDateTimeNow()->format("Y-m-d\TH:i:sP");
-        } catch (\app\exceptions\DatabaseException $e) {
+        }
+        catch (\app\exceptions\DatabaseException $e) {
             // Ignore database exception since that just means the grader is already grading
         }
 
-        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'current_graders_timestamps' => $timestamps));
+        return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
@@ -2461,7 +2462,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        return JsonResponse::getSuccessResponse(array('graders' => $graders, 'current_graders_timestamps' => $timestamps));
+        return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
