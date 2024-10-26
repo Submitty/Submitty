@@ -58,7 +58,7 @@ class Thread {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $pinned_expiration;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
     protected ?DateTime $announced;
 
     /**

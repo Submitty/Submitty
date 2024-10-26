@@ -10,12 +10,35 @@ use Doctrine\ORM\Query\Expr\Join;
 
 class ThreadRepository extends EntityRepository {
     /**
+     * Queries table flatly so we can get a unique and consistent block.
+     * @param int $block_number
+     * @return int[] thread ids in the block
+     */
+    private function getThreadBlock(string $user_id, int $block_number): array {
+        $block_size = 10;
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('thread')
+            ->from(Thread::class, 'thread')
+            ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
+            ->setParameter(':user_id', $user_id)
+            ->addOrderBy('CASE WHEN thread.pinned_expiration > CURRENT_TIMESTAMP() THEN 1 ELSE 0 END', 'DESC')
+            ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'DESC')
+            ->addOrderBy('thread.id', 'DESC')
+            ->setMaxResults($block_size)
+            ->setFirstResult($block_size * $block_number);
+
+        $result = $qb->getQuery()->getResult();
+        return array_map(function ($x) {
+            return $x->getId();
+        }, $result);
+    }
+    /**
      * @param int[] $category_ids
      * @param int[] $status
      * @return Thread[]
      */
     public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int $block_number): array {
-        $block_size = 30;
+        $block = $this->getThreadBlock($user_id, $block_number);
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
@@ -32,7 +55,9 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.history', 'postHistory')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
             ->setParameter('user_id', $user_id)
-            ->join('thread.author', 'author');
+            ->join('thread.author', 'author')
+            ->andWhere('thread.id IN (:block)')
+            ->setParameter(':block', $block);
         // If given any categories, filter out posts lacking at least one of them.
         if (count($category_ids) > 0) {
             $qb->andWhere('categories.category_id IN (:category_ids)')
@@ -51,9 +76,7 @@ class ThreadRepository extends EntityRepository {
         }
         $qb->addOrderBy('CASE WHEN thread.pinned_expiration > CURRENT_TIMESTAMP() THEN 1 ELSE 0 END', 'DESC')
             ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'DESC')
-            ->addOrderBy('thread.id', 'DESC')
-            ->setMaxResults($block_size)
-            ->setFirstResult($block_size * $block_number);
+            ->addOrderBy('thread.id', 'DESC');
 
         $result = $qb->getQuery()->getResult();
 

@@ -416,7 +416,6 @@ class ForumThreadView extends AbstractView {
      * @param string $display_option
      * @param Thread[] $merge_thread_options
      * @param bool $render
-     * @param bool $thread_announced
      * @return mixed[]|string
      */
     public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
@@ -511,7 +510,7 @@ class ForumThreadView extends AbstractView {
      * @return string
      */
     public function showAlteredDisplayList(array $threads): string {
-        return $this->displayThreadList($threads, true);
+        return $this->displayThreadList($threads, true, true);
     }
 
     public function contentMarkdownToPlain($str) {
@@ -748,6 +747,7 @@ class ForumThreadView extends AbstractView {
         if ($render) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
                 "thread_content" => $thread_content,
+                "is_full_page" => $is_full_page,
             ]);
         }
         else {
@@ -810,8 +810,6 @@ class ForumThreadView extends AbstractView {
      * @param bool $includeReply
      * @param int $post_box_id
      * @param bool $render
-     * @param bool $thread_announced
-     * @param bool $isCurrentFavorite
      * @return mixed[]|string
      */
     public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false): array|string {
