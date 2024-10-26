@@ -19,10 +19,7 @@ def up(config, database, semester, course):
         SET eg_late_days = 0
         WHERE eg_late_days < 0;
     """)
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-        DROP CONSTRAINT IF EXISTS late_days_positive
-    """)
+
     database.execute("""
         ALTER TABLE electronic_gradeable
         ADD CONSTRAINT late_days_positive CHECK (eg_late_days >= 0)

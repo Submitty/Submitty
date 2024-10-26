@@ -815,7 +815,6 @@ ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_ma
 CREATE TABLE public.current_gradable_grader (
     id integer NOT NULL,
     grader_id character varying(255) NOT NULL,
-    g_id character varying(255) NOT NULL,
     gc_id integer NOT NULL,
     cgg_user_id character varying(255),
     cgg_team_id character varying(255),
@@ -934,29 +933,8 @@ CREATE TABLE public.forum_attachments (
     post_id integer NOT NULL,
     file_name character varying NOT NULL,
     version_added integer DEFAULT 1 NOT NULL,
-    version_deleted integer DEFAULT 0 NOT NULL,
-    id integer NOT NULL
+    version_deleted integer DEFAULT 0 NOT NULL
 );
-
-
---
--- Name: forum_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.forum_attachments_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: forum_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.forum_attachments_id_seq OWNED BY public.forum_attachments.id;
 
 
 --
@@ -2016,13 +1994,6 @@ ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT ne
 
 
 --
--- Name: forum_attachments id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.forum_attachments ALTER COLUMN id SET DEFAULT nextval('public.forum_attachments_id_seq'::regclass);
-
-
---
 -- Name: current_gradable_grader id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2212,11 +2183,19 @@ ALTER TABLE ONLY public.course_materials_sections
 
 
 --
--- Name: current_gradable_grader current_gradable_grader_grader_id_g_id_gc_id_cgg_user_id_cg_key; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: current_gradable_grader current_gradable_grader_grader_id_gc_id_cgg_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_grader_id_g_id_gc_id_cgg_user_id_cg_key UNIQUE (grader_id, g_id, gc_id, cgg_user_id, cgg_team_id);
+    ADD CONSTRAINT current_gradable_grader_grader_id_gc_id_cgg_team_id_key UNIQUE (grader_id, gc_id, cgg_team_id);
+
+
+--
+-- Name: current_gradable_grader current_gradable_grader_grader_id_gc_id_cgg_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_gradable_grader
+    ADD CONSTRAINT current_gradable_grader_grader_id_gc_id_cgg_user_id_key UNIQUE (grader_id, gc_id, cgg_user_id);
 
 
 --
@@ -2249,14 +2228,6 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
-
-
---
--- Name: forum_attachments forum_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.forum_attachments
-    ADD CONSTRAINT forum_attachments_pkey PRIMARY KEY (id);
 
 
 --
@@ -2828,30 +2799,6 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials
     ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_cgg_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_cgg_team_id_fkey FOREIGN KEY (cgg_team_id) REFERENCES public.gradeable_teams(team_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_cgg_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_cgg_user_id_fkey FOREIGN KEY (cgg_user_id) REFERENCES public.users(user_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id);
 
 
 --
