@@ -59,7 +59,7 @@ class Thread {
     protected DateTime $pinned_expiration;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $announced;
+    protected ?DateTime $announced;
 
     /**
      * @var Collection<Post>
@@ -138,6 +138,10 @@ class Thread {
 
     public function isPinnedExpiring(): bool {
         return $this->pinned_expiration <= (new DateTime("now"))->add(DateInterval::createFromDateString("7 days"));
+    }
+
+    public function isAnnounced(): bool {
+        return !is_null($this->announced);
     }
 
     /**

@@ -651,7 +651,7 @@ class ForumController extends AbstractController {
             true,
             $_POST['post_box_id'],
             true,
-            $this->core->getQueries()->existsAnnouncementsId($post->getThread()->getId())
+            $post->getThread()->isAnnounced()
         );
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
@@ -1188,7 +1188,6 @@ class ForumController extends AbstractController {
 
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
-        $thread_announced = $this->core->getQueries()->existsAnnouncementsId($thread_id);
         if ($thread->isMergedThread()) {
             // Redirect merged thread to parent
             $this->core->addSuccessMessage("Requested thread is merged into current thread.");
@@ -1204,10 +1203,10 @@ class ForumController extends AbstractController {
         $pageNumber = 0;
         $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $pageNumber);
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, ForumUtils::FORUM_CHAR_POST_LIMIT, true, $thread_announced);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, ForumUtils::FORUM_CHAR_POST_LIMIT, false, $thread_announced);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, false);
         }
     }
 

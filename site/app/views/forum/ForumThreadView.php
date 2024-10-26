@@ -162,7 +162,7 @@ class ForumThreadView extends AbstractView {
      * @param Thread[] $merge_thread_options
      * @return mixed[]|string
      */
-    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, int $post_content_limit, bool $ajax = false, bool $thread_announced = true): array|string {
+    public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, bool $ajax = false): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
         $categories = $this->core->getQueries()->getCategories();
 
@@ -189,7 +189,7 @@ class ForumThreadView extends AbstractView {
         $arrowup_visibility = ($initialPageNumber === 0) ? "display:none;" : "";
         $displayThreadContent = $this->displayThreadList($threads, false);
 
-        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false, $thread_announced);
+        $generatePostContent = $this->generatePostList($thread, true, $display_option, $merge_thread_options, false);
 
         $this->core->getQueries()->visitThread($user, $thread->getId());
 
@@ -254,7 +254,7 @@ class ForumThreadView extends AbstractView {
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => $post_content_limit
+                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT
             ]);
         }
         else {
@@ -280,7 +280,7 @@ class ForumThreadView extends AbstractView {
                 "post_box_id" => $generatePostContent["post_box_id"],
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
-                "post_content_limit" => $post_content_limit,
+                "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT,
                 "render_markdown" => $markdown_enabled
             ]);
 
@@ -419,7 +419,7 @@ class ForumThreadView extends AbstractView {
      * @param bool $thread_announced
      * @return mixed[]|string
      */
-    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true, bool $thread_announced = false): array|string {
+    public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
         $first = true;
         $post_data = [];
         $csrf_token = $this->core->getCsrfToken();
@@ -449,7 +449,6 @@ class ForumThreadView extends AbstractView {
                 $includeReply,
                 $post_box_id,
                 false,
-                $thread_announced,
             );
             if ($first) {
                 $first = false;
@@ -815,7 +814,7 @@ class ForumThreadView extends AbstractView {
      * @param bool $isCurrentFavorite
      * @return mixed[]|string
      */
-    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false, bool $thread_announced = false, bool $isCurrentFavorite = false): array|string {
+    public function createPost(Post $first_post, Thread $thread, Post $post, bool $first, string $display_option, bool $includeReply, int $post_box_id, bool $render = false): array|string {
         $user = $this->core->getUser();
         // Get formatted time stamps
         $date = DateUtils::convertTimeStamp($this->core->getUser(), DateUtils::dateTimeToString($post->getTimestamp()), $this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
@@ -981,7 +980,7 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $post->isRenderMarkdown(),
             "has_history" => !$post->getHistory()->isEmpty(),
             "thread_previously_merged" => $merged_thread,
-            "thread_announced" => $thread_announced,
+            "thread_announced" => $thread->isAnnounced(),
         ];
 
         if ($render) {
@@ -990,7 +989,7 @@ class ForumThreadView extends AbstractView {
                 $created_post['activeThreadAnnouncement'] = $thread->isPinned();
             }
             $created_post['activeThread'] = $thread;
-            $created_post['isCurrentFavorite'] = $isCurrentFavorite;
+            $created_post['isCurrentFavorite'] = $thread->isFavorite($user->getId());
             $created_post['csrf_token'] = $this->core->getCsrfToken();
             return $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $created_post);
         }
