@@ -2334,7 +2334,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * @param string $gradeable_id 
+     * @param string $gradeable_id
      * @return JsonResponse|void
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/open_component", methods: ["POST"])]
@@ -2404,7 +2404,7 @@ class ElectronicGraderController extends AbstractController {
     }
 
     /**
-     * @param string $gradeable_id 
+     * @param string $gradeable_id
      * @return JsonResponse|void
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
