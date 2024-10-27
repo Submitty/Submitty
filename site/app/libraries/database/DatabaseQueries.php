@@ -5193,11 +5193,11 @@ SQL;
     public function getSelfRegistrationCourses(string $user_id): array {
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
-WHERE c.self_registration_type > ? AND c.status = 1 and c.course NOT IN (
+WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
     SELECT course FROM courses_users WHERE user_id = ?
 ) AND c.term = t.term_id
 SQL;
-        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, $user_id]);
+        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS,$user_id]);
         $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
