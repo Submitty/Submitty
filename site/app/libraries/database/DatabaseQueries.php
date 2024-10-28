@@ -5197,7 +5197,7 @@ WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
     SELECT course FROM courses_users WHERE user_id = ?
 ) AND c.term = t.term_id
 SQL;
-        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS,$user_id]);
+        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
         $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);

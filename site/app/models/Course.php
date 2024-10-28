@@ -34,8 +34,8 @@ class Course extends AbstractModel {
      * @var string $registration_section for homepage view */
     protected $registration_section;
 
-    public static int $ACTIVE_STATUS = 1;
-    public static int $ARCHIVED_STATUS = 2;
+    const ACTIVE_STATUS = 1;
+    const ARCHIVED_STATUS = 2;
 
     /**
      * Course constructor.
