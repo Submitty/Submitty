@@ -68,7 +68,7 @@ class DockerInterfaceController extends AbstractController {
     #[Route("/api/admin/add_image", methods: ["GET"])]
     public function addImage(): JsonResponse {
         $user = $this->core->getUser();
-        if (is_null($user) || !$user->accessFaculty()) {
+        if (!$user->accessFaculty()) {
             return JsonResponse::getFailResponse("You don't have access to this endpoint.");
         }
         $user_id = $this->core->getUser()->getId();
