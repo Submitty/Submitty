@@ -51,7 +51,7 @@
   "devDependencies": {
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.24.3",
-    "@babel/preset-typescript": "^7.22.11",
+    "@babel/preset-typescript": "^7.26.0",
     "@cypress/skip-test": "^2.6.1",
     "@tsconfig/node20": "^20.1.4",
     "@stylistic/eslint-plugin": "^2.1.0",
