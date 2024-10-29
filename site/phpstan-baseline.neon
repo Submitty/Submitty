@@ -744,6 +744,11 @@ parameters:
 			path: app/controllers/PollController.php
 
 		-
+			message: "#^Call to new app\\\\libraries\\\\response\\\\RedirectResponse\\(\\) on a separate line has no effect\\.$#"
+			count: 2
+			path: app/controllers/PollController.php
+
+		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 5
 			path: app/controllers/PollController.php
@@ -1337,6 +1342,11 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Parameter &\\$data by\\-ref type of method app\\\\controllers\\\\admin\\\\LateController\\:\\:parseAndValidateCsv\\(\\) expects array, null given\\.$#"
+			count: 7
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\NotebookBuilderController\\:\\:builder\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/NotebookBuilderController.php
@@ -1427,7 +1437,12 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between mixed and '' will always evaluate to false\\.$#"
+			message: "#^Parameter \\#1 \\$array \\(list\\<string\\>\\) of array_values is already a list, call has no effect\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Strict comparison using \\=\\=\\= between mixed~\\(''\\|null\\) and '' will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/admin/PlagiarismController.php
 
@@ -6101,6 +6116,11 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadGradedComponentsCountByGradingSections\\(\\) should return array\\<int, int\\> but returns array\\<int\\|string, int\\>\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategories\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -8447,6 +8467,46 @@ parameters:
 			path: app/models/Config.php
 
 		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getCourseDatabaseParams\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getCourseJson\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getHiddenDetails\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getLdapOptions\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getSamlOptions\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method getSubmittyDatabaseParams\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method setLdapOptions\\(\\) parameter \\#1 \\$options with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^Class app\\\\models\\\\Config has PHPDoc tag @method for method setSamlOptions\\(\\) parameter \\#1 \\$options with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 6
 			path: app/models/Config.php
@@ -8645,6 +8705,11 @@ parameters:
 			message: "#^Method app\\\\models\\\\Email\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/Email.php
+
+		-
+			message: "#^Class app\\\\models\\\\GradeableAutocheck has PHPDoc tag @method for method getMessages\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
@@ -9157,6 +9222,16 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
+			message: "#^Class app\\\\models\\\\QueueItem has PHPDoc tag @method for method getGradingQueueObj\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
+			message: "#^Class app\\\\models\\\\QueueItem has PHPDoc tag @method for method getQueueObj\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/models/QueueItem.php
@@ -9419,6 +9494,11 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 3
+			path: app/models/User.php
+
+		-
+			message: "#^Class app\\\\models\\\\User has PHPDoc tag @method for method getGradingRegistrationSections\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
 			path: app/models/User.php
 
 		-
@@ -11167,6 +11247,16 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+			message: "#^Class app\\\\models\\\\gradeable\\\\GradedGradeable has PHPDoc tag @method for method getGradeInquiries\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Class app\\\\models\\\\gradeable\\\\GradedGradeable has PHPDoc tag @method for method getLateDayExceptions\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
@@ -11308,6 +11398,11 @@ parameters:
 
 		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^Class app\\\\models\\\\gradeable\\\\LateDays has PHPDoc tag @method for method getLateDaysUpdates\\(\\) return type with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -11602,6 +11697,31 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
+			message: "#^Class app\\\\models\\\\notebook\\\\Notebook has PHPDoc tag @method for method getFileSubmissions\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\Notebook has PHPDoc tag @method for method getImagePaths\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\Notebook has PHPDoc tag @method for method getInputs\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\Notebook has PHPDoc tag @method for method getItemPool\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\Notebook has PHPDoc tag @method for method getNotebook\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 7
 			path: app/models/notebook/Notebook.php
@@ -11677,6 +11797,11 @@ parameters:
 			path: app/models/notebook/SubmissionCodeBox.php
 
 		-
+			message: "#^Class app\\\\models\\\\notebook\\\\SubmissionMultipleChoice has PHPDoc tag @method for method getChoices\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/SubmissionMultipleChoice.php
+
+		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 2
 			path: app/models/notebook/SubmissionMultipleChoice.php
@@ -11690,6 +11815,21 @@ parameters:
 			message: "#^Property app\\\\models\\\\notebook\\\\SubmissionMultipleChoice\\:\\:\\$choices type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/notebook/SubmissionMultipleChoice.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\UserSpecificNotebook has PHPDoc tag @method for method getHashes\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\UserSpecificNotebook has PHPDoc tag @method for method getSelectedQuestions\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: "#^Class app\\\\models\\\\notebook\\\\UserSpecificNotebook has PHPDoc tag @method for method getTestCases\\(\\) return type with no value type specified in iterable type array\\.$#"
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
 			message: "#^Method app\\\\models\\\\notebook\\\\UserSpecificNotebook\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
@@ -12417,6 +12557,11 @@ parameters:
 			path: app/views/admin/DockerView.php
 
 		-
+			message: "#^Offset 1 on array\\{string, non\\-empty\\-string\\} on left side of \\?\\? always exists and is not nullable\\.$#"
+			count: 1
+			path: app/views/admin/DockerView.php
+
+		-
 			message: "#^Parameter \\#2 \\$bytes of static method app\\\\libraries\\\\Utils\\:\\:formatBytes\\(\\) expects int, string given\\.$#"
 			count: 1
 			path: app/views/admin/DockerView.php
@@ -12799,6 +12944,11 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 2
+			path: app/views/forum/ForumThreadView.php
+
+		-
+			message: "#^Comparison operation \"\\>\" between 4 and 0 is always true\\.$#"
+			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
