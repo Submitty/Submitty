@@ -2400,6 +2400,14 @@ class ElectronicGraderController extends AbstractController {
             // Ignore database exception since that just means the grader is already grading
         }
 
+        for ($i = 0; $i < count($graders[$component_id]); $i++) {
+            if ($graders[$component_id][$i] === $grader->getId()) {
+                array_splice($graders[$component_id], $i, 1);
+                array_splice($timestamps[$component_id], $i, 1);
+                break;
+            }
+        }
+
         return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
     }
 
