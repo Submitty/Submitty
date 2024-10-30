@@ -7,13 +7,6 @@ const queueCode = 'cypress_test';
 const queueCode1 = 'cypress_test_fail';
 const newQueueCode = 'cypress_update';
 
-const enableQueue = () => {
-    cy.visit(['sample', 'config']); // course setting
-    cy.get('[data-testid="queue-enabled"]').check();
-    cy.get('[data-testid="queue-enabled"]').should('be.checked');
-    cy.reload();
-};
-
 const checkRows = (rows) => {
     cy.get('[data-testid="row-label"]')
         .its('length')
@@ -37,15 +30,15 @@ const checkRows = (rows) => {
         });
 };
 
-const deleteQueue = () => {
+const deleteQueue = (queue_name) => {
     cy.visit(['sample', 'office_hours_queue']); // office hours queue
     cy.get('[data-testid="toggle-filter-settings"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
-    cy.get('[data-testid="delete-queue-btn"]').last().click();
+    cy.get('[data-testid="queue-name"]').contains(queue_name).parents('[data-testid="queue-item"]').find('[data-testid="delete-queue-btn"]').click();
 };
 
 const openNewQueue = (queueName, queueCode = '') => {
-    cy.get('#nav-sidebar-queue').click();
+    cy.visit(['sample', 'office_hours_queue']);
     cy.get('[data-testid="toggle-new-queue"]').click();
     cy.get('[data-testid="popup-window"]').should('exist');
     cy.get('[data-testid="new-queue-code"]').type(queueName);
@@ -88,6 +81,7 @@ const studentJoinQueue = (queueName, queueCode) => {
     }
     cy.get('[data-testid="join-queue-btn"]').click();
 };
+
 const editAnnouncement = (text = '') => {
     // openAnnouncementSettings
     cy.get('[data-testid="toggle-announcement-settings"]').click();
@@ -101,22 +95,32 @@ const editAnnouncement = (text = '') => {
 };
 
 describe('test office hours queue', () => {
+    before(() => {
+        cy.login();
+
+        // enable queue if not already enabled
+        cy.visit(['sample', 'config']); // course setting
+        cy.get('[data-testid="queue-enabled"]').check();
+        cy.get('[data-testid="queue-enabled"]').should('be.checked');
+        cy.reload();
+
+        openNewQueue(queueName, queueCode);
+        cy.get('[data-testid="popup-message"]').should('contain', 'New queue added');
+        openNewQueue(queueName_random, 'RANDOM');
+        cy.get('[data-testid="popup-message"]').should('contain', 'New queue added');
+        openNewQueue(queueName_blank, '');
+        cy.get('[data-testid="popup-message"]').should('contain', 'New queue added');
+    });
+
     it('Creating queues and changing queue codes', () => {
         cy.login();
-        enableQueue();
-        // Open new queue for use during the test
-        openNewQueue(queueName, queueCode);
         // Create queue with same name but different code to ensure error
         openNewQueue(queueName, queueCode1);
         cy.get('[data-testid="popup-message"]').should('contain', 'Unable to add queue. Make sure you have a unique queue name');
 
-        // Create queue with random code
-        openNewQueue(queueName_random, 'RANDOM');
         changeQueueCode(queueName_random, 'RANDOM');
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
 
-        // Create queue with blank code
-        openNewQueue(queueName_blank, '');
         changeQueueCode(queueName_blank, '');
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
 
@@ -124,6 +128,7 @@ describe('test office hours queue', () => {
         changeQueueCode(queueName, newQueueCode);
         cy.get('[data-testid="popup-message"]').should('contain', 'Queue Access Code Changed');
     });
+
     it('Joining queues as student', () => {
         // switch to student to join queue
         switchUser('bitdiddle');
@@ -273,12 +278,12 @@ describe('test office hours queue', () => {
 
         cy.get('#times-helped-cell').should('contain', '0 times helped.');
     });
+
     it('Enabling push and sound notifications as Instructor', () => {
         // Ensure notifications are allowed
         expect(isPermissionAllowed('notifications')).to.be.true;
 
-        cy.login('instructor');
-        enableQueue();
+        cy.login();
         cy.visit(['sample', 'office_hours_queue']);
 
         // Assert that switches exist and assign aliases
@@ -303,11 +308,12 @@ describe('test office hours queue', () => {
         cy.get('@push-enabled').should('equal', false);
         cy.get('@audio-enabled').should('equal', false);
     });
-    it('Cleaning up', () => {
-        cy.login('instructor');
+
+    after(() => {
+        cy.login();
         // Delete all created queues
-        deleteQueue();
-        deleteQueue();
-        deleteQueue();
+        deleteQueue(queueName);
+        deleteQueue(queueName_random);
+        deleteQueue(queueName_blank);
     });
 });
