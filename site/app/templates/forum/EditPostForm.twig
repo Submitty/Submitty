@@ -1,13 +1,11 @@
 {% extends 'generic/Popup.twig' %}
 
 {% block popup_id %}edit-user-post{% endblock %}
-
 {% block title_tag %}<h1 id="edit_user_prompt">Editing a post</h1>{% endblock %}
 
 {% block body %}
     <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
     <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
-    <input type="hidden" name="current_time" value="{{ current_time|date('Y-m-d H:i:s') }}">
 
     {% include 'forum/ThreadPostForm.twig' with {
         "show_title": true,
@@ -22,9 +20,9 @@
         "show_lock_date": true,
         "show_expiration" : true,
         "submit_label": "Update Post",
-        "categories" : categories|filter(category => not category.release_date or category.release_date <= current_time),
+        "categories" : categories,
         "attachment_script" : attachment_script,
-        "data_testid" : "forum-update-post",
+        "data_testid" : "forum-update-post"
     } %}
 
     <script>
@@ -35,16 +33,6 @@
             }
         });
         document.querySelector('.popup-box').onclick = null;
-
-        // Additional JavaScript to handle date-released categories
-        $(document).ready(function() {
-            $('.category-selection').each(function() {
-                var releaseDate = $(this).data('release-date');
-                if (releaseDate && new Date(releaseDate) > new Date('{{ current_time|date('Y-m-d H:i:s') }}')) {
-                    $(this).prop('disabled', true).addClass('disabled');
-                }
-            });
-        });
     </script>
 {% endblock %}
 
@@ -59,6 +47,4 @@
     <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}
 
-{% block buttons_panel %}
-    {# TODO: Make the post form not have its own buttons so we can use the normal buttons for the popup #}
-{% endblock %}
+{% block buttons_panel %}{% endblock %}
