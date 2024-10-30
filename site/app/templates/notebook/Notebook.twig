@@ -81,7 +81,7 @@
                     data-recent_submission="{{ cell.recent_submission }}"
                     data-version_submission="{{ cell.version_submission }}"
                     onkeyup="handle_input_keypress();"
-                    {% if viewing_inactive_version or is_grader_view %}
+                    {% if viewing_inactive_version %}
                         style="pointer-events:none;"
                     {% endif %}
                 >
