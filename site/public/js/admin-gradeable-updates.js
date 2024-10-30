@@ -322,10 +322,11 @@ function checkWarningBanners() {
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
 
         // hide/show the element when the start date is before/after the due date respectfully
-        if(grade_inquiry_start_date > grade_inquiry_due_date){
+        if (grade_inquiry_start_date > grade_inquiry_due_date) {
             $('#grade-inquiry-warning').show();
             $('#gradeable-dates-warnings').show();
-        } else {
+        }
+        else {
             $('#grade-inquiry-warning').hide();
         }
     }
