@@ -1,10 +1,10 @@
-/* exported addToTable, deleteRow ResetPerGradeablePercents */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
-const tables = ['plagiarism', 'manualGrade'];
+const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -332,6 +332,7 @@ function getGradeableBuckets() {
  * @param {string} table
  *      'plagiarism'
  *      'manualGrade'
+ *      'performanceWarnings'
  */
 function getTableData(table) {
     if (!tables.includes(table)) {
@@ -343,6 +344,7 @@ function getTableData(table) {
     const tableMap = {
         plagiarism: 'plagiarism-table-body',
         manualGrade: 'manual-grading-table-body',
+        performanceWarnings: 'performance-warnings-table-body',
     };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -367,6 +369,14 @@ function getTableData(table) {
                 note: thirdInput,
             });
         }
+        else if (table === 'performanceWarnings') {
+            const secondInputArray = secondInput.split(', ');
+            data.push({
+                msg: firstInput,
+                ids: secondInputArray,
+                value: parseFloat(thirdInput),
+            });
+        }
     }
 
     return data;
@@ -377,6 +387,7 @@ function getTableData(table) {
  * @param {string} table
  *     'plagiarism'
  *     'manualGrade'
+ *     'performanceWarnings'
  */
 function addToTable(table) {
     if (!tables.includes(table)) {
@@ -386,10 +397,21 @@ function addToTable(table) {
     const tableMap = {
         plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
         manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+        performanceWarnings: ['performance-warnings-table-body', 'performance-warnings-message', 'performance-warnings-gradeables', 'performance-warnings-score'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
-    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    let secondInput;
+    if (table === 'performanceWarnings') { // Performance Warnings gets an object[] for the second input
+        const secondInputArray = [];
+        $('#performance-warnings-gradeables').select2('data').forEach((element) => {
+            secondInputArray.push(element.id);
+        });
+        secondInput = secondInputArray.join(', ');
+    }
+    else {
+        secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    }
     const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
 
     // Check whether input is allowed
@@ -451,6 +473,27 @@ function addToTable(table) {
             }
             break;
         }
+        case 'performanceWarnings': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all fields.');
+                return;
+            }
+            const inputGradeables = secondInput.split(', ');
+            let entryGradeables = [];
+            $('#performance-warnings-table-body tr').each(function () {
+                entryGradeables = $(this).find('td:nth-child(2)').text().split(', ');
+            });
+            const overlappingGradeables = inputGradeables.filter((inputGradeable) => entryGradeables.includes(inputGradeable));
+            if (overlappingGradeables.length > 0) {
+                alert(`Entry with Gradeable(s) '${overlappingGradeables.join(', ')}' already exists`);
+                return;
+            }
+            if (parseFloat(thirdInput) <= 0) {
+                alert('Score must be a number greater than 0');
+                return;
+            }
+            break;
+        }
     }
 
     // Create a new row and cells
@@ -472,6 +515,9 @@ function addToTable(table) {
     deleteLink.appendChild(deleteIcon);
     deleteLink.onclick = function () {
         deleteRow(this);
+        if (table === 'performanceWarnings') {
+            manageWarningsGradeables('delete');
+        }
     };
     cellDelete.appendChild(deleteLink);
 
@@ -486,6 +532,32 @@ function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
     saveChanges();
+}
+
+/**
+ * Enables or disables gradeable options in the performance warnings table
+ *
+ * @param submitOrDelete 'submit' or 'delete'
+ */
+function manageWarningsGradeables(submitOrDelete) {
+    let entryGradeables = [];
+    $('#performance-warnings-table-body tr').each(function () {
+        entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+    });
+    if (submitOrDelete === 'submit') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (entryGradeables.includes($(this).val())) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+    else if (submitOrDelete === 'delete') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (!entryGradeables.includes($(this).val())) {
+                $(this).removeAttr('disabled');
+            }
+        });
+    }
 }
 
 function getMessages() {
@@ -586,6 +658,7 @@ function buildJSON() {
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
         manual_grade: getTableData('manualGrade'),
+        warning: getTableData('performanceWarnings'),
     };
 
     ret = JSON.stringify(ret);
@@ -720,6 +793,9 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
     });
+    $('.final_cutoff_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
     $('#gradeables').find('input, textarea').on('focusout', () => {
         saveChanges();
@@ -836,6 +912,7 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
+        warning: '#performance-warnings',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -894,7 +971,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'warning'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
@@ -1000,6 +1077,29 @@ $(document).ready(() => {
         });
     });
 
+    { // Manage performance warnings table
+        $('#performance-warnings-gradeables').select2({
+            theme: 'bootstrap-5',
+            placeholder: ' -- select an option -- ',
+            multiple: true,
+            allowClear: true,
+        });
+        const gradeablesDropdownOptions = $('#performance-warnings-gradeables option');
+        // Remove empty option to trick browser
+        gradeablesDropdownOptions[0].remove();
+        // Hide selected gradeables
+        let entryGradeables = [];
+        $('#performance-warnings-table-body tr').each(function () {
+            entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+        });
+        gradeablesDropdownOptions.each(function () {
+            const gradeableID = $(this).val();
+            if (entryGradeables.includes(gradeableID)) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
     const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
@@ -1067,5 +1167,12 @@ $(document).ready(() => {
                 $(resetButton).toggle(isChecked);
             });
         });
+    });
+});
+
+$(document).ready(() => {
+    // Bind click listener to grade summaries button
+    $('#grade-summaries-button').click(() => {
+        $('#grade-summaries-last-run').text('Running...');
     });
 });
