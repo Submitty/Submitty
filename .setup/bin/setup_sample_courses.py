@@ -36,7 +36,7 @@ import os
 import os.path
 import random
 
-from sqlalchemy import create_engine, Table, MetaData
+# from sqlalchemy import create_engine, Table, MetaData
 
 from sample_courses import (
     args, SUBMITTY_INSTALL_DIR,
