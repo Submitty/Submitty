@@ -1,5 +1,3 @@
-import { getCurrentSemester } from '../../support/utils.js';
-
 function validate_navigation_page_sections(sections) {
     const section_keys = Object.keys(sections);
     cy.get('.course-section-heading').should('have.length', section_keys.length);
@@ -44,7 +42,7 @@ describe('tests navigation buttons for each level of access', () => {
     // Grade Released Homework, Grade Released Test,
     it('should display instructor buttons correctly', () => {
         cy.login('instructor');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         checkButtons('future_no_tas_homework', [null, 'ALPHA SUBMIT', 'PREVIEW GRADING', 'OPEN TO TAS NOW'], [null, white, white, blue]);
         checkButtons('future_tas_homework', [null, 'BETA SUBMIT', 'PREVIEW GRADING', 'OPEN NOW'], [null, white, white, blue]);
@@ -61,7 +59,7 @@ describe('tests navigation buttons for each level of access', () => {
 
     it('should display TA buttons correctly', () => {
         cy.login('ta');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         checkButtons('future_no_tas_homework', null, null);
         checkButtons('future_tas_homework', [null, 'BETA SUBMIT', 'PREVIEW GRADING', null], [null, white, white, null]);
@@ -78,7 +76,7 @@ describe('tests navigation buttons for each level of access', () => {
 
     it('should display student buttons correctly', () => {
         cy.login('student');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         checkButtons('future_no_tas_homework', null, null);
         checkButtons('future_tas_homework', null, null);
@@ -102,7 +100,7 @@ describe('navigation page', () => {
 
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         const sections = {
             future: 5,
@@ -198,7 +196,7 @@ describe('navigation page', () => {
 
     it('should show full access grader content for ta', () => {
         cy.login('ta');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         const sections = {
             beta: 3,
@@ -215,7 +213,7 @@ describe('navigation page', () => {
 
     it('should show student content for student', () => {
         cy.login('student');
-        cy.visit(`/courses/${getCurrentSemester()}/sample`);
+        cy.visit(['sample']);
 
         const sections = {
             open: 8,
