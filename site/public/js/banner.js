@@ -15,7 +15,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
     formData.append('release_date', releaseDate);
     formData.append('close_date', closeDate);
     $.ajax({
-        url: buildUrl(['banner', 'delete']),
+        url: buildUrl(['community_events', 'delete']),
         data: formData,
         processData: false,
         contentType: false,

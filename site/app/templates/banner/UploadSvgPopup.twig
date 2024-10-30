@@ -1,6 +1,6 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}upload-svg{% endblock %}
-{% block title %}New Community Event{% endblock %}
+{% block title %}Add SVG{% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div> Select Banner Image </div>
@@ -21,12 +21,12 @@
 
     <script>
 
-        function makeSubmission() {
+        function makeSubmissionSvg() {
             handleUploadSvg();
         }
         $(function() {
             $("#submit-svg").click(function(e){ // Submit button
-                makeSubmission();
+                makeSubmissionSvg();
                 e.stopPropagation();
             });
         });

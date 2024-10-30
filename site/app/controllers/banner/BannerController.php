@@ -17,6 +17,7 @@ use app\libraries\routers\AccessControl;
 
 /**
  * @AccessControl(level="FACULTY")
+ * @AccessControl(level="FACULTY")
  */
 class BannerController extends AbstractController {
     /**
@@ -35,7 +36,6 @@ class BannerController extends AbstractController {
     #[Route("/community_event/upload_svg", methods: ["POST"])]
     public function ajaxUploadSvg(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
-    
         if (!isset($_FILES["files2"]) || empty($_FILES["files2"]["name"])) {
             return JsonResponse::getErrorResponse("No files were submitted.");
         }
@@ -77,6 +77,7 @@ class BannerController extends AbstractController {
     #[Route("/community_event/upload", methods: ["POST"])]
     public function ajaxUploadEventFiles(): JsonResponse {
 
+
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         if (isset($_POST['release_time'])) {
@@ -98,6 +99,7 @@ class BannerController extends AbstractController {
         }
 
         $uploaded_files = $_FILES["files1"];
+
 
         $count_item = count($uploaded_files["name"]);
         $bigger_banner_name = $_POST['extra_name'];
