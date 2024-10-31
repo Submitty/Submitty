@@ -1643,7 +1643,7 @@ HTML;
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
-                "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
+                "student_grader" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
@@ -1659,7 +1659,7 @@ HTML;
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-        $is_student = $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $is_student = $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {

@@ -127,7 +127,7 @@ function filter_withdrawn_update() {
     }
 
     // filter student who withdrawned from this course
-    filterWithdrawnCheckbox.on('change', function () {
+    filterWithdrawnCheckbox.on('change', () => {
         if (this.checked) {
             $('[data-student="electronic-grade-withdrawn"]').css('display', 'none');
             Cookies.set('filter_student', true);
@@ -151,7 +151,7 @@ function inquiry_update() {
             }
         });
     }
-    check_inquiry.on('change', function () {
+    check_inquiry.on('change', () => {
         const status = Cookies.get('inquiry_status');
         if (status === 'on') {
             $('.grade-button').each(function () {
@@ -177,7 +177,7 @@ function switch_view() {
     const view_status = $('#view-your-sections');
     if (Cookies.get('view') === undefined) {
         Cookies.set('view', 'all', { path: '/' });
-        localStorage.setItem('general-setting-navigate-assigned-students-only', "false");
+        localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
         location.reload();
     }
     else if (Cookies.get('view') === 'all') {
@@ -186,14 +186,14 @@ function switch_view() {
     else {
         view_status.prop('checked', true);
     }
-    view_status.on('change', function () {
+    view_status.on('change', () => {
         if (Cookies.get('view') === 'all') {
             Cookies.set('view', 'assigned', { path: '/' });
-            localStorage.setItem('general-setting-navigate-assigned-students-only', "true");
+            localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
         }
         else {
             Cookies.set('view', 'all', { path: '/' });
-            localStorage.setItem('general-setting-navigate-assigned-students-only', "false");
+            localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
         }
         location.reload();
     });
@@ -201,6 +201,7 @@ function switch_view() {
 
 function change_anon() {
     const anon_status = $('#toggle-anon-button');
+    const gradeable_id = gradeable_id;
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
     if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
         Cookies.set(`anon_mode_${gradeable_id}`, 'off');
@@ -211,7 +212,7 @@ function change_anon() {
     else {
         anon_status.prop('checked', true);
     }
-    anon_status.on('change', function() {
+    anon_status.on('change', () => {
         if (Cookies.get(`anon_mode_${gradeable_id}`) === 'on') {
             Cookies.set(`anon_mode_${gradeable_id}`, 'off');
         }
@@ -233,7 +234,7 @@ function changeSortOrder() {
     else {
         sort_status.prop('checked', true);
     }
-    sort_status.on('change', function () {
+    sort_status.on('change', () => {
         if (Cookies.get('sort') === 'id') {
             Cookies.set('sort', 'random');
         }
