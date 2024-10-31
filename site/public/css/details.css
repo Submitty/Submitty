@@ -77,23 +77,10 @@
     margin-right: 6px;
 }
 
-.action-btn-cont {
-    display: inline-table;
-    width: 200px;
-    height: 132px;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 10px auto;
-}
-
-.action-btn-cont button {
+.row-wrapper {
     display: flex;
-    width: 100%;
-    height: 30px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--standard-medium-gray);
+    flex-direction: column;
+    float: right;
 }
 
 #details-table#details-table td::before {
@@ -280,9 +267,10 @@
         width: unset;
     }
     
-    .action-btn-cont {
-        margin: 0;
-        width: unset;
+    .column-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
     }
 }
 
