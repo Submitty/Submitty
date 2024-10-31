@@ -113,7 +113,11 @@ function collapseAllSections() {
 function filter_withdrawn_update() {
     // set up, by default this will hide withdrawned student
     const filterWithdrawnCheckbox = $('#toggle-filter-withdrawn');
-    if (Cookies.get('filter_student') === 'false') {
+    if (Cookies.get('filter_student') === undefined) {
+        $('[data-student="electronic-grade-withdrawn"]').css('display', 'none');
+        filterWithdrawnCheckbox.prop('checked', true);
+    }
+    else if (Cookies.get('filter_student') === 'false') {
         $('[data-student="electronic-grade-withdrawn"]').css('display', 'contents');
         filterWithdrawnCheckbox.prop('checked', false);
     }
@@ -147,7 +151,7 @@ function inquiry_update() {
             }
         });
     }
-    check_inquiry.on('change', function() {
+    check_inquiry.on('change', function () {
         const status = Cookies.get('inquiry_status');
         if (status === 'on') {
             $('.grade-button').each(function () {
@@ -157,7 +161,7 @@ function inquiry_update() {
                 }
             });
         }
-        else{
+        else {
             $('.grade-button').each(function () {
                 if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
                     $(this).closest('.grade-table').hide();
@@ -167,13 +171,13 @@ function inquiry_update() {
         }
     });
 }
-    
+
 function switch_view() {
     // true means view all, false means view assigned section
     const view_status = $('#view-your-sections');
     if (Cookies.get('view') === undefined) {
         Cookies.set('view', 'all', { path: '/' });
-        localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
+        localStorage.setItem('general-setting-navigate-assigned-students-only', "false");
         location.reload();
     }
     else if (Cookies.get('view') === 'all') {
@@ -181,16 +185,15 @@ function switch_view() {
     }
     else {
         view_status.prop('checked', true);
-
     }
-    view_status.on('change', function() {
-    if (Cookies.get('view') === 'all') {
+    view_status.on('change', function () {
+        if (Cookies.get('view') === 'all') {
             Cookies.set('view', 'assigned', { path: '/' });
-            localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
-        } 
+            localStorage.setItem('general-setting-navigate-assigned-students-only', "true");
+        }
         else {
             Cookies.set('view', 'all', { path: '/' });
-            localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
+            localStorage.setItem('general-setting-navigate-assigned-students-only', "false");
         }
         location.reload();
     });
@@ -199,8 +202,8 @@ function switch_view() {
 function change_anon() {
     const anon_status = $('#toggle-anon-button');
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
-    if (Cookies.get(`anon_mode_${gradeable_id}`) == undefined) {
-        Cookies.set(`anon_mode_${gradeable_id}`, 'off')
+    if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
+        Cookies.set(`anon_mode_${gradeable_id}`, 'off');
     }
     else if (Cookies.get(`anon_mode_${gradeable_id}`) === 'off') {
         anon_status.prop('checked', false);
@@ -211,7 +214,7 @@ function change_anon() {
     anon_status.on('change', function() {
         if (Cookies.get(`anon_mode_${gradeable_id}`) === 'on') {
             Cookies.set(`anon_mode_${gradeable_id}`, 'off');
-        } 
+        }
         else {
             Cookies.set(`anon_mode_${gradeable_id}`, 'on');
         }
@@ -221,7 +224,7 @@ function change_anon() {
 
 function changeSortOrder() {
     const sort_status = $('#random-default-order');
-    if (Cookies.get('sort') == undefined) {
+    if (Cookies.get('sort') === undefined) {
         Cookies.set('sort', 'id');
     }
     else if (Cookies.get('sort') === 'id') {
@@ -230,10 +233,10 @@ function changeSortOrder() {
     else {
         sort_status.prop('checked', true);
     }
-    sort_status.on('change', function() {
+    sort_status.on('change', function () {
         if (Cookies.get('sort') === 'id') {
             Cookies.set('sort', 'random');
-        } 
+        }
         else {
             Cookies.set('sort', 'id');
         }
