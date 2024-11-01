@@ -15,7 +15,7 @@ opencv-python-headless==4.10.0.84
 requests==2.32.3
 python-pam==2.0.2
 ruamel.yaml==0.18.6
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 sqlalchemy==1.4.29
 psutil==6.1.0
 python-dateutil==2.8.2
@@ -38,4 +38,4 @@ numpy==1.26.4
 
 # python libraries for OCR for digit recognition
 onnx==1.16.2
-onnxruntime==1.18.1
+onnxruntime==1.19.2
