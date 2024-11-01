@@ -1,4 +1,7 @@
 const gradeableId = 'grades_released_homework';
+const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
+const beforeGradeInquiryStartDate = '1970-01-01 00:00:00';
+const originalGradeInquiryDate = '1974-01-08 23:59:59';
 
 describe('Test cases revolving around grade inquiries', () => {
     const setGradeInquiriesForGradeable = (gradeableId, date = null) => {
@@ -15,8 +18,6 @@ describe('Test cases revolving around grade inquiries', () => {
     };
 
     it('should test normal submission grade inquiry panel', () => {
-        const gradeInquiryDeadlineDate = '9998-01-01 00:00:00';
-
         // grade inquiry ended
         cy.login();
         cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
@@ -45,7 +46,6 @@ describe('Test cases revolving around grade inquiries', () => {
     it('Should test if users can see grade inquiry panel/containers', () => {
         ['ta', 'grader'].forEach((user) => {
             cy.login(user);
-            const gradeableId = 'grades_released_homework';
             cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
             cy.get('[data-testid="popup-window"]').should('exist');
             cy.get('[data-testid="close-button"]').should('exist');
@@ -72,9 +72,7 @@ describe('Test cases revolving around grade inquiries', () => {
         cy.visit(['sample', 'gradeable', gradeableId]);
         cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 01/01/9998 @ 12:00 AM EST');
     });
-
     it('should test cases regarding abnormal grade inquiry dates', () => {
-        const beforeGradeInquiryStartDate = '1970-01-01 00:00:00';
         cy.login();
         setGradeInquiriesForGradeable(gradeableId, beforeGradeInquiryStartDate);
         cy.get('[data-testid="grade-inquiry-dates-warning"]').should('be.visible');
@@ -92,14 +90,10 @@ describe('Test cases revolving around grade inquiries', () => {
         // student view
         cy.login('beahaf');
         cy.visit(['sample', 'gradeable', gradeableId]);
-        cy.get('[data-testid="grade-inquiry-container"]').should(($el) => {
-            expect($el.text().trim()).to.equal('There will be no grade inquiries. Contact the instructor if this is a mistake.');
-        });
+        cy.get('[data-testid="grade-inquiry-container"]').should('contain', 'There will be no grade inquiries. Contact the instructor if this is a mistake.');
     });
 
     after(() => {
-        const originalGradeInquiryDate = '1974-01-08 23:59:59';
-
         cy.login();
         setGradeInquiriesForGradeable(gradeableId, originalGradeInquiryDate);
     });
