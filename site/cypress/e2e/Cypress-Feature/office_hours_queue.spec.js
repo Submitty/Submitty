@@ -7,14 +7,51 @@ const queueCode = 'cypress_test';
 const queueCode1 = 'cypress_test_fail';
 const newQueueCode = 'cypress_update';
 
+const bitdiddleRows = [{
+    state: 'done',
+    queue: queueName,
+    helpedBy: '-',
+    removedBy: 'bitdiddle',
+    removalMethod: 'self',
+},
+{
+    state: 'done',
+    queue: queueName_blank,
+    helpedBy: '-',
+    removedBy: 'bitdiddle',
+    removalMethod: 'self',
+},
+{
+    state: 'done',
+    queue: queueName,
+    helpedBy: 'instructor',
+    removedBy: 'bitdiddle',
+    removalMethod: 'self_helped',
+},
+{
+    state: 'done',
+    queue: queueName,
+    helpedBy: '-',
+    removedBy: 'instructor',
+    removalMethod: 'emptied',
+}];
+
+const wisozaRows = [{
+    state: 'waiting',
+    queue: queueName_blank,
+    helpedBy: '-',
+    removedBy: '-',
+    removalMethod: '-',
+}];
+
 const checkRows = (rows) => {
     cy.get('[data-testid="row-label"]')
         .its('length')
         .then((length) => {
-            const startingRow = length - rows.length;
+            const startingRow = length - rows.length + 1;
             for (let i = 0; i < rows.length; i++) {
-                cy.get(`[data-testid="student-row-${startingRow + i + 1}"]`).first().as(`row-${i}`);
-                cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i + 1);
+                cy.get(`[data-testid="student-row-${startingRow + i}"]`).first().as(`row-${i}`);
+                cy.get(`@row-${i}`).find('[data-testid="row-label"]').should('contain', startingRow + i);
                 cy.get(`@row-${i}`).find('[data-testid="current-state"]').should('contain', rows[i].state);
                 cy.get(`@row-${i}`).find('[data-testid="queue"]').should('contain', rows[i].queue);
                 if (rows[i].state !== 'waiting') {
@@ -220,36 +257,6 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
         cy.contains('(ID:bitdiddle)').should('be.visible');
 
-        const bitdiddleRows = [{
-            state: 'done',
-            queue: queueName,
-            helpedBy: '-',
-            removedBy: 'bitdiddle',
-            removalMethod: 'self',
-        },
-        {
-            state: 'done',
-            queue: queueName_blank,
-            helpedBy: '-',
-            removedBy: 'bitdiddle',
-            removalMethod: 'self',
-        },
-        {
-            state: 'done',
-            queue: queueName,
-            helpedBy: 'instructor',
-            removedBy: 'bitdiddle',
-            removalMethod: 'self_helped',
-        },
-        {
-            state: 'done',
-            queue: queueName,
-            helpedBy: '-',
-            removedBy: 'instructor',
-            removalMethod: 'emptied',
-        },
-        ];
-
         checkRows(bitdiddleRows);
 
         cy.get('#times-helped-cell').should('contain', '1 times helped.');
@@ -265,14 +272,6 @@ describe('test office hours queue', () => {
         cy.get('[data-testid="search-student-queue-input"]').first().should('have.value', 'wisoza');
         cy.get('[data-testid="search-student-queue-btn"]').first().click();
         cy.contains('(ID:wisoza)').should('be.visible');
-
-        const wisozaRows = [{
-            state: 'waiting',
-            queue: queueName_blank,
-            helpedBy: '-',
-            removedBy: '-',
-            removalMethod: '-',
-        }];
 
         checkRows(wisozaRows);
 
