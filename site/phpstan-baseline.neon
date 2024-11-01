@@ -9176,10 +9176,10 @@ parameters:
 			count: 1
 			path: app/models/QueueItem.php
 
-                -
+		-
 			message: "#^Variable property access on object\\.$#"
 			count: 3
-                        path: app/models/RainbowCustomizationJSON.php
+			path: app/models/RainbowCustomizationJSON.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
