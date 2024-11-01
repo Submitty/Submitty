@@ -345,7 +345,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
-                "title" => "Rainbow Customization",
+                "title" => "Rainbow Configuration",
                 "id" => "nav-sidebar-reports",
                 "icon" => "fa-chart-bar"
             ]);
