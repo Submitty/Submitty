@@ -13,20 +13,20 @@ const red = 'rgb(220, 53, 69)';
 const green = 'rgb(95, 183, 96)';
 const buttonOrder = ['team-btn', 'submit-btn', 'grade-btn', 'quick-link-btn'];
 
-function checkButtons(courseID, buttonText, buttonColor) {
+function checkButtons(gradeableID, buttonText, buttonColor) {
     // assert that the course does not exist
     if (buttonText === null && buttonColor === null) {
-        cy.get(`[data-testid="${courseID}"]`).should('not.exist');
+        cy.get(`[data-testid="${gradeableID}"]`).should('not.exist');
     }
     else {
         for (let i = 0; i < buttonOrder.length; i++) {
             if (buttonText[i]) {
-                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).contains(buttonText[i]);
-                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
+                cy.get(`[data-testid="${gradeableID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('contain', buttonText[i]);
+                cy.get(`[data-testid="${gradeableID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('have.css', 'background-color', buttonColor[i]);
             }
             else {
                 // assert that the button does not exist
-                cy.get(`[data-testid="${courseID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('not.exist');
+                cy.get(`[data-testid="${gradeableID}"]`).find(`[data-testid="${buttonOrder[i]}"]`).should('not.exist');
             }
         }
     }
@@ -177,11 +177,6 @@ describe('tests navigation buttons for each level of access', () => {
 });
 
 describe('navigation page', () => {
-    beforeEach(() => {
-        cy.visit('/');
-        cy.viewport(1920, 1200);
-    });
-
     it('should show instructor content for instructor', () => {
         cy.login('instructor');
         cy.visit(['sample']);
