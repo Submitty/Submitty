@@ -430,7 +430,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge = false, merge_thread
         }
         else {
             // eslint-disable-next-line no-var, no-redeclare
-            var new_url = buildCourseUrl(['forum', 'threads']);
+            var new_url = buildCourseUrl(['forum']);
         }
         window.location.replace(new_url);
     }

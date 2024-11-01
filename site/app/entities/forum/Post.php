@@ -54,7 +54,6 @@ class Post {
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $deleted;
 
-
     #[ORM\Column(type: Types::STRING)]
     protected string $endorsed_by;
 

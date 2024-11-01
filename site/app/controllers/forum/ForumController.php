@@ -637,6 +637,9 @@ class ForumController extends AbstractController {
         $post_id = $_POST['post_id'];
         $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
         $post = $repo->getPostDetail($post_id);
+        if (is_null($post)) {
+            return $this->core->getOutput()->renderJsonFail("Invalid post id : {$post_id}");
+        }
         $post->setReplyLevel($_POST['reply_level']);
         $GLOBALS['totalAttachments'] = 0;
 
@@ -646,7 +649,7 @@ class ForumController extends AbstractController {
             $post->getThread()->getFirstPost(),
             $post->getThread(),
             $post,
-            $post->getParent()->getId() == -1,
+            $post->getParent()->getId() === -1,
             'tree',
             true,
             $_POST['post_box_id'],
@@ -1159,12 +1162,8 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread);
     }
 
-    #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["GET"])]
     #[Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods: ["GET","POST"], requirements: ["thread_id" => "\d+"])]
     public function showThreads($thread_id = null, $option = 'tree') {
-        if (is_null($thread_id)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id (EMPTY ID)");
-        }
         $thread_id = (int) $thread_id;
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
