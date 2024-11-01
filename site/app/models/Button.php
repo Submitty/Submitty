@@ -9,6 +9,7 @@ use app\libraries\Core;
  * @package app\models
  * @method string getTitle()
  * @method string|null getSubtitle()
+ * @method string|null getName()
  * @method \DateTime|null getDate()
  * @method string|null getHref()
  * @method string|null getOnclick()
@@ -22,7 +23,6 @@ use app\libraries\Core;
  * @method string|null getBadge()
  * @method string|null getIcon()
  * @method bool getPrefix()
- * @method string|null getTestid()
  *
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
@@ -45,6 +45,9 @@ class Button extends AbstractModel {
     /** @prop
      * @var string|null $subtitle */
     protected $subtitle;
+    /** @prop
+     * @var string|null $name */
+    protected $name;
     /** @prop
      * @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
      * grade button then $date may represent the date and time grading begins or ends */
@@ -85,9 +88,6 @@ class Button extends AbstractModel {
     /** @prop
      * @var string|null $prefix */
     protected $prefix;
-    /** @prop
-     * @var string|null $testid */
-    protected $testid;
 
     /**
      * @param Core $core
@@ -97,6 +97,7 @@ class Button extends AbstractModel {
         parent::__construct($core);
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
+        $this->name     = $details["name"] ?? null;
         $this->date     = $details["date"] ?? null;
         $this->href     = $details["href"] ?? null;
         $this->onclick  = $details["onclick"] ?? null;
@@ -113,7 +114,6 @@ class Button extends AbstractModel {
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
         $this->prefix = $details["prefix"] ?? "fa";
-        $this->testid = $details["testid"] ?? null;
     }
 
     /**
