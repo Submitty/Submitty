@@ -1,6 +1,7 @@
 /* global courseUrl */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filter_withdrawn_update */
 const MOBILE_BREAKPOINT = 951;
+const gradeable_id = gradeable_id;
 
 let collapseItems;
 $(document).ready(() => {
@@ -201,7 +202,6 @@ function switch_view() {
 
 function change_anon() {
     const anon_status = $('#toggle-anon-button');
-    const gradeable_id = gradeable_id;
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
     if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
         Cookies.set(`anon_mode_${gradeable_id}`, 'off');
