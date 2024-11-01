@@ -33,10 +33,6 @@ function checkButtons(gradeableID, buttonText, buttonColor) {
 }
 
 describe('tests navigation buttons for each level of access', () => {
-    beforeEach(() => {
-        cy.visit('/');
-        cy.viewport(1920, 1200);
-    });
     // Future (No TAs) Homework, Future(TAs) Homework, Open Homework, Open Team Homework, Closed Homework, Closed Team Homework
     // grading homework, Grading Lab
     // Grade Released Homework, Grade Released Test,
