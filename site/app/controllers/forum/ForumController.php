@@ -1373,7 +1373,10 @@ class ForumController extends AbstractController {
         $edit_id = 0;
         foreach ($post->getHistory() as $version) {
             $tmp = [];
-            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId()) && $post->getAuthor()->getId() == $version->getEditAuthor()->getId() && $post->isAnonymous()) ? '' : $version->getEditAuthor()->getId();
+            // If I'm not full-access nor post author, AND the post author was the editor, AND the post is anonymous, then preserve anonymity
+            $tmp['user'] = (!$this->modifyAnonymous($post->getAuthor()->getId())
+                            && $post->getAuthor()->getId() == $version->getEditAuthor()->getId()
+                            && $post->isAnonymous()) ? '' : $version->getEditAuthor()->getId();
             $tmp['content'] = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                 "post_content" => $version->getContent(),
                 "render_markdown" => false,
@@ -1391,7 +1394,7 @@ class ForumController extends AbstractController {
             $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $version->getEditAuthor()->getDisplayInfo();
             $tmp['is_staff_post'] = $version->getEditAuthor()->accessFullGrading();
-            $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $tmp['post_time'] = DateUtils::parseDateTime($version->getEditTimestamp(), $this->core->getConfig()->getTimezone())->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             $output[] = $tmp;
             $edit_id++;
         }
@@ -1418,7 +1421,7 @@ class ForumController extends AbstractController {
             $emptyAuthor = $tmp['user'] === '';
             $tmp['user_info'] = $emptyAuthor ? ['given_name' => 'Anonymous', 'family_name' => '', 'email' => '', 'pronouns' => '', 'display_pronouns' => false ] : $post->getAuthor()->getDisplayInfo();
             $tmp['is_staff_post'] = !$emptyAuthor && $post->getAuthor()->accessFullGrading();
-            $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $tmp['post_time'] = DateUtils::parseDateTime($post->getTimestamp(), $this->core->getConfig()->getTimezone())->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
             $output[] = $tmp;
         }
         return $this->core->getOutput()->renderJsonSuccess($output);

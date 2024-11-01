@@ -13,14 +13,13 @@ use app\entities\UserEntity;
 class PostHistory {
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "history")]
     #[ORM\JoinColumn(name: "post_id", referencedColumnName: "id", nullable: false)]
+    #[ORM\Id]
     protected Post $post;
 
-    #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: UserEntity::class)]
     #[ORM\JoinColumn(name:"edit_author", referencedColumnName:"user_id", nullable: false)]
     protected UserEntity $edit_author;
 
-    #[ORM\Id]
     #[ORM\Column(type: Types::TEXT)]
     protected string $content;
 
@@ -28,6 +27,7 @@ class PostHistory {
     protected DateTime $edit_timestamp;
 
     #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Id]
     protected int $version_id;
 
     public function getEditAuthor(): UserEntity {
