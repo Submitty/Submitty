@@ -1,7 +1,6 @@
 /* global courseUrl */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filter_withdrawn_update */
 const MOBILE_BREAKPOINT = 951;
-const gradeable_id = gradeable_id;
 
 let collapseItems;
 $(document).ready(() => {
@@ -175,7 +174,7 @@ function inquiry_update() {
 
 function switch_view() {
     // true means view all, false means view assigned section
-    const view_status = $('#view-your-sections');
+    const view_status = $('#view-sections');
     if (Cookies.get('view') === undefined) {
         Cookies.set('view', 'all', { path: '/' });
         localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
