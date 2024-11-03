@@ -99,109 +99,105 @@ class DockerView extends AbstractView {
                 )
             );
 
-            //if $content is false, the file is in the process of being written, avoid trying 
-            //to parse the file for now and instead fallback to displaying unknown time for last update
-            if($content) {
-                $content = rtrim($content);
-                $content_2rpos = strrpos($content, "[Last ran", -35);
-                if ($content_2rpos === false) {
-                    $content_2rpos = 0;
+            $content = rtrim($content);
+            $content_2rpos = strrpos($content, "[Last ran", -35);
+            if ($content_2rpos === false) {
+                $content_2rpos = 0;
+            }
+            $content = substr($content, $content_2rpos + 10);
+            $buffer = strtok($content, "\n");
+            $current_machine = "";
+            while ($buffer !== false) {
+                $matches = [];
+
+                $is_match = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
+                if ($is_match === 1) {
+                    $last_ran = $matches[1];
                 }
-                $content = substr($content, $content_2rpos + 10);
-                $buffer = strtok($content, "\n");
-                $current_machine = "";
-                while ($buffer !== false) {
-                    $matches = [];
 
-                    $is_match = preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $buffer, $matches);
-                    if ($is_match === 1) {
-                        $last_ran = $matches[1];
+                $is_match = preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_to_update[$matches[1]] = false;
+                    $error_logs[] = $buffer;
+                }
+
+                $is_match = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $fail_images = $matches[1];
+                    $error_logs[] = $buffer;
+                }
+                // Note the machine currently described by the log
+                $is_match = preg_match("/UPDATE MACHINE: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $current_machine = $matches[1];
+                }
+
+                // Parse the OS description
+                $is_match = preg_match("/Description:\t(.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["os"] = $matches[1] ?? null;
+                }
+
+                // Parse the docker version
+                $is_match = preg_match("/Docker Version: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_docker_version[$current_machine] = $matches[1];
+                }
+
+                // Check if the log entry is describing a machine
+                $is_match = preg_match("/Tag: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $image_arr = explode(", ", $matches[1]);
+                    $current_image = $image_arr[0];
+                    array_shift($image_arr);
+                    // reset this for newer entries of the log
+                    $aliases[$current_image] = [$current_image];
+                    foreach ($image_arr as $image) {
+                        $aliases[$image][] = $current_image;
                     }
-
-                    $is_match = preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_to_update[$matches[1]] = false;
-                        $error_logs[] = $buffer;
-                    }
-
-                    $is_match = preg_match("/ERROR: Could not pull (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $fail_images = $matches[1];
-                        $error_logs[] = $buffer;
-                    }
-                    // Note the machine currently described by the log
-                    $is_match = preg_match("/UPDATE MACHINE: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $current_machine = $matches[1];
-                    }
-
-                    // Parse the OS description
-                    $is_match = preg_match("/Description:\t(.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_system_details[$current_machine]["os"] = $matches[1] ?? null;
-                    }
-
-                    // Parse the docker version
-                    $is_match = preg_match("/Docker Version: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_docker_version[$current_machine] = $matches[1];
-                    }
-
-                    // Check if the log entry is describing a machine
-                    $is_match = preg_match("/Tag: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $image_arr = explode(", ", $matches[1]);
-                        $current_image = $image_arr[0];
-                        array_shift($image_arr);
-                        // reset this for newer entries of the log
-                        $aliases[$current_image] = [$current_image];
-                        foreach ($image_arr as $image) {
-                            $aliases[$image][] = $current_image;
-                        }
-                        // Read the next 3 lines for more info
-                        // read id
-                        $buffer = strtok("\n");
-                        $is_match = preg_match("/\t-id: (.+)/", $buffer, $matches);
-                        if (!$buffer || !$is_match) {
-                            throw new ParseError("Unexpected log input, attempted to read image id");
-                        }
-                        $id = $matches[1];
-
-                        // read created
-                        $buffer = strtok("\n");
-                        $is_match = preg_match("/\t-created: (.+)/", $buffer, $matches);
-                        if (!$buffer || !$is_match) {
-                            throw new ParseError("Unexpected log input, attempted to read image creation date");
-                        }
-                        $created = $matches[1];
-
-                        // read size
-                        $buffer = strtok("\n");
-                        $is_match = preg_match("/\t-size: (.+)/", $buffer, $matches);
-                        if (!$buffer || !$is_match) {
-                            throw new ParseError("Unexpected log input, attempted to read image size");
-                        }
-                        $size = $matches[1];
-
-                        foreach ($aliases[$current_image] as $alias) {
-                            $image_info[$alias] = [
-                                "id" => $id,
-                                "created" => \DateTime::createFromFormat('Y-m-d\TH:i:s+', $created)->format("Y-m-d H:i:s"),
-                                "size" => Utils::formatBytes('mb', $size, true)
-                            ];
-                        }
-                    }
-
-                    $is_match = preg_match("/APIError was raised./", $buffer, $matches);
-                    if ($is_match) {
-                        $error_logs[] = "APIError has occurred, please update the machines.";
-                    }
-                    if (preg_last_error() != PREG_NO_ERROR) {
-                        $error_logs[] = "Error while parsing the logs";
-                        break;
-                    }
+                    // Read the next 3 lines for more info
+                    // read id
                     $buffer = strtok("\n");
+                    $is_match = preg_match("/\t-id: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
+                        throw new ParseError("Unexpected log input, attempted to read image id");
+                    }
+                    $id = $matches[1];
+
+                    // read created
+                    $buffer = strtok("\n");
+                    $is_match = preg_match("/\t-created: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
+                        throw new ParseError("Unexpected log input, attempted to read image creation date");
+                    }
+                    $created = $matches[1];
+
+                    // read size
+                    $buffer = strtok("\n");
+                    $is_match = preg_match("/\t-size: (.+)/", $buffer, $matches);
+                    if (!$buffer || !$is_match) {
+                        throw new ParseError("Unexpected log input, attempted to read image size");
+                    }
+                    $size = $matches[1];
+
+                    foreach ($aliases[$current_image] as $alias) {
+                        $image_info[$alias] = [
+                            "id" => $id,
+                            "created" => \DateTime::createFromFormat('Y-m-d\TH:i:s+', $created)->format("Y-m-d H:i:s"),
+                            "size" => Utils::formatBytes('mb', $size, true)
+                        ];
+                    }
                 }
+
+                $is_match = preg_match("/APIError was raised./", $buffer, $matches);
+                if ($is_match) {
+                    $error_logs[] = "APIError has occurred, please update the machines.";
+                }
+                if (preg_last_error() != PREG_NO_ERROR) {
+                    $error_logs[] = "Error while parsing the logs";
+                    break;
+                }
+                $buffer = strtok("\n");
             }
         }
 
@@ -215,72 +211,70 @@ class DockerView extends AbstractView {
                 )
             );
 
-            if($sysinfo_content) {
-                $sysinfo_content = rtrim($sysinfo_content);
-                $sysinfo_2rpos = strrpos($sysinfo_content, "[Last ran", -45);
-                if ($sysinfo_2rpos === false) {
-                    $sysinfo_2rpos = 0;
+            $sysinfo_content = rtrim($sysinfo_content);
+            $sysinfo_2rpos = strrpos($sysinfo_content, "[Last ran", -45);
+            if ($sysinfo_2rpos === false) {
+                $sysinfo_2rpos = 0;
+            }
+            $sysinfo_content = substr($sysinfo_content, $sysinfo_2rpos + 10);
+            $buffer = strtok($sysinfo_content, "\n");
+            $current_machine = "";
+
+            while ($buffer !== false) {
+                $matches = [];
+
+                $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $current_machine = $matches[1];
+                    $machine_system_details[$current_machine]["worker"] = null;
+                    $machine_system_details[$current_machine]["shipper"] = null;
+                    $machine_system_details[$current_machine]["daemon"] = null;
+                    $machine_system_details[$current_machine]["disk"] = null;
+                    $machine_system_details[$current_machine]["load"] = null;
+                    $machine_system_details[$current_machine]["os"] ??= null;
                 }
-                $sysinfo_content = substr($sysinfo_content, $sysinfo_2rpos + 10);
-                $buffer = strtok($sysinfo_content, "\n");
-                $current_machine = "";
 
-                while ($buffer !== false) {
-                    $matches = [];
-
-                    $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $current_machine = $matches[1];
-                        $machine_system_details[$current_machine]["worker"] = null;
-                        $machine_system_details[$current_machine]["shipper"] = null;
-                        $machine_system_details[$current_machine]["daemon"] = null;
-                        $machine_system_details[$current_machine]["disk"] = null;
-                        $machine_system_details[$current_machine]["load"] = null;
-                        $machine_system_details[$current_machine]["os"] ??= null;
-                    }
-
-                    $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["worker"] = $matches[1];
-                    }
-
-                    $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["shipper"] = $matches[1];
-                    }
-
-                    $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["daemon"] = $matches[1];
-                    }
-
-                    $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_system_details[$current_machine]["disk"] = $matches[1];
-                    }
-
-                    $is_match = preg_match("/System Load: \((.+)\)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_system_details[$current_machine]["load"] = $matches[1];
-                    }
-
-                    $is_match = preg_match("/^\[Last ran on: (.+)\]/", $buffer, $matches);
-                    if ($is_match) {
-                        $sysinfo_last_updated = $matches[1];
-                    }
-
-                    $is_match = preg_match("/ERR:/", $buffer, $matches);
-                    if ($is_match) {
-                        $error_logs[] = "Failed to update system info";
-                    }
-
-                    if (preg_last_error() != PREG_NO_ERROR) {
-                        $error_logs[] = "Error while parsing system info logs";
-                        break;
-                    }
-
-                    $buffer = strtok("\n");
+                $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["worker"] = $matches[1];
                 }
+
+                $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["shipper"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
+                if ($is_match && $matches[1] != "Service Not Found") {
+                    $machine_system_details[$current_machine]["daemon"] = $matches[1];
+                }
+
+                $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["disk"] = $matches[1];
+                }
+
+                $is_match = preg_match("/System Load: \((.+)\)/", $buffer, $matches);
+                if ($is_match) {
+                    $machine_system_details[$current_machine]["load"] = $matches[1];
+                }
+
+                $is_match = preg_match("/^\[Last ran on: (.+)\]/", $buffer, $matches);
+                if ($is_match) {
+                    $sysinfo_last_updated = $matches[1];
+                }
+
+                $is_match = preg_match("/ERR:/", $buffer, $matches);
+                if ($is_match) {
+                    $error_logs[] = "Failed to update system info";
+                }
+
+                if (preg_last_error() != PREG_NO_ERROR) {
+                    $error_logs[] = "Error while parsing system info logs";
+                    break;
+                }
+
+                $buffer = strtok("\n");
             }
         }
 
