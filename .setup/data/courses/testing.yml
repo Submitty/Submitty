@@ -68,6 +68,6 @@ gradeables:
     eg_grade_inquiry_due_date: 9999-01-06 23:59:59
     eg_has_due_date: true
     eg_has_release_date: true
-    g_title: Open Homework
+    g_title: Open Gradeable
     gradeable_config: python_simple_homework
     g_bucket: homework

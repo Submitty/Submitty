@@ -1,6 +1,6 @@
 /* global buildCourseUrl */
 /* global luxon */
-/* exported confirmExtension, clearDate, deleteHomeworkExtension, setLateDays */
+/* exported confirmExtension, clearDate, deleteGradeableExtension, setLateDays */
 const DateTime = luxon.DateTime;
 
 $(document).ready(() => {
@@ -14,7 +14,7 @@ $(document).ready(() => {
     });
 });
 
-function updateHomeworkExtension() {
+function updateGradeableExtension() {
     const fd = new FormData($('#extensions-form').get(0));
     const url = buildCourseUrl(['extensions', 'update']);
     $.ajax({
@@ -46,11 +46,11 @@ function updateHomeworkExtension() {
     });
 }
 
-function deleteHomeworkExtension(user) {
+function deleteGradeableExtension(user) {
     $('#user_id').val(user);
     $('#late-days').val(0);
     $('#reason-for-exception').val('');
-    updateHomeworkExtension();
+    updateGradeableExtension();
 }
 
 function clearDate() {
@@ -69,7 +69,7 @@ function setLateDays() {
 function confirmExtension(option) {
     $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
-    updateHomeworkExtension();
+    updateGradeableExtension();
     $('input[name="option"]').val(-1);
 }
 

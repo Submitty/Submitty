@@ -76,7 +76,7 @@ class AdminGradeableController extends AbstractController {
             'external_repo' => '',
             'using_subdirectory' => 'false',
             'vcs_subdirectory' => '',
-            'syllabus_bucket' => 'Homework',
+            'syllabus_bucket' => 'Gradeable',
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
@@ -148,7 +148,7 @@ class AdminGradeableController extends AbstractController {
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
-        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Gradeable';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page

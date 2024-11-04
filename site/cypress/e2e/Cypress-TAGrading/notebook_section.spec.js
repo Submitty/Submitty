@@ -3,7 +3,7 @@ describe('Notebook Section Testing', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'update?nav_tab=1']);
         cy.get('[data-testid="start-new-notebook"]').click(); // creating notebook
-        cy.get('[data-testid="notebook-builder-title"]').should('contain', 'Grading Homework Notebook Builder');
+        cy.get('[data-testid="notebook-builder-title"]').should('contain', 'Grading Gradeable Notebook Builder');
         // Assertion for the present buttons on Notebook Builder Section
         cy.get('[data-testid="multiple-choice"]').should('have.value', 'Multiple Choice');
         cy.get('[data-testid="markdown"]').should('have.value', 'Markdown');

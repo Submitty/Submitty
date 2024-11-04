@@ -1,6 +1,6 @@
 {
   "name": "submitty",
-  "description": "Homework Submission, Automated Grading, and TA grading system.",
+  "description": "Gradeable Submission, Automated Grading, and TA grading system.",
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
