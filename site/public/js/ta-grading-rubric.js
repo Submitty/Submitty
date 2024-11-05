@@ -179,6 +179,7 @@ async function ajaxGetGradeableRubric(gradeable_id) {
  * @param {boolean} is_itempool_linked
  * @param {string} itempool_option
  * @async
+ * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
  */
 async function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, student_comment, page, lower_clamp, default_value, max_value, upper_clamp, is_itempool_linked, itempool_option) {
@@ -223,6 +224,7 @@ async function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, 
  * @param {string} gradeable_id
  * @param {int} component_id
  * @async
+ * @throws {Error} Throws except when the response returns status 'success'
  * @returns {Object}
  */
 async function ajaxGetComponentRubric(gradeable_id, component_id) {
@@ -3108,6 +3110,7 @@ function marksEqual(mark0, mark1) {
  * Determines what to do when trying to save a mark provided the mark
  *  before edits, the DOM mark, and the server's up-to-date mark
  *  @async
+ *  @throws {Error} Throws when adding or deleting mark fails
  *  @return {boolean} Resolves true on success, false on conflict
  */
 async function tryResolveMarkSave(gradeable_id, component_id, domMark, serverMark, oldServerMark) {
