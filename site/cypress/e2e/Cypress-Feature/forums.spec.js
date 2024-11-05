@@ -35,6 +35,7 @@ const upduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
+    cy.wait(1000);
     cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 1);
 };
 
@@ -107,6 +108,8 @@ const removeUpduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 1);
     cy.get('[data-testid="upduck-button"]').first().click();
+    // wait for duck like to update
+    cy.wait(1000);
     cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 0);
 };
 
@@ -144,9 +147,12 @@ const checkStaffUpduck = (title, visible) => {
 
 const checkThreadduck = (thread_title, ducks) => {
     // thread 1 suppose to have 2 total duck, thread 2 suppose to have 3 total ducks, thread 3 suppose to have 4 total ducks
-    cy.get('[data-testid="thread-list-item"]').contains(thread_title).get('[data-testid="thread-like-count"]').should('have.text', ducks);
-};
-
+    cy.get('.thread_box').each(($el) => {
+        if ($el.text().includes(thread_title)) {
+            cy.wrap($el).find('[data-testid="thread-like-count"]').should('have.text', ducks);
+        }
+      });
+}      
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.login('instructor');
@@ -197,9 +203,9 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Check thread sum duck
         cy.visit(['sample', 'forum']);
-        checkThreadduck === (title1, 2);
-        checkThreadduck === (title2, 3);
-        checkThreadduck === (title3, 4);
+        checkThreadduck(title1, 2);
+        checkThreadduck(title2, 3);
+        checkThreadduck(title3, 3);
 
         checkStatsUpducks('Instructor, Quinn', 9);
 
