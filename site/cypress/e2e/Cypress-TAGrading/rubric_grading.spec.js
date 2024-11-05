@@ -87,18 +87,19 @@ describe('Test cases for TA grading page', () => {
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Sally Jones');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '− / 2');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
+        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('body').type('{downArrow}');
         cy.get('body').type('{0}');
         cy.get('body').type('{downArrow}');
         cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
-        cy.get('body').type('{0}');
+        cy.get('body').type('{1}');
         cy.get('body').type('{leftArrow}');
         cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Leonie Gutmann');
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '0 / 2');
         cy.get('body').type('{rightArrow}');
-        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
-        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '5 / 5');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '− / 2');
+        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '0 / 5');
     });
 });
