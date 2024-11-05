@@ -8822,8 +8822,8 @@ WHERE current_state IN
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
-             gc.cgg_graders AS cgg_graders,
-             gc.cgg_timestamps AS cgg_timestamps,
+             gc.ag_graders AS ag_graders,
+             gc.ag_timestamps AS ag_timestamps,
 
               {$submitter_data_inject}
 
@@ -8850,19 +8850,19 @@ WHERE current_state IN
                 SELECT 
                   gc.gc_id, 
                   gc.g_id,
-                  COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE cgg.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_graders,
-                  COALESCE(json_object_agg(gc.gc_id, cgg.timestamps) FILTER (WHERE cgg.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as cgg_timestamps
+                  COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE ag.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as ag_graders,
+                  COALESCE(json_object_agg(gc.gc_id, ag.timestamps) FILTER (WHERE ag.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as ag_timestamps
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
-                    cgg_user_id,
-                    cgg_team_id,
+                    ag_user_id,
+                    ag_team_id,
                     gc_id,
                     json_agg(grader_id) AS graders,
                     json_agg(timestamp) AS timestamps
-                  FROM current_gradable_grader
-                  GROUP BY cgg_user_id, cgg_team_id, gc_id
-                ) as cgg on cgg.gc_id = gc.gc_id
+                  FROM active_graders
+                  GROUP BY ag_user_id, ag_team_id, gc_id
+                ) as ag on ag.gc_id = gc.gc_id
                 GROUP BY gc.gc_id, gc.g_id
               ) AS gc ON gc.g_id = g.g_id
 
@@ -9051,8 +9051,8 @@ WHERE current_state IN
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
                 ],
-                json_decode($row['cgg_graders'], true),
-                json_decode($row['cgg_timestamps'], true)
+                json_decode($row['ag_graders'], true),
+                json_decode($row['ag_timestamps'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
@@ -9825,13 +9825,13 @@ ORDER BY
      */
     public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         $this->course_db->query("
-            INSERT INTO current_gradable_grader (gc_id, grader_id, cgg_user_id, cgg_team_id, timestamp)
+            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?)
         ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL", $this->core->getDateTimeNow()]);
     }
 
     /**
-     * Removes a component grader to the current_gradeable_grader table
+     * Removes a component grader to the active graders table
      * @param \app\models\gradeable\Component $component
      * @param bool $isTeam
      * @param string $grader_id
@@ -9840,8 +9840,8 @@ ORDER BY
      */
     public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         $this->course_db->query("
-            DELETE FROM current_gradable_grader
-            WHERE gc_id = ? AND grader_id = ? AND cgg_user_id = ? AND cgg_team_id = ?
+            DELETE FROM active_graders
+            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id = ?
         ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL"]);
     }
 }
