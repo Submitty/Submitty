@@ -169,7 +169,6 @@ describe('test office hours queue', () => {
     it('Joining queues as student', () => {
         // switch to student to join queue
         switchUser('bitdiddle');
-        cy.visit(['sample', 'office_hours_queue']);
 
         // Join first queue created with user 'bitdiddle'
         studentJoinQueue(queueName, newQueueCode);
@@ -282,8 +281,7 @@ describe('test office hours queue', () => {
         // Ensure notifications are allowed
         expect(isPermissionAllowed('notifications')).to.be.true;
 
-        cy.login();
-        cy.visit(['sample', 'office_hours_queue']);
+        switchUser('instructor');
 
         // Assert that switches exist and assign aliases
         cy.get('[data-testid="notification-switch-container"]').first().as('switch-container');
