@@ -152,7 +152,7 @@ const checkThreadduck = (thread_title, ducks) => {
     cy.get('.thread_box').each(($el) => {
         if ($el.text().includes(thread_title)) {
             cy.wrap($el).find('[data-testid="thread-like-count"]').should('have.text', ducks);
-        };
+        }
     });
 };
 
