@@ -208,7 +208,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         cy.visit(['sample', 'forum']);
         checkThreadduck(title1, 2);
         checkThreadduck(title2, 3);
-        checkThreadduck(title3, 3);
+        checkThreadduck(title3, 4);
 
         checkStatsUpducks('Instructor, Quinn', 9);
 
