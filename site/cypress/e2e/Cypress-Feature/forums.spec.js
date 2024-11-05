@@ -35,6 +35,7 @@ const upduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(1000);
     cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 1);
 };
@@ -109,6 +110,7 @@ const removeUpduckPost = (thread_title) => {
     cy.get('[data-testid="like-count"]').first().should('have.text', 1);
     cy.get('[data-testid="upduck-button"]').first().click();
     // wait for duck like to update
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(1000);
     cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 0);
 };
@@ -150,9 +152,10 @@ const checkThreadduck = (thread_title, ducks) => {
     cy.get('.thread_box').each(($el) => {
         if ($el.text().includes(thread_title)) {
             cy.wrap($el).find('[data-testid="thread-like-count"]').should('have.text', ducks);
-        }
-      });
-}      
+        };
+    });
+};
+
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.login('instructor');
