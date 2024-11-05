@@ -617,6 +617,41 @@ $$;
 
 
 --
+-- Name: active_graders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_graders (
+    id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    gc_id integer NOT NULL,
+    ag_user_id character varying(255),
+    ag_team_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT ag_user_team_id_check CHECK (((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_graders_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_graders_id_seq OWNED BY public.active_graders.id;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -806,41 +841,6 @@ CREATE SEQUENCE public.course_materials_sections_id_seq
 --
 
 ALTER SEQUENCE public.course_materials_sections_id_seq OWNED BY public.course_materials_sections.id;
-
-
---
--- Name: current_gradable_grader; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.current_gradable_grader (
-    id integer NOT NULL,
-    grader_id character varying(255) NOT NULL,
-    gc_id integer NOT NULL,
-    cgg_user_id character varying(255),
-    cgg_team_id character varying(255),
-    "timestamp" timestamp with time zone NOT NULL,
-    CONSTRAINT cgg_user_team_id_check CHECK (((cgg_user_id IS NOT NULL) OR (cgg_team_id IS NOT NULL)))
-);
-
-
---
--- Name: current_gradable_grader_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.current_gradable_grader_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: current_gradable_grader_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.current_gradable_grader_id_seq OWNED BY public.current_gradable_grader.id;
 
 
 --
@@ -1980,6 +1980,13 @@ CREATE TABLE public.viewed_responses (
 
 
 --
+-- Name: active_graders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('public.active_graders_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2012,13 +2019,6 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 --
 
 ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
-
-
---
--- Name: current_gradable_grader id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader ALTER COLUMN id SET DEFAULT nextval('public.current_gradable_grader_id_seq'::regclass);
 
 
 --
@@ -2155,6 +2155,30 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 
 
 --
+-- Name: active_graders active_graders_grader_id_gc_id_ag_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_team_id_key UNIQUE (grader_id, gc_id, ag_team_id);
+
+
+--
+-- Name: active_graders active_graders_grader_id_gc_id_ag_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_user_id_key UNIQUE (grader_id, gc_id, ag_user_id);
+
+
+--
+-- Name: active_graders active_graders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2208,30 +2232,6 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials_sections
     ADD CONSTRAINT course_materials_sections_pkey PRIMARY KEY (id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_grader_id_gc_id_cgg_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_grader_id_gc_id_cgg_team_id_key UNIQUE (grader_id, gc_id, cgg_team_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_grader_id_gc_id_cgg_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_grader_id_gc_id_cgg_user_id_key UNIQUE (grader_id, gc_id, cgg_user_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_pkey PRIMARY KEY (id);
 
 
 --
@@ -2822,6 +2822,22 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
+-- Name: active_graders active_graders_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
+
+
+--
+-- Name: active_graders active_graders_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2835,22 +2851,6 @@ ALTER TABLE ONLY public.course_materials
 
 ALTER TABLE ONLY public.course_materials
     ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
-
-
---
--- Name: current_gradable_grader current_gradable_grader_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_gradable_grader
-    ADD CONSTRAINT current_gradable_grader_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id);
 
 
 --
