@@ -33,7 +33,6 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    database.execute("DROP TABLE IF EXISTS current_gradable_grader CASCADE;")
     """
     Run down migration (rollback).
 

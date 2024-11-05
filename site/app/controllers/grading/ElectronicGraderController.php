@@ -2109,16 +2109,16 @@ class ElectronicGraderController extends AbstractController {
             if ($ta_graded_gradeable !== null) {
                 $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader, $all_peers);
             }
-            // remove current grader from $response_data['current_graders'] and $response_data['current_graders_timestamps']
-            // current_graders is formatted as {component_id: [grader_id]}
-            foreach($response_data['current_graders'] as $component_id=>$graders) {
-                if (!isset($response_data['current_graders'])) {
-                    $response_data['current_graders'] = [];
+            // remove current grader from $response_data['active_graders'] and $response_data['active_graders_timestamps']
+            // active_graders is formatted as {component_id: [grader_id]}
+            foreach ($response_data['active_graders'] as $component_id => $graders) {
+                if (!isset($response_data['active_graders'])) {
+                    $response_data['active_graders'] = [];
                 }
-                for ($i = 0; $i < count($response_data['current_graders'][$component_id]); $i++) {
-                    if ($response_data['current_graders'][$component_id][$i] === $grader->getId()) {
-                        array_splice($response_data['current_graders'], $i, 1);
-                        array_splice($response_data['current_graders_timestamps'], $i, 1);
+                for ($i = 0; $i < count($response_data['active_graders'][$component_id]); $i++) {
+                    if ($response_data['active_graders'][$component_id][$i] === $grader->getId()) {
+                        array_splice($response_data['active_graders'], $i, 1);
+                        array_splice($response_data['active_graders_timestamps'], $i, 1);
                         break;
                     }
                 }
@@ -2192,8 +2192,8 @@ class ElectronicGraderController extends AbstractController {
         foreach ($components as $key => $value) {
             $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
         }
-        $response_data['current_graders'] = $graded_gradeable->getGraders();
-        $response_data['current_graders_timestamps'] = $graded_gradeable->getGradersTimestamps();
+        $response_data['active_graders'] = $graded_gradeable->getActiveGraders();
+        $response_data['active_graders_timestamps'] = $graded_gradeable->getActiveGradersTimestamps();
 
         return $response_data;
     }
@@ -2425,7 +2425,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
+        return JsonResponse::getSuccessResponse(['active_graders' => $graders, 'active_graders_timestamps' => $timestamps]);
     }
 
     /**
@@ -2498,7 +2498,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        return JsonResponse::getSuccessResponse(['graders' => $graders, 'current_graders_timestamps' => $timestamps]);
+        return JsonResponse::getSuccessResponse(['active_graders' => $graders, 'active_graders_timestamps' => $timestamps]);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {

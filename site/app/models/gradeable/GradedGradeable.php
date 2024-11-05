@@ -50,12 +50,12 @@ class GradedGradeable extends AbstractModel {
     protected $overridden_grades = false;
 
     /** @prop
-     * @var array<array<int, string>> The graders for this graded gradeable */
-    protected $graders = [];
+     * @var array<array<int, string>> The active graders for this graded gradeable */
+    protected $active_graders = [];
 
     /** @prop
-     * @var array<array<int, string>> The timestamps for the graders this graded gradeable */
-    protected $graders_timestamps = [];
+     * @var array<array<int, string>> The timestamps for the active graders this graded gradeable */
+    protected $active_graders_timestamps = [];
 
     /**
      * GradedGradeable constructor.
@@ -63,11 +63,11 @@ class GradedGradeable extends AbstractModel {
      * @param Gradeable $gradeable The gradeable associated with this grade
      * @param Submitter $submitter The user or team who submitted for this graded gradeable
      * @param array $details Other construction details (indexed by property name)
-     * @param array<array<int, string>> $graders The graders for this graded gradeable
-     * @param array<array<int, string>> $graders_timestamps The timestamps for the graders this graded gradeable
+     * @param array<array<int, string>> $active_graders The active graders for this graded gradeable
+     * @param array<array<int, string>> $active_graders_timestamps The timestamps for the active graders this graded gradeable
      * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
-    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $graders, array $graders_timestamps) {
+    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $active_graders, array $active_graders_timestamps) {
         parent::__construct($core);
 
         // Check the gradeable instance
@@ -87,24 +87,24 @@ class GradedGradeable extends AbstractModel {
 
         $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
 
-        $this->graders = $graders;
-        $this->graders_timestamps = $graders_timestamps;
+        $this->active_graders = $active_graders;
+        $this->active_graders_timestamps = $active_graders_timestamps;
+    }
+
+    /**
+     * Gets the active graders for this graded gradeable
+     * @return array<array<int, string>>
+     */
+    public function getActiveGraders() {
+        return $this->active_graders;
     }
 
     /**
      * Gets the graders for this graded gradeable
      * @return array<array<int, string>>
      */
-    public function getGraders() {
-        return $this->graders;
-    }
-
-    /**
-     * Gets the graders for this graded gradeable
-     * @return array<array<int, string>>
-     */
-    public function getGradersTimestamps() {
-        return $this->graders_timestamps;
+    public function getActiveGradersTimestamps() {
+        return $this->active_graders_timestamps;
     }
 
     /**
