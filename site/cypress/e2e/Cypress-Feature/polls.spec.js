@@ -442,7 +442,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.get('[data-testid="timer"]').contains('Poll Ended');
+        cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
