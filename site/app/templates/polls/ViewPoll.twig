@@ -149,10 +149,12 @@
 </div>
 
 <script>
+
     {% if timer_enabled %}
         const endTime = new Date('{{ end_time }}')
         updateTimer(endTime);
     {% endif %}
+
     {% if user_admin or poll.isHistogramAvailable() %}
         window.onload = function () {
             const data = [{
