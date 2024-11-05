@@ -149,14 +149,12 @@
 </div>
 
 <script>
-
-    {% if timer_enabled %}
-        const endTime = new Date('{{ end_time }}')
-        updateTimer(endTime);
-    {% endif %}
-
     {% if user_admin or poll.isHistogramAvailable() %}
         window.onload = function () {
+            {% if timer_enabled %}
+                const endTime = new Date('{{ end_time }}')
+                updateTimer(endTime);
+            {% endif %}
             const data = [{
                 type: "bar",
                 x: [],
