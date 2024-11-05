@@ -2403,8 +2403,8 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $graders = $graded_gradeable->getGraders();
-        $timestamps = $graded_gradeable->getGradersTimestamps();
+        $graders = $graded_gradeable->getActiveGraders();
+        $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         try {
             $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
             $graders[$component_id][] = $grader->getId();
@@ -2484,8 +2484,8 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $graders = $graded_gradeable->getGraders();
-        $timestamps = $graded_gradeable->getGradersTimestamps();
+        $graders = $graded_gradeable->getActiveGraders();
+        $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
         if (!isset($graders[$component_id])) {
             $graders[$component_id] = [];
