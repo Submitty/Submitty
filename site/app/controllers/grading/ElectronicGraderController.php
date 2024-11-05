@@ -2112,8 +2112,11 @@ class ElectronicGraderController extends AbstractController {
             // remove current grader from $response_data['active_graders'] and $response_data['active_graders_timestamps']
             // active_graders is formatted as {component_id: [grader_id]}
             foreach ($response_data['active_graders'] as $component_id => $graders) {
-                if (!isset($response_data['active_graders'])) {
-                    $response_data['active_graders'] = [];
+                if (!isset($response_data['active_graders'][$component_id])) {
+                    $response_data['active_graders'][$component_id] = [];
+                }
+                if (!isset($response_data['active_graders_timestamps'][$component_id])) {
+                    $response_data['active_graders_timestamps'][$component_id] = [];
                 }
                 for ($i = 0; $i < count($response_data['active_graders'][$component_id]); $i++) {
                     if ($response_data['active_graders'][$component_id][$i] === $grader->getId()) {

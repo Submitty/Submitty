@@ -8847,11 +8847,11 @@ WHERE current_state IN
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
               LEFT JOIN (
-                SELECT 
-                  gc.gc_id, 
+                SELECT
+                  gc.gc_id,
                   gc.g_id,
-                  COALESCE(json_object_agg(gc.gc_id, graders) FILTER (WHERE ag.graders IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as ag_graders,
-                  COALESCE(json_object_agg(gc.gc_id, ag.timestamps) FILTER (WHERE ag.timestamps IS NOT NULL), CONCAT('{\"',gc.gc_id,'\":[]}')::json) as ag_timestamps
+                  json_object_agg(gc.gc_id, graders) as ag_graders,
+                  json_object_agg(gc.gc_id, ag.timestamps) as ag_timestamps
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
