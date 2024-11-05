@@ -36,26 +36,26 @@
 
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <label class="column-wrapper" data-testid="view-your-sections"> View Your Sections
-                    <input type="checkbox" id="view-sections">
+                <label class="column-wrapper" id="view-your-sections"> View Your Sections
+                    <input type="checkbox" data-testid="view-sections">
                 </label>
                 {% endif %}
-                <label class="column-wrapper" data-testid="random-default-order"> Switch to Random Order
-                    <input type="checkbox" id="random-default-order">
+                <label class="column-wrapper" id="random-default-order"> Switch to Random Order
+                    <input type="checkbox" data-testid="random-default-order">
                 </label>
                 {% if toggle_anon_button %}
-                <label class="column-wrapper" data-testid="toggle-anon-button"> Enable Anonymous Mode
-                    <input type="checkbox" id="toggle-anon-button">
+                <label class="column-wrapper" id="toggle-anon-button"> Enable Anonymous Mode
+                    <input type="checkbox" data-testid="toggle-anon-button">
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <label class="column-wrapper" data-testid="toggle-grade-inquiry"> Grade Inquiry Only
-                    <input type="checkbox" id="toggle-grade-inquiry">
+                <label class="column-wrapper" id="toggle-grade-inquiry"> Grade Inquiry Only
+                    <input type="checkbox" data-testid="toggle-grade-inquiry">
                 </label>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
-                <label class="column-wrapper" data-testid="toggle-filter-withdrawn"> Filter Withdrawn Student
-                    <input type="checkbox" id="toggle-filter-withdrawn">
+                <label class="column-wrapper" id="toggle-filter-withdrawn"> Filter Withdrawn Student
+                    <input type="checkbox" data-testid="toggle-filter-withdrawn">
                 </label>
                 {% endif %}
             </div>
@@ -758,7 +758,6 @@
     {% endif %}
 
     {% if toggle_anon_button %}
-        const gradeable_id = '{{ gradeable.getId() }}';
         change_anon();
     {% endif %}
 

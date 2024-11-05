@@ -200,6 +200,7 @@ function switch_view() {
 }
 
 function change_anon() {
+    const gradeable_id = '{{ gradeable.getId() }}';
     const anon_status = $('#toggle-anon-button');
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
     if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
