@@ -77,7 +77,7 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory' => 'false',
             'vcs_subdirectory' => '',
             'syllabus_bucket' => 'Homework',
-            'autograding_config_path' => '' 
+            'autograding_config_path' => ''
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
