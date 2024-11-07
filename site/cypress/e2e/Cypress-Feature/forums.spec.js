@@ -45,6 +45,7 @@ const upduckReply = (thread_title) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="upduck-button"]').eq(1).click();
+    cy.wait(1000);
 };
 
 const checkStatsUpducks = (fullName, numUpducks) => {
@@ -147,13 +148,9 @@ const checkStaffUpduck = (title, visible) => {
     cy.get('[data-testid="instructor-like"]').first().should(visible);
 };
 
-const checkThreadduck = (thread_title, ducks) => {
+const checkThreadduck = (order, ducks) => {
     // thread 1 suppose to have 2 total duck, thread 2 suppose to have 3 total ducks, thread 3 suppose to have 4 total ducks
-    cy.get('.thread_box').each(($el) => {
-        if ($el.text().includes(thread_title)) {
-            cy.wrap($el).find('[data-testid="thread-like-count"]').should('have.text', ducks);
-        }
-    });
+    cy.get('.thread_box').eq(order).find('[data-testid="thread-like-count"]').should('have.text', ducks);
 };
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
@@ -206,9 +203,9 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Check thread sum duck
         cy.visit(['sample', 'forum']);
-        checkThreadduck(title1, 2);
-        checkThreadduck(title2, 3);
-        checkThreadduck(title3, 4);
+        checkThreadduck(2, 2);
+        checkThreadduck(1, 3);
+        checkThreadduck(0, 4);
 
         checkStatsUpducks('Instructor, Quinn', 9);
 
