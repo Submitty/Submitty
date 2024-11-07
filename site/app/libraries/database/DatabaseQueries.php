@@ -8031,7 +8031,7 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function studentQueueSearch(string $user_id): array {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? ORDER BY time_in", [$user_id]);
         return $this->course_db->rows();
     }
 
