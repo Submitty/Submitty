@@ -45,6 +45,7 @@ const upduckReply = (thread_title) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="upduck-button"]').eq(1).click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(1000);
 };
 
