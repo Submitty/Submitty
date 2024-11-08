@@ -44,7 +44,7 @@
                     <input type="checkbox" data-testid="random-default-order">
                 </label>
                 {% if toggle_anon_button %}
-                <label class="column-wrapper" id="toggle-anon-button"> Enable Anonymous Mode
+                <label class="column-wrapper" id="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}"> Enable Anonymous Mode
                     <input type="checkbox" data-testid="toggle-anon-button">
                 </label>
                 {% endif %}
@@ -745,12 +745,12 @@
 
 {# /Column functions #}
 <script>
-    {% if grade_inquiry_only_button %}
-        inquiry_update();
-    {% endif %}
-    
     {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
         filter_withdrawn_update();
+    {% endif %}
+    
+    {% if grade_inquiry_only_button %}
+        inquiry_update();
     {% endif %}
 
     {% if show_all_sections_button %}

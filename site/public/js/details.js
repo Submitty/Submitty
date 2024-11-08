@@ -112,37 +112,36 @@ function collapseAllSections() {
 
 function filter_withdrawn_update() {
     // set up, by default this will hide withdrawned student
-    const filterWithdrawnCheckbox = $('#toggle-filter-withdrawn');
+    const filterWithdrawnCheckbox = $('[data-testid="toggle-filter-withdrawn"]');
     if (Cookies.get('filter_student') === undefined) {
-        $('[data-student="electronic-grade-withdrawn"]').css('display', 'none');
+        $('[data-student="electronic-grade-withdrawn"]').hide();
         filterWithdrawnCheckbox.prop('checked', true);
     }
     else if (Cookies.get('filter_student') === 'false') {
-        $('[data-student="electronic-grade-withdrawn"]').css('display', 'contents');
+        $('[data-student="electronic-grade-withdrawn"]').show();
         filterWithdrawnCheckbox.prop('checked', false);
     }
     else {
-        $('[data-student="electronic-grade-withdrawn"]').css('display', 'none');
+        $('[data-student="electronic-grade-withdrawn"]').hide();
         filterWithdrawnCheckbox.prop('checked', true);
     }
 
     // filter student who withdrawned from this course
     filterWithdrawnCheckbox.on('change', () => {
-        if (this.checked) {
-            $('[data-student="electronic-grade-withdrawn"]').css('display', 'none');
+        if (Cookies.get('filter_student') === 'false') {
+            $('[data-student="electronic-grade-withdrawn"]').hide();
             Cookies.set('filter_student', true);
         }
         else {
-            $('[data-student="electronic-grade-withdrawn"]').css('display', 'contents');
+            $('[data-student="electronic-grade-withdrawn"]').show();
             Cookies.set('filter_student', false);
         }
     });
 }
 
 function inquiry_update() {
-    const check_inquiry = $('#toggle-grade-inquiry');
+    const check_inquiry = $('[data-testid="toggle-grade-inquiry"]');
     const status = Cookies.get('inquiry_status');
-
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
@@ -152,29 +151,19 @@ function inquiry_update() {
         });
     }
     check_inquiry.on('change', () => {
-        const status = Cookies.get('inquiry_status');
         if (status === 'on') {
-            $('.grade-button').each(function () {
-                if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                    $(this).closest('.grade-table').show();
-                    Cookies.set('inquiry_status', 'off');
-                }
-            });
+            Cookies.set('inquiry_status', 'off');
         }
         else {
-            $('.grade-button').each(function () {
-                if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                    $(this).closest('.grade-table').hide();
-                    Cookies.set('inquiry_status', 'on');
-                }
-            });
+            Cookies.set('inquiry_status', 'on');
         }
+        location.reload();
     });
 }
 
 function switch_view() {
     // true means view all, false means view assigned section
-    const view_status = $('#view-sections');
+    const view_status = $('[data-testid="view-sections"]');
     if (Cookies.get('view') === undefined) {
         Cookies.set('view', 'all', { path: '/' });
         localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
@@ -200,8 +189,8 @@ function switch_view() {
 }
 
 function change_anon() {
-    const gradeable_id = '{{ gradeable.getId() }}';
-    const anon_status = $('#toggle-anon-button');
+    const gradeable_id = document.getElementById('toggle-anon-button').getAttribute('data-gradeable-id');
+    const anon_status = $('[data-testid="toggle-anon-button"]');
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
     if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
         Cookies.set(`anon_mode_${gradeable_id}`, 'off');
@@ -224,7 +213,7 @@ function change_anon() {
 }
 
 function changeSortOrder() {
-    const sort_status = $('#random-default-order');
+    const sort_status = $('[data-testid="random-default-order"]');
     if (Cookies.get('sort') === undefined) {
         Cookies.set('sort', 'id');
     }
