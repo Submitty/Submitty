@@ -1068,6 +1068,29 @@ SQL;
     }
 
     /**
+     * Get total likes count for each thread.
+     * @return array<int, int> array with thread_id as key and total likes_count as value.
+     */
+    public function getThreadLikesSum(): array {
+        $this->course_db->query(
+            "SELECT p.thread_id, COUNT(*) AS total_likes
+            FROM posts p
+            JOIN forum_upducks f ON p.id = f.post_id
+            WHERE p.deleted = false
+            GROUP BY p.thread_id"
+        );
+
+        $likesData = $this->course_db->rows();
+        $threadLikes = [];
+        foreach ($likesData as $row) {
+            $threadLikes[$row['thread_id']] = intval($row['total_likes']);
+        }
+        return $threadLikes; // Return array with thread_id as key and total likes_count as value
+    }
+
+
+
+    /**
      * @param int[] $post_ids
      * @return int[] threads that have been merged
      */
@@ -6303,10 +6326,12 @@ AND gc_id IN (
 
 
     public function deleteGradeable($g_id) {
+        $this->course_db->beginTransaction();
         $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
                                 eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable_anon WHERE g_id=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
+        $this->course_db->commit();
     }
 
     /**
@@ -8029,7 +8054,7 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function studentQueueSearch(string $user_id): array {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? ORDER BY time_in", [$user_id]);
         return $this->course_db->rows();
     }
 

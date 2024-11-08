@@ -63,9 +63,9 @@
     </thead>
     <tbody>
       {% for queue in viewer.getAllQueues() %}
-          <tr>
+          <tr data-testid="queue-item">
           <td style="text-align: left;">
-              <b>Name: </b>{{queue['code']}}<br>
+              <span data-testid="queue-name"><b>Name: </b>{{queue['code']}}</span><br>
               <b>Access Code: </b>{{queue['token']}}<br>
               <b>Contact Information: </b>{{ queue['contact_information'] ? "On" : "Off" }}<br>
               {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' and queue['contact_information'] %}
