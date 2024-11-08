@@ -1689,8 +1689,7 @@ class AdminGradeableController extends AbstractController {
                 }
                 elseif (strpos($haystack, $needle) !== false) {
                     $status = 'warnings';
-                }
-                
+                } 
             }
         }
         clearstatcache();
