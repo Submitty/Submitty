@@ -1684,13 +1684,12 @@ class AdminGradeableController extends AbstractController {
                 $makeErrorNeedle = 'MAKE ERROR';
                 $haystack = $logs->json['data'][0];
 
-                if (strpos($haystack, $makeErrorNeedle) !== false){
+                if (strpos($haystack, $makeErrorNeedle) !== false) {
                     $status = false;
                 }
                 elseif (strpos($haystack, $needle) !== false) {
                     $status = 'warnings';
                 }
-                
             }
         }
         clearstatcache();
