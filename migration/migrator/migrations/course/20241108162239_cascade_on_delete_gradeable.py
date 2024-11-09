@@ -14,12 +14,17 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE gradeable_anon DROP CONSTRAINT gradeable_anon_g_id_fkey")
-    database.execute("ALTER TABLE gradeable_anon ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE")
+    database.execute("""
+        ALTER TABLE gradeable_anon DROP CONSTRAINT gradeable_anon_g_id_fkey;
+        ALTER TABLE gradeable_anon ADD CONSTRAINT gradeable_anon_g_id_fkey
+            FOREIGN KEY (g_id) REFERENCES gradeable(g_id)
+            ON UPDATE CASCADE ON DELETE CASCADE;
 
-    database.execute("ALTER TABLE peer_grading_panel DROP CONSTRAINT peer_grading_panel_g_id_fkey")
-    database.execute("ALTER TABLE peer_grading_panel ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE")
-    pass
+        ALTER TABLE peer_grading_panel DROP CONSTRAINT peer_grading_panel_g_id_fkey;
+        ALTER TABLE peer_grading_panel ADD CONSTRAINT peer_grading_panel_g_id_fkey
+            FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id)
+            ON UPDATE CASCADE ON DELETE CASCADE;
+    """)
 
 
 def down(config, database, semester, course):
