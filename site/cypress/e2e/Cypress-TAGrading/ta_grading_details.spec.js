@@ -3,7 +3,7 @@ describe('TA Grading details page', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('[id="view-your-sections"]').should('contain', 'View Your Sections');
-
+        cy.get('[data-testid="view-sections"]').click();
         cy.get('[id="random-default-order"]').should('contain', 'Switch to Random Order');
 
         cy.get('[id="toggle-anon-button"]').should('contain', 'Enable Anonymous Mode');
