@@ -2363,7 +2363,6 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
     }
     catch (err) {
         alert(`Could not fetch gradeable rubric: ${err.message}`);
-        throw err;
     }
     try {
         GRADED_GRADEABLE = await ajaxGetGradedGradeable(gradeable_id, anon_id, false);
