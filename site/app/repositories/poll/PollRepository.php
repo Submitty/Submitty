@@ -34,8 +34,7 @@ class PollRepository extends EntityRepository {
                 SELECT p, r, o FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r WITH r.student_id = :user_id
                 LEFT JOIN p.options o
-                WHERE p.id = :poll_id 
-                AND p.release_date <= :release_date')
+                WHERE p.id = :poll_id AND p.release_date <= :release_date')
             ->setParameter('release_date', date('Y-m-d'))
             ->setParameter('poll_id', $poll_id)
             ->setParameter('user_id', $user_id)
