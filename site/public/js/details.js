@@ -165,8 +165,8 @@ function switch_view() {
     // true means view all, false means view assigned section
     const view_status = $('[data-testid="view-sections"]');
     if (Cookies.get('view') === undefined) {
-        Cookies.set('view', 'all', { path: '/' });
-        localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
+        Cookies.set('view', 'assigned', { path: '/' });
+        localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
         location.reload();
     }
     else if (Cookies.get('view') === 'all') {
