@@ -33,7 +33,7 @@ function instructorSidebar() {
     sidebarContains('Excused Absence Extensions', `/courses/${currentSemester}/sample/extensions`);
     sidebarContains('Grade Override', `/courses/${currentSemester}/sample/grade_override`);
     sidebarContains('Plagiarism Detection', `/courses/${currentSemester}/sample/plagiarism`);
-    sidebarContains('Grade Reports', `/courses/${currentSemester}/sample/reports`);
+    sidebarContains('Grades Configuration', `/courses/${currentSemester}/sample/reports/rainbow_grades_customization`, 'Rainbow Grades Configuration');
     sidebarContains('Docker', '/admin/docker');
     sidebarContains('New Course', '/home/courses/new');
     sidebarContains('Autograding Status', '/autograding_status', 'Job Statistics');
@@ -52,7 +52,7 @@ function notHaveInstructorSidebars() {
         'Excused Absence Extensions',
         'Grade Override',
         'Plagiarism Detection',
-        'Grade Reports',
+        'Rainbow Customization',
         'Docker',
         'New Course',
         'Autograding Status',
