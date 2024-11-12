@@ -666,10 +666,16 @@ function updateCookies() {
 // -----------------------------------------------------------------------------
 // Student navigation
 
-function waitForAllAjaxToComplete() {
-    if ($.active > 0) {
-        setTimeout(waitForAllAjaxToComplete, 100);
-    }
+function waitForAllAjaxToComplete(callback) {
+    const checkAjax = () => {
+        if ($.active > 0) {
+            setTimeout(checkAjax, 100);
+        }
+        else {
+            callback();
+        }
+    };
+    checkAjax();
 }
 
 function gotoMainPage() {
@@ -677,8 +683,9 @@ function gotoMainPage() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, go to main page anyway?')) {
                 window.location = window_location;
@@ -736,8 +743,9 @@ function gotoPrevStudent() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, change student anyway?')) {
                 window.location = window_location;
@@ -795,8 +803,9 @@ function gotoNextStudent() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, change student anyway?')) {
                 window.location = window_location;

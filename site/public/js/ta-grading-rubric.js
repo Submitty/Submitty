@@ -2888,38 +2888,32 @@ function closeComponentGrading(component_id, saveChanges) {
  * @param {int} component_id
  * @param {boolean} saveChanges If the changes to the (graded) component should be saved or discarded
  * @param {boolean} edit_mode editing from ta grading page or instructor edit gradeable page
- * @return {Promise}
+ * @async
+ * @return {void}
  */
-function closeComponent(component_id, saveChanges = true, edit_mode = false) {
+async function closeComponent(component_id, saveChanges = true, edit_mode = false) {
     setComponentInProgress(component_id);
     const gradeable_id = getGradeableId();
     const anon_id = getAnonId();
     // Achieve polymorphism in the interface using this `isInstructorEditEnabled` flag
     if (isInstructorEditEnabled()) {
-        return closeComponentInstructorEdit(component_id, saveChanges).then(() => {
-            setComponentInProgress(component_id, false);
-        })
-            .then(() => {
-                if (!edit_mode) {
-                    return updateTotals(gradeable_id, anon_id);
-                }
-            });
+        await closeComponentInstructorEdit(component_id, saveChanges);
+        setComponentInProgress(component_id, false);
+        if (!edit_mode) {
+            await updateTotals(gradeable_id, anon_id);
+        }
     }
     else {
-        return closeComponentGrading(component_id, saveChanges)
-            .then(() => {
-                setComponentInProgress(component_id, false);
-            })
-            .then(() => {
-                if (!edit_mode) {
-                    if (!GRADED_GRADEABLE.peer_gradeable) {
-                        return refreshTotalScoreBox();
-                    }
-                    else {
-                        return updateTotals(gradeable_id, anon_id);
-                    }
-                }
-            });
+        await closeComponentGrading(component_id, saveChanges);
+        setComponentInProgress(component_id, false);
+        if (!edit_mode) {
+            if (!GRADED_GRADEABLE.peer_gradeable) {
+                await refreshTotalScoreBox();
+            }
+            else {
+                await updateTotals(gradeable_id, anon_id);
+            }
+        }
     }
 }
 
@@ -3209,14 +3203,14 @@ function saveComponent(component_id) {
         // We're in grade mode, so save the graded component
         // The grader didn't change the grade at all, so don't save (don't put our name on a grade we didn't contribute to)
         if (!gradedComponentsEqual(gradedComponent, OLD_GRADED_COMPONENT_LIST[component_id])) {
-            saveGradedComponent(component_id);
             if (!isSilentEditModeEnabled()) {
                 GRADED_COMPONENTS_LIST[component_id].grader_id = getGraderId();
             }
             GRADED_COMPONENTS_LIST[component_id].verifier_id = '';
+            return saveGradedComponent(component_id);
         }
         else if (gradedComponent.graded_version !== getDisplayVersion()) {
-            ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]).then(async () => {
+            return ajaxChangeGradedVersion(getGradeableId(), getAnonId(), getDisplayVersion(), [component_id]).then(async () => {
                 await reloadGradingComponent(component_id, false, false);
             });
         }
