@@ -36,11 +36,11 @@
 
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <label class="column-wrapper" id="view-your-sections"> View Your Sections
+                <label class="column-wrapper" id="view-your-sections"> View Assigned Sections Only
                     <input type="checkbox" data-testid="view-sections">
                 </label>
                 {% endif %}
-                <label class="column-wrapper" id="random-default-order"> Switch to Random Order
+                <label class="column-wrapper" id="random-default-order"> Random Order
                     <input type="checkbox" data-testid="random-default-order">
                 </label>
                 {% if toggle_anon_button %}
@@ -54,7 +54,7 @@
                 </label>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
-                <label class="column-wrapper" id="toggle-filter-withdrawn"> Filter Withdrawn Student
+                <label class="column-wrapper" id="toggle-filter-withdrawn"> Filter Withdrawn Students
                     <input type="checkbox" data-testid="toggle-filter-withdrawn">
                 </label>
                 {% endif %}
