@@ -44,7 +44,7 @@ describe('Tests for self registering for courses', () => {
             .and('contain', selectMessage)
             .and('contain', notifiedMessage);
         cy.get('[data-testid="register-button"]').click();
-        cy.get('[data-testid="open_homework-row"]').should('exist');
+        cy.get('[data-testid="open_homework"]').should('exist');
         cy.visit();
         cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
         cy.logout();
