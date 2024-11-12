@@ -156,6 +156,7 @@ def main() -> None:
                               user_email=user.email,
                               user_access_level=user.access_level,
                               user_pronouns=user.pronouns,
+                              display_pronouns=random.choice([True, False]),
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     for user in extra_students:
@@ -169,6 +170,7 @@ def main() -> None:
                               user_preferred_familyname=user.preferred_familyname,
                               user_email=user.email,
                               user_pronouns=user.pronouns,
+                              display_pronouns=random.choice([True, False]),
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     # INSERT term into terms table, based on today's date.
