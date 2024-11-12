@@ -2369,7 +2369,6 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
     }
     catch (err) {
         alert(`Could not fetch graded gradeable: ${err.message}`);
-        throw err;
     }
     try {
         await loadComponentData(gradeable, GRADED_GRADEABLE);
@@ -2381,7 +2380,6 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
     catch (err) {
         alert(`Could not render gradeable: ${err.message}`);
         console.error(err);
-        throw err;
     }
 }
 /**
