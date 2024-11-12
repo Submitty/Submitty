@@ -1686,7 +1686,6 @@ class AdminGradeableController extends AbstractController {
                 if (strpos($haystack, $errorNeedle) !== false) {
                     $status = false;
                 }
-
                 elseif (strpos($haystack, $needle) !== false) {
                     $status = 'warnings';
                 }
