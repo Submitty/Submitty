@@ -344,8 +344,8 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['reports']),
-                "title" => "Grade Reports",
+                "href" => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
+                "title" => "Grades Configuration",
                 "id" => "nav-sidebar-reports",
                 "icon" => "fa-chart-bar"
             ]);
@@ -655,6 +655,10 @@ class GlobalController extends AbstractController {
                 //April (Flowers)
                 if ($day === 5) {
                     $duck_img = 'moorthy_duck/quantum-duck-light.svg';
+                }
+                elseif ($day >= 24 && $day <= 30) {
+                    // Arbor day
+                    $duck_img = 'moorthy_duck/tree_duck.svg';
                 }
                 else {
                     //April (Flowers)
