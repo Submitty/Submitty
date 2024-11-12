@@ -138,7 +138,7 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             if (!$poll->isVisible()) {
-                $this->core->addErrorMessage("Poll is not visible");
+                $this->core->addErrorMessage("Poll is not available");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             if ($poll->isHistogramAvailable()) {

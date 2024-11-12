@@ -565,7 +565,19 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#tomorrow-table').contains('Poll Tomorrow').should('be.visible');
         cy.get('#future-table').contains('Poll Future').should('be.visible');
 
+        // make sure that today's polls cannot be accessed by the student
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'polls']);
+        cy.get('#today-table').find('a').invoke('attr', 'href').then((href) => {
+            cy.visit(href);
+            cy.get('[data-testid="popup-message"]').should('be.visible').and('contain', 'Poll is not available');
+        });
+
         // change the release date of Poll Future to tomorrow
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'polls']);
         cy.contains('Poll Future').siblings(':nth-child(1)').children().click();
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('[data-testid="poll-date"]').clear({ force: true });
