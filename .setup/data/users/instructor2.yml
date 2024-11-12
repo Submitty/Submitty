@@ -1,0 +1,11 @@
+user_givenname: Jason
+user_group: 1
+user_id: instructor2
+anon_id: lokMH456u2As095
+user_familyname: Instructor
+user_access_level: 2
+user_numeric_id: 801516158
+user_pronouns: He/Him
+courses:
+  testing:
+    user_group: 1
