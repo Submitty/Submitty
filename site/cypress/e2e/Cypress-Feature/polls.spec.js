@@ -569,7 +569,8 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.get('#today-table').find('a').invoke('attr', 'href').then((href) => {
+        console.log(cy.get('#today-table').contains('Poll Today').parent().find('a'));
+        cy.get('#today-table').contains('Poll Today').parent().find('a').invoke('attr', 'href').then((href) => {
             cy.visit(href);
             cy.get('[data-testid="popup-message"]').should('be.visible').and('contain', 'Poll is not available');
         });
