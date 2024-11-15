@@ -155,7 +155,7 @@ class AdminGradeableController extends AbstractController {
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
-
+            // Finally, redirect to the edit page
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
             }
