@@ -83,7 +83,9 @@ class AdminGradeableController extends AbstractController {
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
         }
-
+        if (isset($_POST['rubric'])) {
+            $values['rubric'] = $_POST['rubric'];
+        }
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
@@ -153,7 +155,7 @@ class AdminGradeableController extends AbstractController {
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
-            // Finally, redirect to the edit page
+
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
             }
@@ -310,6 +312,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
             $dates['late_days'] = $gradeable->getLateDays();
             $return_json['dates'] = $dates;
+            $return_json['rubric'] = $gradeable->exportComponents();
         }
         return $return_json;
     }
@@ -1284,8 +1287,14 @@ class AdminGradeableController extends AbstractController {
             );
         }
 
-        // Generate a blank component to make the rubric UI work properly
-        $this->genBlankComponent($gradeable);
+        if (isset($details['rubric'])) {
+            foreach ($details['rubric'] as $component) {
+                $gradeable->importComponent($component);
+            }
+        } else {
+            // Generate a blank component to make the rubric UI work properly
+            $this->genBlankComponent($gradeable);
+        }
 
         // Save the gradeable to the database
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
