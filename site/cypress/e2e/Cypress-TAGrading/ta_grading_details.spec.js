@@ -2,13 +2,13 @@ describe('TA Grading details page', () => {
     it('ta grading ui testing', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.get('[id="view-your-sections"]').should('contain', 'View Your Sections');
+        cy.get('[id="view-your-sections"]').should('contain', 'Only Assigned Sections');
         cy.get('[data-testid="view-sections"]').click();
-        cy.get('[id="random-default-order"]').should('contain', 'Switch to Random Order');
+        cy.get('[id="random-default-order"]').should('contain', 'Randomize Order');
 
-        cy.get('[id="toggle-anon-button"]').should('contain', 'Enable Anonymous Mode');
+        cy.get('[id="toggle-anon-button"]').should('contain', 'Anonymize Student Name');
 
-        cy.get('[id="toggle-grade-inquiry"]').should('contain', 'Grade Inquiry Only');
+        cy.get('[id="toggle-grade-inquiry"]').should('contain', 'Only Grade Inquiry');
 
         cy.get('[data-testid="stats-and-charts"]').should('contain', 'Statistics & Charts');
         cy.get('[data-testid="grade-button"]').should('be.visible');

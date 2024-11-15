@@ -36,25 +36,25 @@
 
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <label class="column-wrapper" id="view-your-sections"> View Assigned Sections Only
+                <label class="column-wrapper" id="view-your-sections"> Only Assigned Sections
                     <input type="checkbox" data-testid="view-sections">
                 </label>
                 {% endif %}
-                <label class="column-wrapper" id="random-default-order"> Random Order
+                <label class="column-wrapper" id="random-default-order"> Randomize Order
                     <input type="checkbox" data-testid="random-default-order">
                 </label>
                 {% if toggle_anon_button %}
-                <label class="column-wrapper" id="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}"> Enable Anonymous Mode
+                <label class="column-wrapper" id="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
                     <input type="checkbox" data-testid="toggle-anon-button">
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <label class="column-wrapper" id="toggle-grade-inquiry"> Grade Inquiry Only
+                <label class="column-wrapper" id="toggle-grade-inquiry"> Only Grade Inquiry
                     <input type="checkbox" data-testid="toggle-grade-inquiry">
                 </label>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
-                <label class="column-wrapper" id="toggle-filter-withdrawn"> Filter Withdrawn Students
+                <label class="column-wrapper" id="toggle-filter-withdrawn"> Hide Withdrawn Students
                     <input type="checkbox" data-testid="toggle-filter-withdrawn">
                 </label>
                 {% endif %}
