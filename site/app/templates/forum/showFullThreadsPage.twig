@@ -46,7 +46,9 @@
         <div id="thread_list" data-prev_page="{{ prev_page }}" data-next_page="{{ next_page }}">
             <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
             <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; display: none" aria-hidden="true"></i>
-
+            <script>
+                Cookies.set('is_full_page',true, {path: '/'});
+            </script>
             {% include 'forum/displayThreadList.twig' with {
                 "is_full_page" : true,
             }%}

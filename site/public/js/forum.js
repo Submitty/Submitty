@@ -1069,6 +1069,7 @@ function dynamicScrollLoadPage(element, atEnd) {
     categories_value = (categories_value == null) ? '' : categories_value.join('|');
     // eslint-disable-next-line eqeqeq
     thread_status_value = (thread_status_value == null) ? '' : thread_status_value.join('|');
+    const isFullPage = Cookies.get('is_full_page') === 'true';
     $.ajax({
         url: next_url,
         type: 'POST',
@@ -1079,6 +1080,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
+            is_full_page: isFullPage,
         },
         success: function (r) {
             const x = JSON.parse(r)['data'];
@@ -1087,6 +1089,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             content = `${content}`;
             $(element).data('dynamic_lock_load', false);
             load_page_callback(content, count);
+            
         },
         error: function () {
             $(element).data('dynamic_lock_load', false);

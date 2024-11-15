@@ -661,7 +661,7 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $ajax = false) {
+    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $is_full_page, $ajax = false) {
         $tempArray = [];
         $threadAnnouncement = false;
         $activeThreadTitle = "";
@@ -675,7 +675,7 @@ class ForumThreadView extends AbstractView {
             }
             $threads = [$thread];
         }
-        return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
+        return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true, $is_full_page);
     }
 
     public function contentMarkdownToPlain($str) {
@@ -929,7 +929,8 @@ class ForumThreadView extends AbstractView {
                 "tooltip" => $tooltip,
                 "is_locked" => isset($thread['lock_thread_date']) && $thread['lock_thread_date'] < date("Y-m-d H:i:S"),
                 "date" => $date_content,
-                "current_user_posted" => $thread["current_user_posted"]
+                "current_user_posted" => $thread["current_user_posted"],
+                "sum_ducks" => $thread_duck_list[$thread['id']]
             ];
 
             if ($is_full_page) {
@@ -961,8 +962,7 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post["anonymous"],
                     "render_markdown" => $first_post["render_markdown"],
                     "author_info" => $author_info,
-                    "deleted" => $first_post['deleted'],
-                    "sum_ducks" => $thread_duck_list[$thread['id']]
+                    "deleted" => $first_post['deleted']
                 ]);
             }
             $thread_content[] = $thread_info;
@@ -973,6 +973,7 @@ class ForumThreadView extends AbstractView {
         if ($render) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", [
                 "thread_content" => $thread_content,
+                "is_full_page" => $is_full_page,
             ]);
         }
         else {
