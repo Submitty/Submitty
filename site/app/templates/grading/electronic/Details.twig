@@ -53,7 +53,7 @@
                     <input type="checkbox" data-testid="toggle-grade-inquiry">
                 </label>
                 {% endif %}
-                {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
+                {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() and is_instructor %}
                 <label class="column-wrapper" id="toggle-filter-withdrawn"> Hide Withdrawn Students
                     <input type="checkbox" data-testid="toggle-filter-withdrawn">
                 </label>
