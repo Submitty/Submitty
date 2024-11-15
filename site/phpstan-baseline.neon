@@ -13087,6 +13087,11 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
+			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$is_full_page with no type specified\\.$#"
+			count: 1
+			path: app/views/forum/ForumThreadView.php
+
+		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php

@@ -1089,7 +1089,6 @@ function dynamicScrollLoadPage(element, atEnd) {
             content = `${content}`;
             $(element).data('dynamic_lock_load', false);
             load_page_callback(content, count);
-            
         },
         error: function () {
             $(element).data('dynamic_lock_load', false);
