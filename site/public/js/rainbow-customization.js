@@ -106,15 +106,17 @@ function ResetPerGradeablePercents(bucket) {
 }
 
 // Returns the list of gradeables that may be alternates in a given bucket (those that are unchecked)
-function GetPotentialAlternates(el, gradeables) {
+function GetPotentialAlternates(el) {
     // Remove all options except the first (which is the disabled default option) from the dropdown
     for (let i = el.options.length - 1; i > 0; i--) {
         el.removeChild(el.options[i]);
     }
 
     // Creates an option for every unchecked gradeable in the bucket
+    const select = $(el);
+    const gradeables = select.data('gradeables');
     gradeables.forEach((gradeable) => {
-        const selectedAsAlternate = $(`input[id^="alternate-checkbox-${gradeable['id']}"]`).is(':checked');
+        const selectedAsAlternate = $(`input[id="alternate-checkbox-${gradeable['id']}"]`).is(':checked');
         if (!selectedAsAlternate) {
             const option = document.createElement('option');
             option.value = `${gradeable['id']}`;
@@ -127,18 +129,29 @@ function GetPotentialAlternates(el, gradeables) {
 // Links the points and percentages of an alternate gradeable to the selected primary gradeable
 function LinkAlternateToPrimary(el) {
     const select = $(el);
-    const alternateID = select.data('gradeable').id;
-    const primaryID = select.data('gradeable').alternate; // 'alternate' in 'this' gradeable refers to the primary gradeable
+    const alternateID = select.data('gradeableid');
+    const primaryID = select.data('gradeablealternate'); // 'gradeableAlternate' in 'this' gradeable refers to the primary gradeable
 
     // Replace alternate values with the primary values, then make alternate values immutable
-    const primaryPoints = $($(`div[id^="gradeable-pts-div-${primaryID}"]`).children()[0]);
-    const primaryPercents = $($(`div[id^="gradeable-percents-div-test-${primaryID}"]`).children()[0]);
-    const alternatePoints = $($(`div[id^="gradeable-pts-div-${alternateID}"]`).children()[0]);
-    const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${alternateID}"]`).children()[0]);
+    const primaryPoints = $($(`div[id="gradeable-pts-div-${primaryID}"]`).children()[0]);
+    const primaryPercents = $($(`div[id="gradeable-percents-div-test-${primaryID}"]`).children()[0]);
+    const alternatePoints = $($(`div[id="gradeable-pts-div-${alternateID}"]`).children()[0]);
+    const alternatePercents = $($(`div[id="gradeable-percents-div-test-${alternateID}"]`).children()[0]);
+    // Need to remove readonly in case the alternate was previously an alternate for a different gradeable
+    alternatePoints.removeAttr('readonly');
+    alternatePercents.removeAttr('readonly');
     alternatePoints.val(primaryPoints.val());
     alternatePercents.val(primaryPercents.val());
     alternatePoints.attr('readonly', 'readonly');
     alternatePercents.attr('readonly', 'readonly');
+    saveChanges();
+}
+
+// Updates the value of data-gradeableAlternate in the select element when an alternate is selected
+function SetAlternateDropdown(el) {
+    const select = $(el);
+    const alternateValue = select.find(':selected').val();
+    select.data('gradeablealternate', alternateValue);
 }
 
 // Updates the values of all detected alternates of a given gradeables points or percents input
@@ -148,46 +161,47 @@ function UpdateAlternates(el, input, primaryID) {
         const gradeableID = alternateDropdown.id.match(/^alternate-dropdown-(.+)$/)[1];
         const gradeableAlternateChecked = $(`#alternate-checkbox-${gradeableID}`).is(':checked');
         if (gradeableAlternateChecked) {
-            const gradeablePrimaryID = $(alternateDropdown).data('gradeable').alternate;
+            const gradeablePrimaryID = $(alternateDropdown).data('gradeablealternate');
             // If value matches, set the new point/percent value in the alternate
             if (gradeablePrimaryID === primaryID) {
                 const val = el.value;
                 if (input === 'points') {
-                    const alternatePoints = $($(`div[id^="gradeable-pts-div-${gradeableID}"]`).children()[0]);
+                    const alternatePoints = $($(`div[id="gradeable-pts-div-${gradeableID}"]`).children()[0]);
                     alternatePoints.val(val);
                 }
                 else if (input === 'percent') {
-                    const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${gradeableID}"]`).children()[0]);
+                    const alternatePercents = $($(`div[id="gradeable-percents-div-test-${gradeableID}"]`).children()[0]);
                     alternatePercents.val(val);
                 }
             }
         }
     });
+    saveChanges();
 }
 
 // Load alternate gradeable when page is loaded
-function LoadAlternate(el, gradeables, dropdownGradeable) {
-    // If alternate is null, no alternate had been selected
-    if (typeof dropdownGradeable['alternate'] !== 'undefined') {
+function LoadAlternate(el, gradeables, dropdownGradeableID, dropdownGradeableAlternate) {
+    // If alternate is null or '', no alternate had been selected
+    if (typeof dropdownGradeableAlternate !== 'undefined' && dropdownGradeableAlternate !== '') {
         let title = '';
         // Find the title of the alternate
         gradeables.forEach((gradeable) => {
-            if (gradeable['id'] === dropdownGradeable['alternate']) {
+            if (gradeable['id'] === dropdownGradeableAlternate) {
                 title = gradeable['title'];
             }
         });
 
         // Create option representing the alternate
         const option = document.createElement('option');
-        option.value = dropdownGradeable['alternate'];
+        option.value = dropdownGradeableAlternate;
         option.text = title;
         el.appendChild(option);
         // Select the option in the dropdown
-        $(el).val(dropdownGradeable['alternate']).change();
+        $(el).val(dropdownGradeableAlternate).change();
 
         // Check the checkboxes to make the alternate dropdown visible
         $('#enable-alternates').prop('checked', true);
-        $(`#alternate-checkbox-${dropdownGradeable['id']}`).prop('checked', true);
+        $(`#alternate-checkbox-${dropdownGradeableID}`).prop('checked', true);
     }
 }
 
@@ -1266,7 +1280,7 @@ $(document).ready(() => {
     const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
     alternateDropdowns.each((index, alternateDropdownDOMElement) => {
         const alternateDropdown = $(alternateDropdownDOMElement);
-        LoadAlternate(alternateDropdownDOMElement, alternateDropdown.data('gradeables'), alternateDropdown.data('gradeable'));
+        LoadAlternate(alternateDropdownDOMElement, alternateDropdown.data('gradeables'), alternateDropdown.data('gradeableid'), alternateDropdown.data('gradeablealternate'));
     });
 
     // Control visibility of gradeable alternate checkboxes
@@ -1295,13 +1309,12 @@ $(document).ready(() => {
         gradeableAlternate.change((event) => {
             const gradeableAlternateChecked = gradeableAlternate.is(':checked');
             $(alternateDropdown).toggle(gradeableAlternateChecked);
-            // TODO: value is never ' -- select a gradeable -- '
-            if (gradeableAlternateChecked && $(alternateDropdown).data('gradeable').alternate !== ' -- select a gradeable -- ') { // Ensure all alternates are linked to primaries on check - edge case
+            if (gradeableAlternateChecked) { // Ensure all alternates are linked to primaries on check - edge case
                 LinkAlternateToPrimary(alternateDropdown);
             }
-            else if (!gradeableAlternateChecked) { // Unlink alternate from primary when checkbox is unchecked
-                const alternatePoints = $($(`div[id^="gradeable-pts-div-${gradeableID}"]`).children()[0]);
-                const alternatePercents = $($(`div[id^="gradeable-percents-div-test-${gradeableID}"]`).children()[0]);
+            else { // Unlink alternate from primary when checkbox is unchecked
+                const alternatePoints = $($(`div[id="gradeable-pts-div-${gradeableID}"]`).children()[0]);
+                const alternatePercents = $($(`div[id^="gradeable-percents-div-"][id$="-${gradeableID}"]`).children()[0]);
                 alternatePoints.removeAttr('readonly');
                 alternatePercents.removeAttr('readonly');
             }

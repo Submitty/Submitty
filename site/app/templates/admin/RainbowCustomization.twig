@@ -308,10 +308,11 @@ To remove a curve simply blank all boxes."></i>
                                                 <select class="gradeable-li-info"
                                                         name="alternate-dropdown-{{ gradeable['id'] }}"
                                                         id="alternate-dropdown-{{ gradeable['id'] }}"
-                                                        onfocus="GetPotentialAlternates(this, {{ gradeables|json_encode() }});"
-                                                        onblur="LinkAlternateToPrimary(this);"
+                                                        onfocus="GetPotentialAlternates(this);"
+                                                        onblur="SetAlternateDropdown(this); LinkAlternateToPrimary(this);"
                                                         data-gradeables="{{ gradeables|json_encode() }}"
-                                                        data-gradeable="{{ gradeable|json_encode() }}"
+                                                        data-gradeableID="{{ gradeable['id'] }}"
+                                                        data-gradeableAlternate="{{ gradeable['alternate_exists'] ? gradeable['alternate'] : "" }}"
                                                         aria-label="Assign Alternate Gradeable">
                                                     <option disabled selected value> -- select a gradeable -- </option>
                                                 </select>
