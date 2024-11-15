@@ -455,8 +455,9 @@ class Gradeable(object):
             form_json["checkpoint_extra"] = []
             form_json["num_text_items"] = 0
             form_json["text_label"] = []
-            for i in range(len(self.components)):
-                component = self.components[i]
+            form_json["num_checkpoint_items"] = 0
+            
+            for component in self.components:
                 if component.is_text:
                     form_json["num_text_items"] += 1
                     form_json["text_label"].append(component.title)

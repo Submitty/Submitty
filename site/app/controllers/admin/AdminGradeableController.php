@@ -358,6 +358,17 @@ class AdminGradeableController extends AbstractController {
             return $c->toArray();
         }, $gradeable->getComponents());
 
+        $num_checkpoints = 0;
+        $num_text = 0;
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $num_text++;
+            }
+            else {
+                $num_checkpoints++;
+            }
+        }
+
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
         $graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
@@ -501,6 +512,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
+            'num_checkpoints' => $num_checkpoints,
+            'num_text' => $num_text,
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
@@ -877,174 +890,167 @@ class AdminGradeableController extends AbstractController {
         return $return_array;
     }
 
-    private function updateRubric(Gradeable $gradeable, $details) {
-        $old_components = $gradeable->getComponents();
-        $num_old_components = count($old_components);
-        $start_index = $num_old_components;
+private function updateRubric(Gradeable $gradeable, $details) {
+    if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        if (!isset($details['checkpoints'])) {
+            $details['checkpoints'] = [];
+        }
+        if (!isset($details['text'])) {
+            $details['text'] = [];
+        }
 
-        /** @var Component[] $new_components */
+        $checkpoint_labels = [];
+        $checkpoint_extra = [];
+        $text_labels = [];
+
+        $num_checkpoints = count($details['checkpoints']);
+        $num_text = count($details['text']);
+        $start_index_text = 0;
+
+        $old_checkpoints = [];
+        $num_old_checkpoints = 0;
+        $old_texts = [];
+        $num_old_texts = 0;
+
+        foreach ($gradeable->getComponents() as $old_component) {
+            if ($old_component->isText()) {
+                $old_texts[] = $old_component;
+                $num_old_texts++;
+                $text_labels[] = $old_component->getTitle();
+            } else {
+                $old_checkpoints[] = $old_component;
+                $num_old_checkpoints++;
+                $checkpoint_labels[] = $old_component->getTitle();
+
+                // Check if this checkpoint is extra credit
+                if ($old_component->isExtraCredit()) {
+                    $checkpoint_extra[] = true;
+                } else {
+                    $checkpoint_extra[] = false;
+                }
+            }
+        }
+
+        $form_json = [];
+        $form_json["checkpoint_label"] = $checkpoint_labels;
+        $form_json["checkpoint_extra"] = $checkpoint_extra;
+        $form_json["num_text_items"] = $num_old_texts;
+        $form_json["num_checkpoint_items"] = $num_old_checkpoints;
+        $form_json["text_label"] = $text_labels;
+
+        // Iterate through existing components
         $new_components = [];
-
-        // The electronic file mode is the least touched of them all since it will be replaced
-        //  with a unified interface with TA grading and share a separate "rubric" controller for it.
-        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            throw new \InvalidArgumentException('Attempt to update rubric using outdated method!');
-        }
-        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            if (!isset($details['checkpoints'])) {
-                $details['checkpoints'] = [];
+        $x = 0;
+        foreach ($old_checkpoints as $old_component) {
+            if ($x < $num_checkpoints) {
+                self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
+                $old_component->setOrder($x);
+                $new_components[] = $old_component;
             }
-            if (!isset($details['text'])) {
-                $details['text'] = [];
-            }
-
-            $num_checkpoints = count($details['checkpoints']);
-            $num_text = count($details['text']);
-            $start_index_text = 0;
-
-            $old_checkpoints = [];
-            $num_old_checkpoints = 0;
-            $old_texts = [];
-            $num_old_texts = 0;
-
-            foreach ($old_components as $old_component) {
-                if ($old_component->isText() === true) {
-                    $old_texts[] = $old_component;
-                    $num_old_texts++;
-                }
-                else {
-                    $old_checkpoints[] = $old_component;
-                    $num_old_checkpoints++;
-                }
-            }
-
-            // Iterate through each existing component and update them in the database,
-            //  removing any extras
-            $x = 0;
-            foreach ($old_components as $old_component) {
-                if ($x < $num_checkpoints && $x < $num_old_components) {
-                    self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
-                    $old_component->setOrder($x);
-                    $new_components[] = $old_component;
-                }
-                if ($old_component->isText() === true) {
-                    $old_texts[] = $old_component;
-                    $num_old_texts++;
-                }
-                $x++;
-            }
-
-            // iterate through each new checkpoint, adding them to the database
-            for ($x = $start_index; $x < $num_checkpoints; $x++) {
-                $component = $this->newComponent($gradeable);
-                self::parseCheckpoint($component, $details['checkpoints'][$x]);
-                $component->setOrder($x);
-                $new_components[] = $component;
-            }
-
-            $z = $x;
-            $x = 0;
-
-            // Iterate through each existing text component and update them in the database,
-            //  removing any extras
-            foreach ($old_texts as $old_text) {
-                if ($x < $num_text && $x < $num_old_texts) {
-                    self::parseText($old_text, $details['text'][$x]);
-                    $old_text->setOrder($z + $x);
-                    $new_components[] = $old_text;
-                    $start_index_text++;
-                }
-                $x++;
-            }
-
-            for ($y = $start_index_text; $y < $num_text; $y++) {
-                $component = $this->newComponent($gradeable);
-                self::parseText($component, $details['text'][$x]);
-                $component->setOrder($y + $z);
-                $new_components[] = $component;
-            }
-        }
-        elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            if (!isset($details['numeric'])) {
-                $details['numeric'] = [];
-            }
-            if (!isset($details['text'])) {
-                $details['text'] = [];
-            }
-
-            $num_numeric = count($details['numeric']);
-            $num_text = count($details['text']);
-
-            $start_index_numeric = 0;
-            $start_index_text = 0;
-
-            // Load all of the old numeric/text elements into two arrays
-            $old_numerics = [];
-            $num_old_numerics = 0;
-            $old_texts = [];
-            $num_old_texts = 0;
-            foreach ($old_components as $old_component) {
-                if ($old_component->isText() === true) {
-                    $old_texts[] = $old_component;
-                    $num_old_texts++;
-                }
-                else {
-                    $old_numerics[] = $old_component;
-                    $num_old_numerics++;
-                }
-            }
-
-            $x = 0;
-            // Iterate through each existing numeric component and update them in the database,
-            //  removing any extras
-            foreach ($old_numerics as $old_numeric) {
-                if ($x < $num_numeric && $x < $num_old_numerics) {
-                    self::parseNumeric($old_numeric, $details['numeric'][$x]);
-                    $old_numeric->setOrder($x);
-                    $new_components[] = $old_numeric;
-                    $start_index_numeric++;
-                }
-                $x++;
-            }
-
-            for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
-                $component = $this->newComponent($gradeable);
-                self::parseNumeric($component, $details['numeric'][$x]);
-                $component->setOrder($x);
-                $new_components[] = $component;
-            }
-
-            $z = $x;
-            $x = 0;
-            // Iterate through each existing text component and update them in the database,
-            //  removing any extras
-            foreach ($old_texts as $old_text) {
-                if ($x < $num_text && $x < $num_old_texts) {
-                    self::parseText($old_text, $details['text'][$x]);
-                    $old_text->setOrder($z + $x);
-                    $new_components[] = $old_text;
-                    $start_index_text++;
-                }
-                $x++;
-            }
-
-            for ($y = $start_index_text; $y < $num_text; $y++) {
-                $component = $this->newComponent($gradeable);
-                self::parseText($component, $details['text'][$x]);
-                $component->setOrder($y + $z);
-                $new_components[] = $component;
-            }
-        }
-        else {
-            throw new \InvalidArgumentException("Invalid gradeable type");
+            $x++;
         }
 
-        // Finally, Set the components and update the gradeable
+        for ($x = $num_old_checkpoints; $x < $num_checkpoints; $x++) {
+            $component = $this->newComponent($gradeable);
+            self::parseCheckpoint($component, $details['checkpoints'][$x]);
+            $component->setOrder($x);
+            $new_components[] = $component;
+        }
+
+        $z = $x;
+        $x = 0;
+        foreach ($old_texts as $old_text) {
+            if ($x < $num_text && $x < $num_old_texts) {
+                self::parseText($old_text, $details['text'][$x]);
+                $old_text->setOrder($z + $x);
+                $new_components[] = $old_text;
+                $start_index_text++;
+            }
+            $x++;
+        }
+
+        for ($y = $start_index_text; $y < $num_text; $y++) {
+            $component = $this->newComponent($gradeable);
+            self::parseText($component, $details['text'][$y]);
+            $component->setOrder($y + $z);
+            $new_components[] = $component;
+        }
+
         $gradeable->setComponents($new_components);
 
-        // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
     }
+    elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        if (!isset($details['numeric'])) {
+            $details['numeric'] = [];
+        }
+        if (!isset($details['text'])) {
+            $details['text'] = [];
+        }
+
+        $num_numeric = count($details['numeric']);
+        $num_text = count($details['text']);
+
+        $old_numerics = [];
+        $num_old_numerics = 0;
+        $old_texts = [];
+        $num_old_texts = 0;
+
+        foreach ($gradeable->getComponents() as $old_component) {
+            if ($old_component->isText()) {
+                $old_texts[] = $old_component;
+                $num_old_texts++;
+            } else {
+                $old_numerics[] = $old_component;
+                $num_old_numerics++;
+            }
+        }
+
+        $new_components = [];
+        $x = 0;
+        foreach ($old_numerics as $old_numeric) {
+            if ($x < $num_numeric && $x < $num_old_numerics) {
+                self::parseNumeric($old_numeric, $details['numeric'][$x]);
+                $old_numeric->setOrder($x);
+                $new_components[] = $old_numeric;
+            }
+            $x++;
+        }
+
+        for ($x = $num_old_numerics; $x < $num_numeric; $x++) {
+            $component = $this->newComponent($gradeable);
+            self::parseNumeric($component, $details['numeric'][$x]);
+            $component->setOrder($x);
+            $new_components[] = $component;
+        }
+
+        // Iterate through text components and update them
+        $z = $x;
+        $x = 0;
+        foreach ($old_texts as $old_text) {
+            if ($x < $num_text && $x < $num_old_texts) {
+                self::parseText($old_text, $details['text'][$x]);
+                $old_text->setOrder($z + $x);
+                $new_components[] = $old_text;
+            }
+            $x++;
+        }
+
+        // Add new text items if any
+        for ($y = $num_old_texts; $y < $num_text; $y++) {
+            $component = $this->newComponent($gradeable);
+            self::parseText($component, $details['text'][$y]);
+            $component->setOrder($y + $z);
+            $new_components[] = $component;
+        }
+
+        $gradeable->setComponents($new_components);
+        $this->core->getQueries()->updateGradeable($gradeable);
+    } else {
+        throw new \InvalidArgumentException("Invalid gradeable type");
+    }
+}
+
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods: ["POST"])]
     public function updateGradersRequest($gradeable_id) {
