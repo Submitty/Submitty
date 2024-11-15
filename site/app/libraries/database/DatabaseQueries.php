@@ -2,6 +2,7 @@
 
 namespace app\libraries\database;
 
+use app\controllers\admin\ConfigurationController;
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
@@ -1066,6 +1067,29 @@ SQL;
             return $rows;
         }
     }
+
+    /**
+     * Get total likes count for each thread.
+     * @return array<int, int> array with thread_id as key and total likes_count as value.
+     */
+    public function getThreadLikesSum(): array {
+        $this->course_db->query(
+            "SELECT p.thread_id, COUNT(*) AS total_likes
+            FROM posts p
+            JOIN forum_upducks f ON p.id = f.post_id
+            WHERE p.deleted = false
+            GROUP BY p.thread_id"
+        );
+
+        $likesData = $this->course_db->rows();
+        $threadLikes = [];
+        foreach ($likesData as $row) {
+            $threadLikes[$row['thread_id']] = intval($row['total_likes']);
+        }
+        return $threadLikes; // Return array with thread_id as key and total likes_count as value
+    }
+
+
 
     /**
      * @param int[] $post_ids
@@ -3332,6 +3356,21 @@ ORDER BY g.sections_rotating_id, g.user_id",
     }
 
     /**
+     * Gets the default registration section for a given course and term from the courses table
+     */
+    public function getDefaultRegistrationSection(string $term, string $course): string|null {
+        $this->submitty_db->query("SELECT default_section_id FROM courses where term=? and course=?", [$term, $course]);
+        return $this->submitty_db->row()['default_section_id'] ?? null;
+    }
+
+    /**
+     * Updates the default registration section for self register courses.
+     */
+    public function setDefaultRegistrationSection(string $term, string $course, string $section_id): void {
+        $this->submitty_db->query("UPDATE courses set default_section_id=? where term=? and course=?", [$section_id, $term, $course]);
+    }
+
+    /**
      * Gets all rotating sections from the sections_rotating table
      *
      * @return array
@@ -5172,6 +5211,35 @@ SQL;
     }
 
     /**
+     * @return array<Course>
+     */
+    public function getSelfRegistrationCourses(string $user_id): array {
+        $query = <<<SQL
+SELECT c.*, t.name AS term_name FROM courses c, terms t
+WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
+    SELECT course FROM courses_users WHERE user_id = ?
+) AND c.term = t.term_id
+SQL;
+        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName();
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    public function getSelfRegistrationType(string $term, string $course): int {
+        $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=? AND term=?", [$course, $term]);
+        return $this->submitty_db->row()['self_registration_type'];
+    }
+
+    public function setSelfRegistrationType(string $term, string $course, int $self_registration_type): void {
+        $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=? AND term=?", [$self_registration_type, $course, $term]);
+    }
+
+    /**
      * Get all unarchived courses where the user with the specified user_id is assigned as an instructor
      */
     public function getInstructorLevelUnarchivedCourses(string $user_id): array {
@@ -6303,10 +6371,11 @@ AND gc_id IN (
 
 
     public function deleteGradeable($g_id) {
+        $this->course_db->beginTransaction();
         $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
                                 eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
-        $this->course_db->query("DELETE FROM gradeable_anon WHERE g_id=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
+        $this->course_db->commit();
     }
 
     /**
@@ -8029,7 +8098,7 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function studentQueueSearch(string $user_id): array {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? ORDER BY time_in", [$user_id]);
         return $this->course_db->rows();
     }
 

@@ -1,7 +1,7 @@
 {% for thread in thread_content %}
-    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" data-thread_title="{{ thread.title }}" id="thread_box_link_{{ thread.thread_id }}">
+    <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" data-thread_title="{{ thread.title }}" id="thread_box_link_{{ thread.thread_id }}" data-testid="thread_box">
         <div class="{{ thread.class }}">
-            <div class="flex-row">
+            <div class="flex-row"  data-testid="flex-row">
                 <span class="thread-left-cont">
                     <span class="thread-list-item" data-testid="thread-list-item">
                         {% if thread.current_user_posted %}
@@ -46,9 +46,27 @@
                 </span>
             </div>
             {% if is_full_page is defined and is_full_page %}
-                <div class="post-action-container">
+                <span>
+                    <i  
+                        data-testid="thread-upduck-button" 
+                        class="upduck-button text-decoration-none" 
+                        title="Total upduck">
+                        <img 
+                            id="ThreadsumDucksIcon_{{thread.thread_id}}" 
+                            src="{{'/img/on-duck-button.svg'}}" 
+                            alt="sum_like"
+                            width="30" 
+                            height="30"
+                        >
+                    </i>
+                    <span data-testid="thread-like-count" 
+                        id="Thread_likeCounter_{{thread.thread_id}}" 
+                        class="thread-like-counter">{{ thread.sum_ducks }}</span>
+                </span>
+                <div class="post-action-container" data-testid="post-action-container">
+
                     <span>
-                    <strong class="post_user_id">{{ thread.author_info.name}}</strong>
+                    <strong class="post_user_id">{{thread.author_info.name}}</strong>
                         {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
                             <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
                         {% endif %}

@@ -1321,3 +1321,10 @@ $(document).ready(() => {
         });
     });
 });
+
+$(document).ready(() => {
+    // Bind click listener to grade summaries button
+    $('#grade-summaries-button').click(() => {
+        $('#grade-summaries-last-run').text('Running...');
+    });
+});
