@@ -1291,7 +1291,8 @@ class AdminGradeableController extends AbstractController {
             foreach ($details['rubric'] as $component) {
                 $gradeable->importComponent($component);
             }
-        } else {
+        }
+        else {
             // Generate a blank component to make the rubric UI work properly
             $this->genBlankComponent($gradeable);
         }
