@@ -137,6 +137,10 @@ class PollController extends AbstractController {
                 $this->core->addErrorMessage("Invalid Poll ID");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
+            if (!$poll->isVisible()) {
+                $this->core->addErrorMessage("Poll is not available");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
             if ($poll->isHistogramAvailable()) {
                 /** @var \app\repositories\poll\OptionRepository */
                 $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
