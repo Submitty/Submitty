@@ -4,12 +4,12 @@ namespace app\views\admin;
 
 use app\libraries\Utils;
 use app\libraries\FileUtils;
+use app\models\DockerUI;
 use app\views\AbstractView;
 use ParseError;
 
 class DockerView extends AbstractView {
-    public function displayDockerPage(array $docker_data) {
-
+    public function displayDockerPage(DockerUI $docker_ui) {
         $this->output->addBreadcrumb("Docker Interface");
         $this->output->setPageName('Docker Interface');
 
@@ -18,55 +18,55 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-        $images = [];
-        foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
-            foreach ($image_list as $image) {
-                $images[] = $image;
-            }
-        }
+        // $images = [];
+        // foreach ($docker_data['autograding_containers'] as $capability => $image_list) {
+        //     foreach ($image_list as $image) {
+        //         $images[] = $image;
+        //     }
+        // }
 
-        $images = array_unique($images);
+        //$images = array_unique($images);
 
-        $capabilities = [];
-        $worker_machines = [];
-        $no_image_capabilities = [];
-        $image_to_capability = [];
-        $machine_docker_version = [];
-        $machine_system_details = [];
-        foreach ($docker_data['autograding_workers'] as $name => $worker) {
-            $worker_temp = [];
-            $worker_temp['name'] = $name;
-            $machine_docker_version[$name] = "Error";
-            $worker_temp['capabilities'] = [];
-            $worker_temp['images'] = [];
-            foreach ($worker['capabilities'] as $capability) {
-                $capabilities[] = $capability;
-                $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
-                $worker_temp['enabled'] = $worker['enabled'];
-                $worker_temp['capabilities'] = $worker['capabilities'];
-                // list of capabilities without containers
-                $worker_temp['images_not_found'] = [];
-                if (array_key_exists($capability, $docker_data['autograding_containers'])) {
-                    foreach ($docker_data['autograding_containers'][$capability] as $image) {
-                        $image_to_capability[$image][] = $capability;
-                    }
-                }
-                else {
-                    $no_image_capabilities[] = $capability;
-                }
-            }
-            $worker_machines[] = $worker_temp;
-        }
+        // $capabilities = [];
+        // $worker_machines = [];
+        // $no_image_capabilities = [];
+        // $image_to_capability = [];
+        // $machine_docker_version = [];
+        // $machine_system_details = [];
+        // foreach ($docker_data['autograding_workers'] as $name => $worker) {
+        //     $worker_temp = [];
+        //     $worker_temp['name'] = $name;
+        //     $machine_docker_version[$name] = "Error";
+        //     $worker_temp['capabilities'] = [];
+        //     $worker_temp['images'] = [];
+        //     foreach ($worker['capabilities'] as $capability) {
+        //         $capabilities[] = $capability;
+        //         $worker_temp['num_autograding_workers'] = $worker['num_autograding_workers'];
+        //         $worker_temp['enabled'] = $worker['enabled'];
+        //         $worker_temp['capabilities'] = $worker['capabilities'];
+        //         // list of capabilities without containers
+        //         $worker_temp['images_not_found'] = [];
+        //         if (array_key_exists($capability, $docker_data['autograding_containers'])) {
+        //             foreach ($docker_data['autograding_containers'][$capability] as $image) {
+        //                 $image_to_capability[$image][] = $capability;
+        //             }
+        //         }
+        //         else {
+        //             $no_image_capabilities[] = $capability;
+        //         }
+        //     }
+        //     $worker_machines[] = $worker_temp;
+        // }
 
-        $capabilities = array_unique($capabilities);
-        foreach ($image_to_capability as $image => $map) {
-            $image_to_capability[$image] = array_unique($map);
-        }
-        sort($capabilities);
-        $capability_to_color = [];
-        for ($i = 0; $i < count($capabilities); $i++) {
-            $capability_to_color[$capabilities[$i]] = min($i + 1, 20);
-        }
+        //$capabilities = array_unique($capabilities);
+        // foreach ($image_to_capability as $image => $map) {
+        //     $image_to_capability[$image] = array_unique($map);
+        // }
+        // sort($capabilities);
+        // $capability_to_color = [];
+        // for ($i = 0; $i < count($capabilities); $i++) {
+        //     $capability_to_color[$capabilities[$i]] = min($i + 1, 20);
+        // }
 
         $sysinfo_files = scandir(
             FileUtils::joinPaths(
@@ -282,19 +282,18 @@ class DockerView extends AbstractView {
             }
         }
 
-        $no_image_capabilities = array_unique($no_image_capabilities);
         foreach ($aliases as &$alias) {
             $alias = array_unique($alias);
         }
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
-                "autograding_containers" => $docker_data['autograding_containers'],
-                "capabilities" => $capabilities,
-                "worker_machines" => $worker_machines,
-                "no_image_capabilities" => $no_image_capabilities,
-                "image_to_capability" => $image_to_capability,
-                "capability_to_color" => $capability_to_color,
+                "autograding_containers" => $docker_ui->getAutogradingContainers(),
+                "capabilities" => $docker_ui->getCapabilities(),
+                "worker_machines" => $docker_ui->getWorkerMachineNames(),
+                "no_image_capabilities" => $docker_ui->getNoImageCapabilities(),
+                "image_to_capability" => $docker_ui->getImageToCapabilitiyMapping(),
+                "capability_to_color" => $docker_ui->getCapabilityToColorMapping(),
                 "admin_url" => $this->core->buildUrl(["admin"]),
                 "last_updated" => $last_ran,
                 "sysinfo_last_updated" => $sysinfo_last_updated,
