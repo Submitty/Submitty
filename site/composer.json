@@ -41,7 +41,7 @@
     "twig/twig": "3.11.1"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "0.7.2",
+    "dealerdirect/phpcodesniffer-composer-installer": "1.0.0",
     "php-mock/php-mock-phpunit": "2.9.0",
     "phpstan/phpstan": "1.10.57",
     "phpstan/phpstan-deprecation-rules": "1.1.4",
