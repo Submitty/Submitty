@@ -4,7 +4,6 @@ import cypressPlugins from './cypress/plugins/index.js';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 export default defineConfig({
     video: true,
     pageLoadTimeout: 120000,
