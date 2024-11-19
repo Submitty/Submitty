@@ -1,41 +1,41 @@
 import { getCurrentSemester } from '../../support/utils';
 import { getApiKey } from '../../support/utils';
-import { gradeable_json } from '../../support/api_testing_json';
+import { gradeable_json, rubric } from '../../support/api_testing_json';
 describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
            // // API
-        // getApiKey('instructor', 'instructor').then((key) => {
-        //     cy.request({
-        //         method: 'POST',
-        //         url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
-        //         body: gradeable_json,
-        //         headers: {
-        //             Authorization: key,
-        //         },
-        //     }).then((response) => {
-        //         expect(response.body.status).to.eql('success');
-        //     });
-        // });
+        getApiKey('instructor', 'instructor').then((key) => {
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: gradeable_json,
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.status).to.eql('success');
+            });
+        });
 
         cy.login('instructor');
 
         const testfile1 = 'cypress/fixtures/json_ui.json';
 
-        // cy.visit(['sample', 'gradeable']);
+        cy.visit(['sample', 'gradeable']);
 
-        // // Makes sure the clear button is not disabled by adding a file
-        // cy.get('[data-testid="upload-gradeable-btn"]').click();
-        // cy.get('[data-testid="popup-window"]').should('be.visible');
-        // cy.get('[data-testid="popup-window"]').should('contain.text', 'Upload JSON for Gradeable');
-        // cy.get('[data-testid="upload"]').selectFile(testfile1, { action: 'drag-drop' });
-        // cy.get('[data-testid="submit"]').click();
-        // cy.get('[data-testid="upload-gradeable-btn"]', { timeout: 10000 }).should('not.exist');
-        // cy.get('body').should('contain.text', 'Edit Gradeable');
-        // cy.get('[data-testid="ta-view-start-date"]').should('have.value', '2024-01-11 23:59:59');
-        // cy.get('[data-testid="team_lock_date"]').should('have.value', '2024-01-15 23:59:59');
-        // cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
-        // cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
-        // cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
+        // Makes sure the clear button is not disabled by adding a file
+        cy.get('[data-testid="upload-gradeable-btn"]').click();
+        cy.get('[data-testid="popup-window"]').should('be.visible');
+        cy.get('[data-testid="popup-window"]').should('contain.text', 'Upload JSON for Gradeable');
+        cy.get('[data-testid="upload"]').selectFile(testfile1, { action: 'drag-drop' });
+        cy.get('[data-testid="submit"]').click();
+        cy.get('[data-testid="upload-gradeable-btn"]', { timeout: 10000 }).should('not.exist');
+        cy.get('body').should('contain.text', 'Edit Gradeable');
+        cy.get('[data-testid="ta-view-start-date"]').should('have.value', '2024-01-11 23:59:59');
+        cy.get('[data-testid="team_lock_date"]').should('have.value', '2024-01-15 23:59:59');
+        cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
+        cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
+        cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
 
         cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
         cy.get('body').should('contain.text', 'Edit Gradeable');
@@ -50,6 +50,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
             expect(test_json.bulk_upload).to.eql(false);
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.rubric).to.eql(rubric);
         });
     });
 

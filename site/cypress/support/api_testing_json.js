@@ -22,9 +22,9 @@ export const gradeable_json = {
         "submission_due_date": "9996-12-31 23:59:59",
         "grade_inquiry_start_date": "9999-01-01 23:59:59",
         "grade_inquiry_due_date": "9999-01-06 23:59:59",
-        "has_due_date": true,
-        "has_release_date": true,
-        "late_submission_allowed": true,
+        "has_due_date": false,
+        "has_release_date": false,
+        "late_submission_allowed": false,
         "late_days": 1
     },
     "rubric": [
