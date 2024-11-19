@@ -110,8 +110,8 @@ class ThreadRepository extends EntityRepository {
             ->andWhere('thread.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
         
-        # sticking this join above and then adding a 'WHERE postChildren.deleted = false' clause would be buggy.
-        # if a thread has all of its child posts deleted, that would return no rows and throw an error. Hence this implementation.
+        // sticking this join above and then adding a 'WHERE postChildren.deleted = false' clause would be buggy.
+        // if a thread has all of its child posts deleted, that would return no rows and throw an error. Hence this implementation.
         if ($get_deleted) {
             $qb->leftJoin('post.children', 'postChildren');
         }
