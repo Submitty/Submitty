@@ -36,25 +36,25 @@
 
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <label class="column-wrapper" id="view-your-sections"> Only Assigned Sections
+                <label class="column-wrapper" id="view-your-sections" data-testid="view-your-sections"> Only Assigned Sections
                     <input type="checkbox" data-testid="view-sections">
                 </label>
                 {% endif %}
-                <label class="column-wrapper" id="random-default-order"> Randomize Order
+                <label class="column-wrapper" id="random-default-order" data-testid="random-default-order"> Randomize Order
                     <input type="checkbox" data-testid="random-default-order">
                 </label>
                 {% if toggle_anon_button %}
-                <label class="column-wrapper" id="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
+                <label class="column-wrapper" id="toggle-anon-button" data-testid="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
                     <input type="checkbox" data-testid="toggle-anon-button">
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <label class="column-wrapper" id="toggle-grade-inquiry"> Only Grade Inquiry
+                <label class="column-wrapper" id="toggle-grade-inquiry" data-testid="toggle-grade-inquiry"> Only Grade Inquiry
                     <input type="checkbox" data-testid="toggle-grade-inquiry">
                 </label>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() and is_instructor %}
-                <label class="column-wrapper" id="toggle-filter-withdrawn"> Hide Withdrawn Students
+                <label class="column-wrapper" id="toggle-filter-withdrawn" data-testid="toggle-filter-withdrawn"> Hide Withdrawn Students
                     <input type="checkbox" data-testid="toggle-filter-withdrawn">
                 </label>
                 {% endif %}
