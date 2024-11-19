@@ -1914,7 +1914,7 @@ async function importComponentsFromFile() {
     }
 
     formData.append('csrf_token', csrfToken);
-  
+
     let response;
     try {
         response = await $.getJSON({
