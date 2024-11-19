@@ -735,10 +735,10 @@ class ForumThreadView extends AbstractView {
                     "is_anon" => $first_post->isAnonymous(),
                     "render_markdown" => $first_post->isRenderMarkdown(),
                     "author_info" => $author_info,
-                    "deleted" => $first_post->isDeleted()
+                    "deleted" => $first_post->isDeleted(),
+                    "sum_ducks" => $thread->getSumUpducks()
                 ]);
             }
-
             $thread_content[] = $thread_info;
         }
 

@@ -188,4 +188,12 @@ class Thread {
             return $x->getParent()->getId() === -1;
         })->first();
     }
+
+    public function getSumUpducks(): int {
+        $sum_upducks = 0;
+        foreach($this->getPosts() as $post) {
+            $sum_upducks += count($post->getUpduckers());
+        }
+        return $sum_upducks;
+    }
 }
