@@ -50,7 +50,7 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('favorers')
             ->addSelect('author')
             ->join('thread.categories', 'categories')
-            ->leftJoin('thread.viewers', 'viewers')
+            ->leftJoin('thread.viewers', 'viewers', Join::WITH, 'viewers.user_id = :user_id')
             ->leftJoin('thread.posts', 'post')
             ->leftJoin('post.history', 'postHistory')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
@@ -90,7 +90,7 @@ class ThreadRepository extends EntityRepository {
     }
 
 
-    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree'): ?Thread {
+    public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree', bool $get_deleted = false): ?Thread {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
@@ -100,6 +100,7 @@ class ThreadRepository extends EntityRepository {
             ->addSelect('threadAuthor')
             ->addSelect('postAuthor')
             ->addSelect('postUpducker')
+            ->addSelect('postChildren')
             ->leftJoin('thread.posts', 'post')
             ->leftJoin('post.attachments', 'postAttachments')
             ->leftJoin('post.history', 'postHistory')
@@ -108,7 +109,17 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.upduckers', 'postUpducker')
             ->andWhere('thread.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
-
+        
+        # sticking this join above and then adding a 'WHERE postChildren.deleted = false' clause would be buggy.
+        # if a thread has all of its child posts deleted, that would return no rows and throw an error. Hence this implementation.
+        if ($get_deleted) {
+            $qb->leftJoin('post.children', 'postChildren');
+        }
+        else {
+            $qb->leftJoin('post.children', 'postChildren', Join::WITH, 'postChildren.deleted = false')
+                ->andWhere('post.deleted = false');
+                
+        }
         switch ($order_posts_by) {
             case 'alpha':
                 $qb->addOrderBy('postAuthor.user_familyname', 'ASC')
@@ -120,18 +131,20 @@ class ThreadRepository extends EntityRepository {
                     ->addSelect('COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order')
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
-            case 'alpha_by_':
+            case 'alpha_by_rotating':
                 $qb->addOrderBy('postAuthor.rotating_section', 'ASC')
                     ->addSelect('COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order')
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'reverse-time':
                 $qb->addOrderBy('post.timestamp', 'DESC')
-                    ->addOrderBy('post.id', 'ASC');
+                    ->addOrderBy('post.id', 'ASC')
+                    ->addOrderBy('postChildren.id', 'ASC');
                 break;
             default:
                 $qb->addOrderBy('post.timestamp', 'ASC')
-                    ->addOrderBy('post.id', 'ASC');
+                    ->addOrderBy('post.id', 'ASC')
+                    ->addOrderBy('postChildren.id', 'ASC');
                 break;
         }
 

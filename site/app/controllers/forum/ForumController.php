@@ -1180,11 +1180,10 @@ class ForumController extends AbstractController {
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $thread = $repo->getThreadDetail($thread_id, $option);
+        $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
         }
-
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
         if ($thread->isMergedThread()) {
