@@ -90,7 +90,7 @@
                 <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
                 <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; {{ arrowup_visibility }}" aria-hidden="true"></i>
                 <script>
-                    Cookies.set('is_full_page',false, {path: '/'});
+                    const isFullPage = false;
                 </script>
                 {% include "forum/displayThreadList.twig" with {
                     "thread_content" : display_thread_content.thread_content,

@@ -661,7 +661,7 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, $is_full_page, $ajax = false) {
+    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids, bool $is_full_page, $ajax = false) {
         $tempArray = [];
         $threadAnnouncement = false;
         $activeThreadTitle = "";
