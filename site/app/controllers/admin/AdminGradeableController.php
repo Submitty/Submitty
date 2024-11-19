@@ -513,7 +513,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'num_checkpoints' => $num_checkpoints,
-            'num_text' => $num_text,
+            'num_text_components' => $num_text,
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
