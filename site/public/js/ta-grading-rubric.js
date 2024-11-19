@@ -1914,26 +1914,28 @@ async function importComponentsFromFile() {
     }
 
     formData.append('csrf_token', csrfToken);
-
+  
+    let response;
     try {
-        const response = await $.getJSON({
+        response = await $.getJSON({
             url: submit_url,
             data: formData,
             processData: false,
             contentType: false,
             type: 'POST',
         });
-        if (response.status !== 'success') {
-            console.error(`Something went wrong importing components: ${response.message}`);
-        }
-        else {
-            location.reload();
-        }
     }
     catch (err) {
         console.log(err);
         alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
         + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+        return;
+    }
+    if (response.status !== 'success') {
+        console.error(`Something went wrong importing components: ${response.message}`);
+    }
+    else {
+        location.reload();
     }
 }
 
@@ -2876,14 +2878,12 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
     const component = getComponentFromDOM(component_id);
     const countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
     if (saveChanges) {
-        // eslint-disable-next-line eqeqeq
-        if (component.max_value == 0 && component.upper_clamp == 0 && component.lower_clamp < 0) {
+        if (component.max_value === 0 && component.upper_clamp === 0 && component.lower_clamp < 0) {
             const mark_title = 'No Penalty Points';
             component.marks[0].title = mark_title;
             $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Penalty Points';
         }
-        // eslint-disable-next-line eqeqeq
-        else if (component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0) {
+        else if (component.max_value === 0 && component.upper_clamp > 0 && component.lower_clamp === 0) {
             const mark_title = 'No Extra Credit Awarded';
             component.marks[0].title = mark_title;
             $(`#mark-${component.marks[0].id.toString()}`).find(':input')[1].value = 'No Extra Credit Awarded';

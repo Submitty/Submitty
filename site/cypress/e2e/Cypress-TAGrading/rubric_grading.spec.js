@@ -90,4 +90,26 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-container"]').its('length').should('eq', 4);
         cy.get('[data-testid="component-container"]').eq(0).should('contain', 'Currently being graded by: instructor');
     });
+    it ('Grader should be able to save and move with arrows', () => {
+        cy.login('instructor');
+        window.localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+        cy.get('body').type('{A}');
+        cy.get('body').type('{G}');
+        cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Sally Jones');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
+        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
+        cy.get('body').type('{downArrow}');
+        cy.get('body').type('{0}');
+        cy.get('body').type('{downArrow}');
+        cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]')
+            .should('contain', 'Save');
+        cy.get('body').type('{1}');
+        cy.get('body').type('{leftArrow}');
+        cy.get('[data-testid="grading-panel-student-name"]').should('contain', 'Leonie Gutmann');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '0 / 2');
+        cy.get('body').type('{rightArrow}');
+        cy.get('[data-testid="grading-total"]').eq(0).should('contain', '− / 2');
+        cy.get('[data-testid="grading-total"]').eq(1).should('contain', '0 / 5');
+    });
 });
