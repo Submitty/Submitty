@@ -205,7 +205,7 @@ class AdminGradeableController extends AbstractController {
      *     autograding_config_path: string|mixed,
      *     bulk_upload: boolean,
      *     team_gradeable?: array{
-     *         team_max_size: int,
+     *         team_size_max: int,
      *         inherit_from: string|mixed,
      *     },
      *     ta_grading?: boolean,
@@ -248,7 +248,7 @@ class AdminGradeableController extends AbstractController {
             $return_json['bulk_upload'] = $gradeable->isBulkUpload();
             if ($gradeable->isTeamAssignment()) {
                 $team_properties = [
-                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'team_size_max' => $gradeable->getTeamSizeMax(),
                     'inherit_from' => ''
                 ];
                 $return_json['team_gradeable'] = $team_properties;
