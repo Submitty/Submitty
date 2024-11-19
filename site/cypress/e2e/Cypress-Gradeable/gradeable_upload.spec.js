@@ -3,7 +3,7 @@ import { getApiKey } from '../../support/utils';
 import { gradeable_json, rubric } from '../../support/api_testing_json';
 describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
-           // // API
+        // // API
         getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'POST',

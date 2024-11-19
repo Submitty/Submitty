@@ -130,7 +130,7 @@ class AdminGradeableController extends AbstractController {
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'] ? 'true' : 'false';
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ? 'true' : 'false';;
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ? 'true' : 'false';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
             }
         }
