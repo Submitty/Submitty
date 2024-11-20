@@ -1,0 +1,36 @@
+{
+  "required_capabilities": "default",
+  "grading_parameters": {
+    "TOTAL_POINTS": 1,
+    "AUTO_POINTS": 1,
+    "TA_POINTS": 0,
+    "EXTRA_CREDIT_POINTS": 0
+  },
+  "autograding_method": "docker",
+  "autograding": {
+    "submission_to_runner": [
+      "**/*"
+    ]
+  },
+  "resource_limits" : {
+    "RLIMIT_NPROC" : 20
+  },
+  "container_options": {
+    "container_image": "submitty/jupyter:latest"
+  },
+  "testcases": [
+    {
+      "title": "Executes successfully",
+      "command": "jupyter execute *.ipynb",
+      "points": 1,
+      "validation": [
+        {
+          "method": "fileExists",
+          "actual_file": "STDOUT.txt",
+          "show_actual" : "always",
+          "show_message" : "always"
+        }
+      ]
+    }
+  ]
+}
