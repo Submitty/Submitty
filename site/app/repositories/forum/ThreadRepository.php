@@ -22,7 +22,7 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
             ->setParameter(':user_id', $user_id)
             ->addOrderBy('CASE WHEN thread.pinned_expiration > CURRENT_TIMESTAMP() THEN 1 ELSE 0 END', 'DESC')
-            ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'DESC')
+            ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'ASC')
             ->addOrderBy('thread.id', 'DESC')
             ->setMaxResults($block_size)
             ->setFirstResult($block_size * $block_number);
@@ -39,6 +39,7 @@ class ThreadRepository extends EntityRepository {
      */
     public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int $block_number): array {
         $block = $this->getThreadBlock($user_id, $block_number);
+
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
@@ -77,7 +78,7 @@ class ThreadRepository extends EntityRepository {
             $qb->andWhere('thread.merged_thread = -1');
         }
         $qb->addOrderBy('CASE WHEN thread.pinned_expiration > CURRENT_TIMESTAMP() THEN 1 ELSE 0 END', 'DESC')
-            ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'DESC')
+            ->addOrderBy('CASE WHEN favorers.user_id IS NULL THEN 1 ELSE 0 END', 'ASC')
             ->addOrderBy('thread.id', 'DESC');
 
         $result = $qb->getQuery()->getResult();
