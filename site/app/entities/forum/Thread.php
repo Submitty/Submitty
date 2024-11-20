@@ -191,7 +191,7 @@ class Thread {
 
     public function getSumUpducks(): int {
         $sum_upducks = 0;
-        foreach($this->getPosts() as $post) {
+        foreach ($this->getPosts() as $post) {
             $sum_upducks += count($post->getUpduckers());
         }
         return $sum_upducks;

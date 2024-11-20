@@ -111,7 +111,7 @@ class ThreadRepository extends EntityRepository {
             ->leftJoin('post.upduckers', 'postUpducker')
             ->andWhere('thread.id = :thread_id')
             ->setParameter('thread_id', $thread_id);
-        
+
         // sticking this join above and then adding a 'WHERE postChildren.deleted = false' clause would be buggy.
         // if a thread has all of its child posts deleted, that would return no rows and throw an error. Hence this implementation.
         if ($get_deleted) {
@@ -120,7 +120,6 @@ class ThreadRepository extends EntityRepository {
         else {
             $qb->leftJoin('post.children', 'postChildren', Join::WITH, 'postChildren.deleted = false')
                 ->andWhere('post.deleted = false');
-                
         }
         switch ($order_posts_by) {
             case 'alpha':
