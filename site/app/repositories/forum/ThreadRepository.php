@@ -15,7 +15,7 @@ class ThreadRepository extends EntityRepository {
      * @return int[] thread ids in the block
      */
     private function getThreadBlock(string $user_id, int $block_number): array {
-        $block_size = 10;
+        $block_size = 30;
         $qb = $this->_em->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
