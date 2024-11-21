@@ -1902,7 +1902,7 @@ async function importComponentsFromFile() {
     catch (err) {
         console.log(err);
         alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-        + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+            + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
         return;
     }
     if (response.status !== 'success') {
