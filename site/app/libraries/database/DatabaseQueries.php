@@ -9899,7 +9899,7 @@ ORDER BY
     public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
         ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL", $this->core->getDateTimeNow()]);
     }
 

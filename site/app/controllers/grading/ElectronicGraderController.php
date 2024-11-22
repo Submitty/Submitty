@@ -2109,8 +2109,6 @@ class ElectronicGraderController extends AbstractController {
             if ($ta_graded_gradeable !== null) {
                 $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader, $all_peers);
             }
-            // remove current grader from $response_data['active_graders'] and $response_data['active_graders_timestamps']
-            // active_graders is formatted as {component_id: [grader_id]}
             foreach ($response_data['active_graders'] as $component_id => $graders) {
                 if (!isset($response_data['active_graders'][$component_id])) {
                     $response_data['active_graders'][$component_id] = [];
@@ -2119,6 +2117,7 @@ class ElectronicGraderController extends AbstractController {
                     $response_data['active_graders_timestamps'][$component_id] = [];
                 }
                 for ($i = 0; $i < count($response_data['active_graders'][$component_id]); $i++) {
+                    // Do not show the grader if they are the current user
                     if ($response_data['active_graders'][$component_id][$i] === $grader->getId()) {
                         array_splice($response_data['active_graders'], $i, 1);
                         array_splice($response_data['active_graders_timestamps'], $i, 1);
@@ -2408,18 +2407,15 @@ class ElectronicGraderController extends AbstractController {
 
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
-        try {
-            $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
-            $graders[$component_id][] = $grader->getId();
-            $timestamps[$component_id][] = $this->core->getDateTimeNow()->format("Y-m-d\TH:i:sP");
-        }
-        catch (\app\exceptions\DatabaseException $e) {
-            // Ignore database exception since that just means the grader is already grading
-        }
+        $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+        $graders[$component_id][] = $grader->getId();
+        $timestamps[$component_id][] = $this->core->getDateTimeNow()->format("Y-m-d\TH:i:sP");
 
+        // If there are no graders for this component, use an empty array
         if (!isset($graders[$component_id])) {
             $graders[$component_id] = [];
         }
+        // Ensure the current grader is not in the list of active graders:w
         for ($i = 0; $i < count($graders[$component_id]); $i++) {
             if ($graders[$component_id][$i] === $grader->getId()) {
                 array_splice($graders[$component_id], $i, 1);
