@@ -25,11 +25,9 @@
 
     <br><br>
 
-    <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ upload_url }}" id="upload_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <label>Upload Config: <input type="file" name="config_upload" /><br /></label>
-        <input type="submit" value="Upload" /><br />
-        <button type='reset'>Cancel Upload</button>
+        <label>Upload Config: <input type="file" id="file_upload" name="config_upload" /><br /></label>
     </form>
     <br>
 
