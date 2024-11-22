@@ -527,7 +527,7 @@ class ForumThreadView extends AbstractView {
      * @param bool $show_merged_threads
      * @return string
      */
-    public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads, $block_number): string {
+    public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads, int $block_number): string {
         $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, true);
         $categories = $this->core->getQueries()->getCategories();

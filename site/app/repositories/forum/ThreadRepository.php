@@ -95,7 +95,7 @@ class ThreadRepository extends EntityRepository {
 
         // if we filtered out all threads in this block, and the block was not empty,
         // recursively fetch the next block until we find a non-empty block or run out of blocks.
-        if (count($result) == 0 && count($block) != 0) {
+        if (count($result) === 0 && count($block) !== 0) {
             $block_number += $scroll_down ? 1 : -1;
             $result = $this->getAllThreads($category_ids, $status, $get_deleted, $get_merged_threads, $filter_unread, $user_id, $block_number);
         }
