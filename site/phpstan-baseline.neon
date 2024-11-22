@@ -1843,12 +1843,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 50
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Foreach overwrites \\$_post with its value variable\\.$#"
-			count: 1
+			count: 49
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -12568,11 +12563,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/admin/ReportView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$grade_summaries_last_run with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/ReportView.php
 

@@ -11,7 +11,7 @@ class GradeableTypeTester extends \PHPUnit\Framework\TestCase {
         return [
             [GradeableType::ELECTRONIC_FILE, "Electronic File"],
             [GradeableType::CHECKPOINTS, "Checkpoints"],
-            [GradeableType::NUMERIC_TEXT, "Numeric/Text"]
+            [GradeableType::NUMERIC_TEXT, "Numeric"]
         ];
     }
 

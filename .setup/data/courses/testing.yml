@@ -1,8 +1,9 @@
 code: testing
-instructor: instructor
+instructor: instructor2
 registration_sections: 10
 registered_students: 10
 make_customization: true
+self_registration_type: 2  # All self registration allowed
 gradeables:
   - g_id: open_homework
     components:
