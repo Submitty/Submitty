@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck enable=all
 
+set -e
+
 display_help() {
     echo "Usage:"
     echo "$0 up|down [Options]"

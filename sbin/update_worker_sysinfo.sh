@@ -5,6 +5,8 @@
 #### It should only be invoked by other scripts or by system, not by PHP
 #### For more info, see `./submitty_daemon_jobs/submitty_jobs/jobs.py`
 
+set -e
+
 CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../config
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' "${CONF_DIR}/submitty.json")
 

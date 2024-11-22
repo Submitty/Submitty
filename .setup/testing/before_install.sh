@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Execute this script using source so that PATH is updated for the rest of the build
 # and that we have access to the variables
 

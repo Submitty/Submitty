@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 ########################################################################################################################
 ########################################################################################################################
@@ -37,12 +38,14 @@ echo $DATABASE_COURSE_USER
 
 CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER} -p ${DATABASE_PORT}"
 
+set +e
 # Check that Submitty Master DB exists.
 PGPASSWORD="${DATABASE_PASS}" psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
     exit
 fi
+set -e
 
 #Ensure that tables exist within Submitty Master DB.
 sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms','courses','courses_users','sessions','users');"
@@ -319,6 +322,7 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
+set +e
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to grant table privileges to course database user"
@@ -344,8 +348,9 @@ python3 "${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py" -e course --cours
 if [[ $? -ne "0" ]] ; then
     PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "DELETE FROM courses WHERE term='${semester}' AND course='${course}';"
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
-    exit
+    exit 1
 fi
+set -e
 
 if [[ "$archived" -eq "1" ]] ; then 
     PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "UPDATE courses SET status=2 WHERE term='${semester}' AND course='${course}';"

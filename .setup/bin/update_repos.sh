@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Submitty source code is split among a number of repositories.
 
 # This script performs the initial checkout and manages updates of the
@@ -42,6 +44,7 @@ function clone_or_update_repo {
         # IF THE REPO ALREADY EXISTS...
         pushd ${repo_dir} > /dev/null
 
+        set +e
         # CHECK TO SEE IF VERSION MATCHES OR IS ANCESTOR
         git merge-base --is-ancestor "${min_repo_version}" HEAD 2> /dev/null
         if [ $? -eq 0 ]; then
@@ -76,6 +79,7 @@ function clone_or_update_repo {
                 exit 1
             fi
         fi
+        set -e
 
     else
 
