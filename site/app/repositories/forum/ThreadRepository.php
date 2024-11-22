@@ -120,7 +120,7 @@ class ThreadRepository extends EntityRepository {
         }
         else {
             $qb->leftJoin('post.children', 'postChildren', Join::WITH, 'postChildren.deleted = false')
-                ->andWhere('post.deleted = false');
+                ->andWhere('post.deleted = false OR post.deleted IS NULL');
         }
         switch ($order_posts_by) {
             case 'alpha':
@@ -150,7 +150,7 @@ class ThreadRepository extends EntityRepository {
                 break;
         }
 
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**

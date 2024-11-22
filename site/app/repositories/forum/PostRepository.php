@@ -46,6 +46,6 @@ class PostRepository extends EntityRepository {
             ->where('post.id = :post_id')
             ->setParameter('post_id', $post_id);
 
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }
