@@ -1101,26 +1101,27 @@ class ForumController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["POST"])]
     public function getThreads($page_number = null) {
         $current_user = $this->core->getUser()->getId();
-        $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 0;
+        $block_number = !empty($page_number) && is_numeric($page_number) ? (int) $page_number : 0;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $categories_ids = array_key_exists('thread_categories', $_POST) && !empty($_POST["thread_categories"]) ? explode("|", $_POST['thread_categories']) : [];
         $thread_status = array_key_exists('thread_status', $_POST) && ($_POST["thread_status"] === "0" || !empty($_POST["thread_status"])) ? explode("|", $_POST['thread_status']) : [];
         $unread_threads = ($_POST["unread_select"] === 'true');
+        $scroll_down = filter_var($_POST['scroll_down'] ?? "true", FILTER_VALIDATE_BOOLEAN);
 
         $categories_ids = $this->getSavedCategoryIds($currentCourse, $categories_ids);
         $thread_status = $this->getSavedThreadStatus($thread_status);
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $pageNumber);
+        $threads = $repo->getAllThreads($categories_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number, $scroll_down);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return $this->core->getOutput()->renderJsonSuccess([
                 "html" => $this->core->getOutput()->getOutput(),
                 "count" => count($threads),
-                "page_number" => $pageNumber,
+                "page_number" => $block_number,
             ]);
     }
 
@@ -1158,8 +1159,9 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb("Discussion Forum");
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, 0);
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread);
+        $block_number = 0;
+        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $current_user, $block_number);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'showFullThreadsPage', $threads, $show_deleted, $show_merged_thread, $block_number);
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/threads/{thread_id}", methods: ["GET","POST"], requirements: ["thread_id" => "\d+"])]
@@ -1198,13 +1200,13 @@ class ForumController extends AbstractController {
 
         $merge_thread_options = $repo->getMergeThreadOptions($thread);
 
-        $pageNumber = 0;
-        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $pageNumber);
+        $block_number = 0;
+        $threads = $repo->getAllThreads($category_ids, $thread_status, $show_deleted, $show_merged_thread, $unread_threads, $user, $block_number);
         if (!empty($_REQUEST["ajax"])) {
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $pageNumber, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $thread, $threads, $merge_thread_options, $show_deleted, $show_merged_thread, $option, $block_number, false);
         }
     }
 

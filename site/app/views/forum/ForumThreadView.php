@@ -527,7 +527,7 @@ class ForumThreadView extends AbstractView {
      * @param bool $show_merged_threads
      * @return string
      */
-    public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads): string {
+    public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads, $block_number): string {
         $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, true);
         $categories = $this->core->getQueries()->getCategories();
@@ -564,8 +564,8 @@ class ForumThreadView extends AbstractView {
             "thread_content" => $thread_content["thread_content"],
             "button_params" => $button_params,
             "filterFormData" => $filterFormData,
-            "next_page" => count($threads) > 0 ? 1 : 0,
-            "prev_page" => count($threads) > 0 ? -1 : 0,
+            "next_page" => count($threads) > 0 ? $block_number + 1 : 0,
+            "prev_page" => count($threads) > 0 ? $block_number - 1 : 0,
             "display_thread_count" => empty($thread_content) ? 0 : count($thread_content["thread_content"]),
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search']),

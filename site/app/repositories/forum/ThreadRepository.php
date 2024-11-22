@@ -11,7 +11,7 @@ use Doctrine\ORM\Query\Expr\Join;
 class ThreadRepository extends EntityRepository {
     /**
      * Queries table flatly so we can get a unique and consistent block.
-     * @param int $block_number
+     * @param int $block_number >= 0
      * @return int[] thread ids in the block
      */
     private function getThreadBlock(string $user_id, int $block_number): array {
@@ -37,7 +37,10 @@ class ThreadRepository extends EntityRepository {
      * @param int[] $status
      * @return Thread[]
      */
-    public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int $block_number): array {
+    public function getAllThreads(array $category_ids, array $status, bool $get_deleted, bool $get_merged_threads, bool $filter_unread, string $user_id, int &$block_number, bool $scroll_down = true): array {
+        if ($block_number < 0) {
+            return [];
+        }
         $block = $this->getThreadBlock($user_id, $block_number);
 
         $qb = $this->_em->createQueryBuilder();
@@ -88,6 +91,13 @@ class ThreadRepository extends EntityRepository {
             $result = array_filter($result, function ($x) use ($user_id) {
                 return $x->isUnread($user_id);
             });
+        }
+
+        // if we filtered out all threads in this block, and the block was not empty,
+        // recursively fetch the next block until we find a non-empty block or run out of blocks.
+        if (count($result) == 0 && count($block) != 0) {
+            $block_number += $scroll_down ? 1 : -1;
+            $result = $this->getAllThreads($category_ids, $status, $get_deleted, $get_merged_threads, $filter_unread, $user_id, $block_number);
         }
         return $result;
     }

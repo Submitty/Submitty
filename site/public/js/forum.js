@@ -1076,6 +1076,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            scroll_down: atEnd,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
