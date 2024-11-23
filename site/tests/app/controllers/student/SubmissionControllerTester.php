@@ -224,6 +224,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             new Submitter($this->core, $this->core->getUser()),
             [],
             [],
+            [],
             []
         );
 

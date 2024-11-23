@@ -2109,22 +2109,6 @@ class ElectronicGraderController extends AbstractController {
             if ($ta_graded_gradeable !== null) {
                 $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader, $all_peers);
             }
-            foreach ($response_data['active_graders'] as $component_id => $graders) {
-                if (!isset($response_data['active_graders'][$component_id])) {
-                    $response_data['active_graders'][$component_id] = [];
-                }
-                if (!isset($response_data['active_graders_timestamps'][$component_id])) {
-                    $response_data['active_graders_timestamps'][$component_id] = [];
-                }
-                for ($i = 0; $i < count($response_data['active_graders'][$component_id]); $i++) {
-                    // Do not show the grader if they are the current user
-                    if ($response_data['active_graders'][$component_id][$i] === $grader->getId()) {
-                        array_splice($response_data['active_graders'], $i, 1);
-                        array_splice($response_data['active_graders_timestamps'], $i, 1);
-                        break;
-                    }
-                }
-            }
             $this->core->getOutput()->renderJsonSuccess($response_data);
         }
         catch (\InvalidArgumentException $e) {
@@ -2194,8 +2178,24 @@ class ElectronicGraderController extends AbstractController {
         foreach ($components as $key => $value) {
             $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
         }
-        $response_data['active_graders'] = $graded_gradeable->getActiveGraders();
-        $response_data['active_graders_timestamps'] = $graded_gradeable->getActiveGradersTimestamps();
+        $graders = $graded_gradeable->getActiveGraders();
+        $timestamps = $graded_gradeable->getActiveGradersTimestamps();
+        $graders_names = $graded_gradeable->getActiveGradersNames();
+
+        // Ensure the current grader is not in the list of active graders:w
+        foreach ($graders as $component_id => $component_graders) {
+            if (isset($timestamps[$component_id]) && isset($graders_names[$component_id])) {
+                for ($i = 0; $i < count($component_graders); $i++) {
+                    if ($component_graders[$i] === $grader->getId()) {
+                        array_splice($graders_names[$component_id], $i, 1);
+                        array_splice($timestamps[$component_id], $i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        $response_data['active_graders'] = $graders_names;
+        $response_data['active_graders_timestamps'] = $timestamps;
 
         return $response_data;
     }
@@ -2407,24 +2407,22 @@ class ElectronicGraderController extends AbstractController {
 
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
+        $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
-        $graders[$component_id][] = $grader->getId();
-        $timestamps[$component_id][] = $this->core->getDateTimeNow()->format("Y-m-d\TH:i:sP");
 
         // If there are no graders for this component, use an empty array
-        if (!isset($graders[$component_id])) {
-            $graders[$component_id] = [];
-        }
-        // Ensure the current grader is not in the list of active graders:w
-        for ($i = 0; $i < count($graders[$component_id]); $i++) {
-            if ($graders[$component_id][$i] === $grader->getId()) {
-                array_splice($graders[$component_id], $i, 1);
-                array_splice($timestamps[$component_id], $i, 1);
-                break;
+        if (isset($graders[$component_id])) {
+            // Ensure the current grader is not in the list of active graders:w
+            for ($i = 0; $i < count($graders[$component_id]); $i++) {
+                if ($graders[$component_id][$i] === $grader->getId()) {
+                    array_splice($timestamps[$component_id], $i, 1);
+                    array_splice($graders_names[$component_id], $i, 1);
+                    break;
+                }
             }
         }
 
-        return JsonResponse::getSuccessResponse(['active_graders' => $graders, 'active_graders_timestamps' => $timestamps]);
+        return JsonResponse::getSuccessResponse(['active_graders' => $graders_names, 'active_graders_timestamps' => $timestamps]);
     }
 
     /**
@@ -2485,19 +2483,17 @@ class ElectronicGraderController extends AbstractController {
 
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
+        $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
-        if (!isset($graders[$component_id])) {
-            $graders[$component_id] = [];
-        }
         for ($i = 0; $i < count($graders[$component_id]); $i++) {
             if ($graders[$component_id][$i] === $grader->getId()) {
-                array_splice($graders[$component_id], $i, 1);
                 array_splice($timestamps[$component_id], $i, 1);
+                array_splice($graders_names[$component_id], $i, 1);
                 break;
             }
         }
 
-        return JsonResponse::getSuccessResponse(['active_graders' => $graders, 'active_graders_timestamps' => $timestamps]);
+        return JsonResponse::getSuccessResponse(['active_graders' => $graders_names, 'active_graders_timestamps' => $timestamps]);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {

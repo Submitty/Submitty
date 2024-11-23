@@ -8897,6 +8897,7 @@ WHERE current_state IN
              rr.array_grade_inquiries,
              gc.ag_graders AS ag_graders,
              gc.ag_timestamps AS ag_timestamps,
+             gc.ag_graders_names AS ag_graders_names,
 
               {$submitter_data_inject}
 
@@ -8924,7 +8925,8 @@ WHERE current_state IN
                   gc.gc_id,
                   gc.g_id,
                   json_object_agg(gc.gc_id, graders) as ag_graders,
-                  json_object_agg(gc.gc_id, ag.timestamps) as ag_timestamps
+                  json_object_agg(gc.gc_id, graders_names) as ag_graders_names,
+                  json_object_agg(gc.gc_id, timestamps) as ag_timestamps
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
@@ -8932,8 +8934,10 @@ WHERE current_state IN
                     ag_team_id,
                     gc_id,
                     json_agg(grader_id) AS graders,
+                    json_agg(COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) || ' ' || substr(COALESCE(NULLIF(user_preferred_familyname,''), user_familyname), 1, 1) || '.') AS graders_names,
                     json_agg(timestamp) AS timestamps
                   FROM active_graders
+                  LEFT JOIN users ON active_graders.grader_id = users.user_id
                   GROUP BY ag_user_id, ag_team_id, gc_id
                 ) as ag on ag.gc_id = gc.gc_id
                 GROUP BY gc.gc_id, gc.g_id
@@ -9125,7 +9129,8 @@ WHERE current_state IN
                     'reasons_for_exceptions' => $reasons_for_exceptions
                 ],
                 json_decode($row['ag_graders'], true),
-                json_decode($row['ag_timestamps'], true)
+                json_decode($row['ag_timestamps'], true),
+                json_decode($row['ag_graders_names'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
