@@ -121,7 +121,10 @@ update_apache() {
 
     info "Double check that HTTP/2 module is enabled"
     phpver=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+    #TODO: REMOVE THIS
+    set +e
     a2dismod "php${phpver}" mpm_prefork
+    set -e
     a2enmod mpm_event http2
 
     info "Checking the integrity of Apache configuration"
