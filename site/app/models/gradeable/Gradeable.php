@@ -2265,10 +2265,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isGradeInquirySettingsValid() {
-        if ($this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date <= $this->grade_inquiry_due_date) {
-            return true;
-        }
-        return false;
+        return $this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date <= $this->grade_inquiry_due_date;
     }
 
     /**
