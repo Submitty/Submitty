@@ -215,19 +215,17 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 else
-    #TODO: REMOVE THIS
-    set +e
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
-    set -e
 fi
-
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
+#TODO: REMOVE THIS
+set +e
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
-
+set -e
 # load lang files
 php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
 
@@ -384,6 +382,7 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a+x ${NODE_FOLDER}/vite/node_modules/@esbuild/linux-x64/bin/esbuild
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
@@ -393,6 +392,7 @@ chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a-x ${NODE_FOLDER}/vite/node_modules/@esbuild/linux-x64/bin/esbuild
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
