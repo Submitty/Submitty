@@ -69,12 +69,12 @@ get_job_index() {
     done
 
     # check if any job scheme is selected
-    [[ -z "${JOB_NAME}" ]] && {
+    if [[ -z "${JOB_NAME}" ]]; then 
         warn "Job name does not match to any job, see the help below"
         info "Job name: $1"
         display_help
         panic "No matched job"
-    }
+    fi
 }
 
 
