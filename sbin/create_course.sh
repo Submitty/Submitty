@@ -307,12 +307,14 @@ chown "$instructor:$ta_www_group" "$course_dir/BUILD_${course}.sh"
 chmod 770 "$course_dir/BUILD_${course}.sh"
 replace_fillin_variables "$course_dir/BUILD_${course}.sh"
 
-
+#TODO: REMOVE THIS
+set +e
 # copy the config file for TA grading & replace the variables
 cp "${SUBMITTY_INSTALL_DIR}/site/config/course_template.json" "${course_dir}/config/config.json"
 chown "${PHP_USER}:${ta_www_group}" "${course_dir}/config/config.json"
 chmod 660 "${course_dir}/config/config.json"
 replace_fillin_variables "${course_dir}/config/config.json"
+set -e
 
 
 echo -e "Creating database ${DATABASE_NAME}\n"
