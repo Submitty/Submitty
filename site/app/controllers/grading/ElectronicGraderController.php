@@ -2486,13 +2486,13 @@ class ElectronicGraderController extends AbstractController {
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
         if (isset($graders[$component_id])) {
-        for ($i = 0; $i < count($graders[$component_id]); $i++) {
-            if ($graders[$component_id][$i] === $grader->getId()) {
-                array_splice($timestamps[$component_id], $i, 1);
-                array_splice($graders_names[$component_id], $i, 1);
-                break;
+            for ($i = 0; $i < count($graders[$component_id]); $i++) {
+                if ($graders[$component_id][$i] === $grader->getId()) {
+                    array_splice($timestamps[$component_id], $i, 1);
+                    array_splice($graders_names[$component_id], $i, 1);
+                    break;
+                }
             }
-        }
         }
 
         return JsonResponse::getSuccessResponse(['active_graders' => $graders_names, 'active_graders_timestamps' => $timestamps]);
