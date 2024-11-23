@@ -1,8 +1,8 @@
 import { defineConfig } from 'cypress';
 import { cypressBrowserPermissionsPlugin } from 'cypress-browser-permissions';
 import cypressPlugins from './cypress/plugins/index.js';
-import fs = require('fs');
-import path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
 export default defineConfig({
     video: true,
