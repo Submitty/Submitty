@@ -85,7 +85,7 @@ class NotificationFactory {
     }
 
     /**
-     * handles the event of a post deleted, undeleted, edited and merged
+     * handles the event of a post deleted, restored, edited and merged
      * @param array $event
      */
     public function onPostModified(array $event): void {

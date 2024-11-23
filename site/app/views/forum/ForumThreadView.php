@@ -1160,7 +1160,7 @@ class ForumThreadView extends AbstractView {
             else {
                 if ($deleted && $userGroup <= User::GROUP_LIMITED_ACCESS_GRADER) {
                     $ud_toggle_status = "false";
-                    $ud_button_title = "Undelete post";
+                    $ud_button_title = "Restore post";
                     $ud_button_icon = "fa-undo";
                 }
                 else {
