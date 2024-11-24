@@ -25,6 +25,12 @@ jobs:
           sudo installer -pkg /Volumes/VirtualBox/VirtualBox.pkg -target /
           hdiutil unmount /Volumes/VirtualBox
 
+     - name: Install HCP CLI
+        run: |
+          brew tap hashicorp/tap
+          brew install hashicorp/tap/hcp
+          brew upgrade hashicorp/tap/hcp
+
       - name: Get latest version
         id: get-version
         run: |
@@ -35,18 +41,6 @@ jobs:
           fi
           echo "version=${TAG:1}" >> $GITHUB_OUTPUT
 
-      - name: Install HCP CLI
-        run: |
-          brew tap hashicorp/tap
-          brew install hashicorp/tap/hcp
-          brew upgrade hashicorp/tap/hcp
-
-      - name: Get HCP token
-        id: hcp-token
-        run: |
-          hcp auth login --client-id=${{ secrets.HCP_CLIENT_ID }} --client-secret=${{ secrets.HCP_CLIENT_SECRET }}
-          echo "HCP_TOKEN=$(hcp auth print-access-token)" >> $GITHUB_OUTPUT
-
       - name: Vagrant Up
         run: CI=1 vagrant up
 
@@ -56,11 +50,17 @@ jobs:
       - name: Save image
         run: vagrant package --output submitty.box
 
+      - name: Get HCP token
+        id: hcp-token
+        run: |
+          hcp auth login --client-id=${{ secrets.HCP_CLIENT_ID }} --client-secret=${{ secrets.HCP_CLIENT_SECRET }}
+          echo "HCP_TOKEN=$(hcp auth print-access-token)" >> $GITHUB_OUTPUT
+
       - name: Publish image
         run: |
           export VAGRANT_CLOUD_TOKEN="${{ secrets.VAGRANT_CLOUD_TOKEN }};${{ steps.hcp-token.outputs.HCP_TOKEN }}"
           vagrant cloud auth login
-          vagrant cloud publish testing-apoi/camvax 99.88.0.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
+          vagrant cloud publish SubmittyBot/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
           vagrant cloud auth logout
 
       - name: Acquire Job ID
