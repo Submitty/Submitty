@@ -58,8 +58,8 @@ class Thread {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $pinned_expiration;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $announced;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $announced;
 
     /**
      * @var Collection<Post>
@@ -136,8 +136,12 @@ class Thread {
         return $this->pinned_expiration > new DateTime("now");
     }
 
-    public function IsPinnedExpiring(): bool {
+    public function isPinnedExpiring(): bool {
         return $this->pinned_expiration <= (new DateTime("now"))->add(DateInterval::createFromDateString("7 days"));
+    }
+
+    public function isAnnounced(): bool {
+        return !is_null($this->announced);
     }
 
     /**
@@ -183,5 +187,13 @@ class Thread {
         return $this->posts->filter(function ($x) {
             return $x->getParent()->getId() === -1;
         })->first();
+    }
+
+    public function getSumUpducks(): int {
+        $sum_upducks = 0;
+        foreach ($this->getPosts() as $post) {
+            $sum_upducks += count($post->getUpduckers());
+        }
+        return $sum_upducks;
     }
 }
