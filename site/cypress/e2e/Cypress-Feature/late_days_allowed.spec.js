@@ -71,13 +71,13 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
             cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
             cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('3');
-            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('2021-01-01');
 
             // login as bitdiddle and check that they have proper number of late days
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('2021-01-01');
             cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+3');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('3');
 
@@ -101,13 +101,13 @@ describe('Test cases involving the late days allowed page', () => {
             cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('Ben');
             cy.get('#late-day-table > tbody > tr > :nth-child(3)').contains('Bitdiddle');
             cy.get('#late-day-table > tbody > tr > :nth-child(4)').contains('5');
-            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(5)').contains('2021-01-01');
 
             // logout and log back in as bitdiddle to make sure the number of late days has been updated correctly
             cy.logout();
             cy.login('bitdiddle');
             cy.visit(['sample', 'late_table']);
-            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('01/01/2021');
+            cy.get('#late-day-table > tbody > tr > :nth-child(2)').contains('2021-01-01');
             cy.get('#late-day-table > tbody > tr > :nth-child(8)').contains('+5');
             cy.get('#late-day-table > tbody > tr').last(':nth-child(8)').contains('5');
 
