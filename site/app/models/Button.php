@@ -9,6 +9,7 @@ use app\libraries\Core;
  * @package app\models
  * @method string getTitle()
  * @method string|null getSubtitle()
+ * @method string|null getName()
  * @method \DateTime|null getDate()
  * @method string|null getHref()
  * @method string|null getOnclick()
@@ -44,6 +45,9 @@ class Button extends AbstractModel {
     /** @prop
      * @var string|null $subtitle */
     protected $subtitle;
+    /** @prop
+     * @var string|null $name */
+    protected $name;
     /** @prop
      * @var \DateTime|null A DateTime object representing the time for this Button.  For example if this was a
      * grade button then $date may represent the date and time grading begins or ends */
@@ -93,6 +97,7 @@ class Button extends AbstractModel {
         parent::__construct($core);
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
+        $this->name     = $details["name"] ?? null;
         $this->date     = $details["date"] ?? null;
         $this->href     = $details["href"] ?? null;
         $this->onclick  = $details["onclick"] ?? null;
