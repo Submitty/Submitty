@@ -40,7 +40,7 @@
 
         <tr class={{class}}>
             <td data-before-content="Event/Assignment" class="align-left">{{ late_day_info.getEventTitle() }}</td>
-            <td data-before-content="Event/Assignment Date">{{ late_day_info.getLateDayEventTime()|date('m/d/Y') }}</td>
+            <td data-before-content="Event/Assignment Date">{{ late_day_info.getLateDayEventTime()|date('Y-m-d') }}</td>
             <td data-before-content="Max Late Days">{{ late_day_info.isLateDayUpdate() ? '' : (late_day_info.getAssignmentAllowedLateDays() ?? placeholder) }}</td>
             <td data-before-content="Days Submitted Late">{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : placeholder }}</td>
             <td data-before-content="Days From Extensions">{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() ~ ' (' ~ late_day_info.getReasonForException() ~ ') ' : placeholder }}</td>

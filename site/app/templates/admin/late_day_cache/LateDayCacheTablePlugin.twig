@@ -21,7 +21,7 @@
                 <th>
                     {% if title.timestamp is defined %}
 
-                        {{ title|date('m/d/Y') }}
+                        {{ title|date('Y-m-d') }}
                     {% else %}
                         {{ title }}
                     {% endif %}
