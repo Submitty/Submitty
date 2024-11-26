@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import tempfile
 
+from checkworker import isWorker
 from ruamel.yaml import YAML
 
 yaml = YAML(typ='safe')
@@ -94,6 +95,9 @@ def delete_user(user_id):
 
 
 def main():
+    worker = isWorker()
+    # TODO: check if removing this would break the worker
+    
     if not os.path.isdir(os.path.join(CURRENT_PATH, "..", "..", ".vagrant")):
         raise SystemExit("This script can only be run against the vagrant installation")
 
@@ -110,7 +114,7 @@ def main():
 
     # If we have psql cmd available, then PostgreSQL is installed so we should scrub out any
     # submitty DBs
-    if cmd_exists('psql'):
+    if not worker and cmd_exists('psql'):
         os.environ['PGPASSWORD'] = 'submitty_dbuser'
         os.system("psql -h localhost -U submitty_dbuser --list | grep submitty_* | awk '{print $1}' | "
                   "xargs -I \"@@\" dropdb -h localhost -U submitty_dbuser \"@@\"")
@@ -132,18 +136,19 @@ def main():
     remove_lines('/etc/pam.d/httpd', auths)
 
     # Scrub some stuff from apache
-    shutil.rmtree('/etc/apache2/ssl', True)
-    remove_file('/etc/apache2/suexec/www-data')
+    if not worker:
+        shutil.rmtree('/etc/apache2/ssl', True)
+        remove_file('/etc/apache2/suexec/www-data')
 
-    for folder in ["/etc/apache2/sites-enabled", "/etc/apache2/sites-available"]:
-        if os.path.isdir(folder):
-            for the_file in os.listdir(folder):
-                if folder == "/etc/apache2/sites-available":
-                    os.system("a2dissite " + the_file.replace(".conf", ""))
-                file_path = os.path.join(folder, the_file)
-                remove_file(file_path)
+        for folder in ["/etc/apache2/sites-enabled", "/etc/apache2/sites-available"]:
+            if os.path.isdir(folder):
+                for the_file in os.listdir(folder):
+                    if folder == "/etc/apache2/sites-available":
+                        os.system("a2dissite " + the_file.replace(".conf", ""))
+                    file_path = os.path.join(folder, the_file)
+                    remove_file(file_path)
 
-    #remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
+        # remove_lines('/etc/apache2/apache2.conf', ["ServerName 10.0.2.15"])
 
     shutil.rmtree('/root/bin', True)
 

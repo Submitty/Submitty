@@ -530,9 +530,11 @@ EOF
         fi
     fi
 
-    cp -n ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
-    cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
-    chmod 0640 /etc/apache2/suexec/www-data
+    if [ WORKER == 0 ];
+        cp -n ${SUBMITTY_REPOSITORY}/.setup/php-fpm/pool.d/submitty.conf /etc/php/${PHP_VERSION}/fpm/pool.d/submitty.conf
+        cp ${SUBMITTY_REPOSITORY}/.setup/apache/www-data /etc/apache2/suexec/www-data
+        chmod 0640 /etc/apache2/suexec/www-data
+    fi
 
 
     #################################################################
