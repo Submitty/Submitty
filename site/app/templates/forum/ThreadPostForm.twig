@@ -183,7 +183,7 @@
             <label>Anonymous (to class)? </label>
         {% endif %}
         {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
-            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
+            {% set announcement_text = email_enabled ? "Notify Students(w/email & notification)" : "Notify Studnets(w/ notification)" %}
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
             <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
