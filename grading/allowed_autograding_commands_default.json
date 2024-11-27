@@ -129,5 +129,7 @@
     "strace":                  { "path": "/usr/bin/strace" },
 
     // Matlab
-    "matlab":                  { "path": "/usr/local/bin/matlab" }
+    "matlab":                  { "path": "/usr/local/bin/matlab" },
+
+    "jupyter":                 { "path": "/usr/local/bin/jupyter" }
 }

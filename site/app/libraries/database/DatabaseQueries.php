@@ -1302,7 +1302,7 @@ SQL;
 
     public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
-            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?) ON CONFLICT DO NOTHING", [$user_id, $thread_id]);
         }
         else {
             $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", [$user_id, $thread_id]);
@@ -1979,7 +1979,8 @@ WHERE term=? AND course=? AND user_id=?",
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
                         ) calculated_cache
-                    )";
+                    )
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -2000,7 +2001,8 @@ WHERE term=? AND course=? AND user_id=?",
         $query = "INSERT INTO late_day_cache
                     (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
                     late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -2012,7 +2014,8 @@ WHERE term=? AND course=? AND user_id=?",
 
         $query = "INSERT INTO late_day_cache
                     (user_id, late_day_date, late_days_remaining, late_days_change) 
-                    VALUES (?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -2177,7 +2180,8 @@ WHERE term=? AND course=? AND user_id=?",
         $params = [$user_id, $default_late_days];
 
         $query = "INSERT INTO late_day_cache
-                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
+                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)
+                    ON CONFLICT DO NOTHING";
 
         $this->course_db->query($query, $params);
     }
