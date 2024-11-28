@@ -434,7 +434,7 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // SUPERUSERS ONLY
-        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+        if ($this->core->getUser()->getAccessLevel() === User::LEVEL_FACULTY) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['community_events']),
                 "title" => "Community Events",

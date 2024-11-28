@@ -16,7 +16,7 @@ use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 
 /**
- * @AccessControl(level="SUPERUSER")
+ * @AccessControl(level="FACULTY")
  */
 class BannerController extends AbstractController {
     /**
@@ -32,8 +32,15 @@ class BannerController extends AbstractController {
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
+    #[Route("/community_event/upload_svg", methods: ["POST"])]
+    public function ajaxUploadSvg(): JsonResponse {
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+        return JsonResponse::getErrorResponse("need to finish");
+    }
+
     #[Route("/community_event/upload", methods: ["POST"])]
     public function ajaxUploadEventFiles(): JsonResponse {
+
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         if (isset($_POST['release_time'])) {
@@ -55,6 +62,7 @@ class BannerController extends AbstractController {
         }
 
         $uploaded_files = $_FILES["files1"];
+
         $count_item = count($uploaded_files["name"]);
         $bigger_banner_name = $_POST['extra_name'];
         $link_name = $_POST['link_name'];

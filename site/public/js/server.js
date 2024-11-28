@@ -317,6 +317,22 @@ function newUploadBanner() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
+function newUploadSVG() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-svg');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-svg');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
 
 function newEditCourseMaterialsFolderForm(tag) {
     const id = $(tag).data('id');
