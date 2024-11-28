@@ -1,4 +1,4 @@
-/* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported handleUploadBanner, handleUploadSvg, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
@@ -213,13 +213,10 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
     });
 }
 
-function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
+function handleUploadSvg() {
     const formData = new FormData();
     formData.append('csrf_token', window.csrfToken);
-    formData.append('close_time', closeTime);
-    formData.append('release_time', releaseTime);
-    formData.append('extra_name', extraName);
-    formData.append('link_name', linkName);
+;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
             if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
@@ -237,7 +234,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['community_event', 'upload']),
+        url: buildUrl(['community_event', 'upload_svg']),
         data: formData,
         processData: false,
         contentType: false,
@@ -256,6 +253,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             catch (e) {
                 alert('Failed to upload a banner!');
                 console.log(data);
+                console.log(e);
             }
         },
         error: function () {

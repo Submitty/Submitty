@@ -35,7 +35,43 @@ class BannerController extends AbstractController {
     #[Route("/community_event/upload_svg", methods: ["POST"])]
     public function ajaxUploadSvg(): JsonResponse {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
-        return JsonResponse::getErrorResponse("need to finish");
+    
+        if (!isset($_FILES["files2"]) || empty($_FILES["files2"]["name"])) {
+            return JsonResponse::getErrorResponse("No files were submitted.");
+        }
+    
+        foreach ($_FILES["files2"]["name"] as $index => $file_name) {
+            if (is_uploaded_file($_FILES["files2"]["tmp_name"][$index])) {
+                $destination_path = FileUtils::joinPaths($upload_path, $file_name);
+    
+                if (strlen($destination_path) > 255) {
+                    return JsonResponse::getErrorResponse("File path is too long.");
+                }
+
+                if (!is_dir($upload_path)) {
+                    if (!mkdir($upload_path, 0755, true)) {
+                        return JsonResponse::getErrorResponse("Failed to create the directory '{$upload_path}'.");
+                    }
+                }
+
+    
+                if (!@copy($_FILES["files2"]["tmp_name"][$index], $destination_path)) {
+                    $error = error_get_last();
+    
+                    // Return detailed error message
+                    return JsonResponse::getErrorResponse(
+                        "Failed to upload file '{$file_name}'. Error: {$error['message']} in {$error['file']} on line {$error['line']}"
+                    );
+                }
+    
+                if (!@unlink($_FILES["files2"]["tmp_name"][$index])) {
+                    return JsonResponse::getErrorResponse("Failed to delete the temporary file '{$file_name}'.");
+                }
+            } else {
+                return JsonResponse::getErrorResponse("The file '{$file_name}' was not properly uploaded.");
+            }
+        }
+        return JsonResponse::getSuccessResponse("Files uploaded successfully.");
     }
 
     #[Route("/community_event/upload", methods: ["POST"])]

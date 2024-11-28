@@ -36,8 +36,13 @@
     <p> Id: {{id}} </p>
     <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
     <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
+
+
 </div>
 {% endfor %}
+<embed src="data:application/pdf;base64,{{data}}" type="application/pdf" width="600" height="400" />
+<img src="data:image/gif;base64,{{data2}}" alt="GIF image">
+
 </div>
 
 {{ include('banner/UploadBannerPopup.twig') }}

@@ -67,24 +67,6 @@
     </div>
 
 
-    hi
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div> Select Banner Image </div>
-
-    <div id="upload-boxes">
-        <div id="upload2" class="file-input">
-            <label class="label key_to_click" for="input-file2" tabindex="0">"Drag your file here or click to open file browser"</label>
-            <input type="file" name="files" id="input-file2" onchange="addFilesFromInput(2,false)" multiple />
-            <table class="file-upload-table" id="file-upload-table-2">
-                <tr style="background:transparent; display:none;">
-                    <th>File Name:</th>
-                    <th>Size:</th>
-                </tr>
-            </table>
-        </div>
-
-
-    </div>
 
     <script>
         $('#url_link_address').hide();
@@ -108,12 +90,6 @@
         createArray(2);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);
-        dropzone.addEventListener("dragover", draghandle, false);
-        dropzone.addEventListener("dragleave", draghandle, false);
-        dropzone.addEventListener("drop", dropWithMultipleZips, false);
-
-        dropzone = document.getElementById("upload2");
-        dropzone.addEventListener("dragenter"), 
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
