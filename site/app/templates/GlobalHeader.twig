@@ -149,8 +149,8 @@
             </div>
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow" id="main-container"
-            style="display: flex; justify-content: center; align-items: center;"
-            >
+            style="display: flex; justify-content: center; align-items: center; height: 85px;"
+            >   
 
                 {#COMMUNITY EVENT BANNERS COME IN HERE#}
                 {% include 'nav_content.twig' %}
@@ -195,23 +195,46 @@
 
 
                     <span id="duckdiv" style="position: relative">
-                    <a id="duck-desktop"
-                        href="http://submitty.org/developer/rcos_moorthy"
-                        target="_blank"
-                        aria-label="Learn more about Moorthy"
-                    >
-                        <img id="moorthy-duck"
-                                src="data:image/gif;base64,{{duckGif}}" {#  #}
-                                alt="Moorthy - Submitty's Duck Mascot!"
-                                height="80"
-                                class="key_to_click"
-                                onclick="ducky();"
-                                tabindex="0"
-                        />
-                    </a>
-
+                    <img id="moorthy-duck"
+                            src="{{ base_url }}/img/{{ duck_img }}"
+                            alt="Moorthy - Submitty's Duck Mascot!"
+                            height="80"
+                            class="key_to_click"
+                            {% if user_given_name != "" %}
+                            onclick="onMoorthyClick();"
+                            {% endif %}
+                            tabindex="0"
+                    />
                     </span>
 
+
+                    {% if user_given_name == "" %}
+                    <script>
+                        localStorage.setItem('open', false);
+                        localStorage.setItem('duckTalking', false);
+                    </script>
+                    {% else %}
+                    <script>
+                        localStorage.setItem('duckTalking', true);
+                    </script>
+                    {% endif %}
+                    <script>
+                        function onMoorthyClick() {
+                            if (localStorage.getItem('bannerArray') && JSON.parse(localStorage.getItem('bannerArray')).length > 0) {
+                                if (localStorage.getItem('open') === 'true') {
+                                    localStorage.setItem('open', false);
+                                    initializeBanner();
+                                } 
+                                else {
+                                    localStorage.setItem('open', true);
+                                    initializeBanner();   
+                                }
+                            }
+                            else {
+                                window.open('http://submitty.org/developer/rcos_moorthy', '_blank');
+                            }
+                        }   
+                    </script>
 
 
 

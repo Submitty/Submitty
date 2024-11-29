@@ -1,64 +1,180 @@
 <script>
-    if (!Cookies.get('imageDataArray')) {
-        Cookies.set('imageDataArray', JSON.stringify(imageDataArray));
-        Cookies.set('currEventIndex', 0);
-    } 
 
-    var imageDataArray = JSON.parse(Cookies.get('imageDataArray'));
-    var currEventIndex = parseInt(Cookies.get('currEventIndex'));
+function updateImageData(imageData) {
+    var imgElement = document.getElementById('bye');
+    if (imgElement) {
+        imgElement.src = "data:image/png;base64," + imageData.data;
+        imgElement.alt = imageData.name + "_" + imageData.id;
+    } else {
+        console.error("Image element with id 'bye' not found");
+    }
+}
+function openLink() {
+    window.open('http://submitty.org/developer/rcos_moorthy', '_blank');
+}
+
+function duckTalking() {
+    const imageElement = document.querySelector('#moorthy-duck');
+    if (!imageElement) return;
+
+    const bannerArray = localStorage.getItem('bannerArray');
+    if (bannerArray && JSON.parse(bannerArray).length > 0 && localStorage.getItem('open') == 'false') {
+        imageElement.src = "data:image/gif;base64,{{duckGif}}";
+    } else {
+        imageElement.src = "{{ base_url }}/img/{{ duck_img }}";
+    }
+}
+
+function initializeBanner() {
+    var bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
+    var openBanner = JSON.parse(localStorage.getItem('open')); 
+
+    if (!bannerArray) {
+    var imageDataArray = {{ imageDataArray | json_encode | raw }}; 
+        localStorage.setItem('bannerArray', JSON.stringify(imageDataArray));
+        localStorage.setItem('removedArray', JSON.stringify([]));
+        localStorage.setItem('currEventIndex', 0);    
+        localStorage.setItem('open', false);
+    }    
+
+    bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
+    var removedArray = JSON.parse(localStorage.getItem('removedArray'));
+    var currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+
+    if (bannerArray.length > 0) {
+        var imageData = bannerArray[currEventIndex];
+        updateImageData(imageData);
+        document.getElementById('hola').style.setProperty('display', 'block', 'important');
+    }
+    else if (bannerArray.length <= 0) {
+        localStorage.setItem('open', false); 
+    }
+
+    if (localStorage.getItem('open') === 'false') {
+        localStorage.setItem('currEventIndex', 0);  
+        document.getElementById('hola').style.setProperty('display', 'none');
+    }
+
+    if (localStorage.getItem('duckTalking') === 'true') {
+        duckTalking();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    initializeBanner();
+
+    document.getElementById('prevButton').addEventListener('click', previousBanner);
+    document.getElementById('nextButton').addEventListener('click', nextBanner);
+
+    document.getElementById('removeButton').addEventListener('click', removeBanner);
+    document.getElementById('closeButton').addEventListener('click', closeBanner);
+    document.getElementById('inquireButton').addEventListener('click', inquireBanner);
+});
+
+function inquireBanner() {
+    let bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    var imageData = bannerArray[currEventIndex];
+    if (imageData.extra_info === "" && imageData.link_name !== "") {
+        window.open(imageData.link_name, '_blank');
+    }
+    else {
+    displayBigBanner(imageData.data, imageData.link_name)
+    }
+
+}
+
+function closeBanner() {
+    localStorage.setItem('open', 'false');   
+    initializeBanner();
+}
+
+function removeBanner() {
+    let bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+    let hiddenBanners = JSON.parse(localStorage.getItem('hiddenBanners')) || [];
+
+    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+
+    if (currEventIndex >= 0 && currEventIndex < bannerArray.length) {
+        hiddenBanners.push(bannerArray[currEventIndex]);
+        console.log(bannerArray[currEventIndex]);
+
+        bannerArray.splice(currEventIndex, 1);
+
+        localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
+        localStorage.setItem('hiddenBanners', JSON.stringify(hiddenBanners));
+
+    } else {
+        console.log("Invalid index for the banner.");
+    }
+
+    initializeBanner();
+
+}
+
+function previousBanner() {
+    var currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    var bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
     
+    currEventIndex = (currEventIndex - 1 + bannerArray.length) % bannerArray.length;
+    localStorage.setItem('currEventIndex', currEventIndex);
+
+    initializeBanner();
+}
+
+function nextBanner() {
+    var currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    var bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+
+    currEventIndex = (currEventIndex + 1) % bannerArray.length;
+    localStorage.setItem('currEventIndex', currEventIndex);
+
+    initializeBanner();
+}
+
+
+
 </script>
-{% if imageDataArray|length != 0 %}
-
-{% set imageData = imageDataArray[0] %}
-<div style="position: absolute; top: 40px; right: 50%; transform: translate(50%, -50%); text-align: center;">
-
-<div style="display: grid; grid-template-columns: 1fr;">
-    <img id="club-bannersid"
-        alt="{{imageData.name}}_{{imageData.id}}"
-        class="club-banners {{imageData.name}}_{{imageData.id}}"
-        src="data:imgName/png;base64,{{ imageData.data }}"
-        {% if imageData.extra_info != "" and imageData.link_name == "" %}
-            onclick="window.location.href='{{ imageData.extra_info }}';"
-        {% elseif imageData.extra_info == "" and imageData.link_name != "" %}
-            onclick="window.location.href='{{ imageData.link_name }}';"
-        {% endif %}
-    />
 
 
-    <div id="bannerNavigation" style="display: inline-flex; justify-content: center; margin: 0px">
-        <div style="display: inline-flex; background-color: lightgray; border: 1px solid black; border-radius: 5px;" >
-        <!-- Previous Button -->
-        <button onclick="previousBanner()" style="border: none; background: none; cursor: pointer;">
-            <i class="fa fa-arrow-left"></i> Prev
-        </button>
 
-        <!-- Next Button -->
-        <button onclick="nextBanner()" style="border: none; background: none; cursor: pointer;">
-            <i class="fa fa-arrow-right"></i> Next
-        </button>
+{% if imageDataArray | length != 0 %}
+    <div id="hola" style="z-index: 9999; position: absolute; top: 52px; right: 50%; transform: translate(50%, -50%); text-align: center; display: none;"> 
+        <div style="display: grid; grid-template-columns: 1fr;">
+            <!-- Placeholder for image -->
+            <img id="bye"
+                alt="Banner"
+                class="club-banners"
+                src="" 
+            />
+        <div id="bannerNavigation" style="display: inline-flex; justify-content: center; margin: 0px">
+            <div style="display: inline-flex; background-color: lightgray; border: 1px solid black; border-radius: 5px;">
 
-        <!-- Close Button -->
-        <button onclick="closeBanner()" style="border: none; background: none; cursor: pointer;">
-            <i class="fa fa-times"></i> Close
-        </button>
+                <button id="prevButton" style="border: none; background: none; cursor: pointer;">
+                    Prev
+                </button>
 
-        <!-- Delete Banner Button -->
-        <button onclick="deleteBanner()" style="border: none; background: none; cursor: pointer;">
-            <i class="fa fa-trash"></i> Delete
-        </button>
+                <button id="nextButton" style="border: none; background: none; cursor: pointer;">
+                     Next
+                </button>
 
-        <!-- See More Inquire Button -->
-        <button onclick="seeMoreInquire()" style="border: none; background: none; cursor: pointer;">
-            <i class="fa fa-info-circle"></i> See More
-        </button>
+                <button id="closeButton" style="border: none; background: none; cursor: pointer;">
+                     Close
+                </button>
+
+                <button id="removeButton" style="border: none; background: none; cursor: pointer;">
+                     Remove
+                </button>
+
+                <button id="inquireButton" style="border: none; background: none; cursor: pointer;">
+                     See More
+                </button>
+            </div>
+        </div>
         </div>
     </div>
 
-</div>
-</div>
-
+{{ include('banner/BiggerBanner.twig') }}
 
 {% endif %}
-
-

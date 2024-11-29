@@ -317,6 +317,21 @@ function newUploadBanner() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload"]', form).val(null);
 }
+
+function displayBigBanner(imageSrc, link=null) {
+    $('.popup-form').css('display', 'none');
+    const form = $('#enlarged-banner');
+    console.log(imageSrc);
+    $('#big-banner').attr('src', "data:image/png;base64," + imageSrc);
+    if (link && link.length > 0) {
+        $('#big-banner-link').attr('href', link);
+    }
+
+    form.css('display', 'block');
+    captureTabInModal('enlarged-banner');
+    form.find('.form-body').scrollTop(0);
+}
+
 function newUploadSVG() {
     createArray(1);
     const files = [];
@@ -548,7 +563,7 @@ function captureTabInModal(formName, resetFocus = true) {
             e.preventDefault();
         }
     });
-
+    console.log(form);
     // Watch for the modal to be hidden
     const observer = new MutationObserver(() => {
         if (form[0].style.display === 'none') {
