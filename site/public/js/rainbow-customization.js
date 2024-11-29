@@ -144,7 +144,10 @@ function LinkAlternateToPrimary(el) {
     alternatePercents.val(primaryPercents.val());
     alternatePoints.attr('readonly', 'readonly');
     alternatePercents.attr('readonly', 'readonly');
-    saveChanges();
+    // Save changes only if and when page is loaded
+    $(() => {
+        saveChanges();
+    });
 }
 
 // Updates the value of data-gradeableAlternate in the select element when an alternate is selected
@@ -176,7 +179,10 @@ function UpdateAlternates(el, input, primaryID) {
             }
         }
     });
-    saveChanges();
+    // Save changes only if and when page is loaded
+    $(() => {
+        saveChanges();
+    });
 }
 
 // Load alternate gradeable when page is loaded
