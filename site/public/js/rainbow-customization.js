@@ -344,6 +344,7 @@ function getGradeableBuckets() {
             // Extract each independent gradeable in the bucket
             const ids = [];
             const selector = `#gradeables-list-${type}`;
+            const primaries = [];
             $(selector).children('.gradeable-li').each(function () {
                 const gradeable = {};
 
@@ -367,6 +368,8 @@ function getGradeableBuckets() {
                 const alternate_value = $(children[4]).find(':selected').val();
                 if ($(children[4]).is(':visible') && alternate_value !== '') {
                     gradeable.alternate = alternate_value;
+                    // Keep track of what the alternate is pointing at
+                    primaries.push(alternate_value);
                 }
 
                 // Get gradeable release date
@@ -421,6 +424,11 @@ function getGradeableBuckets() {
                 }
 
                 ids.push(gradeable);
+            });
+
+            // Make alternate primaries point at themselves
+            primaries.forEach((primary) => {
+                ids.find((gradeable) => gradeable.id === primary)['alternate'] = primary;
             });
 
             // Add gradeable buckets to gradeables array
