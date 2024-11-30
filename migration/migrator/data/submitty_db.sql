@@ -480,6 +480,16 @@ CREATE TABLE public.courses_users (
 
 
 --
+-- Name: docker_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_images (
+    image_name character varying NOT NULL,
+    user_id character varying
+);
+
+
+--
 -- Name: emails; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -782,6 +792,14 @@ ALTER TABLE ONLY public.courses_users
 
 
 --
+-- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_image_name_key UNIQUE (image_name);
+
+
+--
 -- Name: emails emails_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -962,6 +980,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
