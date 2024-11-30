@@ -688,4 +688,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->expectExceptionMessage("Missing config value for ldap options: ${option}");
         $config->loadMasterConfigs($this->config_path);
     }
+
+    public function testRainbowGradesCountValidation() {
+        $config = $this->createMockConfig();
+        $this->assertFalse($config->validateRainbowGradesCounts(5, 7));
+        $this->assertTrue($config->validateRainbowGradesCounts(7, 5));
+    }
+    
 }
