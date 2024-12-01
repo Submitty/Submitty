@@ -321,10 +321,10 @@
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
-    text-shadow: black 0 0 5px !important;
+    text-shadow: black 0 0 5px;
 }
 
-[data-theme="dark"] .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+[data-theme="dark"] .active-thread-remove-expiring-announcement:hover, [data-theme="dark"] .active-thread-remove-announcement:hover, [data-theme="dark"] .current-favorite:hover {
     text-shadow: white 0 0 5px;
 }
 
