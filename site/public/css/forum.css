@@ -218,10 +218,19 @@
     -webkit-text-stroke: 1px black;
 }
 
+.not-active-thread-announcement:hover {
+    text-shadow: gold 0px 0px 5px;
+}
+
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
     color: #e0e0e0 !important;
 }
+
+.red_hover:hover {
+    text-shadow: var(--standard-medium-red) 0px 0px 5px;
+}
+
 
 /* stylelint-disable-next-line selector-class-pattern */
 .reverse_golden_hover {
@@ -309,6 +318,15 @@
 
 .active-thread-remove-announcement i.fas {
     color: var(--submitty-logo-blue) !important;
+}
+
+.active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+    text-shadow: white 0px 0px 5px;
+}
+
+.red_hover:hover, .not-active-thread-announcement:hover, .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+    display: inline-block;
+    transform: translateY(-2px);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
