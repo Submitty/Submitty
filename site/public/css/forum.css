@@ -219,7 +219,7 @@
 }
 
 .not-active-thread-announcement:hover {
-    text-shadow: gold 0px 0px 5px;
+    text-shadow: gold 0 0 5px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -227,8 +227,8 @@
     color: #e0e0e0 !important;
 }
 
-.red_hover:hover {
-    text-shadow: var(--standard-medium-red) 0px 0px 5px;
+.red-hover:hover {
+    text-shadow: var(--standard-medium-red) 0 0 5px;
 }
 
 
@@ -321,10 +321,10 @@
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
-    text-shadow: white 0px 0px 5px;
+    text-shadow: white 0 0 5px;
 }
 
-.red_hover:hover, .not-active-thread-announcement:hover, .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+.red-hover:hover, .not-active-thread-announcement:hover, .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
     display: inline-block;
     transform: translateY(-2px);
 }
