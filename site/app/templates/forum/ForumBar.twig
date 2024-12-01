@@ -26,7 +26,7 @@
 				<div class="col-6">
 					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
-				<div class="col-5">
+				<div class="col-5" style="display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; width: auto;">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 		  				Search
 					</button>
@@ -48,7 +48,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue); min-width: 120px; "title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
