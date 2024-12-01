@@ -321,6 +321,10 @@
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+    text-shadow: black 0 0 5px !important;
+}
+
+[data-theme="dark"] .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
     text-shadow: white 0 0 5px;
 }
 
