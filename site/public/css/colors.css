@@ -116,6 +116,10 @@
     --standard-pastel-blue: #d9edf7;
     --standard-light-blue: #99ccff;
     --standard-light-seafoam: #a4dad5;
+    --standard-grey: #808080;
+    --standard-orange: orange;
+    --standard-gold: gold;
+    --standard-black: black;
 
     /* the look of the webpage itself */
     --background-blue: #f6fbfe;
@@ -242,6 +246,18 @@
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
     --invisible: #00000000;
+    --attachment-image-hover: rgb(0 140 186 / 50%);
+    --attachment-image-color: #dddddd;
+    --well-blackquote-border: rgb(0 0 0 / 15%);
+    --well-border: #e3e3e3; 
+    --well-box-shadow: rgb(0 0 0 / 5%);
+    --post-hr-color: #999999;
+    --thread-announcement-expiring-color: gold;
+    --thread-lock-color: black;
+    --pinned-thread: #e0e0e0;
+    --create-thread-background: rgb(255 255 255 / 80%);
+    --post-box-color: #888888;
+    --post-viewed-btn: #dcdcdcb5;
 
     /* autograding results */
     --diff-char: var(--default-black);
