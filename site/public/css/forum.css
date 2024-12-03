@@ -237,6 +237,7 @@
     margin-top: 8px;
     margin-left: 10px;
     float: right;
+    white-space: nowrap;
 }
 
 .post-email-toggle,
@@ -561,6 +562,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
+    gap: 5px;
 }
 
 .email-announcement-checkbox {
