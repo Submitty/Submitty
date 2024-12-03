@@ -382,6 +382,7 @@ class FileUtils {
                     || $char == "\\"
                     || $char == "<"
                     || $char == ">"
+                    || $char == " "
                 ) {
                     return false;
                 }
