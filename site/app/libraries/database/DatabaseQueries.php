@@ -1258,7 +1258,7 @@ SQL;
 
     public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
-            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?) ON CONFLICT DO NOTHING", [$user_id, $thread_id]);
         }
         else {
             $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", [$user_id, $thread_id]);

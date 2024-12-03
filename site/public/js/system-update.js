@@ -11,8 +11,8 @@ async function getReleases(current_tag) {
         if (response.status !== 200) {
             // eslint-disable-next-line no-undef
             displayMessage(' Failed to get latest version info.'
-            + ` (Status Code : ${response.status.toString()})<br>`
-            + `Message : ${response.statusText}`, 'error',
+                + ` (Status Code : ${response.status.toString()})<br>`
+                + `Message : ${response.statusText}`, 'error',
             );
             console.error('Got bad response:', response);
         }

@@ -4,7 +4,7 @@
 <a class="skip-btn key_to_click" href="#reply_box_{{post_box_id}}" onclick="$('#reply_box_{{post_box_id}}').focus(); return false;">Skip to reply</a>
 {% for post_d in  post_data %}
 
-    {% if (post_d.userGroup <= 3 or post_d.post.author_user_id == post_d.current_user) and post_d.first %}
+    {% if (post_d.userGroup <= 3 or post_d.post.author.id == post_d.current_user) and post_d.first %}
         {% set show_unresolve = true %}
     {% endif %}
 

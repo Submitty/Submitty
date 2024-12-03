@@ -28,7 +28,6 @@ class Post {
     #[ORM\JoinColumn(name: "thread_id", referencedColumnName: "id", nullable: false)]
     protected Thread $thread;
 
-
     #[ORM\ManyToOne(targetEntity: Post::class, inversedBy: "children")]
     #[ORM\JoinColumn(name: "parent_id", referencedColumnName: "id")]
     protected ?Post $parent;
@@ -95,13 +94,14 @@ class Post {
      * We are free to make constructors for "empty" or "junk" posts.
      */
 
-    public function __construct(Thread $merged_thread) {
+    public function __construct(Thread $empty_thread) {
         $this->content = '';
         $this->render_markdown = false;
-        $this->author = $merged_thread->getAuthor();
-        $this->thread = $merged_thread;
+        $this->author = $empty_thread->getAuthor();
+        $this->thread = $empty_thread;
         $this->deleted = false;
         $this->anonymous = true;
+        $this->timestamp = new DateTime("0000-00-00");
         $this->id = -1;
     }
 
