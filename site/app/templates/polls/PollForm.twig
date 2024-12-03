@@ -112,15 +112,15 @@
             </label>
             <div class="poll-input">
                 <label for="poll-hours" class="option"> Hours </label><br>
-                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
+                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" onchange="changeTimerDisplay()"/>
             </div>
             <div class="poll-input">
                 <label for="poll-minutes" class="option"> Minutes </label><br>
-                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}"/>
+                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}" onchange="changeTimerDisplay()"/>
             </div>
             <div class="poll-input">
                 <label for="poll-seconds" class="option"> Seconds </label><br>
-                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}"/>
+                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}" onchange="changeTimerDisplay()"/>
             </div>
         </div>
         <br>
@@ -242,6 +242,34 @@
                 fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
             }
         });
+
+    function changeTimerDisplay() {
+        const hoursInput = $("#poll-hours");
+        const minutesInput = $("#poll-minutes");
+        const secondsInput = $("#poll-seconds");
+
+        let hours = Number(hoursInput.val()) || 0;
+        let minutes = Number(minutesInput.val()) || 0;
+        let seconds = Number(secondsInput.val()) || 0;
+
+        if (seconds >= 60) {
+            minutes += Math.floor(seconds/60);
+            seconds = seconds % 60;
+        }
+        if (minutes >= 60) {
+            hours += Math.floor(minutes/60);
+            minutes = minutes % 60;
+        }
+        if (hours > 24) {
+            hours = 24;
+            minutes = 0;
+            seconds = 0;
+        }
+        hoursInput.val(hours);
+        minutesInput.val(minutes);
+        secondsInput.val(seconds);
+    }
+
     function changePollType() {
         let count = $(".option_id").length;
         if ($("#poll-type-single-response-survey").is(":checked")
