@@ -83,7 +83,9 @@ class AdminGradeableController extends AbstractController {
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
         }
-
+        if (isset($_POST['rubric'])) {
+            $values['rubric'] = $_POST['rubric'];
+        }
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
@@ -126,9 +128,9 @@ class AdminGradeableController extends AbstractController {
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
-            $values['ta_grading'] = $_POST['ta_grading'];
+            $values['ta_grading'] = $_POST['ta_grading'] ? 'true' : 'false';
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ? 'true' : 'false';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
             }
         }
@@ -203,7 +205,7 @@ class AdminGradeableController extends AbstractController {
      *     autograding_config_path: string|mixed,
      *     bulk_upload: boolean,
      *     team_gradeable?: array{
-     *         team_max_size: int,
+     *         team_size_max: int,
      *         inherit_from: string|mixed,
      *     },
      *     ta_grading?: boolean,
@@ -246,7 +248,7 @@ class AdminGradeableController extends AbstractController {
             $return_json['bulk_upload'] = $gradeable->isBulkUpload();
             if ($gradeable->isTeamAssignment()) {
                 $team_properties = [
-                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'team_size_max' => $gradeable->getTeamSizeMax(),
                     'inherit_from' => ''
                 ];
                 $return_json['team_gradeable'] = $team_properties;
@@ -310,6 +312,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
             $dates['late_days'] = $gradeable->getLateDays();
             $return_json['dates'] = $dates;
+            $return_json['rubric'] = $gradeable->exportComponents();
         }
         return $return_json;
     }
@@ -1284,8 +1287,15 @@ class AdminGradeableController extends AbstractController {
             );
         }
 
-        // Generate a blank component to make the rubric UI work properly
-        $this->genBlankComponent($gradeable);
+        if (isset($details['rubric'])) {
+            foreach ($details['rubric'] as $component) {
+                $gradeable->importComponent($component);
+            }
+        }
+        else {
+            // Generate a blank component to make the rubric UI work properly
+            $this->genBlankComponent($gradeable);
+        }
 
         // Save the gradeable to the database
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
