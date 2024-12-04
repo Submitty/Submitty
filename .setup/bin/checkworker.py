@@ -14,6 +14,8 @@ CONF_DIR = os.path.abspath(CURRENT_DIR + "../../../config")
 
 def is_worker():
     worker = 0
+    if os.environ['WORKER'] and not (os.environ['WORKER'] == 0):
+        return 1
 
     try:
         # Read the JSON file from CONF_DIR
