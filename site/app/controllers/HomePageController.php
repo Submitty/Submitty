@@ -111,6 +111,7 @@ class HomePageController extends AbstractController {
      */
     #[Route("/home")]
     public function showHomepage() {
+        throw new \Exception();
         $courses = $this->getCourses()->json_response->json;
 
         return new MultiResponse(

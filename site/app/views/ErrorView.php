@@ -5,7 +5,8 @@ namespace app\views;
 class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {
         return $this->core->getOutput()->renderTwigTemplate("error/ExceptionPage.twig", [
-            "error_message" => $error_message
+            "error_message" => $error_message,
+            "user_id" => $this->core->getUser()->getId()
         ]);
     }
 
