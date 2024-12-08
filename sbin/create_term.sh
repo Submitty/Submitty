@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # This script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"
@@ -19,6 +21,7 @@ if [ -d ${DATABASE_HOST} ]; then
     CONN_STRING="${CONN_STRING} -p ${DATABASE_PORT}"
 fi
 
+set +e
 # Check that Submitty Master DB exists.
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
@@ -33,6 +36,7 @@ if [[ $table_count -ne "1" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit 4
 fi
+set -e 
 
 amend=0
 if [ "${1}" = "-a" ] || [ "${1}" = "--amend" ]; then
@@ -67,6 +71,7 @@ if ! [[ $end =~ $regex ]] ; then
     exit 5
 fi
 
+set +e
 # Validate that start and end dates are actual calendar dates.
 date -d $start > /dev/null 2>&1
 if [[ $? -ne "0" ]] ; then
@@ -97,6 +102,7 @@ if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to INSERT $([ ${amend} -eq 1 ] && echo 'or AMEND ')new term into master DB."
     exit 6
 fi
+set -e
 
 echo "'${semester}' term has been INSERTed $([ ${amend} -eq 1 ] && echo 'or AMENDed ')into the master DB."
 echo "You may now create courses for the '${semester}' term."

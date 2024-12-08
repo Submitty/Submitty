@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 
 which_test_dir=$1
 SUBMITTY_INSTALL_DIR=$2
@@ -8,6 +9,7 @@ CONFIGURE_BIN=$3
 config_directory=${which_test_dir}/assignment_config
 GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
 
+set +e
 # Use the C Pre-Processor to strip the C & C++ comments from config.json
 cpp ${config_directory}/config.json ${config_directory}/complete_config.json
 cpp_res=$?
@@ -31,6 +33,7 @@ if (( $configure_res != 0 )); then
     echo -e "\nFailed to create a complete_config.json"
     exit 1
 fi
+set -e
 
 # Remove the intermediate config
 rm ${config_directory}/complete_config.json
