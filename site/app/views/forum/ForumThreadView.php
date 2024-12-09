@@ -703,7 +703,8 @@ class ForumThreadView extends AbstractView {
                 "tooltip" => $tooltip,
                 "is_locked" => $thread->isLocked(),
                 "date" => $date_content,
-                "current_user_posted" => $thread->getAuthor()->getId() === $current_user,
+                "sum_ducks" => $thread_duck_list[$thread['id']],
+                "current_user_posted" => $thread->getAuthor()->getId() === $current_user
             ];
 
             if ($is_full_page) {
@@ -736,7 +737,7 @@ class ForumThreadView extends AbstractView {
                     "render_markdown" => $first_post->isRenderMarkdown(),
                     "author_info" => $author_info,
                     "deleted" => $first_post->isDeleted(),
-                    "sum_ducks" => $thread->getSumUpducks()
+
                 ]);
             }
             $thread_content[] = $thread_info;
