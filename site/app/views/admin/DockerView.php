@@ -18,24 +18,22 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $docker_ui->getAutogradingContainers(),
                 "capabilities" => $docker_ui->getCapabilities(),
-                "worker_machines" => $docker_ui->getWorkerMachineNames(),
+                "worker_machines" => $docker_ui->getWorkerMachines(),
                 "no_image_capabilities" => $docker_ui->getNoImageCapabilities(),
-                "image_to_capability" => $docker_ui->getImageToCapabilitiyMapping(),
-                "capability_to_color" => $docker_ui->getCapabilityToColorMapping(),
+                "capability_to_color_mapping" => $docker_ui->getCapabilityToColorMapping(),
                 "admin_url" => $this->core->buildUrl(["admin"]),
                 "last_updated" => $docker_ui->getLastRan(),
-                "sysinfo_last_updated" => $sysinfo_last_updated,
-                "machine_to_update" => $machine_to_update,
-                "image_info" => $image_info,
-                "machine_docker_version" => $machine_docker_version,
-                "machine_system_details" => $machine_system_details,
-                "aliases" => $aliases,
+                "sysinfo_last_updated" => $docker_ui->getSysinfoLastUpdated(),
+                "docker_images" => $docker_ui->getDockerImages(),
+                // "machine_to_update" => $machine_to_update,
+                // "image_info" => $image_info,
+                //"machine_docker_version" => $machine_docker_version,
+                //"machine_system_details" => $machine_system_details,
                 "fail_images" => $fail_images ?? [],
                 "error_logs" => $docker_ui->getErrorLogs(),
             ]

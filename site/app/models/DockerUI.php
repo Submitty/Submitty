@@ -3,23 +3,123 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
-
+use app\libraries\Logger;
+//re-using the php parseError, this is typically used internally but for now using for errors related to parsing logs
 use ParseError;
+use Exception;
+
+/**
+ * Simple class to represent a worker machine
+ */
+class Worker {
+    /** The name of this worker */
+    public string $name;
+    /** number of workers this machine has */
+    public int $num_autograding_workers;
+    /** What capabilities this worker has */
+    public array $capabilities;
+    /** Is this woker enabled or not */
+    public bool $is_enabled;
+    /** Set after parsing logs if this machine could not be updated */
+    public bool $failed_to_update;
+    /** Docker version on the machine */
+    public string $docker_version;
+    /** System information parsed from sysinfo logs */
+    public ?WorkerSystemInformation $system_information;
+    /** Create a new Worker object */
+    public function __construct(string $name, int $num_autograding_workers, array $capabilities, bool $is_enabled) {
+        $this->name = $name;
+        $this->num_autograding_workers = $num_autograding_workers;
+        $this->capabilities = $capabilities;
+        $this->is_enabled = $is_enabled;
+        //these pieces of information are known later in the parsing
+        $this->failed_to_update = false;
+        $this->system_information = null;
+        // this is taken from the docker logs parsed earlier and associated after the worker obj is created
+        $this->docker_version = "Unknown";
+    }
+}
+
+/**
+ * Store information about a worker system information, this comes from system log information 
+ * instead of configuration
+ */
+class WorkerSystemInformation {
+    /** Name of worker machine this information is associated with */
+    public string $associated_worker; 
+    /** State of worker_service */
+    public string $worker_service;
+    /** State of worker_service */
+    public ?string $shipper_service;
+    /** State of worker_service */
+    public ?string $daemon_service;
+    /** Disk usage in percetange */
+    public string $disk_usage;
+    /** String with a unix load average
+     * See https://www.gnu.org/software/coreutils/manual/html_node/uptime-invocation.html#uptime-invocation 
+     * For understanding the load numbers
+     */
+    public string $load;
+    /** operating system of the worker */
+    public string $os;
+
+    /** Create a new WorkerSystemInformation object */
+    public function __construct(string $associated_worker, string $worker_service, string $shipper_service, string $daemon_service, 
+        string $disk_usage, string $load, string $os) {
+
+        $this->associated_worker = $associated_worker;
+        $this->worker_service = $worker_service;
+        $this->shipper_service = $shipper_service;
+        $this->daemon_service = $daemon_service;
+        $this->disk_usage = $disk_usage;
+        $this->load = $load;
+        $this->os = $os;
+    }
+
+    /** 
+     * Given an associative array of worker system information and the worker name, convert it to a class and 
+     * perform null checks over the data
+     */
+    public static function fromArray(array $data, string $name): self {
+        return new self(
+            $name, 
+            $data['worker'] ?? 'No status collected',
+            $data['shipper'] ?? null,
+            $data['daemon'] ?? null,
+            $data['disk'] ?? 'No status collected',
+            $data['load'] ?? 'No status collected',
+            $data['os'] ?? 'No status collected',
+        );
+    }
+}
 
 /** 
  * Simple class to represent docker image from parsed information
  */
 class DockerImage {
+    /** The Docker image ID */
     public string $id;
+    /** Date of creation, reported by Docker */
     public \DateTime $created;
-    public string $size;
-
+    /** Human readable timestamp from the date of creation */
+    public string $created_timestamp;
+    /** size of the image in human readable format */
+    public string $size_mb;
+    /** The name:tag of the image */
+    public string $primary_name;
+    /** Any other name:tags that also point to this image */
+    public array $aliases = [];
+    /** What Submitty capabilities this image is associated with */
+    public array $capabilities = [];
+    /** Create a new DockerImage object*/
     public function __construct(string $id, \DateTime $created, string $size) {
         $this->id = $id;
         $this->created = $created;
-        $this->size = $size;
+        $this->created_timestamp = DateUtils::dateTimeToString($created);
+        $this->size_mb = $size;
     }
 
     /** 
@@ -60,36 +160,49 @@ class DockerImage {
 /**
  * Represents the data parsed from the docker autograding and worker json files
  * 
- * @method string getWorkerMachineNames()
  * @method string getCapabilities()
  * @method string getNoImageCapabilities()
- * @method string getWorkerMachineNames()
- * @method string getImageToCapabilityMapping()
- * @method string getCapabilityToColorMapping()
+ * @method array getWorkerMachines()
+ * @method array getCapabilityToColorMapping()
  * @method string getLastRan()
+ * @method string getSysinfoLastUpdated()
  * @method array getErrorLogs()
+ * @method array getDockerImages()
  */
 class DockerUI extends AbstractModel {
     /** Json data passed in */
     private array $json_data;
     /** List of worker machine names */
-    protected array $worker_machine_names;
+    protected array $worker_machines;
     /** List of capability tags */
     protected array $capabilities;
     /** List of capabilities unassociated with any container */
     protected array $no_image_capabilities;
-    /** Mapping between images to capabilities */
-    protected array $image_to_capability_mapping;
     /** Mapping between capabilities and the color to draw their badge */
     protected array $capability_to_color_mapping;
-    /** Human readable string of when the docker and sysinfo logs were last parsed */
+    /** Human readable string of when the docker logs generated by Submitty were last parsed */
     protected string $last_ran = "Unknown";
+    /** Human readable string of when the sysinfo logs were last parsed */
+    protected string $sysinfo_last_updated = "unknown";
     /** List of errors from parsing log files  */
     protected array $error_logs = [];
     /** location of where the sysinfo log files generated by Submitty are located */
     private string $sysinfo_filepath;
     /** location of where logs generated by Submitty related to docker are located */
     private string $docker_logpath;
+    /** A list of \DockerImages */
+    protected array $docker_images = [];
+    private array $fail_images;
+    /** Mapping between images to which Submitty capabilities they are associated with */
+    private array $image_to_capability_mapping;
+    private array $machineSystemDetails;
+    /** 
+     * Mapping between workers and the docker version they run, this is collected from the 
+     * docker logs but displayed later in the worker machines table
+     */
+    private array $worker_docker_versions = [];
+
+
     /** Create a new docker UI object from the json data read from the filesystem */
     public function __construct(Core $core, array $json) {
         parent::__construct($core);
@@ -102,8 +215,15 @@ class DockerUI extends AbstractModel {
         $this->docker_logpath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker");
 
         $this->json_data = $json;
-        $this->parseWorkersAndCapabilities($this->json_data['autograding_containers'], $this->json_data['autograding_workers']);
-        $this->parseDockerLogs();
+
+        try {
+            $this->parseWorkersAndCapabilities($this->json_data['autograding_containers'], $this->json_data['autograding_workers']);
+            $this->parseDockerLogs();
+            $this->parseSystemInformationLogs();
+        } catch (Exception $e) {
+            $this->error_logs[] = $e->getMessage();
+            Logger::error($e->getMessage());
+        }
     }
 
     /** Return a list of autograding worker names */
@@ -119,15 +239,14 @@ class DockerUI extends AbstractModel {
         
         foreach ($autograding_workers as $name => $worker) {
             //worker with some defaults
-            $worker_temp = [
-                'name' => $name,
-                'num_autograding_workers' => $worker['num_autograding_workers'] ?? 0,
-                'enabled' => $worker['enabled'] ?? false,
-                'capabilities' => $worker['capabilities'] ?? [],
-                'images_not_found' => [],
-            ];
+            $worker_temp = new Worker(
+                $name,
+                $worker['num_autograding_workers'] ?? 0,
+                $worker['capabilities'] ?? [],
+                $worker['enabled'] ?? false,
+            );
 
-            foreach ($worker_temp['capabilities'] as $capability) {
+            foreach ($worker_temp->capabilities as $capability) {
                 $capabilities[] = $capability;
     
                 if (isset($autograding_containers[$capability])) {
@@ -136,19 +255,16 @@ class DockerUI extends AbstractModel {
                     }
                 } else {
                     $no_image_capabilities[] = $capability;
-                    $workerTemp['images_not_found'][] = $capability;
                 }
             }
 
-            $this->worker_machine_names[] = $worker_temp;
+            $this->worker_machines[] = $worker_temp;
         }
 
         sort($capabilities);
         $this->capabilities = array_unique($capabilities);
         //deduplicate capability lists
         $this->no_image_capabilities = array_unique($no_image_capabilities);
-        $this->image_to_capability_mapping = array_map('array_unique', $image_to_capability);
-
         foreach ($image_to_capability as $image => $map) {
             $image_to_capability[$image] = array_unique($map);
         }
@@ -177,22 +293,23 @@ class DockerUI extends AbstractModel {
 
         $most_recent = max($array_list);
         $content = file_get_contents(FileUtils::joinPaths($this->docker_logpath, $most_recent));
-        if($content === false) {
+        if($content === false || strlen($content) <= 35) {
             //the docker log file is probably being written or is in the process of being written, exit now 
             //and the next time the user loads the page it will be attempted to be read again
             return; 
         }
 
+        //each subsequent update on the same day will append to the same docker log, navigate to the last update block and parse that
         $content = rtrim($content);
         $contentStart = strrpos($content, "[Last ran", -35);
-        $contentStart = $contentStart === false ? 0 : $contentStart + 10;
-        $content = substr($content, $contentStart);
+        $contentStart = $contentStart === false ? 0 : $contentStart;
+        $content = substr($content, $contentStart + 10);
 
         $buffer = strtok($content, "\n");
-        $current_machine = "";
+        $current_machine = null;
 
         while ($buffer !== false) {
-            $this->parseLogLine($buffer, $currentMachine);
+            $this->parseLogLine($buffer, $current_machine);
             if (preg_last_error() != PREG_NO_ERROR) {
                 $error_logs[] = "Error while parsing the logs";
                 break;
@@ -202,142 +319,178 @@ class DockerUI extends AbstractModel {
         
     }
 
-    /** Helper function to parse docker logs, updates currentMachine if applicable */
-    private function parseLogLine(string $line, string &$currentMachine): void {
+    /** 
+     * Helper function to parse docker logs, returns an updated current_machine if applicable 
+     * If parsing the description or docker version, the current_machine is expected to be known at that point
+     **/
+    private function parseLogLine(string $line, ?string $current_machine): ?string {
         $matches = [];
-    
-        // Match patterns
-        if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $line, $matches) === true) {
-            $this->lastRan = $matches[1];
-        } elseif (preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $line, $matches) === true) {
-            $this->machineToUpdate[$matches[1]] = false;
-            $this->errorLogs[] = $line;
-        } elseif (preg_match("/ERROR: Could not pull (.+)/", $line, $matches) === true) {
-            $this->failImages = $matches[1];
-            $this->errorLogs[] = $line;
-        } elseif (preg_match("/UPDATE MACHINE: (.+)/", $line, $matches) === true) {
-            $currentMachine = $matches[1];
-        } elseif (preg_match("/Description:\t(.+)/", $line, $matches) === true) {
-            $this->machineSystemDetails[$currentMachine]['os'] = $matches[1] ?? null;
-        } elseif (preg_match("/Docker Version: (.+)/", $line, $matches) === true) {
-            $this->machineDockerVersion[$currentMachine] = $matches[1];
-        } elseif (preg_match("/Tag: (.+)/", $line, $matches) === true) {
-            $this->parseImageDetails($line, $matches[1]);
-        } elseif (preg_match("/APIError was raised./", $line) === true) {
-            $this->errorLogs[] = "APIError has occurred, please update the machines.";
+        // Match patterns, preg_match returns 1 on match
+        if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $line, $matches) === 1) {            
+            $this->last_ran = $matches[1];
+        } elseif (preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $line, $matches) === 1) {
+            $this->setWorkerToFailure($matches[1]);
+            $this->error_logs[] = $line;
+        } elseif (preg_match("/ERROR: Could not pull (.+)/", $line, $matches) === 1) {
+            $this->fail_images[] = $matches[1];
+            $this->error_logs[] = $line;
+        } elseif (preg_match("/UPDATE MACHINE: (.+)/", $line, $matches) === 1) {
+            $current_machine = $matches[1];
+        } elseif (preg_match("/Description:\t(.+)/", $line, $matches) === 1 && $current_machine !== null) {
+            $this->machineSystemDetails[$current_machine]['os'] = $matches[1] ?? null;
+        } elseif (preg_match("/Docker Version: (.+)/", $line, $matches) === 1  && $current_machine !== null) {
+            $this->worker_docker_versions[$current_machine] = $matches[1];
+        } elseif (preg_match("/Tag: (.+)/", $line, $matches) === 1) {
+            $this->parseImageDetails($matches[1]);
+        } elseif (preg_match("/APIError was raised./", $line) === 1) {
+            $this->error_logs[] = "APIError has occurred, please update the machines.";
+        }
+
+        return $current_machine;
+    }
+
+    /** Search for a worker by name and set its status to 'failed to update' */
+    private function setWorkerToFailure(string $target_name) {
+        foreach($this->worker_machines as &$worker) {
+            if($worker->name == $target_name) {
+                $worker->failed_to_update = true;
+                break;
+            }
         }
     }
 
     /** helper function to parse image information */
-    private function parseImageDetails(string $line, string $tags): void {
-        $imageArr = explode(", ", $tags);
-        $currentImage = array_shift($imageArr);
-    
-        $this->aliases[$currentImage] = array_merge([$currentImage], $imageArr);
-        foreach ($imageArr as $image) {
-            $this->aliases[$image][] = $currentImage;
-        }
-    
+    private function parseImageDetails(string $tags): void {
+        $image_array = explode(", ", $tags);    
         // Read next three lines for additional details
         $image = $this->readImageDetails();
-        foreach ($this->aliases[$currentImage] as $alias) {
-            $this->imageInfo[$alias] = $image;
+
+        //take the first name in the list of name:tags and use that as the primary
+        $image->primary_name = array_shift($image_array);
+        $image->aliases = $image_array;
+        if(array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
+            $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
+
+        $this->docker_images[] = $image;
     }
 
     /** Collect the details of an image and return them in a map, in the future a class should represent the return */
     private function readImageDetails(): DockerImage {
-        $logLines = [];
+        $log_lines = [];
+        
         for ($i = 0; $i < 3; $i++) {
             $line = strtok("\n");
             if ($line === false) {
                 throw new ParseError("Unexpected end of log while reading image details.");
             }
-            $logLines[] = $line;
+
+            $log_lines[] = $line;
         }
 
-        return DockerImage::fromLog($logLines);
+        return DockerImage::fromLog($log_lines);
     }
 
     private function parseSystemInformationLogs(): void {
-        if (count($sysinfo_files) > 2) {
-            $sysinfo_most_recent = max($sysinfo_files);
-            $sysinfo_content = file_get_contents(
-                FileUtils::joinPaths(
-                    $this->core->getConfig()->getSubmittyPath(),
-                    "logs/sysinfo",
-                    $sysinfo_most_recent
-                )
-            );
+        $sysinfo_files = scandir($this->sysinfo_filepath);
+        if($sysinfo_files === false) {
+           throw new ParseError("Failed to scandir at path '" . $this->sysinfo_filepath . "'" ); 
+        }
 
-            if ($sysinfo_content) {
-                $sysinfo_content = rtrim($sysinfo_content);
-                $sysinfo_2rpos = strrpos($sysinfo_content, "[Last ran", -45);
-                if ($sysinfo_2rpos === false) {
-                    $sysinfo_2rpos = 0;
-                }
-                $sysinfo_content = substr($sysinfo_content, $sysinfo_2rpos + 10);
-                $buffer = strtok($sysinfo_content, "\n");
-                $current_machine = "";
+        //ignore the '.' and '..' directories, if there are no files to parse, nothing to do, exit
+        if(count($sysinfo_files) <= 2) {
+            return;
+        }
 
-                while ($buffer !== false) {
-                    $matches = [];
+        $sysinfo_most_recent = max($sysinfo_files);
+        $sysinfo_content = file_get_contents(FileUtils::joinPaths($this->sysinfo_filepath, $sysinfo_most_recent));
 
-                    $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $current_machine = $matches[1];
-                        $machine_system_details[$current_machine]["worker"] = null;
-                        $machine_system_details[$current_machine]["shipper"] = null;
-                        $machine_system_details[$current_machine]["daemon"] = null;
-                        $machine_system_details[$current_machine]["disk"] = null;
-                        $machine_system_details[$current_machine]["load"] = null;
-                        $machine_system_details[$current_machine]["os"] ??= null;
-                    }
+        if ($sysinfo_content === false || strlen($sysinfo_content) <= 45) {
+            //the system info log file is probably being written or is in the process of being written, exit now 
+            //and the next time the user loads the page it will be attempted to be read again
+            return; 
+        }
 
-                    $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["worker"] = $matches[1];
-                    }
+        //each subsequent update on the same day will append to the same docker log, navigate to the last update block and parse that
+        $sysinfo_content = rtrim($sysinfo_content);
+        $contentStart = strrpos($sysinfo_content, "[Last ran", -45);
+        $contentStart = $contentStart === false ? 0 : $contentStart;
+        $sysinfo_content = substr($sysinfo_content, $contentStart + 10);
+        
+        $buffer = strtok($sysinfo_content, "\n");
+        //the first line is expected to be "---", consume that to get to the start of the block
+        $buffer = strtok("\n");
+        $current_machine = null;
 
-                    $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["shipper"] = $matches[1];
-                    }
+        $machine_system_details = [];
+        while ($buffer !== false) {
+            $matches = [];
+            var_dump($buffer);
 
-                    $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
-                    if ($is_match && $matches[1] != "Service Not Found") {
-                        $machine_system_details[$current_machine]["daemon"] = $matches[1];
-                    }
+            $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
+            if (preg_match("/System Info :: (.+)/", $buffer, $matches) === 1) {
+                $current_machine = $matches[1];
+            }
 
-                    $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_system_details[$current_machine]["disk"] = $matches[1];
-                    }
+            if($current_machine === null) {
+                //if have not set the current_machine at this point, assume the log file is bad
+                $this->error_logs[] = "Failed to parse system information logs, never saw System info line";
+                break;
+            }
 
-                    $is_match = preg_match("/System Load: \((.+)\)/", $buffer, $matches);
-                    if ($is_match) {
-                        $machine_system_details[$current_machine]["load"] = $matches[1];
-                    }
+            $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
+            if ($is_match === 1 && $matches[1] != "Service Not Found") {
+                $machine_system_details[$current_machine]["worker"] = $matches[1];
+            }
 
-                    $is_match = preg_match("/^\[Last ran on: (.+)\]/", $buffer, $matches);
-                    if ($is_match) {
-                        $sysinfo_last_updated = $matches[1];
-                    }
+            $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
+            if ($is_match === 1 && $matches[1] != "Service Not Found") {
+                $machine_system_details[$current_machine]["shipper"] = $matches[1];
+            }
 
-                    $is_match = preg_match("/ERR:/", $buffer, $matches);
-                    if ($is_match) {
-                        $error_logs[] = "Failed to update system info";
-                    }
+            $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
+            if ($is_match === 1 && $matches[1] != "Service Not Found") {
+                $machine_system_details[$current_machine]["daemon"] = $matches[1];
+            }
 
-                    if (preg_last_error() != PREG_NO_ERROR) {
-                        $error_logs[] = "Error while parsing system info logs";
-                        break;
-                    }
+            $is_match = preg_match("/Disk Usage: (.+)/", $buffer, $matches);
+            if ($is_match === 1) {
+                $machine_system_details[$current_machine]["disk"] = $matches[1];
+            }
 
-                    $buffer = strtok("\n");
+            $is_match = preg_match("/System Load: \((.+)\)/", $buffer, $matches);
+            if ($is_match === 1) {
+                $machine_system_details[$current_machine]["load"] = $matches[1];
+            }
+
+            if (preg_match("/^\[Last ran on: (.+)\]/", $buffer, $matches) === 1) {
+                $this->sysinfo_last_updated = $matches[1];
+            }
+
+            if (preg_match("/ERR:/", $buffer, $matches) === 1) {
+                $error_logs[] = "Failed to update system info";
+            }
+
+            if (preg_last_error() != PREG_NO_ERROR) {
+                $this->error_logs[] = "Error while parsing system info logs";
+                break;
+            }
+
+            $buffer = strtok("\n");
+        }
+
+        foreach($machine_system_details as $key => $value) {
+            $worker_info = WorkerSystemInformation::fromArray($value, $key);
+            //now find the worker and append the information parsed to it
+            foreach($this->worker_machines as &$worker) {
+                if($worker->name == $key) {
+                    $worker->system_information = $worker_info;
+                    $worker->docker_version = $this->worker_docker_versions[$key] ?? "Unknown";
+                    break;
                 }
             }
         }
+        
     }
 
 }
