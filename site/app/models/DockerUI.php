@@ -27,6 +27,8 @@ class Worker {
     public bool $failed_to_update;
     /** Docker version on the machine */
     public string $docker_version;
+    /** OS of the machine */
+    public string $os;
     /** System information parsed from sysinfo logs */
     public ?WorkerSystemInformation $system_information;
     /** Create a new Worker object */
@@ -38,8 +40,9 @@ class Worker {
         //these pieces of information are known later in the parsing
         $this->failed_to_update = false;
         $this->system_information = null;
-        // this is taken from the docker logs parsed earlier and associated after the worker obj is created
+        // this information is taken from the docker logs parsed earlier and associated after the worker obj is created
         $this->docker_version = "Unknown";
+        $this->os = "Unknown";
     }
 }
 
@@ -68,7 +71,7 @@ class WorkerSystemInformation {
 
     /** Create a new WorkerSystemInformation object */
     public function __construct(string $associated_worker, string $worker_service, string $shipper_service, string $daemon_service, 
-        string $disk_usage, string $load, string $os) {
+        string $disk_usage, string $load) {
 
         $this->associated_worker = $associated_worker;
         $this->worker_service = $worker_service;
@@ -76,7 +79,6 @@ class WorkerSystemInformation {
         $this->daemon_service = $daemon_service;
         $this->disk_usage = $disk_usage;
         $this->load = $load;
-        $this->os = $os;
     }
 
     /** 
@@ -90,8 +92,7 @@ class WorkerSystemInformation {
             $data['shipper'] ?? null,
             $data['daemon'] ?? null,
             $data['disk'] ?? 'No status collected',
-            $data['load'] ?? 'No status collected',
-            $data['os'] ?? 'No status collected',
+            $data['load'] ?? 'No status collected'
         );
     }
 }
@@ -195,12 +196,16 @@ class DockerUI extends AbstractModel {
     private array $fail_images;
     /** Mapping between images to which Submitty capabilities they are associated with */
     private array $image_to_capability_mapping;
-    private array $machineSystemDetails;
     /** 
      * Mapping between workers and the docker version they run, this is collected from the 
      * docker logs but displayed later in the worker machines table
      */
     private array $worker_docker_versions = [];
+    /** 
+     * Mapping between workers and the os they have, this is collected from the 
+     * docker logs but displayed later in the worker machines table
+     */
+    private array $worker_os_names = [];
 
 
     /** Create a new docker UI object from the json data read from the filesystem */
@@ -309,7 +314,7 @@ class DockerUI extends AbstractModel {
         $current_machine = null;
 
         while ($buffer !== false) {
-            $this->parseLogLine($buffer, $current_machine);
+            $current_machine = $this->parseLogLine($buffer, $current_machine);
             if (preg_last_error() != PREG_NO_ERROR) {
                 $error_logs[] = "Error while parsing the logs";
                 break;
@@ -337,7 +342,7 @@ class DockerUI extends AbstractModel {
         } elseif (preg_match("/UPDATE MACHINE: (.+)/", $line, $matches) === 1) {
             $current_machine = $matches[1];
         } elseif (preg_match("/Description:\t(.+)/", $line, $matches) === 1 && $current_machine !== null) {
-            $this->machineSystemDetails[$current_machine]['os'] = $matches[1] ?? null;
+            $this->worker_os_names[$current_machine] = $matches[1];
         } elseif (preg_match("/Docker Version: (.+)/", $line, $matches) === 1  && $current_machine !== null) {
             $this->worker_docker_versions[$current_machine] = $matches[1];
         } elseif (preg_match("/Tag: (.+)/", $line, $matches) === 1) {
@@ -391,6 +396,7 @@ class DockerUI extends AbstractModel {
         return DockerImage::fromLog($log_lines);
     }
 
+    /** Parse the logs under the sysinfo dir for worker machine info */
     private function parseSystemInformationLogs(): void {
         $sysinfo_files = scandir($this->sysinfo_filepath);
         if($sysinfo_files === false) {
@@ -415,8 +421,7 @@ class DockerUI extends AbstractModel {
         $sysinfo_content = rtrim($sysinfo_content);
         $contentStart = strrpos($sysinfo_content, "[Last ran", -45);
         $contentStart = $contentStart === false ? 0 : $contentStart;
-        $sysinfo_content = substr($sysinfo_content, $contentStart + 10);
-        
+        $sysinfo_content = substr($sysinfo_content, $contentStart + 10);        
         $buffer = strtok($sysinfo_content, "\n");
         //the first line is expected to be "---", consume that to get to the start of the block
         $buffer = strtok("\n");
@@ -425,7 +430,6 @@ class DockerUI extends AbstractModel {
         $machine_system_details = [];
         while ($buffer !== false) {
             $matches = [];
-            var_dump($buffer);
 
             $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
             if (preg_match("/System Info :: (.+)/", $buffer, $matches) === 1) {
@@ -433,9 +437,9 @@ class DockerUI extends AbstractModel {
             }
 
             if($current_machine === null) {
-                //if have not set the current_machine at this point, assume the log file is bad
-                $this->error_logs[] = "Failed to parse system information logs, never saw System info line";
-                break;
+                //if have not set the current_machine at this point, keep consuming lines until we see it
+                $buffer = strtok("\n");
+                continue;
             }
 
             $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
@@ -486,6 +490,7 @@ class DockerUI extends AbstractModel {
                 if($worker->name == $key) {
                     $worker->system_information = $worker_info;
                     $worker->docker_version = $this->worker_docker_versions[$key] ?? "Unknown";
+                    $worker->os = $this->worker_os_names[$key] ?? "Unknown";
                     break;
                 }
             }

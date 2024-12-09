@@ -41,7 +41,7 @@
             <td>{{worker.num_autograding_workers}}</td>
             <td data-testid="system-info">
                 {% if worker.system_information is not null %}
-                    {{ worker.system_information.os }} <br />
+                    OS: {{ worker.os }} <br />
                     Disk Usage: {{ worker.system_information.disk_usage }} <br/>
                     Load: {{ worker.system_information.load }} <br />
                     Worker: {{ worker.system_information.worker_service }} <br/>
