@@ -2656,3 +2656,38 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'POST',
+        url: url,
+        data: { post_id: post_id, csrf_token: csrfToken },
+        dataType: 'json',
+        success: function(data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                } else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+        error: function() {
+            displayErrorMessage('Something went wrong while trying to display who liked this post. Please try again.');
+        }
+    });
+}
