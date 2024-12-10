@@ -703,7 +703,7 @@ class ForumThreadView extends AbstractView {
                 "tooltip" => $tooltip,
                 "is_locked" => $thread->isLocked(),
                 "date" => $date_content,
-                "sum_ducks" => $thread_duck_list[$thread['id']],
+                "sum_ducks" =>$thread->getSumUpducks(),
                 "current_user_posted" => $thread->getAuthor()->getId() === $current_user
             ];
 
