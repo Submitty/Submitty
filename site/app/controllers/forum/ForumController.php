@@ -1445,6 +1445,22 @@ class ForumController extends AbstractController {
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
     }
+    
+
+
+    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["POST"])]
+    public function getPostLikesDetails(): JsonResponse {
+        $post_id = $_POST['post_id'] ?? null;
+        if (empty($post_id) || !ctype_digit($post_id)) {
+            return JsonResponse::getFailResponse("Invalid or missing post_id");
+        }
+    
+        $post_id = (int)$post_id;
+        $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);
+    
+        return JsonResponse::getSuccessResponse(['users' => $users]);
+    }
+    
 
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
