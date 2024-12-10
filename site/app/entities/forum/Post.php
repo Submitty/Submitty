@@ -52,7 +52,7 @@ class Post {
     protected bool $anonymous;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    protected bool $deleted;
+    protected bool $deleted = false;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $endorsed_by;
@@ -144,6 +144,9 @@ class Post {
         return $this->deleted;
     }
 
+    public function setDeleted(bool $deleted): void {
+        $this->deleted = $deleted;
+    }
     public function isRenderMarkdown(): bool {
         return $this->render_markdown;
     }

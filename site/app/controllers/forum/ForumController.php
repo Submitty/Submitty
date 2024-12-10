@@ -12,6 +12,7 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
+use app\views\forum\ForumThreadView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use app\entities\forum\Post;
@@ -705,51 +706,197 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * Alter content/delete/undelete post of a thread
-     *
-     * If applied on the first post of a thread, same action will be reflected on the corresponding thread
-     *
-     * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
+     * Edit a post or thread
+     * @return mixed[]
      */
     #[Route("/courses/{_semester}/{_course}/forum/posts/modify", methods: ["POST"])]
-    public function alterPost($modify_type) {
-        $full_course_name = $this->core->getFullCourseName();
-        $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
-        $post = $this->core->getQueries()->getPost($post_id);
-        $current_user_id = $this->core->getUser()->getId();
+    public function alterPost(): array {
+        $post_id = filter_input(INPUT_POST, "edit_post_id", FILTER_SANITIZE_NUMBER_INT);
+        $thread_id = filter_input(INPUT_POST, "edit_thread_id", FILTER_SANITIZE_NUMBER_INT);
+        if ($thread_id === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
+        }
+        if ($post_id === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
+        }
+        $order = $_COOKIE['forum_display_option'] ?? 'tree';
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($thread_id, $order);
+        if (is_null($thread)) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id : {$thread_id}");
+        }
 
-        $markdown = !empty($_POST['markdown_status']);
+        $post = $thread->getPosts()->filter(function ($x) use ($post_id) {
+            return $x->getId() === $post_id;
+        })->first();
 
-        if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
+        if ($post === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
+        }
+        if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if (isset($_POST['thread_id']) && $post['thread_id'] !== intval($_POST['thread_id'])) {
-            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
-        }
-        if (isset($_POST['edit_thread_id']) && $post['thread_id'] !== intval($_POST['edit_thread_id'])) {
-            return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
-        }
-        if (!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()) {
+        if ($post->getThread()->isLocked() && !$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
-        elseif (!empty($_POST['thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()) {
-            return $this->core->getOutput()->renderJsonFail('Thread is locked');
+
+        $status_edit_thread = $this->editThread();
+        $status_edit_post   = $this->editPost();
+
+        $any_changes = false;
+        $type = null;
+        $isError = false;
+        $messageString = '';
+         // Author of first post and thread must be same
+        if (is_null($status_edit_thread) && is_null($status_edit_post)) {
+            $this->core->addErrorMessage("No data submitted. Please try again.");
         }
-        elseif ($modify_type == 0) { //delete post or thread
-            $thread_id = $_POST["thread_id"];
-            $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
-            if ($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)) {
-                $type = "thread";
+        elseif (is_null($status_edit_thread) || is_null($status_edit_post)) {
+            $type = is_null($status_edit_thread) ? "Post" : "Thread";
+            if ($status_edit_thread || $status_edit_post) {
+                //$type is true
+                $messageString = "{$type} updated successfully.";
+                $any_changes = true;
             }
             else {
-                $type = "post";
+                $isError = true;
+                $messageString = "{$type} update failed. Please try again.";
+            }
+        }
+        else {
+            if ($status_edit_thread && $status_edit_post) {
+                $type = "Thread and Post";
+                $messageString = "Thread and post updated successfully.";
+                $any_changes = true;
+            }
+            else {
+                $type = ($status_edit_thread) ? "Thread" : "Post";
+                $type_opposite = (!$status_edit_thread) ? "Thread" : "Post";
+                $isError = true;
+                if ($status_edit_thread || $status_edit_post) {
+                    //$type is true
+                    $messageString = "{$type} updated successfully. {$type_opposite} update failed. Please try again.";
+                    $any_changes = true;
+                }
+                else {
+                    $messageString = "Thread and Post update failed. Please try again.";
+                }
+            }
+        }
+        if ($any_changes) {
+            $full_course_name = $this->core->getFullCourseName();
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
+            if ($type == "Post") {
+                $post_content = $_POST["thread_post_content"];
+                $subject = "Post Edited: " . Notification::textShortner($post_content);
+                $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post_content;
+            }
+            elseif ($type == "Thread and Post") {
+                $post_content = $_POST["thread_post_content"];
+                $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
+                $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post_content;
+            }
+            else {
+                $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
+                $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle();
             }
 
-            $post_author_id = $post['author_user_id'];
+            $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
+            $this->core->getNotificationFactory()->onPostModified($event);
+        }
+        if ($isError) {
+            return $this->core->getOutput()->renderJsonFail($messageString);
+        }
+        if ($type === 'Post') {
+            if ($order === 'tree') {
+                ForumThreadView::BuildReplyHeirarchy($thread->getFirstPost());
+            }
+            $reply_level = $thread->getPosts()->filter(function ($x) use ($post) {
+                return $x->getId() === $post->getId();
+            })->first()->getReplyLevel();
+
+            $this->sendSocketMessage([
+                'type' => 'edit_post',
+                'thread_id' => $thread_id,
+                'post_id' => $post_id,
+                'reply_level' => $reply_level,
+                'post_box_id' => 1,
+            ]);
+        }
+        elseif ($type === 'Thread and Post') {
+            $this->sendSocketMessage([
+                'type' => 'edit_thread',
+                'thread_id' => $thread_id,
+                'post_id' => $post_id,
+                'reply_level' => 1,
+                'post_box_id' => 1,
+            ]);
+        }
+        return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
+    }
+
+    /**
+     * Toggle deletion of a post or thread 
+     * @return mixed[]
+     */
+    #[Route("courses/{_semester}/{_course}/forum/posts/delete", methods: ["POST"])]
+    public function deleteOrRestorePost(): array {
+        $full_course_name = $this->core->getFullCourseName();
+        $post_id = filter_input(INPUT_POST, "post_id", FILTER_SANITIZE_NUMBER_INT);
+        $thread_id = filter_input(INPUT_POST, "thread_id", FILTER_SANITIZE_NUMBER_INT);
+        if (is_null($thread_id) || $thread_id === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
+        }
+        if (is_null($post_id)|| $post_id === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
+        }
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($thread_id, 'tree', true);
+        if (is_null($thread)) {
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id : {$thread_id}");
+        }
+
+        $post = $thread->getPosts()->filter(function ($x) use ($post_id) {
+            return $x->getId() === $post_id;
+        })->first();
+
+        if ($post === false) {
+            return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
+        }
+        if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
+                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
+        }
+        if ($post->getThread()->isLocked() && !$this->core->getUser()->accessAdmin()) {
+            return $this->core->getOutput()->renderJsonFail('Thread is locked');
+        }
+        if ($post->isDeleted()) {
+            if ($post->getParent()->isDeleted()) {
+                return $this->core->getOutput()->renderJsonFail("Parent post must be restored first.");
+            }
+            else {
+                $post->setDeleted(false);
+                if($thread->getFirstPost()->getId() === $post->getId()) {
+                    $thread->setDeleted(false);
+                }
+                $this->core->getCourseEntityManager()->flush();
+                // We want to reload same thread again, in both case (thread/post undelete)
+                $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
+                $subject = "Undeleted: " . Notification::textShortner($post->getContent());
+                $content = "In " . $full_course_name . "\n\nThe following post was undeleted.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
+                $this->core->getNotificationFactory()->onPostModified($event);
+                $type = "post";
+                return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
+            }
+        }
+        else {
+            $type = $thread->getFirstPost()->getId() === $post->getId() ? "thread" : "post";
+            $this->recursiveDeletePost($post, $thread);
+            $this->core->getCourseEntityManager()->flush();
             $metadata = json_encode([]);
-            $subject = "Deleted: " . Notification::textShortner($post["content"]);
-            $content = "In " . $full_course_name . "\n\nThread: " . $thread_title . "\n\nPost:\n" . $post["content"] . " was deleted.";
-            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+            $subject = "Deleted: " . Notification::textShortner($post->getContent());
+            $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
+            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
 
@@ -761,124 +908,15 @@ class ForumController extends AbstractController {
 
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
-        elseif ($modify_type == 2) { //undelete post or thread
-            $thread_id = $_POST["thread_id"];
-            $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
-            if (is_null($result)) {
-                $error = "Parent post must be undeleted first.";
-                return $this->core->getOutput()->renderJsonFail($error);
-            }
-            else {
-                // We want to reload same thread again, in both case (thread/post undelete)
-                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
-                $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Undeleted: " . Notification::textShortner($post["content"]);
-                $content = "In " . $full_course_name . "\n\nThe following post was undeleted.\n\nThread: " . $thread_title . "\n\n" . $post["content"];
-                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
-                $this->core->getNotificationFactory()->onPostModified($event);
-                $type = "post";
-                return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
-            }
+    }
+
+    private function recursiveDeletePost(Post $post, Thread $thread): void {
+        if ($thread->getFirstPost()->getId() === $post->getId()) {
+            $thread->setDeleted(true);
         }
-        elseif ($modify_type == 1) { //edit post or thread
-            $thread_id = $_POST["edit_thread_id"];
-            $status_edit_thread = $this->editThread();
-            $status_edit_post   = $this->editPost();
-
-            $any_changes = false;
-            $type = null;
-            $isError = false;
-            $messageString = '';
-             // Author of first post and thread must be same
-            if (is_null($status_edit_thread) && is_null($status_edit_post)) {
-                $this->core->addErrorMessage("No data submitted. Please try again.");
-            }
-            elseif (is_null($status_edit_thread) || is_null($status_edit_post)) {
-                $type = is_null($status_edit_thread) ? "Post" : "Thread";
-                if ($status_edit_thread || $status_edit_post) {
-                    //$type is true
-                    $messageString = "{$type} updated successfully.";
-                    $any_changes = true;
-                }
-                else {
-                    $isError = true;
-                    $messageString = "{$type} update failed. Please try again.";
-                }
-            }
-            else {
-                if ($status_edit_thread && $status_edit_post) {
-                    $type = "Thread and Post";
-                    $messageString = "Thread and post updated successfully.";
-                    $any_changes = true;
-                }
-                else {
-                    $type = ($status_edit_thread) ? "Thread" : "Post";
-                    $type_opposite = (!$status_edit_thread) ? "Thread" : "Post";
-                    $isError = true;
-                    if ($status_edit_thread || $status_edit_post) {
-                        //$type is true
-                        $messageString = "{$type} updated successfully. {$type_opposite} update failed. Please try again.";
-                        $any_changes = true;
-                    }
-                    else {
-                        $messageString = "Thread and Post update failed. Please try again.";
-                    }
-                }
-            }
-            if ($any_changes) {
-                $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
-                $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                if ($type == "Post") {
-                    $post_content = $_POST["thread_post_content"];
-                    $subject = "Post Edited: " . Notification::textShortner($post_content);
-                    $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
-                }
-                elseif ($type == "Thread and Post") {
-                    $post_content = $_POST["thread_post_content"];
-                    $subject = "Thread Edited: " . Notification::textShortner($thread_title);
-                    $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
-                }
-                else {
-                    $subject = "Thread Edited: " . Notification::textShortner($thread_title);
-                    $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title;
-                }
-
-                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
-                $this->core->getNotificationFactory()->onPostModified($event);
-            }
-            if ($isError) {
-                return $this->core->getOutput()->renderJsonFail($messageString);
-            }
-            if ($type === 'Post') {
-                $posts = $this->core->getQueries()->getPostsInThreads([$thread_id]);
-                $order_and_replies = self::getPostsOrderAndReplies($posts, $thread_id);
-                $order_array = $order_and_replies[0];
-                $reply_level_array = $order_and_replies[1];
-
-                $place = array_search($post["id"], $order_array, true);
-                $reply_level = $reply_level_array[$place];
-                $post_box_id = 1;
-
-                $this->sendSocketMessage([
-                    'type' => 'edit_post',
-                    'thread_id' => $thread_id,
-                    'post_id' => $post_id,
-                    'reply_level' => $reply_level,
-                    'post_box_id' => $post_box_id,
-                ]);
-            }
-            elseif ($type === 'Thread and Post') {
-                $this->sendSocketMessage([
-                    'type' => 'edit_thread',
-                    'thread_id' => $thread_id,
-                    'post_id' => $post_id,
-                    'reply_level' => 1,
-                    'post_box_id' => 1,
-                ]);
-            }
-            return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
+        $post->setDeleted(true);
+        foreach($post->getChildren() as $child) {
+            $this->recursiveDeletePost($child, $thread);
         }
     }
 
@@ -993,9 +1031,9 @@ class ForumController extends AbstractController {
 
     private function editThread() {
         // Ensure authentication before call
-        if (!empty($_POST["title"])) {
+        if (count($_POST["title"]) > 0) {
             $thread_id = $_POST["edit_thread_id"];
-            if (!empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()) {
+            if (!is_null($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()) {
                 $lock_thread_date = $_POST['lock_thread_date'];
             }
             else {

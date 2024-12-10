@@ -400,11 +400,11 @@ class ForumThreadView extends AbstractView {
      * @param Post[] $reply_hierarchy
      * @return Post[]
      */
-    private function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
+    public static function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
         $reply_hierarchy[] = $post;
         $post->setReplyLevel($reply_level);
         foreach ($post->getChildren() as $child) {
-            $this->BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
+            ForumThreadView::BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
         }
         return $reply_hierarchy;
     }

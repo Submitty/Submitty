@@ -104,6 +104,10 @@ class Thread {
         return $this->deleted;
     }
 
+    public function setDeleted(bool $deleted): void {
+        $this->deleted = $deleted;
+    }
+
     public function getMergedThread(): ?Thread {
         return $this->merged_thread;
     }

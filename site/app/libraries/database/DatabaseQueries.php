@@ -956,42 +956,6 @@ SQL;
         $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
         return null;
     }
-    /**
-     * Set delete status for given post and all descendant
-     *
-     * If delete status of the first post in a thread is changed, it will also update thread delete status
-     *
-     * @param  integer      $post_id
-     * @param  integer      $thread_id
-     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
-     * @return boolean|null Is first post of thread
-     */
-    public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
-        $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
-        $parent_id = $this->course_db->row()["parent_id"];
-        $children = [$post_id];
-        $get_deleted = $newStatus == 0;
-        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
-
-        if (!$newStatus) {
-            // On undelete, parent post must have deleted = false
-            if ($parent_id != -1) {
-                if ($this->getPost($parent_id)['deleted']) {
-                    return null;
-                }
-            }
-        }
-        if ($parent_id == -1) {
-            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
-            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
-            return true;
-        }
-        else {
-            foreach ($children as $post_id) {
-                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $post_id]);
-            }
-        } return false;
-    }
 
     public function getParentPostId($child_id) {
         $this->course_db->query("SELECT parent_id from posts where id = ?", [$child_id]);
