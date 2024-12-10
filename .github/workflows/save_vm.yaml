@@ -17,12 +17,20 @@ jobs:
           fetch-depth: 0
       - name: Install vagrant
         run: brew install vagrant
+
       - name: install virtual box 7.0.20
         run: |
           curl -LO https://download.virtualbox.org/virtualbox/7.0.20/VirtualBox-7.0.20-163906-OSX.dmg
           hdiutil mount VirtualBox-7.0.20-163906-OSX.dmg
           sudo installer -pkg /Volumes/VirtualBox/VirtualBox.pkg -target /
           hdiutil unmount /Volumes/VirtualBox
+
+      - name: Install HCP CLI
+        run: |
+          brew tap hashicorp/tap
+          brew install hashicorp/tap/hcp
+          brew upgrade hashicorp/tap/hcp
+
       - name: Get latest version
         id: get-version
         run: |
@@ -32,17 +40,29 @@ jobs:
             exit 1
           fi
           echo "version=${TAG:1}" >> $GITHUB_OUTPUT
+
       - name: Vagrant Up
         run: CI=1 vagrant up
+
       - name: Validate image
         run: curl --show-error --fail --include http://localhost:1511
+
       - name: Save image
         run: vagrant package --output submitty.box
+
+      - name: Get HCP token
+        id: hcp-token
+        run: |
+          hcp auth login --client-id=${{ secrets.HCP_CLIENT_ID }} --client-secret=${{ secrets.HCP_CLIENT_SECRET }}
+          echo "HCP_TOKEN=$(hcp auth print-access-token)" >> $GITHUB_OUTPUT
+
       - name: Publish image
         run: |
-          vagrant cloud auth login --token ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+          export VAGRANT_CLOUD_TOKEN="${{ secrets.VAGRANT_CLOUD_TOKEN }};${{ steps.hcp-token.outputs.HCP_TOKEN }}"
+          vagrant cloud auth login
           vagrant cloud publish SubmittyBot/ubuntu22-dev ${{ steps.get-version.outputs.version }}.$(date +"%y%m%d%H%M") virtualbox submitty.box --release --force
           vagrant cloud auth logout
+
       - name: Acquire Job ID
         if: failure()
         id: get-job-id
@@ -52,6 +72,7 @@ jobs:
           jobs=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id}}/attempts/${{ github.run_attempt }}/jobs)
           job_id=$(echo $jobs | jq -r '.jobs[] | select(.runner_name=="${{ runner.name }}") | .id')
           echo "job_id=$job_id" >> $GITHUB_OUTPUT
+
       - name: Send zulip message on failure
         if: failure()
         run: |
