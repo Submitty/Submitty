@@ -39,4 +39,27 @@ class Category {
     public function getColor(): string {
         return $this->color;
     }
+
+    /**
+     * @param Collection<Category> $c1
+     * @param Collection<Category> $c2
+     * @return bool true iff collections contain the same categories
+     */
+    public static function areCollectionsEqual(Collection $c1, Collection $c2): bool {
+        if (count($c1) !== count($c2)) {
+            return false;
+        }
+        $c1_ids = $c1->map(function ($x) {
+            return $x->getId();
+        });
+        $c2_ids = $c2->map(function ($x) {
+            return $x->getId();
+        });
+        foreach ($c1_ids as $cat) {
+            if (!$c2_ids->contains($cat)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

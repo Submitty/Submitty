@@ -89,6 +89,8 @@ class Post {
 
     protected int $reply_level = 1;
 
+    protected bool $is_changed = false;
+
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
      * We are free to make constructors for "empty" or "junk" posts.
@@ -132,12 +134,26 @@ class Post {
         return $this->content;
     }
 
+    public function setContent(string $content): void {
+        if ($this->content !== $content) {
+            $this->content = $content;
+            $this->is_changed = true;
+        }
+    }
+
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
 
     public function isAnonymous(): bool {
         return $this->anonymous;
+    }
+
+    public function setAnonymous(bool $anonymous): void {
+        if ($this->anonymous !== $anonymous) {
+            $this->anonymous = $anonymous;
+            $this->is_changed = true;
+        }
     }
 
     public function isDeleted(): bool {
@@ -149,6 +165,13 @@ class Post {
     }
     public function isRenderMarkdown(): bool {
         return $this->render_markdown;
+    }
+
+    public function setRenderMarkdown(bool $render_markdown): void {
+        if ($this->render_markdown !== $render_markdown) {
+            $this->render_markdown = $render_markdown;
+            $this->is_changed = true;
+        }
     }
 
     /**
@@ -186,5 +209,9 @@ class Post {
         return $view->getTimestamp() < max($this->history->map(function ($x) {
             return $x->getEditTimestamp();
         })->toArray());
+    }
+
+    public function isChanged(): bool {
+        return $this->is_changed;
     }
 }

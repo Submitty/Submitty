@@ -6,6 +6,7 @@ namespace app\entities\forum;
 
 use DateInterval;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use app\entities\UserEntity;
 use Doctrine\DBAL\Types\Types;
@@ -88,12 +89,21 @@ class Thread {
     #[ORM\OneToMany(mappedBy: "thread", targetEntity: StudentFavorite::class)]
     protected Collection $favorers;
 
+    protected bool $is_changed = false;
+
     public function getId(): int {
         return $this->id;
     }
 
     public function getTitle(): string {
         return $this->title;
+    }
+
+    public function setTitle(string $title): void {
+        if ($this->title !== $title) {
+            $this->title = $title;
+            $this->is_changed = true;
+        }
     }
 
     public function getAuthor(): UserEntity {
@@ -120,12 +130,22 @@ class Thread {
         return $this->status;
     }
 
-    public function setStatus(int $newStatus): void {
-        $this->status = $newStatus;
+    public function setStatus(int $status): void {
+        if($this->status !== $status) {
+            $this->status = $status;
+            $this->is_changed = true;
+        }
     }
 
     public function getLockDate(): ?DateTime {
         return $this->lock_thread_date;
+    }
+
+    public function setLockDate(?DateTime $lock_thread_date): void {
+        if ($this->lock_thread_date?->getTimestamp() !== $lock_thread_date?->getTimestamp()) {
+            $this->lock_thread_date = $lock_thread_date;
+            $this->is_changed = true;
+        }
     }
 
     public function isLocked(): bool {
@@ -134,6 +154,13 @@ class Thread {
 
     public function getPinnedExpiration(): DateTime {
         return $this->pinned_expiration;
+    }
+
+    public function setPinnedExpiration(DateTime $pinned_expiration): void {
+        if ($this->pinned_expiration->getTimestamp() !== $pinned_expiration->getTimestamp()) {
+            $this->pinned_expiration = $pinned_expiration;
+            $this->is_changed = true;
+        }
     }
 
     public function isPinned(): bool {
@@ -160,6 +187,19 @@ class Thread {
      */
     public function getCategories(): Collection {
         return $this->categories;
+    }
+
+    /**
+     * @param Category[]|Collection<Category> $categories
+     * @return void
+     */
+    public function setCategories(array|Collection $categories): void {
+        $new_categories = new ArrayCollection($categories);
+        if (!Category::areCollectionsEqual($this->categories, $new_categories)) {
+            $this->categories = $new_categories;
+            $this->is_changed = true;
+        }
+        
     }
     public function isUnread(string $user_id): bool {
         return !$this->getNewPosts($user_id)->isEmpty();
@@ -199,5 +239,12 @@ class Thread {
             $sum_upducks += count($post->getUpduckers());
         }
         return $sum_upducks;
+    }
+
+    /**
+     * @return bool true iff a persistant field has been changed since this object was fetched from db
+     */
+    public function isChanged(): bool {
+        return $this->is_changed;
     }
 }

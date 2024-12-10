@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use app\entities\forum\Post;
 use app\entities\forum\Thread;
+use app\entities\forum\Category;
 use WebSocket;
 
 /**
@@ -711,8 +712,8 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/posts/modify", methods: ["POST"])]
     public function alterPost(): array {
-        $post_id = filter_input(INPUT_POST, "edit_post_id", FILTER_SANITIZE_NUMBER_INT);
-        $thread_id = filter_input(INPUT_POST, "edit_thread_id", FILTER_SANITIZE_NUMBER_INT);
+        $post_id = filter_input(INPUT_POST, "edit_post_id", FILTER_VALIDATE_INT);
+        $thread_id = filter_input(INPUT_POST, "edit_thread_id", FILTER_VALIDATE_INT);
         if ($thread_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
         }
@@ -740,30 +741,32 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
 
-        $status_edit_thread = $this->editThread();
-        $status_edit_post   = $this->editPost();
+        $status_edit_thread = true;
+        if ($thread->getFirstPost()->getId() === $post->getId()) {
+            $status_edit_thread = $this->editThread($thread);
+        }
+        $status_edit_post = $this->editPost($post);
 
-        $any_changes = false;
+        $message = [];
+        if (!$status_edit_thread) {
+            $message[] = "Thread update failed.";
+            $this->core->getCourseEntityManager()->refresh($thread);
+        }
+        if (!$status_edit_post) {
+            $this->core->getCourseEntityManager()->refresh($post);
+            $message[] = "Post update failed.";
+        }
+        if (count($message) > 0) {
+            return $this->core->getOutput()->renderJsonFail(join(" ", $message));
+        }
+        if (!$thread->isChanged() && !$post->isChanged()) {
+            return $this->core->getOutput()->renderJsonFail("No data submitted. Please try again.");
+        }
+        
         $type = null;
         $isError = false;
         $messageString = '';
-         // Author of first post and thread must be same
-        if (is_null($status_edit_thread) && is_null($status_edit_post)) {
-            $this->core->addErrorMessage("No data submitted. Please try again.");
-        }
-        elseif (is_null($status_edit_thread) || is_null($status_edit_post)) {
-            $type = is_null($status_edit_thread) ? "Post" : "Thread";
-            if ($status_edit_thread || $status_edit_post) {
-                //$type is true
-                $messageString = "{$type} updated successfully.";
-                $any_changes = true;
-            }
-            else {
-                $isError = true;
-                $messageString = "{$type} update failed. Please try again.";
-            }
-        }
-        else {
+        if ($thread->isChanged() && $post->isChanged()) {
             if ($status_edit_thread && $status_edit_post) {
                 $type = "Thread and Post";
                 $messageString = "Thread and post updated successfully.";
@@ -782,6 +785,22 @@ class ForumController extends AbstractController {
                     $messageString = "Thread and Post update failed. Please try again.";
                 }
             }
+        }
+        else 
+        if (is_null($status_edit_thread) || is_null($status_edit_post)) {
+            $type = is_null($status_edit_thread) ? "Post" : "Thread";
+            if ($status_edit_thread || $status_edit_post) {
+                //$type is true
+                $messageString = "{$type} updated successfully.";
+                $any_changes = true;
+            }
+            else {
+                $isError = true;
+                $messageString = "{$type} update failed. Please try again.";
+            }
+        }
+        else {
+
         }
         if ($any_changes) {
             $full_course_name = $this->core->getFullCourseName();
@@ -842,8 +861,8 @@ class ForumController extends AbstractController {
     #[Route("courses/{_semester}/{_course}/forum/posts/delete", methods: ["POST"])]
     public function deleteOrRestorePost(): array {
         $full_course_name = $this->core->getFullCourseName();
-        $post_id = filter_input(INPUT_POST, "post_id", FILTER_SANITIZE_NUMBER_INT);
-        $thread_id = filter_input(INPUT_POST, "thread_id", FILTER_SANITIZE_NUMBER_INT);
+        $post_id = filter_input(INPUT_POST, "post_id", FILTER_VALIDATE_INT);
+        $thread_id = filter_input(INPUT_POST, "thread_id", FILTER_VALIDATE_INT);
         if (is_null($thread_id) || $thread_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
         }
@@ -1029,113 +1048,121 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function editThread() {
+    /**
+     * 
+     * @param Thread $thread
+     * @return bool true iff successful (thread may not have changed, use $thread->isChanged() to check changes)
+     */
+    private function editThread(Thread $thread): bool {
         // Ensure authentication before call
-        if (count($_POST["title"]) > 0) {
-            $thread_id = $_POST["edit_thread_id"];
-            if (!is_null($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()) {
-                $lock_thread_date = $_POST['lock_thread_date'];
+        $user = $this->core->getUser();
+        $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_STRING);
+        $status = filter_input(INPUT_POST, "thread_status", FILTER_VALIDATE_INT);
+        $categories_ids  = [];
+        if (isset($_POST["cat"])) {
+            foreach ($_POST["cat"] as $category_id) {
+                $categories_ids[] = (int) $category_id;
+            }
+        }
+        if ($title === false || $status === false || !$this->isValidCategories($categories_ids)) {
+            return false;
+        }
+        $thread->setTitle($title);
+        $thread->setStatus($status);
+        $categories = $this->core->getCourseEntityManager()->getRepository(Category::class)->findBy(['category_id' => $categories_ids], ['category_id' => 'ASC']);
+        $thread->setCategories($categories);
+
+        if ($user->accessAdmin()) {
+            $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_SANITIZE_STRING);
+            if ($lock_thread_date_input !== false && DateUtils::validateTimestamp($lock_thread_date_input)) {
+                $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
-                $lock_thread_date = null;
+                $thread->setLockDate(null);
             }
-            if (!empty($_POST["expirationDate"]) && $this->core->getUser()->accessAdmin()) {
-                $expiration = $_POST["expirationDate"];
+
+            $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_SANITIZE_STRING);
+            if ($expiration_input !== false && DateUtils::validateTimestamp($expiration_input)) {
+                $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
             }
             else {
-                $expiration = null;
-            }
-            $thread_title = $_POST["title"];
-            $status = $_POST["thread_status"];
-            $categories_ids  = [];
-            if (!empty($_POST["cat"])) {
-                foreach ($_POST["cat"] as $category_id) {
-                    $categories_ids[] = (int) $category_id;
-                }
-            }
-            if (!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration);
         }
-        return null;
+        return true;
     }
 
-    private function editPost() {
+    /**
+     * @param Post $post
+     * @return bool true iff successful (post may not have changed, use $post->isChanged() to check changes)
+     */
+    private function editPost(Post $post): bool {
         // Ensure authentication before call
-        $new_post_content = $_POST["thread_post_content"];
-        if (!empty($new_post_content)) {
-            if (strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT) {
-                $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
-                return null;
-            }
-
-            $post_id = $_POST["edit_post_id"];
-            $original_post = $this->core->getQueries()->getPost($post_id);
-            $original_creator = !empty($original_post) ? $original_post['author_user_id'] : null;
-            $anon = (!empty($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
-            $current_user = $this->core->getUser()->getId();
-            if (!$this->modifyAnonymous($original_creator)) {
-                $anon = $original_post["anonymous"] ? 1 : 0;
-            }
-
-            $markdown = !empty($_POST['markdown_status']);
-
-            $file_post = 'file_input';
-            $thread_id = $original_post["thread_id"];
-            $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
-            if ($hasGoodAttachment[0] === -1) {
-                return null;
-            }
-
-            $attachment_name = [];
-            if ($hasGoodAttachment[0] === 1) {
-                $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
-                $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
-
-                if (!is_dir($thread_dir)) {
-                    FileUtils::createDir($thread_dir);
-                }
-                if (!is_dir($post_dir)) {
-                    FileUtils::createDir($post_dir);
-                }
-
-                $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
-                //compile list of attachment names
-                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                    //check for files with same name
-                    $file_name = basename($_FILES[$file_post]["name"][$i]);
-                    if (in_array($file_name, $existing_attachments, true)) {
-                        // add unique prefix if file with this name already exists on this post
-                        $tmp = 1;
-                        while (in_array("(" . $tmp . ")" . $file_name, $existing_attachments, true)) {
-                            $tmp++;
-                        }
-                        $file_name = "(" . $tmp . ")" . $file_name;
-                    }
-                    $attachment_name[] = $file_name;
-                }
-
-                for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-                    $target_file = $post_dir . "/" . $attachment_name[$i];
-                    move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
-                }
-            }
-
-            return $this->core->getQueries()->editPost(
-                $original_creator,
-                $current_user,
-                $post_id,
-                $new_post_content,
-                $anon,
-                $markdown,
-                json_decode($_POST['deleted_attachments']),
-                $attachment_name,
-            );
+        $content = filter_input(INPUT_POST, "thread_post_content", FILTER_SANITIZE_STRING);
+        if ($content === false || $content === "") {
+            return false;
         }
-        return null;
+        if (strlen($content) > ForumUtils::FORUM_CHAR_POST_LIMIT) {
+            $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
+            return false;
+        }
+        $post->setContent($content);
+        if ($this->modifyAnonymous($post->getAuthor()->getId())) {
+            $post->setAnonymous(filter_input(INPUT_POST, "Anon", FILTER_SANITIZE_STRING) === "Anon");
+        }
+        $this->saveAttachments(false, $post->getThread()->getId(), $post->getId(), 'file_input');
+        $post->setRenderMarkdown(filter_input(INPUT_POST, "markdown_status", FILTER_VALIDATE_BOOL) !== false);
+
+        // TODO: Handle attachments & edit table
+        return true;
     }
 
+    /**
+     * Writes attachments to filesystem
+     * @param bool $is_thread
+     * @param int $thread_id
+     * @param int $post_id
+     * @param string $file_post
+     * @return bool true iff success
+     */
+    private function saveAttachments(bool $is_thread, int $thread_id, int $post_id, string $file_post) {
+        $hasGoodAttachment = $this->checkGoodAttachment($is_thread, $thread_id, $file_post);
+        $attachment_name = [];
+        if ($hasGoodAttachment[0] !== 1) {
+            return false;
+        }
+        $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
+        $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
+
+        if (!is_dir($thread_dir)) {
+            FileUtils::createDir($thread_dir);
+        }
+        if (!is_dir($post_dir)) {
+            FileUtils::createDir($post_dir);
+        }
+
+        $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
+        //compile list of attachment names
+        for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+            //check for files with same name
+            $file_name = basename($_FILES[$file_post]["name"][$i]);
+            if (in_array($file_name, $existing_attachments, true)) {
+                // add unique prefix if file with this name already exists on this post
+                $tmp = 1;
+                while (in_array("(" . $tmp . ")" . $file_name, $existing_attachments, true)) {
+                    $tmp++;
+                }
+                $file_name = "(" . $tmp . ")" . $file_name;
+            }
+            $attachment_name[] = $file_name;
+        }
+
+        for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+            $target_file = $post_dir . "/" . $attachment_name[$i];
+            move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+        }
+        return true;
+    }
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["POST"])]
     public function getThreads($page_number = null) {
         $current_user = $this->core->getUser()->getId();
