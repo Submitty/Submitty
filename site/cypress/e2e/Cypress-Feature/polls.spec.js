@@ -243,6 +243,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Closed');
+        cy.contains('Poll Cypress Test').parent().find('a').invoke('attr', 'href').then((href) => {
+            cy.visit(href);
+            cy.get('[data-testid="popup-message"]').should('be.visible').and('contain', 'Poll is not available');
+        });
 
         // log into instructor and change poll to visible
         cy.logout();
