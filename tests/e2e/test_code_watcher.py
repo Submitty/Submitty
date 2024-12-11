@@ -15,7 +15,7 @@ def read_output(pipe, output_list):
 class TestCodeWatcher(unittest.TestCase):
     def setUp(self):
         """
-        Set up temporary directories and mock files for testing.
+        Set up the necessary environment for testing.
         """
         self.test_dir = Path("/usr/local/submitty/GIT_CHECKOUT/Submitty/")
         self.setup_dir = Path(self.test_dir, ".setup")
@@ -23,37 +23,32 @@ class TestCodeWatcher(unittest.TestCase):
         self.bin_dir = Path(self.test_dir, "bin")
         self.sbin_dir = Path(self.test_dir, "sbin")
 
-        # Create directories
-        self.setup_dir.mkdir(parents=True, exist_ok=True)
-        self.site_dir.mkdir(parents=True, exist_ok=True)
-        self.bin_dir.mkdir(parents=True, exist_ok=True)
-        self.sbin_dir.mkdir(parents=True, exist_ok=True)
+        # Ensure directories exist
+        for directory in [self.setup_dir, self.site_dir, self.bin_dir, self.sbin_dir]:
+            if not directory.exists():
+                self.skipTest(f"Required directory {directory} does not exist.")
 
-        # Create dummy INSTALL_SUBMITTY_HELPER scripts
-        for helper in ["SITE", "BIN"]:
-            script_path = self.setup_dir / f"INSTALL_SUBMITTY_HELPER_{helper}.sh"
-            with open(script_path, "w") as f:
-                f.write("#!/bin/bash\necho Running {} installer".format(helper))
-            os.chmod(script_path, 0o755)
-
-        self.script_path = Path("/usr/local/submitty/.setup/bin/code_watcher.py")
-        self.process_pids = []  # record subprocess PID
+        self.script_path = Path("/usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py")
+        self.process_pids = []  # Record subprocess PIDs
 
     def tearDown(self):
         """
-        Clean up the temporary directories and kill any remaining processes.
+        Clean up the temporary changes and terminate any remaining processes.
         """
+        # Kill processes started during the test
         for pid in self.process_pids:
             try:
-                os.kill(pid, 9)  # forcely kill
+                os.kill(pid, 9)
             except ProcessLookupError:
-                pass  # if already exit
-        subprocess.run(["rm", "-rf", str(self.test_dir)])
-        self.kill_remaining_processes()
+                pass
 
+        # Remove test files from watched directories
         for directory in [self.site_dir, self.bin_dir, self.sbin_dir]:
             for file in directory.iterdir():
-                file.unlink()
+                if file.is_file() and file.name.startswith("dummy"):
+                    file.unlink()
+
+        self.kill_remaining_processes()
 
     def kill_remaining_processes(self):
         """
@@ -84,7 +79,7 @@ class TestCodeWatcher(unittest.TestCase):
             stderr=subprocess.PIPE,
             text=True
         )
-        self.process_pids.append(process.pid)  # record PID
+        self.process_pids.append(process.pid)  # Record PID
         print(f"Started code_watcher.py with PID: {process.pid}")
         print(f"Monitoring directory: {self.site_dir}")
 
@@ -134,7 +129,6 @@ class TestCodeWatcher(unittest.TestCase):
                 process.stdout.close()
             if process.stderr:
                 process.stderr.close()
-
 
 if __name__ == "__main__":
     unittest.main()
