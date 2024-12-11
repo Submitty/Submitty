@@ -17,7 +17,7 @@ class StudentActivityDashboardView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentActivityDashboard.twig", [
             "data" => $data_dump,
-            "download_link" => $this->core->buildCourseUrl(['activity', 'download'])
+            "download_link" => $this->core->buildCourseUrl(['activity', 'download_activity'])
         ]);
     }
 
