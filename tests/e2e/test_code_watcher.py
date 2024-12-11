@@ -17,7 +17,7 @@ class TestCodeWatcher(unittest.TestCase):
         """
         Set up temporary directories and mock files for testing.
         """
-        self.test_dir = Path("/usr/local/submitty")
+        self.test_dir = Path("/usr/local/submitty/GIT_CHECKOUT/Submitty/")
         self.setup_dir = Path(self.test_dir, ".setup")
         self.site_dir = Path(self.test_dir, "site")
         self.bin_dir = Path(self.test_dir, "bin")
