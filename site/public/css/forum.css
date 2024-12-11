@@ -58,7 +58,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .post_viewed_btn {
-    background-color: var(--post-viewed-btn) !important;
+    background-color: var(--standard-light-gray) !important;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -76,7 +76,7 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .post_box {
     position: relative;
-    box-shadow: 0 2px 15px -5px var(--post-box-color);
+    box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     padding: 7px;
     margin-top: 20px;
     word-wrap: break-word;
@@ -120,8 +120,8 @@
     min-width: 40px;
     min-height: 40px;
     position: relative;
-    background: var(--create-thread-background);
-    box-shadow: 2px 2px 4px -3px var(--attachment-image-color);
+    background: var(--btn-default-white);
+    box-shadow: 2px 2px 4px -3px var(--standard-light-gray);
 }
 
 .reply-box {
@@ -140,7 +140,7 @@
 }
 
 .category-color-picker {
-    color: var(--always-default-white);
+    color: white;
     font-size: 14px;
     height: 18px;
     padding: 0;
@@ -177,15 +177,15 @@
 
 .active-thread-remove-announcement {
     display: inline-block;
-    color: var(--standard-orange);
+    color: var(--standard-medium-orange);
 }
 
 .active-thread-announcement-expiring {
     position: relative;
     display: inline-block;
-    color: var(--standard-gold);
+    color: var(--standard-tangerine-yellow);
     -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: var(--standard-black);
+    -webkit-text-stroke-color: black;
 }
 
 .active-thread-announcement {
@@ -193,7 +193,7 @@
     display: inline-block;
     color: var(--submitty-logo-blue);
     -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: var(--thread-lock-color);
+    -webkit-text-stroke-color: black;
 }
 
 .not-active-thread-announcement,
@@ -201,31 +201,31 @@
 .pinned-thread {
     position: relative;
     display: inline-block;
-    color: var(--standard-orange);
+    color: var(--standard-medium-orange);
 }
 
 .not-active-thread-announcement {
     position: relative;
     display: inline-block;
-    color: var(--pinned-thread);
+    color: var(--standard-hover-light-gray);
     -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: var(--thread-lock-color);
+    -webkit-text-stroke-color: var(--standard-gray-black);
 }
 
 .not-active-thread-announcement i.fas,
 .pinned-thread i.fas {
-    color: var(--pinned-thread);
-    -webkit-text-stroke: 1px var(--thread-lock-color);
+    color: var(--standard-hover-light-gray);
+    -webkit-text-stroke: 1px var(--standard-gray-black);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
-    color: var(--pinned-thread) !important;
+    color: var(--standard-hover-light-gray) !important;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .reverse_golden_hover {
-    color: var(--thread-announcement-expiring-color);
+    color: var(--standard-tangerine-yellow);
 }
 
 .text-decoration-none {
@@ -296,7 +296,7 @@
     position: relative;
     display: inline-block;
     -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: var(--thread-lock-color);
+    -webkit-text-stroke-color: var(--standard-gray-black);
 }
 
 .current-favorite i.fas {
@@ -304,7 +304,7 @@
 }
 
 .active-thread-remove-expiring-announcement i.fas {
-    color: var(--thread-announcement-expiring-color) !important;
+    color: var(--standard-tangerine-yellow) !important;
 }
 
 .active-thread-remove-announcement i.fas {
@@ -334,7 +334,7 @@
 }
 
 .content.create-thread-message {
-    border: solid var(--thread-announcement-expiring-color) 4px;
+    border: solid var(--standard-tangerine-yellow) 4px;
     margin: 15px;
     padding: 20px;
     word-break: break-word;
@@ -350,11 +350,11 @@
     float: right;
     display: inline-block;
     -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: var(--thread-lock-color);
+    -webkit-text-stroke-color: var(--standard-gray-black);
 }
 
 .thread-announcement-expiring {
-    color: var(--thread-announcement-expiring-color);
+    color: var(--standard-tangerine-yellow);
 }
 
 .thread-favorite {
@@ -367,7 +367,7 @@
 
 .thread-merged,
 .thread-locked {
-    color: var(--always-default-white);
+    color: var(--btn-default-white);
 }
 
 .thead-content {
@@ -439,7 +439,7 @@
 }
 
 #post-hr {
-    border-top: 1px solid var(--post-hr-color);
+    border-top: 1px solid var(--standard-medium-gray);
     margin-bottom: 5px;
 }
 
@@ -621,14 +621,14 @@
     padding: 19px;
     margin-bottom: 20px;
     background-color: var(--attachment-box-color);
-    border: 1px solid var(--well-border);
+    border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
-    box-shadow: inset 0 1px 1px var(--well-box-shadow);
+    box-shadow: inset 0 1px 1px var(--btn-default-hover);
 }
 
 .well blockquote {
-    border-color: var(--attachment-image-color);
-    border-color: var(--well-blackquote-border);
+    border-color: var(--standard-light-gray);
+    border-color: var(--standard-light-gray);
 }
 
 .well-lg {
@@ -642,7 +642,7 @@
 }
 
 .attachment-img {
-    border: 1px solid var(--attachment-image-color);
+    border: 1px solid var(--standard-light-gray);
     border-radius: 4px;
     padding: 5px;
     max-width: 400px;
@@ -651,7 +651,7 @@
 }
 
 .attachment-img:hover {
-    box-shadow: 0 0 2px 1px var(--attachment-image-hover);
+    box-shadow: 0 0 2px 1px var(--standard-gray-blue);
     cursor: pointer;
 }
 /* stylelint-disable-next-line selector-id-pattern */
@@ -734,7 +734,7 @@
 .thread-box-full {
     padding: 10px 20px;
     margin: 5px auto;
-    border: 1px solid var(--standard-grey);
+    border: 1px solid var(--standard-medium-gray);
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,
