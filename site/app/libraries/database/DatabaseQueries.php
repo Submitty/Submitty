@@ -207,7 +207,7 @@ class DatabaseQueries {
         FROM posts
         ORDER BY author_user_id, timestamp desc),
         F AS
-        (SELECT student_id, count (student_id)
+        (SELECT student_id, count (DISTINCT poll_id)
         FROM poll_responses
         GROUP BY student_id),
         G AS
