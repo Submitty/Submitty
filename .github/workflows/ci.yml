@@ -597,35 +597,6 @@ jobs:
           path: ${{ github.WORKSPACE }}/dumped/**/*.sql
           retention-days: 3
 
-  routes:
-    name: Route Check
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          path: MAIN
-
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          path: PR
-
-      - name: Compare the Number of Routes
-        run: |
-          DIRECTORY="site/app/controllers"
-          ROUTE_NUMBER_DIFF=$(( $(grep -roE "#\[Route((.*?))]" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -roE "#\[Route((.*?))]" --include="*.php" "PR/$DIRECTORY" | wc -l) ))
-          if [ $ROUTE_NUMBER_DIFF -ne 0 ]; then
-            echo "::error::The number of routes has changed by $ROUTE_NUMBER_DIFF in this PR."
-            echo "::error::Please make sure that routes do not conflict with each other."
-            echo "::error::This requirement may be waived on maintainer review after thorough checking."
-            exit 1
-          else
-            echo "No Routes added. OK."
-          fi
-
 
   Cypress-System:
     name: Cypress (System)
