@@ -82,7 +82,6 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="component-64"]').click(20, 25);
         cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
-        cy.logout();
         cy.clearCookies();
         cy.login('ta');
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
