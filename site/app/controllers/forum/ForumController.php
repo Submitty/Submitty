@@ -1362,7 +1362,13 @@ class ForumController extends AbstractController {
                 $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
-                    $this->getThreadContent($_POST["thread_id"], $output);
+                    $output['lock_thread_date'] = $result->getThread()->getLockDate()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['title'] = $result->getThread()->getTitle();
+                    $output['categories_ids'] =  $result->getThread()->getCategories()->map(function ($x) {
+                        return $x->getId();
+                    })->toArray();
+                    $output['thread_status'] = $result->getThread()->getStatus();
+                    $output['expiration'] = $result->getThread()->getPinnedExpiration();
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
             }
@@ -1371,15 +1377,6 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
-    }
-
-    private function getThreadContent($thread_id, &$output) {
-        $result = $this->core->getQueries()->getThread($thread_id);
-        $output['lock_thread_date'] = $result['lock_thread_date'];
-        $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
-        $output['thread_status'] = $result["status"];
-        $output['expiration'] = $result["pinned_expiration"];
     }
 
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
