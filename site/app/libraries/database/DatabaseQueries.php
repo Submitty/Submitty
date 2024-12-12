@@ -8,7 +8,6 @@ use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
