@@ -33,11 +33,21 @@
       <button id='download-sql-btn' class="btn btn-primary" disabled>Download CSV</button>
       <hr>
       <h2>Load Queries</h2>
-      <p>If you have any saved queries, they will appear here.</p>
+      <p>Any saved queries will appear here.</p>
       <div id="saved-queries">
       </div>
       <hr>
-      <h2>Save/Unsave Queries</h2>
+    </div>
+
+    <div>
+      <h2>Query Results</h2>
+      <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
+      <table id="query-results" class="table table-striped mobile-table">
+      </table>
+    </div>
+    <div>
+        <hr>
+      <h2>Save/Delete Queries</h2>
       In the box below, input the name of the query you'd like to save.
       <br>
       <textarea id="toolbox-namearea" name="saved-name" style="margin-bottom: 2px;" aria-label="Save SQL Name"></textarea>
@@ -47,17 +57,9 @@
       <textarea id="toolbox-textarea" name="saved-sql" style="margin-bottom: 2px;" aria-label="Save SQL Query"></textarea>
       <button id='save-sql-btn' class="btn btn-primary">Save Query</button>
       <br />
-      Alternatively, input the name of a query below and press "Unsave Query" if you'd like to delete a query.
+      Alternatively, input the name of a query below and press "Delete Query" if you'd like to delete a query.
       <br />
       <textarea id="toolbox-namearea" name="removal-name" style="margin-bottom: 2px;" aria-label="Save SQL Name"></textarea>
-      <button id='remove-sql-btn' class="btn btn-primary">Unsave Query</button>
-      <hr>
-    </div>
-
-    <div>
-      <h2>Query Results</h2>
-      <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
-      <table id="query-results" class="table table-striped mobile-table">
-      </table>
+      <button id='remove-sql-btn' class="btn btn-primary">Delete Query</button>
     </div>
 </div>
