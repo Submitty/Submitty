@@ -2416,7 +2416,7 @@ class ElectronicGraderController extends AbstractController {
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->addComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
 
-        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             // return empty data for peers
             return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
@@ -2496,7 +2496,7 @@ class ElectronicGraderController extends AbstractController {
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
 
-        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
             // return empty data for peers
             return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
@@ -3778,7 +3778,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonError("This gradeable is not an electronic file gradeable");
             return null;
         }
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() == $gradeable_id;
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() === $gradeable_id;
         if ($graded_gradeable === false) {
             return null;
         }
