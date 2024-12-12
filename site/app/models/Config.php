@@ -362,6 +362,7 @@ class Config extends AbstractModel {
 
     public function loadMasterConfigs($config_path) {
         if (!is_dir($config_path)) {
+            throw new ConfigException("Could not find config directory: " . $config_path, true);
         }
         $this->config_path = $config_path;
         // Load config details from the master config file
@@ -383,7 +384,7 @@ class Config extends AbstractModel {
             $this->database_driver = $database_json['driver'];
         }
 
-        // $this->debug = $database_json['debugging_enabled'] === true;
+        $this->debug = $database_json['debugging_enabled'] === true;
 
         $authentication_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'authentication.json'));
         if (!$authentication_json) {
