@@ -410,6 +410,16 @@ class Core {
     }
 
     /**
+     * Returns the user that the client is logged in as. Will return null if there is no user
+     * to be logged in as.
+     *
+     * @return string|null
+     */
+    public function getUserId() {
+        return $this->user_id;
+    }
+
+    /**
      * Is a user loaded into the Core to be used for the client to be logged in as
      *
      * @return bool
