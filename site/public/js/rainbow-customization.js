@@ -157,6 +157,21 @@ function SetAlternateDropdown(el) {
     select.data('gradeablealternate', alternateValue);
 }
 
+// Sets the placeholder values of gradeable percents
+function SetPercentsPlaceholderValue(bucket) {
+    const expectedGradeablesInBucket = $(`input[id="config-count-${bucket}"]`).val();
+
+    // Subtract alternate gradeables from the count
+    const countCheckedCheckboxes = $(`div[id="config-${bucket}"]`).find('input[id^="alternate-checkbox-"]:checked').length;
+    const countGradeables = expectedGradeablesInBucket - countCheckedCheckboxes;
+
+    const gradeablePercentDivs = $(`div[id^="gradeable-percents-div-${bucket}-"] > input`);
+    gradeablePercentDivs.each((index, gradeablePercentDiv) => {
+        // Floor to get 1 decimal place
+        $(gradeablePercentDiv).attr('placeholder', Math.floor((1 / countGradeables) * 1000) / 10);
+    });
+}
+
 // Updates the values of all detected alternates of a given gradeables points or percents input
 function UpdateAlternates(el, input, primaryID) {
     const alternateDropdowns = $('select[id^="alternate-dropdown-"]');
@@ -1320,6 +1335,8 @@ $(document).ready(() => {
         if (gradeableAlternateChecked) { // Ensure all alternates are linked to primaries on page load
             LinkAlternateToPrimary(alternateDropdown);
         }
+        const bucket = gradeableAlternate.data('bucket');
+        SetPercentsPlaceholderValue(bucket);
         gradeableAlternate.change((event) => {
             const gradeableAlternateChecked = gradeableAlternate.is(':checked');
             $(alternateDropdown).toggle(gradeableAlternateChecked);
@@ -1332,6 +1349,9 @@ $(document).ready(() => {
                 alternatePoints.removeAttr('readonly');
                 alternatePercents.removeAttr('readonly');
             }
+            // Change gradeable percent placeholder values based on number of 'primary' gradeables
+            const bucket = gradeableAlternate.data('bucket');
+            SetPercentsPlaceholderValue(bucket);
         });
     });
 });
