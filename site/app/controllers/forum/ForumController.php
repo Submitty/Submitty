@@ -721,10 +721,7 @@ class ForumController extends AbstractController {
         if ($post_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
-        $order = filter_input(INPUT_COOKIE, 'forum_display_option', FILTER_UNSAFE_RAW);
-        if ($order === false) {
-            $order = 'tree';
-        }
+        $order = $_COOKIE['forum_display_option'] ?? 'tree';
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $order);
         if (is_null($thread)) {
