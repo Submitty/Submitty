@@ -113,7 +113,47 @@ export async function downloadSqlResult(id) {
     document.body.removeChild(temp_element);
 }
 
+async function getQueries() {
+    try {
+        const response = await fetch(buildCourseUrl(['getQueries']), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+
+        const json = await response.json();
+        if (!response.ok) {
+            console.log(json);
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log(json.data);
+
+        const buttonContainer = document.getElementById('saved-queries');
+        buttonContainer.innerHTML = "";
+        // Create buttons for each retrieved query
+        for (let i = 0; i < json.data.length; i += 2) {
+            const name = json.data[i];
+            const query = json.data[i + 1];
+            console.log(name);
+            const button = document.createElement('button');
+            button.className = "btn btn-primary";
+            button.textContent = json.data[i];
+            button.dataset.value = json.data[i+1];
+            button.addEventListener('click', () => {
+                const associatedQuery = button.dataset.value;
+                document.querySelector('[name="sql"]').textContent = associatedQuery;
+            });
+            buttonContainer.appendChild(button);
+        }
+    } catch (error) {
+        console.error("Error fetching queries: ", error);
+    }
+}
+
 export function init() {
+    getQueries();
     document.getElementById('run-sql-btn').addEventListener('click', () => runSqlQuery());
     document.getElementById('sql-database-schema').addEventListener('click', () => {
         document.getElementById('sql-database-schema-content').style.display
@@ -128,6 +168,43 @@ export function init() {
                     ? 'none'
                     : 'block';
         });
+    });
+    document.getElementById('save-sql-btn').addEventListener('click', async () => {
+        const form_data = new FormData();
+        form_data.append('csrf_token', getCsrfToken());
+        form_data.append('sql', document.querySelector('[name="saved-sql"]').value);
+        form_data.append('name', document.querySelector('[name="saved-name"]').value);
+        try {
+            const resp = await fetch(
+                buildCourseUrl(['saveQuery']),
+                {
+                    method: 'POST',
+                    body: form_data,
+                },
+            );
+        }
+        catch(exc){
+            console.error(exc);
+        }
+        getQueries();
+    });
+    document.getElementById('remove-sql-btn').addEventListener('click', async () => {
+        const form_data = new FormData();
+        form_data.append('csrf_token', getCsrfToken());
+        form_data.append('name', document.querySelector('[name="removal-name"]').value);
+        try {
+            const resp = await fetch(
+                buildCourseUrl(['removeQuery']),
+                {
+                    method: 'POST',
+                    body: form_data,
+                },
+            );
+        }
+        catch(exc){
+            console.error(exc);
+        }
+        getQueries();
     });
     document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult('query-results'));
 }
