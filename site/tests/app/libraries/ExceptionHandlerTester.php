@@ -29,7 +29,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
 
     public function testThrowRuntimeException() {
         ExceptionHandler::setDisplayExceptions(true);
-        $this->assertMatchesRegularExpression("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test"), '1'));
+        $this->assertMatchesRegularExpression("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test"), 'test'));
         ExceptionHandler::setDisplayExceptions(false);
     }
 
