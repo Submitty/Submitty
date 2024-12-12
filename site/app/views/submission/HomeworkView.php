@@ -274,7 +274,8 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_day_budget
+                    'remaining' => $late_day_budget,
+                    'allowed_remaining' => $late_days_allowed - $active_days_charged
                 ]];
             }
             if ($error) {
@@ -337,10 +338,13 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
             'error' => $error,
-            'daylight' => $daylight_message_required
+            'daylight' => $daylight_message_required,
+            'late_days_url' => $late_days_url
         ]);
     }
 

@@ -13,6 +13,18 @@ export function getCurrentSemester() {
 
     return semester + year;
 }
+/**
+* Generates the semester name e.g Spring 2021, Fall 2021 based on today's data
+*
+* @returns {String}
+*/
+export function getFullCurrentSemester() {
+    const today = new Date();
+    const year = today.getFullYear().toString(); // get last two digits
+    const semester = ((today.getMonth() + 1) < 7) ? 'Spring' : 'Fall'; // first half of year 'spring' rest is fall
+
+    return `${semester} ${year}`;
+}
 
 /**
 * Get the API key for the given user_id and password

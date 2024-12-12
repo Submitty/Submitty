@@ -11,8 +11,8 @@
             <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
             <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" aria-label="Select thread to merge into" data-ays-ignore="true">
-                {% for threads in possibleMerges %}
-                    <option value="{{ threads['id'] }}" data-first-post-id={{ threads['first_post_id'] }}>({{ threads['id'] }}) {{ threads['title'] }}</option>
+                {% for thread in possibleMerges %}
+                    <option value="{{ thread.id }}" data-first-post-id={{ thread.getFirstPost().id }}>({{ thread.id }}) {{ thread.title }}</option>
                 {% endfor %}
             </select>
         </div>
