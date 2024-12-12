@@ -619,7 +619,7 @@ jobs:
           MAIN_FILE="MAIN/$FILEPATH"
           PR_FILE="PR/$FILEPATH"
 
-          ROUTE_NUMBER_DIFF=$(((grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -ro "#\[Route" --include="*.php" "PR/$DIRECTORY" | wc -l)))
+          ROUTE_NUMBER_DIFF=$(($(grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -ro "#\[Route" --include="*.php" "PR/$DIRECTORY" | wc -l)))
           echo $(grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l)
           echo "$ROUTE_NUMBER_DIFF"
           if [ $LINES_DIFF -gt 0 ]; then
