@@ -832,11 +832,11 @@ class ForumThreadView extends AbstractView {
             $classes[] = "first_post";
         }
         $isNewPost = false;
-        if ($thread->getNewPosts($user->getId())->contains($post) || $user->getId() === $post->getAuthor()->getId()) {
+        if ($thread->getNewPosts($user->getId())->contains($post)) {
             $classes[] = "new_post";
             $isNewPost = true;
             if ($post->getAuthor()->accessGrading()) {
-                $classes[] = "important new_post important-new";
+                $classes[] = "important important-new";
             }
         }
         else {
