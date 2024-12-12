@@ -616,7 +616,7 @@ jobs:
       - name: Compare the Number of Routes
         run: |
           DIRECTORY="site/app/controllers"
-          ROUTE_NUMBER_DIFF=$(( $(grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -ro "#\[Route" --include="*.php" "PR/$DIRECTORY" | wc -l) ))
+          ROUTE_NUMBER_DIFF=$(( $(grep -roE "#\[Route((.*?))]" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -roE "#\[Route((.*?))]" --include="*.php" "PR/$DIRECTORY" | wc -l) ))
           if [ $ROUTE_NUMBER_DIFF -ne 0 ]; then
             echo "::error::The number of routes has changed by $ROUTE_NUMBER_DIFF in this PR."
             echo "::error::Please make sure that routes do not conflict with each other."
