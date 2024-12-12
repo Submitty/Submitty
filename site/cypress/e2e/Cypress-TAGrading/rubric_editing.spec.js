@@ -21,13 +21,14 @@ describe('Test cases for TA grading page', () => {
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
         cy.get('#edit-mode-enabled').click();
+        // Matching with ^ to find last component regardless of id
         cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
         cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
         cy.get('[data-testid="add-new-mark-button"]').click();
-        cy.get('[aria-label="mark title"]').eq(-1).type('First New Mark');
+        cy.get('[data-testid="mark-title-input"]').eq(-1).type('First New Mark');
         cy.get('[data-testid="add-new-mark-button"]').click();
-        cy.get('[aria-label="mark title"]').eq(-1).type('Second New Mark');
+        cy.get('[data-testid="mark-title-input"]').eq(-1).type('Second New Mark');
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="add-new-mark-button"]')
             .should('not.exist');
@@ -36,19 +37,17 @@ describe('Test cases for TA grading page', () => {
             .should('contain', 'Save');
         cy.get('[data-testid="mark-reorder"]').eq(-2).then(($el) => {
             const rect = $el[0].getBoundingClientRect();
-            // eslint-disable-next-line cypress/unsafe-to-chain-command, cypress/no-unnecessary-waiting
             cy.wrap($el)
-                .wait(300)
-                .trigger('mousedown', { which: 1 })
-                .wait(300)
-                .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 })
-                .wait(300)
+                .trigger('mousedown', { which: 1 });
+            cy.wrap($el)
+                .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 });
+            cy.wrap($el)
                 .trigger('mouseup', { force: true });
         });
         cy.get('#edit-mode-enabled').click();
         cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
-        cy.get('[data-testid^="component"] .mark-title').eq(-3).should('contain', 'Second New Mark');
-        cy.get('[data-testid^="component"] .mark-title').eq(-2).should('contain', 'First New Mark');
+        cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-3).should('contain', 'Second New Mark');
+        cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-2).should('contain', 'First New Mark');
     });
 });

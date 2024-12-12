@@ -53,9 +53,9 @@ Required Input:
             {{ mark.points }}
         {% endif %}
     </span>
-    <span class="col-sm mark-title" data-title="{{ mark.title|escape }}">
+    <span class="col-sm mark-title" data-testid="mark-title" data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title" {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
+            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title" data-testid="mark-title-input" {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
         {% endif %}
