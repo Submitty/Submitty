@@ -558,25 +558,25 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                             successCallback(response.data);
                         }
                         else if (response.status === 'fail') {
-                            $('#save_status').text('Error Saving Changes').css('color', 'var(--text-black)');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             errorCallback(response.message, response.data);
                         }
                         else {
                             alert('Internal server error');
-                            $('#save_status').text('Error Saving Changes').css('color', 'var(--text-black)');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             console.error(response.message);
                         }
                         location.reload();
                     },
                     error: function (response) {
-                        $('#save_status').text('Error Saving Changes').css('color', 'var(--text-black)');
+                        $('#save_status').text('Error Saving Changes').css('color', 'red');
                         setGradeableUpdateComplete();
                         console.error(`Failed to parse response from server: ${response}`);
                     },
                 });
             }
             catch (e) {
-                $('#save_status').text('Error Saving Changes').css('color', 'var(--text-black)');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         };
     }
@@ -744,7 +744,7 @@ function serializeRubric() {
 function saveRubric(redirect = true) {
     const values = serializeRubric();
 
-    $('#save_status').text('Saving Rubric...');
+    $('#save_status').text('Saving Rubric...').css('color', 'var(--text-black)');
     $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),

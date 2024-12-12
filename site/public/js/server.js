@@ -1669,7 +1669,7 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
                 $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
             }
             else {
-                $('#save_status').text('Error Saving Changes');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         },
         error: function () {
