@@ -767,7 +767,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("No data submitted. Please try again.");
         }
 
-        $type="";
+        $type = "";
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
         if ($thread->isChanged() && $post->isChanged()) {
@@ -782,7 +782,7 @@ class ForumController extends AbstractController {
                 'post_box_id' => 1,
             ]);
         }
-        else if ($thread->isChanged()) {
+        elseif ($thread->isChanged()) {
             // Clear prepered post history additions.
             $this->core->getCourseEntityManager()->refresh($post);
             $type = "Thread";
@@ -816,7 +816,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * Toggle deletion of a post or thread 
+     * Toggle deletion of a post or thread
      * @return mixed[]
      */
     #[Route("courses/{_semester}/{_course}/forum/posts/delete", methods: ["POST"])]
@@ -827,7 +827,7 @@ class ForumController extends AbstractController {
         if (is_null($thread_id) || $thread_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse thread id.");
         }
-        if (is_null($post_id)|| $post_id === false) {
+        if (is_null($post_id) || $post_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
@@ -855,7 +855,7 @@ class ForumController extends AbstractController {
             }
             else {
                 $post->setDeleted(false);
-                if($thread->getFirstPost()->getId() === $post->getId()) {
+                if ($thread->getFirstPost()->getId() === $post->getId()) {
                     $thread->setDeleted(false);
                 }
                 $this->core->getCourseEntityManager()->flush();
@@ -895,7 +895,7 @@ class ForumController extends AbstractController {
             $thread->setDeleted(true);
         }
         $post->setDeleted(true);
-        foreach($post->getChildren() as $child) {
+        foreach ($post->getChildren() as $child) {
             $this->recursiveDeletePost($child, $thread);
         }
     }
@@ -1010,7 +1010,7 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * 
+     *
      * @param Thread $thread
      * @return bool true iff successful (thread may not have changed, use $thread->isChanged() to check changes)
      */
@@ -1060,7 +1060,7 @@ class ForumController extends AbstractController {
      */
     private function editPost(Post $post): bool {
         $initial_post = null;
-        if(count($post->getHistory()) === 0) {
+        if (count($post->getHistory()) === 0) {
             $initial_post = $post->saveNewVersion($post->getAuthor());
         }
         // Ensure authentication before call

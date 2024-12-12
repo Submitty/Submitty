@@ -131,7 +131,7 @@ class Thread {
     }
 
     public function setStatus(int $status): void {
-        if($this->status !== $status) {
+        if ($this->status !== $status) {
             $this->status = $status;
             $this->is_changed = true;
         }
@@ -199,7 +199,6 @@ class Thread {
             $this->categories = $new_categories;
             $this->is_changed = true;
         }
-        
     }
     public function isUnread(string $user_id): bool {
         return !$this->getNewPosts($user_id)->isEmpty();

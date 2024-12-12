@@ -36,7 +36,6 @@ class PostHistory {
         $this->content = $post->getContent();
         $this->edit_timestamp = new DateTime("now");
         $this->version_id = $version;
-
     }
     public function getEditAuthor(): UserEntity {
         return $this->edit_author;

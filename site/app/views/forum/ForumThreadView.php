@@ -431,7 +431,7 @@ class ForumThreadView extends AbstractView {
 
         $posts = [];
         if ($display_option == "tree") {
-            $posts = $this->BuildReplyHeirarchy($first_post);
+            $posts = ForumThreadView::BuildReplyHeirarchy($first_post);
         }
         else {
             // posts were ordered at query-time by repository

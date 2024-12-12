@@ -222,7 +222,7 @@ class Post {
      */
     public function saveNewVersion(UserEntity $edit_author): PostHistory {
         $version = 1;
-        if(count($this->history) > 0) {
+        if (count($this->history) > 0) {
             $version = max($this->history->map(function ($x) {
                 return $x->getVersion();
             })->toArray()) + 1;
