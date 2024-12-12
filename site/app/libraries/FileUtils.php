@@ -672,7 +672,7 @@ class FileUtils {
         // Check exists
         $exists = file_exists($path);
         if (!$exists) {
-            $results[] = "'${path}' does not exist.";
+            $results[] = "'{$path}' does not exist.";
             return $results;
         }
 
@@ -681,7 +681,7 @@ class FileUtils {
             $owner_id = fileowner($path);
             $owner_name = posix_getpwuid($owner_id)['name'];
             if ($owner_name !== $expected_owner) {
-                $results[] = "Expected '${path}' to have owner '${expected_owner}' but instead got '${owner_name}'.";
+                $results[] = "Expected '{$path}' to have owner '{$expected_owner}' but instead got '{$owner_name}'.";
             }
         }
 
@@ -690,20 +690,20 @@ class FileUtils {
             $group_id = filegroup($path);
             $group_name = posix_getgrgid($group_id)['name'];
             if ($group_name !== $expected_group) {
-                $results[] = "Expected '${path}' to have group '${expected_group}' but instead got '${group_name}'.";
+                $results[] = "Expected '{$path}' to have group '{$expected_group}' but instead got '{$group_name}'.";
             }
         }
 
         // Check is readable
         $readable = is_readable($path);
         if (!$readable) {
-            $results[] = "'${path}' is not readable.";
+            $results[] = "'{$path}' is not readable.";
         }
 
         // Check is writable
         $writable = is_writable($path);
         if (!$writable) {
-            $results[] = "'${path}' is not writable.";
+            $results[] = "'{$path}' is not writable.";
         }
 
         return $results;
