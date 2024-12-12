@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          disableElementChildren, PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
 
 let updateInProgressCount = 0;
