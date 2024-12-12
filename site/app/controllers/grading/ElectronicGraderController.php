@@ -2494,7 +2494,7 @@ class ElectronicGraderController extends AbstractController {
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
-        $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+        $this->core->getQueries()->removeComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
 
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->accessGrading()) {
             // return empty data for peers
