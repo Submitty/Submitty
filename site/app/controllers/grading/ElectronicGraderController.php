@@ -2418,7 +2418,7 @@ class ElectronicGraderController extends AbstractController {
 
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             // return empty data for peers
-            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]); 
+            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
         // If there are no graders for this component, use an empty array
         if (isset($graders[$component_id])) {
@@ -2498,7 +2498,7 @@ class ElectronicGraderController extends AbstractController {
 
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             // return empty data for peers
-            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]); 
+            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
 
         if (isset($graders[$component_id])) {
