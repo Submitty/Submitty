@@ -850,7 +850,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         if ($post->isDeleted()) {
-            if ($post->getParent()->isDeleted()) {
+            if ($thread->getFirstPost() !== $post && $post->getParent()->isDeleted()) {
                 return $this->core->getOutput()->renderJsonFail("Parent post must be restored first.");
             }
             else {
@@ -1017,7 +1017,7 @@ class ForumController extends AbstractController {
     private function editThread(Thread $thread): bool {
         // Ensure authentication before call
         $user = $this->core->getUser();
-        $title = filter_input(INPUT_POST, "title", FILTER_SANITIZE_STRING);
+        $title = filter_input(INPUT_POST, "title", FILTER_UNSAFE_RAW);
         $status = filter_input(INPUT_POST, "thread_status", FILTER_VALIDATE_INT);
         $categories_ids  = [];
         if (isset($_POST["cat"])) {
@@ -1035,7 +1035,7 @@ class ForumController extends AbstractController {
 
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
-            if ($lock_thread_date_input !== false && DateUtils::validateTimestamp($lock_thread_date_input)) {
+            if ($lock_thread_date_input !== false) {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
@@ -1043,10 +1043,11 @@ class ForumController extends AbstractController {
             }
 
             $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW);
-            if ($expiration_input !== false && DateUtils::validateTimestamp($expiration_input)) {
+            if ($expiration_input !== false) {
                 $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
             }
             else {
+                print($expiration_input);
                 return false;
             }
         }
