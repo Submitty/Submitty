@@ -50,7 +50,7 @@ class Category {
             return false;
         }
         foreach ($c1 as $cat) {
-            // Doctrine ensures only one instance of an entity in memory, so reference equality works. 
+            // Doctrine ensures only one instance of an entity in memory, so reference equality works.
             if (!$c2->contains($cat)) {
                 return false;
             }
