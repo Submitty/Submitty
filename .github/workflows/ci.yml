@@ -622,7 +622,7 @@ jobs:
           ROUTE_NUMBER_DIFF=$(($(grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l) - $(grep -ro "#\[Route" --include="*.php" "PR/$DIRECTORY" | wc -l)))
           echo $(grep -ro "#\[Route" --include="*.php" "MAIN/$DIRECTORY" | wc -l)
           echo "$ROUTE_NUMBER_DIFF"
-          if [ $LINES_DIFF -gt 0 ]; then
+          if [ $ROUTE_NUMBER_DIFF -gt 0 ]; then
             echo "::error::colors.css has increased in size by $LINES_DIFF lines in this PR."
             echo "::error::Please use existing colors in colors.css instead of adding new ones, to keep the size of the file manageable."
             echo "::error::If adding to colors.css really is necessary for your PR, this requirement may be waived on maintainer review."
