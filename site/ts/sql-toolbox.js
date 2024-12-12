@@ -146,8 +146,8 @@ async function getQueries() {
             });
             buttonContainer.appendChild(button);
         }
-    } catch (error) 
-    {
+    } 
+    catch(error) {
         console.error('Error fetching queries: ', error);
     }
 }
