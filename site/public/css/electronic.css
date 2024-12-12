@@ -1529,7 +1529,9 @@ tr.is_publish {
 }
 
 .grader-names {
-    color: var(--standard-vibrant-red);
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
 }
 
 .solution-cont {

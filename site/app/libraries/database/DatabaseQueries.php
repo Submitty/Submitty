@@ -8920,7 +8920,7 @@ WHERE current_state IN
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
 
-              LEFT JOIN (
+              LEFT JOIN LATERAL (
                 SELECT
                   gc.gc_id,
                   gc.g_id,
@@ -8939,7 +8939,7 @@ WHERE current_state IN
                   FROM active_graders
                   LEFT JOIN users ON active_graders.grader_id = users.user_id
                   GROUP BY ag_user_id, ag_team_id, gc_id
-                ) as ag on ag.gc_id = gc.gc_id
+                ) as ag on ag.gc_id = gc.gc_id AND ag.ag_{$submitter_type}={$submitter_type_ext}
                 GROUP BY gc.gc_id, gc.g_id
               ) AS gc ON gc.g_id = g.g_id
 

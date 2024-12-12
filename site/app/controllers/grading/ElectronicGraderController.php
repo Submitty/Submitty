@@ -2182,6 +2182,12 @@ class ElectronicGraderController extends AbstractController {
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
 
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            // If the user is a student, we don't want to show the peer grader's name
+            $response_data['active_graders'] = [];
+            $response_data['active_graders_timestamps'] = [];
+            return $response_data;
+        }
         // Ensure the current grader is not in the list of active graders:w
         foreach ($graders as $component_id => $component_graders) {
             if (isset($timestamps[$component_id]) && isset($graders_names[$component_id])) {
@@ -2408,8 +2414,12 @@ class ElectronicGraderController extends AbstractController {
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
-        $this->core->getQueries()->addComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+        $this->core->getQueries()->addComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
 
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            // return empty data for peers
+            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]); 
+        }
         // If there are no graders for this component, use an empty array
         if (isset($graders[$component_id])) {
             // Ensure the current grader is not in the list of active graders:w
@@ -2485,6 +2495,12 @@ class ElectronicGraderController extends AbstractController {
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
+
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+            // return empty data for peers
+            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]); 
+        }
+
         if (isset($graders[$component_id])) {
             for ($i = 0; $i < count($graders[$component_id]); $i++) {
                 if ($graders[$component_id][$i] === $grader->getId()) {

@@ -45,6 +45,11 @@ Required Input:
         </div>
     </div>
     {# /Title bar #}
+    {% if graders is not empty %}
+        <p class="grader-names" data-testid="grader-names">
+        &nbsp;Currently being graded by: {{ graders|join(", ")}}
+        </p>
+    {% endif %}
 
     {# Marks table #}
     <div class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
