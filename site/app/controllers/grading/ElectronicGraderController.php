@@ -3778,7 +3778,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->getOutput()->renderJsonError("This gradeable is not an electronic file gradeable");
             return null;
         }
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() === $gradeable_id;
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id)->getGradeableId() == $gradeable_id;
         if ($graded_gradeable === false) {
             return null;
         }
