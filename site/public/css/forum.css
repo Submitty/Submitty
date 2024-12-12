@@ -321,7 +321,7 @@
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
-    text-shadow: black 0 0 5px;
+    text-shadow: var(--default-black) 0 0 5px;
 }
 
 .red-hover:hover, .not-active-thread-announcement:hover, .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
@@ -330,7 +330,7 @@
 }
 
 [data-theme="dark"] .active-thread-remove-expiring-announcement:hover, [data-theme="dark"] .active-thread-remove-announcement:hover, [data-theme="dark"] .current-favorite:hover {
-    text-shadow: white 0 0 5px;
+    text-shadow: var(--text-black) 0 0 5px;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
