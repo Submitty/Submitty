@@ -2,6 +2,7 @@
 
 namespace app\controllers\forum;
 
+use app\entities\UserEntity;
 use app\libraries\Core;
 use app\libraries\ForumUtils;
 use app\models\Notification;
@@ -720,7 +721,10 @@ class ForumController extends AbstractController {
         if ($post_id === false) {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
-        $order = $_COOKIE['forum_display_option'] ?? 'tree';
+        $order = filter_input(INPUT_COOKIE, 'forum_display_option', FILTER_UNSAFE_RAW);
+        if ($order === false) {
+            $order = 'tree';
+        }
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $order);
         if (is_null($thread)) {
@@ -762,71 +766,33 @@ class ForumController extends AbstractController {
         if (!$thread->isChanged() && !$post->isChanged()) {
             return $this->core->getOutput()->renderJsonFail("No data submitted. Please try again.");
         }
-        
-        $type = null;
-        $isError = false;
-        $messageString = '';
+
+        $type="";
+        $full_course_name = $this->core->getFullCourseName();
+        $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
         if ($thread->isChanged() && $post->isChanged()) {
-            if ($status_edit_thread && $status_edit_post) {
-                $type = "Thread and Post";
-                $messageString = "Thread and post updated successfully.";
-                $any_changes = true;
-            }
-            else {
-                $type = ($status_edit_thread) ? "Thread" : "Post";
-                $type_opposite = (!$status_edit_thread) ? "Thread" : "Post";
-                $isError = true;
-                if ($status_edit_thread || $status_edit_post) {
-                    //$type is true
-                    $messageString = "{$type} updated successfully. {$type_opposite} update failed. Please try again.";
-                    $any_changes = true;
-                }
-                else {
-                    $messageString = "Thread and Post update failed. Please try again.";
-                }
-            }
+            $type = "Thread and Post";
+            $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
+            $this->sendSocketMessage([
+                'type' => 'edit_thread',
+                'thread_id' => $thread_id,
+                'post_id' => $post_id,
+                'reply_level' => 1,
+                'post_box_id' => 1,
+            ]);
         }
-        else 
-        if (is_null($status_edit_thread) || is_null($status_edit_post)) {
-            $type = is_null($status_edit_thread) ? "Post" : "Thread";
-            if ($status_edit_thread || $status_edit_post) {
-                //$type is true
-                $messageString = "{$type} updated successfully.";
-                $any_changes = true;
-            }
-            else {
-                $isError = true;
-                $messageString = "{$type} update failed. Please try again.";
-            }
+        else if ($thread->isChanged()) {
+            // Clear prepered post history additions.
+            $this->core->getCourseEntityManager()->refresh($post);
+            $type = "Thread";
+            $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
+            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle();
         }
         else {
-
-        }
-        if ($any_changes) {
-            $full_course_name = $this->core->getFullCourseName();
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-            if ($type == "Post") {
-                $post_content = $_POST["thread_post_content"];
-                $subject = "Post Edited: " . Notification::textShortner($post_content);
-                $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post_content;
-            }
-            elseif ($type == "Thread and Post") {
-                $post_content = $_POST["thread_post_content"];
-                $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
-                $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post_content;
-            }
-            else {
-                $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
-                $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle();
-            }
-
-            $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
-            $this->core->getNotificationFactory()->onPostModified($event);
-        }
-        if ($isError) {
-            return $this->core->getOutput()->renderJsonFail($messageString);
-        }
-        if ($type === 'Post') {
+            $type = "Post";
+            $subject = "Post Edited: " . Notification::textShortner($post->getContent());
+            $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             if ($order === 'tree') {
                 ForumThreadView::BuildReplyHeirarchy($thread->getFirstPost());
             }
@@ -842,15 +808,10 @@ class ForumController extends AbstractController {
                 'post_box_id' => 1,
             ]);
         }
-        elseif ($type === 'Thread and Post') {
-            $this->sendSocketMessage([
-                'type' => 'edit_thread',
-                'thread_id' => $thread_id,
-                'post_id' => $post_id,
-                'reply_level' => 1,
-                'post_box_id' => 1,
-            ]);
-        }
+        $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
+        $this->core->getNotificationFactory()->onPostModified($event);
+        $this->core->getCourseEntityManager()->flush();
+
         return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
     }
 
@@ -1073,7 +1034,7 @@ class ForumController extends AbstractController {
         $thread->setCategories($categories);
 
         if ($user->accessAdmin()) {
-            $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_SANITIZE_STRING);
+            $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
             if ($lock_thread_date_input !== false && DateUtils::validateTimestamp($lock_thread_date_input)) {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
@@ -1081,7 +1042,7 @@ class ForumController extends AbstractController {
                 $thread->setLockDate(null);
             }
 
-            $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_SANITIZE_STRING);
+            $expiration_input = filter_input(INPUT_POST, "expirationDate", FILTER_UNSAFE_RAW);
             if ($expiration_input !== false && DateUtils::validateTimestamp($expiration_input)) {
                 $thread->setPinnedExpiration(DateUtils::parseDateTime($expiration_input, $user->getUsableTimeZone()));
             }
@@ -1097,8 +1058,12 @@ class ForumController extends AbstractController {
      * @return bool true iff successful (post may not have changed, use $post->isChanged() to check changes)
      */
     private function editPost(Post $post): bool {
+        $initial_post = null;
+        if(count($post->getHistory()) === 0) {
+            $initial_post = $post->saveNewVersion($post->getAuthor());
+        }
         // Ensure authentication before call
-        $content = filter_input(INPUT_POST, "thread_post_content", FILTER_SANITIZE_STRING);
+        $content = filter_input(INPUT_POST, "thread_post_content", FILTER_UNSAFE_RAW);
         if ($content === false || $content === "") {
             return false;
         }
@@ -1108,12 +1073,30 @@ class ForumController extends AbstractController {
         }
         $post->setContent($content);
         if ($this->modifyAnonymous($post->getAuthor()->getId())) {
-            $post->setAnonymous(filter_input(INPUT_POST, "Anon", FILTER_SANITIZE_STRING) === "Anon");
+            $post->setAnonymous(filter_input(INPUT_POST, "Anon", FILTER_UNSAFE_RAW) === "Anon");
         }
-        $this->saveAttachments(false, $post->getThread()->getId(), $post->getId(), 'file_input');
         $post->setRenderMarkdown(filter_input(INPUT_POST, "markdown_status", FILTER_VALIDATE_BOOL) !== false);
 
         // TODO: Handle attachments & edit table
+        // As core gets legacy user model currently, which isn't a doctrine entity, we need to get the corresponding entity.
+        $edit_author = $this->core->getCourseEntityManager()->find(UserEntity::class, $this->core->getUser()->getId());
+        $post_edit = $post->saveNewVersion($edit_author);
+        $new_attachments = $this->saveAttachments(false, $post->getThread()->getId(), $post->getId(), 'file_input');
+        $em = $this->core->getCourseEntityManager();
+        if ($new_attachments !== false) {
+            foreach ($new_attachments as $attachment_name) {
+                $em->persist($post->addAttachment($attachment_name, $post_edit->getVersion()));
+            }
+        }
+        foreach (json_decode($_POST['deleted_attachments']) as $attachment_name) {
+            $post->deleteAttachment($attachment_name, $post_edit->getVersion());
+        }
+        if ($post->isChanged()) {
+            if (!is_null($initial_post)) {
+                $em->persist($initial_post);
+            }
+            $em->persist($post_edit);
+        }
         return true;
     }
 
@@ -1123,14 +1106,14 @@ class ForumController extends AbstractController {
      * @param int $thread_id
      * @param int $post_id
      * @param string $file_post
-     * @return bool true iff success
+     * @return string[]|bool false if no good attachments. Otherwise array of attachment names.
      */
-    private function saveAttachments(bool $is_thread, int $thread_id, int $post_id, string $file_post) {
+    private function saveAttachments(bool $is_thread, int $thread_id, int $post_id, string $file_post): array|bool {
         $hasGoodAttachment = $this->checkGoodAttachment($is_thread, $thread_id, $file_post);
-        $attachment_name = [];
         if ($hasGoodAttachment[0] !== 1) {
             return false;
         }
+        $attachment_names = [];
         $thread_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments", $thread_id);
         $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
 
@@ -1154,14 +1137,14 @@ class ForumController extends AbstractController {
                 }
                 $file_name = "(" . $tmp . ")" . $file_name;
             }
-            $attachment_name[] = $file_name;
+            $attachment_names[] = $file_name;
         }
 
         for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
-            $target_file = $post_dir . "/" . $attachment_name[$i];
+            $target_file = $post_dir . "/" . $attachment_names[$i];
             move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
         }
-        return true;
+        return $attachment_names;
     }
     #[Route("/courses/{_semester}/{_course}/forum/threads", methods: ["POST"])]
     public function getThreads($page_number = null) {
