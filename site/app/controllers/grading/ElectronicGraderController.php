@@ -2182,7 +2182,7 @@ class ElectronicGraderController extends AbstractController {
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
 
-        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && !$this->core->getUser()->accessGrading()) {
             // If the user is a student, we don't want to show the peer grader's name
             $response_data['active_graders'] = [];
             $response_data['active_graders_timestamps'] = [];
@@ -2416,7 +2416,7 @@ class ElectronicGraderController extends AbstractController {
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->addComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
 
-        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && !$this->core->getUser()->accessGrading())
             // return empty data for peers
             return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
@@ -2496,7 +2496,7 @@ class ElectronicGraderController extends AbstractController {
         $graders_names = $graded_gradeable->getActiveGradersNames();
         $this->core->getQueries()->removeComponentGrader($component, $gradeable, $grader->getId(), $submitter_id);
 
-        if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
+        if ($gradeable->hasPeerComponent() && $this->core->getUser()->accessGrading()) {
             // return empty data for peers
             return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
         }
