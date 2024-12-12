@@ -1362,7 +1362,7 @@ class ForumController extends AbstractController {
                 $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
-                    $output['lock_thread_date'] = $result->getThread()->getLockDate()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['lock_thread_date'] = $result->getThread()->getLockDate()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
                     $output['title'] = $result->getThread()->getTitle();
                     $output['categories_ids'] =  $result->getThread()->getCategories()->map(function ($x) {
                         return $x->getId();
