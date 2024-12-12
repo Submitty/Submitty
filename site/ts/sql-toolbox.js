@@ -122,7 +122,6 @@ async function getQueries() {
             },
         });
 
-
         const json = await response.json();
         if (!response.ok) {
             console.log(json);
@@ -131,24 +130,25 @@ async function getQueries() {
         console.log(json.data);
 
         const buttonContainer = document.getElementById('saved-queries');
-        buttonContainer.innerHTML = "";
+        buttonContainer.innerHTML = '';
         // Create buttons for each retrieved query
         for (let i = 0; i < json.data.length; i += 2) {
             const name = json.data[i];
             const query = json.data[i + 1];
             console.log(name);
             const button = document.createElement('button');
-            button.className = "btn btn-primary";
+            button.className = 'btn btn-primary';
             button.textContent = json.data[i];
-            button.dataset.value = json.data[i+1];
+            button.dataset.value = json.data[i + 1];
             button.addEventListener('click', () => {
                 const associatedQuery = button.dataset.value;
                 document.querySelector('[name="sql"]').textContent = associatedQuery;
             });
             buttonContainer.appendChild(button);
         }
-    } catch (error) {
-        console.error("Error fetching queries: ", error);
+    } catch (error) 
+    {
+        console.error('Error fetching queries: ', error);
     }
 }
 
@@ -183,7 +183,7 @@ export function init() {
                 },
             );
         }
-        catch(exc){
+        catch (exc) {
             console.error(exc);
         }
         getQueries();
@@ -201,7 +201,7 @@ export function init() {
                 },
             );
         }
-        catch(exc){
+        catch (exc) {
             console.error(exc);
         }
         getQueries();
