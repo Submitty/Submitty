@@ -796,15 +796,12 @@ class ForumController extends AbstractController {
             if ($order === 'tree') {
                 ForumThreadView::BuildReplyHeirarchy($thread->getFirstPost());
             }
-            $reply_level = $thread->getPosts()->filter(function ($x) use ($post) {
-                return $x->getId() === $post->getId();
-            })->first()->getReplyLevel();
 
             $this->sendSocketMessage([
                 'type' => 'edit_post',
                 'thread_id' => $thread_id,
                 'post_id' => $post_id,
-                'reply_level' => $reply_level,
+                'reply_level' => $post->getReplyLevel(),
                 'post_box_id' => 1,
             ]);
         }
@@ -880,7 +877,6 @@ class ForumController extends AbstractController {
             $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
 
-            $post_id = $_POST["post_id"];
             $this->sendSocketMessage(array_merge(
                 ['type' => 'delete_post', 'thread_id' => $thread_id],
                 $type === "post" ? ['post_id' => $post_id] : []
