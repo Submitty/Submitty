@@ -253,7 +253,7 @@ def main():
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:
-        inp = input("Found {:d} matching submissions. Add to queue? [y/n]".format(len(grade_queue)))
+        inp = input("Found {:d} matching submissions. Add to queue? [y/N]".format(len(grade_queue)))
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 

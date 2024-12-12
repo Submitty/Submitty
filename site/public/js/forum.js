@@ -430,7 +430,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge = false, merge_thread
         }
         else {
             // eslint-disable-next-line no-var, no-redeclare
-            var new_url = buildCourseUrl(['forum', 'threads']);
+            var new_url = buildCourseUrl(['forum']);
         }
         window.location.replace(new_url);
     }
@@ -992,7 +992,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd ? 'next_page' : 'prev_page');
-    if (load_page === 0) {
+    if (load_page === -1) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -1014,7 +1014,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             // eslint-disable-next-line eqeqeq
             if (count == 0) {
                 // Stop further loads
-                $(element).data('next_page', 0);
+                $(element).data('next_page', -1);
             }
             else {
                 $(element).data('next_page', parseInt(load_page) + 1);
@@ -1035,12 +1035,12 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if (count === 0) {
                 // Stop further loads
-                $(element).data('prev_page', 0);
+                $(element).data('prev_page', -1);
             }
             else {
                 const prev_page = parseInt(load_page) - 1;
                 $(element).data('prev_page', prev_page);
-                if (prev_page >= 1) {
+                if (prev_page >= 0) {
                     arrow_up.show();
                 }
             }
@@ -1076,6 +1076,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            scroll_down: atEnd,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
@@ -1119,7 +1120,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            if ($(element).data('prev_page') !== 0) {
+            if ($(element).data('prev_page') !== -1) {
                 element.scrollTop = sensitivity;
             }
             dynamicScrollLoadPage(element, false);
@@ -1195,7 +1196,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
