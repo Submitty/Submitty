@@ -148,7 +148,7 @@ async function getQueries() {
         }
     }
     catch (error) {
-        console.error('Error fetching queries: ', error);
+        /*console.error('Error fetching queries: ', error);*/
     }
 }
 
@@ -169,42 +169,44 @@ export function init() {
                     : 'block';
         });
     });
-    document.getElementById('save-sql-btn').addEventListener('click', async () => {
-        const form_data = new FormData();
-        form_data.append('csrf_token', getCsrfToken());
-        form_data.append('sql', document.querySelector('[name="saved-sql"]').value);
-        form_data.append('name', document.querySelector('[name="saved-name"]').value);
-        try {
-            const resp = await fetch(
-                buildCourseUrl(['saveQuery']),
-                {
-                    method: 'POST',
-                    body: form_data,
-                },
-            );
-        }
-        catch (exc) {
-            console.error(exc);
-        }
-        getQueries();
-    });
-    document.getElementById('remove-sql-btn').addEventListener('click', async () => {
-        const form_data = new FormData();
-        form_data.append('csrf_token', getCsrfToken());
-        form_data.append('name', document.querySelector('[name="removal-name"]').value);
-        try {
-            const resp = await fetch(
-                buildCourseUrl(['removeQuery']),
-                {
-                    method: 'POST',
-                    body: form_data,
-                },
-            );
-        }
-        catch (exc) {
-            console.error(exc);
-        }
-        getQueries();
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('save-sql-btn').addEventListener('click', async () => {
+            const form_data = new FormData();
+            form_data.append('csrf_token', getCsrfToken());
+            form_data.append('sql', document.querySelector('[name="saved-sql"]').value);
+            form_data.append('name', document.querySelector('[name="saved-name"]').value);
+            try {
+                const resp = await fetch(
+                    buildCourseUrl(['saveQuery']),
+                    {
+                        method: 'POST',
+                        body: form_data,
+                    },
+                );
+            }
+            catch (exc) {
+                console.error(exc);
+            }
+            getQueries();
+        });
+        document.getElementById('remove-sql-btn').addEventListener('click', async () => {
+            const form_data = new FormData();
+            form_data.append('csrf_token', getCsrfToken());
+            form_data.append('name', document.querySelector('[name="removal-name"]').value);
+            try {
+                const resp = await fetch(
+                    buildCourseUrl(['removeQuery']),
+                    {
+                        method: 'POST',
+                        body: form_data,
+                    },
+                );
+            }
+            catch (exc) {
+                console.error(exc);
+            }
+            getQueries();
+        });
     });
     document.getElementById('download-sql-btn').addEventListener('click', () => downloadSqlResult('query-results'));
 }
