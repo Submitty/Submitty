@@ -168,10 +168,8 @@
             const [correctColor, defaultColor] =
             [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
                 window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
-            let responseText;
             {% for option in poll.getOptions() %}
-                responseText = "{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}";
-                data[0].x.push(responseText.replace(/(\d) /g, "$1\u00A0"));
+                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
                 data[0].y.push({{ response_counts[option.getId()] }});
                 data[0].marker.color.push(
                     {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
@@ -186,7 +184,8 @@
                 font: {
                     color: $("body").css("--text-black")
                 },
-                width: width
+                width: width,
+                xaxis: {type: 'category'}
             }
             Plotly.newPlot("chartContainer", data, layout);
             window.addEventListener('resize', function() {
