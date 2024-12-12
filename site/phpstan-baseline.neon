@@ -3811,11 +3811,6 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
-			count: 1
-			path: app/libraries/Core.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 2
 			path: app/libraries/CourseMaterialsUtils.php
