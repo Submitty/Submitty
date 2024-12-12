@@ -95,22 +95,22 @@ const PDF_PAGE_INSTRUCTOR = -2;
 // eslint-disable-next-line no-var
 var AJAX_USE_ASYNC = true;
 
-const units = [
-    'year',
-    'month',
-    'week',
-    'day',
-    'hour',
-    'minute',
-    'second',
-];
-
 /**
  *
  * @param {DateTime} dateTime input date time
  * @returns {string} time ago
  */
 const timeAgo = (dateTime) => {
+    const units = [
+        'year',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+    ];
+
     const diff = dateTime.diffNow().shiftTo(...units);
     const unit = units.find((unit) => diff.get(unit) !== 0) || 'second';
 
@@ -1928,7 +1928,7 @@ async function importComponentsFromFile() {
     catch (err) {
         console.log(err);
         alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-            + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+        + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
         return;
     }
     if (response.status !== 'success') {
@@ -2419,7 +2419,11 @@ async function loadComponentData(gradeable, graded_gradeable) {
     for (const component of gradeable.components) {
         COMPONENT_RUBRIC_LIST[component.id] = component;
         if (graded_gradeable.active_graders[component.id]) {
-            ACTIVE_GRADERS_LIST[component.id] = graded_gradeable.active_graders[component.id]?.map((_, index) => `${graded_gradeable.active_graders[component.id][index]} (${timeAgo(luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]))})`) ?? [];
+            ACTIVE_GRADERS_LIST[component.id] = graded_gradeable.active_graders[component.id]?.map((_, index) => {
+                const grader = graded_gradeable.active_graders[component.id][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
         }
         else {
             ACTIVE_GRADERS_LIST[component.id] = [];
@@ -2762,7 +2766,11 @@ async function openComponentGrading(component_id) {
             return;
         }
         for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
-            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => `${response.data.active_graders[component][index]} (${timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]))})`) ?? [];
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
         }
     }
     catch (err) {
@@ -2928,7 +2936,11 @@ async function closeComponentGrading(component_id, saveChanges) {
             return;
         }
         for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
-            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => `${response.data.active_graders[component][index]} (${timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]))})`) ?? [];
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
         }
     }
     catch (err) {

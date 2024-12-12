@@ -19,14 +19,14 @@ use app\models\User;
  */
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
-    private $gradeable = null;
+    private $gradeable;
     /** @prop
      * @var string Id of the gradeable this grade is attached to */
-    protected $gradeable_id = "";
+    protected $gradeable_id;
 
     /** @prop
      * @var Submitter The submitter who received this graded gradeable */
-    protected $submitter = null;
+    protected $submitter;
     /** @prop
      * @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
     protected $ta_graded_gradeable = null;
@@ -39,11 +39,11 @@ class GradedGradeable extends AbstractModel {
 
     /** @prop
      * @var array The late day exceptions indexed by user id */
-    protected $late_day_exceptions = [];
+    protected $late_day_exceptions;
 
     /** @prop
      * @var array<string> The reasons for exceptions indexed by user id */
-    protected $reasons_for_exceptions = [];
+    protected $reasons_for_exceptions;
 
     /** @prop
      * @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
@@ -51,15 +51,15 @@ class GradedGradeable extends AbstractModel {
 
     /** @prop
      * @var array<array<int, string>> The active graders for this graded gradeable */
-    protected $active_graders_names = [];
+    protected $active_graders_names;
 
     /** @prop
      * @var array<array<int, string>> The active graders for this graded gradeable */
-    protected $active_graders = [];
+    protected $active_graders;
 
     /** @prop
      * @var array<array<int, string>> The timestamps for the active graders this graded gradeable */
-    protected $active_graders_timestamps = [];
+    protected $active_graders_timestamps;
 
     /**
      * GradedGradeable constructor.
