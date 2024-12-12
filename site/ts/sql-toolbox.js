@@ -148,7 +148,9 @@ async function getQueries() {
         }
     }
     catch (error) {
-        /*console.error('Error fetching queries: ', error);*/
+        /*
+        console.error('Error fetching queries: ', error);
+        */
     }
 }
 
