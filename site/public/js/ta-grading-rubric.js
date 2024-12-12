@@ -3000,12 +3000,11 @@ async function saveMarkList(component_id) {
             };
         }
     }));
-    // No conflicts, so don't open the popup
+    // If conflicts, open the popup
     if (Object.keys(conflictMarks).length !== 0) {
         await openMarkConflictPopup(component_id, conflictMarks);
     }
 
-    // Prompt the user with any conflicts
     const markOrder = {};
     domMarkList.forEach((mark) => {
         markOrder[mark.id] = mark.order;
