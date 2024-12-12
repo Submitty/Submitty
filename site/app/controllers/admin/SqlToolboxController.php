@@ -85,12 +85,11 @@ class SqlToolboxController extends AbstractController {
         }*/
 
         try {
-            
             $this->core->getQueries()->addSQLSavedQuery($user, $name, $query);
-            return "Saving query " .$query;
+            return "Saving query " . $query;
         }
-        catch(DatabaseException $exc) {
-            print "ERROR " .$exc;
+        catch (DatabaseException $exc) {
+            print "ERROR " . $exc;
         }
         return "a";
     }
@@ -100,21 +99,12 @@ class SqlToolboxController extends AbstractController {
         $name = trim($_POST['name']);
         $user = $this->core->getUser()->getId();
 
-        if($user == NULL){
-            print "USER IS NULL";
-        }
-        ELSE{
-            print"USER: " .$user;
-            print"QUERY NAME: " .$name;
-        }
-
         try {
-            
             $this->core->getQueries()->removeSQLSavedQuery($user, $name);
-            return "Removing query named" .$name;
+            return "Removing query named" . $name;
         }
-        catch(DatabaseException $exc) {
-            print "ERROR " .$exc;
+        catch (DatabaseException $exc) {
+            print "ERROR " . $exc;
         }
         return "a";
     }
@@ -123,15 +113,14 @@ class SqlToolboxController extends AbstractController {
     public function getQueries(): JsonResponse {
         $user = $this->core->getUser()->getId();
 
-        if($user == NULL){
+        if ($user === null) {
             return JsonResponse::getFailResponse('user is null');
         }
-
         try {
             $queries = $this->core->getQueries()->getSQLSavedQueries($user);
             return JsonResponse::getSuccessResponse($queries);
         }
-        catch(DatabaseException $exc) {
+        catch (DatabaseException $exc) {
             return JsonResponse::getFailResponse('Detected errorz');
         }
     }
