@@ -38,4 +38,4 @@ numpy==1.26.4
 
 # python libraries for OCR for digit recognition
 onnx==1.16.2
-onnxruntime==1.20.0
+onnxruntime==1.20.1
