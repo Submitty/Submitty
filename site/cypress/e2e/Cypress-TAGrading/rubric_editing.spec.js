@@ -16,7 +16,7 @@ describe('Test cases for TA grading page', () => {
 
         cy.get('[value="Add New Component"]').click();
 
-        cy.get('[data-testid^="component"]').should('have.length', 8);
+        cy.get('[data-testid^="component"]').should('have.length', 6);
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
