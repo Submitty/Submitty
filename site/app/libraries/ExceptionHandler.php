@@ -123,7 +123,7 @@ class ExceptionHandler {
             }
         }
         // Adding more debug information
-        $message .= "\nUSER: " . $user_id;
+        $message .= "\nUSER: " . $user_id ?? "User is not signed in";
 
 
         if ($log_exception) {
