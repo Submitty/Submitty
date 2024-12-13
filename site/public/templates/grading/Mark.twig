@@ -10,7 +10,7 @@ Required Input:
 #}
 <div id="mark-{{ mark.id }}" class="mark-container key_to_click row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}" tabindex="0" data-component_id="{{ component.id }}" data-mark_id="{{ mark.id }}" data-publish="{{ mark.publish }}" onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}">
     {% if edit_marks_enabled %}
-        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
+        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks" data-testid="mark-reorder">
             <i class="fas fa-ellipsis-v"></i>
         </span>
     {% endif %}
@@ -53,9 +53,9 @@ Required Input:
             {{ mark.points }}
         {% endif %}
     </span>
-    <span class="col-sm mark-title" data-title="{{ mark.title|escape }}">
+    <span class="col-sm mark-title" data-testid="mark-title" data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title" {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
+            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title" data-testid="mark-title-input" {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
         {% endif %}
