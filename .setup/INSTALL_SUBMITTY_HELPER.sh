@@ -101,6 +101,7 @@ fi
 ########################################################################################################################
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
+# Use set +e to allow capturing of the exit code
 set +e
 /bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh"
 
@@ -493,6 +494,7 @@ done
 mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 cmake ..
+# Use set +e to allow capturing of the exit code
 set +e
 make
 if [ "$?" -ne 0 ] ; then
@@ -836,6 +838,7 @@ chown root:root /etc/sudoers.d/submitty
 #############################################################
 # stop the submitty daemons (if they're running)
 for i in "${ALL_DAEMONS[@]}"; do
+    # Use set +e to allow capturing of the exit code
     set +e
     systemctl is-active --quiet "${i}"
     is_active_now="$?"
@@ -844,6 +847,7 @@ for i in "${ALL_DAEMONS[@]}"; do
         systemctl stop "${i}"
         echo -e "Stopped ${i}"
     fi
+    # Use set +e to allow capturing of the exit code
     set +e
     systemctl is-active --quiet "${i}"
     is_active_tmp="$?"
@@ -1005,6 +1009,7 @@ systemctl daemon-reload
 # restart the socket & jobs handler daemons
 for i in "${RESTART_DAEMONS[@]}"; do
     systemctl restart "${i}"
+    # Use set +e to allow capturing of the exit code
     set +e
     systemctl is-active --quiet "${i}"
     is_active_after="$?"
@@ -1065,6 +1070,7 @@ if [ "${WORKER}" == 0 ]; then
         shift
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
+        # Use set +e to allow capturing of the exit code
         set +e
         python3 "${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py"  "$@"
 
