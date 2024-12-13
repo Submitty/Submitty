@@ -16,7 +16,7 @@ describe('Test cases for TA grading page', () => {
 
         cy.get('[value="Add New Component"]').click();
 
-        cy.get('[data-testid^="component"]').should('have.length', 6);
+        cy.get('[data-testid^="component"]').should('have.length', 8);
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
         cy.get('body').type('{A}');
         cy.get('body').type('{G}');
@@ -37,11 +37,13 @@ describe('Test cases for TA grading page', () => {
             .should('contain', 'Save');
         cy.get('[data-testid="mark-reorder"]').eq(-2).then(($el) => {
             const rect = $el[0].getBoundingClientRect();
+            // Needed due to drag and drop weirdness
+            // eslint-disable-next-line cypress/no-unnecessary-waiting, cypress/unsafe-to-chain-command
             cy.wrap($el)
-                .trigger('mousedown', { which: 1 });
-            cy.wrap($el)
-                .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 });
-            cy.wrap($el)
+                .trigger('mousedown', { which: 1 })
+                .wait(300)
+                .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 })
+                .wait(300)
                 .trigger('mouseup', { force: true });
         });
         cy.get('#edit-mode-enabled').click();
