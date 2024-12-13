@@ -184,7 +184,8 @@
                 font: {
                     color: $("body").css("--text-black")
                 },
-                width: width
+                width: width,
+                xaxis: {type: 'category'}
             }
             Plotly.newPlot("chartContainer", data, layout);
             window.addEventListener('resize', function() {
