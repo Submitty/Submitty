@@ -57,7 +57,7 @@ class ExceptionHandler {
      * otherwise just returning a very generic message to the user
      *
      * @param \Exception|\Throwable $exception
-     * @param string $user_id
+     * @param string|null $user_id
      * @return string    A string that either contains a generic message or the actual
      *                   exception message depending on the value of $display_exceptions
      */
