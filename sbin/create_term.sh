@@ -21,6 +21,7 @@ if [ -d ${DATABASE_HOST} ]; then
     CONN_STRING="${CONN_STRING} -p ${DATABASE_PORT}"
 fi
 
+# Use set +e to allow capturing of the exit code
 set +e
 # Check that Submitty Master DB exists.
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
@@ -71,6 +72,7 @@ if ! [[ $end =~ $regex ]] ; then
     exit 5
 fi
 
+# Use set +e to allow capturing of the exit code
 set +e
 # Validate that start and end dates are actual calendar dates.
 date -d $start > /dev/null 2>&1

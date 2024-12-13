@@ -9,6 +9,7 @@ CONFIGURE_BIN=$3
 config_directory=${which_test_dir}/assignment_config
 GRADINGCODE=${SUBMITTY_INSTALL_DIR}/src/grading
 
+# Use set +e to allow capturing of the exit code
 set +e
 # Use the C Pre-Processor to strip the C & C++ comments from config.json
 cpp ${config_directory}/config.json ${config_directory}/complete_config.json

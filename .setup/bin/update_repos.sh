@@ -44,6 +44,7 @@ function clone_or_update_repo {
         # IF THE REPO ALREADY EXISTS...
         pushd ${repo_dir} > /dev/null
 
+        # Use set +e to allow capturing of the exit code
         set +e
         # CHECK TO SEE IF VERSION MATCHES OR IS ANCESTOR
         git merge-base --is-ancestor "${min_repo_version}" HEAD 2> /dev/null

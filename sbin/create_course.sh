@@ -38,6 +38,7 @@ echo $DATABASE_COURSE_USER
 
 CONN_STRING="-h ${DATABASE_HOST} -U ${DATABASE_USER} -p ${DATABASE_PORT}"
 
+# Use set +e to allow capturing of the exit code
 set +e
 # Check that Submitty Master DB exists.
 PGPASSWORD="${DATABASE_PASS}" psql ${CONN_STRING} -lqt | cut -d \| -f 1 | grep -qw submitty
@@ -326,6 +327,7 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
+# Use set +e to allow capturing of the exit code
 set +e
 PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d ${DATABASE_NAME} -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ${DATABASE_COURSE_USER};"
 if [[ "$?" -ne "0" ]] ; then

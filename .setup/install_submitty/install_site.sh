@@ -404,6 +404,7 @@ find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+# Use set +e to allow capturing of the exit code
 set +e
 systemctl is-active --quiet php${PHP_VERSION}-fpm
 if [[ "$?" == "0" ]]; then
