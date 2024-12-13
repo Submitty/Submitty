@@ -41,9 +41,9 @@ describe('Test cases for TA grading page', () => {
             // eslint-disable-next-line cypress/no-unnecessary-waiting, cypress/unsafe-to-chain-command
             cy.wrap($el)
                 .trigger('mousedown', { which: 1 })
-                .wait(300)
+                .wait(1000)
                 .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 })
-                .wait(300)
+                .wait(1000)
                 .trigger('mouseup', { force: true });
         });
         cy.get('#edit-mode-enabled').click();
