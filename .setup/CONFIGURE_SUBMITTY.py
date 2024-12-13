@@ -312,10 +312,10 @@ else:
 
     while True:
         user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
-        if (user_create_account.lower() in ['yes', 'y']):
+        if user_create_account.lower() in ['yes', 'y']:
             USER_CREATE_ACCOUNT = True
             break
-        elif (user_create_account.lower() in ['no', 'n']):
+        elif user_create_account.lower() in ['no', 'n']:
             USER_CREATE_ACCOUNT = False
             break
     print()

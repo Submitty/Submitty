@@ -402,22 +402,26 @@ class AuthenticationController extends AbstractController {
         $subject = "Submitty Email Verification";
         $url = $this->core->getConfig()->getBaseUrl() . 'authentication/verify_email?verification_code=' . $verification_code;
         $body = <<<EMAIL
-                Welcome to Submitty! We are excited to have you on board. To complete your account setup, either enter this verification code, or click the link below.
+Welcome to Submitty! We are excited to have you on board. To complete your account setup, either enter this verification code, or click the link below.
 
-                Verification Code: $verification_code
+Verification Code: $verification_code
 
-                Verification Link: $url
+Verification Link: $url
 
-                If you didn't sign up for Submitty, you can ignore this email.
+If you didn't sign up for Submitty, you can ignore this email.
 
-                Welcome,
-                Submitty Team
-        EMAIL;
+Welcome,
+Submitty Team
+EMAIL;
 
-        $details = ["subject" => $subject, "body" => $body, "email_address" => $email, 'to_name' => $user_id];
+        $details = [
+            'subject' => $subject,
+            'body' => $body,
+            'email_address' => $email,
+            'to_name' => $user_id
+        ];
         $email = new Email($this->core, $details);
-        $emails = [$email];
-        $this->core->getNotificationFactory()->sendEmails($emails);
+        $this->core->getNotificationFactory()->sendEmails([$email]);
     }
 
     /**
@@ -496,7 +500,7 @@ class AuthenticationController extends AbstractController {
         $this->core->addSuccessMessage('You have successfully verified your email.');
         $user = $this->core->getQueries()->getUnverifiedUserByCode($_GET['verification_code']);
         $this->core->getQueries()->insertSubmittyUser($user);
-        $this->core->getQueries()->removeUnverifiedUserByCode($_GET['verification_code']);
+        $this->core->getQueries()->removeUnverifiedUserByCode($_GET['verification_code'], $user->getId());
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
 

@@ -172,8 +172,8 @@ class DatabaseQueries {
      * Removes an unverified user from the database given a verification code.
      *
      */
-    public function removeUnverifiedUserByCode(string $code): void {
-        $this->submitty_db->query("DELETE FROM unverified_users WHERE verification_code=?", [$code]);
+    public function removeUnverifiedUserByCode(string $code, string $user_id): void {
+        $this->submitty_db->query("DELETE FROM unverified_users WHERE verification_code=? and user_id=?", [$code, $user_id]);
     }
 
     /**
@@ -554,6 +554,7 @@ SQL;
                        $user->getLegalFamilyName(), $user->getPreferredFamilyName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated())];
+
         $this->submitty_db->query(
             "INSERT INTO users (user_id, user_password, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_updated, instructor_updated)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -561,19 +562,16 @@ SQL;
         );
     }
 
-    /**
-     * @param User $user
-     */
     public function insertUnverifiedSubmittyUser(User $user): void {
         $array = [
-                    $user->getId(),
-                    $user->getPassword(),
-                    $user->getLegalGivenName(),
-                    $user->getLegalFamilyName(),
-                    $user->getEmail(),
-                    $user->getVerificationExpiration(),
-                    $user->getVerificationCode()
-                ];
+            $user->getId(),
+            $user->getPassword(),
+            $user->getLegalGivenName(),
+            $user->getLegalFamilyName(),
+            $user->getEmail(),
+            $user->getVerificationExpiration(),
+            $user->getVerificationCode()
+        ];
         $this->submitty_db->query(
             "INSERT INTO unverified_users (
                 user_id,
