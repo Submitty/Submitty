@@ -23,13 +23,13 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testThrowServerException() {
-        $message = ExceptionHandler::handleException(new \RuntimeException("test"));
+        $message = ExceptionHandler::handleException(new \RuntimeException("test"), 'test');
         $this->assertEquals("An exception was thrown. Please contact an administrator about what you were doing that caused this exception.\n", $message);
     }
 
     public function testThrowRuntimeException() {
         ExceptionHandler::setDisplayExceptions(true);
-        $this->assertMatchesRegularExpression("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test")));
+        $this->assertMatchesRegularExpression("/Message:\ntest\n\n/", ExceptionHandler::handleException(new \RuntimeException("test"), 'test'));
         ExceptionHandler::setDisplayExceptions(false);
     }
 
@@ -43,7 +43,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']) . '.log';
         ExceptionHandler::setDisplayExceptions(false);
         ExceptionHandler::setLogExceptions(true);
-        ExceptionHandler::handleException(new BaseException("test", ["test" => "b", "test2" => ['a','c']]));
+        ExceptionHandler::handleException(new BaseException("test", ["test" => "b", "test2" => ['a','c']]), 'test');
         $file = FileUtils::joinPaths($tmp_dir, 'site_errors', $filename);
         $this->assertFileExists($file);
         $actual = file_get_contents($file);
@@ -64,7 +64,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         }
         catch (AuthenticationException $e) {
             ExceptionHandler::setDisplayExceptions(true);
-            $message = ExceptionHandler::handleException($e);
+            $message = ExceptionHandler::handleException($e, 'test');
             $this->assertMatchesRegularExpression("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);
         }
     }
@@ -73,7 +73,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
         ExceptionHandler::setDisplayExceptions(false);
         $exception = new BaseException("exception message");
         $exception->setDisplayMessage(true);
-        $message = ExceptionHandler::handleException($exception);
+        $message = ExceptionHandler::handleException($exception, 'test');
         $this->assertStringContainsString("exception message", $message);
         $this->assertStringNotContainsString("Stack Trace", $message);
     }
