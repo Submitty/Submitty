@@ -307,7 +307,7 @@ chown "$instructor:$ta_www_group" "$course_dir/BUILD_${course}.sh"
 chmod 770 "$course_dir/BUILD_${course}.sh"
 replace_fillin_variables "$course_dir/BUILD_${course}.sh"
 
-#TODO: REMOVE THIS https://github.com/Submitty/Submitty/actions/runs/11982612424/job/33410908260#step:14:95
+#TODO: REMOVE THIS https://github.com/Submitty/Submitty/issues/11255 
 set +e
 # cp: cannot stat '/home/runner/work/Submitty/Submitty/branch/site/config/course_template.json': No such file or directory
 

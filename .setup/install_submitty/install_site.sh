@@ -220,15 +220,8 @@ fi
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
-#TODO: REMOVE THIS https://github.com/Submitty/Submitty/actions/runs/11982612424/job/33410908041#step:4:6265
+#TODO: REMOVE THIS https://github.com/Submitty/Submitty/issues/11254
 set +e
-
-#PHP Fatal error:  Uncaught app\exceptions\ConfigException: Could not find version file: /usr/local/submitty/site/app/libraries/../../../config/version.json in /usr/local/submitty/site/app/models/Config.php:518
-#Stack trace:
-##0 /usr/local/submitty/site/app/libraries/Core.php(156): app\models\Config->loadMasterConfigs()
-##1 /usr/local/submitty/sbin/doctrine.php(21): app\libraries\Core->loadMasterConfig()
-##2 {main}
-#  thrown in /usr/local/submitty/site/app/models/Config.php on line 518
 
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"

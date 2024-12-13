@@ -121,7 +121,7 @@ update_apache() {
 
     info "Double check that HTTP/2 module is enabled"
     phpver=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
-    #TODO: REMOVE THIS https://github.com/Submitty/Submitty/actions/runs/11983433520/job/33412925940#step:22:50
+    #TODO: REMOVE THIS https://github.com/Submitty/Submitty/issues/11253
     # ERROR: Module php8.1 does not exist!
     set +e
     a2dismod "php${phpver}" mpm_prefork
