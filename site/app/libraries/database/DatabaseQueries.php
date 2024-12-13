@@ -163,7 +163,7 @@ class DatabaseQueries {
      *
      * @return User|null
      */
-    public function getUnverifiedUserByCode(string $code): ?User {
+    public function getUnverifiedUser(string $code): ?User {
         $this->submitty_db->query("SELECT * FROM unverified_users WHERE verification_code=?", [$code]);
         return new User($this->core, $this->submitty_db->row());
     }
@@ -172,7 +172,7 @@ class DatabaseQueries {
      * Removes an unverified user from the database given a verification code.
      *
      */
-    public function removeUnverifiedUserByCode(string $code, string $user_id): void {
+    public function removeUnverifiedUser(string $code, string $user_id): void {
         $this->submitty_db->query("DELETE FROM unverified_users WHERE verification_code=? and user_id=?", [$code, $user_id]);
     }
 

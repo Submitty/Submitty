@@ -160,6 +160,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'polls_enabled'                  => false
             ],
             'feature_flags' => [
+
             ]
         ];
 
@@ -390,7 +391,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
             "default_locale" => "default",
-            "locale" => ['modified' => false]
+            "locale" => ['modified' => false],
         ];
         $actual = $config->toArray();
 
