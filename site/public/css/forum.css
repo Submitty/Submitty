@@ -434,6 +434,11 @@
 .forum_bar div div.col-5 {
     padding: 0;
     top: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+    width: auto;
 }
 /* stylelint-enable selector-class-pattern, selector-id-pattern */
 
