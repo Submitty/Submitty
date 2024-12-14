@@ -9371,4 +9371,28 @@ ORDER BY
         ");
         return $this->rowsToArray($this->submitty_db->rows());
     }
+
+    public function addSQLSavedQuery(string $user_id, string $query_name, string $query) {
+        $this->submitty_db->beginTransaction();
+        $this->submitty_db->query("
+            INSERT INTO instructor_queries (user_id, query_name, query)
+                VALUES (?, ?, ?)
+        ", [$user_id, $query_name, $query]);
+        $this->submitty_db->commit();
+    }
+
+    public function removeSQLSavedQuery(string $user_id, string $query_name) {
+        $this->submitty_db->beginTransaction();
+        $this->submitty_db->query("
+            DELETE FROM instructor_queries WHERE user_id = ? AND query_name = ?;
+        ", [$user_id, $query_name]);
+        $this->submitty_db->commit();
+    }
+
+    public function getSQLSavedQueries(string $user_id): array {
+        $this->submitty_db->query("
+            SELECT query_name,query FROM instructor_queries WHERE user_id = ?;
+        ", [$user_id]);
+        return $this->rowsToArray($this->submitty_db->rows());
+    }
 }

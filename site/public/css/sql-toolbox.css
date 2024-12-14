@@ -4,6 +4,12 @@
     resize: vertical;
 }
 
+#toolbox-namearea {
+    width: 25%;
+    min-height: 25px;
+    resize: vertical;
+}
+
 #query-results {
     overflow-x: auto;
 }
