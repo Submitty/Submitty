@@ -222,6 +222,9 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->core,
             $gradeable,
             new Submitter($this->core, $this->core->getUser()),
+            [],
+            [],
+            [],
             []
         );
 
