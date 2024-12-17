@@ -31,6 +31,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
  * @method void setDisplayNameOrder()
+ * @method string getVerificationCode()
+ * @method int getVerificationExpiration()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -139,6 +141,12 @@ class User extends AbstractModel {
     /** @prop
      * @var string The secondary email of the user */
     protected $secondary_email;
+    /** @prop
+     * @var string Email verification code */
+    protected $verification_code;
+    /** @prop
+     * @var int Timestamp of the expiration of the verification code */
+    protected $verification_expiration;
     /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
@@ -290,6 +298,11 @@ class User extends AbstractModel {
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
 
+        if (isset($details['user_verification_code'])) {
+            $this->core->getQueries()->updateUserVerificationValues($details['user_email'], $details['user_verification_code'], $details['user_verification_expiration']);
+            $this->verification_expiration = $details['user_verification_expiration'];
+            $this->verification_code = $details['user_verification_code'];
+        }
         if (isset($details['user_preferred_locale'])) {
             $this->preferred_locale = $details['user_preferred_locale'];
             $this->core->getConfig()->setLocale($this->preferred_locale);
