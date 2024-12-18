@@ -169,8 +169,8 @@
             [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
                 window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
             {% for option in poll.getOptions() %}
-                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-                data[0].y.push({{ response_counts[option.getId()] }});
+                data[0].x.push("{{ option.getResponse()|raw |escape('js') |replace({"\n": " ", "\r": " ", "\t": " "}) }}");
+                data[0].y.push({{ response_counts[ option.getId()] }});
                 data[0].marker.color.push(
                     {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
                 );
