@@ -292,7 +292,7 @@ class Core {
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+        Logger::debug("Excessive or duplicate queries observed: {$num_queries} queries executed.\nMethod: {$_SERVER['REQUEST_METHOD']}");
     }
 
     /**
@@ -407,16 +407,6 @@ class Core {
      */
     public function getUser() {
         return $this->user;
-    }
-
-    /**
-     * Returns the user that the client is logged in as. Will return null if there is no user
-     * to be logged in as.
-     *
-     * @return string|null
-     */
-    public function getUserId() {
-        return $this->user_id;
     }
 
     /**
