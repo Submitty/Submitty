@@ -553,7 +553,6 @@ function setupNumericTextCells() {
                             { csrf_token: csrfToken, users: user_ids,
                                 num_numeric: num_numeric, big_file: reader.result },
                             (returned_data) => {
-                                // console.log(returned_data);
                                 for (let x = 0; x < returned_data['data'].length; x++) {
                                     const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
                                     if (rowElement.length) {
@@ -563,7 +562,6 @@ function setupNumericTextCells() {
                                             // if we hit the "total" column, display the total
                                             if (num_numeric && col === num_numeric) {
                                                 const split_row = rowElement.attr('id').split('-');
-                                                console.log('total', total, `#total-${split_row[1]}-${split_row[2]}`);
                                                 $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
                                                 continue;
                                             }
@@ -587,7 +585,6 @@ function setupNumericTextCells() {
                                             }
                                             else {
                                                 // -1 only if we have numeric elements for extra total column
-                                                console.log(`Cell: #cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
                                                 cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
                                                 cellElement.text(returned_data['data'][x][value]);
                                                 y++;
