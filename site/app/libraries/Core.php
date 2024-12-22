@@ -292,7 +292,7 @@ class Core {
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: {$num_queries} queries executed.\nMethod: {$_SERVER['REQUEST_METHOD']}");
+        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
     }
 
     /**
