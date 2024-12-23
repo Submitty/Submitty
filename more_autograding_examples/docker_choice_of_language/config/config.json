@@ -15,6 +15,7 @@
             "title": "Rust Compilation",
             "containers": [
                 {
+                    // Rust will use dynamic linking by default, and libraries may not be available in a different image.
                     "commands": "/usr/local/cargo/bin/rustc part1/*.rs -o a.out -C target-feature=+crt-static",
                     "container_image": "submitty/rust:latest"
                 }
