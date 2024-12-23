@@ -15,6 +15,7 @@ use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use app\views\forum\ForumThreadView;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Collections\ArrayCollection;
 use app\libraries\socket\Client;
 use app\entities\forum\Post;
 use app\entities\forum\Thread;
@@ -736,10 +737,10 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
         }
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
-                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
+                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
         }
         if ($post->getThread()->isLocked() && !$this->core->getUser()->accessAdmin()) {
-            return $this->core->getOutput()->renderJsonFail('Thread is locked');
+            return $this->core->getOutput()->renderJsonFail("Thread is locked");
         }
 
         $status_edit_thread = true;
@@ -825,7 +826,7 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Unable to parse post id.");
         }
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $thread = $repo->getThreadDetail($thread_id, 'tree', true);
+        $thread = $repo->getThreadDetail($thread_id, "tree", true);
         if (is_null($thread)) {
             return $this->core->getOutput()->renderJsonFail("Invalid thread id : {$thread_id}");
         }
@@ -838,10 +839,10 @@ class ForumController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
         }
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
-                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
+                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
         }
         if ($post->getThread()->isLocked() && !$this->core->getUser()->accessAdmin()) {
-            return $this->core->getOutput()->renderJsonFail('Thread is locked');
+            return $this->core->getOutput()->renderJsonFail("Thread is locked");
         }
         if ($post->isDeleted()) {
             if ($thread->getFirstPost() !== $post && $post->getParent()->isDeleted()) {
@@ -1013,8 +1014,8 @@ class ForumController extends AbstractController {
         $title = filter_input(INPUT_POST, "title", FILTER_UNSAFE_RAW);
         $status = filter_input(INPUT_POST, "thread_status", FILTER_VALIDATE_INT);
         $categories_ids  = [];
-        if (isset($_POST["cat"])) {
-            foreach ($_POST["cat"] as $category_id) {
+        if (isset($_POST['cat'])) {
+            foreach ($_POST['cat'] as $category_id) {
                 $categories_ids[] = (int) $category_id;
             }
         }
@@ -1024,7 +1025,7 @@ class ForumController extends AbstractController {
         $thread->setTitle($title);
         $thread->setStatus($status);
         $categories = $this->core->getCourseEntityManager()->getRepository(Category::class)->findBy(['category_id' => $categories_ids], ['category_id' => 'ASC']);
-        $thread->setCategories($categories);
+        $thread->setCategories(new ArrayCollection($categories));
 
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
@@ -1075,7 +1076,7 @@ class ForumController extends AbstractController {
         // As core gets legacy user model currently, which isn't a doctrine entity, we need to get the corresponding entity.
         $edit_author = $this->core->getCourseEntityManager()->find(UserEntity::class, $this->core->getUser()->getId());
         $post_edit = $post->saveNewVersion($edit_author);
-        $new_attachments = $this->saveAttachments(false, $post->getThread()->getId(), $post->getId(), 'file_input');
+        $new_attachments = $this->saveAttachments(false, $post->getThread()->getId(), $post->getId(), "file_input");
         $em = $this->core->getCourseEntityManager();
         if ($new_attachments !== false) {
             foreach ($new_attachments as $attachment_name) {
@@ -1120,9 +1121,9 @@ class ForumController extends AbstractController {
 
         $existing_attachments = array_column(FileUtils::getAllFiles($post_dir), "name");
         //compile list of attachment names
-        for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+        for ($i = 0; $i < count($_FILES[$file_post]['name']); $i++) {
             //check for files with same name
-            $file_name = basename($_FILES[$file_post]["name"][$i]);
+            $file_name = basename($_FILES[$file_post]['name'][$i]);
             if (in_array($file_name, $existing_attachments, true)) {
                 // add unique prefix if file with this name already exists on this post
                 $tmp = 1;
@@ -1134,9 +1135,9 @@ class ForumController extends AbstractController {
             $attachment_names[] = $file_name;
         }
 
-        for ($i = 0; $i < count($_FILES[$file_post]["name"]); $i++) {
+        for ($i = 0; $i < count($_FILES[$file_post]['name']); $i++) {
             $target_file = $post_dir . "/" . $attachment_names[$i];
-            move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
+            move_uploaded_file($_FILES[$file_post]['tmp_name'][$i], $target_file);
         }
         return $attachment_names;
     }

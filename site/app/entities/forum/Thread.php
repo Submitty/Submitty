@@ -6,7 +6,6 @@ namespace app\entities\forum;
 
 use DateInterval;
 use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use app\entities\UserEntity;
 use Doctrine\DBAL\Types\Types;
@@ -190,13 +189,16 @@ class Thread {
     }
 
     /**
-     * @param Category[]|Collection<Category> $categories
+     * @param Collection<Category> $categories
      * @return void
      */
-    public function setCategories(array|Collection $categories): void {
-        $new_categories = new ArrayCollection($categories);
-        if (!Category::areCollectionsEqual($this->categories, $new_categories)) {
-            $this->categories = $new_categories;
+    public function setCategories(Collection $categories): void {
+        $old_categories = $this->categories->toArray();
+        $new_categories = $categories->toArray();
+        sort($old_categories);
+        sort($new_categories);
+        if ($old_categories !== $new_categories) {
+            $this->categories = $categories;
             $this->is_changed = true;
         }
     }

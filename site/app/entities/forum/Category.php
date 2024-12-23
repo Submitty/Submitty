@@ -39,22 +39,4 @@ class Category {
     public function getColor(): string {
         return $this->color;
     }
-
-    /**
-     * @param Collection<Category> $c1 Collection of unique categories.
-     * @param Collection<Category> $c2 Collection of unique categories.
-     * @return bool true iff collections contain the same categories
-     */
-    public static function areCollectionsEqual(Collection $c1, Collection $c2): bool {
-        if (count($c1) !== count($c2)) {
-            return false;
-        }
-        foreach ($c1 as $cat) {
-            // Doctrine ensures only one instance of an entity in memory, so reference equality works.
-            if (!$c2->contains($cat)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
