@@ -9,7 +9,7 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="password"]').type('Password123!');
         cy.get('[data-testid="confirm-password"]').type('Password123!');
         cy.get('[data-testid="sign-up-button"]').click();
-        cy.get('[data-testid="verification-code"').type('00000000');
+        cy.get('[data-testid="verification-code"]').type('00000000');
         cy.get('[data-testid="verify-email-button"').click();
         cy.get('[data-testid="popup-message"]').should('contain', 'You have successfully verified your email.');
         cy.login('test_id', 'Password123!');

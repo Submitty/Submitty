@@ -141,12 +141,13 @@ class User extends AbstractModel {
     /** @prop
      * @var string The secondary email of the user */
     protected $secondary_email;
-    /** @prop
-     * @var string Email verification code */
-    protected $verification_code;
-    /** @prop
-     * @var int Timestamp of the expiration of the verification code */
-    protected $verification_expiration;
+
+    /** @prop Email verification code */
+    protected string $verification_code;
+
+    /** @prop Timestamp of the expiration of the verification code */
+    protected int $verification_expiration;
+
     /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;

@@ -38,7 +38,11 @@
                     (name_reqs['given_name'] ~ ' characters of your given name' )}}
                 {% elseif user_id_reqs['require_email'] == true %}
                     {% if user_id_reqs['whole_email'] %} 
-
+                        * Must be the whole email
+                    {% elseif user_id_reqs['whole_prefix'] %}
+                        * Must equal the email minus @extension /// FIX WORDING
+                    {% else %}
+                        * Must equal the first {{ user_id_reqs['prefix_count'] }} characters of your email
                     {% endif %}
                 {% endif %}
             </div>
@@ -71,18 +75,3 @@
         <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" data-testid="sign-up-button" />
     </form>
 </div>
-
-
-<script>
-
-function showRequirements(id_string) {
-    id_string = id_string + '-helper';
-    if (document.getElementById(id_string).style.display === '' || document.getElementById(id_string).style.display === 'none') {
-        document.getElementById(id_string).style.display = 'block';
-    } else {
-        document.getElementById(id_string).style.display = 'none';
-    }
-   
-}
-</script>
-

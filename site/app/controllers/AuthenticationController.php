@@ -388,7 +388,7 @@ EMAIL;
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        $verification_values = $this->generateVerificationCode();
+        $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
         $this->core->getQueries()->updateUserVerificationValues($_GET['email'], $verification_values['code'], $verification_values['exp']);
         $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_users['user_id']);
         $this->core->addSuccessMessage('Verification email resent.');
@@ -451,7 +451,7 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!$this->isGoodPassword($password)) {
+        if (!Utils::isValidPassword($password)) {
             $this->core->addErrorMessage('Password does not meet the requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
@@ -461,16 +461,16 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!$this->isAcceptedEmail($email)) {
+        if (!Utils::isAcceptedEmail($this->core->getConfig()->getAcceptedEmails(), $email)) {
             $this->core->addErrorMessage('This email is not accepted.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
 
-        if (!$this->isAcceptedUserId($user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
+        if (!Utils::isAcceptedUserId($this->core->getConfig()->getUserIdRequirements(), $user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
             $this->core->addErrorMessage('This user id does not meet requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
-        $verification_values = $this->generateVerificationCode();
+        $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
         $user = new User($this->core, [
             'user_id' => $user_id,
             'user_givenname' => $_POST['given_name'],
