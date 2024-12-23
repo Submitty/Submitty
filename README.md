@@ -4,6 +4,12 @@
     <img src="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo.png?raw=true" alt="Submitty Logo" width="500px"/>
   </picture>
 </p>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo_white.png?raw=true">
+    <img src="https://github.com/Submitty/Submitty/blob/main/site/public/img/submitty_logo.png?raw=true" alt="Submitty Logo" width="500px"/>
+  </picture>
+</p>
 
 [![Submitty CI](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml/badge.svg?event=push)](https://github.com/Submitty/Submitty/actions/workflows/submitty_ci.yml)
 [![Vagrant Up](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml/badge.svg)](https://github.com/Submitty/Submitty/actions/workflows/vagrant_up.yaml)
