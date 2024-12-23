@@ -37,7 +37,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testValidPassword() {
         $good_password = 'GoodPassword#123';
-        $this->assertTrue(Utils::isValidPassword($password));
+        $this->assertTrue(Utils::isValidPassword($good_password));
         $bad_password_length = 'Bad#123';
         $this->assertFalse(Utils::isValidPassword($bad_password_length));
         $bad_password_numbers = 'BadPasswordWithoutNumbers@';
@@ -50,15 +50,15 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse(Utils::isValidPassword($bad_password_lowercase));
     }
 
-    public function testValidEmail() {
+    public function testAcceptedEmail() {
         $good_email = 'goodemail@rpi.edu';
-        $this->assertTrue(Utils::isValidEmail($good_email));
+        $this->assertTrue(Utils::isAcceptedEmail($good_email));
         $good_email_gmail = 'goodemail@gmail.com';
-        $this->assertTrue(Utils::isValidEmail($good_email));
+        $this->assertTrue(Utils::isAcceptedEmail($good_email));
         $bad_email_extension = 'goodemail@notanextension.edu';
-        $this->assertFalse(Utils::isValidEmail($good_email));
+        $this->assertFalse(Utils::isAcceptedEmail($good_email));
         $accepts_multiple_at_signs = 'good@email@testing@rpi.edu';
-        $this->assertTrue(Utils::isValidEmail($accepts_multiple_at_signs));
+        $this->assertTrue(Utils::isAcceptedEmail($accepts_multiple_at_signs));
     }
 
     public function testGenerateRandomString2() {

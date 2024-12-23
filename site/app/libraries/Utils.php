@@ -104,8 +104,7 @@ class Utils {
         $lowerCase = preg_match('/[a-z]/', $password);
         $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
         $numericVal = preg_match('/[0-9]/', $password);
-        return
-            $upperCase >= 1 &&
+        return $upperCase >= 1 &&
             $lowerCase >= 1 &&
             $specialChar >= 1 &&
             $numericVal >= 1 &&
@@ -163,7 +162,7 @@ class Utils {
         if (count($split_email) < 2) {
             return false;
         }
-        return in_array($split_email[count($split_email)-1], array_keys($accepted_emails), true);
+        return in_array($split_email[count($split_email) - 1], array_keys($accepted_emails), true);
     }
 
     /**
