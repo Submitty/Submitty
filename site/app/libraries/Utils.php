@@ -158,7 +158,7 @@ class Utils {
      * Checks if the email extension is in the accepted emails part of the Submitty config file
      */
     public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
-        $split_email = explode('@', $accepted_emails);
+        $split_email = explode('@', $email);
         // No @ symbol found
         if (count($split_email) < 2) {
             return false;

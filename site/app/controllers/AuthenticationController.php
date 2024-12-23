@@ -406,14 +406,14 @@ EMAIL;
         $verification_values = $this->core->getQueries()->getUserVerificationValuesByCode($_GET['verification_code']);
 
         if ($verification_values === []) {
-            $this->core->addErrorMessage('The verification code is not correct, please resend email verification.');
+            $this->core->addErrorMessage('The verification code is not correct. Verify you entered the correct code or resend the verification email');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
 
         $this->core->addSuccessMessage('You have successfully verified your email.');
-        $user = $this->core->getQueries()->getUnverifiedUserByCode($_GET['verification_code']);
+        $user = $this->core->getQueries()->getUnverifiedUser($_GET['verification_code']);
         $this->core->getQueries()->insertSubmittyUser($user);
-        $this->core->getQueries()->removeUnverifiedUserByCode($_GET['verification_code'], $user->getId());
+        $this->core->getQueries()->removeUnverifiedUser($_GET['verification_code'], $user->getId());
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
 
@@ -467,7 +467,7 @@ EMAIL;
         }
 
         if (!Utils::isAcceptedUserId($this->core->getConfig()->getUserIdRequirements(), $user_id, $_POST['given_name'], $_POST['family_name'], $email)) {
-            $this->core->addErrorMessage('This user id does not meet requirements.');
+            $this->core->addErrorMessage('This user id does not meet the requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
         $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
