@@ -569,7 +569,7 @@ async function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
 async function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
     let response;
     try {
-        response = $.getJSON({
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
@@ -3000,13 +3000,11 @@ async function saveMarkList(component_id) {
             };
         }
     }));
-    // No conflicts, so don't open the popup
-    if (Object.keys(conflictMarks).length === 0) {
-        return;
+    // If conflicts, open the popup
+    if (Object.keys(conflictMarks).length !== 0) {
+        await openMarkConflictPopup(component_id, conflictMarks);
     }
 
-    // Prompt the user with any conflicts
-    await openMarkConflictPopup(component_id, conflictMarks);
     const markOrder = {};
     domMarkList.forEach((mark) => {
         markOrder[mark.id] = mark.order;
