@@ -9,7 +9,6 @@ use app\models\User;
 use tests\BaseUnitTest;
 
 class HomePageControllerTester extends BaseUnitTest {
-
     public function createCore(array $config_values, string $user_id): Core {
         $core = $this->createMockCore($config_values, ['no_user' => true]);
         $user = $this->createMockModel(User::class);
@@ -161,5 +160,4 @@ class HomePageControllerTester extends BaseUnitTest {
         $this->assertEquals('showHomePage', $response->web_response->view_function);
         $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], []], $response->web_response->parameters);
     }
-
 }
