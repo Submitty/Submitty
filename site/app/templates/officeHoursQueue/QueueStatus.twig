@@ -105,7 +105,7 @@
 
     <form method="post" action="{{base_url}}/{{ viewer.getCurrentQueueCode() | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+      <input type="hidden" name="user_id" value="{{viewer.getUser()->getId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="leave_queue" type="submit" class="btn btn-danger" data-testid="leave-queue">Leave Queue</button>
     </form>
@@ -208,7 +208,7 @@
       action="{{base_url}}/{{ viewer.getCurrentQueueCode() | url_encode }}/finishHelp"
       onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+      <input type="hidden" name="user_id" value="{{viewer.getUser()->getId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
       <button id="self_finish_help" type="submit" class="btn btn-danger" data-testid="self-finish-help">Finish Being Helped</button>
     </form>

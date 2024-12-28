@@ -19,7 +19,5 @@ class StudentFavorite {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
 
-    public function getUserId(): string {
-        return $this->user_id;
-    }
+
 }

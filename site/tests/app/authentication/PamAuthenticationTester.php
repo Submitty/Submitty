@@ -38,7 +38,7 @@ class PamAuthenticationTester extends BaseUnitTest {
         /** @noinspection PhpParamsInspection */
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
-        $this->assertEquals('test', $pam->getUserId());
+        $this->assertEquals('test', $pam->getUser()->getId());
         $pam->setPassword('test');
         $this->assertTrue($pam->authenticate());
     }

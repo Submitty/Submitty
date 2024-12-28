@@ -60,9 +60,7 @@ class Session {
         return $this->session_id;
     }
 
-    public function getUserId(): string {
-        return $this->user_id;
-    }
+
 
     public function getCsrfToken(): string {
         return $this->csrf_token;

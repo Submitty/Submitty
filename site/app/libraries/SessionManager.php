@@ -53,7 +53,7 @@ class SessionManager {
             return false;
         }
 
-        return $this->session->getUserId();
+        return $this->session->getUser()->getId();
     }
 
     /**

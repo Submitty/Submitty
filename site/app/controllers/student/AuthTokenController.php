@@ -121,7 +121,7 @@ class AuthTokenController extends AbstractController {
         $em = $this->core->getSubmittyEntityManager();
         /** @var VcsAuthToken | null $token */
         $token = $em->getRepository(VcsAuthToken::class)->find($id);
-        if ($token === null || $token->getUserId() !== $this->core->getUser()->getId()) {
+        if ($token === null || $token->getUser()->getId() !== $this->core->getUser()->getId()) {
             $this->core->addErrorMessage("Unknown token");
             return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
         }

@@ -245,15 +245,15 @@ class NotificationFactory {
                 continue;
             }
             // check if user is in the null section
-            if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getTerm())) {
+            if (!$skip_check && !$this->core->getQueries()->checkStudentActiveInCourse($email->getUser()->getId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getTerm())) {
                 continue;
             }
-            if ($skip_check || $email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
-                $user = $this->core->getQueries()->getUserById($email->getUserId());
+            if ($skip_check || $email->getUser()->getId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
+                $user = $this->core->getQueries()->getUserById($email->getUser()->getId());
                 if (($user->getEmailBoth() || $force_secondary) && $user->getSecondaryEmail() != "") {
                     $flattened_emails[] = $email->getSubject();
                     $flattened_emails[] = $email->getBody();
-                    $flattened_emails[] = $email->getUserId();
+                    $flattened_emails[] = $email->getUser()->getId();
                     $flattened_emails[] = null;
                     $flattened_emails[] = $user->getSecondaryEmail();
                     $flattened_emails[] = $this->core->getConfig()->getTerm();
@@ -261,7 +261,7 @@ class NotificationFactory {
                 }
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
-                $flattened_emails[] = $email->getUserId();
+                $flattened_emails[] = $email->getUser()->getId();
                 $flattened_emails[] = null;
                 $flattened_emails[] = $user->getEmail();
                 $flattened_emails[] = $this->core->getConfig()->getTerm();

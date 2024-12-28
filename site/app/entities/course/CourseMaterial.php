@@ -224,7 +224,7 @@ class CourseMaterial {
 
     public function userHasViewed(string $user_id): bool {
         return $this->accesses->filter(function (CourseMaterialAccess $courseMaterialAccess) use ($user_id) {
-                return $courseMaterialAccess->getUserId() === $user_id;
+                return $courseMaterialAccess->getUser()->getId() === $user_id;
         })->count() > 0;
     }
 

@@ -516,7 +516,7 @@ class Core {
     public function authenticate(bool $persistent_cookie = true): bool {
         try {
             if ($this->authentication->authenticate()) {
-                $user_id = $this->authentication->getUserId();
+                $user_id = $this->authentication->getUser()->getId();
                 // Get information about user's browser
                 try {
                     $path = FileUtils::joinPaths(
@@ -579,7 +579,7 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticateJwt() {
-        $user_id = $this->authentication->getUserId();
+        $user_id = $this->authentication->getUser()->getId();
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
@@ -607,7 +607,7 @@ class Core {
      * @throws AuthenticationException
      */
     public function invalidateJwt() {
-        $user_id = $this->authentication->getUserId();
+        $user_id = $this->authentication->getUser()->getId();
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);

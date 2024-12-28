@@ -32,7 +32,7 @@ class DatabaseAuthenticationTester extends BaseUnitTest {
 
         $auth = new DatabaseAuthentication($core);
         $auth->setUserId('test');
-        $this->assertEquals('test', $auth->getUserId());
+        $this->assertEquals('test', $auth->getUser()->getId());
         $auth->setPassword('test');
         $this->assertTrue($auth->authenticate());
     }

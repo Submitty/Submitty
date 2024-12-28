@@ -36,7 +36,7 @@
     <tbody id="queue-history-table">
       {% set history_count = 0 %}
       {% for entry in viewer.getPastQueue() %}
-        {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
+        {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUser()->getId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
             <th scope="row" class="number-count">{{history_count}}</th>
