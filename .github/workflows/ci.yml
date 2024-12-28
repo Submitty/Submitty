@@ -111,6 +111,8 @@ jobs:
         with:
           files: site/tests/report/jest/clover.xml
           flags: js
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   php-lint:
@@ -181,6 +183,8 @@ jobs:
         with:
           files: site/tests/report/clover.xml
           flags: php
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   python-lint:
@@ -238,6 +242,8 @@ jobs:
         with:
           files: python_submitty_utils/coverage.xml
           flags: python_submitty_utils
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Migrator unit test
       - name: Run migrator python unit tests
@@ -250,6 +256,8 @@ jobs:
         with:
           files: migration/coverage.xml
           flags: migrator
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Auto grader unit test
       - name: Run autograder python unit tests
@@ -262,6 +270,8 @@ jobs:
         with:
           files: autograder/coverage.xml
           flags: autograder
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       #  submitty_daemon_jobs unit tests
       - name: Install bulk upload dependencies
@@ -281,6 +291,8 @@ jobs:
         with:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   yaml-lint:
     name: YAML Lint
