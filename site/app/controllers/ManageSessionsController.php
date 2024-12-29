@@ -47,7 +47,7 @@ class ManageSessionsController extends AbstractController {
         }
         $session = $this->core->getSubmittyEntityManager()->getRepository(Session::class)
             ->findOneBy(['session_id' => $session_id]);
-        if (empty($session) || ($session->getUser()->getId() !== $this->core->getUser()->getId())) {
+        if (empty($session) || ($session->getUserId() !== $this->core->getUser()->getId())) {
             $this->core->addErrorMessage("Session doesn't exist.");
             return new RedirectResponse($this->core->buildUrl(["manage_sessions"]));
         }

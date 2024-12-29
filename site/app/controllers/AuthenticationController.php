@@ -125,8 +125,8 @@ class AuthenticationController extends AbstractController {
             if ($is_saml_auth && isset($_POST['RelayState']) && str_starts_with($_POST['RelayState'], $this->core->getConfig()->getBaseUrl())) {
                 $old = $_POST['RelayState'];
             }
-            Logger::logAccess($this->core->getAuthentication()->getUser()->getId(), $_COOKIE['submitty_token'], "login");
-            $msg = "Successfully logged in as " . htmlentities($this->core->getAuthentication()->getUser()->getId());
+            Logger::logAccess($this->core->getAuthentication()->getUserId(), $_COOKIE['submitty_token'], "login");
+            $msg = "Successfully logged in as " . htmlentities($this->core->getAuthentication()->getUserId());
 
             $this->core->addSuccessMessage($msg);
             return new MultiResponse(

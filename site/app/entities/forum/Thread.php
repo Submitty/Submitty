@@ -166,7 +166,7 @@ class Thread {
      */
     public function getNewPosts(string $user_id): Collection {
         $last_view = $this->viewers->filter(function ($x) use ($user_id) {
-            return $user_id === $x->getUser()->getId();
+            return $user_id === $x->getUserId();
         })->first();
 
         if ($last_view === false) {
@@ -179,7 +179,7 @@ class Thread {
 
     public function isFavorite(string $user_id): bool {
         return $this->favorers->map(function ($x) {
-            return $x->getUser()->getId();
+            return $x->getUserId();
         })->contains($user_id);
     }
 

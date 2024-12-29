@@ -44,7 +44,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $this->assertSame('person', $email->getUser()->getId());
+        $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame('email body' . $this->footer, $email->getBody());
     }
@@ -57,7 +57,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'relevant_url' => 'http://example.com'
         ]);
 
-        $this->assertSame('person', $email->getUser()->getId());
+        $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
             "email body\n\nClick here for more info: http://example.com" . $this->footer,
@@ -73,7 +73,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUser()->getId());
+        $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
             "email body\n\nAuthor: Test P." . $this->footer,
@@ -90,7 +90,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUser()->getId());
+        $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
             "email body" . $this->footer,
@@ -107,7 +107,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUser()->getId());
+        $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
             "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com" . $this->footer,

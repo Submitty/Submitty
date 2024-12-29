@@ -39,7 +39,9 @@ class PlagiarismRunAccess {
         $this->timestamp = DateUtils::getDateTimeNow();
     }
 
-
+    public function getUserID(): string {
+        return $this->user_id;
+    }
 
     public function getTimestamp(): DateTime {
         return $this->timestamp;

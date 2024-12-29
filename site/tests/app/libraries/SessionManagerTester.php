@@ -92,7 +92,7 @@ class SessionManagerTester extends BaseUnitTest {
             ->with(
                 $this->callback(function ($session): bool {
                     $this->assertInstanceOf(Session::class, $session);
-                    $this->assertEquals($session->getUser()->getId(), 'test');
+                    $this->assertEquals($session->getUserId(), 'test');
                     $this->assertEquals($session->getBrowserName(), $this->browser_info['browser']);
                     $this->assertEquals($session->getBrowserVersion(), $this->browser_info['version']);
                     $this->assertEquals($session->getPlatform(), $this->browser_info['platform']);

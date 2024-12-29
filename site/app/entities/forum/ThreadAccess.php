@@ -21,6 +21,9 @@ class ThreadAccess {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $timestamp;
 
+    public function getUserId(): string {
+        return $this->user_id;
+    }
 
     public function getTimestamp(): DateTime {
         return $this->timestamp;

@@ -70,6 +70,9 @@ class VcsAuthToken {
     /**
      * @return string
      */
+    public function getUserId(): string {
+        return $this->user_id;
+    }
 
     public function isExpired(): bool {
         if ($this->expiration === null) {

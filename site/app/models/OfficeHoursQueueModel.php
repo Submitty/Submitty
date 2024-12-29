@@ -98,7 +98,9 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->core->getUser()->accessGrading();
     }
 
-
+    public function getUserId() {
+        return $this->core->getUser()->getId();
+    }
 
     public function isAnyQueueOpen() {
         return $this->core->getQueries()->isAnyQueueOpen();

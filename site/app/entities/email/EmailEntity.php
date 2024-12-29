@@ -54,6 +54,9 @@ class EmailEntity {
      * Used if to_name is null.
      * @return string
      */
+    public function getUserId(): string {
+        return $this->user_id;
+    }
 
     /**
      * The name of the person this is email is sent to.

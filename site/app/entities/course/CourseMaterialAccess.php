@@ -33,7 +33,7 @@ class CourseMaterialAccess {
         $this->timestamp = $timestamp;
     }
 
-
+    public function getUserId(): string {
+        return $this->user_id;
+    }
 }
-
-
