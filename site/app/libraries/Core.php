@@ -57,11 +57,9 @@ class Core {
     /** @var DatabaseQueries */
     private $database_queries;
 
-    /** @var User */
+    /** @var User | null */
     private $user = null;
 
-    /** @var string */
-    private $user_id = null;
 
     /** @var Output */
     private $output = null;
@@ -390,7 +388,7 @@ class Core {
 
     public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
-        $this->user_id = $user_id;
+   
         $this->setUser($this->database_queries->getUserById($user_id));
         $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
@@ -403,9 +401,9 @@ class Core {
      * Returns the user that the client is logged in as. Will return null if there is no user
      * to be logged in as.
      *
-     * @return User
+     * @return User | null 
      */
-    public function getUser() {
+    public function getUser(): ?User {
         return $this->user;
     }
 
