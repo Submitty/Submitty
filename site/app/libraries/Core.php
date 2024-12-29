@@ -388,7 +388,6 @@ class Core {
 
     public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
-   
         $this->setUser($this->database_queries->getUserById($user_id));
         $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
@@ -401,7 +400,7 @@ class Core {
      * Returns the user that the client is logged in as. Will return null if there is no user
      * to be logged in as.
      *
-     * @return User | null 
+     * @return User|null
      */
     public function getUser(): ?User {
         return $this->user;
