@@ -9,7 +9,7 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="password"]').type('Password123!');
         cy.get('[data-testid="confirm-password"]').type('Password123!');
         cy.get('[data-testid="sign-up-button"]').click();
-        // Bad code 
+        // Bad code
         cy.get('[data-testid="verification-code"]').type('99999999');
         cy.get('[data-testid="verify-email-button"').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'The verification code is not correct. Verify you entered the correct code or resend the verification email');
@@ -23,7 +23,7 @@ describe('Self account creation tests', () => {
         cy.logout();
         cy.get('[data-testid="new-account-button"]').click();
 
-        // Bad email 
+        // Bad email
         cy.get('[data-testid="email"]').type('test.email.bad@bad.com');
         cy.get('[data-testid="user-id"]').type('good_id');
         cy.get('[data-testid="given-name"]').type('GivenName');

@@ -52,13 +52,14 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testAcceptedEmail() {
         $good_email = 'goodemail@rpi.edu';
-        $this->assertTrue(Utils::isAcceptedEmail($good_email));
+        $reqs = $this->core->getConfig()->getAcceptedEmails();
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email));
         $good_email_gmail = 'goodemail@gmail.com';
-        $this->assertTrue(Utils::isAcceptedEmail($good_email));
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email));
         $bad_email_extension = 'goodemail@notanextension.edu';
-        $this->assertFalse(Utils::isAcceptedEmail($good_email));
+        $this->assertFalse(Utils::isAcceptedEmail($reqs, $good_email));
         $accepts_multiple_at_signs = 'good@email@testing@rpi.edu';
-        $this->assertTrue(Utils::isAcceptedEmail($accepts_multiple_at_signs));
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $accepts_multiple_at_signs));
     }
 
     public function testGenerateRandomString2() {

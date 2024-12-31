@@ -113,6 +113,8 @@ class Utils {
 
     /**
      * Check if the user ID meets requirements specified in the Submitty config file
+     *
+     * @param array<mixed> $requirements
      */
     public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
         if ($requirements['max_length'] < strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
@@ -155,6 +157,8 @@ class Utils {
 
     /**
      * Checks if the email extension is in the accepted emails part of the Submitty config file
+     *
+     * @param array<mixed> $accepted_emails
      */
     public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
         $split_email = explode('@', $email);
