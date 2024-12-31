@@ -52,7 +52,7 @@ class Post {
     protected bool $anonymous;
 
     #[ORM\Column(type: Types::BOOLEAN)]
-    protected bool $deleted;
+    protected bool $deleted = false;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $endorsed_by;
@@ -88,6 +88,8 @@ class Post {
     protected Collection $upduckers;
 
     protected int $reply_level = 1;
+
+    protected bool $is_changed = false;
 
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
@@ -132,6 +134,13 @@ class Post {
         return $this->content;
     }
 
+    public function setContent(string $content): void {
+        if ($this->content !== $content) {
+            $this->content = $content;
+            $this->is_changed = true;
+        }
+    }
+
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
@@ -140,12 +149,29 @@ class Post {
         return $this->anonymous;
     }
 
+    public function setAnonymous(bool $anonymous): void {
+        if ($this->anonymous !== $anonymous) {
+            $this->anonymous = $anonymous;
+            $this->is_changed = true;
+        }
+    }
+
     public function isDeleted(): bool {
         return $this->deleted;
     }
 
+    public function setDeleted(bool $deleted): void {
+        $this->deleted = $deleted;
+    }
     public function isRenderMarkdown(): bool {
         return $this->render_markdown;
+    }
+
+    public function setRenderMarkdown(bool $render_markdown): void {
+        if ($this->render_markdown !== $render_markdown) {
+            $this->render_markdown = $render_markdown;
+            $this->is_changed = true;
+        }
     }
 
     /**
@@ -183,5 +209,55 @@ class Post {
         return $view->getTimestamp() < max($this->history->map(function ($x) {
             return $x->getEditTimestamp();
         })->toArray());
+    }
+
+    public function isChanged(): bool {
+        return $this->is_changed;
+    }
+
+    /**
+     * Saves a version as a PostHistory entity
+     * @param \app\entities\UserEntity $edit_author
+     * @return PostHistory the new version number
+     */
+    public function saveNewVersion(UserEntity $edit_author): PostHistory {
+        $version = 1;
+        if (count($this->history) > 0) {
+            $version = max($this->history->map(function ($x) {
+                return $x->getVersion();
+            })->toArray()) + 1;
+        }
+        $saved_edit = new PostHistory($this, $version, $edit_author);
+        $this->history->add($saved_edit);
+        return $saved_edit;
+    }
+
+    /**
+     * Adds an attachment with the given name and version
+     * @param string $attachment_name
+     * @param int $version
+     * @return \app\entities\forum\PostAttachment the added attachment
+     */
+    public function addAttachment(string $attachment_name, int $version): PostAttachment {
+        $attachment = new PostAttachment($this, $attachment_name, $version, 0);
+        $this->attachments->add($attachment);
+        $this->is_changed = true;
+        return $attachment;
+    }
+
+    /**
+     * Marks an attachment as deleted.
+     * @param string $attachment_name
+     * @param int $version
+     * @return void
+     */
+    public function deleteAttachment(string $attachment_name, int $version): void {
+        $attachment = $this->attachments->filter(function ($x) use ($attachment_name) {
+            return $x->getFileName() === $attachment_name;
+        })->first();
+        if ($attachment !== false) {
+            $attachment->setVersionDeleted($version);
+            $this->is_changed = true;
+        }
     }
 }
