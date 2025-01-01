@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
-    "@codemirror/autocomplete": "6.18.3",
+    "@codemirror/autocomplete": "6.18.4",
     "@codemirror/commands": "6.7.1",
     "@codemirror/lang-cpp": "6.0.2",
     "@codemirror/lang-java": "6.0.1",
