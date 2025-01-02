@@ -21,7 +21,7 @@
   },
   "require": {
     "aptoma/twig-markdown": "3.4.1",
-    "browscap/browscap-php": "7.4.0",
+    "browscap/browscap-php": "7.5.0",
     "cboden/ratchet": "0.4.4",
     "doctrine/annotations": "1.14.3",
     "doctrine/dbal": "3.8.3",
