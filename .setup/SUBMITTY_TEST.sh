@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 pushd /usr/local/submitty/GIT_CHECKOUT/Submitty/site  > /dev/null || {
     echo "Failed to change to /usr/local/submitty/GIT_CHECKOUT/Submitty/site."
     exit 1

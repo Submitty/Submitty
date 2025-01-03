@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ###############################################################################################################################
 # USER CONFIGURATION (Required)                                                                                  
 # Please fill in the information below. 
