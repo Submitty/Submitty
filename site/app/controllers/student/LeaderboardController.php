@@ -19,6 +19,18 @@ class LeaderboardController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
 
+        if (
+            !$this->core->getUser()->accessGrading()
+            && (
+                !$gradeable->isSubmissionOpen()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
+                && !$gradeable->isTaGradeReleased()
+            )
+        ) {
+            return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
+        }
+
         $leaderboards = [];
 
         $autogradingConfig = $gradeable->getAutogradingConfig();
