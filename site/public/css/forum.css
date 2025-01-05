@@ -215,6 +215,7 @@
     color: var(--standard-hover-light-gray);
     -webkit-text-stroke: 1px var(--standard-gray-black);
 }
+
 .not-active-thread-announcement:hover {
     text-shadow: var(--standard-tangerine-yellow) 0 0 5px;
 }
@@ -652,7 +653,6 @@
 
 .well blockquote {
     border-color: var(--standard-light-gray);
-    border-color: var(--standard-light-gray);
 }
 
 .well-lg {
@@ -722,6 +722,7 @@
     background: var(--actionable-blue);
     color: var(--always-default-white);
 }
+
 .filter-inactive {
     background: var(--always-default-white);
     color: var(--actionable-blue);
