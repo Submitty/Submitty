@@ -491,11 +491,14 @@ class SubmissionController extends AbstractController {
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
                 $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
-                $num_pages_encoded = urlencode($num_pages);
-                $file_name_encoded = urlencode($job_data['filename']);
-                $pdf_full_path_encoded = urlencode($pdf_full_path);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path_encoded}&num_page={$num_pages_encoded}&file_name={$file_name_encoded}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi"."?".http_build_query(
+                    [
+                        'pdf_path'=>$pdf_full_path,
+                        'num_page'=>$num_pages,
+                        'file_name'=>$job_data['filename']
+                    ]
+                ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
                 curl_close($ch);
