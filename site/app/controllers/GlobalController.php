@@ -32,8 +32,9 @@ class GlobalController extends AbstractController {
         }
 
         $unread_notifications_count = null;
-        if ($this->core->getUser() && $this->core->getConfig()->isCourseLoaded()) {
-            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($this->core->getUser()->getId(), null);
+        $user = $this->core->getUser();
+        if (!is_null($user) && $this->core->getConfig()->isCourseLoaded()) {
+            $unread_notifications_count = $this->core->getQueries()->getUnreadNotificationsCount($user->getId(), null);
         }
 
         $sidebar_buttons = [];

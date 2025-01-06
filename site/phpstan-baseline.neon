@@ -167,11 +167,6 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 2
-			path: app/controllers/DockerInterfaceController.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
@@ -204,11 +199,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
-			path: app/controllers/GlobalController.php
-
-		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 1
 			path: app/controllers/GlobalController.php
 
 		-
@@ -272,7 +262,7 @@ parameters:
 			path: app/controllers/GlobalController.php
 
 		-
-			message: "#^Only booleans are allowed in &&, app\\\\models\\\\User given on the left side\\.$#"
+			message: "#^Only booleans are allowed in &&, app\\\\models\\\\User\\|null given on the left side\\.$#"
 			count: 1
 			path: app/controllers/GlobalController.php
 
@@ -295,11 +285,6 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
-			path: app/controllers/HomePageController.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 4
 			path: app/controllers/HomePageController.php
 
 		-
@@ -8042,11 +8027,6 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\User and null will always evaluate to true\\.$#"
-			count: 2
-			path: app/libraries/routers/WebRouter.php
-
-		-
 			message: "#^Variable method call on app\\\\models\\\\Config\\|null\\.$#"
 			count: 1
 			path: app/libraries/routers/WebRouter.php
@@ -8348,11 +8328,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\models\\\\Config\\:\\:\\$wrapper_files type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/Config.php
 
@@ -10102,11 +10077,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 9
 			path: app/models/gradeable/Gradeable.php
@@ -11672,17 +11642,7 @@ parameters:
 			path: app/views/GlobalView.php
 
 		-
-			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\User given\\.$#"
-			count: 1
-			path: app/views/GlobalView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/views/GlobalView.php
-
-		-
-			message: "#^Ternary operator condition is always true\\.$#"
+			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\User\\|null given\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
 
