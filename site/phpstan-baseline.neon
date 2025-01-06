@@ -262,11 +262,6 @@ parameters:
 			path: app/controllers/GlobalController.php
 
 		-
-			message: "#^Only booleans are allowed in &&, app\\\\models\\\\User\\|null given on the left side\\.$#"
-			count: 1
-			path: app/controllers/GlobalController.php
-
-		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -11638,11 +11633,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\GlobalView\\:\\:header\\(\\) has parameter \\$wrapper_urls with no type specified\\.$#"
-			count: 1
-			path: app/views/GlobalView.php
-
-		-
-			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\User\\|null given\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
 
