@@ -552,6 +552,17 @@ ALTER SEQUENCE public.global_calendar_items_id_seq OWNED BY public.global_calend
 
 
 --
+-- Name: instructor_queries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.instructor_queries (
+    user_id character varying NOT NULL,
+    query_name character varying NOT NULL,
+    query character varying NOT NULL
+);
+
+
+--
 -- Name: mapped_courses; Type: TABLE; Schema: public; Owner: -
 --
 
