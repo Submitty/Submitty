@@ -75,8 +75,8 @@
             else total_score += max_score;
         });
 
-        $("#totalScore").html(total_score);
-        $("#totalEC").html("(" + total_ec + ")");
+        $("#totalScore").text(total_score.toFixed(2));
+        $("#totalEC").text(`(${total_ec.toFixed(2)})`);
     }
 
     $(document).ready(function() {
