@@ -14,13 +14,13 @@ opencv-python-headless==4.10.0.84
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
 requests==2.32.3
 python-pam==2.0.2
-ruamel.yaml==0.18.6
+ruamel.yaml==0.18.7
 psycopg2-binary==2.9.10
 sqlalchemy==1.4.29
-psutil==6.1.0
+psutil==6.1.1
 python-dateutil==2.8.2
 watchdog==4.0.1
-xlsx2csv==0.8.3
+xlsx2csv==0.8.4
 pause==0.3
 paramiko==3.5.0
 tzlocal==5.2
@@ -29,7 +29,7 @@ distro==1.9.0
 jsonschema==4.23.0
 jsonref==1.1.0
 docker==7.1.0
-urllib3==2.2.3
+urllib3==2.3.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.9
@@ -37,5 +37,5 @@ pdf2image==1.17.0
 numpy==2.1.3
 
 # python libraries for OCR for digit recognition
-onnx==1.16.2
+onnx==1.17.0
 onnxruntime==1.20.1
