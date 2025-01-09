@@ -323,7 +323,10 @@ function displayBigBanner(imageSrc, link=null) {
     const form = $('#enlarged-banner');
     console.log(imageSrc);
     $('#big-banner').attr('src', "data:image/png;base64," + imageSrc);
+    console.log("here");
+    console.log(link);
     if (link && link.length > 0) {
+        console.log("hi");
         $('#big-banner-link').attr('href', link);
     }
 

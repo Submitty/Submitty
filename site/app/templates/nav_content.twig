@@ -9,9 +9,6 @@ function updateImageData(imageData) {
         console.error("Image element with id 'bye' not found");
     }
 }
-function openLink() {
-    window.open('http://submitty.org/developer/rcos_moorthy', '_blank');
-}
 
 function duckTalking() {
     const imageElement = document.querySelector('#moorthy-duck');
@@ -80,6 +77,7 @@ function inquireBanner() {
         window.open(imageData.link_name, '_blank');
     }
     else {
+    console.log(imageData.link_name);
     displayBigBanner(imageData.data, imageData.link_name)
     }
 
