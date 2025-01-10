@@ -35,6 +35,7 @@ def main():
         with open(complete_config_json_path,'r', encoding='utf-8') as infile:
             config_file=json.load(infile)
     else:
+        print("ERROR: Could not find the complete_config file for the gradeable")
         sys.exit(1)
 
     required_capabilities = config_file.get('required_capabilities','default')
