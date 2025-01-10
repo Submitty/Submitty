@@ -9,7 +9,7 @@
 
     {% if show_title is defined and show_title %}
     <span class="edit_thread">
-        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" aria-label="Edit thread title" required/>
+        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" data-testid="title" aria-label="Edit thread title" required/>
     </span>
     {% endif %}
 
@@ -118,7 +118,7 @@
         {% endif %}
         <fieldset>
           <legend id="cat_label">Categories:</legend>
-          <div id=id='categories-pick-list'>
+          <div id='categories-pick-list' data-testid='categories-pick-list'>
             {% for category in categories %}
                 {# if diff > 0 then visible_Date is true
                  diff is used for comparison between the given date of category and the current date of user 
@@ -126,7 +126,7 @@
                  and when date is below then current date the optput is greater then zero #}
                 {% if category.visible_date is null or category.diff > 0 %}
                 <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" data-testid="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
                 </div>
                 {% endif %}
             {% endfor %}
@@ -147,7 +147,7 @@
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Upload Attachment</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image</label>
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
@@ -179,7 +179,7 @@
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
         {% if show_anon %}
-            <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <input type="checkbox" class="thread-anon-checkbox" data-testid="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
             <label>Anonymous (to class)? </label>
         {% endif %}
         {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
