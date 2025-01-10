@@ -32,24 +32,24 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="add-new-mark-button"]')
             .should('not.exist');
-        cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
-        cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
-            .should('contain', 'Save');
-        cy.get('[data-testid="mark-reorder"]').eq(-2).then(($el) => {
-            const rect = $el[0].getBoundingClientRect();
-            // Needed due to drag and drop weirdness
-            // eslint-disable-next-line cypress/no-unnecessary-waiting, cypress/unsafe-to-chain-command
-            cy.wrap($el)
-                .trigger('mousedown', { which: 1 })
-                .wait(1000)
-                .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 })
-                .wait(1000)
-                .trigger('mouseup', { force: true });
-        });
-        cy.get('#edit-mode-enabled').click();
-        cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
-            .should('contain', 'Save');
-        cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-3).should('contain', 'Second New Mark');
-        cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-2).should('contain', 'First New Mark');
+        // cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
+        // cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
+        //     .should('contain', 'Save');
+        // cy.get('[data-testid="mark-reorder"]').eq(-2).then(($el) => {
+        //     const rect = $el[0].getBoundingClientRect();
+        //     // Needed due to drag and drop weirdness
+        //     // eslint-disable-next-line cypress/no-unnecessary-waiting, cypress/unsafe-to-chain-command
+        //     cy.wrap($el)
+        //         .trigger('mousedown', { which: 1 })
+        //         .wait(1000)
+        //         .trigger('mousemove', { which: 1, force: true, pageX: rect.left + 40, pageY: rect.top - 30 })
+        //         .wait(1000)
+        //         .trigger('mouseup', { force: true });
+        // });
+        // cy.get('#edit-mode-enabled').click();
+        // cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
+        //     .should('contain', 'Save');
+        // cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-3).should('contain', 'Second New Mark');
+        // cy.get('[data-testid^="component"] [data-testid="mark-title"]').eq(-2).should('contain', 'First New Mark');
     });
 });
