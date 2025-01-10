@@ -569,7 +569,7 @@ async function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
 async function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
     let response;
     try {
-        response = $.getJSON({
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
@@ -1902,7 +1902,7 @@ async function importComponentsFromFile() {
     catch (err) {
         console.log(err);
         alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-        + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
+            + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadGradeableComponents]');
         return;
     }
     if (response.status !== 'success') {
@@ -3000,13 +3000,11 @@ async function saveMarkList(component_id) {
             };
         }
     }));
-    // No conflicts, so don't open the popup
-    if (Object.keys(conflictMarks).length === 0) {
-        return;
+    // If conflicts, open the popup
+    if (Object.keys(conflictMarks).length !== 0) {
+        await openMarkConflictPopup(component_id, conflictMarks);
     }
 
-    // Prompt the user with any conflicts
-    await openMarkConflictPopup(component_id, conflictMarks);
     const markOrder = {};
     domMarkList.forEach((mark) => {
         markOrder[mark.id] = mark.order;

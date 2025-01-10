@@ -156,7 +156,7 @@ abstract class AbstractModel {
             $value = $arguments[0];
             if (isset(static::$properties[$class_name][$property_name])) {
                 if (isset(static::$properties[$class_name][$property_name]['read_only'])) {
-                    throw new PropertyAccessException("Cannot write to read-only property ${property_name}");
+                    throw new PropertyAccessException("Cannot write to read-only property {$property_name}");
                 }
                 $type = static::$properties[$class_name][$property_name];
                 switch ($type) {
@@ -187,7 +187,7 @@ abstract class AbstractModel {
                 isset(static::$properties[$class_name][$property_name])
                 && isset(static::$properties[$class_name][$property_name]['write_only'])
             ) {
-                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+                throw new PropertyAccessException("Cannot read write-only property {$property_name}");
             }
 
             return $this->$property_name;
@@ -197,7 +197,7 @@ abstract class AbstractModel {
                 isset(static::$properties[$class_name][$property_name])
                 && isset(static::$properties[$class_name][$property_name]['write_only'])
             ) {
-                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+                throw new PropertyAccessException("Cannot read write-only property {$property_name}");
             }
 
             return $this->$property_name === true;
