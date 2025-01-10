@@ -145,6 +145,8 @@ jobs:
         run: |
             php vendor/bin/phpcs --version
             php vendor/bin/phpcs
+            php vendor/bin/php-cs-fixer --version
+            php vendor/bin/php-cs-fixer fix --dry-run
       - name: Static analysis
         run: |
             php vendor/bin/phpstan  --version
