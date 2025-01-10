@@ -10,9 +10,9 @@ use app\exceptions\FileReadException;
  * Contains various useful functions for interacting with files and directories.
  */
 class FileUtils {
-    const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
-    const IGNORE_FILES = ['.ds_store'];
-    const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+    public const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
+    public const IGNORE_FILES = ['.ds_store'];
+    public const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
 
     /**
      * Return all files from a given directory.  All subdirectories
@@ -440,7 +440,7 @@ class FileUtils {
             case 'pdf':
                 $content_type = "application/pdf";
                 break;
-            // images
+                // images
             case 'png':
                 $content_type = "image/png";
                 break;
@@ -454,7 +454,7 @@ class FileUtils {
             case 'bmp':
                 $content_type = "image/bmp";
                 break;
-            // text
+                // text
             case 'c':
                 $content_type = 'text/x-csrc';
                 break;

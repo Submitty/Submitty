@@ -18,9 +18,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CourseMaterialRepository::class)]
 #[ORM\Table(name: "course_materials")]
 class CourseMaterial {
-    const FILE = 0;
-    const LINK = 1;
-    const DIR = 2;
+    public const FILE = 0;
+    public const LINK = 1;
+    public const DIR = 2;
 
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
@@ -224,7 +224,7 @@ class CourseMaterial {
 
     public function userHasViewed(string $user_id): bool {
         return $this->accesses->filter(function (CourseMaterialAccess $courseMaterialAccess) use ($user_id) {
-                return $courseMaterialAccess->getUserId() === $user_id;
+            return $courseMaterialAccess->getUserId() === $user_id;
         })->count() > 0;
     }
 

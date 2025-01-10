@@ -13,89 +13,89 @@ class Access {
     // Access control options
 
     /** Allow Instructors to do this */
-    const ALLOW_INSTRUCTOR              = 1 << 0;
+    public const ALLOW_INSTRUCTOR              = 1 << 0;
     /** Allow full access graders to do this */
-    const ALLOW_FULL_ACCESS_GRADER      = 1 << 1;
+    public const ALLOW_FULL_ACCESS_GRADER      = 1 << 1;
     /** Allow limited access graders to do this */
-    const ALLOW_LIMITED_ACCESS_GRADER   = 1 << 2;
+    public const ALLOW_LIMITED_ACCESS_GRADER   = 1 << 2;
     /** Allow students to do this */
-    const ALLOW_STUDENT                 = 1 << 3;
+    public const ALLOW_STUDENT                 = 1 << 3;
     /** Allow logged out users to do this */
-    const ALLOW_LOGGED_OUT              = 1 << 4;
+    public const ALLOW_LOGGED_OUT              = 1 << 4;
     /**
      * Check that the current user is at or above the minimum grading group required for a gradeable
      * If the gradeable has peer grading, this will also accept for students
      */
-    const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5 | self::REQUIRE_ARG_GRADEABLE;
+    public const CHECK_GRADEABLE_MIN_GROUP     = 1 << 5 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's grading section for a gradeable
      * Only applies to limited access graders
      */
-    const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
+    public const CHECK_GRADING_SECTION_GRADER  = 1 << 6 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that a given user is in the current user's peer grading assignment for a gradeable
      * Only applies to students
      */
-    const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADEABLE;
+    public const CHECK_PEER_ASSIGNMENT_STUDENT = 1 << 7 | self::REQUIRE_ARG_GRADEABLE;
     /** Require that the given gradeable have an active version / submission */
-    const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
+    public const CHECK_HAS_SUBMISSION          = 1 << 8 | self::REQUIRE_ARG_GRADEABLE;
     /** Check that a valid CSRF token was passed in the request */
-    const CHECK_CSRF                    = 1 << 9;
+    public const CHECK_CSRF                    = 1 << 9;
     /** Allow access if the gradeable is our own, even if sections are checked */
-    const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
+    public const ALLOW_SELF_GRADEABLE          = 1 << 10 | self::REQUIRE_ARG_GRADEABLE;
     /** Only allow access if the gradeable is our own */
-    const ALLOW_ONLY_SELF_GRADEABLE     = 1 << 11 | self::REQUIRE_ARG_GRADEABLE;
+    public const ALLOW_ONLY_SELF_GRADEABLE     = 1 << 11 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check if the given component allows peer grading
      * Only applies to students
      */
-    const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
+    public const CHECK_COMPONENT_PEER_STUDENT  = 1 << 12 | self::REQUIRE_ARG_COMPONENT;
     /** Check if they can access the given file and directory */
-    const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
+    public const CHECK_FILE_DIRECTORY          = 1 << 13 | self::REQUIRE_ARGS_DIR_PATH;
     /** Require that the given file exists */
-    const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
+    public const CHECK_FILE_EXISTS             = 1 << 14 | self::REQUIRE_ARGS_DIR_PATH;
     /**
      * Check that students are allowed to view the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
+    public const CHECK_STUDENT_VIEW            = 1 << 15 | self::REQUIRE_ARG_GRADEABLE;
     /**
      * Check that students are allowed to submit the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_SUBMIT = 1 << 16 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    public const CHECK_STUDENT_SUBMIT = 1 << 16 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
     /**
      * Checks that students are allowed to view and download submission files for the given gradeable
      * Only applies to students
      */
-    const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
+    public const CHECK_STUDENT_DOWNLOAD = 1 << 17 | self::REQUIRE_ARG_GRADEABLE | self::REQUIRE_ARG_VERSION;
 
     /** Check that the course status is such that the user can view the course */
-    const CHECK_COURSE_STATUS           = 1 << 18;
+    public const CHECK_COURSE_STATUS           = 1 << 18;
 
     /** If the current set of flags requires the "gradeable" (type Gradeable) argument */
-    const REQUIRE_ARG_GRADEABLE         = 1 << 24;
+    public const REQUIRE_ARG_GRADEABLE         = 1 << 24;
     /** If the current set of flags requires the "component" (type GradeableComponent) argument */
-    const REQUIRE_ARG_COMPONENT         = 1 << 25;
+    public const REQUIRE_ARG_COMPONENT         = 1 << 25;
     /** If the current set of flags requires the "dir" (type string) and "path" (type string) arguments */
-    const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
+    public const REQUIRE_ARGS_DIR_PATH         = 1 << 26;
     /** If the current set of flags requires the "gradeable_version" (type int) argument */
-    const REQUIRE_ARG_VERSION           = 1 << 27;
+    public const REQUIRE_ARG_VERSION           = 1 << 27;
     /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
-    const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
+    public const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */
-    const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
+    public const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
 
-    const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
-    const ALLOW_MIN_LIMITED_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
-    const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
-    const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
-    const DENY_ALL                        = -1;
+    public const ALLOW_MIN_STUDENT               = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER | self::ALLOW_STUDENT;
+    public const ALLOW_MIN_LIMITED_ACCESS_GRADER = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER | self::ALLOW_LIMITED_ACCESS_GRADER;
+    public const ALLOW_MIN_FULL_ACCESS_GRADER    = self::ALLOW_INSTRUCTOR | self::ALLOW_FULL_ACCESS_GRADER;
+    public const ALLOW_MIN_INSTRUCTOR            = self::ALLOW_INSTRUCTOR;
+    public const DENY_ALL                        = -1;
 
-    const ACCESS_LEVELS = [
+    public const ACCESS_LEVELS = [
         User::LEVEL_USER        => "User",
         User::LEVEL_FACULTY     => "Faculty",
         User::LEVEL_SUPERUSER   => "Superuser"

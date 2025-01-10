@@ -38,14 +38,14 @@ class UserProfileView extends AbstractView {
 
         $user_utc_offset = DateUtils::getUTCOffset($user->getTimeZone());
         $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'
-            ?  $user->getTimeZone()
+            ? $user->getTimeZone()
             : "(UTC" . $user_utc_offset . ") " . $user->getTimeZone();
 
         $this->core->getOutput()->addInternalModuleJs('user-profile.js');
 
         $curr_locale = $this->core->getConfig()->getLocale()->getName();
         $supported_locales = $this->core->getSupportedLocales() ?? [];
-        $locale_names = array_map(fn(string $locale): string => mb_convert_case(\Locale::getDisplayName($locale, $curr_locale), MB_CASE_TITLE, 'UTF-8'), $supported_locales);
+        $locale_names = array_map(fn (string $locale): string => mb_convert_case(\Locale::getDisplayName($locale, $curr_locale), MB_CASE_TITLE, 'UTF-8'), $supported_locales);
         $supported_locales = array_combine($supported_locales, $locale_names);
         $default_locale_name = mb_convert_case(\Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale), MB_CASE_TITLE, 'UTF-8');
 

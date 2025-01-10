@@ -204,11 +204,11 @@ class ForumThreadView extends AbstractView {
 
         if (!$ajax) {
             $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']), null, true);
-             // Add breadcrumb for the current thread
-             $max_length = 25;
-             $fullTitle = $thread->getTitle();
-             $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
-             $this->core->getOutput()->addBreadcrumb("(" . $thread->getId() . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', $thread->getId()]), null, true);
+            // Add breadcrumb for the current thread
+            $max_length = 25;
+            $fullTitle = $thread->getTitle();
+            $title = strlen($fullTitle) > $max_length ? substr($fullTitle, 0, $max_length - 3) . "..." : $fullTitle;
+            $this->core->getOutput()->addBreadcrumb("(" . $thread->getId() . ") " . $title, $this->core->buildCourseUrl(['forum', 'threads', $thread->getId()]), null, true);
 
             //Body Style is necessary to make sure that the forum is still readable...
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
@@ -862,7 +862,8 @@ class ForumThreadView extends AbstractView {
         $post_content = $post->getContent();
         do {
             $post_content = preg_replace('/(?:!\[(.*?)\]\((.*?)\))/', '$2', $post_content, -1, $count);
-        } while ($count > 0);
+        }
+        while ($count > 0);
 
         $post_user_info = [];
 

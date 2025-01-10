@@ -83,13 +83,13 @@ class DiffViewer {
      */
     private $white_spaces = [];
 
-    const SPECIAL_CHARS_ORIGINAL = 'original';
-    const SPECIAL_CHARS_ESCAPE = 'escape';
-    const SPECIAL_CHARS_UNICODE = 'unicode';
+    public const SPECIAL_CHARS_ORIGINAL = 'original';
+    public const SPECIAL_CHARS_ESCAPE = 'escape';
+    public const SPECIAL_CHARS_UNICODE = 'unicode';
 
     //The first element of array is used to find the special char, the second is the visual representation, the third is
     // the escape code
-    const SPECIAL_CHARS_LIST = [
+    public const SPECIAL_CHARS_LIST = [
         "space" => [" ", "&nbsp;", " "],
         "tabs" => ["\t", "↹", "\\t"],
         "carriage return" => ["\r", "↵<br>", "\\r<br>"],
@@ -101,8 +101,8 @@ class DiffViewer {
         "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
     ];
 
-    const EXPECTED = 'expected';
-    const ACTUAL = 'actual';
+    public const EXPECTED = 'expected';
+    public const ACTUAL = 'actual';
 
     public static function isValidSpecialCharsOption($option) {
         return in_array($option, [

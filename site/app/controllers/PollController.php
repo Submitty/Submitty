@@ -193,12 +193,12 @@ class PollController extends AbstractController {
         }
 
         if (!in_array($_POST["release_histogram"], PollUtils::getReleaseHistogramSettings())) {
-                    $this->core->addErrorMessage("Invalid student histogram release setting");
+            $this->core->addErrorMessage("Invalid student histogram release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
         if (!in_array($_POST["release_answer"], PollUtils::getReleaseAnswerSettings())) {
-                    $this->core->addErrorMessage("Invalid poll answer release setting");
+            $this->core->addErrorMessage("Invalid poll answer release setting");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 

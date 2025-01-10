@@ -49,7 +49,7 @@ class Notebook extends AbstractModel {
 
 
     protected function parseNotebook(array $details): void {
-         // Setup $this->notebook
+        // Setup $this->notebook
         $actual_input = [];
         $this->notebook = [];
         $this->item_pool = $details["item_pool"] ?? [];
@@ -120,7 +120,7 @@ class Notebook extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                    $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
+                $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
             }
             elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $actual_input[$i]['allow_multiple'] = $actual_input[$i]['allow_multiple'] ?? false;
@@ -153,16 +153,16 @@ class Notebook extends AbstractModel {
     }
 
 
-   /**
-    * Gets a new 'notebook' which contains information about most recent submissions
-    *
-    * @return array An updated 'notebook' which has the most recent submission data entered into the
-    * @param array $new_notebook a notebook config to parse
-    * @param int $version which version to get notebook submission values from
-    * @param string $student_id which student's notebook to pull data from
-    * @param ?int $display_version selected version (may not be active version)
-    * @param string $gradeable_id
-    */
+    /**
+     * Gets a new 'notebook' which contains information about most recent submissions
+     *
+     * @return array An updated 'notebook' which has the most recent submission data entered into the
+     * @param array $new_notebook a notebook config to parse
+     * @param int $version which version to get notebook submission values from
+     * @param string $student_id which student's notebook to pull data from
+     * @param ?int $display_version selected version (may not be active version)
+     * @param string $gradeable_id
+     */
     public function getMostRecentNotebookSubmissions(int $version, array $new_notebook, string $student_id, ?int $display_version, string $gradeable_id): array {
         foreach ($new_notebook as $notebookKey => $notebookVal) {
             if (isset($notebookVal['type'])) {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace app\libraries\database;
 
 class QueryIdentifier {
-    const SELECT = 'select';
-    const INSERT = 'insert';
-    const UPDATE = 'update';
-    const DELETE = 'delete';
-    const UNKNOWN = 'unknown';
+    public const SELECT = 'select';
+    public const INSERT = 'insert';
+    public const UPDATE = 'update';
+    public const DELETE = 'delete';
+    public const UNKNOWN = 'unknown';
 
     public static function identify(string $query): string {
         $query = strtolower(trim($query));

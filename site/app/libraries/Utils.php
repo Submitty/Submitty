@@ -238,13 +238,13 @@ class Utils {
         return json_encode(array_merge($students_full->toArray(), $null_students->toArray()));
     }
 
-   /**
-    * Convert the shorthand byte notation in php.ini to bytes.
-    * E.g : php returnBytes(ini_get('post_max_size'))
-    * Src : https://www.php.net/manual/en/function.ini-get.php
-    * @param string $size_str
-    * @return int
-    */
+    /**
+     * Convert the shorthand byte notation in php.ini to bytes.
+     * E.g : php returnBytes(ini_get('post_max_size'))
+     * Src : https://www.php.net/manual/en/function.ini-get.php
+     * @param string $size_str
+     * @return int
+     */
     public static function returnBytes(string $size_str): int {
         switch (strtolower(substr($size_str, -1))) {
             case 'm':

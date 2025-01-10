@@ -36,9 +36,9 @@ class DatabaseFactoryTester extends BaseUnitTest {
     }
 
     public function testDatabaseFactoryInvalid() {
-         $factory = new DatabaseFactory('invalid');
-         $this->expectException(\app\exceptions\NotImplementedException::class);
-         $this->expectExceptionMessage('Database not implemented for driver: invalid');
-         $factory->getDatabase([]);
+        $factory = new DatabaseFactory('invalid');
+        $this->expectException(\app\exceptions\NotImplementedException::class);
+        $this->expectExceptionMessage('Database not implemented for driver: invalid');
+        $factory->getDatabase([]);
     }
 }

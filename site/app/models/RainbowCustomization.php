@@ -55,7 +55,7 @@ class RainbowCustomization extends AbstractModel {
      * which is a lot nicer to type.
      */
     //XXX: 'none (for practice only)' we want to truncate to just 'none'.
-    const syllabus_buckets = [
+    public const syllabus_buckets = [
         'homework', 'assignment', 'problem-set',
         'quiz', 'test', 'exam',
         'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',

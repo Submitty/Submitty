@@ -26,12 +26,12 @@ use app\models\User;
  * @method \app\models\gradeable\Gradeable[] getGradedGradeables()
  */
 class GradeableList extends AbstractModel {
-    const FUTURE  = 0;
-    const BETA    = 1;
-    const OPEN    = 2;
-    const CLOSED  = 3;
-    const GRADING = 4;
-    const GRADED  = 5;
+    public const FUTURE  = 0;
+    public const BETA    = 1;
+    public const OPEN    = 2;
+    public const CLOSED  = 3;
+    public const GRADING = 4;
+    public const GRADED  = 5;
 
     /** @prop
      * @var User */

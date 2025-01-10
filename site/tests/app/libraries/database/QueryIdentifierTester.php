@@ -21,7 +21,7 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
      * @dataProvider dataProvider
      */
     public function testIdentify(string $query, string $expected): void {
-         $this->assertEquals($expected, QueryIdentifier::identify($query));
+        $this->assertEquals($expected, QueryIdentifier::identify($query));
     }
 
     public function testCteSelectIdentify(): void {
@@ -73,7 +73,7 @@ class QueryIdentifierTester extends \PHPUnit\Framework\TestCase {
             left join G on A.user_id=G.user_id
             ORDER BY A.registration_section, A.user_familyname, A.user_givenname, A.user_id;
 SQL;
-          $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));
+        $this->assertEquals(QueryIdentifier::SELECT, QueryIdentifier::identify($query));
     }
 
     public function invalidQueriesDataProvider(): array {
@@ -88,6 +88,6 @@ SQL;
      * @dataProvider invalidQueriesDataProvider
      */
     public function testInvalidQueriesReturnUnknown(string $query): void {
-          $this->assertEquals(QueryIdentifier::UNKNOWN, QueryIdentifier::identify($query));
+        $this->assertEquals(QueryIdentifier::UNKNOWN, QueryIdentifier::identify($query));
     }
 }

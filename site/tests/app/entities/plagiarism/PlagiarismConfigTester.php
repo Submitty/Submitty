@@ -124,17 +124,17 @@ class PlagiarismConfigTester extends BaseUnitTest {
     }
 
     public function testSetRegexDirs() {
-         // submissions dir
-         $this->my_config->setRegexDirSubmissions(false);
-         $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
+        // submissions dir
+        $this->my_config->setRegexDirSubmissions(false);
+        $this->assertFalse($this->my_config->isRegexDirSubmissionsSelected());
 
-         // results dir
-         $this->my_config->setRegexDirResults(true);
-         $this->assertTrue($this->my_config->isRegexDirResultsSelected());
+        // results dir
+        $this->my_config->setRegexDirResults(true);
+        $this->assertTrue($this->my_config->isRegexDirResultsSelected());
 
-         // checkout dir
-         $this->my_config->setRegexDirCheckout(true);
-         $this->assertTrue($this->my_config->isRegexDirCheckoutSelected());
+        // checkout dir
+        $this->my_config->setRegexDirCheckout(true);
+        $this->assertTrue($this->my_config->isRegexDirCheckoutSelected());
     }
 
     public function testSetIgnoredPermissions() {

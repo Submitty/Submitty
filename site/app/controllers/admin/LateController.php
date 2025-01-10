@@ -193,7 +193,7 @@ class LateController extends AbstractController {
             }
         }
         else {
-            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" )) {
+            if ((!isset($_POST['g_id']) || $_POST['g_id'] == "")) {
                 $error = "Please choose a gradeable_id";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(

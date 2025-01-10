@@ -113,18 +113,18 @@ use app\controllers\admin\AdminGradeableController;
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
-    const ROTATING_SECTION = 0;
-    const REGISTRATION_SECTION = 1;
-    const ALL_ACCESS = 2;
+    public const ROTATING_SECTION = 0;
+    public const REGISTRATION_SECTION = 1;
+    public const ALL_ACCESS = 2;
 
     /**
      * Enum range for blind and unblind grading:
      * 1 is unblind, 2 is single blind, 3 is double blind
     */
 
-    const UNBLIND_GRADING = 1;
-    const SINGLE_BLIND_GRADING = 2;
-    const DOUBLE_BLIND_GRADING = 3;
+    public const UNBLIND_GRADING = 1;
+    public const SINGLE_BLIND_GRADING = 2;
+    public const DOUBLE_BLIND_GRADING = 3;
 
     /* Properties for all types of gradeables */
 
@@ -453,7 +453,7 @@ class Gradeable extends AbstractModel {
     /**
      * All \DateTime properties for this class
      */
-    const date_properties = [
+    public const date_properties = [
         'ta_view_start_date',
         'team_lock_date',
         'submission_open_date',
@@ -468,7 +468,7 @@ class Gradeable extends AbstractModel {
     /**
      * Display names for the different date properties (for forming error messages)
      */
-    const date_display_names = [
+    public const date_display_names = [
         'ta_view_start_date' => 'Beta Testing',
         'submission_open_date' => 'Submission Open',
         'submission_due_date' => 'Submission Due',
@@ -484,7 +484,7 @@ class Gradeable extends AbstractModel {
     /**
      * All \DateTime properties that should be validated
      */
-    const date_validated_properties = [
+    public const date_validated_properties = [
         'ta_view_start_date',
         'team_lock_date',
         'submission_open_date',
@@ -500,7 +500,7 @@ class Gradeable extends AbstractModel {
      * All \DateTime properties for NUMERIC_TEXT and CHECKPOINT gradeables
      * Note: this is in validation order
      */
-    const date_properties_simple = [
+    public const date_properties_simple = [
         'ta_view_start_date',
         'grade_start_date',
         'grade_due_date',
@@ -511,7 +511,7 @@ class Gradeable extends AbstractModel {
      * All \DateTime properties for ELECTRONIC gradeables with ta grading
      * Note: this is in validation order
      */
-    const date_properties_elec_ta = [
+    public const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
         'grade_start_date',
@@ -522,7 +522,7 @@ class Gradeable extends AbstractModel {
      * All \DateTime properties for ELECTRONIC gradeables with no ta grading
      * Note: this is in validation order
      */
-    const date_properties_elec_no_ta = [
+    public const date_properties_elec_no_ta = [
         'ta_view_start_date',
         'submission_open_date'
     ];
@@ -531,7 +531,7 @@ class Gradeable extends AbstractModel {
      * All \DateTime properties for ELECTRONIC exam gradeables
      * Note: this is in validation order
      */
-    const date_properties_elec_exam = [
+    public const date_properties_elec_exam = [
         'ta_view_start_date',
         'grade_start_date',
         'grade_due_date'
@@ -542,7 +542,7 @@ class Gradeable extends AbstractModel {
      * Note: This is also the set for no student upload AND no ta grading
      * Note: this is in validation order
      */
-    const date_properties_bare = [
+    public const date_properties_bare = [
         'ta_view_start_date'
     ];
 
@@ -676,9 +676,9 @@ class Gradeable extends AbstractModel {
             }
             $query_string = chop($query_string, ',');
             $query_string .= ";";
-                $this->core->getQueries()->insertBulkPeerGradingAssignment($query_string);
-                $this->modified = true;
-                $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+            $this->core->getQueries()->insertBulkPeerGradingAssignment($query_string);
+            $this->modified = true;
+            $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         }
     }
     public function setPeerGradersList($input) {
@@ -1802,7 +1802,7 @@ class Gradeable extends AbstractModel {
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-//        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
+        //        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
         return false;
     }
 

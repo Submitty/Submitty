@@ -584,7 +584,7 @@ class UsersController extends AbstractController {
                 $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
                 $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
                 if ($default_section === $_POST['delete_reg_section'] && $is_self_register) {
-                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
+                    $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
                 }
                 else {
                     $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
@@ -1257,7 +1257,7 @@ class UsersController extends AbstractController {
                 $user->setGroup($user_group);
             }
             else {
-               // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                 // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
                 if (!empty($row[$registration_section_idx])) {
                     $this->core->getQueries()->insertNewRegistrationSection($row[$registration_section_idx]);

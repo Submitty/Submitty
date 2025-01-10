@@ -177,7 +177,7 @@ class HomeworkView extends AbstractView {
         $active_days_late =  $late_day_info !== null ? $late_day_info->getDaysLate() : 0;
         $extensions = $late_day_info !== null ? $late_day_info->getLateDayException() : 0;
         $active_days_charged = $late_day_info !== null ? $late_day_info->getLateDaysCharged() : $active_days_late - $extensions;
-        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() :  $late_days_remaining;
+        $late_day_budget = $late_day_info !== null ? $late_day_info->getLateDaysRemaining() : $late_days_remaining;
 
         $late_days_allowed = $gradeable->getLateDays();
 
@@ -226,7 +226,7 @@ class HomeworkView extends AbstractView {
                         $daylight_message_required = intval($due_date->format("m")) < 6 && intval($due_date_with_late_days->format("m")) > 6;
                     }
 
-                // different year, only false if we go from second non-DST to first non-DST
+                    // different year, only false if we go from second non-DST to first non-DST
                 }
                 else {
                     if (
@@ -829,10 +829,10 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
-     /**
-      * @param GradedGradeable $graded_gradeable
-      * @return string
-      */
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @return string
+     */
     private function renderLeaderboardBox(GradedGradeable $graded_gradeable): string {
         $autograding_config = $graded_gradeable->getGradeable()->getAutogradingConfig();
         if (is_null($autograding_config)) {
@@ -847,12 +847,12 @@ class HomeworkView extends AbstractView {
         ]);
     }
 
-     /**
-      * @param GradedGradeable $graded_gradeable
-      * @param AutoGradedVersion|null $version_instance
-      * @param bool $show_hidden
-      * @return string
-      */
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
     private function renderTotalScoreBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -971,12 +971,12 @@ class HomeworkView extends AbstractView {
         );
     }
 
-     /**
-      * @param GradedGradeable $graded_gradeable
-      * @param AutoGradedVersion|null $version_instance
-      * @param bool $show_hidden
-      * @return string
-      */
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
     private function renderAutogradingBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -1154,7 +1154,7 @@ class HomeworkView extends AbstractView {
                 foreach ($param['files'] as $file) {
                     if (str_contains($file['relative_name'], 'failed')) {
                         $failed_file = file_get_contents($file['path']);
-                    // Exclude the Exception error message
+                        // Exclude the Exception error message
                         $failed_file = substr(strstr($failed_file, "\n"), 3);
                     }
                 }

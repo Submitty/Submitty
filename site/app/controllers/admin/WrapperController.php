@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(permission="admin.wrapper")
  */
 class WrapperController extends AbstractController {
-    const WRAPPER_FILES = [
+    public const WRAPPER_FILES = [
         'override.css',
         'sidebar.json'
     ];

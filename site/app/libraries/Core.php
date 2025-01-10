@@ -703,11 +703,11 @@ class Core {
         return $course_name;
     }
 
-     /**
-      * Returns either the 'actual' coursename or the coursename set by the professor.
-      *
-      * @return string
-      */
+    /**
+     * Returns either the 'actual' coursename or the coursename set by the professor.
+     *
+     * @return string
+     */
     public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
@@ -927,7 +927,7 @@ class Core {
             if (empty($files)) {
                 return [];
             }
-            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_filter($files, fn (string $file): bool => str_ends_with($file, ".php"));
             $files = array_map(function (string $file) {
                 $parts = explode(DIRECTORY_SEPARATOR, $file);
                 return substr(end($parts), 0, -4);

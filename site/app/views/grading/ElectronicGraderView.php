@@ -144,14 +144,14 @@ class ElectronicGraderView extends AbstractView {
             $graded_total = $num_components > 0 ? round($graded / $num_components, 2) : 0;
             $non_late_graded_total = $num_components > 0 ? round($non_late_graded / $num_components, 2) : 0;
             if ($submitted_total > 0) {
-                $total_grading_percentage =  number_format(($graded_total / $submitted_total ) * 100, 1);
+                $total_grading_percentage =  number_format(($graded_total / $submitted_total) * 100, 1);
             }
             else {
                 $total_grading_percentage = 0;
             }
 
             if ($non_late_submitted_total > 0) {
-                $non_late_total_grading_percentage =  number_format(($non_late_graded_total / $non_late_submitted_total ) * 100, 1);
+                $non_late_total_grading_percentage =  number_format(($non_late_graded_total / $non_late_submitted_total) * 100, 1);
             }
             else {
                 $non_late_total_grading_percentage = 0;
@@ -191,12 +191,12 @@ class ElectronicGraderView extends AbstractView {
                     if ($num_peer_components > 0) {
                         $total_students_submitted =  floor(($sections['peer_stu_grad']['total_who_submitted']));
                         $submitted_percentage_peer = round((($total_students_submitted) / $total_submissions) * 100, 1);
-                        $total_grading_percentage =  number_format(($graded_total / $total_students_submitted ) * 100, 1);
+                        $total_grading_percentage =  number_format(($graded_total / $total_students_submitted) * 100, 1);
                         $entire_peer_total =  floor(($sections['peer_stu_grad']['view_peer_components']));
                         $entire_peer_graded =  $sections['peer_stu_grad']['view_peer_graded_components'] / $num_peer_components;
                     }
                     if ($entire_peer_total > 0) {
-                        $entire_peer_percentage = number_format(($entire_peer_graded / ($entire_peer_total) ) * 100, 1);
+                        $entire_peer_percentage = number_format(($entire_peer_graded / ($entire_peer_total)) * 100, 1);
                     }
                     else {
                         $entire_peer_percentage = 0;
@@ -214,7 +214,7 @@ class ElectronicGraderView extends AbstractView {
                         }
                     }
                     if ($peer_total > 0) {
-                        $peer_percentage = number_format(($peer_graded / ($peer_total) ) * 100, 1);
+                        $peer_percentage = number_format(($peer_graded / ($peer_total)) * 100, 1);
                     }
                     else {
                         $peer_percentage = 0;
@@ -249,7 +249,7 @@ class ElectronicGraderView extends AbstractView {
                     $section['non_late_verified_percentage'] = number_format(($section['non_late_verified'] / $section['non_late_total']) * 100, 1);
                 }
             }
-                unset($section); // Clean up reference
+            unset($section); // Clean up reference
 
             if ($gradeable->isTaGradeReleased()) {
                 if ($peer) {
@@ -1097,26 +1097,26 @@ HTML;
                     <div class="content-item content-item-right">
 HTML;
 
-            $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
-            $return .= $this->core->getOutput()->renderTemplate(
-                ['grading', 'ElectronicGrader'],
-                'renderGradingPanelHeader',
-                $isPeerPanel,
-                $isPeerGrader,
-                $isPeerAutograding,
-                $isPeerRubric,
-                $isPeerFiles,
-                $isPeerSolutions,
-                $isPeerDiscussion,
-                $isStudentInfoPanel,
-                $isDiscussionPanel,
-                $isGradeInquiryPanel,
-                $gradeable->getAutogradingConfig()->isNotebookGradeable(),
-                $error_message['color'],
-                $error_message['message']
-            );
+        $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderNavigationBar', $graded_gradeable, $progress, $gradeable->hasPeerComponent(), $sort, $direction, $from, ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() == 2), $anon_mode, $blind_grading);
+        $return .= $this->core->getOutput()->renderTemplate(
+            ['grading', 'ElectronicGrader'],
+            'renderGradingPanelHeader',
+            $isPeerPanel,
+            $isPeerGrader,
+            $isPeerAutograding,
+            $isPeerRubric,
+            $isPeerFiles,
+            $isPeerSolutions,
+            $isPeerDiscussion,
+            $isStudentInfoPanel,
+            $isDiscussionPanel,
+            $isGradeInquiryPanel,
+            $gradeable->getAutogradingConfig()->isNotebookGradeable(),
+            $error_message['color'],
+            $error_message['message']
+        );
 
-            $return .= <<<HTML
+        $return .= <<<HTML
                 <div class="panels-container">
                     <div class="two-panel-cont">
                          <div class="two-panel-item two-panel-left active">

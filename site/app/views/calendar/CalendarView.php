@@ -24,8 +24,8 @@ class CalendarView extends AbstractView {
      */
     public function showCalendar(CalendarInfo $info, GlobalCalendarInfo $global_info, array $courses, bool $in_course = false): string {
 
-        $year = (isset($_GET['year']) && $_GET['year'] != "")  ?  (int) $_GET['year']  : (int) date("Y");
-        $month = (isset($_GET['month']) && $_GET['month'] != "") ?  (int) $_GET['month'] : (int) date("n");
+        $year = (isset($_GET['year']) && $_GET['year'] != "") ? (int) $_GET['year'] : (int) date("Y");
+        $month = (isset($_GET['month']) && $_GET['month'] != "") ? (int) $_GET['month'] : (int) date("n");
         $show_table = (isset($_GET['show_table'])) ? (int) $_GET['show_table'] : 0; // not showing the table by default
 
         // Error checking
@@ -71,7 +71,7 @@ class CalendarView extends AbstractView {
         $course_colors["PURPLE"]    = "var(--category-color-8)";
 
         //Get if legend will be displayed
-        $show_legend = (isset($_COOKIE['show_legend']))  ?  (int) $_COOKIE['show_legend'] : 1;
+        $show_legend = (isset($_COOKIE['show_legend'])) ? (int) $_COOKIE['show_legend'] : 1;
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalCss('calendar.css');

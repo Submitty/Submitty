@@ -98,9 +98,9 @@ class Component extends AbstractModel {
     private $any_grades = false;
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
-    const PDF_PAGE_STUDENT = -1;
+    public const PDF_PAGE_STUDENT = -1;
     /** @var int Pass to setPage to indicate no pdf page */
-    const PDF_PAGE_NONE = 0;
+    public const PDF_PAGE_NONE = 0;
 
     /**
      * Component constructor.
@@ -238,7 +238,7 @@ class Component extends AbstractModel {
         $this->modified = true;
     }
 
-    const point_properties = [
+    public const point_properties = [
         'lower_clamp',
         'default',
         'max_value',

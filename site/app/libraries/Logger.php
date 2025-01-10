@@ -16,11 +16,11 @@ class Logger {
     /**
      * Log levels for the logger
      */
-    const DEBUG = 0;
-    const INFO = 1;
-    const WARN = 2;
-    const ERROR = 3;
-    const FATAL = 4;
+    public const DEBUG = 0;
+    public const INFO = 1;
+    public const WARN = 2;
+    public const ERROR = 3;
+    public const FATAL = 4;
 
     private static $log_path = null;
 

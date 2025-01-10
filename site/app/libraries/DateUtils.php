@@ -11,10 +11,10 @@ use app\models\User;
  */
 class DateUtils {
     /** @var string $MAX_TIME Max limit we allow for parsed DateTimes to avoid compatibility issues between PHP and DB */
-    const MAX_TIME = '9999-02-01 00:00:00';
+    public const MAX_TIME = '9999-02-01 00:00:00';
 
     /** @var string $BEGINNING_OF_TIME feature we use in Course Materials */
-    const BEGINNING_OF_TIME = '1900-02-01T00:00:00';
+    public const BEGINNING_OF_TIME = '1900-02-01T00:00:00';
 
     /** @var \DateTimeZone $timezone */
     private static $timezone;

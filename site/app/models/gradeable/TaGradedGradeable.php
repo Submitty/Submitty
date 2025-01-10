@@ -144,13 +144,13 @@ class TaGradedGradeable extends AbstractModel {
         }
 
         // Uncomment this block if we want to serialize these values all the time
-//        $percent_graded = $this->getPercentGraded();
-//        $percent_graded = is_nan($percent_graded) ? 0 : $percent_graded;
-//        $details['percent_graded'] = $percent_graded;
-//
-//        $graded_percent = $this->getGradedPercent();
-//        $graded_percent = is_nan($graded_percent) ? 0 : $graded_percent;
-//        $details['graded_percent'] = $graded_percent;
+        //        $percent_graded = $this->getPercentGraded();
+        //        $percent_graded = is_nan($percent_graded) ? 0 : $percent_graded;
+        //        $details['percent_graded'] = $percent_graded;
+        //
+        //        $graded_percent = $this->getGradedPercent();
+        //        $graded_percent = is_nan($graded_percent) ? 0 : $graded_percent;
+        //        $details['graded_percent'] = $graded_percent;
 
         return $details;
     }

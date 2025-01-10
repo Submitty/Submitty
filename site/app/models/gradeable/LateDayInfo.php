@@ -17,10 +17,10 @@ use app\models\User;
  * @method string getId()
  */
 class LateDayInfo extends AbstractModel {
-    const STATUS_NO_ACTIVE_VERSION = 0;
-    const STATUS_GOOD = 1;
-    const STATUS_LATE = 2;
-    const STATUS_BAD = 3;
+    public const STATUS_NO_ACTIVE_VERSION = 0;
+    public const STATUS_GOOD = 1;
+    public const STATUS_LATE = 2;
+    public const STATUS_BAD = 3;
 
     public static function isValidStatus(int $status): bool {
         return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
@@ -338,6 +338,7 @@ class LateDayInfo extends AbstractModel {
                 else {
                     return 'No Submission';
                 }
+                // no break
             case self::STATUS_GOOD:
                 return 'Good';
             case self::STATUS_LATE:
@@ -350,6 +351,7 @@ class LateDayInfo extends AbstractModel {
                 else {
                     return 'Bad (too many late days used on this assignment)';
                 }
+                // no break
             default:
                 return 'INTERNAL ERROR';
         }
