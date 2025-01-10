@@ -52,6 +52,7 @@ class PollController extends AbstractController {
 
             $todays_polls = [];
             $old_polls = [];
+            $tomorrow_polls = [];
             $future_polls = [];
             /** @var Poll $poll */
             foreach ($all_polls as $poll) {
@@ -60,6 +61,12 @@ class PollController extends AbstractController {
                 }
                 elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
                     $old_polls[] = $poll;
+                }
+                elseif (
+                    $poll->getReleaseDate() > $this->core->getDateTimeNow()
+                    && $poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->modify('+1 day')->format('Y-m-d')
+                ) {
+                    $tomorrow_polls[] = $poll;
                 }
                 elseif ($poll->getReleaseDate() > $this->core->getDateTimeNow()) {
                     $future_polls[] = $poll;
@@ -71,6 +78,7 @@ class PollController extends AbstractController {
                 'showPollsInstructor',
                 $todays_polls,
                 $old_polls,
+                $tomorrow_polls,
                 $future_polls,
                 $num_responses_by_poll,
                 $dropdown_states,
@@ -129,6 +137,10 @@ class PollController extends AbstractController {
             $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
             if ($poll === null) {
                 $this->core->addErrorMessage("Invalid Poll ID");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
+            if (!$poll->isVisible()) {
+                $this->core->addErrorMessage("Poll is not available");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             if ($poll->isHistogramAvailable()) {

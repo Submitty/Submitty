@@ -23,7 +23,7 @@ class NotebookUtils {
                 case 'markdown':
                     $cells[] = [
                         'type' => 'markdown',
-                        'markdown_data' => implode($cell['source']),
+                        'markdown_data' => is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'],
                     ];
                     break;
                 case 'code':
@@ -31,8 +31,8 @@ class NotebookUtils {
                         'type' => 'short_answer',
                         'label' => '',
                         'programming_language' => $filedata['metadata']['language_info']['name'] ?? 'python',
-                        'initial_value' => implode($cell['source']),
-                        'rows' => count($cell['source']),
+                        'initial_value' => is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'],
+                        'rows' => is_array($cell['source']) ? count($cell['source']) : 1,
                         'filename' => $cell['id'] ?? 'notebook-cell-' . rand(),
                         'recent_submission' => '',
                         'version_submission' => '',
@@ -43,7 +43,7 @@ class NotebookUtils {
                         if (($output['output_type'] ?? '') === 'stream') {
                             $cells[] = [
                                 'type' => 'output',
-                                'output_text' => implode($output['text'] ?? []),
+                                'output_text' => is_array($output['text'] ?? '') ? implode($output['text']) : (string) ($output['text'] ?? ''),
                             ];
                         }
                         elseif (($output['output_type'] ?? '') === 'display_data' && isset($output['data'])) {

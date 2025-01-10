@@ -44,14 +44,13 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
-        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
         $json = null;
         $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "manual_customization.json");
         if (file_exists($customization_path)) {
             $json = file_get_contents($customization_path);
         }
-        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run, $json);
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $json);
     }
 
     /**
@@ -98,7 +97,7 @@ class ReportController extends AbstractController {
         // Write the JSON string to the file
         if (!file_put_contents($url_base_path, $json_data)) {
             $this->core->addErrorMessage('Unable to write to base_url.json');
-            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+            $this->core->redirect($this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']));
         }
 
         $g_sort_keys = [
@@ -121,7 +120,7 @@ class ReportController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        $this->core->redirect($this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']));
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
@@ -260,8 +259,10 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
-            $ggs[] = $graded_gradeable;
+            if ($graded_gradeable !== null) {
+                $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
+                $ggs[] = $graded_gradeable;
+            }
         }
         return $ggs;
     }
@@ -661,13 +662,17 @@ class ReportController extends AbstractController {
         else {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+            $this->core->getOutput()->addInternalCss('grade-report.css');
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $this->core->getOutput()->addSelect2WidgetCSSAndJs();
             $students = $this->core->getQueries()->getAllUsers();
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
+                'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
                 'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
                 'gui_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'gui_download']),
                 'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
@@ -690,6 +695,7 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
                 'manual_grade' => $customization->getManualGrades(),
+                'warning' => $customization->getPerformanceWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),

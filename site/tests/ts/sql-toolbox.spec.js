@@ -60,8 +60,8 @@ test('csv generation', () => {
         </table>
     `;
     expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n'
-    + '"foo","bar",\n'
-    + '"baz","qux",\n');
+        + '"foo","bar",\n'
+        + '"baz","qux",\n');
 });
 
 test('success with results', async () => {

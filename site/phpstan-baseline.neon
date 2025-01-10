@@ -168,7 +168,7 @@ parameters:
 
 		-
 			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 3
+			count: 2
 			path: app/controllers/DockerInterfaceController.php
 
 		-
@@ -1843,22 +1843,17 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 50
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Foreach overwrites \\$_post with its value variable\\.$#"
-			count: 1
+			count: 40
 			path: app/controllers/forum/ForumController.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 3
+			count: 2
 			path: app/controllers/forum/ForumController.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 24
+			count: 19
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -1988,51 +1983,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSingleThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$blockNumber with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$max_thread with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$show_merged_thread with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$thread_status with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSortedThreads\\(\\) has parameter \\$unread_threads with no type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -2208,11 +2158,6 @@ parameters:
 
 		-
 			message: "#^Only booleans are allowed in &&, int given on the right side\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Only booleans are allowed in &&, mixed given on the left side\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -3406,79 +3351,14 @@ parameters:
 			path: app/entities/Session.php
 
 		-
-			message: "#^Method app\\\\entities\\\\course\\\\CourseMaterial\\:\\:getSections\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
-			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$accesses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
-			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterial\\:\\:\\$sections with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/course/CourseMaterial.php
-
-		-
 			message: "#^Property app\\\\entities\\\\course\\\\CourseMaterialAccess\\:\\:\\$course_material type mapping mismatch\\: database can contain app\\\\entities\\\\course\\\\CourseMaterial\\|null but property expects app\\\\entities\\\\course\\\\CourseMaterial\\.$#"
 			count: 1
 			path: app/entities/course/CourseMaterialAccess.php
 
 		-
-			message: "#^Method app\\\\entities\\\\db\\\\Table\\:\\:getColumns\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/db/Table.php
-
-		-
-			message: "#^Property app\\\\entities\\\\db\\\\Table\\:\\:\\$columns with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/db/Table.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/entities/email/EmailEntity.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Category\\:\\:\\$threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Category.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$children with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$history with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Post\\:\\:\\$merged_threads with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Post.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$categories with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$merged_on_this with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$posts with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
-
-		-
-			message: "#^Property app\\\\entities\\\\forum\\\\Thread\\:\\:\\$viewers with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/forum/Thread.php
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
@@ -3551,11 +3431,6 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
-			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$access_times with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/plagiarism/PlagiarismConfig.php
-
-		-
 			message: "#^Property app\\\\entities\\\\plagiarism\\\\PlagiarismConfig\\:\\:\\$ignore_submissions type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
@@ -3596,32 +3471,12 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismRunAccess.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Option\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Option\\:\\:\\$user_responses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Option.php
-
-		-
 			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:addResponse\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
 		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getOptions\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
 			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getSelectedOptionIds\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Method app\\\\entities\\\\poll\\\\Poll\\:\\:getUserResponses\\(\\) return type with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3637,11 +3492,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$name has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$options with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3662,11 +3512,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$release_histogram has no type specified\\.$#"
-			count: 1
-			path: app/entities/poll/Poll.php
-
-		-
-			message: "#^Property app\\\\entities\\\\poll\\\\Poll\\:\\:\\$responses with generic interface Doctrine\\\\Common\\\\Collections\\\\Collection does not specify its types\\: TKey, T$#"
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3809,11 +3654,6 @@ parameters:
 			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: app/libraries/Access.php
-
-		-
-			message: "#^Class app\\\\libraries\\\\CascadingIterator implements generic interface Iterator but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/libraries/CascadingIterator.php
 
 		-
 			message: "#^Method app\\\\libraries\\\\CascadingIterator\\:\\:seek\\(\\) has no return type specified\\.$#"
@@ -4816,21 +4656,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getCss\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getJs\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\Output\\:\\:getModuleJs\\(\\) return type with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\Output\\:\\:getOutput\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/Output.php
@@ -5011,22 +4836,7 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$css with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$js with generic class Ds\\\\Set does not specify its types\\: TValue$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$loaded_views has no type specified\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\Output\\:\\:\\$module_js with generic class Ds\\\\Set does not specify its types\\: TValue$#"
 			count: 1
 			path: app/libraries/Output.php
 
@@ -5287,7 +5097,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 18
+			count: 13
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -5307,12 +5117,12 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 16
+			count: 15
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 36
+			count: 27
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -5397,76 +5207,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:alreadyInAQueue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$current_user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_join with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_order with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_parameters with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_select with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_where with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$show_merged_thread with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$thread_status with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$unread_threads with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$want_categories with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$want_order with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5941,26 +5681,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncements\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncements\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncementsId\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncementsId\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsPost\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6302,16 +6022,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getEmailListWithIds\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getFirstPostForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getFirstPostForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6836,16 +6546,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostHistory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostHistory\\(\\) has parameter \\$post_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostOldThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6857,36 +6557,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPosts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$current_user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$filterOnUser with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$option with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7201,21 +6871,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has parameter \\$page with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has parameter \\$timestamp with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getTimeJoinedQueue\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7307,21 +6962,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnregisteredStudentsWithRotatingSection\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has parameter \\$user_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7607,16 +7247,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:leaveTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:loadBookmarkedThreads\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:loadThreadBlock\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -8086,11 +7716,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Class app\\\\libraries\\\\database\\\\DatabaseRowIterator implements generic interface Iterator but does not specify its types\\: TKey, TValue$#"
-			count: 1
-			path: app/libraries/database/DatabaseRowIterator.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:close\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
@@ -8327,11 +7952,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has parameter \\$annot with no type specified\\.$#"
-			count: 1
-			path: app/libraries/routers/AnnotatedRouteLoader.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has parameter \\$class with generic class ReflectionClass but does not specify its types\\: T$#"
 			count: 1
 			path: app/libraries/routers/AnnotatedRouteLoader.php
 
@@ -9322,263 +8942,8 @@ parameters:
 			path: app/models/QueueItem.php
 
 		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
+			message: "#^Variable property access on object\\.$#"
 			count: 3
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with array will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:buildCustomization\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:error\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getAvailableBuckets\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getBucketCounts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getBucketPercentages\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getCustomizationData\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getDisplayBenchmarks\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getErrorMessages\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getMessages\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getPerGradeableCurves\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:getUsedBuckets\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:processForm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:reorderBucket\\(\\) has parameter \\$bucket_gradeables with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:reorderBucket\\(\\) has parameter \\$json_bucket_ids with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomization\\:\\:reorderBucket\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Only booleans are allowed in &&, int\\<0, max\\> given on the right side\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$RCJSON has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$available_buckets has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$bucket_counts has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$customization_data has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$error_messages has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$has_error has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$sections has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$sections is never read, only written\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomization\\:\\:\\$used_buckets has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomization.php
-
-		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 4
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Casting to float something that's already float\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 4
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addBenchmarkPercent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addDisplay\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addDisplayBenchmarks\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addMessage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:addSection\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:getDisplayBenchmarks\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:getGradeables\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:getMessages\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:loadFromJsonFile\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Method app\\\\models\\\\RainbowCustomizationJSON\\:\\:saveToJsonFile\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$benchmark_percent has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$display has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$display_benchmark has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$gradeables has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$messages has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Property app\\\\models\\\\RainbowCustomizationJSON\\:\\:\\$section has no type specified\\.$#"
-			count: 1
-			path: app/models/RainbowCustomizationJSON.php
-
-		-
-			message: "#^Variable property access on mixed\\.$#"
-			count: 2
 			path: app/models/RainbowCustomizationJSON.php
 
 		-
@@ -12007,29 +11372,9 @@ parameters:
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\SessionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/SessionRepository.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/repositories/SessionRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\VcsAuthTokenRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/VcsAuthTokenRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\course\\\\CourseMaterialRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/course/CourseMaterialRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\email\\\\EmailRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
@@ -12087,19 +11432,9 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\OptionRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/poll/OptionRepository.php
-
-		-
 			message: "#^Method app\\\\repositories\\\\poll\\\\OptionRepository\\:\\:findByPollWithResponseCounts\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
-
-		-
-			message: "#^Class app\\\\repositories\\\\poll\\\\PollRepository extends generic class Doctrine\\\\ORM\\\\EntityRepository but does not specify its types\\: TEntityClass$#"
-			count: 1
-			path: app/repositories/poll/PollRepository.php
 
 		-
 			message: "#^Method app\\\\views\\\\AuthTokenView\\:\\:showAuthTokenPage\\(\\) has no return type specified\\.$#"
@@ -12857,11 +12192,6 @@ parameters:
 			path: app/views/admin/ReportView.php
 
 		-
-			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$grade_summaries_last_run with no type specified\\.$#"
-			count: 1
-			path: app/views/admin/ReportView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$json with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/ReportView.php
@@ -13093,7 +12423,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 18
+			count: 11
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -13103,12 +12433,12 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 6
+			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 15
+			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -13118,36 +12448,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:contentMarkdownToPlain\\(\\) has parameter \\$str with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$display_option with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$first with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$includeReply with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$reply_level with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:createPost\\(\\) has parameter \\$unviewed_posts with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
@@ -13162,142 +12462,12 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$activeThread with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$activeThreadAnnouncement with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$activeThreadTitle with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$current_categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$filtering with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$is_full_page with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$render with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$thread_id_p with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:displayThreadList\\(\\) has parameter \\$threads with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:filter_post_content\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:filter_post_content\\(\\) has parameter \\$original_post_content with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$categories with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$cookieSelectedCategories with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$cookieSelectedThreadStatus with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$cookieSelectedUnread with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$currentCategoriesIds with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$currentCourse with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$currentThread with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$display_option with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$includeReply with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$isCurrentFavorite with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$posts with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$render with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$threadExists with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$thread_announced with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:generatePostList\\(\\) has parameter \\$unviewed_posts with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
@@ -13367,142 +12537,12 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$ajax with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$filtering with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showAlteredDisplayList\\(\\) has parameter \\$threads with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showCategories\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
 		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showCategories\\(\\) has parameter \\$category_colors with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$ajax with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$display_option with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$initialPageNumber with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$max_thread with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$post_content_limit with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$posts with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$show_merged_thread with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$thread_announced with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$thread_resolve_state with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$threadsHead with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$unviewed_posts with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showForumThreads\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has parameter \\$category_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has parameter \\$page_number with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has parameter \\$show_merged_threads with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:showFullThreadsPage\\(\\) has parameter \\$threads with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
 
@@ -13537,21 +12577,6 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:sizeTitle\\(\\) has parameter \\$title with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:sizeTitle\\(\\) has parameter \\$titleDisplay with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:sizeTitle\\(\\) has parameter \\$titleLength with no type specified\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:statPage\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
@@ -13560,16 +12585,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\forum\\\\ForumThreadView\\:\\:statPage\\(\\) has parameter \\$users with no type specified\\.$#"
 			count: 1
 			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Only booleans are allowed in an if condition, array\\<int, mixed\\> given\\.$#"
-			count: 1
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
 
 		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$component_details might not exist\\.$#"
