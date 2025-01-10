@@ -17,7 +17,11 @@ Michael Papadopoulos, 2024-current
 William Powe, 2024-current  
 Zachary Niles Peretz, 2024-current  
 Williams Chen, 2024-current  
-Jeffrey Cordero, 2024-current    
+Sahil Suman, 2024, Google Summer of Code 2024  
+Rahul Vishwakarma, 2024, Google Summer of Code 2024  
+Sophia Oliinik, 2024, Google Summer of Code 2024  
+Nithish Reddy Banda, 2024, Google Summer of Code 2024  
+Jeffrey Cordero, 2024-current  
 Kush Raval, 2024-current  
 Ryan Varughese, 2024-current  
 Zheyu Deng, 2023-current  
