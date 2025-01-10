@@ -13,6 +13,7 @@
     <rule ref="SubmittyStandard">
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
+        <exclude name="SubmittyStandard.ControlStructures.StroustrupStructure.Found" />
 
         <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />

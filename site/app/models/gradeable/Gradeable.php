@@ -120,7 +120,7 @@ class Gradeable extends AbstractModel {
     /**
      * Enum range for blind and unblind grading:
      * 1 is unblind, 2 is single blind, 3 is double blind
-    */
+     */
 
     public const UNBLIND_GRADING = 1;
     public const SINGLE_BLIND_GRADING = 2;
