@@ -9,6 +9,12 @@ $finder = PhpCsFixer\Finder::create()
 
 $config = new PhpCsFixer\Config();
 return $config->setRules([
-])
-    ->setFinder($finder)
-    ;
+    '@PSR12' => true,
+    'braces_position' => [
+        'classes_opening_brace' => 'same_line',
+        'functions_opening_brace' => 'same_line',
+    ],
+    'control_structure_continuation_position' => [
+        'position' => 'next_line',
+    ],
+])->setFinder($finder);
