@@ -65,7 +65,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             expect(test_json.ta_grading).to.eql(true);
             expect(test_json.grade_inquiries).to.eql(true);
             expect(test_json.team_gradeable).to.exist;
-            expect(test_json.team_gradeable.team_max_size).to.eql(3);
+            expect(test_json.team_gradeable.team_size_max).to.eql(3);
             expect(test_json.team_gradeable.inherit_from).to.eql('');
             expect(test_json.vcs).to.not.exist;
             expect(test_json.rubric).to.eql(rubric);
@@ -94,7 +94,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                 expect(response.body.data.ta_grading).to.eql(true);
                 expect(response.body.data.grade_inquiries).to.eql(true);
                 expect(response.body.data.team_gradeable).to.exist;
-                expect(response.body.data.team_gradeable.team_max_size).to.eql(3);
+                expect(response.body.data.team_gradeable.team_size_max).to.eql(3);
                 expect(response.body.data.team_gradeable.inherit_from).to.eql('');
                 expect(response.body.data.vcs).to.not.exist;
                 expect(response.body.data.rubric).to.eql(rubric);
