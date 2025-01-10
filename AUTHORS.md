@@ -2,7 +2,8 @@
 
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
 [Matthew Peveler](http://mpeveler.com/) 2014-current  
-Christopher Reed, 2021-current  William Allen, 2021-current  
+Christopher Reed, 2021-current  
+William Allen, 2021-current  
 
 
 ## Developers  
