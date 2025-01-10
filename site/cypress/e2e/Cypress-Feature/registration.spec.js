@@ -63,7 +63,7 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="register-button"]').click();
         cy.get('[data-testid="open_homework"]').should('exist');
         cy.visit();
-        cy.get('[data-testid="testing-button"]').should('contain', 'Section 1');
+        cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
         cy.logout();
     });
 });
