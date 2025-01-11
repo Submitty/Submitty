@@ -24,7 +24,7 @@ class NotificationController extends AbstractController {
         'team_invite',
         'team_joined',
         'team_member_submission',
-        'self_notification',
+        'self_notification'
     ];
 
     const EMAIL_SELECTIONS = [

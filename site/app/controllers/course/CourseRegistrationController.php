@@ -4,7 +4,6 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
-use app\libraries\Logger;
 use app\models\User;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
