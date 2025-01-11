@@ -108,37 +108,37 @@
                 {% if not user_admin and poll.isOpen() %}
                     <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
                     <script>
-                        function initStudentSocketClient() {
+                        function initializeStudentSocketClient() {
                             window.socketClient = new WebSocketClient();
+
                             window.socketClient.onmessage = (msg) => {
                                 const submit_button = document.querySelector('.student-submit');
+                                document.querySelector('#messages').innerHTML = '';
+
                                 switch (msg.type) {
-                                    case "poll_closed":
-                                    case "poll_ended":
-                                        if (!submit_button.disabled) {
-                                            displayErrorMessage(msg.updates);
-                                            submit_button.disabled = true;
-                                        }
-                                        break;
                                     case "poll_opened":
-                                        displaySuccessMessage(msg.updates);
-                                        submit_button.disabled = false;
-                                        break;
                                     case "poll_updated":
+                                        submit_button.disabled = false;
                                         displaySuccessMessage(msg.updates);
-                                        setTimeout(()=> {
-                                            location.reload();
-                                        }, 1500);
+                                        msg.type === "poll_updated" && setTimeout(() => window.location.reload(), 1500);
+                                        break;
+                                    case "poll_ended":
+                                        submit_button.disabled = true;
+                                        displayErrorMessage(msg.updates);
+                                        break;
+                                    case "poll_closed":
+                                        window.location.reload();
                                         break;
                                     default:
-                                        console.log("Unknown message received.");
+                                        console.error("Unknown web socket message received:", msg);
                                         break;
                                 }
                             };
+
                             window.socketClient.open('polls-{{ poll.getId() }}-student');
                         }
 
-                        initStudentSocketClient();
+                        initializeStudentSocketClient();
                     </script>
                 {% endif %}
             </form>
@@ -199,14 +199,14 @@
                 },
             }];
 
-            // Store the index of each x-coordinate (option) for constant time access during websocket updates
-            const data_index = {};
-            let index = 0;
+            // Store the position of each response for websocket updates
+            const responseIndexMap = {};
+            let position = 0;
             const [correctColor, defaultColor] =
             [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
                 window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
             {% for option in poll.getOptions() %}
-                data_index["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}"] = index++;
+                responseIndexMap["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}"] = position++;
                 data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
                 data[0].y.push({{ response_counts[option.getId()] }});
                 data[0].marker.color.push(
@@ -238,34 +238,36 @@
             {% if user_admin and poll.isOpen() %}
             let graph_data = data;
 
-            function initInstructorSocketClient() {
+            function updateHistogram(updates) {
+                console.log(updates);
+
+                const histogram = document.getElementById('chartContainer');
+
+                for (option of Object.keys(updates)) {
+                    graph_data[0].y[responseIndexMap[option]] = updates[option];
+                }
+                
+                Plotly.restyle(histogram, { y: [graph_data[0].y] });
+            }
+
+            function initializeInstructorSocketClient() {
                 window.socketClient = new WebSocketClient();
+                 
                 window.socketClient.onmessage = (msg) => {
                     switch (msg.type) {
                         case "update_histogram":
                             updateHistogram(msg.updates);
                             break;
                         default:
-                            console.log("Unknown message received.");
+                            console.error("Unknown web socket message received:", msg);
                             break;
                     }
                 };
+
                 window.socketClient.open('polls-{{ poll.getId() }}-instructor');
             }
 
-            function updateHistogram(updates) {
-                const container = document.getElementById('chartContainer');
-                for (option of Object.keys(updates)) {
-                    // Update the y-coordinate for each updated option given the latest response counts
-                    graph_data[0].y[data_index[option]] = updates[option];
-                }
-                const update = {
-                    y: [graph_data[0].y]
-                }
-                Plotly.restyle(container, update);
-            }
-
-            initInstructorSocketClient();
+            initializeInstructorSocketClient();
             {% endif %}
         }
     {% endif %}

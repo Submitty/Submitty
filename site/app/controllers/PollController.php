@@ -688,7 +688,6 @@ class PollController extends AbstractController {
             /** @var Option|null */
             $option = $this->core->getCourseEntityManager()->find(Option::class, $response->getOption()->getId());
             $em->remove($response);
-            $web_socket_message['updates'][$option->getResponse()] = $option->getUserResponses()->count() - 1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
@@ -696,12 +695,17 @@ class PollController extends AbstractController {
                 $option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
-                $web_socket_message['updates'][$option->getResponse()] += 1;
                 $em->persist($response);
             }
         }
 
         $em->flush();
+        
+        foreach ($poll->getOptions() as $option) {
+            // Send the most recent response count for each option to the websocket for histogram updates
+            $web_socket_message['updates'][$option->getResponse()] = $option->getUserResponses()->count();
+        }
+
         $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
