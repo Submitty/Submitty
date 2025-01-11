@@ -5268,7 +5268,6 @@ AND gc_id IN (
         $preferences = [
             'merge_threads',
             'all_new_threads',
-            'all_new_self_registrations',
             'all_new_posts',
             'all_modifications_forum',
             'reply_in_post_thread',

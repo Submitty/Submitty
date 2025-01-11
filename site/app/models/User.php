@@ -723,7 +723,6 @@ class User extends AbstractModel {
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
         $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
         $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
-        $notification_settings['all_new_self_registrations'] = $details['all_new_self_registrations'] ?? false;
         $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
         $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
         $notification_settings['team_invite'] = $details['team_invite'] ?? true;

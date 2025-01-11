@@ -20,6 +20,7 @@ class CourseRegistrationController extends AbstractController {
         $emails = [];
         $instructors_settings = $this->core->getQueries()->getUsersNotificationSettings($instructors);
         foreach ($instructors as $instructor) {
+            // Find the row in the settings for the instructor
             $instructor_settings_row = array_values(array_filter($instructors_settings, function ($v) use ($instructor) {
                 return $v['user_id'] === $instructor;
             }));
@@ -27,6 +28,7 @@ class CourseRegistrationController extends AbstractController {
                 $instructor_settings_row = $instructor_settings_row[0];
             }
             $notification_settings = User::constructNotificationSettings($instructor_settings_row);
+            // If the instructor has notifications enabled for self registrations
             if ($notification_settings['all_new_self_registrations_email']) {
                 $emails[] = new Email(
                     $this->core,
@@ -36,13 +38,13 @@ class CourseRegistrationController extends AbstractController {
                         "to_user_id" => $instructor
                     ]
                 );
-            Logger::logAccess('Self-registration', 'notifyInstructors', "User $user self-registered for course $course for term $term. Notifying instructor $instructor.");
-
             }
            
         }
 
-        $this->core->getNotificationFactory()->sendEmails($emails);
+        if (!empty($emails)) {
+            $this->core->getNotificationFactory()->sendEmails($emails);
+        }
     }
 
     #[Route("/courses/{term}/{course}/register")]
