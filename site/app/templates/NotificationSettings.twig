@@ -43,6 +43,24 @@
             </div>
 
             <div class="heading">
+                <h2>Registration</h2>
+                <hr>
+            </div>
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <span>
+                        <span class="option-title">New Self Registration</span>
+                        <br>
+                        <span class="option-alt">Alert me when a student self registers for a course</span>
+                    </span>
+                </div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All New Self Registrations" name="all_new_self_registrations" id="all_new_self_registrations" {% if notification_saves['all_new_self_registrations'] %}checked="checked"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All New Self Registrations" name="all_new_self_registrations_email" id="all_new_self_registrations_email" {% if notification_saves['all_new_self_registrations_email'] %}checked="checked"{% endif %}></div>
+                {% endif %}
+            </div>
+
+            <div class="heading">
                 <h2>Forum</h2>
                 <hr>
             </div>

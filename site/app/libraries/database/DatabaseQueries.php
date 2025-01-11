@@ -5268,6 +5268,7 @@ AND gc_id IN (
         $preferences = [
             'merge_threads',
             'all_new_threads',
+            'all_new_self_registrations',
             'all_new_posts',
             'all_modifications_forum',
             'reply_in_post_thread',
@@ -5277,6 +5278,7 @@ AND gc_id IN (
             'self_notification',
             'merge_threads_email',
             'all_new_threads_email',
+            'all_new_self_registrations_email',
             'all_new_posts_email',
             'all_modifications_forum_email',
             'reply_in_post_thread_email',
@@ -8849,12 +8851,12 @@ WHERE current_state IN
         if ($this->course_db) {
             $this->course_db->query(
                 "
-            SELECT u.*, ns.merge_threads, ns.all_new_threads,
+            SELECT u.*, ns.merge_threads, ns.all_new_threads, ns.all_new_self_registrations,
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
                  ns.self_notification,
-                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.merge_threads_email, ns.all_new_self_registrations_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,

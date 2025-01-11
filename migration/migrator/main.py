@@ -471,7 +471,7 @@ def dump(args):
         out_file = data_dir / 'course_tables.sql'
         print(f'Dumping course environment to {str(out_file)}... ', end='')
         today = datetime.today()
-        semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
+        semester = "f24"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')
 
