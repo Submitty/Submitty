@@ -37,7 +37,7 @@ class NotificationController extends AbstractController {
         'team_joined_email',
         'team_member_submission_email',
         'self_notification_email',
-        "all_new_self_registrations_email"
+        'all_new_self_registrations_email'
     ];
 
     protected $selections;
