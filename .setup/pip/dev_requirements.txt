@@ -2,7 +2,7 @@
 
 # Linters
 pylint==3.3.3
-flake8-bugbear==24.10.31
+flake8-bugbear==24.12.12
 flake8==7.1.1
 
 # Code Formatter
