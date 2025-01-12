@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\libraries\Utils;
+use app\models\User;
 use app\libraries\FileUtils;
 use app\models\DockerUI;
 use app\views\AbstractView;
@@ -18,7 +19,7 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-        return $this->output->renderTwigTemplate(
+       return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $docker_ui->getAutogradingContainers(),
@@ -32,7 +33,7 @@ class DockerView extends AbstractView {
                 "docker_images" => $docker_ui->getDockerImages(),
                 "fail_images" => $fail_images ?? [],
                 "error_logs" => $docker_ui->getErrorLogs(),
-            ]
+           ]
         );
     }
 }

@@ -3040,7 +3040,7 @@ ALTER TABLE ONLY public.gradeable_access
 --
 
 ALTER TABLE ONLY public.gradeable_anon
-    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -3360,7 +3360,7 @@ ALTER TABLE ONLY public.peer_feedback
 --
 
 ALTER TABLE ONLY public.peer_grading_panel
-    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

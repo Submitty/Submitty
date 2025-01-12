@@ -90,12 +90,14 @@
         <thead>
             <tr>
                 <th>Image Name</th>
+                <th>Owner</th>
                 <th>Id</th>
                 <th>Size</th>
                 <th>Tag</th>
                 <th>Created</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
+                <th>Remove</th>
             </tr>
         </thead>
         <tbody>
@@ -123,6 +125,11 @@
                     {% for capability in image.capabilities %}
                         <span class="badge badge-{{ capability_to_color_mapping[capability] % 8 + 1 }}">{{capability}}</span>
                     {% endfor %}
+                </td>
+                <td>
+                    {% if (docker_image_owners[key] is defined and user_id == docker_image_owners[key]) or superuser %}
+                    <button class="send-button btn btn-default" id="{{ key }}" data-image-id="{{ key }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

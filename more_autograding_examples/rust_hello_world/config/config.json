@@ -1,0 +1,33 @@
+{
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/rust:latest"
+    },
+    "autograding": {
+        "submission_to_compilation": ["**/*.rs"]
+    },
+    "testcases" : [
+        {
+            "type": "Compilation",
+            "title": "Compilation",
+            "command": "/usr/local/cargo/bin/rustc *.rs -o a.out",
+            "executable_name": "a.out",
+            "points": 5
+        },
+        {
+            "title": "Check Output",
+            "details": "Run Program",
+            "command": "./a.out",
+            "points": 5,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "diff",
+                    "comparison": "byLinebyChar",
+                    "expected_string": "Hello World!\n"
+                }
+            ]
+        }
+    ]
+}

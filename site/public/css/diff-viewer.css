@@ -1,6 +1,7 @@
 @import url("google/inconsolata.css");
 
 .diff-container-box {
+    display: grid;
     overflow: auto;
     background-color: var(--standard-pale-gray);
     border: 1px solid var(--standard-light-gray);
