@@ -66,6 +66,7 @@ class DockerInterfaceController extends AbstractController {
             );
         }
 
+        $json['image_owners'] = $this->core->getQueries()->getAllDockerImageOwners();
         return new MultiResponse(
             JsonResponse::getSuccessResponse($json),
             new WebResponse(

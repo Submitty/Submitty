@@ -129,6 +129,7 @@ class DockerUI extends AbstractModel {
         /** Sanity checks on given json structure */
         assert(array_key_exists('autograding_workers', $json) && is_array($json['autograding_workers']));
         assert(array_key_exists('autograding_containers', $json) && is_array($json['autograding_containers']));
+        assert(array_key_exists('image_owners', $json) && is_array($json['image_owners']));
 
         $this->sysinfo_filepath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "sysinfo");
         $this->docker_logpath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker");
@@ -148,6 +149,11 @@ class DockerUI extends AbstractModel {
     /** Return a list of autograding worker names */
     public function getAutogradingContainers(): array {
         return $this->json_data['autograding_containers'];
+    }
+
+    /** Return a mapping of docker image IDs to their owner's user_ids */
+    public function getDockerImageOwners(): array {
+        return $this->json_data['image_owners'];
     }
 
     /** Collect which capabilities are present along with the workers associated with and any that are unaassociated */
