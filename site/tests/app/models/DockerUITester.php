@@ -96,9 +96,7 @@ class DockerUITester extends BaseUnitTest {
             "autograding_workers" => $this->getAutogradingWorkersJson() 
         ]);
 
-        var_dump($docker_ui->getErrorLogs());
         $this->assertEquals(0, count($docker_ui->getErrorLogs()));
-        
     }
 
 }

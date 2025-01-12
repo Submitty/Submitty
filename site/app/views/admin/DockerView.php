@@ -30,10 +30,6 @@ class DockerView extends AbstractView {
                 "last_updated" => $docker_ui->getLastRan(),
                 "sysinfo_last_updated" => $docker_ui->getSysinfoLastUpdated(),
                 "docker_images" => $docker_ui->getDockerImages(),
-                // "machine_to_update" => $machine_to_update,
-                // "image_info" => $image_info,
-                //"machine_docker_version" => $machine_docker_version,
-                //"machine_system_details" => $machine_system_details,
                 "fail_images" => $fail_images ?? [],
                 "error_logs" => $docker_ui->getErrorLogs(),
             ]

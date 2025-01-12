@@ -7,9 +7,7 @@ use app\libraries\DateUtils;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Logger;
-//re-using the php parseError, this is typically used internally but for now using for errors related to parsing logs
-use ParseError;
-use Exception;
+use app\exceptions\DockerLogParseException;
 
 /**
  * Simple class to represent a worker machine
@@ -28,7 +26,7 @@ class Worker {
     /** Docker version on the machine */
     public string $docker_version;
     /** OS of the machine */
-    public string $os;
+    public string $os = "Unknown";
     /** System information parsed from sysinfo logs */
     public ?WorkerSystemInformation $system_information;
     /** Create a new Worker object */
@@ -42,7 +40,6 @@ class Worker {
         $this->system_information = null;
         // this information is taken from the docker logs parsed earlier and associated after the worker obj is created
         $this->docker_version = "Unknown";
-        $this->os = "Unknown";
     }
 }
 
@@ -70,7 +67,11 @@ class WorkerSystemInformation {
     public string $os;
 
     /** Create a new WorkerSystemInformation object */
-    public function __construct(string $associated_worker, string $worker_service, string $shipper_service, string $daemon_service, 
+    public function __construct(
+        string $associated_worker, 
+        string $worker_service, 
+        string $shipper_service, 
+        string $daemon_service, 
         string $disk_usage, string $load) {
 
         $this->associated_worker = $associated_worker;
