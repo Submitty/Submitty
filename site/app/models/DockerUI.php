@@ -8,95 +8,8 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Logger;
 use app\exceptions\DockerLogParseException;
-
-/**
- * Simple class to represent a worker machine
- */
-class Worker {
-    /** The name of this worker */
-    public string $name;
-    /** number of workers this machine has */
-    public int $num_autograding_workers;
-    /** What capabilities this worker has */
-    public array $capabilities;
-    /** Is this woker enabled or not */
-    public bool $is_enabled;
-    /** Set after parsing logs if this machine could not be updated */
-    public bool $failed_to_update;
-    /** Docker version on the machine */
-    public string $docker_version;
-    /** OS of the machine */
-    public string $os = "Unknown";
-    /** System information parsed from sysinfo logs */
-    public ?WorkerSystemInformation $system_information;
-    /** Create a new Worker object */
-    public function __construct(string $name, int $num_autograding_workers, array $capabilities, bool $is_enabled) {
-        $this->name = $name;
-        $this->num_autograding_workers = $num_autograding_workers;
-        $this->capabilities = $capabilities;
-        $this->is_enabled = $is_enabled;
-        //these pieces of information are known later in the parsing
-        $this->failed_to_update = false;
-        $this->system_information = null;
-        // this information is taken from the docker logs parsed earlier and associated after the worker obj is created
-        $this->docker_version = "Unknown";
-    }
-}
-
-/**
- * Store information about a worker system information, this comes from system log information 
- * instead of configuration
- */
-class WorkerSystemInformation {
-    /** Name of worker machine this information is associated with */
-    public string $associated_worker; 
-    /** State of worker_service */
-    public string $worker_service;
-    /** State of worker_service */
-    public ?string $shipper_service;
-    /** State of worker_service */
-    public ?string $daemon_service;
-    /** Disk usage in percetange */
-    public string $disk_usage;
-    /** String with a unix load average
-     * See https://www.gnu.org/software/coreutils/manual/html_node/uptime-invocation.html#uptime-invocation 
-     * For understanding the load numbers
-     */
-    public string $load;
-    /** operating system of the worker */
-    public string $os;
-
-    /** Create a new WorkerSystemInformation object */
-    public function __construct(
-        string $associated_worker, 
-        string $worker_service, 
-        string $shipper_service, 
-        string $daemon_service, 
-        string $disk_usage, string $load) {
-
-        $this->associated_worker = $associated_worker;
-        $this->worker_service = $worker_service;
-        $this->shipper_service = $shipper_service;
-        $this->daemon_service = $daemon_service;
-        $this->disk_usage = $disk_usage;
-        $this->load = $load;
-    }
-
-    /** 
-     * Given an associative array of worker system information and the worker name, convert it to a class and 
-     * perform null checks over the data
-     */
-    public static function fromArray(array $data, string $name): self {
-        return new self(
-            $name, 
-            $data['worker'] ?? 'No status collected',
-            $data['shipper'] ?? null,
-            $data['daemon'] ?? null,
-            $data['disk'] ?? 'No status collected',
-            $data['load'] ?? 'No status collected'
-        );
-    }
-}
+use app\data_objects\WorkerMachine;
+use app\data_objects\WorkerMachineSystemInformation;
 
 /** 
  * Simple class to represent docker image from parsed information
@@ -126,32 +39,32 @@ class DockerImage {
 
     /** 
      * Construct a new DockerImage from log lines
-     * @throws ParseError
+     * @throws DockerLogParseException
      */
     public static function fromLog(array $logLines): self {
         if (count($logLines) < 3) {
-            throw new ParseError("Unexpected log input, insufficient lines for image details.");
+            throw new DockerLogParseException("Unexpected log input, insufficient lines for image details.");
         }
 
         // Parse ID
         if (!preg_match("/\t-id: (.+)/", $logLines[0], $matches)) {
-            throw new ParseError("Unexpected log input, attempted to read image ID.");
+            throw new DockerLogParseException("Unexpected log input, attempted to read image ID.");
         }
 
         $id = $matches[1];
         // Parse created date
         if (!preg_match("/\t-created: (.+)/", $logLines[1], $matches)) {
-            throw new ParseError("Unexpected log input, attempted to read image creation date.");
+            throw new DockerLogParseException("Unexpected log input, attempted to read image creation date.");
         }
 
         $created = \DateTime::createFromFormat('Y-m-d\TH:i:s+', $matches[1]);
         if (!$created) {
-            throw new ParseError("Invalid date format in log input.");
+            throw new DockerLogParseException("Invalid date format in log input.");
         }
 
         // Parse size
         if (!preg_match("/\t-size: (.+)/", $logLines[2], $matches)) {
-            throw new ParseError("Unexpected log input, attempted to read image size.");
+            throw new DockerLogParseException("Unexpected log input, attempted to read image size.");
         }
 
         $size = Utils::formatBytes('mb', $matches[1], true);
@@ -185,7 +98,7 @@ class DockerUI extends AbstractModel {
     /** Human readable string of when the docker logs generated by Submitty were last parsed */
     protected string $last_ran = "Unknown";
     /** Human readable string of when the sysinfo logs were last parsed */
-    protected string $sysinfo_last_updated = "unknown";
+    protected string $sysinfo_last_updated = "Unknown";
     /** List of errors from parsing log files  */
     protected array $error_logs = [];
     /** location of where the sysinfo log files generated by Submitty are located */
@@ -245,7 +158,7 @@ class DockerUI extends AbstractModel {
         
         foreach ($autograding_workers as $name => $worker) {
             //worker with some defaults
-            $worker_temp = new Worker(
+            $worker_temp = new WorkerMachine(
                 $name,
                 $worker['num_autograding_workers'] ?? 0,
                 $worker['capabilities'] ?? [],
@@ -284,12 +197,12 @@ class DockerUI extends AbstractModel {
 
     /** 
      * Entry point to parse logs generated by Submitty containing information on docker images across workers
-     * @throws ParseError
+     * @throws DockerLogParseException
      */
     private function parseDockerLogs(): void {
         $array_list = scandir($this->docker_logpath);
         if($array_list === false) {
-           throw new ParseError("Failed to scandir at path '" . $this->docker_logpath . "'" ); 
+           throw new DockerLogParseException("Failed to scandir at path '" . $this->docker_logpath . "'" ); 
         }
 
         //ignore the '.' and '..' directories, if there are no files to parse, nothing to do, exit
@@ -388,7 +301,7 @@ class DockerUI extends AbstractModel {
         for ($i = 0; $i < 3; $i++) {
             $line = strtok("\n");
             if ($line === false) {
-                throw new ParseError("Unexpected end of log while reading image details.");
+                throw new DockerLogParseException("Unexpected end of log while reading image details.");
             }
 
             $log_lines[] = $line;
@@ -401,7 +314,7 @@ class DockerUI extends AbstractModel {
     private function parseSystemInformationLogs(): void {
         $sysinfo_files = scandir($this->sysinfo_filepath);
         if($sysinfo_files === false) {
-           throw new ParseError("Failed to scandir at path '" . $this->sysinfo_filepath . "'" ); 
+           throw new DockerLogParseException("Failed to scandir at path '" . $this->sysinfo_filepath . "'" ); 
         }
 
         //ignore the '.' and '..' directories, if there are no files to parse, nothing to do, exit
@@ -485,7 +398,7 @@ class DockerUI extends AbstractModel {
         }
 
         foreach($machine_system_details as $key => $value) {
-            $worker_info = WorkerSystemInformation::fromArray($value, $key);
+            $worker_info = WorkerMachineSystemInformation::fromArray($value, $key);
             //now find the worker and append the information parsed to it
             foreach($this->worker_machines as &$worker) {
                 if($worker->name == $key) {
