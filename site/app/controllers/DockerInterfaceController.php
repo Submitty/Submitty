@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\libraries\FileUtils;
-use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -145,7 +144,6 @@ class DockerInterfaceController extends AbstractController {
                 ),
                 $json
             );
-            Logger::logAccess('check json', json_encode($json), $this->core->getConfig()->getSubmittyInstallPath());
 
             if (!$this->updateDocker()) {
                 return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
