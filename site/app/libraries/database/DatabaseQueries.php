@@ -207,7 +207,7 @@ class DatabaseQueries {
         FROM posts
         ORDER BY author_user_id, timestamp desc),
         F AS
-        (SELECT student_id, count (student_id)
+        (SELECT student_id, count (DISTINCT poll_id)
         FROM poll_responses
         GROUP BY student_id),
         G AS
@@ -4807,7 +4807,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? {$include_archived} AND {$force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -9430,5 +9430,59 @@ ORDER BY
             DELETE FROM active_graders
             WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id = ?
         ", [$component->getId(), $grader_id, $isTeam ? "NULL" : $graded_id, $isTeam ? $graded_id : "NULL"]);
+    }
+    /**
+     * @param string $image the full name of the image to get
+     * @return string|false the user id of the image's owner or false if the image is not in the db
+     */
+    public function getDockerImageOwner(string $image): string|false {
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
+        if ($this->submitty_db->row() === []) {
+            return false;
+        }
+        return $this->submitty_db->row()['user_id'] ?? '';
+    }
+
+    /**
+     * @return array<string, string> the owners of all docker images, indexed by image name
+     */
+    public function getAllDockerImageOwners(): array {
+        $result = [];
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images");
+        foreach ($this->submitty_db->rows() as $row) {
+            $result[$row['image_name']] = $row['user_id'] ?? '';
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $image the full name of the image to set ownership
+     * @param string $user_id the user id of its owner.
+     */
+    public function setDockerImageOwner(string $image, string $user_id): void {
+        $current_owner = $this->getDockerImageOwner($image);
+        if ($current_owner === false) {
+            $this->submitty_db->query("INSERT INTO docker_images (image_name, user_id) values (?, ?)", [$image,$user_id]);
+        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+        // Only sysadmin will be able to remove it.
+        }
+        elseif ($current_owner !== $user_id) {
+            $this->submitty_db->query("UPDATE docker_images SET user_id = NULL WHERE image_name = ?", [$image]);
+        }
+    }
+
+    /**
+     * @param string $image the full name of the image to remove
+     * @param User $user the user who is removing the image
+     * @return bool true if image was deleted, false otherwise
+     */
+    public function removeDockerImageOwner(string $image, User $user): bool {
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=?", [$image]);
+        }
+        else {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
+        }
+        return $this->submitty_db->getRowCount() > 0;
     }
 }
