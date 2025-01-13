@@ -507,7 +507,7 @@ class NavigationView extends AbstractView {
                 }
             }
 
-        $prerequisite = '';
+        $prerequisite = 'Please complete ';
 
             // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
             if (
@@ -603,7 +603,7 @@ class NavigationView extends AbstractView {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 $title = "MUST BE ON A TEAM TO SUBMIT";
-                $prerequisite = "making a team";
+                $prerequisite = "You must be on a team to submit to this gradeable";
                 $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
@@ -614,7 +614,7 @@ class NavigationView extends AbstractView {
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
             $title = "LOCKED";
-            $prerequisite = $gradeable->getPrerequisite();
+            $prerequisite .= $gradeable->getPrerequisite();
         }
         return new Button($core, [
             "title" => $title,
