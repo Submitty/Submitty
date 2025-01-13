@@ -1,7 +1,7 @@
 ##########################################################################
 # HELPER FUNCTION FOR INSTALLING INDIVIDUAL HOMEWORKS
 ##########################################################################
-set -e
+set -ev
 
 function clean_homework {
     # which assignment to cleanup
