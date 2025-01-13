@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_new_self_registrations_email BOOLEAN DEFAULT TRUE NOT NULL")
+    database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS self_registration_email BOOLEAN DEFAULT TRUE NOT NULL")
 
 
 

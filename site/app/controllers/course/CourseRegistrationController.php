@@ -4,7 +4,6 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
-use app\models\User;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
@@ -18,17 +17,11 @@ class CourseRegistrationController extends AbstractController {
         $body = "Student $user has self-registered for course $course for term $term.";
         $emails = [];
         $instructors_settings = $this->core->getQueries()->getUsersNotificationSettings($instructors);
-        foreach ($instructors as $instructor) {
-            // Find the row in the settings for the instructor
-            $instructor_settings_row = array_values(array_filter($instructors_settings, function ($v) use ($instructor) {
-                return $v['user_id'] === $instructor;
-            }));
-            if (!empty($instructor_settings_row)) {
-                $instructor_settings_row = $instructor_settings_row[0];
-            }
-            $notification_settings = User::constructNotificationSettings($instructor_settings_row);
-            // If the instructor has notifications enabled for self registrations
-            if ($notification_settings['all_new_self_registrations_email']) {
+        $zipped_instructors_settings = array_map(null, $instructors, $instructors_settings);
+        
+        foreach ($zipped_instructors_settings as [$instructor, $instructor_setting]) {
+            // If the instructor has notifications enabled for self registrations add to email list
+            if ($instructor_setting['self_registration_email']) {
                 $emails[] = new Email(
                     $this->core,
                     [
@@ -38,12 +31,9 @@ class CourseRegistrationController extends AbstractController {
                     ]
                 );
             }
-           
         }
 
-        if (!empty($emails)) {
-            $this->core->getNotificationFactory()->sendEmails($emails);
-        }
+        $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
     #[Route("/courses/{term}/{course}/register")]

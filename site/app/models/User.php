@@ -733,11 +733,11 @@ class User extends AbstractModel {
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
         $notification_settings['all_new_posts_email'] = $details['all_new_posts_email'] ?? false;
-        $notification_settings['all_new_self_registrations_email'] = $details['all_new_self_registrations_email'] ?? true;
         $notification_settings['all_modifications_forum_email'] = $details['all_modifications_forum_email'] ?? false;
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
         return $notification_settings;
     }
