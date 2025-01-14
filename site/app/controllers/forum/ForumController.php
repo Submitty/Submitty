@@ -744,8 +744,10 @@ class ForumController extends AbstractController {
         }
 
         $status_edit_thread = true;
+        $did_edit_thread = false;
         if ($thread->getFirstPost()->getId() === $post->getId()) {
             $status_edit_thread = $this->editThread($thread);
+            $did_edit_thread = true;
         }
         $status_edit_post = $this->editPost($post);
 
@@ -761,15 +763,11 @@ class ForumController extends AbstractController {
         if (count($message) > 0) {
             return $this->core->getOutput()->renderJsonFail(join(" ", $message));
         }
-        if (!$thread->isChanged() && !$post->isChanged()) {
-            return $this->core->getOutput()->renderJsonFail("No data submitted. Please try again.");
-        }
 
         $type = "";
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-        if ($thread->isChanged() && $post->isChanged()) {
-            $type = "Thread and Post";
+        if ($did_edit_thread) {
             $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
             $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             $this->sendSocketMessage([
@@ -780,21 +778,12 @@ class ForumController extends AbstractController {
                 'post_box_id' => 1,
             ]);
         }
-        elseif ($thread->isChanged()) {
-            // Clear prepered post history additions.
-            $this->core->getCourseEntityManager()->refresh($post);
-            $type = "Thread";
-            $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
-            $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle();
-        }
         else {
-            $type = "Post";
             $subject = "Post Edited: " . Notification::textShortner($post->getContent());
             $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             if ($order === 'tree') {
                 ForumThreadView::BuildReplyHeirarchy($thread->getFirstPost());
             }
-
             $this->sendSocketMessage([
                 'type' => 'edit_post',
                 'thread_id' => $thread_id,
@@ -1006,7 +995,7 @@ class ForumController extends AbstractController {
     /**
      *
      * @param Thread $thread
-     * @return bool true iff successful (thread may not have changed, use $thread->isChanged() to check changes)
+     * @return bool true iff successful
      */
     private function editThread(Thread $thread): bool {
         // Ensure authentication before call
@@ -1050,7 +1039,7 @@ class ForumController extends AbstractController {
 
     /**
      * @param Post $post
-     * @return bool true iff successful (post may not have changed, use $post->isChanged() to check changes)
+     * @return bool true iff successful
      */
     private function editPost(Post $post): bool {
         $initial_post = null;
@@ -1086,12 +1075,10 @@ class ForumController extends AbstractController {
         foreach (json_decode($_POST['deleted_attachments']) as $attachment_name) {
             $post->deleteAttachment($attachment_name, $post_edit->getVersion());
         }
-        if ($post->isChanged()) {
-            if (!is_null($initial_post)) {
-                $em->persist($initial_post);
-            }
-            $em->persist($post_edit);
+        if (!is_null($initial_post)) {
+            $em->persist($initial_post);
         }
+        $em->persist($post_edit);
         return true;
     }
 

@@ -88,8 +88,6 @@ class Thread {
     #[ORM\OneToMany(mappedBy: "thread", targetEntity: StudentFavorite::class)]
     protected Collection $favorers;
 
-    protected bool $is_changed = false;
-
     public function getId(): int {
         return $this->id;
     }
@@ -99,10 +97,7 @@ class Thread {
     }
 
     public function setTitle(string $title): void {
-        if ($this->title !== $title) {
-            $this->title = $title;
-            $this->is_changed = true;
-        }
+        $this->title = $title;
     }
 
     public function getAuthor(): UserEntity {
@@ -130,10 +125,7 @@ class Thread {
     }
 
     public function setStatus(int $status): void {
-        if ($this->status !== $status) {
-            $this->status = $status;
-            $this->is_changed = true;
-        }
+        $this->status = $status;
     }
 
     public function getLockDate(): ?DateTime {
@@ -141,10 +133,7 @@ class Thread {
     }
 
     public function setLockDate(?DateTime $lock_thread_date): void {
-        if ($this->lock_thread_date?->getTimestamp() !== $lock_thread_date?->getTimestamp()) {
-            $this->lock_thread_date = $lock_thread_date;
-            $this->is_changed = true;
-        }
+        $this->lock_thread_date = $lock_thread_date;
     }
 
     public function isLocked(): bool {
@@ -156,10 +145,7 @@ class Thread {
     }
 
     public function setPinnedExpiration(DateTime $pinned_expiration): void {
-        if ($this->pinned_expiration->getTimestamp() !== $pinned_expiration->getTimestamp()) {
-            $this->pinned_expiration = $pinned_expiration;
-            $this->is_changed = true;
-        }
+        $this->pinned_expiration = $pinned_expiration;
     }
 
     public function isPinned(): bool {
@@ -193,14 +179,7 @@ class Thread {
      * @return void
      */
     public function setCategories(Collection $categories): void {
-        $old_categories = $this->categories->toArray();
-        $new_categories = $categories->toArray();
-        sort($old_categories);
-        sort($new_categories);
-        if ($old_categories !== $new_categories) {
-            $this->categories = $categories;
-            $this->is_changed = true;
-        }
+        $this->categories = $categories;
     }
     public function isUnread(string $user_id): bool {
         return !$this->getNewPosts($user_id)->isEmpty();
@@ -240,12 +219,5 @@ class Thread {
             $sum_upducks += count($post->getUpduckers());
         }
         return $sum_upducks;
-    }
-
-    /**
-     * @return bool true iff a persistant field has been changed since this object was fetched from db
-     */
-    public function isChanged(): bool {
-        return $this->is_changed;
     }
 }

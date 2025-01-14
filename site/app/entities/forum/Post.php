@@ -89,8 +89,6 @@ class Post {
 
     protected int $reply_level = 1;
 
-    protected bool $is_changed = false;
-
     /**
      * Doctrine ORM does not use constructors, instead filling properties from database.
      * We are free to make constructors for "empty" or "junk" posts.
@@ -135,10 +133,7 @@ class Post {
     }
 
     public function setContent(string $content): void {
-        if ($this->content !== $content) {
-            $this->content = $content;
-            $this->is_changed = true;
-        }
+        $this->content = $content;
     }
 
     public function getTimestamp(): DateTime {
@@ -150,10 +145,7 @@ class Post {
     }
 
     public function setAnonymous(bool $anonymous): void {
-        if ($this->anonymous !== $anonymous) {
-            $this->anonymous = $anonymous;
-            $this->is_changed = true;
-        }
+        $this->anonymous = $anonymous;
     }
 
     public function isDeleted(): bool {
@@ -168,10 +160,7 @@ class Post {
     }
 
     public function setRenderMarkdown(bool $render_markdown): void {
-        if ($this->render_markdown !== $render_markdown) {
-            $this->render_markdown = $render_markdown;
-            $this->is_changed = true;
-        }
+        $this->render_markdown = $render_markdown;
     }
 
     /**
@@ -211,10 +200,6 @@ class Post {
         })->toArray());
     }
 
-    public function isChanged(): bool {
-        return $this->is_changed;
-    }
-
     /**
      * Saves a version as a PostHistory entity
      * @param \app\entities\UserEntity $edit_author
@@ -241,7 +226,6 @@ class Post {
     public function addAttachment(string $attachment_name, int $version): PostAttachment {
         $attachment = new PostAttachment($this, $attachment_name, $version, 0);
         $this->attachments->add($attachment);
-        $this->is_changed = true;
         return $attachment;
     }
 
@@ -257,7 +241,6 @@ class Post {
         })->first();
         if ($attachment !== false) {
             $attachment->setVersionDeleted($version);
-            $this->is_changed = true;
         }
     }
 }
