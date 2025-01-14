@@ -113,21 +113,30 @@
 
                             window.socketClient.onmessage = (msg) => {
                                 const submit_button = document.querySelector('.student-submit');
-                                document.querySelector('#messages').innerHTML = '';
+                                const custom_response_submit = document.querySelector('.custom-response-submit');
 
                                 switch (msg.type) {
                                     case "poll_opened":
                                     case "poll_updated":
                                         submit_button.disabled = false;
-                                        displaySuccessMessage(msg.updates);
-                                        msg.type === "poll_updated" && setTimeout(() => window.location.reload(), 1500);
-                                        break;
-                                    case "poll_ended":
-                                        submit_button.disabled = true;
-                                        displayErrorMessage(msg.updates);
+
+                                        if (custom_response_submit) {
+                                            custom_response_submit.dataset.disabled = "false";
+                                            validateCustomResponse();
+                                        }
+                                        
+                                        displaySuccessMessage(msg.message);
                                         break;
                                     case "poll_closed":
-                                        window.location.reload();
+                                    case "poll_ended":
+                                        submit_button.disabled = true;
+
+                                        if (custom_response_submit) {
+                                            custom_response_submit.dataset.disabled = "true";
+                                            custom_response_submit.disabled = true;
+                                        }
+
+                                        displayErrorMessage(msg.message);
                                         break;
                                     default:
                                         console.error("Unknown web socket message received:", msg);
@@ -239,8 +248,6 @@
             let graph_data = data;
 
             function updateHistogram(updates) {
-                console.log(updates);
-
                 const histogram = document.getElementById('chartContainer');
 
                 for (option of Object.keys(updates)) {
@@ -256,7 +263,7 @@
                 window.socketClient.onmessage = (msg) => {
                     switch (msg.type) {
                         case "update_histogram":
-                            updateHistogram(msg.updates);
+                            updateHistogram(msg.message);
                             break;
                         default:
                             console.error("Unknown web socket message received:", msg);
