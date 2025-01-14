@@ -245,8 +245,7 @@
 {# Render the grading columns for a lab #}
 {% macro render_lab_cols(gradeable, section_id, grade, index) %}
     {% for component in grade.getGradeable().getComponents() %}
-        {% if component.isText() %}
-        {% else %}
+        {% if not component.isText() %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
