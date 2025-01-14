@@ -1,7 +1,6 @@
 ##########################################################################
 # HELPER FUNCTION FOR INSTALLING INDIVIDUAL HOMEWORKS
 ##########################################################################
-set -ev
 
 function clean_homework {
     # which assignment to cleanup
@@ -161,8 +160,6 @@ function build_homework {
     # go to the build directory
     pushd "$hw_build_path" > /dev/null
 
-    # Use set +e to allow capturing of the exit code
-    set +e
     # Use the C Pre-Processor to strip the C & C++ comments from config.json
     cpp "${course_dir}/build/${assignment}/config.json" complete_config.json
     cpp_res="$?"
@@ -199,19 +196,15 @@ function build_homework {
         popd > /dev/null
         exit 1
     fi
-    set -e
 
     # Remove the intermediate config
     rm complete_config.json
 
 
-    # Use set +e to allow capturing of the exit code
-    set +e
     # build the configuration, compilation, runner, and validation executables
     # configure cmake, specifying the clang compiler
     CXX=/usr/bin/clang++ cmake . > "$hw_build_path/log_cmake_output.txt" 2>&1
     cmake_res="$?"
-    set -e
     chmod -f 660 "$hw_build_path/log_cmake_output.txt"
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
@@ -223,15 +216,12 @@ function build_homework {
         exit 1
     fi
 
-    # Use set +e to allow capturing of the exit code
-    set +e
     # build (in parallel, 8 threads)
     # quit (don't continue on to build other homeworks) if there is a compile error
     make -j 8
 
     # capture exit code of make
     make_res="$?"
-    set -e
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
     if (( "$make_res" != 0 )); then
