@@ -229,8 +229,8 @@ class DockerInterfaceController extends AbstractController {
         }
 
         FileUtils::writeJsonFile(
-           $jsonFilePath,
-            $json
+            $jsonFilePath,
+            $json,
         );
         return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
     }
