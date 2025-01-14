@@ -32,7 +32,7 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="save-tools-save"]').click();
         cy.get('[data-testid="add-new-mark-button"]')
             .should('not.exist');
-        /* commented out due to issue #11309 TODO: Find permanent solution
+        /* commented out due to issue #11309 becuase Cypress drag and drop is flaky TODO: Find permanent solution
         cy.get('[data-testid^="component"]').eq(-1).click(20, 25);
         cy.get('[data-testid^="component"] [data-testid="save-tools-save"]')
             .should('contain', 'Save');
