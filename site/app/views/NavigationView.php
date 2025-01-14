@@ -507,7 +507,7 @@ class NavigationView extends AbstractView {
                 }
             }
 
-        $prerequisite = 'Please complete ';
+            $prerequisite = 'Please complete ';
 
             // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
             if (
