@@ -120,7 +120,7 @@ function validateCustomResponse() {
 
     const validate = () => {
         custom_response_submit.prop(
-            'disabled', custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === "true"
+            'disabled', custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === 'true',
         );
     };
 
