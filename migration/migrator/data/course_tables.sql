@@ -2822,6 +2822,22 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
+-- Name: active_graders active_graders_ag_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id);
+
+
+--
+-- Name: active_graders active_graders_ag_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: active_graders active_graders_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
