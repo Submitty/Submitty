@@ -350,16 +350,16 @@ class RainbowCustomization extends AbstractModel {
 
             // Save the sum of used percentages to special key in array
             $retArray['used_percentage'] = $sum;
-        }
 
-        // Add values for buckets added automatically when no other buckets are used
-        $json_bucket_types = [];
-        foreach ($json_buckets as $json_bucket) {
-            $json_bucket_types[] = $json_bucket->type;
-        }
-        $automatic_buckets = array_diff($this->used_buckets, $json_bucket_types);
-        foreach ($automatic_buckets as $automatic_bucket) {
-            $retArray[$automatic_bucket] = 0;
+            // Assign percentage values for buckets added automatically (i.e. when no other buckets are used)
+            $json_bucket_types = [];
+            foreach ($json_buckets as $json_bucket) {
+                $json_bucket_types[] = $json_bucket->type;
+            }
+            $automatic_buckets = array_diff($this->used_buckets, $json_bucket_types);
+            foreach ($automatic_buckets as $automatic_bucket) {
+                $retArray[$automatic_bucket] = 0;
+            }
         }
 
         return $retArray;
