@@ -125,6 +125,7 @@
 .gradeable-li-right-of-input {
     display: flex;
     flex-direction: column;
+    margin-right: 32px;
 }
 
 i.fa-exclamation-triangle {
