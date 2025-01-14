@@ -24,6 +24,8 @@ def up(config, database, semester, course):
             timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
             FOREIGN KEY (grader_id) REFERENCES users(user_id),
             FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id),
+            FOREIGN KEY (ag_user_id) REFERENCES users(user_id),
+            FOREIGN KEY (ag_team_id) REFERENCES gradeable_teams(team_id),
             CONSTRAINT ag_user_team_id_check CHECK ((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)),
             UNIQUE (grader_id, gc_id, ag_user_id),
             UNIQUE (grader_id, gc_id, ag_team_id)
