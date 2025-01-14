@@ -40,7 +40,7 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
-        if($json['autograding_containers'] === false) {
+        if ($json['autograding_containers'] === false) {
             $error_message = "Failed to read autograding_containers.json";
             Logger::error($error_message);
             return new MultiResponse(
@@ -57,7 +57,7 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
-        if($json['autograding_workers'] === false) {
+        if ($json['autograding_workers'] === false) {
             $error_message = "Failed to read autograding_workers.json";
             Logger::error($error_message);
             return new MultiResponse(

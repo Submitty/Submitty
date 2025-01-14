@@ -2,12 +2,9 @@
 
 namespace app\views\admin;
 
-use app\libraries\Utils;
 use app\models\User;
-use app\libraries\FileUtils;
 use app\models\DockerUI;
 use app\views\AbstractView;
-use ParseError;
 
 class DockerView extends AbstractView {
     public function displayDockerPage(DockerUI $docker_ui) {
@@ -19,7 +16,7 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
-       return $this->output->renderTwigTemplate(
+        return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
                 "autograding_containers" => $docker_ui->getAutogradingContainers(),
@@ -36,7 +33,7 @@ class DockerView extends AbstractView {
                 "docker_image_owners" => $docker_ui->getDockerImageOwners(),
                 "is_super_user" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 "user_id" => $this->core->getUser()->getId(),
-           ]
+            ]
         );
     }
 }

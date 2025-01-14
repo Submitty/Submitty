@@ -33,5 +33,3 @@ class WorkerMachine {
         $this->is_enabled = $is_enabled;
     }
 }
-
-

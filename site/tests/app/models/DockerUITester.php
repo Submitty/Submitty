@@ -17,7 +17,7 @@ class DockerUITester extends BaseUnitTest {
     private string $tmp_dir;
 
     /** helper functions to test */
-    private function getAutogradingWorkersJson(): array {
+    public static function getAutogradingWorkersJson(): string {
         $json = <<<EOD
         {
             "primary": {
@@ -40,10 +40,10 @@ class DockerUITester extends BaseUnitTest {
         }
         EOD;
 
-        return json_decode($json, true);
+        return $json;
     }
 
-    private function getAutogradingContainersJson(): array {
+    public static function getAutogradingContainersJson(): string {
         $json = <<<EOD
         {
             "default": [
@@ -66,7 +66,7 @@ class DockerUITester extends BaseUnitTest {
         }
         EOD;
 
-        return json_decode($json, true);
+        return $json;
     }
 
     /** Setup runs before each unit test in this file */
@@ -92,8 +92,9 @@ class DockerUITester extends BaseUnitTest {
     /** begin unit tests */
     public function testConstructorGoodData() {
         $docker_ui = new DockerUI($this->core, [
-            "autograding_containers" => $this->getAutogradingContainersJson(), 
-            "autograding_workers" => $this->getAutogradingWorkersJson() 
+            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true), 
+            "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
+            "image_owners" => [],
         ]);
 
         $this->assertEquals(0, count($docker_ui->getErrorLogs()));

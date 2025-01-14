@@ -3,78 +3,16 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\DateUtils;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Logger;
 use app\exceptions\DockerLogParseException;
 use app\data_objects\WorkerMachine;
 use app\data_objects\WorkerMachineSystemInformation;
-
-/** 
- * Simple class to represent docker image from parsed information
- */
-class DockerImage {
-    /** The Docker image ID */
-    public string $id;
-    /** Date of creation, reported by Docker */
-    public \DateTime $created;
-    /** Human readable timestamp from the date of creation */
-    public string $created_timestamp;
-    /** size of the image in human readable format */
-    public string $size_mb;
-    /** The name:tag of the image */
-    public string $primary_name;
-    /** Any other name:tags that also point to this image */
-    public array $aliases = [];
-    /** What Submitty capabilities this image is associated with */
-    public array $capabilities = [];
-    /** Create a new DockerImage object*/
-    public function __construct(string $id, \DateTime $created, string $size) {
-        $this->id = $id;
-        $this->created = $created;
-        $this->created_timestamp = DateUtils::dateTimeToString($created);
-        $this->size_mb = $size;
-    }
-
-    /** 
-     * Construct a new DockerImage from log lines
-     * @throws DockerLogParseException
-     */
-    public static function fromLog(array $logLines): self {
-        if (count($logLines) < 3) {
-            throw new DockerLogParseException("Unexpected log input, insufficient lines for image details.");
-        }
-
-        // Parse ID
-        if (!preg_match("/\t-id: (.+)/", $logLines[0], $matches)) {
-            throw new DockerLogParseException("Unexpected log input, attempted to read image ID.");
-        }
-
-        $id = $matches[1];
-        // Parse created date
-        if (!preg_match("/\t-created: (.+)/", $logLines[1], $matches)) {
-            throw new DockerLogParseException("Unexpected log input, attempted to read image creation date.");
-        }
-
-        $created = \DateTime::createFromFormat('Y-m-d\TH:i:s+', $matches[1]);
-        if (!$created) {
-            throw new DockerLogParseException("Invalid date format in log input.");
-        }
-
-        // Parse size
-        if (!preg_match("/\t-size: (.+)/", $logLines[2], $matches)) {
-            throw new DockerLogParseException("Unexpected log input, attempted to read image size.");
-        }
-
-        $size = Utils::formatBytes('mb', $matches[1], true);
-        return new self($id, $created, $size);
-    }
-}
+use app\data_objects\DockerImage;
 
 /**
  * Represents the data parsed from the docker autograding and worker json files
- * 
+ *
  * @method string getCapabilities()
  * @method string getNoImageCapabilities()
  * @method array getWorkerMachines()
@@ -110,13 +48,13 @@ class DockerUI extends AbstractModel {
     private array $fail_images;
     /** Mapping between images to which Submitty capabilities they are associated with */
     private array $image_to_capability_mapping;
-    /** 
-     * Mapping between workers and the docker version they run, this is collected from the 
+    /**
+     * Mapping between workers and the docker version they run, this is collected from the
      * docker logs but displayed later in the worker machines table
      */
     private array $worker_docker_versions = [];
-    /** 
-     * Mapping between workers and the os they have, this is collected from the 
+    /**
+     * Mapping between workers and the os they have, this is collected from the
      * docker logs but displayed later in the worker machines table
      */
     private array $worker_os_names = [];
@@ -125,6 +63,7 @@ class DockerUI extends AbstractModel {
     /** Create a new docker UI object from the json data read from the filesystem */
     public function __construct(Core $core, array $json) {
         parent::__construct($core);
+
 
         /** Sanity checks on given json structure */
         assert(array_key_exists('autograding_workers', $json) && is_array($json['autograding_workers']));
@@ -140,7 +79,8 @@ class DockerUI extends AbstractModel {
             $this->parseWorkersAndCapabilities($this->json_data['autograding_containers'], $this->json_data['autograding_workers']);
             $this->parseDockerLogs();
             $this->parseSystemInformationLogs();
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             $this->error_logs[] = $e->getMessage();
             Logger::error($e->getMessage());
         }
@@ -161,7 +101,7 @@ class DockerUI extends AbstractModel {
         $capabilities = [];
         $no_image_capabilities = [];
         $image_to_capability = [];
-        
+
         foreach ($autograding_workers as $name => $worker) {
             //worker with some defaults
             $worker_temp = new WorkerMachine(
@@ -173,12 +113,13 @@ class DockerUI extends AbstractModel {
 
             foreach ($worker_temp->capabilities as $capability) {
                 $capabilities[] = $capability;
-    
+
                 if (isset($autograding_containers[$capability])) {
                     foreach ($autograding_containers[$capability] as $image) {
                         $image_to_capability[$image][] = $capability;
                     }
-                } else {
+                }
+                else {
                     $no_image_capabilities[] = $capability;
                 }
             }
@@ -201,27 +142,27 @@ class DockerUI extends AbstractModel {
         }
     }
 
-    /** 
+    /**
      * Entry point to parse logs generated by Submitty containing information on docker images across workers
      * @throws DockerLogParseException
      */
     private function parseDockerLogs(): void {
         $array_list = scandir($this->docker_logpath);
-        if($array_list === false) {
-           throw new DockerLogParseException("Failed to scandir at path '" . $this->docker_logpath . "'" ); 
+        if ($array_list === false) {
+            throw new DockerLogParseException("Failed to scandir at path '" . $this->docker_logpath . "'");
         }
 
         //ignore the '.' and '..' directories, if there are no files to parse, nothing to do, exit
-        if(count($array_list) <= 2) {
+        if (count($array_list) <= 2) {
             return;
         }
 
         $most_recent = max($array_list);
         $content = file_get_contents(FileUtils::joinPaths($this->docker_logpath, $most_recent));
-        if($content === false || strlen($content) <= 35) {
-            //the docker log file is probably being written or is in the process of being written, exit now 
+        if ($content === false || strlen($content) <= 35) {
+            //the docker log file is probably being written or is in the process of being written, exit now
             //and the next time the user loads the page it will be attempted to be read again
-            return; 
+            return;
         }
 
         //each subsequent update on the same day will append to the same docker log, navigate to the last update block and parse that
@@ -241,33 +182,39 @@ class DockerUI extends AbstractModel {
             }
             $buffer = strtok("\n");
         }
-        
     }
 
-    /** 
-     * Helper function to parse docker logs, returns an updated current_machine if applicable 
+    /**
+     * Helper function to parse docker logs, returns an updated current_machine if applicable
      * If parsing the description or docker version, the current_machine is expected to be known at that point
      **/
     private function parseLogLine(string $line, ?string $current_machine): ?string {
         $matches = [];
         // Match patterns, preg_match returns 1 on match
-        if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $line, $matches) === 1) {            
+        if (preg_match("/^\[Last ran on: ([0-9 :-]{19})\]/", $line, $matches) === 1) {
             $this->last_ran = $matches[1];
-        } elseif (preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $line, $matches) === 1) {
+        }
+        elseif (preg_match("/FAILURE TO UPDATE MACHINE (.+)$/", $line, $matches) === 1) {
             $this->setWorkerToFailure($matches[1]);
             $this->error_logs[] = $line;
-        } elseif (preg_match("/ERROR: Could not pull (.+)/", $line, $matches) === 1) {
+        }
+        elseif (preg_match("/ERROR: Could not pull (.+)/", $line, $matches) === 1) {
             $this->fail_images[] = $matches[1];
             $this->error_logs[] = $line;
-        } elseif (preg_match("/UPDATE MACHINE: (.+)/", $line, $matches) === 1) {
+        }
+        elseif (preg_match("/UPDATE MACHINE: (.+)/", $line, $matches) === 1) {
             $current_machine = $matches[1];
-        } elseif (preg_match("/Description:\t(.+)/", $line, $matches) === 1 && $current_machine !== null) {
+        }
+        elseif (preg_match("/Description:\t(.+)/", $line, $matches) === 1 && $current_machine !== null) {
             $this->worker_os_names[$current_machine] = $matches[1];
-        } elseif (preg_match("/Docker Version: (.+)/", $line, $matches) === 1  && $current_machine !== null) {
+        }
+        elseif (preg_match("/Docker Version: (.+)/", $line, $matches) === 1 && $current_machine !== null) {
             $this->worker_docker_versions[$current_machine] = $matches[1];
-        } elseif (preg_match("/Tag: (.+)/", $line, $matches) === 1) {
+        }
+        elseif (preg_match("/Tag: (.+)/", $line, $matches) === 1) {
             $this->parseImageDetails($matches[1]);
-        } elseif (preg_match("/APIError was raised./", $line) === 1) {
+        }
+        elseif (preg_match("/APIError was raised./", $line) === 1) {
             $this->error_logs[] = "APIError has occurred, please update the machines.";
         }
 
@@ -276,8 +223,8 @@ class DockerUI extends AbstractModel {
 
     /** Search for a worker by name and set its status to 'failed to update' */
     private function setWorkerToFailure(string $target_name) {
-        foreach($this->worker_machines as &$worker) {
-            if($worker->name == $target_name) {
+        foreach ($this->worker_machines as &$worker) {
+            if ($worker->name == $target_name) {
                 $worker->failed_to_update = true;
                 break;
             }
@@ -286,14 +233,14 @@ class DockerUI extends AbstractModel {
 
     /** helper function to parse image information */
     private function parseImageDetails(string $tags): void {
-        $image_array = explode(", ", $tags);    
+        $image_array = explode(", ", $tags);
         // Read next three lines for additional details
         $image = $this->readImageDetails();
 
         //take the first name in the list of name:tags and use that as the primary
         $image->primary_name = array_shift($image_array);
         $image->aliases = $image_array;
-        if(array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
+        if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
             $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
 
@@ -303,7 +250,7 @@ class DockerUI extends AbstractModel {
     /** Collect the details of an image and return them in a map, in the future a class should represent the return */
     private function readImageDetails(): DockerImage {
         $log_lines = [];
-        
+
         for ($i = 0; $i < 3; $i++) {
             $line = strtok("\n");
             if ($line === false) {
@@ -319,12 +266,12 @@ class DockerUI extends AbstractModel {
     /** Parse the logs under the sysinfo dir for worker machine info */
     private function parseSystemInformationLogs(): void {
         $sysinfo_files = scandir($this->sysinfo_filepath);
-        if($sysinfo_files === false) {
-           throw new DockerLogParseException("Failed to scandir at path '" . $this->sysinfo_filepath . "'" ); 
+        if ($sysinfo_files === false) {
+            throw new DockerLogParseException("Failed to scandir at path '" . $this->sysinfo_filepath . "'");
         }
 
         //ignore the '.' and '..' directories, if there are no files to parse, nothing to do, exit
-        if(count($sysinfo_files) <= 2) {
+        if (count($sysinfo_files) <= 2) {
             return;
         }
 
@@ -332,16 +279,16 @@ class DockerUI extends AbstractModel {
         $sysinfo_content = file_get_contents(FileUtils::joinPaths($this->sysinfo_filepath, $sysinfo_most_recent));
 
         if ($sysinfo_content === false || strlen($sysinfo_content) <= 45) {
-            //the system info log file is probably being written or is in the process of being written, exit now 
+            //the system info log file is probably being written or is in the process of being written, exit now
             //and the next time the user loads the page it will be attempted to be read again
-            return; 
+            return;
         }
 
         //each subsequent update on the same day will append to the same docker log, navigate to the last update block and parse that
         $sysinfo_content = rtrim($sysinfo_content);
         $contentStart = strrpos($sysinfo_content, "[Last ran", -45);
         $contentStart = $contentStart === false ? 0 : $contentStart;
-        $sysinfo_content = substr($sysinfo_content, $contentStart + 10);        
+        $sysinfo_content = substr($sysinfo_content, $contentStart + 10);
         $buffer = strtok($sysinfo_content, "\n");
         //the first line is expected to be "---", consume that to get to the start of the block
         $buffer = strtok("\n");
@@ -356,7 +303,7 @@ class DockerUI extends AbstractModel {
                 $current_machine = $matches[1];
             }
 
-            if($current_machine === null) {
+            if ($current_machine === null) {
                 //if have not set the current_machine at this point, keep consuming lines until we see it
                 $buffer = strtok("\n");
                 continue;
@@ -403,11 +350,11 @@ class DockerUI extends AbstractModel {
             $buffer = strtok("\n");
         }
 
-        foreach($machine_system_details as $key => $value) {
+        foreach ($machine_system_details as $key => $value) {
             $worker_info = WorkerMachineSystemInformation::fromArray($value, $key);
             //now find the worker and append the information parsed to it
-            foreach($this->worker_machines as &$worker) {
-                if($worker->name == $key) {
+            foreach ($this->worker_machines as &$worker) {
+                if ($worker->name == $key) {
                     $worker->system_information = $worker_info;
                     $worker->docker_version = $this->worker_docker_versions[$key] ?? "Unknown";
                     $worker->os = $this->worker_os_names[$key] ?? "Unknown";
@@ -415,7 +362,5 @@ class DockerUI extends AbstractModel {
                 }
             }
         }
-        
     }
-
 }
