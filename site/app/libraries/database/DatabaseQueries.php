@@ -1818,7 +1818,7 @@ WHERE term=? AND course=? AND user_id=?",
 
 
         $version = 0;
-// Get gradeable version where all submitters have a good status
+        // Get gradeable version where all submitters have a good status
         if ($gg->getGradeable()->isTeamAssignment()) {
             // Check if all members have a valid instance
             if ($this->course_db->getRowCount() === count($gg->getSubmitter()->getTeam()->getMemberUsers())) {
@@ -2285,7 +2285,7 @@ ORDER BY merged_data.{$section_key}
     public function getBadGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
         //getBadTeamSubmissionsByGradingSection
         //getBadUserSubmissionsByGradingSection
-         $u_or_t = "u";
+        $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         if ($is_team) {
@@ -3186,11 +3186,11 @@ ORDER BY rotating_section"
         );
     }
 
-     /**
-      * Return an array of user id's for users that have been assigned a registration section
-      *
-      * @return string[] user id's
-      */
+    /**
+     * Return an array of user id's for users that have been assigned a registration section
+     *
+     * @return string[] user id's
+     */
     public function getRegisteredUserIds() {
         $this->course_db->query(
             "
@@ -3476,7 +3476,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         // Map the results into a non-associative array of team/user ids
         return array_map(
             function ($row) use ($row_type) {
-                    return $row[$row_type];
+                return $row[$row_type];
             },
             $this->course_db->rows()
         );
@@ -3661,13 +3661,13 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         return $sections;
     }
 
-     /**
-      * returns 2d array of new graders after rotating sections set up
-      * for all access grading and limited access graders gradeables,
-      * top level is all graders' ids and second level is all rotating sections
-      *
-      * @return array
-      */
+    /**
+     * returns 2d array of new graders after rotating sections set up
+     * for all access grading and limited access graders gradeables,
+     * top level is all graders' ids and second level is all rotating sections
+     *
+     * @return array
+     */
     public function getNewGraders() {
         $new_graders = [];
         $all_sections = $this->core->getQueries()->getAllRotatingSections();
@@ -4454,7 +4454,7 @@ ORDER BY gt.{$section_key}",
             [$gradeable_id,$user_id]
         );
 
-          return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverriddenUser($this->core, $this->course_db->row()) : null;
+        return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverriddenUser($this->core, $this->course_db->row()) : null;
     }
 
     public function getAllOverriddenGrades() {
@@ -4663,11 +4663,11 @@ SQL;
         }
     }
 
-  /**
-   * Bulk Uploads Peer Grading Assignments
-   *
-   * @param string $values
-   */
+    /**
+     * Bulk Uploads Peer Grading Assignments
+     *
+     * @param string $values
+     */
     public function insertBulkPeerGradingAssignment($values) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES " . $values);
     }
@@ -5023,8 +5023,8 @@ AND gc_id IN (
         $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_pronouns, display_pronouns FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
         $ar = [];
-        $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"]      : $name_rows["user_preferred_givenname"];
-        $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"]))  ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
+        $ar["given_name"] = (empty($name_rows["user_preferred_givenname"])) ? $name_rows["user_givenname"] : $name_rows["user_preferred_givenname"];
+        $ar["family_name"]  = (empty($name_rows["user_preferred_familyname"])) ? " " . $name_rows["user_familyname"] : " " . $name_rows["user_preferred_familyname"];
         $ar["user_email"] = $name_rows["user_email"];
         $ar["pronouns"] = $name_rows["user_pronouns"];
         $ar["display_pronouns"] = $name_rows["display_pronouns"];
@@ -5135,7 +5135,7 @@ AND gc_id IN (
             return true;
         }
         catch (DatabaseException $dbException) {
-             $this->course_db->rollback();
+            $this->course_db->rollback();
         }
         return false;
     }
@@ -7502,21 +7502,21 @@ AND gc_id IN (
 
 
 
-/////////////////Office Hours Queue queries/////////////////////////////////////
+    /////////////////Office Hours Queue queries/////////////////////////////////////
 
-  /*
-  current_state values
-      ('waiting'):Waiting
-      ('being_helped'):Being helped
-      ('done'):Done/Fully out of the queue
-  removal_type values
-      (null):Still in queue
-      ('self'):Removed yourself
-      ('helped'):Mentor/TA helped you
-      ('removed'):Mentor/TA removed you
-      ('emptied'):Kicked out because queue emptied
-      ('self_helped'):You helped you
-  */
+    /*
+    current_state values
+        ('waiting'):Waiting
+        ('being_helped'):Being helped
+        ('done'):Done/Fully out of the queue
+    removal_type values
+        (null):Still in queue
+        ('self'):Removed yourself
+        ('helped'):Mentor/TA helped you
+        ('removed'):Mentor/TA removed you
+        ('emptied'):Kicked out because queue emptied
+        ('self_helped'):You helped you
+    */
 
     public function getCurrentQueue() {
         $query = "
@@ -8121,7 +8121,7 @@ WHERE current_state IN
 
 
 
-/////////////////END Office Hours Queue queries//////////////////////////////////
+    /////////////////END Office Hours Queue queries//////////////////////////////////
 
 
 
@@ -8900,7 +8900,7 @@ WHERE current_state IN
      * Maps sort keys to an array of expressions to sort by in place of the key.
      *  Useful for ambiguous keys or for key alias's
      */
-    const graded_gradeable_key_map_user = [
+    public const graded_gradeable_key_map_user = [
         'registration_section' => [
             'SUBSTRING(u.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(u.registration_section, \'[0-9]+\')::INT, -1)',
@@ -8914,7 +8914,7 @@ WHERE current_state IN
             'u.registration_subsection',
         ]
     ];
-    const graded_gradeable_key_map_team = [
+    public const graded_gradeable_key_map_team = [
         'registration_section' => [
             'SUBSTRING(team.registration_section, \'^[^0-9]*\')',
             'COALESCE(SUBSTRING(team.registration_section, \'[0-9]+\')::INT, -1)',
@@ -9404,8 +9404,8 @@ ORDER BY
         $current_owner = $this->getDockerImageOwner($image);
         if ($current_owner === false) {
             $this->submitty_db->query("INSERT INTO docker_images (image_name, user_id) values (?, ?)", [$image,$user_id]);
-        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
-        // Only sysadmin will be able to remove it.
+            // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+            // Only sysadmin will be able to remove it.
         }
         elseif ($current_owner !== $user_id) {
             $this->submitty_db->query("UPDATE docker_images SET user_id = NULL WHERE image_name = ?", [$image]);

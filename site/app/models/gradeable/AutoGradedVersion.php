@@ -560,7 +560,7 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
-    const point_properties = [
+    public const point_properties = [
         'non_hidden_non_extra_credit',
         'non_hidden_extra_credit',
         'hidden_non_extra_credit',

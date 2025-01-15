@@ -9,7 +9,7 @@ use app\libraries\response\WebResponse;
 use app\controllers\admin\LateController;
 
 class LateControllerTester extends BaseUnitTest {
-   /** @var LateController */
+    /** @var LateController */
     protected $controller;
 
     /** @var Core */

@@ -34,7 +34,7 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    const syllabus_buckets = [
+    public const syllabus_buckets = [
         'homework', 'assignment', 'problem-set',
         'quiz', 'test', 'exam',
         'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
@@ -42,7 +42,7 @@ class AdminGradeableController extends AbstractController {
         'participation', 'note',
         'none (for practice only)'];
 
-    const gradeable_type_strings = [
+    public const gradeable_type_strings = [
         'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
         'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short text strings)',
         'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
@@ -1487,10 +1487,12 @@ class AdminGradeableController extends AbstractController {
                 //convert the property name to a setter name
                 $setter_name = 'set' . implode(
                     '',
-                    array_map(function ($val) {
-                        return ucfirst($val);
-                    },
-                    explode('_', $prop))
+                    array_map(
+                        function ($val) {
+                            return ucfirst($val);
+                        },
+                        explode('_', $prop)
+                    )
                 );
                 $gradeable->$setter_name($post_val);
             }

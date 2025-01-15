@@ -13,9 +13,9 @@ use app\libraries\Core;
  * @method bool isModified()
  */
 abstract class AbstractModel {
-    const CALL_SET = 1;
-    const CALL_GET = 2;
-    const CALL_IS = 3;
+    public const CALL_SET = 1;
+    public const CALL_GET = 2;
+    public const CALL_IS = 3;
 
     protected static $properties = [];
 

@@ -12,8 +12,8 @@ use app\models\DisplayImage;
 use tests\BaseUnitTest;
 
 class DisplayImageTester extends BaseUnitTest {
-    const TEST_USER_NAME = 'abc_test_user';
-    const TEST_IMAGE = 'test_image.gif';
+    public const TEST_USER_NAME = 'abc_test_user';
+    public const TEST_IMAGE = 'test_image.gif';
 
     private $core;
     private $test_image_path;
