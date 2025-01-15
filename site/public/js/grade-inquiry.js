@@ -140,26 +140,27 @@ function onGradeInquirySubmitClicked(button) {
                 const json = JSON.parse(response);
                 if (json['status'] === 'success') {
                     const data = json['data'];
+                    console.log(data);
 
                     // inform other open websocket clients
                     const submitter_id = form.children('#submitter_id').val();
                     if (data.type === 'new_post') {
                         newPostRender(gc_id, data.post_id, data.new_post);
                         text_area.val('');
-                        window.socketClient.send({
-                            type: data.type,
-                            post_id: data.post_id,
-                            submitter_id: submitter_id,
-                            gc_id: gc_id,
-                        });
+                        // window.socketClient.send({
+                        //     type: data.type,
+                        //     post_id: data.post_id,
+                        //     submitter_id: submitter_id,
+                        //     gc_id: gc_id,
+                        // });
                     }
                     else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
+                        // window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
                         window.location.reload();
                     }
                     else if (data.type === 'toggle_status') {
                         newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({ type: data.type, submitter_id: submitter_id });
+                        // window.socketClient.send({ type: data.type, submitter_id: submitter_id });
                     }
                 }
                 else {
@@ -180,6 +181,7 @@ function onGradeInquirySubmitClicked(button) {
 function initGradingInquirySocketClient() {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
+        console.log(msg);
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
@@ -192,6 +194,7 @@ function initGradingInquirySocketClient() {
         }
     };
     const page = `${window.location.pathname.split('gradeable/')[1].split('/')[0]}_${$('#submitter_id').val()}`;
+    console.log(page);
     window.socketClient.open(page);
 }
 
