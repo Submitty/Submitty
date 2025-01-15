@@ -57,10 +57,11 @@ class ExceptionHandler {
      * otherwise just returning a very generic message to the user
      *
      * @param \Exception|\Throwable $exception
+     * @param string|null $user_id
      * @return string    A string that either contains a generic message or the actual
      *                   exception message depending on the value of $display_exceptions
      */
-    public static function handleException($exception) {
+    public static function handleException($exception, $user_id) {
         $display_message = false;
         $is_base_exception = false;
         $log_exception = static::$log_exceptions;
@@ -121,6 +122,9 @@ class ExceptionHandler {
                 }
             }
         }
+
+        // Adding more debug information
+        $message .= "\nUSER: " . ($user_id ?? 'User is not signed in');
 
         if ($log_exception) {
             Logger::fatal($message);
