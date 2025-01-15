@@ -223,8 +223,7 @@ class DockerInterfaceController extends AbstractController {
 
         foreach ($json as $capability_key => $capability) {
             if (($key = array_search($image, $capability, true)) !== false) {
-                unset($json[$capability_key][$key]);
-                $json[$capability_key] = array_values($json[$capability_key]); // Re-index array
+                array_splice($json[$capability_key], $key, 1);
             }
         }
 
