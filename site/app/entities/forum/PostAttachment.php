@@ -26,6 +26,13 @@ class PostAttachment {
     #[ORM\Column(type: TYPES::INTEGER)]
     protected int $version_deleted;
 
+    public function __construct(Post $post, string $file_name, int $version_added, int $version_deleted) {
+        $this->post = $post;
+        $this->file_name = $file_name;
+        $this->version_added = $version_added;
+        $this->version_deleted = $version_deleted;
+    }
+
     public function getFileName(): string {
         return $this->file_name;
     }
@@ -36,6 +43,10 @@ class PostAttachment {
 
     public function getVersionDeleted(): int {
         return $this->version_deleted;
+    }
+
+    public function setVersionDeleted(int $version): void {
+        $this->version_deleted = $version;
     }
 
     public function isCurrent(): bool {
