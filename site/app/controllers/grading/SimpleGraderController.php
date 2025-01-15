@@ -311,7 +311,7 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse("You do not have permission to grade {$gradeable->getTitle()}");
         }
 
-        $num_numeric = $_POST['num_numeric'];
+        $num_numeric = intval($_POST['num_numeric']);
 
         $csv_array = preg_split("/\r\n|\n|\r/", $_POST['big_file']);
         $arr_length = count($csv_array);
@@ -335,8 +335,6 @@ class SimpleGraderController extends AbstractController {
                 $temp_array['username'] = $username;
                 $index1 = 0;
                 $index2 = 3; //3 is the starting index of the grades in the csv
-                $value_str = "value_";
-                $status_str = "status_";
 
                 // Get the user grade for this gradeable
                 $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
@@ -346,33 +344,43 @@ class SimpleGraderController extends AbstractController {
                     $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
                     $component_grade->setGrader($grader);
 
-                    $value_temp_str = $value_str . $index1;
-                    $status_temp_str = $status_str . $index1;
+                    $value_temp_str = "value_" . $index1;
+                    $status_temp_str = "status_" . $index1;
                     if (isset($data_array[$j][$index2])) {
+                        $component_data = $data_array[$j][$index2];
+                        // text component
                         if ($component->isText()) {
-                            $component_grade->setComment($data_array[$j][$index2]);
+                            $component_grade->setComment($component_data);
                             $component_grade->setGradeTime($this->core->getDateTimeNow());
-                            $temp_array[$value_temp_str] = $data_array[$j][$index2];
+                            $temp_array[$value_temp_str] = $component_data;
                             $temp_array[$status_temp_str] = "OK";
                         }
                         else {
-                            if ($component->getUpperClamp() < $data_array[$j][$index2]) {
-                                $temp_array[$value_temp_str] = $data_array[$j][$index2];
+                            // numeric component
+                            // if the data is empty, we should just input 0. If it is not a number, we should fail.
+                            if ($component_data !== '' && !is_numeric($component_data)) {
+                                $temp_array[$value_temp_str] = $component_data;
                                 $temp_array[$status_temp_str] = "ERROR";
                             }
                             else {
-                                $component_grade->setScore($data_array[$j][$index2]);
-                                $component_grade->setGradeTime($this->core->getDateTimeNow());
-                                $temp_array[$value_temp_str] = $data_array[$j][$index2];
-                                $temp_array[$status_temp_str] = "OK";
+                                $component_data = floatval($component_data);
+                                if ($component->getUpperClamp() < $component_data) {
+                                    $temp_array[$value_temp_str] = $component_data;
+                                    $temp_array[$status_temp_str] = "ERROR";
+                                }
+                                else {
+                                    $component_grade->setScore($component_data);
+                                    $component_grade->setGradeTime($this->core->getDateTimeNow());
+                                    $temp_array[$value_temp_str] = $component_data;
+                                    $temp_array[$status_temp_str] = "OK";
+                                }
                             }
                         }
                     }
                     $index1++;
                     $index2++;
-
                     //skips the index of the total points in the csv file
-                    if ($index1 == $num_numeric) {
+                    if ($index1 === $num_numeric) {
                         $index2++;
                     }
                 }
