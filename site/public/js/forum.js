@@ -402,6 +402,11 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 if ($('data#current-thread').val() != thread_id) {
                     $(`[data-thread_id="${thread_id}"] .thread_box`).removeClass('active');
                 }
+
+                // scroll into the new post
+                const mergeThreadBtn = document
+                .getElementById("merge-thread-btn");
+                mergeThreadBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
             catch (err) {
                 displayErrorMessage('Error parsing new thread. Please refresh the page.');
