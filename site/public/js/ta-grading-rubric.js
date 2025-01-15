@@ -8,7 +8,7 @@
 
 /* global buildCourseUrl csrfToken displayErrorMessage renderGradingGradeable renderPeerGradeable renderInstructorEditGradeable
    viewFileFullPanel resizeNoScrollTextareas openMarkConflictPopup renderEditComponent renderEditComponentHeader
-   renderGradingComponent renderGradingComponentHeader renderTotalScoreBox renderRubricTotalBox */
+   renderGradingComponent renderGradingComponentHeader renderTotalScoreBox renderRubricTotalBox luxon */
 
 /**
  *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
@@ -20,6 +20,7 @@
 
 const GRADED_COMPONENTS_LIST = {};
 const COMPONENT_RUBRIC_LIST = {};
+const ACTIVE_GRADERS_LIST = {};
 let GRADED_GRADEABLE = null;
 
 /**
@@ -93,6 +94,31 @@ const PDF_PAGE_INSTRUCTOR = -2;
  */
 // eslint-disable-next-line no-var
 var AJAX_USE_ASYNC = true;
+
+/**
+ *
+ * @param {DateTime} dateTime input date time
+ * @returns {string} time ago
+ */
+const timeAgo = (dateTime) => {
+    const units = [
+        'year',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+    ];
+
+    const diff = dateTime.diffNow().shiftTo(...units);
+    const unit = units.find((unit) => diff.get(unit) !== 0) || 'second';
+
+    const relativeFormatter = new Intl.RelativeTimeFormat('en', {
+        numeric: 'auto',
+    });
+    return relativeFormatter.format(Math.min(Math.trunc(diff.as(unit)), 0), unit);
+};
 
 /**
  * Keep All of the ajax functions at the top of this file
@@ -2373,6 +2399,7 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
     try {
         await loadComponentData(gradeable, GRADED_GRADEABLE);
         const elements = await renderGradingGradeable(getGraderId(), gradeable, GRADED_GRADEABLE,
+            ACTIVE_GRADERS_LIST,
             isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         setRubricDOMElements(elements);
         await openCookieComponent();
@@ -2391,6 +2418,16 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
 async function loadComponentData(gradeable, graded_gradeable) {
     for (const component of gradeable.components) {
         COMPONENT_RUBRIC_LIST[component.id] = component;
+        if (graded_gradeable.active_graders[component.id]) {
+            ACTIVE_GRADERS_LIST[component.id] = graded_gradeable.active_graders[component.id]?.map((_, index) => {
+                const grader = graded_gradeable.active_graders[component.id][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+        else {
+            ACTIVE_GRADERS_LIST[component.id] = [];
+        }
     }
     if (graded_gradeable.graded_components) {
         const graded_array = Object.values(graded_gradeable.graded_components);
@@ -2427,6 +2464,7 @@ async function updateTotals(gradeable_id, anon_id) {
         alert(`Could not fetch graded gradeable: ${err.message}`);
     }
     const elements = await renderGradingGradeable(getGraderId(), gradeable, graded_gradeable,
+        ACTIVE_GRADERS_LIST,
         isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
     setRubricDOMElements(elements);
 }
@@ -2712,6 +2750,33 @@ async function openComponentInstructorEdit(component_id) {
  * @return {void}
  */
 async function openComponentGrading(component_id) {
+    try {
+        const response = await $.getJSON({
+            type: 'POST',
+            async: AJAX_USE_ASYNC,
+            data: {
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: getAnonId(),
+            },
+            url: buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'graded_gradeable', 'open_component']),
+        });
+        if (response.status !== 'success') {
+            console.error(`Something went wrong fetching the gradeable rubric: ${response.message}`);
+            return;
+        }
+        for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
     OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id];
     OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
 
@@ -2855,6 +2920,33 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
  * @return {void}
  */
 async function closeComponentGrading(component_id, saveChanges) {
+    try {
+        const response = await $.getJSON({
+            type: 'POST',
+            async: AJAX_USE_ASYNC,
+            data: {
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: getAnonId(),
+            },
+            url: buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'graded_gradeable', 'close_component']),
+        });
+        if (response.status !== 'success') {
+            console.error(`Something went wrong fetching the gradeable rubric: ${response.message}`);
+            return;
+        }
+        for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
     GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
     COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
 
@@ -3352,7 +3444,7 @@ async function injectInstructorEditComponentHeader(component, showMarkList) {
  */
 async function injectGradingComponent(component, graded_component, editable, showMarkList) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    const elements = await renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks());
+    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks());
     setComponentContents(component.id, elements);
 }
 
