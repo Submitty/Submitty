@@ -64,19 +64,22 @@
                             aria-label="Notification All New Self Registrations" 
                             name="self_registration" 
                             id="self_registration" 
-                            disabled>
+                            disabled
+                        >
                 </div>
                 {% if email_enabled %}
                     <div 
                         class="option-input 
                         col-md-5 
-                        email-setting-input">
+                        email-setting-input"
+                    >
                             <input 
                                 type="checkbox" 
                                 aria-label="Email All New Self Registrations" 
                                 name="self_registration_email" 
                                 id="self-registration-email" 
-                                {% if notification_saves['self_registration_email'] %} checked {% endif %}>
+                                {% if notification_saves['self_registration_email'] %} checked {% endif %}
+                            >
                     </div>
                 {% endif %}
             </div>
