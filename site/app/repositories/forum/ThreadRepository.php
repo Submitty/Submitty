@@ -134,18 +134,19 @@ class ThreadRepository extends EntityRepository {
         }
         switch ($order_posts_by) {
             case 'alpha':
-                $qb->addOrderBy('postAuthor.user_familyname', 'ASC')
+                $qb->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
+                    ->addOrderBy('user_familyname_order', 'ASC')
                     ->addOrderBy('post.timestamp', 'ASC')
                     ->addOrderBy('post.id', 'ASC');
                 break;
             case 'alpha_by_registration':
                 $qb->addOrderBy('postAuthor.registration_section', 'ASC')
-                    ->addSelect('COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order')
+                    ->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'alpha_by_rotating':
                 $qb->addOrderBy('postAuthor.rotating_section', 'ASC')
-                    ->addSelect('COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order')
+                    ->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'reverse-time':
