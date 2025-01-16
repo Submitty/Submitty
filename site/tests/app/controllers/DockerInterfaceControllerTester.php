@@ -2,7 +2,6 @@
 
 namespace tests\app\controllers;
 
-use app\models\Config;
 use tests\BaseUnitTest;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
@@ -24,10 +23,14 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "docker"), true);
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo"), true);
 
-        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "config", "autograding_containers.json"), 
-            DockerUITester::getAutogradingContainersJson());
-        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "config", "autograding_workers.json"), 
-            DockerUITester::getAutogradingWorkersJson());
+        FileUtils::writeFile(
+            FileUtils::joinPaths($this->tmp_dir, "config", "autograding_containers.json"),
+            DockerUITester::getAutogradingContainersJson()
+        );
+        FileUtils::writeFile(
+            FileUtils::joinPaths($this->tmp_dir, "config", "autograding_workers.json"),
+            DockerUITester::getAutogradingWorkersJson()
+        );
 
         /** Set dummy paths to tmp dir, ok to use same path since everything will be in dirs inside of there */
         $this->core->getConfig()->method('getSubmittyPath')->willReturn($this->tmp_dir);

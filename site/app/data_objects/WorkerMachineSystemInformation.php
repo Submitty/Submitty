@@ -48,6 +48,7 @@ class WorkerMachineSystemInformation {
     /**
      * Given an associative array of worker system information and the worker name, convert it to a class and
      * perform null checks over the data
+     * @param array<string, ?string> $data - array from parsed json data to turn into a \WorkerMachineSystemInformation object
      */
     public static function fromArray(array $data, string $name): self {
         return new self(

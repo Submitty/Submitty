@@ -9,16 +9,19 @@ use app\libraries\FileUtils;
 use app\models\Config;
 use app\libraries\Utils;
 
-
 class DockerUITester extends BaseUnitTest {
     /** Mock core */
     private Core $core;
     /** Tmp area for file operations */
     private string $tmp_dir;
+    /** Example log file from the docker update job */
+    private string $docker_job_log_file;
+    /** Example log file from the sysinfo update job */
+    private string $sysinfo_log_file;
 
     /** helper functions to test */
     public static function getAutogradingWorkersJson(): string {
-        $json = <<<EOD
+        return <<<EOD
         {
             "primary": {
                 "address": "localhost",
@@ -39,12 +42,10 @@ class DockerUITester extends BaseUnitTest {
             }
         }
         EOD;
-
-        return $json;
     }
 
     public static function getAutogradingContainersJson(): string {
-        $json = <<<EOD
+        return <<<EOD
         {
             "default": [
                 "submitty/clang:6.0",
@@ -65,8 +66,6 @@ class DockerUITester extends BaseUnitTest {
             ]
         }
         EOD;
-
-        return $json;
     }
 
     /** Setup runs before each unit test in this file */
@@ -75,6 +74,10 @@ class DockerUITester extends BaseUnitTest {
         //create dummy log areas
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "docker"), true);
         FileUtils::createDir(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo"), true);
+
+        $this->docker_job_log_file = FileUtils::joinPaths(dirname(__DIR__, 3), 'tests', 'data', 'logs', 'docker', 'install_containers.txt');
+        $this->sysinfo_log_file = FileUtils::joinPaths(dirname(__DIR__, 3), 'tests', 'data', 'logs', 'docker', 'sysinfo.txt');
+        $this->assertFileExists($this->docker_job_log_file);
 
         $this->core = $this->createMockModel(Core::class);
         $config = $this->createMockModel(Config::class);
@@ -92,12 +95,44 @@ class DockerUITester extends BaseUnitTest {
     /** begin unit tests */
     public function testConstructorGoodData() {
         $docker_ui = new DockerUI($this->core, [
-            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true), 
+            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true),
             "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
             "image_owners" => [],
         ]);
 
         $this->assertEquals(0, count($docker_ui->getErrorLogs()));
+        $this->assertEquals(json_decode($this::getAutogradingContainersJson(), true), $docker_ui->getAutogradingContainers());
+        $this->assertEquals([], $docker_ui->getDockerImageOwners());
     }
 
+    public function testParsingLogLines() {
+        //place some dummy data first
+        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "docker", "20251234.txt"), file_get_contents($this->docker_job_log_file));
+        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo", "20251234.txt"), file_get_contents($this->sysinfo_log_file));
+
+        $docker_ui = new DockerUI($this->core, [
+            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true),
+            "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
+            "image_owners" => [],
+        ]);
+
+        $this->assertEquals(6, count($docker_ui->getCapabilities()));
+        $this->assertEquals(1, count($docker_ui->getWorkerMachines()));
+
+        $worker = $docker_ui->getWorkerMachines()[0];
+        $this->assertEquals("primary", $worker->name);
+        $this->assertEquals(5, $worker->num_autograding_workers);
+        $this->assertEquals(["default", "cpp", "python", "et-cetera", "notebook", "taz"], $worker->capabilities);
+        $this->assertEquals(true, $worker->is_enabled);
+        $this->assertEquals(false, $worker->failed_to_update);
+
+        $this->assertEquals(11, count($docker_ui->getDockerImages()));
+        $image = $docker_ui->getDockerImages()[0];
+        $this->assertEquals("submitty/tutorial:database_client", $image->primary_name);
+
+        $image = $docker_ui->getDockerImages()[2];
+        $this->assertEquals("ubuntu:custom", $image->primary_name);
+        $this->assertEquals(1, count($image->aliases));
+        $this->assertEquals("submitty/autograding-default:latest", $image->aliases[0]);
+    }
 }

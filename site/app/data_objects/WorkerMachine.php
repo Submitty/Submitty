@@ -12,7 +12,7 @@ class WorkerMachine {
     public string $name;
     /** number of workers this machine has */
     public int $num_autograding_workers;
-    /** What capabilities this worker has */
+    /** @var array<string> - What capabilities this worker has */
     public array $capabilities;
     /** Is this woker enabled or not */
     public bool $is_enabled;
@@ -25,7 +25,10 @@ class WorkerMachine {
     /** System information parsed from sysinfo logs */
     public ?WorkerMachineSystemInformation $system_information = null;
 
-    /** Create a new Worker object */
+    /**
+     * Create a new Worker object
+     * @param array<string> $capabilities a list of capabilities this worker has
+     */
     public function __construct(string $name, int $num_autograding_workers, array $capabilities, bool $is_enabled) {
         $this->name = $name;
         $this->num_autograding_workers = $num_autograding_workers;

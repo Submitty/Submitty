@@ -8,7 +8,6 @@ use app\libraries\DateUtils;
 use app\exceptions\DockerLogParseException;
 use app\libraries\Utils;
 
-
 /**
  * Simple class to represent docker image from parsed information
  */
@@ -23,9 +22,9 @@ class DockerImage {
     public string $size_mb;
     /** The name:tag of the image */
     public string $primary_name;
-    /** Any other name:tags that also point to this image */
+    /** @var array<string> $aliases - Any other name:tags that also point to this image */
     public array $aliases = [];
-    /** What Submitty capabilities this image is associated with */
+    /** @var array<string> What Submitty capabilities this image is associated with */
     public array $capabilities = [];
     /** Create a new DockerImage object*/
     public function __construct(string $id, \DateTime $created, string $size) {
@@ -37,6 +36,7 @@ class DockerImage {
 
     /**
      * Construct a new DockerImage from log lines
+     * @param array<string> $logLines
      * @throws DockerLogParseException
      */
     public static function fromLog(array $logLines): self {
@@ -45,13 +45,13 @@ class DockerImage {
         }
 
         // Parse ID
-        if (!preg_match("/\t-id: (.+)/", $logLines[0], $matches)) {
+        if (preg_match("/\t-id: (.+)/", $logLines[0], $matches) === 0) {
             throw new DockerLogParseException("Unexpected log input, attempted to read image ID.");
         }
 
         $id = $matches[1];
         // Parse created date
-        if (!preg_match("/\t-created: (.+)/", $logLines[1], $matches)) {
+        if (preg_match("/\t-created: (.+)/", $logLines[1], $matches) === 0) {
             throw new DockerLogParseException("Unexpected log input, attempted to read image creation date.");
         }
 
@@ -61,11 +61,12 @@ class DockerImage {
         }
 
         // Parse size
-        if (!preg_match("/\t-size: (.+)/", $logLines[2], $matches)) {
+        if (preg_match("/\t-size: (.+)/", $logLines[2], $matches) === 0) {
             throw new DockerLogParseException("Unexpected log input, attempted to read image size.");
         }
 
-        $size = Utils::formatBytes('mb', $matches[1], true);
+        $bytes = (int) $matches[1];
+        $size = Utils::formatBytes('mb', $bytes, true);
         return new self($id, $created, $size);
     }
 }
