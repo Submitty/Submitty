@@ -1683,7 +1683,9 @@ function refreshCategories() {
             var category_id = parseInt(data[i].split('=')[1]);
             const category_desc = $(`#categorylistitem-${category_id} .categorylistitem-desc span`).text().trim();
             const category_color = $(`#categorylistitem-${category_id} select`).val();
-            order.push([category_id, category_desc, category_color]);
+            const category_diff = parseFloat($(`#categorylistitem-${category_id}`).data('diff'));
+            const category_visible_date = $(`#categorylistitem-${category_id}`).data('visible_date');
+            order.push([category_id, category_desc, category_color, category_diff, category_visible_date]);
         }
 
         // Obtain current selected category
@@ -1702,17 +1704,21 @@ function refreshCategories() {
         // Refresh selected categories
         $('#categories-pick-list').empty();
         order.forEach((category) => {
-            const category_id = category[0];
-            const category_desc = category[1];
-            const category_color = category[2];
-            let selection_class = '';
-            if (selected_button.has(category_id)) {
-                selection_class = 'btn-selected';
+            const category_visible_date = category[4];
+            const category_diff = category[3];
+            if (category_visible_date === '' || category_diff > 0) {
+                const category_id = category[0];
+                const category_desc = category[1];
+                const category_color = category[2];
+                let selection_class = '';
+                if (selected_button.has(category_id)) {
+                    selection_class = 'btn-selected';
+                }
+                const element = `<div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
+                                    <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
+                                </div>`;
+                $('#categories-pick-list').append(element);
             }
-            const element = ` <div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
-                                <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
-                            </div>`;
-            $('#categories-pick-list').append(element);
         });
 
         $(".cat-buttons input[type='checkbox']").each(function () {
