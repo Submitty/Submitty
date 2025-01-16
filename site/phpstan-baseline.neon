@@ -551,6 +551,11 @@ parameters:
 			path: app/controllers/NavigationController.php
 
 		-
+			message: "#^Using nullsafe method call on non\\-nullable type app\\\\models\\\\User\\. Use \\-\\> instead\\.$#"
+			count: 1
+			path: app/controllers/NavigationController.php
+
+		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
