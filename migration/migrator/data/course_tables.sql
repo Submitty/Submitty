@@ -2842,7 +2842,7 @@ ALTER TABLE ONLY public.active_graders
 --
 
 ALTER TABLE ONLY public.active_graders
-    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id);
+    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id) ON DELETE CASCADE;
 
 
 --
