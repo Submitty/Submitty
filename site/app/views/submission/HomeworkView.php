@@ -1272,7 +1272,6 @@ class HomeworkView extends AbstractView {
      */
     private function renderGradeInquiryBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/GradeInquiryBox.twig', [
-            'user_id' => $this->core->getUser()->getId(),
             'graded_gradeable' => $graded_gradeable,
             'can_inquiry' => $can_inquiry
         ]);

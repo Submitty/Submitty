@@ -179,11 +179,11 @@ function initGradingInquirySocketClient() {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
                 break;
-            case 'toggle_status':
-                gradeInquiryDiscussionHandler(msg.submitter_id);
-                break;
             case 'open_grade_inquiry':
                 window.location.reload();
+                break;
+            case 'toggle_status':
+                gradeInquiryDiscussionHandler(msg.submitter_id);
                 break;
             default:
                 console.log('Undefined message received.');
