@@ -82,15 +82,15 @@ def main():
                 if 'allowed_minutes' in testcase['validation'][0]:
                     timelimit_case = testcase
                     break
-                
+   
     allowed_minutes = override = None
     # If time limit exists, set it to the correct time limit
     if timelimit_case is not None:
         allowed_minutes = timelimit_case['validation'][0]['allowed_minutes']
         if 'override' in timelimit_case['validation'][0]:
             override = timelimit_case['validation'][0]['override']
-    
-    # sets allowed_minutes and override to the correct values
+
+    # sets allowed_minutes and override in the database
     try:
         db, metadata = setup_db()
         send_data(db, allowed_minutes, override)
