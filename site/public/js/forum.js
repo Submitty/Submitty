@@ -2667,6 +2667,7 @@ function showUpduckUsers(post_id, csrf_token) {
         success: function (data) {
             if (data.status === 'success') {
                 $('#popup-post-likes').show();
+                // eslint-disable-next-line no-undef
                 captureTabInModal('popup-post-likes');
 
                 $('#popup-post-likes .form-body').empty();
