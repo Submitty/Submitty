@@ -1184,7 +1184,9 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
         if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
+            $this->core->addErrorMessage("Requested thread does not exist.");
+            $this->core->redirect(($this->core->buildCourseUrl(['forum'])));
+            return;
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);

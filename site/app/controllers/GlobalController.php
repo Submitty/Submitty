@@ -294,7 +294,6 @@ class GlobalController extends AbstractController {
 
         if (
             $this->core->getUser()->accessAdmin()
-            && $this->core->getConfig()->displayRainbowGradesSummary()
         ) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(["gradebook"]),
