@@ -57,11 +57,11 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewGradeInquiry($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            $this->sendSocketMessage(['type' => 'new_post', 'submitter_id' => $submitter_id, 'gc_id' => $gc_id, 'g_id' => $gradeable_id]);
+            $this->sendSocketMessage(['type' => 'open_grade_inquiry', 'submitter_id' => $submitter_id, 'g_id' => $gradeable_id]);
             $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion, 'page' => $gradeable_id . '_' . $submitter_id])
+                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -136,7 +136,7 @@ class GradeInquiryController extends AbstractController {
             $this->sendSocketMessage(['type' => 'new_post', 'submitter_id' => $submitter_id,'post_id' => $grade_inquiry_post_id, 'gc_id' => $gc_id, 'g_id' => $gradeable_id]);
 
             return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $grade_inquiry_post_id, 'new_post' => $new_post, 'page' => $gradeable_id . '_' . $submitter_id])
+                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $grade_inquiry_post_id, 'new_post' => $new_post])
             );
         }
         catch (\InvalidArgumentException $e) {
@@ -273,12 +273,12 @@ class GradeInquiryController extends AbstractController {
             $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
-            $this->sendSocketMessage(['type' => 'new_post', 'submitter_id' => $submitter_id, 'gc_id' => $gc_id, 'g_id' => $gradeable_id]);
+            $this->sendSocketMessage(['type' => 'toggle_status', 'submitter_id' => $submitter_id, 'g_id' => $gradeable_id]);
+
             return JsonResponse::getSuccessResponse(
                 [
                 'type' => 'toggle_status',
-                'new_discussion' => $new_discussion,
-                'page' => $gradeable_id . '_' . $submitter_id
+                'new_discussion' => $new_discussion
                 ]
             );
         }
@@ -439,7 +439,8 @@ class GradeInquiryController extends AbstractController {
      * @param array<mixed> $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
-        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $user_id = $this->core->getUser()->getId();
+        $msg_array['user_id'] = $msg_array['sender_id'] = $user_id;
         $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'] . '_' . $msg_array['submitter_id'];
 
         try {
