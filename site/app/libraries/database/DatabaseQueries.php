@@ -785,11 +785,11 @@ SQL;
     }
 
         /**
-     * Gets the list of users who liked a given post.
-     *
-     * @param int $post_id
-     * @return string[] Array of user ids who liked this post.
-     */
+         * Gets the list of users who liked a given post.
+         *
+         * @param int $post_id
+         * @return string[] Array of user ids who liked this post.
+         */
     public function getUsersWhoLikedPost(int $post_id): array {
         $this->course_db->query("
             SELECT u.user_id 
