@@ -150,6 +150,7 @@ function UpdateVisibilityBuckets() {
             prev_bucket = bucket;
         }
     });
+    saveChanges();
 }
 
 function getDisplay() {
