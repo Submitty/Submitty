@@ -82,7 +82,7 @@ def main():
                 if 'allowed_minutes' in testcase['validation'][0]:
                     timelimit_case = testcase
                     break
-   
+
     allowed_minutes = override = None
     # If time limit exists, set it to the correct time limit
     if timelimit_case is not None:
@@ -98,7 +98,7 @@ def main():
         sys.exit(1)
     except IOError:
         print("WARNING: You do not have access to set allowed minutes from CLI." +
-                " Please use website to set that.")
+              " Please use website to set that.")
         exit()
 
 
