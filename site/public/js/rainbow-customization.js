@@ -172,10 +172,6 @@ function getSection() {
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
 
-        if (label === '') {
-            $('#save_status').text('All sections MUST have a label before saving');
-        }
-
         // Add to sections
         sections[section] = label;
     });
