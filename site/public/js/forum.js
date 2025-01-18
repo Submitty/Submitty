@@ -331,6 +331,12 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
                 hljs.highlightAll();
+
+                 // scroll into an active text area if it exists
+                 const activeReplyBox = document.querySelector('.post_content_reply[data-active="true"]');
+                 if (activeReplyBox) {
+                     activeReplyBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 }
             }
             catch (error) {
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
@@ -402,11 +408,6 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 if ($('data#current-thread').val() != thread_id) {
                     $(`[data-thread_id="${thread_id}"] .thread_box`).removeClass('active');
                 }
-
-                // scroll into the new post
-                const mergeThreadBtn = document
-                .getElementById("merge-thread-btn");
-                mergeThreadBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
             catch (err) {
                 displayErrorMessage('Error parsing new thread. Please refresh the page.');
