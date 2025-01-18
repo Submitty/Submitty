@@ -873,7 +873,7 @@ class ForumThreadView extends AbstractView {
         if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessFullGrading())) {
             if ($deleted && $user->accessGrading()) {
                 $ud_toggle_status = "false";
-                $ud_button_title = "Undelete post";
+                $ud_button_title = "Restore post";
                 $ud_button_icon = "fa-undo";
             }
             else {
