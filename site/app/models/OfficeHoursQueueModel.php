@@ -130,7 +130,7 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue;
     }
 
-    public function getDisplayNameFromUserId($user_id): string {
+    public function getDisplayNameFromUserId(string $user_id): string {
         $user = $this->core->getQueries()->getUserById($user_id);
         return $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName();
     }
