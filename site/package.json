@@ -26,7 +26,7 @@
     "@codemirror/theme-one-dark": "6.1.2",
     "@codemirror/view": "6.36.2",
     "@fortawesome/fontawesome-free": "6.7.2",
-    "@highlightjs/cdn-assets": "11.9.0",
+    "@highlightjs/cdn-assets": "11.11.1",
     "@submitty/pdf-annotate.js": "2.5.1",
     "bootstrap": "4.6.0",
     "chosen-js": "1.8.7",
