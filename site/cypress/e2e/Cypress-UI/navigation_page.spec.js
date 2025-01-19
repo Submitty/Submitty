@@ -174,9 +174,9 @@ describe('tests navigation buttons for each level of access', () => {
     it('should show the correct alert message for team homework', () => {
         cy.login('instructor');
         cy.visit(['sample']);
-            
+
         cy.get('[data-testid="open_team_homework"]').find('[data-testid="submit-btn"]').click();
-        
+
         // Capture and verify the alert text
         cy.on('window:alert', (alertText) => {
             expect(alertText).to.equal('You must be on a team to submit to this gradeable.');

@@ -437,6 +437,8 @@ class NavigationView extends AbstractView {
             ]);
         }
 
+        $prerequisite = 'Please complete ';
+
         if ($graded_gradeable !== null) {
             /** @var TaGradedGradeable $ta_graded_gradeable */
             $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -506,8 +508,6 @@ class NavigationView extends AbstractView {
                     $class = "btn-default";
                 }
             }
-
-            $prerequisite = 'Please complete ';
 
             // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
             if (
