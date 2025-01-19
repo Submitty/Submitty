@@ -130,17 +130,9 @@ class OfficeHoursQueueModel extends AbstractModel {
         return $this->current_queue;
     }
 
-    public function getDisplayName($preferred_first_name, $preferred_last_name, $full_name, $display_name_order): string {
-        if ($preferred_first_name && $preferred_last_name) {
-            if ($display_name_order && $display_name_order === 'GIVEN_F') {
-                return $preferred_first_name . " " . $preferred_last_name;
-            }
-            else {
-                return $preferred_last_name . " " . $preferred_first_name;
-            }
-        }
-
-        return $full_name;
+    public function getDisplayNameFromUserId($user_id): string {
+        $user = $this->core->getQueries()->getUserById($user_id);
+        return $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName();
     }
 
     public function getPastQueue() {
