@@ -13,6 +13,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class SimpleGraderController
@@ -210,6 +212,9 @@ class SimpleGraderController extends AbstractController {
         if (!isset($_POST['user_id'])) {
             return JsonResponse::getFailResponse('Did not pass in user_id');
         }
+        elseif (!isset($_POST['anon_id'])) {
+            return JsonResponse::getFailResponse('Did not pass anon_id');
+        }
         $user_id = $_POST['user_id'];
 
         $grader = $this->core->getUser();
@@ -243,7 +248,7 @@ class SimpleGraderController extends AbstractController {
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
 
-        foreach ($gradeable->getComponents() as $component) {
+        foreach ($gradeable->getComponents() as $index => $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
 
@@ -275,13 +280,39 @@ class SimpleGraderController extends AbstractController {
                     continue;
                 }
             }
-            $component_grade->setGradeTime($this->core->getDateTimeNow());
+            
+            $date = $this->core->getDateTimeNow();
+            $formatted_date = $date->format('Y-m-d H:i:s');
+            $component_grade->setGradeTime($date);
             $return_data[$component->getId()] = $data;
+            $return_data['date'] = $formatted_date;
+
+            if ($data !== '') {
+                if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+                    $this->sendSocketMessage([
+                        'type' => 'update_checkpoint',
+                        'g_id' => $gradeable_id,
+                        'user' => $_POST['anon_id'],
+                        'grader' => $grader->getId(),
+                        'elem' => (string) $index,
+                        'score' => (float) $data,
+                        'date' => $formatted_date
+                    ]);
+                } else {
+                    $this->sendSocketMessage([
+                        'type' => 'update_numeric',
+                        'g_id' => $gradeable_id,
+                        'user' => $_POST['anon_id'],
+                        'elem' => (string) $index,
+                        'value' => $component->isText() ? (string) $data : (float) $data,
+                        'total' => $component_grade->getTotalScore(),
+                    ]);
+                }   
+            }
+            
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
-
-        $return_data['date'] = $this->core->getDateTimeNow()->format('c');
 
         return JsonResponse::getSuccessResponse($return_data);
     }
@@ -386,5 +417,22 @@ class SimpleGraderController extends AbstractController {
         }
 
         return JsonResponse::getSuccessResponse($return_data);
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array<mixed> $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }
