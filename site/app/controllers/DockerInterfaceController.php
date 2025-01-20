@@ -236,11 +236,14 @@ class DockerInterfaceController extends AbstractController {
 
         foreach ($json as $capability_key => $capability) {
             if (($key = array_search($image, $capability, true)) !== false) {
-                unset($json[$capability_key][$key]);
+                array_splice($json[$capability_key], $key, 1);
             }
         }
 
-        file_put_contents($jsonFilePath, json_encode($json, JSON_PRETTY_PRINT));
+        FileUtils::writeJsonFile(
+            $jsonFilePath,
+            $json,
+        );
         return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
     }
 }
