@@ -47,7 +47,7 @@ class DockerUI extends AbstractModel {
     /** @var array<DockerImage> A list of \DockerImages */
     protected array $docker_images = [];
     /** @var array<string> A list of docker image names that could not be pulled */
-    private array $fail_images;
+    private array $fail_images = [];
     /** @var array<mixed> Mapping between images to which Submitty capabilities they are associated with */
     private array $image_to_capability_mapping;
     /**
