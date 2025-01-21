@@ -281,12 +281,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function addSection(string $sectionID, string $label): void {
         // If label is not set, use sectionID as default
-        if ($label === '') {
-            $this->section->$sectionID = $sectionID;
-        }
-        else {
-            $this->section->$sectionID = $label;
-        }
+        $this->section->$sectionID = $label === '' ? $sectionID : $label;
     }
 
     /**
