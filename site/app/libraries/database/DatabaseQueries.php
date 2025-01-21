@@ -963,7 +963,7 @@ SQL;
      *
      * @param  integer      $post_id
      * @param  integer      $thread_id
-     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
+     * @param  integer      $newStatus - 1 implies deletion and 0 as restoration
      * @return boolean|null Is first post of thread
      */
     public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
@@ -974,7 +974,7 @@ SQL;
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if (!$newStatus) {
-            // On undelete, parent post must have deleted = false
+            // On restore, parent post must have deleted = false
             if ($parent_id != -1) {
                 if ($this->getPost($parent_id)['deleted']) {
                     return null;
