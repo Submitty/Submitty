@@ -822,7 +822,14 @@ function saveChanges() {
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
-    formData.append('json_string', buildJSON());
+    try {
+        formData.append('json_string', buildJSON());
+    }
+    catch (err) {
+        console.error(err);
+        $('#save_status').text('An error occurred while saving.');
+        return;
+    }
 
     $.ajax({
         url: url,
