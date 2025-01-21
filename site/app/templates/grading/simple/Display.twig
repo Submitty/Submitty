@@ -272,14 +272,6 @@
             </td>
         {% endif %}
     {% endfor %}
-    <script>
-        function adjustHeight(el){
-            el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
-        }
-        function minimizeHeight(el) {
-            el.style.height = '30px';
-        }
-    </script>
     {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}

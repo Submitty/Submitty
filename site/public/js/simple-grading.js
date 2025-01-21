@@ -384,11 +384,10 @@ function setupCheckboxCells() {
                 old_scores: old_scores,
                 scores: scores,
             },
+            null,
             () => {
-                console.log('Success');
-            },
-            () => {
-                console.log('Failed to save data');
+                console.error('Failed to save data for gradeable:', row_el.data('gradeable'), 
+                              'user:', row_el.data('user'));
             },
         );
     });
@@ -435,6 +434,7 @@ function setupNumericTextCells() {
         let elem = $(this);
         const split_id = elem.attr('id').split('-');
         const row_el = $(`tr#row-${split_id[1]}-${split_id[2]}`);
+
         const scores = {};
         const old_scores = {};
         let total = 0;
