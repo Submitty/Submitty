@@ -430,7 +430,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge = false, merge_thread
         }
         else {
             // eslint-disable-next-line no-var, no-redeclare
-            var new_url = buildCourseUrl(['forum', 'threads']);
+            var new_url = buildCourseUrl(['forum']);
         }
         window.location.replace(new_url);
     }
@@ -992,7 +992,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd ? 'next_page' : 'prev_page');
-    if (load_page === 0) {
+    if (load_page === -1) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -1014,7 +1014,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             // eslint-disable-next-line eqeqeq
             if (count == 0) {
                 // Stop further loads
-                $(element).data('next_page', 0);
+                $(element).data('next_page', -1);
             }
             else {
                 $(element).data('next_page', parseInt(load_page) + 1);
@@ -1035,12 +1035,12 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if (count === 0) {
                 // Stop further loads
-                $(element).data('prev_page', 0);
+                $(element).data('prev_page', -1);
             }
             else {
                 const prev_page = parseInt(load_page) - 1;
                 $(element).data('prev_page', prev_page);
-                if (prev_page >= 1) {
+                if (prev_page >= 0) {
                     arrow_up.show();
                 }
             }
@@ -1076,6 +1076,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            scroll_down: atEnd,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
@@ -1119,7 +1120,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            if ($(element).data('prev_page') !== 0) {
+            if ($(element).data('prev_page') !== -1) {
                 element.scrollTop = sensitivity;
             }
             dynamicScrollLoadPage(element, false);
@@ -1195,7 +1196,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
@@ -1677,7 +1678,9 @@ function refreshCategories() {
             var category_id = parseInt(data[i].split('=')[1]);
             const category_desc = $(`#categorylistitem-${category_id} .categorylistitem-desc span`).text().trim();
             const category_color = $(`#categorylistitem-${category_id} select`).val();
-            order.push([category_id, category_desc, category_color]);
+            const category_diff = parseFloat($(`#categorylistitem-${category_id}`).data('diff'));
+            const category_visible_date = $(`#categorylistitem-${category_id}`).data('visible_date');
+            order.push([category_id, category_desc, category_color, category_diff, category_visible_date]);
         }
 
         // Obtain current selected category
@@ -1696,17 +1699,21 @@ function refreshCategories() {
         // Refresh selected categories
         $('#categories-pick-list').empty();
         order.forEach((category) => {
-            const category_id = category[0];
-            const category_desc = category[1];
-            const category_color = category[2];
-            let selection_class = '';
-            if (selected_button.has(category_id)) {
-                selection_class = 'btn-selected';
+            const category_visible_date = category[4];
+            const category_diff = category[3];
+            if (category_visible_date === '' || category_diff > 0) {
+                const category_id = category[0];
+                const category_desc = category[1];
+                const category_color = category[2];
+                let selection_class = '';
+                if (selected_button.has(category_id)) {
+                    selection_class = 'btn-selected';
+                }
+                const element = `<div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
+                                    <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
+                                </div>`;
+                $('#categories-pick-list').append(element);
             }
-            const element = ` <div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
-                                <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
-                            </div>`;
-            $('#categories-pick-list').append(element);
         });
 
         $(".cat-buttons input[type='checkbox']").each(function () {
@@ -1797,7 +1804,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
         return;
     }
     const type = (isDeletion ? '0' : '2');
-    const message = (isDeletion ? 'delete' : 'undelete');
+    const message = (isDeletion ? 'delete' : 'restore');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
@@ -1838,7 +1845,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 window.location.replace(new_url);
             },
             error: function () {
-                window.alert('Something went wrong while trying to delete/undelete a post. Please try again.');
+                window.alert('Something went wrong while trying to delete/restore a post. Please try again.');
             },
         });
     }

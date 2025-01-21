@@ -16,7 +16,7 @@
             <br>
             <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
-        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" />
+        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
 
         <label for="course-home-url" class="config-row">
             <span class="option-title">Course Home URL</span>
@@ -303,6 +303,49 @@
                 <br>
                 <span class="option-alt">Show a custom message to students at the top of the navigation page.</span>
             </label>
+        </div>
+
+        <br/>
+        <br/>
+        <div class="danger">
+            <h2> Danger Zone</h2>
+            <hr>
+                <div class="config-row checkbox-row">
+                    <input 
+                        type="checkbox"
+                        name="all_self_registration"
+                        id="all-self-registration"
+                        data-testid="all-self-registration"
+                        value="true"
+                        {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                        onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
+                    />
+                    <div>
+                        <label for="all-self-registration">
+                            <span class="option-title">Enable Self Registration</span>
+                        </label>
+                        <br/>
+                        <span>WARNING: This allows ANY user who has access to Submitty to register for this course</span>
+                        <br/>
+                        <span>
+                            In order to allow self registration, you must have at least one <a href='{{ sections_url }}'>registration section</a>
+                        </span>
+                        <br/>
+                        <span class="option-title">Default Section</span>
+                        <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
+                            {% for section in fields['registration_sections'] %}
+                                <option 
+                                    value="{{ section['sections_registration_id'] }}" 
+                                    {{ section['sections_registration_id'] == fields['default_section'] ? 'selected' : ''}}
+                                >
+                                    Section: {{ section['sections_registration_id'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <br/>
+                    </div>
+                </div>
+            </hr>
         </div>
     </div>
 </div>
