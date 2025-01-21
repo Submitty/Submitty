@@ -213,9 +213,10 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse('Did not pass in user_id');
         }
         elseif (!isset($_POST['anon_id'])) {
-            return JsonResponse::getFailResponse('Did not pass anon_id');
+            return JsonResponse::getFailResponse('Did not pass in anon_id');
         }
         $user_id = $_POST['user_id'];
+        $anon_id = $_POST['anon_id'];
 
         $grader = $this->core->getUser();
         try {
@@ -248,12 +249,22 @@ class SimpleGraderController extends AbstractController {
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
 
+        // Account for numeric gradeable websocket update message
+        $elem = isset($_POST['elem']) ? (int) $_POST['elem'] : null;
+        $total = 0;
+        $value = null;
+
         foreach ($gradeable->getComponents() as $index => $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
 
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
+
+            if ($index === $elem) {
+                // Store the value of the updating numeric gradeable element for the websocket message
+                $value = $data;
+            }
 
             if ($component->isText()) {
                 $component_grade->setComment($data);
@@ -275,44 +286,44 @@ class SimpleGraderController extends AbstractController {
                         return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
                     }
                     $component_grade->setScore($data);
+                    $total += $data;
                 }
                 else {
                     continue;
                 }
             }
-            
-            $date = $this->core->getDateTimeNow();
-            $formatted_date = $date->format('Y-m-d H:i:s');
-            $component_grade->setGradeTime($date);
-            $return_data[$component->getId()] = $data;
-            $return_data['date'] = $formatted_date;
 
-            if ($data !== '') {
-                if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-                    $this->sendSocketMessage([
-                        'type' => 'update_checkpoint',
-                        'g_id' => $gradeable_id,
-                        'user' => $_POST['anon_id'],
-                        'grader' => $grader->getId(),
-                        'elem' => (string) $index,
-                        'score' => (float) $data,
-                        'date' => $formatted_date
-                    ]);
-                } else {
-                    $this->sendSocketMessage([
-                        'type' => 'update_numeric',
-                        'g_id' => $gradeable_id,
-                        'user' => $_POST['anon_id'],
-                        'elem' => (string) $index,
-                        'value' => $component->isText() ? (string) $data : (float) $data,
-                        'total' => $component_grade->getTotalScore(),
-                    ]);
-                }   
+            $time = $this->core->getDateTimeNow();
+            $component_grade->setGradeTime($time);
+
+            if (isset($_POST['scores'][$component->getId()]) && $gradeable->getType() === GradeableType::CHECKPOINTS) {
+                // Send websocket message for each checkpoint update (bulk updates possible via keyboard shortcuts)
+                $this->sendSocketMessage([
+                    'type' => 'update_checkpoint',
+                    'g_id' => $gradeable_id,
+                    'user' => $anon_id,
+                    'grader' => $grader->getId(),
+                    'elem' => (string) $index,
+                    'score' => (float) $data,
+                    'date' => $time->format('Y-m-d H:i:s')
+                ]);
             }
-            
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+
+        $return_data['date'] = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+
+        if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $this->sendSocketMessage([
+                'type' => 'update_numeric',
+                'g_id' => $gradeable_id,
+                'user' => $anon_id,
+                'elem' => $_POST['elem'],
+                'value' => $value,
+                'total' => (float) $total,
+            ]);
+        }
 
         return JsonResponse::getSuccessResponse($return_data);
     }

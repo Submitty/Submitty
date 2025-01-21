@@ -277,8 +277,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         (returned_data) => {
             const returned_date = returned_data?.data?.date;
             if (returned_date) {
-                const date = new Date(returned_date);
-                if (!isNaN(date.getTime())) {
+                if (!isNaN(new Date(returned_date).getTime())) {
                     elems.each((idx, elem) => {
                         elem = $(elem);
                         elem.animate({ 'border-right-width': '0px' }, 400);
@@ -454,6 +453,7 @@ function setupNumericTextCells() {
                 csrf_token: csrfToken,
                 user_id: row_el.data('user'),
                 anon_id: row_el.data('anon'),
+                elem: split_id[3],
                 old_scores: old_scores,
                 scores: scores,
             },
@@ -463,8 +463,6 @@ function setupNumericTextCells() {
                 if (row_el.find('.cell-total').text() != total) {
                     row_el.find('.cell-total').text(total).hide().fadeIn('slow');
                 }
-                
-                console.log("Sending", { type: 'update_numeric', elem: split_id[3], user: row_el.data('anon'), value: value, total: total })
             },
             () => {
                 elem.css('background-color', '--standard-light-pink');
@@ -913,7 +911,6 @@ function setupSimpleGrading(action) {
 function initSocketClient() {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        console.log('Received message:', msg);
         switch (msg.type) {
             case 'update_checkpoint':
                 checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader, msg.date);
