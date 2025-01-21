@@ -733,7 +733,7 @@
 
 [data-theme="dark"] .filter-inactive {
     background: var(--btn-default-white);
-    color: var(--actionable-blue); 
+    color: var(--default-black) !important; /* Will be cleaning up this file's use of !important in a future PR */
 }
 
 .thread-resolved {
