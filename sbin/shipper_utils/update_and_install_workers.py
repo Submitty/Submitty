@@ -61,25 +61,25 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                 for image in client.images.list()
                 for image_name in image.attrs["RepoTags"]
             }
-
-            images_to_remove = set.difference(image_set, images_to_update)
+            print("Images found on machine:")
+            for image in image_set:
+                print(image)
+            print("\n")
+            image_ids = set([client.images.get(im).id for im in image_set])
+            images_to_update_ids = set([client.images.get(im).id for im in images_to_update])
+            images_to_remove = set.difference(image_ids, images_to_update_ids)
 
             # Prevent removal of system docker containers
             with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
                 system_docker_containers = json.load(json_file)
 
-            images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
+            images_to_remove = set.difference(images_to_remove, set([client.images.get(im).id for im in system_docker_containers]))
 
             # Remove images
-            for imageRemoved in images_to_remove:
-                try:
-                    image_id = client.images.get(imageRemoved).id
-                    print("Removed image " + imageRemoved)
-                except docker.errors.ImageNotFound as e:
-                    print(f"ERROR: Couldn't find image {imageRemoved}", file=sys.stderr)
-                    continue
+            for image_id in images_to_remove:
                 try:
                     client.images.remove(image_id, True)
+                    print(f"Removed image {image_id}")
                 except Exception as e:
                     print(f"ERROR: An error occurred while removing image by ID {image_id}: {e}", file=sys.stderr)
                     traceback.print_exc(file=sys.stderr)
