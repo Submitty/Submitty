@@ -386,8 +386,8 @@ function setupCheckboxCells() {
             },
             null,
             () => {
-                console.error('Failed to save data for gradeable:', row_el.data('gradeable'), 
-                              'user:', row_el.data('user'));
+                console.error('Failed to save data for gradeable:', row_el.data('gradeable'),
+                    'user:', row_el.data('user'));
             },
         );
     });
