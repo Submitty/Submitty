@@ -107,7 +107,7 @@ class GlobalView extends AbstractView {
             "errorImageData" => $error_image_data,
             "html_lang" => $html_lang,
             "server_time" => time(),
-            "duckGif" => base64_encode(file_get_contents($pathName2))
+            "duckGif" => file_get_contents($pathName2) ? base64_encode(file_get_contents($pathName2)) : ""
         ]);
     }
 

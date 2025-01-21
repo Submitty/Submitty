@@ -24,7 +24,7 @@ class BannerView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         $this->core->getOutput()->addInternalJs("banner.js");
-
+        
         $pathName = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", "draw.pdf");
         $pathName2 = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", "moorthy_chat_gif.gif");
 
@@ -32,8 +32,8 @@ class BannerView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("banner/Banner.twig", [
             "csrf_token" => $this->core->getCsrfToken(),
             "banners" => $communityEventImages,
-            "data" => base64_encode(file_get_contents($pathName)), //THIS IS GOOD
-            "data2"=> base64_encode(file_get_contents($pathName2))
+            "data" => (file_exists($pathName) && file_get_contents($pathName) )? base64_encode(file_get_contents($pathName)) : "", //THIS IS GOOD
+            "data2"=> (file_exists($pathName2) && file_get_contents($pathName2)) ? base64_encode(file_get_contents($pathName2)) : ""
         ]);
     }
 }

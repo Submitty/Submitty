@@ -5,10 +5,12 @@
 &nbsp;
 </p>
 
-<button class="upload-banner btn btn-primary" onclick="newUploadBanner()"> Upload a New Community Event </button>
-<button class="upload-svg btn btn-primary" onclick="newUploadSVG()"> Upload a New Community Event </button>
+  <button class="upload-banner btn btn-primary" onclick="newUploadBanner()" style="margin: 20px 0;"> 
+    Upload a New Community Event 
+  </button>
 
-<br>
+
+
 
 
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -40,12 +42,22 @@
 
 </div>
 {% endfor %}
-<embed src="data:application/pdf;base64,{{data}}" type="application/pdf" width="600" height="400" />
+<br>
+<hr style="border: 1px solid #ccc; margin: 20px 0;">
+
+
+  <button class="upload-svg btn btn-primary" onclick="newUploadSVG()" style="margin: 20px 0;"> 
+    Upload a New Notification Duck
+  </button>
+
+
+
+<br>
 <img src="data:image/gif;base64,{{data2}}" alt="GIF image">
 
+
 </div>
+  {{ include('banner/UploadBannerPopup.twig') }}
+  <br />
+  {{ include('banner/UploadSvgPopup.twig') }}
 
-{{ include('banner/UploadBannerPopup.twig') }}
-
-<br></br>
-{{ include('banner/UploadSvgPopup.twig') }}

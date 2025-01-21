@@ -30,4 +30,5 @@ def up(config, database):
     """)
 
 def down(config, database):
+    #sometimes have to drop the table if weird values get added in
     pass
