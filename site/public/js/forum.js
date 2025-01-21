@@ -1804,7 +1804,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
         return;
     }
     const type = (isDeletion ? '0' : '2');
-    const message = (isDeletion ? 'delete' : 'undelete');
+    const message = (isDeletion ? 'delete' : 'restore');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
@@ -1845,7 +1845,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 window.location.replace(new_url);
             },
             error: function () {
-                window.alert('Something went wrong while trying to delete/undelete a post. Please try again.');
+                window.alert('Something went wrong while trying to delete/restore a post. Please try again.');
             },
         });
     }

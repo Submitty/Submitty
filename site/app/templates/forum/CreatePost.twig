@@ -120,7 +120,7 @@
                 {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                     {#pass#}
                 {% else %}
-                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread.id }}, {{ post.id }}, '{{ post.author.id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
+                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread.id }}, {{ post.id }}, '{{ post.author.id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">{{ post_buttons.delete.ud_toggle_status == "true" ? "Delete" : "Restore" }}</a>
                     <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread.id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
                 {% endif %}
             {% endif %}
