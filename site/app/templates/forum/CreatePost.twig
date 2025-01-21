@@ -25,7 +25,7 @@
 
             {% else %}
 
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover red-hover"></i></a>
 
             {% endif %}
 
@@ -66,11 +66,11 @@
         <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
     {% endif %}
 
-    {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
-        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
+    {% if includeReply and (userGroup <= 3 or post.author.id == current_user) and first and thread_resolve_state == -1 %}
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none key_to_click" tabindex = "0" onClick="changeThreadStatus({{ post.thread.id }})" title="Mark thread as resolved">Mark as resolved</a>
     {% endif %}
 
-    {% if post.author_user_id == current_user and first and not thread_announced and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
+    {% if post.author.id == current_user and first and not thread_announced and date() < date(post_date)|date_modify("+1hour") and userGroup <= 2 %}
         <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{activeThread.id }});"> Pin &amp; email this thread </a>
     {% endif %}
 
@@ -87,7 +87,7 @@
 
     <span class="post-action-container">
 
-        {% if userGroup <= 2 and post.author_user_id != current_user %}
+        {% if userGroup <= 2 and post.author.id != current_user %}
             <a class="post-email-toggle key_to_click" tabindex = "0" onClick='$(this).next().toggle();' title="Show/Hide email address" aria-label="Show/Hide email address"><i class="fas fa-envelope"></i></a>
             <a href="mailto:{{ author_email }}" style="display: none;">{{ author_email }}</a>
         {% endif %}
@@ -116,12 +116,12 @@
         </a>
         <div class="dropdown-menu custom-dropdown-menu" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item key_to_click" tabindex="0" onClick="markPostUnread('{{activeThread.id}}', '{{post_id}}', '{{post_date}}');" title="Mark Post Unread" aria-label="Mark Post Unread">Mark Unread</a>
-            {% if userGroup <= 3 or post.author_user_id == current_user %}
+            {% if userGroup <= 3 or post.author.id == current_user %}
                 {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                     {#pass#}
                 {% else %}
-                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
-                    <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
+                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread.id }}, {{ post.id }}, '{{ post.author.id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">{{ post_buttons.delete.ud_toggle_status == "true" ? "Delete" : "Restore" }}</a>
+                    <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread.id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
                 {% endif %}
             {% endif %}
         </div>
