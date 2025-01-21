@@ -46,9 +46,9 @@ Required Input:
     </div>
     {# /Title bar #}
     {% if graders is not empty %}
-        <p class="grader-names" data-testid="grader-names">
+        <b class="grader-names" data-testid="grader-names">
         &nbsp;Currently being graded by: {{ graders|join(", ")}}
-        </p>
+        </b>
     {% endif %}
 
     {# Marks table #}
