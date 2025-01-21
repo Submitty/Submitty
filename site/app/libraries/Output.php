@@ -135,7 +135,7 @@ class Output {
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
-<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
+<img alt="{$title}" src="data:{$mime_type};base64,{$base64_data}" />
 HTML;
         }, ['is_safe' => ['html']]));
 

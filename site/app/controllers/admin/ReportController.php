@@ -259,8 +259,10 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
-            $ggs[] = $graded_gradeable;
+            if ($graded_gradeable !== null) {
+                $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
+                $ggs[] = $graded_gradeable;
+            }
         }
         return $ggs;
     }

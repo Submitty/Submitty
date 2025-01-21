@@ -1,0 +1,34 @@
+{
+    "required_capabilities" : "default",
+    "autograding_method" : "docker",
+    "container_options" : {
+        "container_image" : "submitty/prolog:8"
+    },
+    "grading_parameters" : {
+        "TOTAL_POINTS" : 5,
+        "AUTO_POINTS" : 5
+    },
+    "autograding" : {
+        "submission_to_runner" : [ "**/*.pl", "**/*.prolog" ]
+    },
+    // prolog is really heavily reliant on signals, even with 
+    // --no-signals and --sigalert=0 it still gets killed without this
+    "allow_system_calls": [
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS"
+    ],
+    "testcases" : [
+        {
+            "title" : "Output Check",
+            "command" : "swipl -l *.pl -g goal(atom) -g print(success) -t halt",
+            "points" : 5,
+            "validation" : [
+                {
+                    "actual_file" : "STDOUT.txt",
+                    "method" : "diff",
+                    "comparison" : "byLinebyChar",
+                    "expected_string" : "success"
+                }
+            ]
+        }
+    ]
+}

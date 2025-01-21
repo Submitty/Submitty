@@ -119,7 +119,7 @@ class AccessControl {
             $this->role = $role;
         }
         else {
-            throw new \InvalidArgumentException("Invalid role: ${role}");
+            throw new \InvalidArgumentException("Invalid role: {$role}");
         }
     }
 
@@ -145,7 +145,7 @@ class AccessControl {
             $this->level = $level;
         }
         else {
-            throw new \InvalidArgumentException("Invalid level: ${level}");
+            throw new \InvalidArgumentException("Invalid level: {$level}");
         }
     }
 
