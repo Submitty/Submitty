@@ -924,21 +924,17 @@ class AdminGradeableController extends AbstractController {
                     $checkpoint_labels[] = $old_component->getTitle();
 
                     // Check if this checkpoint is extra credit
-                    if ($old_component->isExtraCredit()) {
-                        $checkpoint_extra[] = true;
-                    }
-                    else {
-                        $checkpoint_extra[] = false;
-                    }
+                    $checkpoint_extra[] = $old_component->isExtraCredit();
                 }
             }
 
-            $form_json = [];
-            $form_json["checkpoint_label"] = $checkpoint_labels;
-            $form_json["checkpoint_extra"] = $checkpoint_extra;
-            $form_json["num_text_items"] = $num_old_texts;
-            $form_json["num_checkpoint_items"] = $num_old_checkpoints;
-            $form_json["text_label"] = $text_labels;
+            $form_json = [
+                'checkpoint_label' => $checkpoint_labels,
+                'checkpoint_extra' => $checkpoint_extra,
+                'num_text_items' => $num_old_texts,
+                'num_checkpoint_items' => $num_old_checkpoints,
+                'text_label' => $text_labels,
+            ];
 
             // Iterate through existing components
             $new_components = [];
@@ -959,28 +955,25 @@ class AdminGradeableController extends AbstractController {
                 $new_components[] = $component;
             }
 
+            // Update existing text components with new details if they exist
             $z = $x;
             $x = 0;
             foreach ($old_texts as $old_text) {
                 if ($x < $num_text && $x < $num_old_texts) {
                     self::parseText($old_text, $details['text'][$x]);
-                    $old_text->setOrder($z + $x);
+                    $old_text->setOrder($z + $x);// Maintain correct order after checkpoints
                     $new_components[] = $old_text;
                     $start_index_text++;
                 }
                 $x++;
             }
-
+            // Add new text components if number of text items increase
             for ($y = $start_index_text; $y < $num_text; $y++) {
                 $component = $this->newComponent($gradeable);
                 self::parseText($component, $details['text'][$y]);
                 $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
-
-            $gradeable->setComponents($new_components);
-
-            $this->core->getQueries()->updateGradeable($gradeable);
         }
         elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             if (!isset($details['numeric'])) {
@@ -1046,13 +1039,15 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
-
-            $gradeable->setComponents($new_components);
-            $this->core->getQueries()->updateGradeable($gradeable);
         }
         else {
             throw new \InvalidArgumentException("Invalid gradeable type");
         }
+        // Finally, Set the components and update the gradeable
+        $gradeable->setComponents($new_components);
+
+        // Save to the database
+        $this->core->getQueries()->updateGradeable($gradeable);
     }
 
 
