@@ -8,7 +8,7 @@ class PlagiarismUtils {
      * hash size and language name are listed but more parameters can be added in the future.
      * @var int
      */
-    const SUPPORTED_LANGUAGES = [
+    public const SUPPORTED_LANGUAGES = [
         "plaintext" => [
             "hash_size" => 14
         ],
@@ -30,7 +30,7 @@ class PlagiarismUtils {
      * This constant represents the default common code threshold listed on the plagiarism configuration form
      * @var int
      */
-    const DEFAULT_THRESHOLD = 10;
+    public const DEFAULT_THRESHOLD = 10;
 
     /**
      * @param string $filename

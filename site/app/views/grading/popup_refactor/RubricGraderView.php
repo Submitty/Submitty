@@ -15,6 +15,7 @@
  */
 
 // Namespace:
+
 namespace app\views\grading\popup_refactor;
 
 // Includes:

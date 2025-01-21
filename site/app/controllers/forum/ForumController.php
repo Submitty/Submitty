@@ -455,7 +455,7 @@ class ForumController extends AbstractController {
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
-                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
+                $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -721,7 +721,7 @@ class ForumController extends AbstractController {
         $markdown = !empty($_POST['markdown_status']);
 
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
-                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
+            return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
         if (isset($_POST['thread_id']) && $post['thread_id'] !== intval($_POST['thread_id'])) {
             return $this->core->getOutput()->renderJsonFail("You do not have permission to do that.");
@@ -790,7 +790,7 @@ class ForumController extends AbstractController {
             $type = null;
             $isError = false;
             $messageString = '';
-             // Author of first post and thread must be same
+            // Author of first post and thread must be same
             if (is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
             }

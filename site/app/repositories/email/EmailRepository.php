@@ -5,8 +5,8 @@ namespace app\repositories\email;
 use Doctrine\ORM\EntityRepository;
 
 class EmailRepository extends EntityRepository {
-    const PAGE_SIZE = 5000;
-    const MAX_SUBJECTS_PER_PAGE = 10;
+    public const PAGE_SIZE = 5000;
+    public const MAX_SUBJECTS_PER_PAGE = 10;
 
     public function getEmailsByPage(int $page, $semester = null, $course = null): array {
         $subjects = $this->getPageSubjects($page, $semester, $course);

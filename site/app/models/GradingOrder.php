@@ -326,7 +326,7 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
 
-        // Else $submitter is not in one of our sections so set $index to number of submitters in our sections
+            // Else $submitter is not in one of our sections so set $index to number of submitters in our sections
         }
         else {
             $count = 0;
@@ -345,7 +345,8 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
             //Repeat until we find one that works
-        } while (!$fn($sub));
+        }
+        while (!$fn($sub));
 
         return $sub;
     }
@@ -366,7 +367,7 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
 
-        // Else $submitter is not in one of our sections so set $index to -1
+            // Else $submitter is not in one of our sections so set $index to -1
         }
         else {
             $index = -1;
@@ -379,7 +380,8 @@ class GradingOrder extends AbstractModel {
                 return null;
             }
             //Repeat until we find one that works
-        } while (!$fn($sub));
+        }
+        while (!$fn($sub));
 
         return $sub;
     }

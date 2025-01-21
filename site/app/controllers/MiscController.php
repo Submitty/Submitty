@@ -17,7 +17,7 @@ use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 
 class MiscController extends AbstractController {
-    const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
+    public const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
     /**
      * Get the current server time

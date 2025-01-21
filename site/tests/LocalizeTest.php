@@ -25,7 +25,7 @@ class LocalizeTest extends \PHPUnit\Framework\TestCase {
 
             $body = file_get_contents($file['path']);
 
-            $blocks = array_map(fn($s) => explode('}}', $s)[0], array_slice(explode('{{', $body), 1));
+            $blocks = array_map(fn ($s) => explode('}}', $s)[0], array_slice(explode('{{', $body), 1));
 
             foreach ($blocks as $block) {
                 preg_match_all($expression, $block, $matches, PREG_SET_ORDER);

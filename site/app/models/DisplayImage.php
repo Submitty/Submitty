@@ -23,10 +23,10 @@ use app\libraries\FileUtils;
  */
 class DisplayImage extends AbstractModel {
     /** string[] The set of legal display_image_state which may be collected from the DB */
-    const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
+    public const LEGAL_IMAGE_STATES = ['system', 'preferred', 'flagged'];
 
     /** string[] The set of directories for which it is legal to save a DisplayImage to */
-    const LEGAL_FOLDERS = ['system_images', 'user_images'];
+    public const LEGAL_FOLDERS = ['system_images', 'user_images'];
 
     /**
      * int
@@ -34,7 +34,7 @@ class DisplayImage extends AbstractModel {
      * have the larger dimension resized to this constant, while the other dimension will be reduced to maintain the
      * original form factor of the image.
      */
-    const IMG_MAX_DIMENSION = 500;
+    public const IMG_MAX_DIMENSION = 500;
 
     /** @prop
      * @var string The file path to the selected image */
