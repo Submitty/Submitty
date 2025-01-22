@@ -25,7 +25,8 @@ class GlobalView extends AbstractView {
         }
 
         $page_title = "Submitty";
-        if ($this->core->getUser() === null) {
+        $user = $this->core->getUser();
+        if ($user === null) {
             $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
@@ -82,7 +83,7 @@ class GlobalView extends AbstractView {
             "page_title" => $page_title,
             "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
-            "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
+            "user_given_name" => $user !== null ? $user->getDisplayedGivenName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
