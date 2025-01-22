@@ -249,7 +249,7 @@ class SimpleGraderController extends AbstractController {
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
 
-        // Account for numeric gradeable websocket update message
+        // Numeric gradeable websocket message data
         $elem = isset($_POST['elem']) ? (int) $_POST['elem'] : null;
         $total = 0;
         $value = null;
@@ -260,11 +260,6 @@ class SimpleGraderController extends AbstractController {
 
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
-
-            if ($index === $elem) {
-                // Store the value of the updating numeric gradeable element for the websocket message
-                $value = $data;
-            }
 
             if ($component->isText()) {
                 $component_grade->setComment($data);
@@ -295,9 +290,15 @@ class SimpleGraderController extends AbstractController {
 
             $time = $this->core->getDateTimeNow();
             $component_grade->setGradeTime($time);
+            $return_data[$component->getId()] = $data;
+
+            if ($index === $elem) {
+                // Store the value of the updating component for the websocket message
+                $value = $data;
+            }
 
             if (isset($_POST['scores'][$component->getId()]) && $gradeable->getType() === GradeableType::CHECKPOINTS) {
-                // Send websocket message for each checkpoint update (bulk updates possible via keyboard shortcuts)
+                // Send websocket updates for each provided component (bulk updates possible via keyboard shortcuts)
                 $this->sendSocketMessage([
                     'type' => 'update_checkpoint',
                     'g_id' => $gradeable_id,
