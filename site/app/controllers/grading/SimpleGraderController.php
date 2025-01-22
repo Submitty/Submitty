@@ -212,11 +212,8 @@ class SimpleGraderController extends AbstractController {
         if (!isset($_POST['user_id'])) {
             return JsonResponse::getFailResponse('Did not pass in user_id');
         }
-        elseif (!isset($_POST['anon_id'])) {
-            return JsonResponse::getFailResponse('Did not pass in anon_id');
-        }
         $user_id = $_POST['user_id'];
-        $anon_id = $_POST['anon_id'];
+        $anon_id = $_POST['anon_id'] ?? $user_id;
 
         $grader = $this->core->getUser();
         try {
