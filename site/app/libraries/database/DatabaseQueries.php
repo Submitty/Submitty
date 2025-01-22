@@ -9409,18 +9409,10 @@ ORDER BY
      * @return void
      */
     public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
-        if ($isTeam) {
             $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
         ", [$component->getId(), $grader_id, $isTeam ? null : $graded_id, $isTeam ? $graded_id : null, $this->core->getDateTimeNow()]);
-        }
-        else {
-            $this->course_db->query("
-            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, timestamp)
-            VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING
-        ", [$component->getId(), $grader_id, $graded_id, $this->core->getDateTimeNow()]);
-        }
     }
 
     /**
@@ -9433,15 +9425,15 @@ ORDER BY
      */
     public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
         if ($isTeam) {
-        $this->course_db->query("
+            $this->course_db->query("
             DELETE FROM active_graders
-            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id = ?
-        ", [$component->getId(), $grader_id, $isTeam ? null : $graded_id, $isTeam ? $graded_id : null]);
+            WHERE gc_id = ? AND grader_id = ? AND ag_user_id IS NULL AND ag_team_id = ?
+        ", [$component->getId(), $grader_id, $graded_id]);
         }
         else {
-        $this->course_db->query("
+            $this->course_db->query("
             DELETE FROM active_graders
-            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ?
+            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id IS NULL
         ", [$component->getId(), $grader_id, $graded_id]);
         }
     }
