@@ -58,7 +58,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .post_viewed_btn {
-    background-color: #dcdcdcb5 !important;
+    background-color: #dcdcdcb5;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -90,8 +90,8 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .first_post {
-    padding-left: 10px !important;
-    margin-top: 0 !important;
+    padding-left: 10px;
+    margin-top: 0;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -155,15 +155,15 @@
 }
 
 .category-item-box {
-    background-color: var(--standard-pale-gray) !important;
+    background-color: var(--standard-pale-gray);
 }
 
 .category-button {
-    color: var(--standard-gray-black) !important;
+    color: var(--standard-gray-black);
 }
 
 .edit-catergoty-name {
-    background-color: var(--always-default-white) !important;
+    background-color: var(--always-default-white);
 }
 
 .create-post-head {
@@ -224,7 +224,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
-    color: #e0e0e0 !important;
+    color: #e0e0e0;
 }
 
 .red-hover:hover {
@@ -238,7 +238,7 @@
 }
 
 .text-decoration-none {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 
@@ -309,15 +309,15 @@
 }
 
 .current-favorite i.fas {
-    color: var(--standard-medium-red) !important;
+    color: var(--standard-medium-red);
 }
 
 .active-thread-remove-expiring-announcement i.fas {
-    color: gold !important;
+    color: gold;
 }
 
 .active-thread-remove-announcement i.fas {
-    color: var(--submitty-logo-blue) !important;
+    color: var(--submitty-logo-blue);
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
@@ -521,7 +521,7 @@
 }
 
 .cursor-pointer {
-    cursor: pointer !important;
+    cursor: pointer;
 }
 
 #search-hr {
@@ -544,15 +544,15 @@
 }
 
 .position-relative {
-    position: relative !important;
+    position: relative;
 }
 
 .position-absolute {
-    position: absolute !important;
+    position: absolute;
 }
 
 .right-zero {
-    right: 0 !important;
+    right: 0;
 }
 
 #merge-thread-btn {
@@ -798,8 +798,8 @@
 }
 
 .deleted-unviewed {
-    background-color: var(--deleted-and-unviewed-thread) !important;
-    color: var(--deleted-color) !important;
+    background-color: var(--deleted-and-unviewed-thread);
+    color: var(--deleted-color);
 }
 
 .deleted.active {
@@ -872,7 +872,7 @@
 
 .pinned-thread .fa-ellipsis-v {
     font-size: 1.2em;
-    color: var(--default-black) !important;
+    color: var(--default-black);
 }
 
 .custom-dropdown-menu {
