@@ -8431,7 +8431,6 @@ WHERE current_state IN
 
               LEFT JOIN LATERAL (
                 SELECT
-                  gc.gc_id,
                   gc.g_id,
                   json_object_agg(gc.gc_id, graders) as ag_graders,
                   json_object_agg(gc.gc_id, graders_names) as ag_graders_names,
@@ -8439,17 +8438,16 @@ WHERE current_state IN
                 FROM gradeable_component gc
                 LEFT JOIN (
                   SELECT
-                    ag_user_id,
-                    ag_team_id,
+                    ag_{$submitter_type},
                     gc_id,
                     json_agg(grader_id) AS graders,
                     json_agg(COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) || ' ' || substr(COALESCE(NULLIF(user_preferred_familyname,''), user_familyname), 1, 1) || '.') AS graders_names,
                     json_agg(timestamp) AS timestamps
                   FROM active_graders
                   LEFT JOIN users ON active_graders.grader_id = users.user_id
-                  GROUP BY ag_user_id, ag_team_id, gc_id
+                  GROUP BY ag_{$submitter_type} , gc_id
                 ) as ag on ag.gc_id = gc.gc_id AND ag.ag_{$submitter_type}={$submitter_type_ext}
-                GROUP BY gc.gc_id, gc.g_id
+                GROUP BY gc.g_id
               ) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
@@ -9411,10 +9409,18 @@ ORDER BY
      * @return void
      */
     public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
-        $this->course_db->query("
+        if ($isTeam) {
+            $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
         ", [$component->getId(), $grader_id, $isTeam ? null : $graded_id, $isTeam ? $graded_id : null, $this->core->getDateTimeNow()]);
+        }
+        else {
+            $this->course_db->query("
+            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, timestamp)
+            VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING
+        ", [$component->getId(), $grader_id, $graded_id, $this->core->getDateTimeNow()]);
+        }
     }
 
     /**
@@ -9426,10 +9432,18 @@ ORDER BY
      * @return void
      */
     public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
+        if ($isTeam) {
         $this->course_db->query("
             DELETE FROM active_graders
             WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id = ?
         ", [$component->getId(), $grader_id, $isTeam ? null : $graded_id, $isTeam ? $graded_id : null]);
+        }
+        else {
+        $this->course_db->query("
+            DELETE FROM active_graders
+            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ?
+        ", [$component->getId(), $grader_id, $graded_id]);
+        }
     }
     /**
      * @param string $image the full name of the image to get

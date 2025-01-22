@@ -2422,7 +2422,7 @@ class ElectronicGraderController extends AbstractController {
         }
         // If there are no graders for this component, use an empty array
         if (isset($graders[$component_id])) {
-            // Ensure the current grader is not in the list of active graders:w
+            // Ensure the current grader is not in the list of active graders
             for ($i = 0; $i < count($graders[$component_id]); $i++) {
                 if ($graders[$component_id][$i] === $grader->getId()) {
                     array_splice($timestamps[$component_id], $i, 1);
