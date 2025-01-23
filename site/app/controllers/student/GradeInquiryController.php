@@ -439,8 +439,7 @@ class GradeInquiryController extends AbstractController {
      * @param array<mixed> $msg_array
      */
     private function sendSocketMessage(array $msg_array): void {
-        $user_id = $this->core->getUser()->getId();
-        $msg_array['user_id'] = $msg_array['sender_id'] = $user_id;
+        $msg_array['user_id'] = $this->core->getUser()->getId();
         $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'] . '_' . $msg_array['submitter_id'];
 
         try {
