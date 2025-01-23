@@ -1297,42 +1297,36 @@ class Gradeable extends AbstractModel {
      */
     public function setComponents(array $components) {
         $components = array_values($components);
-    
-        // Verify that the inputs are all Component instances
         foreach ($components as $component) {
             if (!($component instanceof Component)) {
                 throw new \InvalidArgumentException('Object in components array was not a component');
             }
         }
-    
-        // Getting deleted components
+
+        // Get the implied deleted components from this operation and ensure we aren't deleting any
+        //  components that have grades already
         $deleted_components = array_udiff($this->components, $components, Utils::getCompareByReference());
-    
-        // Check for attempts to delete non-empty components with associated grades
-        foreach ($deleted_components as $deleted_component) {
-            if (trim($deleted_component->getTitle()) !== '') {
-                throw new \InvalidArgumentException('Cannot delete a component with grades');
-            }
+        if (
+            in_array(
+                true,
+                array_map(
+                    function (Component $component) {
+                        return $component->anyGrades();
+                    },
+                    $deleted_components
+                )
+            )
+        ) {
+            throw new \InvalidArgumentException('Call to setComponents implied deletion of component with grades');
         }
-    
-        // Check the number of remaining non-empty components
-        $non_empty_components = array_filter($components, function (Component $component) {
-            return trim($component->getTitle()) !== ''; 
-        });
-    
-        if (count($non_empty_components) < 1) {
-            throw new \InvalidArgumentException('At least one non-empty component must remain');
-        }
-    
-        // 更新组件列表
+
         $this->components = $components;
-    
-        // Sort components by order
+
+        // sort by order
         usort($this->components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
     }
-    
 
     /**
      * Adds a new component to this gradeable with the provided properties
