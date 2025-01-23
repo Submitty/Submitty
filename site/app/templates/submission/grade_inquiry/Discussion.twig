@@ -18,7 +18,7 @@
     {% if grade_inquiry_per_component_allowed %}
         {%  include "submission/grade_inquiry/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
     {% endif %}
-    <div class='grade-inquiries' data-user_id="{{ user_id }}">
+    <div class='grade-inquiries'>
         {% for component in gradeable_components %}
             <div class="grade-inquiry" data-component_id={{ component.id }}>
                 <div class="grade-inquiry-header-div">

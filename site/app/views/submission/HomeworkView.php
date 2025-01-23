@@ -1425,8 +1425,7 @@ class HomeworkView extends AbstractView {
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,
-            "csrf_token" => $this->core->getCsrfToken(),
-            "user_id" => $this->core->getUser()->getId()
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 

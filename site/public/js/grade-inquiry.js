@@ -170,11 +170,6 @@ function onGradeInquirySubmitClicked(button) {
 function initGradingInquirySocketClient() {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        // Ignore websocket messages related to current user actions
-        if ($('.grade-inquiries').first().attr('data-user_id') === msg.sender_id) {
-            return;
-        }
-
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
