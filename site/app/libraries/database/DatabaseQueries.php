@@ -7533,9 +7533,10 @@ AND gc_id IN (
                 helper.user_email_secondary_notify AS helper_email_secondary_notify,
                 helper.user_group AS helper_group,
                 helper.user_pronouns AS helper_pronouns,
+                helper.display_name_order AS helper_display_name_order,
                 h1.helped_today
             FROM queue
-            LEFT JOIN users helper on helper.user_id = queue.help_started_by
+            LEFT JOIN users helper on helper.user_id = queue.added_by
             LEFT JOIN (
             SELECT user_id as uid, queue_code as qc, COUNT(queue_code) AS helped_today
             FROM queue WHERE time_in > ? AND (removal_type = 'helped' OR removal_type = 'self_helped')
