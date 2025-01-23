@@ -1,5 +1,5 @@
 /* global displaySuccessMessage, hljs, luxon, buildCourseUrl, csrfToken,
-    displayErrorMessage, escapeSpecialChars */
+    displayErrorMessage, escapeSpecialChars, isFullPage */
 /* exported markForDeletion */
 /* exported unMarkForDeletion */
 /* exported  displayHistoryAttachment */
@@ -1086,6 +1086,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
+            is_full_page: isFullPage,
         },
         success: function (r) {
             const x = JSON.parse(r)['data'];
