@@ -317,7 +317,7 @@ class SimpleGraderController extends AbstractController {
                 'type' => 'update_numeric',
                 'g_id' => $gradeable_id,
                 'user' => $anon_id,
-                'elem' => $_POST['elem'],
+                'elem' => $_POST['elem'] ?? '',
                 'value' => $value,
                 'total' => (float) $total,
             ]);
