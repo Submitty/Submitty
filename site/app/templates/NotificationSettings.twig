@@ -43,44 +43,6 @@
             </div>
 
             <div class="heading">
-                <h2>Registration</h2>
-                <hr>
-            </div>
-            <div class="option row">
-                <div class="option-desc col-md-4">
-                    <span>
-                        <span class="option-title">New Self Registration</span>
-                        <br>
-                        <span class="option-alt">Notify me of self-registrations</span>
-                    </span>
-                </div>
-                <div 
-                    class="option-input col-md-3 notification-setting-input"
-                >
-                        <input 
-                            type="checkbox" 
-                            aria-label="Notification All New Self Registrations" 
-                            name="self_registration" 
-                            id="self_registration" 
-                            disabled
-                        >
-                </div>
-                {% if email_enabled %}
-                    <div 
-                        class="option-input col-md-5 email-setting-input"
-                    >
-                            <input 
-                                type="checkbox" 
-                                aria-label="Email All New Self Registrations" 
-                                name="self_registration_email" 
-                                id="self-registration-email" 
-                                {% if notification_saves['self_registration_email'] %} checked {% endif %}
-                            >
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="heading">
                 <h2>Forum</h2>
                 <hr>
             </div>
@@ -326,6 +288,43 @@
                 {% endif %}
             </div>
 
+            <div class="heading">
+                <h2>Registration</h2>
+                <hr>
+            </div>
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <span>
+                        <span class="option-title">New Self Registration</span>
+                        <br>
+                        <span class="option-alt">Notify me of self-registrations</span>
+                    </span>
+                </div>
+                <div 
+                    class="option-input col-md-3 notification-setting-input"
+                >
+                        <input 
+                            type="checkbox" 
+                            aria-label="Notification All New Self Registrations" 
+                            name="self_registration" 
+                            id="self_registration" 
+                            disabled
+                        >
+                </div>
+                {% if email_enabled %}
+                    <div 
+                        class="option-input col-md-5 email-setting-input"
+                    >
+                            <input 
+                                type="checkbox" 
+                                aria-label="Email All New Self Registrations" 
+                                name="self_registration_email" 
+                                id="self-registration-email" 
+                                {% if notification_saves['self_registration_email'] %} checked {% endif %}
+                            >
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </form>
     <script>
