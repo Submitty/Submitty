@@ -731,6 +731,11 @@
     color: var(--actionable-blue);
 }
 
+[data-theme="dark"] .filter-inactive {
+    background: var(--btn-default-white);
+    color: var(--default-black) !important;
+}
+
 .thread-resolved {
     color: var(--good-green);
     margin-right: 0;
