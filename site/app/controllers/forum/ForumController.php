@@ -845,8 +845,8 @@ class ForumController extends AbstractController {
                 $this->core->getCourseEntityManager()->flush();
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Undeleted: " . Notification::textShortner($post->getContent());
-                $content = "In " . $full_course_name . "\n\nThe following post was undeleted.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
+                $subject = "Restored: " . Notification::textShortner($post->getContent());
+                $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
@@ -1214,7 +1214,9 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
         if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
+            $this->core->addErrorMessage("Requested thread does not exist.");
+            $this->core->redirect(($this->core->buildCourseUrl(['forum'])));
+            return;
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
