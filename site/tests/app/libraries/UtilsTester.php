@@ -52,7 +52,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testAcceptedEmail() {
         $good_email = 'goodemail@rpi.edu';
-        $core = new Core();
+        $core = createMockCore();
         $reqs = $core->getConfig()->getAcceptedEmails();
         $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email));
         $good_email_gmail = 'goodemail@gmail.com';
