@@ -1814,7 +1814,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
-        const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
+        const url = buildCourseUrl(['forum', 'posts', 'delete']);
         $.ajax({
             url: url,
             type: 'POST',
@@ -2334,7 +2334,7 @@ function updateThread(e) {
     }
 
     $.ajax({
-        url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
+        url: buildCourseUrl(['forum', 'posts', 'modify']),
         type: 'POST',
         data: formData,
         processData: false,
