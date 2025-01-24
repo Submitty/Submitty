@@ -831,7 +831,7 @@ function saveChanges() {
                 $('#save_status').text('All changes saved');
             }
             else {
-                console.log(response);
+                console.error(response);
             }
         },
         // error: function (jqXHR, textStatus, errorThrown) {
