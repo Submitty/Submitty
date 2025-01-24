@@ -2,10 +2,6 @@
 
 
 def up(config, database):
-    # Set all users with an empty string for user_preferred_givenname to NULL and add a constraint to prevent future empty strings
-    database.execute("UPDATE users SET user_preferred_givenname = NULL WHERE user_preferred_givenname = ''")
-    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_givenname_not_empty CHECK (user_preferred_givenname <> '')")
-    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_familyname_not_empty CHECK (user_preferred_familyname <> '')")
     """
     Run up migration.
 
@@ -14,13 +10,14 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
+
+    database.execute("UPDATE users SET user_preferred_givenname = NULL WHERE user_preferred_givenname = ''")
+    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_givenname_not_empty CHECK (user_preferred_givenname <> '')")
+    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_familyname_not_empty CHECK (user_preferred_familyname <> '')")
     pass
 
 
 def down(config, database):
-    # Remove the constraint that prevents empty strings in user_preferred_givenname
-    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_givenname_not_empty")
-    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_familyname_not_empty")
     """
     Run down migration (rollback).
 
@@ -29,4 +26,7 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
+
+    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_givenname_not_empty")
+    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_familyname_not_empty")
     pass
