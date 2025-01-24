@@ -2188,7 +2188,7 @@ class ElectronicGraderController extends AbstractController {
             $response_data['active_graders_timestamps'] = [];
             return $response_data;
         }
-        // Ensure the current grader is not in the list of active graders:w
+        // Ensure the current grader is not in the list of active graders
         foreach ($graders as $component_id => $component_graders) {
             if (isset($timestamps[$component_id]) && isset($graders_names[$component_id])) {
                 for ($i = 0; $i < count($component_graders); $i++) {
