@@ -3,10 +3,20 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Test Rainbow Grading', () => {
         beforeEach(() => {
             cy.login('instructor');
-            cy.visit(['sample', 'config']);
-            checkCheckbox('[data-testid="display-rainbow-grades-summary"]');
-            cy.visit(['sample', 'reports', 'rainbow_grades_customization']);
+            cy.visit(['testing', 'config']);
+            cy.get('[data-testid="display-rainbow-grades-summary"]').check();
+            cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
             reset();
+        });
+        it('Add grades to numeric gradeable', () => {
+            const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
+
+            cy.visit(['testing', 'gradeable', 'numeric', 'grading']);
+            cy.get('#csvUpload').selectFile(gradesfile, { action: 'drag-drop' });
+            cy.on('window:confirm', () => true);
+
+            cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
+            cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
         });
         it('Web-Based Rainbow Grades Customization should work', () => {
             // Ensure that elements requiring a manual_customization.json are only visible if file exists
@@ -115,7 +125,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="plagiarism-submit"]').click();
             cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
             cy.get('@plagiarism-table-elements').eq(0).should('contain', 'adamsg');
-            cy.get('@plagiarism-table-elements').eq(1).should('contain', 'grades_released_homework_autota');
+            cy.get('@plagiarism-table-elements').eq(1).should('contain', 'numeric');
             cy.get('@plagiarism-table-elements').eq(2).should('contain', '1');
             cy.get('@plagiarism-table-elements').eq(3).find('a').click();
         });
@@ -161,39 +171,38 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
             cy.get('[data-testid="display-benchmarks-average"]').check();
             cy.get('[data-testid="display-benchmarks-stddev"]').check();
             cy.get('[data-testid="display-benchmarks-perfect"]').check();
+            cy.visit(['testing', 'reports', 'summaries']);
+            cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
             cy.get('[data-testid="btn-build-customization"]').click();
             cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
-            cy.visit(['sample', 'grades']);
+            cy.visit(['testing', 'grades']);
             ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
                 cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
             });
             cy.get('[data-testid="rainbow-grades"]').should('contain', 'Information last updated');
-            ['ta', 'student', 'grader', 'instructor'].forEach((username) => {
+            ['aphacker', 'bitdiddle', 'student'].forEach((username) => {
                 cy.logout();
                 cy.login(username);
-                cy.visit(['sample', 'grades']);
-                cy.get('[data-testid="rainbow-grades"]').should('contain', `Lecture Participation Polls for: ${username}`);
-                if (username === 'instructor') {
-                    checkRainbowGrades('instructor', 801516157, 'Quinn', 'Instructor');
+                cy.visit(['testing', 'grades']);
+                if (username === 'aphacker') {
+                    checkRainbowGrades('aphacker', 'aphacker', 121238953, 'Alyssa P', 'Hacker');
                     checkRainbowGradesOption();
                 }
-                else if (username === 'ta') {
-                    checkRainbowGrades('ta', 281179137, 'Jill', 'TA');
+                else if (username === 'bitdiddle') {
+                    checkRainbowGrades('bitdiddle', 'bitdiddle', 141574736, 'Ben', 'Bitdiddle');
                     checkRainbowGradesOption();
                 }
                 else if (username === 'student') {
                     checkRainbowGrades('student', 'student', 410853871, 'Joe', 'Student');
                     checkRainbowGradesOption();
                 }
-                else if (username === 'grader') {
-                    checkRainbowGrades('grader', 10306042, 'Tim', 'Grader');
-                    checkRainbowGradesOption();
-                }
             });
-            cy.visit(['sample', 'config']);
+            cy.logout();
+            cy.login('instructor');
+            cy.visit(['testing', 'config']);
             cy.get('[data-testid="display-rainbow-grades-summary"]').uncheck();
             cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
-            cy.visit(['sample', 'grades']);
+            cy.visit(['testing', 'grades']);
             cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
         });
     });
@@ -230,7 +239,7 @@ const checkRainbowGradesOption = () => {
     });
 };
 const reset = () => {
-    cy.get('[data-testid="display-grade-summary"]').uncheck();
+    cy.get('[data-testid="display-grade-summary"]').should('be.visible').uncheck();
     cy.get('[data-testid="display-grade-details"]').uncheck();
     cy.get('[data-testid="display-exam-seating"]').uncheck();
     cy.get('[data-testid="display-section"]').uncheck();
