@@ -9430,10 +9430,11 @@ ORDER BY
     public function removeComponentGrader(Component $component, string $grader_id, string $graded_id) {
             $this->course_db->query("
             DELETE FROM active_graders
-            WHERE gc_id = ? AND grader_id = ? AND ag_user_id IS NULL AND (ag_user_id = ? OR ag_team_id = ?)
+            WHERE gc_id = ? AND grader_id = ? AND (ag_user_id = ? OR ag_team_id = ?)
             ", [
             $component->getId(),
             $grader_id,
+            $graded_id,
             $graded_id,
             ]);
     }
