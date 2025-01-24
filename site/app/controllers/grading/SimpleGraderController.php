@@ -272,7 +272,7 @@ class SimpleGraderController extends AbstractController {
                 if ($original_data != $db_data) {
                     return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
                 }
-                $component_grade->setScore($data);  
+                $component_grade->setScore($data);
             }
             $component_grade->setGradeTime($this->core->getDateTimeNow());
             $return_data[$component->getId()] = $data;
