@@ -696,10 +696,22 @@ class ForumController extends AbstractController {
     public function markPostUnread(): JsonResponse {
         $thread_id = $_POST["thread_id"];
         $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
+        
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($thread_id, "tree", true);
+        $post = $thread->getPosts()->filter(function ($x) use ($post_id) {
+            return $x->getId() === $post_id;
+        })->first();
+        
+        //To-do: add method for visitThread in Thread entity.
+
         // format the last viewed timestamp to be in the same format as the database
         $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone())->format("Y-m-d H:i:sO");
         $current_user = $this->core->getUser()->getId();
-        $this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
+
+        
+        //$this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
+        
         $response = ['user' => $current_user, 'last_viewed_timestamp' => $last_viewed_timestamp];
         return JsonResponse::getSuccessResponse($response);
     }
