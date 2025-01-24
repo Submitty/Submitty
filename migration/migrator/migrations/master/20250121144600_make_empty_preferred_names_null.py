@@ -12,6 +12,7 @@ def up(config, database):
     """
 
     database.execute("UPDATE users SET user_preferred_givenname = NULL WHERE user_preferred_givenname = ''")
+    database.execute("UPDATE users SET user_preferred_familyname = NULL WHERE user_preferred_familyname = ''")
     database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_givenname_not_empty CHECK (user_preferred_givenname <> '')")
     database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_familyname_not_empty CHECK (user_preferred_familyname <> '')")
     pass
