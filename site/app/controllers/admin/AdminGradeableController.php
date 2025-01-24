@@ -892,7 +892,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             throw new \InvalidArgumentException('Attempt to update rubric using outdated method!');
         }
-        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) 
+        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
