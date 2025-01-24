@@ -1,6 +1,6 @@
 <div id="numerical-data" class="page-content">
     <div class = "row">
-        <div class = "box col-md-6">
+        <div class = "box col-md-6" id = "left-grading-stats" >
             {# LEFT CHUNK#}
             {% if warnings|length > 0 %}
                 <ul>
@@ -10,6 +10,7 @@
                 </ul>
                 <br/>
             {% endif %}
+
             {% if core.getUser().getGroup() < 4 %}
                 {% if team_assignment %}
                     <br/>
@@ -20,7 +21,11 @@
                     <b>Number of teams:</b> {{ total_submissions }}
                     <br/>
                     <br/>
-                    <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                        {% if include_bad_submissions  == 'include' %}
+                        <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                    {% else %}
+                        <b>Teams who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
+                    {% endif %}
                 {% else %}
                     {% if peer and not team_assignment %}
                         <br/>
@@ -30,10 +35,18 @@
                         <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ total_students_submitted }} ({{ total_grading_percentage }}%)
                     {% else %}
                         <br/>
-                        <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                        <br/>
-                        <br/>
-                        <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
+                        {% if include_bad_submissions == 'include'  %}
+
+                            <b>Students who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                            <br/>
+                            <br/>
+                            <b>Current percentage of TA grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ total_grading_percentage }}%)
+                        {% else %}
+                            <b>Students who have submitted on time:</b> {{ non_late_submitted_total }} / {{ total_submissions }} ({{ non_late_submitted_percentage }}%)
+                            <br/>
+                            <br/>
+                            <b>Current percentage of TA grading done:</b> {{ non_late_graded_total }} / {{ non_late_submitted_total }} ({{ non_late_total_grading_percentage }}%)
+                        {% endif %}
                     {% endif %}
                 {% endif %}
                 <br/>
@@ -48,9 +61,25 @@
             {% endif %}
                 <b>TA Grading By Sections:</b>
                 <div style="margin-left: 20px">
+                {# checks if any of sections has a verified value #}
                     {% for key, section in sections %}
                         {% if key != "peer_stu_grad"%}
-                            Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
+                            {% if not (key == "NULL" and include_null_section != 'include') %}
+                                {% if include_bad_submissions  == 'include'  %}
+                                    <span>
+                                        Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}% graded){% if section.verified > 0 %}, 
+                                        {{ section.verified }} / {{ section.total }} ({{ section.verified_percentage }}% verified)
+                                        {% endif %}
+                                    </span>
+                                {% else %}
+                                    <span>
+                                        Section {{ key }}: {{ section.non_late_graded }} / {{ section.non_late_total }} ({{ section.non_late_percentage }}% graded){% if section.non_late_verified > 0 %}, 
+                                        {{ section.non_late_verified }} / {{ section.non_late_total }} ({{ section.non_late_verified_percentage }}% verified)
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                                <br />
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -95,27 +124,28 @@
                 <br/>
                 <br/>
                 <p><b>Number of unresolved grade inquiries:</b> {{ grade_inquiries }}</p>
+                <br/>
+                {% if  grade_inquiries > 0 %}
+                    <p><b>Number of unresolved grade inquiries per grader:</b></p>
+                    <div style="margin-left: 20px">
+                    {% for key, value in graders_of_inquiries %}
+                        <p>{{ key }}: {{ value }} </p>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+                    <br/>
                 {% if grade_inquiry_per_component_allowed %}
                     {% for component in component_averages %}
-                        <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                        {% if  component.getActiveGradeInquiryCount() > 0 %}
+                            <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
             {% endif %}
             {# LEFT CHUNK #}
         </div>
-        <div class = "box col-md-6">
+        <div class = "box col-md-6" id="right-grading-stats">
             {# RIGHT CHUNK#}
-
-            {% if not peer %}
-                <a class="btn btn-default" style="float: right"
-                    onclick="changeOverride()">
-                    {% if include_overridden == 'omit' %}
-                        Include Grade Overrides
-                    {% else %}
-                        Omit Grade Overrides
-                    {% endif %}
-                </a>
-            {% endif %}
 
             {# Should Be visible if gradeable contains peer components, non-peer components or both #}
                 <br>
@@ -166,7 +196,7 @@
                                 Count: {{ component.getCount() }} <br/>
                                 {% for grader, data in component.getGraderInfo() %}
 		                            {% if loop.first == grader %}
-		                                <p> Graders:
+		                                <p id="grader-info"> Graders:
 		                            {% else %}
 		                                <p style="padding-left:3.7em">
 		                            {% endif %}

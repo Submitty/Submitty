@@ -4,84 +4,102 @@ declare(strict_types=1);
 
 namespace app\entities\course;
 
+use app\repositories\course\CourseMaterialRepository;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class CourseMaterial
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\course\CourseMaterialRepository")
- * @ORM\Table(name="course_materials")
  */
+#[ORM\Entity(repositoryClass: CourseMaterialRepository::class)]
+#[ORM\Table(name: "course_materials")]
 class CourseMaterial {
     const FILE = 0;
     const LINK = 1;
     const DIR = 2;
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var integer
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $path;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    protected int $type;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $release_date;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $hidden_from_students;
+
+    #[ORM\Column(type: Types::FLOAT)]
+    protected float $priority;
 
     /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $path;
-
-    /**
-     * @ORM\Column(type="smallint")
-     * @var int
-     */
-    protected $type;
-
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var \DateTime
-     */
-    protected $release_date;
-
-    /**
-     * @ORM\Column(type="boolean")
-     * @var boolean
-     */
-    protected $hidden_from_students;
-
-    /**
-     * @ORM\Column(type="float")
-     * @var float
-     */
-    protected $priority;
-
-    /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialAccess", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialAccess>
      */
-    protected $accesses;
+    #[ORM\OneToMany(
+        mappedBy: "course_material",
+        targetEntity: CourseMaterialAccess::class,
+        cascade: ["persist"],
+        fetch: "EAGER",
+        orphanRemoval: true
+    )]
+    protected Collection $accesses;
 
     /**
-     * @ORM\OneToMany(targetEntity="\app\entities\course\CourseMaterialSection", mappedBy="course_material", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var Collection<CourseMaterialSection>
      */
-    protected $sections;
+    #[ORM\OneToMany(
+        mappedBy: "course_material",
+        targetEntity: CourseMaterialSection::class,
+        cascade: ["persist"],
+        fetch: "EAGER",
+        orphanRemoval: true
+    )]
+    protected Collection $sections;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $url;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $title;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $uploaded_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $uploaded_date;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $last_edit_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $last_edit_date;
 
     /**
-     * @ORM\Column(type="string")
-     * @var string
+     * Constructs a new instance of a CourseMaterial.
+     *
+     * @param int $type The type of the course material.
+     * @param string $path The file system path to the course material.
+     * @param \DateTime $release_date The release date of the course material.
+     * @param bool $hidden_from_students Indicates whether the course material is hidden from students.
+     * @param float $priority The priority or ordering of the course material.
+     * @param ?string $url The URL of the course material, applicable if it's a link type.
+     * @param ?string $title The title of the course material.
+     * @param ?string $uploaded_by The user ID of the person who uploaded the course material.
+     * @param ?\DateTime $uploaded_date The date and time when the course material was uploaded.
+     * @param ?string $last_edit_by The user ID of the last person who edited the course material.
+     * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
      */
-    protected $url;
-
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $url_title;
-
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $url_title) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -89,7 +107,11 @@ class CourseMaterial {
         $this->setPriority($priority);
         $this->sections = new ArrayCollection();
         $this->url = $url;
-        $this->url_title = $url_title;
+        $this->title = $title;
+        $this->uploaded_by = $uploaded_by;
+        $this->uploaded_date = $uploaded_date;
+        $this->last_edit_by = $last_edit_by;
+        $this->last_edit_date = $last_edit_date;
     }
 
     /**
@@ -125,6 +147,23 @@ class CourseMaterial {
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
+    }
+
+
+    public function getUploadedBy(): string | null {
+        return $this->uploaded_by;
+    }
+
+    public function getUploadedDate(): \DateTime | null {
+        return $this->uploaded_date;
+    }
+
+    public function getLastEditBy(): string | null {
+        return $this->last_edit_by;
+    }
+
+    public function getLastEditDate(): \DateTime | null {
+        return $this->last_edit_date;
     }
 
     public function isHiddenFromStudents(): bool {
@@ -193,15 +232,31 @@ class CourseMaterial {
         return $this->url;
     }
 
-    public function getUrlTitle(): string {
-        return $this->url_title;
+    public function getTitle(): ?string {
+        return $this->title;
     }
 
     public function setUrl(string $url): void {
         $this->url = $url;
     }
 
-    public function setUrlTitle(string $url_title): void {
-        $this->url_title = $url_title;
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function setUploadedBy(string $uploaded_by): void {
+        $this->uploaded_by = $uploaded_by;
+    }
+
+    public function setUploadDate(\DateTime $uploaded_date): void {
+        $this->uploaded_date = $uploaded_date;
+    }
+
+    public function setLastEditBy(string $last_edit_by): void {
+        $this->last_edit_by = $last_edit_by;
+    }
+
+    public function setLastEditDate(\DateTime $last_edit_date): void {
+        $this->last_edit_date = $last_edit_date;
     }
 }

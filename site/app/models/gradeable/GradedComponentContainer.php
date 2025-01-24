@@ -23,7 +23,8 @@ class GradedComponentContainer extends AbstractModel {
     /** @var TaGradedGradeable The TaGradedGradeable all grades belong to */
     private $ta_graded_gradeable = null;
 
-    /** @prop @var GradedComponent[] The graded components for this Component */
+    /** @prop
+     * @var GradedComponent[] The graded components for this Component */
     protected $graded_components = [];
 
     /**
@@ -115,7 +116,7 @@ class GradedComponentContainer extends AbstractModel {
         if ($this->component->isPeerComponent()) {
             // Try to find existing graded component for this component and user...
             foreach ($this->graded_components as $graded_component) {
-                if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                if ($grader->accessGrading() || $graded_component->getGrader()->getId() === $grader->getId()) {
                     // ... Found one
                     return $graded_component;
                 }
@@ -161,9 +162,17 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets if any grades exist for this component
-     * @return bool
+     * @param User|null $grader If provided, checks if any grades exist for that grader
      */
-    public function anyGradedComponents() {
+    public function anyGradedComponents(User $grader = null): bool {
+        if ($grader !== null && $grader->getGroup() === User::GROUP_STUDENT) { // If grader is a peer grader
+            foreach ($this->graded_components as $graded_component) {
+                if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                    return true;
+                }
+            }
+            return false;
+        }
         return count($this->graded_components) > 0;
     }
 
@@ -281,16 +290,22 @@ class GradedComponentContainer extends AbstractModel {
      * Gets whether this component is considered fully graded
      * In the peer case, components are considered fully graded if they
      *  meet the peer grade set or one of the graders is non-peer
-     * @return bool
+     * @param User|null $grader If provided, checks if the component is fully graded for that grader
      */
-    public function isComplete() {
+    public function isComplete(User $grader = null): bool {
         if ($this->component->isPeerComponent()) {
-            if (count($this->graded_components) > 0) {
-                return true;
+            if ($grader !== null && $grader->getGroup() === User::GROUP_STUDENT) { // If grader is a peer grader
+                // A peer component might be graded by multiple graders, so we need to check if the $grader has graded it
+                foreach ($this->graded_components as $graded_component) {
+                    if ($graded_component->getGrader()->getId() === $grader->getId()) {
+                        return true;
+                    }
+                }
             }
             else {
-                return false;
+                return count($this->graded_components) > 0;
             }
+            return false;
         }
 
         $required_graders = $this->component->getGradingSet();

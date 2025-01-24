@@ -3,41 +3,40 @@
 namespace app\entities\forum;
 
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="categories_list")
- */
+#[ORM\Entity]
+#[ORM\Table(name: "categories_list")]
 class Category {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @var integer
-     */
-    protected $category_id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $category_id;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $category_desc;
+
+    #[ORM\Column(type: Types::INTEGER)]
+    protected int $rank;
+
+    #[ORM\Column(type: Types::STRING)]
+    protected string $color;
 
     /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $category_desc;
-
-    /**
-     * @ORM\Column(type="integer")
-     * @var integer
-     */
-    protected $rank;
-
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $color;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="\app\entities\forum\Thread", mappedBy="categories")
      * @var Collection<Thread>
      */
-    protected $threads;
+    #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
+    protected Collection $threads;
+
+    public function getId(): int {
+        return $this->category_id;
+    }
+
+    public function getDescription(): string {
+        return $this->category_desc;
+    }
+
+    public function getColor(): string {
+        return $this->color;
+    }
 }

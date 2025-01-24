@@ -22,20 +22,24 @@
         <th scope="col">Time Helped</th>
         <th scope="col">Times Helped Today</th>
         <th scope="col">Times Helped this week</th>
-        <th scope="col" class="mobile-hide">Helped Started By</th>
+        <th scope="col">
+            <a onclick="toggleSort('HelpStartedBy')">Helped Started By
+                <i id="sort-indicator-oh-queue"></i>
+            </a>
+        </th>
         <th scope="col" class="mobile-hide">Removed By</th>
         {% if viewer.isGrader() %}
           <th scope="col">Restore</th>
         {% endif %}
       </tr>
     </thead>
-    <tbody>
+    <tbody id="queue-history-table">
       {% set history_count = 0 %}
       {% for entry in viewer.getPastQueue() %}
         {% if (history_count < 25 or viewer.getFullHistory()) and (viewer.isGrader() or entry['user_id'] == viewer.getUserId()) %}
           {% set history_count = history_count + 1 %}
           <tr class="queue_history_{{entry['queue_code']}} queue_history_row">
-            <th scope="row">{{history_count}}</th>
+            <th scope="row" class="number-count">{{history_count}}</th>
             <td>
               {{ entry['name'] }}
               <a onclick="unhideId(this, '{{ entry['user_id'] }}')" onkeypress="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
@@ -61,7 +65,7 @@
 
             <td>{{ entry['helped_today'] }}</td>
             <td>{{ entry['times_helped'] }}</td>
-            <td class="mobile-hide">{{ entry['help_started_by'] }}</td> 
+            <td class="mobile-hide help-started">{{ entry['help_started_by'] }}</td> 
 
 
             {% if entry['removal_type'] == 'self' %}
@@ -74,7 +78,7 @@
                 <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/restore" onsubmit="return confirm('Are you sure you want to restore {{ entry['name'] }} to the queue?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="entry_id" value="{{entry['entry_id']}}"/>
-                  <button type="submit" class="btn btn-danger queue_restore_btn">Restore</button>
+                  <button type="submit" class="btn btn-danger queue_restore_btn" data-testid="queue-restore-btn">Restore</button>
                 </form>
               </td>
             {% endif %}

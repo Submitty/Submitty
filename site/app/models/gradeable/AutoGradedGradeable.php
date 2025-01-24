@@ -14,11 +14,14 @@ use app\models\AbstractModel;
  * @method AutoGradedVersion[] getAutoGradedVersions()
  */
 class AutoGradedGradeable extends AbstractModel {
-    /** @prop @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
+    /** @prop
+     * @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
     private $graded_gradeable = null;
-    /** @prop @var int The active submission version for electronic gradeables */
+    /** @prop
+     * @var int The active submission version for electronic gradeables */
     protected $active_version = 0;
-    /** @prop @var AutoGradedVersion[] The graded versions for electronic gradeables */
+    /** @prop
+     * @var AutoGradedVersion[] The graded versions for electronic gradeables */
     protected $auto_graded_versions = [];
 
     /**
@@ -218,5 +221,25 @@ class AutoGradedGradeable extends AbstractModel {
             return GradingQueue::NOT_QUEUED;
         }
         return $instance->getQueuePosition();
+    }
+
+
+    /**
+     * Gets the autograding metrics for a specific version and testcase
+     */
+    public function getMetrics_Sum(): array {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return [];
+        }
+        return $instance->getMetrics_Sum();
+    }
+
+    public function getSubmitterId(): string {
+        $instance = $this->getActiveVersionInstance();
+        if ($instance === null) {
+            return '';
+        }
+        return $instance->getSubmitterId();
     }
 }

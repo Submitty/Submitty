@@ -6,10 +6,10 @@
  * @param animateDurInMs animation duration in milli-secs
  * @param headActiveClass className which will be added on active headers
  */
-function attachCollapsiblePanel (panelHeadSel, breakPoint, headActiveClass, animateDurInMs = 600) {
+function attachCollapsiblePanel(panelHeadSel, breakPoint, headActiveClass, animateDurInMs = 600) {
     // Setting up variables
     let isCollapsibleDisabled = true;
-    function handleCollapsiblePanel () {
+    function handleCollapsiblePanel() {
         if (window.innerWidth < breakPoint && isCollapsibleDisabled) {
             // Add a listener on a head
             $(panelHeadSel).click(function () {
@@ -24,8 +24,8 @@ function attachCollapsiblePanel (panelHeadSel, breakPoint, headActiveClass, anim
             // clear the listener from the header
             $(panelHeadSel).off('click');
             // Make all the panels visible
-            $(panelHeadSel).each(function() {
-                if ($(this).next().is( ':hidden' )) {
+            $(panelHeadSel).each(function () {
+                if ($(this).next().is(':hidden')) {
                     $(this).next().slideDown('slow');
                     $(this).addClass(headActiveClass);
                 }
@@ -38,4 +38,3 @@ function attachCollapsiblePanel (panelHeadSel, breakPoint, headActiveClass, anim
     // Finally, attach the handler on resize event of window
     window.addEventListener('resize', handleCollapsiblePanel);
 }
-

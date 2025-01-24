@@ -1,6 +1,6 @@
 /* global sortTable, escapeSpecialChars, buildCourseUrl */
 $(document).ready(() => {
-    $('th').click(function() {
+    $('th').click(function () {
         let table_id = 0;
         switch ($(this).attr('id')) {
             case 'user_sort':
@@ -25,7 +25,7 @@ $(document).ready(() => {
             sortTable(table_id, false);
         }
     });
-    $('button').click(function() {
+    $('button').click(function () {
         const action = $(this).data('action');
         const posts = $(this).data('posts');
         const ids = $(this).data('id');
@@ -41,8 +41,8 @@ $(document).ready(() => {
                 $(this).parent().parent().parent().append(`<tr id="${ids[i]}"><td></td><td>${timestamps[i]}</td><td style = "cursor:pointer;" data-type = "thread" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${thread_title}</pre></td><td colspan = "2" style = "cursor:pointer;" align = "left" data-type = "post" data-thread_id="${thread_ids[i]}"><pre class="pre-forum" style="white-space: pre-wrap;">${post_string}</pre></td></tr> `);
             }
             $(this).html('Collapse');
-            $(this).data('action','collapse');
-            $('td').click(function() {
+            $(this).data('action', 'collapse');
+            $('td').click(function () {
                 if ($(this).data('type') === 'post' || $(this).data('type') === 'thread') {
                     const id = $(this).data('thread_id');
                     const url = buildCourseUrl(['forum', 'threads', id]);
@@ -56,7 +56,7 @@ $(document).ready(() => {
                 item.remove();
             }
             $(this).html('Expand');
-            $(this).data('action','expand');
+            $(this).data('action', 'expand');
         }
         return false;
     });

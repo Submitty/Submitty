@@ -1,0 +1,71 @@
+---
+- name: Submitty Course Creation
+  hosts: submitty
+  become: true
+
+  vars:
+    submitty_common_php_version: 8.1
+
+  tasks:
+    - name: Term Creation
+      ansible.builtin.include_role:
+        name: submitty_term_creation
+      vars:
+        submitty_term_creation_key: term
+        submitty_term_creation_name: term
+        submitty_term_creation_start_date: 01/01/2024
+        submitty_term_creation_end_date: 06/07/2024
+
+    - name: Course Creation
+      ansible.builtin.include_role:
+        name: submitty_course_creation
+      vars:
+        submitty_course_creation_term: term
+        submitty_course_creation_course: course
+        submitty_course_creation_section: i
+        submitty_course_creation_username: instructor
+        submitty_course_creation_firstname: firstname
+        submitty_course_creation_lastname: lastname
+        submitty_course_creation_email: email
+
+    - name: Add Instructors
+      ansible.builtin.include_role:
+        name: submitty_course_add_instructor
+      vars:
+        submitty_course_add_instructor_term: term
+        submitty_course_add_instructor_course: course
+        submitty_course_add_instructor_username: instructor2
+        submitty_course_add_instructor_firstname: firstname
+        submitty_course_add_instructor_lastname: lastname
+        submitty_course_add_instructor_email: email
+        submitty_course_add_instructor_password: password
+
+    - name: Add Users
+      ansible.builtin.include_role:
+        name: submitty_course_add_user
+      vars:
+        submitty_course_add_user_term: term
+        submitty_course_add_user_course: course
+        submitty_course_add_user_username: "{{ user.username }}"
+        submitty_course_add_user_firstname: "{{ user.firstname }}"
+        submitty_course_add_user_lastname: "{{ user.lastname }}"
+        submitty_course_add_user_email: "{{ user.email }}"
+        submitty_course_add_user_password: "{{ user.password }}"
+      loop:
+        - username: aphacker
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+        - username: bitddle
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+        - username: adamsg
+          firstname: firstname
+          lastname: lastname
+          email: email
+          password: password
+      loop_control:
+        loop_var: user

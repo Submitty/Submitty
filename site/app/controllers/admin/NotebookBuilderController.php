@@ -27,12 +27,12 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods={"GET"})
      * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
      * notebook builder know to save a new configuration or edit the existing one.
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods: ["GET"])]
     public function builder(string $g_id, string $mode) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
@@ -41,14 +41,7 @@ class NotebookBuilderController extends AbstractController {
             $this->core->addErrorMessage('Invalid Gradeable ID.');
             return new RedirectResponse($this->core->buildUrl());
         }
-
         $failure_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?nav_tab=1';
-
-        if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
-            return new RedirectResponse($failure_url);
-        }
-
         // If mode is new then generate a new config directory and place a default config.json inside of it
         if ($mode === 'new') {
             $autograding_config_controller = new AutogradingConfigController($this->core);
@@ -81,6 +74,11 @@ class NotebookBuilderController extends AbstractController {
 
             // Redirect to same page but with mode now set to 'edit'
             return new RedirectResponse($this->core->buildCourseUrl(['notebook_builder', $gradeable->getId(), 'edit']));
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->addErrorMessage("Notebook builder may only edit uploaded configurations for the current course and semester.");
+            return new RedirectResponse($failure_url);
         }
 
         $json_path = $gradeable->getAutogradingConfigPath() . '/config.json';
@@ -121,9 +119,9 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/save", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/notebook_builder/save", methods: ["POST"])]
     public function save(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
 
@@ -148,9 +146,9 @@ class NotebookBuilderController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notebook_builder/file", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/notebook_builder/file", methods: ["POST"])]
     public function file(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
 

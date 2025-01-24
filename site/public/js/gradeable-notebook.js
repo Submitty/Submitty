@@ -9,8 +9,7 @@ function setMultipleChoices(mc_field_id, viewing_inactive_version) {
     let prev_checked = $(`#${mc_field_id}`).attr('data-prev_checked');
     prev_checked = prev_checked.split('\n');
     // For each input inside the fieldset see if its value is inside the prev checked array
-    $(`#${mc_field_id} :input`).each((index,element) => {
-
+    $(`#${mc_field_id} :input`).each((index, element) => {
         const value = element.getAttribute('value');
 
         if (prev_checked.includes(value)) {
@@ -32,10 +31,8 @@ function setMultipleChoices(mc_field_id, viewing_inactive_version) {
  */
 function clearMultipleChoices(mc_field_id) {
     // For each input inside the fieldset remove the 'checked' attribute
-    $(`#${mc_field_id} :input`).each((index,element) => {
-
+    $(`#${mc_field_id} :input`).each((index, element) => {
         $(element).prop('checked', false);
-
     });
 }
 
@@ -48,7 +45,7 @@ function clearMultipleChoices(mc_field_id) {
 function setCodeBox(codebox_id, state) {
     // Get initial and previous submission values
     const initial_value = $(`#${codebox_id}`).attr('data-initial_value');
-    const version_submission =  $(`#${codebox_id}`).attr('data-version_submission');
+    const version_submission = $(`#${codebox_id}`).attr('data-version_submission');
     // Get the codebox
     const codebox = $(`#${codebox_id} .CodeMirror`).get(0).CodeMirror;
 
@@ -79,37 +76,37 @@ function notebookAutosaveKey() {
  * Saves the current state of the notebook gradeable to localstorage.
  */
 function saveNotebookToLocal() {
-    const mc_inputs=[];
+    const mc_inputs = [];
     const codebox_inputs = [];
 
-    //loop through multiple choice questions and save answers
-    $('.multiple_choice').each(function() {
-        let file_name='';
-        $(this).children('fieldset').each(function() {
+    // loop through multiple choice questions and save answers
+    $('.multiple_choice').each(function () {
+        let file_name = '';
+        $(this).children('fieldset').each(function () {
             file_name = $(this).data('filename');
             if (file_name) {
                 const answers = [];
-                //grab selected answers
-                $(this).find('input').each(function() {
+                // grab selected answers
+                $(this).find('input').each(function () {
                     if ($(this)[0].checked) {
                         answers.push($(this)[0].defaultValue);
                     }
                 });
-                mc_inputs.push({file_name, answers});
+                mc_inputs.push({ file_name, answers });
             }
         });
     });
 
-    //save short answers
-    $('.short_answer').each(function() {
-        $(this).find('div[name^="codebox_"]').each(function() {
+    // save short answers
+    $('.short_answer').each(function () {
+        $(this).find('div[name^="codebox_"]').each(function () {
             const file_name = ($(this).data('filename') || '').trim();
             if (file_name) {
-                //grab input
+                // grab input
                 const editor = ($(this)[0]).querySelector('.CodeMirror').CodeMirror;
                 if (editor) {
                     const value = editor.getValue();
-                    codebox_inputs.push({file_name, value});
+                    codebox_inputs.push({ file_name, value });
                 }
             }
         });
@@ -132,16 +129,16 @@ function restoreNotebookFromLocal() {
         if (inputs === null) {
             return;
         }
-        //to prevent data loss when these changes get installed on production
+        // to prevent data loss when these changes get installed on production
         const not_found = [];
 
-        //restore multiple choice
+        // restore multiple choice
         for (const id in inputs.multiple_choice) {
-            const {file_name, answers} = inputs.multiple_choice[id];
+            const { file_name, answers } = inputs.multiple_choice[id];
             let found = false;
-            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function() {
+            $(`fieldset.mc[data-filename="${file_name}"] input`).each(function () {
                 found = true;
-                //check off proper inputs
+                // check off proper inputs
                 for (let i = 0; i < answers.length; i++) {
                     if ($(this)[0].defaultValue === answers[i]) {
                         $(this).prop('checked', true);
@@ -154,11 +151,11 @@ function restoreNotebookFromLocal() {
             }
         }
 
-        //restore short answers
+        // restore short answers
         for (const id in inputs.codebox) {
-            const {file_name, value} = inputs.codebox[id];
+            const { file_name, value } = inputs.codebox[id];
             const question = $(`.short_answer > div[data-filename="${file_name}"]`);
-            //fill in proper values if question is found
+            // fill in proper values if question is found
             if (question.length > 0) {
                 const editor = question[0].querySelector('.CodeMirror').CodeMirror;
                 editor.setValue(value);
@@ -168,18 +165,18 @@ function restoreNotebookFromLocal() {
             }
         }
 
-        //if there are answers that could not be placed anywhere
+        // if there are answers that could not be placed anywhere
         if (not_found.length > 0) {
             const old_answers_div = document.createElement('div');
             old_answers_div.id = 'old-answers';
             old_answers_div.classList.add('box');
             old_answers_div.style.backgroundColor = 'var(--alert-background-danger-red)';
 
-            //create header text to warn user
+            // create header text to warn user
             const old_answers_header = document.createElement('h4');
             old_answers_header.style.color = 'var(--focus-danger-red)';
             old_answers_header.innerHTML = 'Answer(s) could not be restored. You will have to copy and paste them in the proper place.';
-            //add header to container
+            // add header to container
             old_answers_div.appendChild(old_answers_header);
 
             // for ... of loop loops through all elements in array, while for ... in loop loops through
@@ -198,10 +195,8 @@ function restoreNotebookFromLocal() {
 }
 
 $(document).ready(() => {
-
     // If any button inside the notebook has been clicked then enable the submission button
     $('.notebook button').click(() => {
-
         // Set global javascript variable to allow submission for notebook
         window.is_notebook = true;
     });
@@ -213,8 +208,7 @@ $(document).ready(() => {
     });
 
     // Register click handler for codebox clear and recent buttons
-    $('.codebox-clear-reset').click(function() {
-
+    $('.codebox-clear-reset').click(function () {
         // Collect the id of the button and split it apart to find out which field it is bound to
         const items = this.id.split('_');
         const index = items[1];
@@ -236,7 +230,7 @@ $(document).ready(() => {
     });
 
     // Register handler to detect changes inside codeboxes and then enable buttons
-    $('.CodeMirror').each((_index, cm) => cm.CodeMirror.on('changes', codebox => {
+    $('.CodeMirror').each((_index, cm) => cm.CodeMirror.on('changes', (codebox) => {
         // Select the <div> that wraps the actual codebox element and contains
         // the data-initial_value and data-recent_submission attributes.
         const codeboxWrapper = codebox.getWrapperElement().parentElement;
@@ -267,8 +261,7 @@ $(document).ready(() => {
     $('.CodeMirror').each((_index, cm) => cm.CodeMirror.on('changes', () => deferredSave(NOTEBOOK_DEFER_KEY, saveNotebookToLocal)));
 
     // Register click handler for multiple choice buttons
-    $('.mc-clear, .mc-recent').click(function() {
-
+    $('.mc-clear, .mc-recent').click(function () {
         // Collect the id of the button and split it apart to find out which field it is bound to
         const items = this.id.split('_');
         const index = items[1];
@@ -290,8 +283,7 @@ $(document).ready(() => {
     });
 
     // Register change handler to enable buttons when multiple choice inputs change
-    $('.mc').change(function() {
-
+    $('.mc').change(function () {
         const items = this.id.split('_');
         const index = items[2];
 
@@ -299,7 +291,7 @@ $(document).ready(() => {
         $(`#mc_${index}_clear_button`).attr('disabled', false);
         $(`#mc_${index}_recent_button`).attr('disabled', false);
         const prev_checked_items = this.getAttribute('data-prev_checked');
-        const curr_checked_items = $(this).serializeArray().map(v => v.value).join('\n');
+        const curr_checked_items = $(this).serializeArray().map((v) => v.value).join('\n');
         if (curr_checked_items !== prev_checked_items) {
             window.onbeforeunload = saveAndWarnUnsubmitted;
             $(`#mc_${index}_recent_button`).attr('disabled', false);
@@ -312,8 +304,7 @@ $(document).ready(() => {
     });
 
     // Setup click events for short answer buttons
-    $('.sa-clear-reset').click(function() {
-
+    $('.sa-clear-reset').click(function () {
         // Collect the id of the button and split it apart to find out which short answer it is bound to
         // and which action it performs
         const items = this.id.split('_');
@@ -343,8 +334,7 @@ $(document).ready(() => {
     });
 
     // Setup keyup event for short answer boxes
-    $('.sa-box').on('input', function() {
-
+    $('.sa-box').on('input', function () {
         const index_num = this.id.split('_')[2];
 
         const initial_value = this.getAttribute('data-initial_value');

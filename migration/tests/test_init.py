@@ -21,15 +21,20 @@ class TestInit(unittest.TestCase):
     def test_get_paths(self):
         self.assertEqual(migrator.DIR_PATH, migrator.get_dir_path())
         self.assertEqual(migrator.MIGRATIONS_PATH, migrator.get_migrations_path())
+        self.assertEqual(migrator.TRIGGERS_PATH, migrator.get_triggers_path())
 
         old_dir = migrator.DIR_PATH
         migrator.DIR_PATH = 'test1'
         old_migration = migrator.MIGRATIONS_PATH
         migrator.MIGRATIONS_PATH = 'test2'
+        old_triggers = migrator.TRIGGERS_PATH
+        migrator.TRIGGERS_PATH = 'test3'
 
         try:
             self.assertEqual('test1', migrator.get_dir_path())
             self.assertEqual('test2', migrator.get_migrations_path())
+            self.assertEqual('test3', migrator.get_triggers_path())
         finally:
             migrator.DIR_PATH = old_dir
             migrator.MIGRATIONS_PATH = old_migration
+            migrator.TRIGGERS_PATH = old_triggers

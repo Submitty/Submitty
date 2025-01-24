@@ -3,58 +3,43 @@ updates:
   - package-ecosystem: "composer"
     directory: "/site"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     versioning-strategy: increase
     commit-message:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: "npm"
     directory: "/site"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: pip
-    directory: "/.setup/pip/"
+    directories:
+      - "/.setup/pip/"
+      - "/python_submitty_utils/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/e2e-Setup-Composite"
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
+      interval: "monthly"
     labels:
       - dependencies
     commit-message:
       prefix: "[DevDependency] "
-  - package-ecosystem: "github-actions"
-    directory: "/actions/e2e-Setup-Composite"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "10:00"
-    open-pull-requests-limit: 15
-    labels:
-      - dependencies
-    commit-message:
-      prefix: "[DevDependency] "
+    open-pull-requests-limit: 100

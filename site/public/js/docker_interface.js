@@ -1,10 +1,10 @@
-/* exported collapseSection, addImage, updateImage */
+/* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
 * @param {string} btn_id id of the button calling this function
 */
-function collapseSection(id,btn_id) {
+function collapseSection(id, btn_id) {
     const tgt = document.getElementById(id);
     const btn = document.getElementById(btn_id);
 
@@ -27,7 +27,7 @@ function filterOnClick() {
 
     $(this).removeClass('fully-transparent');
 
-    $('.image-row').each(function() {
+    $('.image-row').each(function () {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function () {
@@ -53,15 +53,49 @@ function addFieldOnChange() {
     const command = $(this).val();
     const regex = new RegExp('^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$');
     if (!regex.test(command)) {
-        $('#send-button').attr('disabled',true);
+        $('#send-button').attr('disabled', true);
         if (command !== '') {
             $('#docker-warning').css('display', '');
         }
     }
     else {
-        $('#send-button').attr('disabled',false);
+        $('#send-button').attr('disabled', false);
         $('#docker-warning').css('display', 'none');
     }
+}
+
+function confirmationDialog(url, id) {
+    if (confirm(`Are you sure you want to remove ${id} image?`)) {
+        removeImage(url, id);
+    }
+}
+
+function removeImage(url, id) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            image: id,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: (data) => {
+            const json = JSON.parse(data);
+            if (json.status === 'success') {
+                location.reload();
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
+            }
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
 }
 
 function addImage(url) {
@@ -71,12 +105,12 @@ function addImage(url) {
         url: url,
         type: 'POST',
         data: {
-            'capability': capability,
-            'image': image,
+            capability: capability,
+            image: image,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
@@ -88,7 +122,7 @@ function addImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -103,7 +137,7 @@ function updateImage(url) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
@@ -114,7 +148,7 @@ function updateImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },

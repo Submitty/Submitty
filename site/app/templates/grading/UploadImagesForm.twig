@@ -4,9 +4,9 @@
 {% block body %}
     <div class="flex-col flex-col-space">
         <p>
-            Instructions to download images of students:
+            Instructions to upload images of students:
             <a target="_blank" href="http://submitty.org/instructor/student_photos" aria-label="Student Photos Info">
-              <i style="font-style:normal;" class="far fa-question-circle disabled"></i>
+              <i style="font-style:normal;" class="fa-question-circle"></i>
             </a>
         </p>
         <p>
@@ -45,7 +45,6 @@
     <script>
         createArray(1);
         var dropzone = document.getElementById("upload1");
-        dropzone.addEventListener("click", clicked_on_box, false);
         dropzone.addEventListener("dragenter", draghandle, false);
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);

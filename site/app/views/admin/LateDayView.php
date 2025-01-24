@@ -2,6 +2,7 @@
 
 namespace app\views\admin;
 
+use app\models\User;
 use app\views\AbstractView;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
@@ -28,12 +29,16 @@ class LateDayView extends AbstractView {
             "users" => $users,
             "student_full" => $student_full,
             "initial_late_days" => $initial_late_days,
-            "late_days_forensics_url" => $this->core->buildCourseUrl(['late_days_forensics']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
-    public function displayLateDayForesnics($students, $initial_late_days) {
+    /**
+     * @param User[] $students
+     * @param int $initial_late_days
+     * @return string
+     */
+    public function displayLateDayCache($students, $initial_late_days) {
         $this->core->getOutput()->addInternalCss('details.css');
         $this->core->getOutput()->addInternalCss('exceptionforms.css');
         $this->core->getOutput()->addInternalCss('simple-grading.css');
@@ -45,7 +50,7 @@ class LateDayView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
-        $this->core->getOutput()->addBreadcrumb('Late Days Forensics');
+        $this->core->getOutput()->addBreadcrumb('Bulk Late Days');
         $this->core->getOutput()->enableMobileViewport();
 
         $student_full = Utils::getAutoFillData($students);
@@ -118,13 +123,13 @@ class LateDayView extends AbstractView {
             }
         }
 
-        return $this->core->getOutput()->renderTwigTemplate("admin/late_days_forensics/LateDaysForensicsBase.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("admin/late_day_cache/LateDayCacheBase.twig", [
             "student_full" => $student_full,
             "students" => $students,
             "initial_late_days" => $initial_late_days,
-            "flush_cache_url" => $this->core->buildCourseUrl(['late_days_forensics', 'flush']),
-            "calculate_cache_url" => $this->core->buildCourseUrl(['late_days_forensics', 'calculate']),
-            "cache_url" => $this->core->buildCourseUrl(['late_days_forensics']),
+            "flush_cache_url" => $this->core->buildCourseUrl(['bulk_late_days', 'flush']),
+            "calculate_cache_url" => $this->core->buildCourseUrl(['bulk_late_days', 'calculate']),
+            "cache_url" => $this->core->buildCourseUrl(['bulk_late_days']),
             "view_all" => $view_all,
             "status_to_simple_message" => LateDayInfo::getSimpleMessageFromSatus(),
             "late_day_cache_header" => $late_day_cache_header,

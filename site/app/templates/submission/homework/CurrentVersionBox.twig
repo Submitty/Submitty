@@ -70,7 +70,7 @@
                         Contact an instructor or TA if this is unexpected.
                     </p>
                 {% elseif not active_same_as_graded and has_manual_grading %}
-                    <p class="red-message">
+                    <p class="red-message" data-testid="version-conflict-version-box">
                         Note: The version you have selected to be graded is not the version graded by the instructor/TAs.<br />
                         If the graded version does not match your selected version, a zero will be recorded in the gradebook.<br />
                     </p>
@@ -97,7 +97,7 @@
                 {% endif %}
             </div>
         {% endif %}
-        {% if (failed_file != '') or (file_length == 0 and not incomplete_autograding) %}
+        {% if (failed_file != '' or (file_count == 0 and not incomplete_autograding)) and is_vcs %}
         <div id="error-message" class="red-message">
             <b>Warning: The submitted repository is empty.</b><br/>
             {% if failed_file != '' %}

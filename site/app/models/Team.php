@@ -17,29 +17,40 @@ use app\models\gradeable\Gradeable;
  * @method string getTeamName()
  */
 class Team extends AbstractModel {
-    /** @prop @var string The id of this team of form "<unique number>_<creator user id>" */
+    /** @prop
+     * @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
-    /** @prop @var string registration section (registration or rotating) of team creator */
+    /** @prop
+     * @var string registration section (registration or rotating) of team creator */
     protected $registration_section;
-    /** @prop @var integer rotating section (registration or rotating) of team creator */
+    /** @prop
+     * @var integer rotating section (registration or rotating) of team creator */
     protected $rotating_section;
-    /** @prop @var string[] containing user ids of team members */
+    /** @prop
+     * @var string[] containing user ids of team members */
     protected $member_user_ids;
-    /** @prop @var string[] containing user ids of those invited to the team */
+    /** @prop
+     * @var string[] containing user ids of those invited to the team */
     protected $invited_user_ids;
-    /** @prop @var User[] containing users of team members */
+    /** @prop
+     * @var User[] containing users of team members */
     protected $member_users;
-    /** @prop @var User[] containing users of those invited to the team */
+    /** @prop
+     * @var User[] containing users of those invited to the team */
     protected $invited_users;
-    /** @prop @var string containing comma-seperated list of team members */
+    /** @prop
+     * @var string containing comma-seperated list of team members */
     protected $member_list;
     /** @var array $assignment_settings */
     protected $assignment_settings;
     /** @var string $anon_id */
     protected $anon_id;
-    /** @prop @var string The name of the team */
+    /** @prop
+     * @var string The name of the team */
     protected $team_name;
-
+    /** @prop
+     * @var number Maximum length of the team name */
+    const MAX_TEAM_NAME_LENGTH = 30;
     /**
      * Team constructor.
      * @param Core  $core

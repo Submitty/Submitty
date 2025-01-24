@@ -15,18 +15,27 @@ use app\libraries\FileUtils;
  * @method int getUserGroup()
  */
 class Course extends AbstractModel {
-    /** @property string $term the term's code in which the course is taking place. */
+    /** @prop
+     * @var string $term the term's code in which the course is taking place. */
     protected $term;
-    /** @property string $term_name the name of the term. aka "Long Term". */
+    /** @prop
+     * @var string $term_name the name of the term. aka "Long Term". */
     protected $term_name;
-    /** @property string $title the proper title of the course. */
+    /** @prop
+     * @var string $title the proper title of the course. */
     protected $title;
-    /** @property string $display_name the display name of the course. */
+    /** @prop
+     * @var string $display_name the display name of the course. */
     protected $display_name;
-    /** @property int $user_group used to rank courses in homepage view. */
+    /** @prop
+     * @var int $user_group used to rank courses in homepage view. */
     protected $user_group;
-    /** @property string $registration_section for homepage view */
+    /** @prop
+     * @var string $registration_section for homepage view */
     protected $registration_section;
+
+    const ACTIVE_STATUS = 1;
+    const ARCHIVED_STATUS = 2;
 
     /**
      * Course constructor.
@@ -36,7 +45,7 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->term = $details['semester'];
+        $this->term = $details['term'];
         $this->term_name = $details['term_name'];
         $this->title = $details['course'];
         $this->display_name = "";

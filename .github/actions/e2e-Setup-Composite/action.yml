@@ -10,28 +10,36 @@ env:
   SUBMITTY_INSTALL_DIR: /usr/local/submitty
   SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
   POSTGRES_HOST: localhost
-  PHP_VER: 7.4
+  PHP_VER: 8.1
   NODE_VERSION: 16
-  PYTHON_VERSION: 3.8
+  PYTHON_VERSION: "3.10"
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    - name: Delete huge unnecessary folders, and clean apt cache
+      run: |
+        rm -rf /opt/hostedtoolcache
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf "$AGENT_TOOLSDIRECTORY"
+        sudo apt-get clean
+      shell: bash
+    - uses: actions/checkout@v4
       with:
         path: SUBMITTY_CPY/
     - name: Copy Repo
       run: |
-        # have to copy first, absolute paths not supported by actions/checkout@v3
+        # have to copy first, absolute paths not supported by actions/checkout@v4
           sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
       shell: bash
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.24.0
+    - uses: shivammathur/setup-php@2.32.0
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -42,7 +50,7 @@ runs:
       shell: bash
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -73,7 +81,7 @@ runs:
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       shell: bash
     - name: Install composer Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
@@ -117,6 +125,7 @@ runs:
         sudo apt-get install php${PHP_VER}-fpm
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
+        sudo apt-get install ca-certificates
         sudo apt-get install moreutils
       shell: bash
 
@@ -143,7 +152,7 @@ runs:
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_grading sample
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing archived
       shell: bash
 
     - name: Set up test suite
@@ -155,7 +164,7 @@ runs:
     - name: Set up apache
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel
+        sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
         sudo mkdir -p /run/php
         sudo chown www-data:www-data /run/php
@@ -194,13 +203,4 @@ runs:
         SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
         sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
         bash tests/git_test.sh
-      shell: bash
-
-    - uses: nanasess/setup-chromedriver@master
-    - name: Setup chromedriver
-      run: |
-        sudo systemctl restart submitty_autograding_worker
-        sudo systemctl restart submitty_autograding_shipper
-        export DISPLAY=:99
-        chromedriver --url-base=/wd/hub &
       shell: bash

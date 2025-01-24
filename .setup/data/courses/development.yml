@@ -73,6 +73,30 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
+  - gradeable_config: comment_count
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
   - gradeable_config: cpp_buggy_custom
     components:
       - gc_lower_clamp: 0
@@ -98,6 +122,30 @@ gradeables:
     eg_max_random_submissions: 0
 
   - gradeable_config: cpp_cats
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: cpp_count_ts
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -265,7 +313,31 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-  - gradeable_config: iclicker_upload
+  - gradeable_config: file_check
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: haskell_hello_world
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -314,6 +386,30 @@ gradeables:
     eg_max_random_submissions: 0
 
   - gradeable_config: input_output_subdirectories
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: leaderboard
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -409,7 +505,55 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
+  - gradeable_config: multiple_pdf_annotations
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
   - gradeable_config: notebook_basic
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: notebook_expected_string
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -543,15 +687,16 @@ gradeables:
             gcm_points: -5
     g_ta_view_start_date: -2 days
     eg_submission_open_date: -1 days
-    eg_submission_due_date: +1000 days
-    g_grade_start_date: +1005 days
-    g_grade_due_date: +1010 days
-    g_grade_released_date: +1010 days
-    eg_grade_inquiry_start_date: +1011 days
-    eg_grade_inquiry_due_date: +1015 days
+    eg_submission_due_date: +29 days
+    g_grade_start_date: +34 days
+    g_grade_due_date: +39 days
+    g_grade_released_date: +39 days
+    eg_grade_inquiry_start_date: +40 days
+    eg_grade_inquiry_due_date: +44 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
+    eg_bulk_test: true
 
   - gradeable_config: pdf_word_count
     components:
@@ -567,17 +712,17 @@ gradeables:
             gcm_points: -5
     g_ta_view_start_date: -2 days
     eg_submission_open_date: -1 days
-    eg_submission_due_date: +1000 days
-    g_grade_start_date: +1005 days
-    g_grade_due_date: +1010 days
-    g_grade_released_date: +1010 days
-    eg_grade_inquiry_start_date: +1011 days
-    eg_grade_inquiry_due_date: +1015 days
+    eg_submission_due_date: +26 days
+    g_grade_start_date: +31 days
+    g_grade_due_date: +36 days
+    g_grade_released_date: +36 days
+    eg_grade_inquiry_start_date: +37 days
+    eg_grade_inquiry_due_date: +41 days
     eg_has_due_date: true
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-  - gradeable_config: python_linehighlight
+  - gradeable_config: pre_commands
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -601,7 +746,7 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-  - gradeable_config: python_multipart_static_analysis
+  - gradeable_config: prolog_simple_goal
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -625,7 +770,7 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-  - gradeable_config: python_simple_homework
+  - gradeable_config: python_count_ts
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -649,79 +794,7 @@ gradeables:
     eg_has_release_date: true
     eg_max_random_submissions: 0
 
-  - gradeable_config: python_random_input_output
-    components:
-      - gc_lower_clamp: 0
-        gc_default: 5
-        gc_max_value: 5
-        gc_upper_clamp: 5
-        gc_title: Question 1
-        marks:
-          - gcm_note: Full Credit
-            gcm_points: 0
-          - gcm_note: Question 1 Mark 1
-            gcm_points: -5
-    g_ta_view_start_date: -2 days
-    eg_submission_open_date: -1 days
-    eg_submission_due_date: +1000 days
-    g_grade_start_date: +1005 days
-    g_grade_due_date: +1010 days
-    g_grade_released_date: +1010 days
-    eg_grade_inquiry_start_date: +1011 days
-    eg_grade_inquiry_due_date: +1015 days
-    eg_has_due_date: true
-    eg_has_release_date: true
-    eg_max_random_submissions: 0
-
-  - gradeable_config: test_notes_upload
-    components:
-      - gc_lower_clamp: 0
-        gc_default: 5
-        gc_max_value: 5
-        gc_upper_clamp: 5
-        gc_title: Question 1
-        marks:
-          - gcm_note: Full Credit
-            gcm_points: 0
-          - gcm_note: Question 1 Mark 1
-            gcm_points: -5
-    g_ta_view_start_date: -2 days
-    eg_submission_open_date: -1 days
-    eg_submission_due_date: +1000 days
-    g_grade_start_date: +1005 days
-    g_grade_due_date: +1010 days
-    g_grade_released_date: +1010 days
-    eg_grade_inquiry_start_date: +1011 days
-    eg_grade_inquiry_due_date: +1015 days
-    eg_has_due_date: true
-    eg_has_release_date: true
-    eg_max_random_submissions: 0
-
-  - gradeable_config: test_notes_upload_3page
-    components:
-      - gc_lower_clamp: 0
-        gc_default: 5
-        gc_max_value: 5
-        gc_upper_clamp: 5
-        gc_title: Question 1
-        marks:
-          - gcm_note: Full Credit
-            gcm_points: 0
-          - gcm_note: Question 1 Mark 1
-            gcm_points: -5
-    g_ta_view_start_date: -2 days
-    eg_submission_open_date: -1 days
-    eg_submission_due_date: +1000 days
-    g_grade_start_date: +1005 days
-    g_grade_due_date: +1010 days
-    g_grade_released_date: +1010 days
-    eg_grade_inquiry_start_date: +1011 days
-    eg_grade_inquiry_due_date: +1015 days
-    eg_has_due_date: true
-    eg_has_release_date: true
-    eg_max_random_submissions: 0
-
-  - gradeable_config: upload_only
+  - gradeable_config: python_custom_docker_rlimits
     components:
       - gc_lower_clamp: 0
         gc_default: 5
@@ -746,6 +819,342 @@ gradeables:
     eg_max_random_submissions: 0
 
   - gradeable_config: python_custom_validation
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +25 days
+    g_grade_start_date: +30 days
+    g_grade_due_date: +35 days
+    g_grade_released_date: +35 days
+    eg_grade_inquiry_start_date: +36 days
+    eg_grade_inquiry_due_date: +40 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: python_linehighlight
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +23 days
+    g_grade_start_date: +28 days
+    g_grade_due_date: +33 days
+    g_grade_released_date: +33 days
+    eg_grade_inquiry_start_date: +34 days
+    eg_grade_inquiry_due_date: +38 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: python_multipart_static_analysis
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +20 days
+    g_grade_start_date: +25 days
+    g_grade_due_date: +30 days
+    g_grade_released_date: +30 days
+    eg_grade_inquiry_start_date: +31 days
+    eg_grade_inquiry_due_date: +35 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: python_simple_homework
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +17 days
+    g_grade_start_date: +22 days
+    g_grade_due_date: +27 days
+    g_grade_released_date: +27 days
+    eg_grade_inquiry_start_date: +28 days
+    eg_grade_inquiry_due_date: +32 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: python_random_input_output
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +14 days
+    g_grade_start_date: +19 days
+    g_grade_due_date: +24 days
+    g_grade_released_date: +24 days
+    eg_grade_inquiry_start_date: +25 days
+    eg_grade_inquiry_due_date: +29 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: qiskit_circuit_draw_diff
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +11 days
+    g_grade_start_date: +16 days
+    g_grade_due_date: +21 days
+    g_grade_released_date: +21 days
+    eg_grade_inquiry_start_date: +22 days
+    eg_grade_inquiry_due_date: +26 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: qiskit_tolerance_diff
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +11 days
+    g_grade_start_date: +16 days
+    g_grade_due_date: +21 days
+    g_grade_released_date: +21 days
+    eg_grade_inquiry_start_date: +22 days
+    eg_grade_inquiry_due_date: +26 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: test_notes_upload
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +11 days
+    g_grade_start_date: +16 days
+    g_grade_due_date: +21 days
+    g_grade_released_date: +21 days
+    eg_grade_inquiry_start_date: +22 days
+    eg_grade_inquiry_due_date: +26 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: tolerance_check
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +11 days
+    g_grade_start_date: +16 days
+    g_grade_due_date: +21 days
+    g_grade_released_date: +21 days
+    eg_grade_inquiry_start_date: +22 days
+    eg_grade_inquiry_due_date: +26 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: test_notes_upload_3page
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +7 days
+    g_grade_start_date: +12 days
+    g_grade_due_date: +17 days
+    g_grade_released_date: +17 days
+    eg_grade_inquiry_start_date: +18 days
+    eg_grade_inquiry_due_date: +22 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: upload_only
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +4 days
+    g_grade_start_date: +9 days
+    g_grade_due_date: +14 days
+    g_grade_released_date: +14 days
+    eg_grade_inquiry_start_date: +15 days
+    eg_grade_inquiry_due_date: +19 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: vcs_submissions
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: verilog_hello_world
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: rust_hello_world
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Question 1
+        marks:
+          - gcm_note: Full Credit
+            gcm_points: 0
+          - gcm_note: Question 1 Mark 1
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    eg_max_random_submissions: 0
+
+  - gradeable_config: docker_choice_of_language
     components:
       - gc_lower_clamp: 0
         gc_default: 5

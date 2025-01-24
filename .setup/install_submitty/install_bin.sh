@@ -26,7 +26,7 @@ chmod 755 ${SUBMITTY_INSTALL_DIR}/bin
 rsync -rtz  ${SUBMITTY_REPOSITORY}/bin/*   ${SUBMITTY_INSTALL_DIR}/bin/
 
 # all course builders (instructors & head TAs) need read/execute access to these scripts
-array=( grading_done.py left_right_parse.py read_iclicker_ids.py regrade.py extract_notes_page.py )
+array=( grading_done.py left_right_parse.py regrade.py extract_notes_page.py )
 for i in "${array[@]}"; do
     chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/bin/${i}
     chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/${i}
@@ -68,6 +68,10 @@ find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 # www-data needs to have access to this so that it can authenticate for git
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
+
+# submitty_daemon needs to check for zombie networks during autograding
+chown root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/docker_cleanup.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/docker_cleanup.sh
 
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py

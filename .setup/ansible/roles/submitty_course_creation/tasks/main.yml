@@ -1,0 +1,125 @@
+---
+# Submitty Course Creation Ansible script.
+# Assumes that local user accounts for instructor and TA already exist.
+
+- name: Create new course groups for course
+  ansible.builtin.group:
+    name: "{{ submitty_course_creation_groups }}"
+    state: present
+  loop:
+    - "{{ submitty_course_creation_course }}"
+    - "{{ submitty_course_creation_course }}_tas_www"
+    - "{{ submitty_course_creation_course }}_archive"
+  loop_control:
+    loop_var: submitty_course_creation_groups
+  vars:
+    course_name: "{{ submitty_course_creation_course }}"
+
+- name: Add instructors to the course groups.
+  ansible.builtin.user:
+    name: "{{ submitty_course_creation_username }}"
+    groups: "{{ submitty_course_creation_groups }}"
+    append: true
+  loop:
+    - "{{ submitty_course_creation_course }}"
+    - "{{ submitty_course_creation_course }}_tas_www"
+    - "{{ submitty_course_creation_course }}_archive"
+  loop_control:
+    loop_var: submitty_course_creation_groups
+
+- name: Add special users to the course group.
+  ansible.builtin.user:
+    name: "{{ submitty_course_creation_user }}"
+    groups: "{{ submitty_course_creation_course }}_tas_www"
+    append: true
+  loop:
+    - submitty_php
+    - submitty_daemon
+    - submitty_cgi
+  loop_control:
+    loop_var: submitty_course_creation_user
+  notify: Reload fpm
+  vars:
+    course_group: "{{ submitty_course_creation_course }}_tas_www"
+
+- name: Give course management permissions to "{{ submitty_course_creation_username }}".
+  ansible.builtin.user:
+    name: "{{ submitty_course_creation_user }}"
+    groups: "submitty_course_builders"
+    append: true
+  loop:
+    - submitty_php
+    - submitty_daemon
+    - submitty_cgi
+    - "{{ submitty_course_creation_username }}"
+  loop_control:
+    loop_var: submitty_course_creation_user
+  notify: Reload fpm
+
+- name: Create private directory/repository for "{{ submitty_course_creation_course }}".
+  ansible.builtin.file:
+    path: "/var/local/submitty/private_course_repositories/{{ submitty_course_creation_course }}"
+    state: directory
+    mode: '0770'
+
+- name: Recursively add private directory ownership to "{{ submitty_course_creation_username }}".
+  ansible.builtin.file:
+    path: "/var/local/submitty/private_course_repositories/{{ submitty_course_creation_course }}"
+    state: directory
+    recurse: true
+    owner: "{{ submitty_course_creation_username }}"
+    group: "{{ submitty_course_creation_course }}_tas_www"
+
+- name: Recursively update permissions to private directory.
+  ansible.builtin.file:
+    path: "/var/local/submitty/private_course_repositories/{{ submitty_course_creation_course }}"
+    state: directory
+    recurse: true
+    mode: g+s
+
+- name: Add instructors to submitty users.
+  ansible.builtin.expect:
+    command: ./adduser.py "{{ submitty_course_creation_username }}"
+    chdir: /usr/local/submitty/sbin/
+    echo: true
+    responses:
+      (?m)^User givenname: "{{ submitty_course_creation_firstname }}"
+      (?m)^User preferred name: "{{ submitty_course_creation_firstname }}"
+      (?m)^User familyname: "{{ submitty_course_creation_lastname }}"
+      (?m)^User email: "{{ submitty_course_creation_email }}"
+      (?m)^User password: NotUsedWithLdap
+  become: true
+  become_user: root
+
+# Prepare the course directory and course database.
+# Assumes top-level Submitty database exists.
+
+- name: Run the create_course script to create a course.
+  ansible.builtin.command:
+    cmd: ./create_course.sh "{{ submitty_course_creation_term }}"
+      "{{ submitty_course_creation_course }}" "{{ submitty_course_creation_username }}"
+      "{{ submitty_course_creation_course }}_tas_www"
+    chdir: /usr/local/submitty/sbin/
+  become: true
+  become_user: root
+  notify: Reload fpm
+  register: submitty_course_creation_output
+  changed_when: submitty_course_creation_output.rc != 0
+
+- name: Add existing instructors to the course database.
+  ansible.builtin.command:
+    cmd: ./adduser_course.py "{{ submitty_course_creation_username }}"
+      "{{ submitty_course_creation_term }}" "{{ submitty_course_creation_course }}"
+      "{{ submitty_course_creation_user_group }}"
+    chdir: /usr/local/submitty/sbin/
+  become: true
+  become_user: root
+  register: submitty_course_creation
+  changed_when: submitty_course_creation.rc != 0
+
+- name: Restart PHP=FPM service.
+  ansible.builtin.systemd:
+    name: "php{{ submitty_common_php_version }}-fpm"
+    state: restarted
+  become: true
+  become_user: root

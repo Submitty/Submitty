@@ -1,13 +1,25 @@
 includes:
     - %rootDir%/../../../phpstan-baseline.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-doctrine/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - phar://phpstan.phar/conf/bleedingEdge.neon
 
 parameters:
+    paths:
+        - app
+        - public/index.php
+        - socket/index.php
     ignoreErrors:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
     reportAlwaysTrueInLastCondition: true
-    level: 5
+    level: 6
+    doctrine:
+        objectManagerLoader: tests/phpstan/DoctrineExtensionTester.php
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
 
 services:
     - class: tests\phpstan\ModelClassExtension

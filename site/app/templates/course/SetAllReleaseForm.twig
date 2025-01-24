@@ -6,12 +6,13 @@
 
 
     <div style="margin: auto; text-align: center;">
+    <br/>
         <label for="date_to_release_all">
             <b>Change the release date for all course materials</b>
         </label>
-        <br/>
-        <br/>
+        <br/><br/>
         <input name="release_date" id="date_to_release_all" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewAllDateTime('date_to_release_all')"/>
+        <br/><br/>
     </div>
     <script>
 
@@ -34,7 +35,7 @@
         }
 
 
-        const release_date_fp = flatpickr("#date_to_release_all", {
+        const release_all_fp = flatpickr("#date_to_release_all", {
             plugins: [ShortcutButtonsPlugin(
                     {
                         button: [
@@ -51,11 +52,11 @@
                                 label: "End of time"
                             }
                         ],
-                        onClick: (index, fp) => {
+                        onClick: (index, release_all_fp) => {
                             let date;
                             switch (index) {
                                 case 0:
-                                    date = new Date("1001-01-01 00:00:00");
+                                    date = new Date('{{ beginning_of_time_date }}');
                                     break;
                                 case 1:
                                     date = new Date();
@@ -65,10 +66,10 @@
                                     date.setDate(date.getDate() + 1);
                                     break;
                                 case 3:
-                                    date = new Date("9998-01-01 00:00:00");
+                                    date = new Date("9998-01-01T00:00:00");
                                     break;
                             }
-                            fp.setDate(date);
+                            release_all_fp.setDate(date);
                         }
                     }
             )],
@@ -78,13 +79,13 @@
             enableSeconds: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            onReady: (a, b, release_all_fp) => {
+                release_all_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                release_all_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
     $('.form-body').on('scroll', function() {
-        release_date_fp._positionCalendar();
+        release_all_fp._positionCalendar();
     });
     </script>
 

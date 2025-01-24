@@ -32,7 +32,7 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     editor1.setSize('100%', '100%');
     editor2.setSize('100%', '100%');
 
-    const default_highlighting_colors =  {
+    const default_highlighting_colors = {
         'common-code': '#d3d3d3',
         'provided-code': '#ccebc5',
         'match': '#ffffb3',
@@ -43,38 +43,38 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
 
     // this is the global state for the entire program.  All functions will read and modify this object.
     const state = {
-        'gradeable_id': gradeable_id,
-        'config_id': config_id,
-        'this_term_course_gradeable': term_course_gradeable,
-        'user_1_dropdown_list': user_1_list,
-        'user_1_version_dropdown_list': {
-            'versions': [],
-            'max_matching': '',
-            'active_version': '',
+        gradeable_id: gradeable_id,
+        config_id: config_id,
+        this_term_course_gradeable: term_course_gradeable,
+        user_1_dropdown_list: user_1_list,
+        user_1_version_dropdown_list: {
+            versions: [],
+            max_matching: '',
+            active_version: '',
         },
-        'user_2_dropdown_list': [],
-        'user_1_selected': {
-            'user_id': user_1_list[0].user_id,
-            'version': user_1_list[0].version,
+        user_2_dropdown_list: [],
+        user_1_selected: {
+            user_id: user_1_list[0].user_id,
+            version: user_1_list[0].version,
         },
-        'user_2_selected': {
-            'percent': '',
-            'user_id': '',
-            'display_name' : '',
-            'version': '',
-            'source_gradeable': '',
+        user_2_selected: {
+            percent: '',
+            user_id: '',
+            display_name: '',
+            version: '',
+            source_gradeable: '',
         },
-        'editor1': editor1,
-        'editor2': editor2,
-        'color_info': [],
-        'previous_selection': {
-            'start_line': -1,
-            'end_line': -1,
-            'start_char': -1,
-            'end_char': -1,
+        editor1: editor1,
+        editor2: editor2,
+        color_info: [],
+        previous_selection: {
+            start_line: -1,
+            end_line: -1,
+            start_char: -1,
+            end_char: -1,
         },
-        'anon_mode_enabled': localStorage.getItem('plagiarism-anon-mode-enabled') === 'true',
-        'highlighting_colors': JSON.parse(JSON.stringify(default_highlighting_colors)), // a crude way to copy the object
+        anon_mode_enabled: localStorage.getItem('plagiarism-anon-mode-enabled') === 'true',
+        highlighting_colors: JSON.parse(JSON.stringify(default_highlighting_colors)), // a crude way to copy the object
     };
 
     // Highlighting setup
@@ -171,7 +171,6 @@ function setUpPlagView(gradeable_id, term_course_gradeable, config_id, user_1_li
     handleClickedMarks(state);
 }
 
-
 function user1DropdownChanged(state) {
     // update the state
     state.user_1_selected.user_id = $('#user-1-dropdown-list').val();
@@ -196,7 +195,6 @@ function user1DropdownChanged(state) {
     loadUser1VersionDropdownList(state);
 }
 
-
 function user1VersionDropdownChanged(state) {
     // update the state
     state.user_1_selected.version = $('#user-1-version-dropdown-list').val();
@@ -217,7 +215,6 @@ function user1VersionDropdownChanged(state) {
     loadUser2DropdownList(state);
     loadConcatenatedFileForEditor(state, 1);
 }
-
 
 function user2DropdownChanged(state) {
     // update the state
@@ -240,7 +237,6 @@ function user2DropdownChanged(state) {
     loadColorInfo(state);
 }
 
-
 function loadUser1VersionDropdownList(state) {
     // eslint-disable-next-line no-undef
     const url = `${buildCourseUrl(['plagiarism', 'gradeable', state.gradeable_id, state.config_id, 'versionlist'])}?user_id_1=${state.user_1_selected.user_id}`;
@@ -257,7 +253,6 @@ function loadUser1VersionDropdownList(state) {
         loadUser2DropdownList(state);
     });
 }
-
 
 function loadUser2DropdownList(state) {
     // acquire ajax data for user 2 dropdown and send to the refresher
@@ -277,7 +272,6 @@ function loadUser2DropdownList(state) {
         loadColorInfo(state);
     });
 }
-
 
 /**
  * @param {int} editor
@@ -311,7 +305,6 @@ function loadConcatenatedFileForEditor(state, editor) {
     });
 }
 
-
 /**
  * Prevents a race condition where the editor could still be waiting on data when the color info results come back.
  * We wait until the contents of both editors are set before attempting to make colored marks
@@ -327,7 +320,6 @@ function colorRefreshAfterConcatLoad(state) {
         }, 50);
     }
 }
-
 
 function loadColorInfo(state) {
     if (state.user_2_selected.length === 0) {
@@ -345,7 +337,6 @@ function loadColorInfo(state) {
     });
 }
 
-
 /**
  * Makes a request to the specified URL and passes the list of parameters (es) to the specified callback function (f)
  * @param url
@@ -355,7 +346,7 @@ function loadColorInfo(state) {
 function requestAjaxData(url, f, es) {
     $.ajax({
         url: url,
-        success: function(data) {
+        success: function (data) {
             try {
                 data = JSON.parse(data);
             }
@@ -371,12 +362,11 @@ function requestAjaxData(url, f, es) {
 
             f(data.data, es);
         },
-        error: function() {
+        error: function () {
             alert('Error occurred when requesting via ajax. Please refresh the page and try again.');
         },
     });
 }
-
 
 // VIEWS ///////////////////////////////////////////////////////////////////////
 // functions that get data from the global state and load it into UI elements
@@ -416,7 +406,6 @@ function refreshUser1VersionDropdown(state) {
     $('#user-1-version-dropdown-list').append(append_options);
 }
 
-
 function refreshUser2Dropdown(state) {
     // grab users from user_2_dropdown_list and append to the html element
     $('#user-2-dropdown-list').empty();
@@ -452,7 +441,6 @@ function refreshUser2Dropdown(state) {
         $('#swap-students-button').removeClass('disabled');
     }
 }
-
 
 function refreshColorInfo(state) {
     let previousSelectedMark = null;
@@ -499,11 +487,11 @@ function refreshColorInfo(state) {
                         },
                         {
                             attributes: {
-                                'original_color': 'specific-match',
-                                'start_line': mp.start_line - 1,
-                                'end_line': mp.end_line - 1,
-                                'start_char': mp.start_char - 1,
-                                'end_char': mp.end_char - 1,
+                                original_color: 'specific-match',
+                                start_line: mp.start_line - 1,
+                                end_line: mp.end_line - 1,
+                                start_char: mp.start_char - 1,
+                                end_char: mp.end_char - 1,
                             },
                             className: 'specific-match-style',
                             css: `background-color: ${state.highlighting_colors['specific-match']};`,
@@ -522,15 +510,15 @@ function refreshColorInfo(state) {
                     },
                     {
                         attributes: {
-                            'original_color': color,
-                            'selected': false,
-                            'type': interval.type,
-                            'matching_positions': mp_text_marks,
-                            'others': interval.others,
-                            'start_line': interval.start_line - 1,
-                            'end_line': interval.end_line - 1,
-                            'start_char': interval.start_char - 1,
-                            'end_char': interval.end_char - 1,
+                            original_color: color,
+                            selected: false,
+                            type: interval.type,
+                            matching_positions: mp_text_marks,
+                            others: interval.others,
+                            start_line: interval.start_line - 1,
+                            end_line: interval.end_line - 1,
+                            start_char: interval.start_char - 1,
+                            end_char: interval.end_char - 1,
                         },
                         className: wasPreviousSelection ? 'selected-style-red' : `${color}-style`,
                         css: `background-color: ${wasPreviousSelection ? state.highlighting_colors['selected-red'] : state.highlighting_colors[color]};`,
@@ -552,7 +540,6 @@ function refreshColorInfo(state) {
     hideLoadingIndicatorRight();
 }
 
-
 function handleClickedMark_editor1(state, clickedMark, e = null) {
     // mark the clicked mark on both sides
     if (clickedMark.attributes.type === 'specific-match' && !clickedMark.attributes.selected) {
@@ -566,16 +553,16 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
                 mp.className = 'selected-style-red';
                 mp.css = `background-color: ${state.highlighting_colors['selected-red']};`;
             });
-            state.editor2.scrollIntoView({line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0}, 400);
+            state.editor2.scrollIntoView({ line: clickedMark.attributes.matching_positions[0].attributes.end_line, ch: 0 }, 400);
         });
 
         // highlight the other matching regions on the left side
-        state.editor1.getAllMarks().forEach(mark => {
+        state.editor1.getAllMarks().forEach((mark) => {
             $.each(mark.attributes.matching_positions, (i, mp) => {
-                if (mp.attributes.start_line === clickedMark.attributes.matching_positions[0].attributes.start_line &&
-                    mp.attributes.end_line === clickedMark.attributes.matching_positions[0].attributes.end_line &&
-                    mp.attributes.start_char === clickedMark.attributes.matching_positions[0].attributes.start_char &&
-                    mp.attributes.end_char === clickedMark.attributes.matching_positions[0].attributes.end_char
+                if (mp.attributes.start_line === clickedMark.attributes.matching_positions[0].attributes.start_line
+                    && mp.attributes.end_line === clickedMark.attributes.matching_positions[0].attributes.end_line
+                    && mp.attributes.start_char === clickedMark.attributes.matching_positions[0].attributes.start_char
+                    && mp.attributes.end_char === clickedMark.attributes.matching_positions[0].attributes.end_char
                 ) {
                     mark.attributes.selected = true;
                     mark.className = 'selected-style-red';
@@ -642,19 +629,18 @@ function handleClickedMark_editor1(state, clickedMark, e = null) {
     state.editor2.refresh();
 }
 
-
 function handleClickedMark_editor2(state, clickedMark) {
     clickedMark.className = 'selected-style-red';
     clickedMark.css = `background-color: ${state.highlighting_colors['selected-red']};`;
     state.editor1.operation(() => {
         let first_mark = true;
-        state.editor1.getAllMarks().forEach(mark => {
+        state.editor1.getAllMarks().forEach((mark) => {
             let mark_does_contain_mp = false;
             $.each(mark.attributes.matching_positions, (i, mp) => {
-                if (mp.attributes.start_line === clickedMark.attributes.start_line &&
-                    mp.attributes.end_line === clickedMark.attributes.end_line &&
-                    mp.attributes.start_char === clickedMark.attributes.start_char &&
-                    mp.attributes.end_char === clickedMark.attributes.end_char
+                if (mp.attributes.start_line === clickedMark.attributes.start_line
+                    && mp.attributes.end_line === clickedMark.attributes.end_line
+                    && mp.attributes.start_char === clickedMark.attributes.start_char
+                    && mp.attributes.end_char === clickedMark.attributes.end_char
                 ) {
                     mark_does_contain_mp = true;
                 }
@@ -667,7 +653,7 @@ function handleClickedMark_editor2(state, clickedMark) {
                     mp.className = 'selected-style-red';
                     mp.css = `background-color: ${state.highlighting_colors['selected-red']};`;
                     if (first_mark) {
-                        state.editor1.scrollIntoView({line: mark.attributes.end_line, ch: 0}, 400);
+                        state.editor1.scrollIntoView({ line: mark.attributes.end_line, ch: 0 }, 400);
                         first_mark = false;
                     }
                 });
@@ -680,25 +666,21 @@ function handleClickedMark_editor2(state, clickedMark) {
     state.editor2.refresh();
 }
 
-
 function handleClickedMarks(state) {
-    state.editor1.getWrapperElement().onmouseup = function(e) {
+    state.editor1.getWrapperElement().onmouseup = function (e) {
         const lineCh = state.editor1.coordsChar({ left: e.clientX, top: e.clientY });
         let markers = state.editor1.findMarksAt(lineCh);
-
 
         // hide the "others" popup in case it was visible
         $('#popup-to-show-matches-id').css('display', 'none');
 
-
         // Only grab the first one if there is overlap...
         const clickedMark = markers[0];
-
 
         // reset all previous marks
         const marks_editor1 = state.editor1.getAllMarks();
         state.editor1.operation(() => {
-            marks_editor1.forEach(mark => {
+            marks_editor1.forEach((mark) => {
                 // If this mark is already blue, it's like we didn't click any mark
                 if (mark.className === 'selected-style-blue') {
                     markers = [];
@@ -713,12 +695,11 @@ function handleClickedMarks(state) {
         });
         const marks_editor2 = state.editor2.getAllMarks();
         state.editor2.operation(() => {
-            marks_editor2.forEach(mark => {
+            marks_editor2.forEach((mark) => {
                 mark.className = `${mark.attributes.original_color}-style`;
                 mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
             });
         });
-
 
         // Did not select a marker
         if (markers.length === 0) {
@@ -730,14 +711,12 @@ function handleClickedMarks(state) {
         handleClickedMark_editor1(state, clickedMark, e);
     };
 
-    state.editor2.getWrapperElement().onmouseup = function(e) {
+    state.editor2.getWrapperElement().onmouseup = function (e) {
         const lineCh = state.editor2.coordsChar({ left: e.clientX, top: e.clientY });
         const markers = state.editor2.findMarksAt(lineCh);
 
-
         // hide the "others" popup in case it was visible
         $('#popup-to-show-matches-id').css('display', 'none');
-
 
         // Only grab the first one if there is overlap...
         const clickedMark = markers[0];
@@ -745,7 +724,7 @@ function handleClickedMarks(state) {
         // reset all previous marks
         const marks_editor1 = state.editor1.getAllMarks();
         state.editor1.operation(() => {
-            marks_editor1.forEach(mark => {
+            marks_editor1.forEach((mark) => {
                 if (markers.length === 0 || mark !== clickedMark) {
                     mark.className = mark.attributes.original_color;
                     mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
@@ -755,12 +734,11 @@ function handleClickedMarks(state) {
         });
         const marks_editor2 = state.editor2.getAllMarks();
         state.editor2.operation(() => {
-            marks_editor2.forEach(mark => {
+            marks_editor2.forEach((mark) => {
                 mark.className = mark.attributes.original_color;
                 mark.css = `background-color: ${state.highlighting_colors[mark.attributes.original_color]};`;
             });
         });
-
 
         // Did not select a marker
         if (markers.length === 0) {
@@ -773,40 +751,33 @@ function handleClickedMarks(state) {
     };
 }
 
-
 function showLoadingIndicatorLeft() {
     $('.left-sub-item-middle').addClass('blurry');
     $('.left-loader').css('display', 'block');
 }
-
 
 function hideLoadingIndicatorLeft() {
     $('.left-sub-item-middle').removeClass('blurry');
     $('.left-loader').css('display', 'none');
 }
 
-
 function showLoadingIndicatorRight() {
     $('.right-sub-item-middle').addClass('blurry');
     $('.right-loader').css('display', 'block');
 }
-
 
 function hideLoadingIndicatorRight() {
     $('.right-sub-item-middle').removeClass('blurry');
     $('.right-loader').css('display', 'none');
 }
 
-
 function showPlagiarismHighKey() {
     $('#Plagiarism-Highlighting-Key').css('display', 'block');
 }
 
-
 function toggleFullScreenMode() {
     $('main#main').toggleClass('full-screen-mode');
 }
-
 
 function toggleAnonymousMode(state) {
     if (state.anon_mode_enabled) {
@@ -825,7 +796,6 @@ function toggleAnonymousMode(state) {
     user1DropdownChanged(state);
 }
 
-
 // currently selects user 2 in the user 1 dropdown and then reloads everything without selecting the proper user 2
 // further discussion is necessary regarding whether this behavior is a good or bad thing and whether this should
 // be a "swap students" button or a "move user 2 to the left side" button
@@ -834,7 +804,6 @@ function swapStudents(state) {
     $('#user-1-dropdown-list').val(state.user_2_selected.user_id);
     user1DropdownChanged(state);
 }
-
 
 // takes in a string and outputs an 8-character hash of it
 function hashString(input) {

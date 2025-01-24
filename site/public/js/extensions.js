@@ -1,12 +1,14 @@
 /* global buildCourseUrl */
+/* global luxon */
 /* exported confirmExtension, clearDate, deleteHomeworkExtension, setLateDays */
+const DateTime = luxon.DateTime;
 
 $(document).ready(() => {
     $('#gradeable-select').change(() => {
         const g_id = $('#gradeable-select').val();
-        const expiration_date = new Date();
-        expiration_date.setDate(expiration_date.getDate() + 1);
-        Cookies.set('exception_gid', g_id, { expires: expiration_date });
+        const expirationDate = DateTime.local().plus({ days: 1 });
+        const expirationDateJS = expirationDate.toJSDate();
+        Cookies.set('exception_gid', g_id, { expires: expirationDateJS });
         // eslint-disable-next-line no-self-assign
         window.location = window.location; // pseudo post/redirect/get pattern
     });
@@ -22,7 +24,7 @@ function updateHomeworkExtension() {
         processData: false,
         cache: false,
         contentType: false,
-        success: function(data) {
+        success: function (data) {
             let json;
             try {
                 json = JSON.parse(data);
@@ -38,7 +40,7 @@ function updateHomeworkExtension() {
                 window.location = window.location; // pseudo post/redirect/get pattern
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
@@ -47,6 +49,7 @@ function updateHomeworkExtension() {
 function deleteHomeworkExtension(user) {
     $('#user_id').val(user);
     $('#late-days').val(0);
+    $('#reason-for-exception').val('');
     updateHomeworkExtension();
 }
 
@@ -55,9 +58,9 @@ function clearDate() {
 }
 
 function setLateDays() {
-    const new_date = new Date($('#late-calendar').val());
-    const old_date = new Date($('#due-date').data('date'));
-    const diff = (new_date.getTime() - old_date.getTime()) / (1000 * 3600 * 24);
+    const newDate = luxon.DateTime.fromISO($('#late-calendar').val());
+    const oldDate = luxon.DateTime.fromISO($('#due-date').data('date'));
+    const diff = newDate.diff(oldDate, 'days').days;
     if (!Number.isNaN(diff)) {
         document.getElementById('late-days').value = diff;
     }

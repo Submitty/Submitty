@@ -164,7 +164,7 @@ def main():
                     # FIXME: This will need to be adjusted for team assignments
                     # and assignments with special required capabilities!
                     queue_time = dateutils.write_submitty_date()
-                    json.dump({"semester": args.semester,
+                    json.dump({"term": args.semester,
                                "course": args.course_name,
                                "gradeable": args.assignment_name,
                                "user": user_name,

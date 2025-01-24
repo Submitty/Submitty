@@ -79,24 +79,21 @@
 
 .action-btn-cont {
     display: flex;
-    width: 100%;
-    flex-direction: row;
-    justify-self: flex-end;
+    width: 200px;
+    height: 132px;
     /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
     flex-wrap: wrap;
-    justify-content: space-between;
-    margin: 10px 0;
+    gap: 4px;
+    margin: 10px auto;
 }
 
-.action-btn-cont a {
-    padding: 12px;
-    flex: 1;
-    margin-right: 10px;
+.action-btn-cont button {
+    display: flex;
+    width: 100%;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--standard-medium-gray);
-}
-
-.action-btn-cont a:last-child {
-    margin-right: 0;
 }
 
 #details-table#details-table td::before {
@@ -158,7 +155,7 @@
 
     #details-table tbody.panel-head-active {
         background: var(--submitty-logo-blue);
-        color: white;
+        color: var(--default-white);
     }
 
     #details-table .details-content td:nth-of-type(1) { display: none; }
@@ -210,7 +207,7 @@
 
     #details-table tbody.details-info-header:hover {
         background-color: var(--standard-medium-blue);
-        color: white;
+        color: var(--default-white);
         transform: translate(0, -5px);
     }
 
@@ -256,22 +253,7 @@
     }
 
     #details-legend {
-        width: unset;
-    }
-
-    .action-btn-cont {
-        flex-direction: column;
-        width: unset;
-        margin: 0 5px;
-    }
-
-    .action-btn-cont a {
-        margin-right: 0;
-        flex: unset;
-    }
-
-    .action-btn-cont a:first-child {
-        margin-bottom: 10px;
+        width: 300px;
     }
 }
 
@@ -287,6 +269,21 @@
     .details-action-box > * {
         margin-top: 0;
     }
+    
+    .markers-container {
+        display: grid;
+        grid-template-columns: 60% 40%;
+        gap: 10px;
+    }
+    
+    #details-legend {
+        width: unset;
+    }
+    
+    .action-btn-cont {
+        margin: 0;
+        width: unset;
+    }
 }
 
 @media (min-width: 951px) {
@@ -299,7 +296,7 @@
     }
 
     .markers-container {
-        width: unset;
+        width: 600px;
     }
 
     #details-table td:nth-of-type(1) { display: table-cell; }

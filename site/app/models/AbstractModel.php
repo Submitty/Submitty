@@ -24,7 +24,8 @@ abstract class AbstractModel {
     /** @var Core */
     protected $core;
 
-    /** @prop @var bool flag on whether this model has been changed or not by the application layer */
+    /** @prop
+     * @var bool flag on whether this model has been changed or not by the application layer */
     protected $modified = false;
 
     public function __construct(Core $core) {
@@ -98,7 +99,7 @@ abstract class AbstractModel {
                         'read_only' => true,
                     ];
                 }
-                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                elseif (preg_match("/ @prop[\s]/", $doc_comment) === 1) {
                     static::$properties[$class_name][$prop_name] = [];
                 }
 
@@ -155,7 +156,7 @@ abstract class AbstractModel {
             $value = $arguments[0];
             if (isset(static::$properties[$class_name][$property_name])) {
                 if (isset(static::$properties[$class_name][$property_name]['read_only'])) {
-                    throw new PropertyAccessException("Cannot write to read-only property ${property_name}");
+                    throw new PropertyAccessException("Cannot write to read-only property {$property_name}");
                 }
                 $type = static::$properties[$class_name][$property_name];
                 switch ($type) {
@@ -186,7 +187,7 @@ abstract class AbstractModel {
                 isset(static::$properties[$class_name][$property_name])
                 && isset(static::$properties[$class_name][$property_name]['write_only'])
             ) {
-                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+                throw new PropertyAccessException("Cannot read write-only property {$property_name}");
             }
 
             return $this->$property_name;
@@ -196,7 +197,7 @@ abstract class AbstractModel {
                 isset(static::$properties[$class_name][$property_name])
                 && isset(static::$properties[$class_name][$property_name]['write_only'])
             ) {
-                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+                throw new PropertyAccessException("Cannot read write-only property {$property_name}");
             }
 
             return $this->$property_name === true;

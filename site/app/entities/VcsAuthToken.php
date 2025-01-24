@@ -3,48 +3,36 @@
 namespace app\entities;
 
 use app\libraries\DateUtils;
+use app\repositories\VcsAuthTokenRepository;
+use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class GitAuthToken
  * @package app\entities
- * @ORM\Entity(repositoryClass="\app\repositories\VcsAuthTokenRepository")
- * @ORM\Table(name="vcs_auth_tokens")
  */
+#[ORM\Entity(repositoryClass: VcsAuthTokenRepository::class)]
+#[ORM\Table(name: "vcs_auth_tokens")]
 class VcsAuthToken {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var integer
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $user_id;
+    #[ORM\Column(type: Types::STRING)]
+    protected string $user_id;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $token;
+    #[ORM\Column(type: Types::STRING)]
+    protected string $token;
 
-    /**
-     * @ORM\Column(type="string")
-     * @var string
-     */
-    protected $name;
+    #[ORM\Column(type: Types::STRING)]
+    protected string $name;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var ?\DateTime
-     */
-    protected $expiration;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $expiration;
 
-    public function __construct(string $user_id, string $token, string $name, ?\DateTime $expiration) {
+    public function __construct(string $user_id, string $token, string $name, ?DateTime $expiration) {
         $this->user_id = $user_id;
         $this->token = $token;
         $this->name = $name;

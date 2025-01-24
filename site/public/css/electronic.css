@@ -32,8 +32,7 @@ main#main.full-screen-mode .content {
 aside {
     margin: 0;
     padding-top: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden auto;
 }
 
 #electronic-gradeable-container {
@@ -172,13 +171,23 @@ button > i.fas:hover {
     color: initial;
 }
 
+:root {
+    --default-border-color: black;
+    --default-box-shadow: 1px 1px 2px black;
+}
+
+[data-black_mode="black"][data-theme="dark"]  {
+    --default-border-color: grey;
+    --default-box-shadow: 1px 1px 2px grey;
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    border: 2px solid black;
+    border: 2px solid var(--default-border-color);
     border-radius: 5px;
-    box-shadow: 2px 2px 4px;
+    box-shadow: var(--default-box-shadow);
 }
 
 #prev-student-navlink i,
@@ -187,7 +196,7 @@ button > i.fas:hover {
 }
 
 #grade-inquiry-navlink {
-    background: #36e08e;
+    background: var(--standard-mint-green);
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
@@ -235,18 +244,18 @@ progress::-webkit-progress-value {
 
 .grade-panel button {
     color: var(--text-black);
-    position: relative;
     cursor: pointer;
-    padding: 2px 6px 5px 24px;
+    padding: 4px 12px;
     white-space: nowrap;
     outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
-    position: absolute;
-    top: 1px;
-    left: 4px;
+    margin-right: 5px;
     font-size: 14px;
 }
 
@@ -279,25 +288,25 @@ progress::-webkit-progress-value {
 
 .grade-panel.active button,
 .grade-panel:hover button {
-    color: white;
+    color: var(--default-white);
 }
 
 /* Default Btn CSS (background + hover + active) */
 /* stylelint-disable-next-line no-descending-specificity, no-duplicate-selectors */
 .grade-panel {
-    border: 2px solid #1c83b7;
+    border: 2px solid var(--standard-gray-blue);
 }
 
 .grade-panel:hover,
 .grade-panel.active,
 .grade-panel .panel-position-cont option:hover,
 .grade-panel .panel-position-cont option:focus {
-    background: #286888;
+    background: var(--standard-medium-dark-blue);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #autograding_results_btn {
-    border: 2px solid #bc0a33;
+    border: 2px solid var(--standard-vibrant-pink-red);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -305,13 +314,13 @@ progress::-webkit-progress-value {
 #autograding_results_btn.active,
 #autograding_results_select option:hover,
 #autograding_results_select option:focus {
-    background: #962e2e;
+    background: var(--standard-medium-dark-red);
 }
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
 #grading_rubric_btn {
-    border: 2px solid #249c63;
+    border: 2px solid var(--standard-dark-mint-green);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -319,13 +328,13 @@ progress::-webkit-progress-value {
 #grading_rubric_btn.active,
 #grading_rubric_select option:hover,
 #grading_rubric_select option:focus {
-    background: #1c794d;
+    background: var(--standard-dark-green);
 }
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
 #submission_browser_btn {
-    border: 2px solid #1c83b7;
+    border: 2px solid var(--standard-medium-blue);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -333,7 +342,7 @@ progress::-webkit-progress-value {
 #submission_browser_btn.active,
 #submission_browser_select option:hover,
 #submission_browser_select option:focus {
-    background: #286888;
+    background: var(--standard-medium-dark-blue);
 }
 /* stylelint-enable selector-id-pattern */
 
@@ -367,7 +376,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-id-pattern */
 #discussion_browser_btn {
-    border: 2px solid #316895;
+    border: 2px solid var(--standard-medium-dark-blue);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -375,13 +384,13 @@ progress::-webkit-progress-value {
 #discussion_browser_btn.active,
 #discussion_browser_select option:hover,
 #discussion_browser_select option:focus {
-    background: #316895;
+    background: var(--standard-medium-dark-blue);
 }
 /* stylelint-enable selector-id-pattern */
 
 /* stylelint-disable-next-line selector-id-pattern */
 #grade_inquiry_info_btn {
-    border: 2px solid #f29f0d;
+    border: 2px solid var(--standard-vibrant-orange);
 }
 
 /* stylelint-disable selector-id-pattern */
@@ -389,7 +398,7 @@ progress::-webkit-progress-value {
 #grade_inquiry_info_btn.active,
 #grade_inquiry_info_select option:hover,
 #grade_inquiry_info_select option:focus {
-    background: #9e7835;
+    background: var(--standard-bronze);
 }
 /* stylelint-enable selector-id-pattern */
 
@@ -420,7 +429,7 @@ progress::-webkit-progress-value {
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:hover,
 .panel-position-cont option:focus {
-    color: white;
+    color: var(--default-white);
 }
 
 /* Grading Panels CSS */
@@ -572,8 +581,8 @@ progress::-webkit-progress-value {
 
 #grading-panel-student-name::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: rgb(0 0 0 / 50%);
-    box-shadow: 0 0 1px rgb(255 255 255 / 50%);
+    background-color: var(--black-moderately-transparent);
+    box-shadow: 0 0 1px var(--white-moderately-transparent);
 }
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
@@ -738,8 +747,8 @@ progress::-webkit-progress-value {
 }
 
 .icon-selected.fa-user {
-    box-shadow: 0 0 3px 3px rgb(0 0 0 / 40%);
-    background-color: rgb(0 0 0 / 40%);
+    box-shadow: 0 0 3px 3px var(--black-moderately-transparent);
+    background-color: var(--black-moderately-transparent);
 }
 
 .icon-selected.fa-users {
@@ -834,7 +843,7 @@ progress::-webkit-progress-value {
 }
 
 .div-viewer a:hover {
-    color: #6db7ff;
+    color: var(--standard-focus-cornflower-blue);
     text-decoration: none;
 }
 
@@ -849,7 +858,7 @@ progress::-webkit-progress-value {
 
 .icon-folder-closed {
     background: url("../img/glyphicons-halflings.png") no-repeat -384px -120px;
-    color: rgb(51 51 51);
+    color: var(--standard-dark-gray);
     display: inline-block;
     height: 14px;
     width: 14px;
@@ -857,7 +866,7 @@ progress::-webkit-progress-value {
 
 .icon-folder-open {
     background: url("../img/glyphicons-halflings.png") no-repeat -410px -120px;
-    color: rgb(51 51 51);
+    color: var(--standard-dark-gray);
     display: inline-block;
     height: 14px;
     width: 14px;
@@ -867,7 +876,7 @@ progress::-webkit-progress-value {
     background-image: url("../img/glyphicons-halflings.png");
     background-position: 0 -96px;
     background-repeat: no-repeat;
-    color: rgb(51 51 51);
+    color: var(--standard-dark-gray);
     display: inline-block;
     height: 14px;
     width: 14px;
@@ -877,7 +886,7 @@ progress::-webkit-progress-value {
     background-image: url("../img/glyphicons-halflings.png");
     background-position: -24px -96px;
     background-repeat: no-repeat;
-    color: rgb(51 51 51);
+    color: var(--standard-dark-gray);
     display: inline-block;
     height: 14px;
     width: 14px;
@@ -907,8 +916,7 @@ progress::-webkit-progress-value {
 #overall-comment-collapsed {
     padding: 0 0 0 20px;
     max-height: 100px;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: hidden scroll;
     width: 100%;
     overflow-wrap: break-word;
 }
@@ -920,7 +928,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line selector-class-pattern */
 tr.is_publish {
-    background-color: #81d4fa;
+    background-color: var(--standard-light-blue);
 }
 
 .btn-large {
@@ -937,7 +945,7 @@ tr.is_publish {
 
 /* stylelint-disable-next-line selector-id-pattern, selector-class-pattern */
 #grade_inquiry_box.rubric_panel {
-    border: 5px solid #f47a42;
+    border: 5px solid var(--standard-creamsicle-orange);
 }
 
 #settings-content {
@@ -969,9 +977,31 @@ tr.is_publish {
     padding: 4px;
 }
 
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center;
+}
+
 .remap-button {
     width: 100%;
     text-align: center;
+}
+
+.hotkeys-title-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hotkeys-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.hotkeys-title-buttons h2 {
+    margin: 0;
 }
 
 /* Gradeable */
@@ -1047,7 +1077,7 @@ tr.is_publish {
 
 .gradeable .verify-container {
     display: inline;
-    color: red;
+    color: var(--standard-vibrant-red);
 }
 
 .gradeable div.component-container {
@@ -1143,7 +1173,7 @@ tr.is_publish {
 /* stylelint-disable-next-line no-descending-specificity */
 .gradeable .component .row.divider,
 .solution-box .row.divider {
-    background: #dddddd;
+    background: var(--standard-light-gray);
     height: 2px;
     width: 100%;
     padding-left: 10px;
@@ -1163,7 +1193,7 @@ tr.is_publish {
 }
 
 .gradeable .done-button {
-    color: green;
+    color: var(--standard-dark-green);
 }
 
 .gradeable .cancel-container {
@@ -1171,7 +1201,7 @@ tr.is_publish {
 }
 
 .gradeable .cancel-button {
-    color: red;
+    color: var(--standard-vibrant-red);
 }
 
 /* Marks */
@@ -1185,7 +1215,7 @@ tr.is_publish {
 
 .gradeable .mark-container {
     min-height: 28px;
-    border-bottom: 1px solid #999999;
+    border-bottom: 1px solid var(--standard-medium-gray);
     padding: 3px;
 }
 
@@ -1272,12 +1302,12 @@ tr.is_publish {
 }
 
 .gradeable .mark-deleted {
-    background: #ffaaaa;
+    background: var(--standard-light-pink);
 }
 
 .gradeable .custom-mark-error {
-    border-color: #ff0000;
-    background-color: #ffeeee;
+    border-color: var(--standard-vibrant-red);
+    background-color: var(--standard-pastel-pink);
 }
 
 .gradeable .mark-deleted span.delete-mark-container {

@@ -25,7 +25,7 @@ class EmailStatusView extends AbstractView {
         $successes = [];
         // A map of email subjects to the rows that resulted in an error in the database
         $errors = [];
-        // A map of email subjects to the semester and course as one string
+        // A map of email subjects to the term and course as one string
         $courses = [];
         $count = 0;
         foreach ($data as $iterator) {
@@ -38,8 +38,8 @@ class EmailStatusView extends AbstractView {
                     $errors[$key] = [];
                     $pending[$key] = [];
                 }
-                if ($row->getSemester() != null || $row->getCourse() != null) {
-                    $courses[$key] = $row->getSemester() . ' ' . $row->getCourse();
+                if ($row->getTerm() != null || $row->getCourse() != null) {
+                    $courses[$key] = $row->getTerm() . ' ' . $row->getCourse();
                 }
                 if ($row->getSent() != null) {
                     $successes[$key][] = $row;

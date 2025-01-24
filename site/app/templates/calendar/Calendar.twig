@@ -6,27 +6,33 @@
     const curr_month = {{ curr_month }};
     const curr_day = {{ curr_day }};
     const instructor_courses = {{ instructor_courses|json_encode|raw }};
+    const global_items_by_date = {{global_items_by_date|json_encode|raw }};
+    const is_superuser = {{ is_superuser ? "true" : "false" }};
 
     $( document ).ready(function() {
         // Get value of the type dropdown
         const type = $("#calendar-item-type-edit").val();
-        loadCalendar(curr_month, curr_year, curr_day, type);
+        // Get cookie for curr the viewed day, month, and year
+        cookie_year = parseInt(Cookies.get('calendar_year'));
+        cookie_month = parseInt(Cookies.get('calendar_month'));
+        cookie_day = parseInt(Cookies.get('calendar_day'));
+        if (isNaN(cookie_year)) {
+            cookie_year = curr_year;
+        }
+        if (isNaN(cookie_month)) {
+            cookie_month = curr_month;
+        }
+        if (isNaN(cookie_day)) {
+            cookie_day = curr_day;
+        }
+        // Load the calendar to the correct day
+        loadCalendar(cookie_month, cookie_year, cookie_day, type);
+        //Color the legend
+        if ({{show_legend}} === 1) {
+            colorLegend();
+        }
     });
-
-    function changeView(x) {
-        if (x.value === "month") {
-            document.cookie = "view=month";
-        }
-        else if (x.value === "two_week") {
-            document.cookie = "view=two_week";
-        }
-        else if (x.value === "one_week") {
-            document.cookie = "view=one_week";
-        }
-        loadCalendar({{ view_month }}, {{ view_year }}, {{ curr_day }}, x.value);
-    }
 </script>
-
 
 {# Begin Calendar #}
 <div class="content">
@@ -38,13 +44,65 @@
                     <i class="fas fa-plus"></i> New Item
                 </button>
             {% endif %}
-            
-                <select id="calendar-item-type-edit" name="type" onchange="changeView(this);">
+            {% if is_superuser %}
+                <button type="button" onclick="openNewGlobalEventModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Global Event
+                </button>
+            {% endif %}
+                <button type="button" onclick="openOptionsModal()" class="btn btn-primary">
+                    <i class="fas fa-sliders"></i> Options
+                </button>
+                <select id="calendar-item-type-edit" name="type" onchange="changeView(this, {{view_year}}, {{view_month}});">
                     <option value="month" {% if (view_cookie is defined) and view_cookie == "month" %} selected {% endif %}>Month</option>
                     <option value="two_week" {% if (view_cookie is defined)  and view_cookie == "two_week" %} selected {% endif %}>Two Week</option>
                     <option value="one_week" {% if (view_cookie is defined)  and view_cookie == "one_week" %} selected {% endif %}>One Week</option>
                 </select>
+                <button id="calendar-today-button" type="button" onclick="setDateToToday()" class="btn btn-primary">
+                    <i class="fas fa-clock"></i> Today
+                </button>
         </div>
+
+        {# Legend #}
+        {% if show_legend == 1 %}
+        <div class="cal-legend">
+            {% if show_all_cookie == 1 %}
+                {% for course in course_names %}
+                <div 
+                    name="{{ course.course_name|replace({' ':''}) }}" 
+                    class="legend-color" 
+                    onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
+                    style="cursor: pointer;" 
+                    title="Click to filter course, click again to show all courses"
+                    aria-label="Filter course {{ course.display_name }}"
+                ></div>
+                <p 
+                    for="{{ course.course_name|replace({' ':''}) }}-color" 
+                    style="cursor: pointer;" 
+                    onclick="filter_course('{{ course.course_name }}', '{{ course.display_name }}')" 
+                    title="Click to filter course, click again to show all courses" 
+                    class="legend-label"
+                >{{ course.display_name }}</p>
+                {% endfor %}
+                {% else %}
+                <div 
+                    name="{{ calendar_course_cookie|replace({' ':''}) }}" 
+                    class="legend-color" 
+                    onclick="filter_course('show all', '')"
+                    style="cursor: pointer;" 
+                    title="Click to open Calendar options form"
+                    aria-label="Show all courses"
+                ></div>
+                <p 
+                    for="{{ calendar_course_cookie|replace({' ':''}) }}-color" 
+                    style="cursor: pointer;" 
+                    onclick="filter_course('show all', '')" 
+                    title="Click to filter course, click again to show all courses" 
+                    class="legend-label"
+                    >{{display_name_cookie}}
+                </p>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <div class="calendar" style='margin-bottom: 20px;' id="full-calendar">
             {# Replace by js function call #}
@@ -97,5 +155,10 @@
     {% endif %}
 </div>
 
+
+
 {{ include('calendar/NewCalendarItem.twig') }}
 {{ include('calendar/EditCalendarItem.twig') }}
+{{ include('calendar/CalendarOptions.twig') }}
+{{ include('calendar/NewGlobalItem.twig') }}
+{{ include('calendar/EditGlobalItem.twig') }}

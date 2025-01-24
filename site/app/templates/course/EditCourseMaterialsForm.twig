@@ -2,7 +2,25 @@
 {% block popup_id %}edit-course-materials-form{% endblock %}
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
+    {{ add_twig_module_js('courseMaterials/upload.js') }}
     <div id="material-edit-form" class="flex-col flex-col-space" data-directory = "Check">
+        <label id="file-path-label">
+            <span><strong>File Path / URL </strong></span>
+            <span id="edit-location-drop-down">
+                <select id="new-file-name">
+                    <option value="">.</option>
+                    {% for folder_path in folder_paths %}
+                        <option value="{{ folder_path }}/">{{ folder_path }}</option>
+                    {% endfor %}
+                </select>
+            </span>
+        </label>
+
+        <label id="edit-title-label">
+            <span><strong>File Name </strong></span>
+            <input type="text" id="edit-title" class="full-width" onchange="editFilePathRecommendations()" />
+        </label>
+
         <fieldset id="edit_sections">
             <legend class="black-message">
                 Do you want to restrict this course material to some sections?
@@ -35,7 +53,9 @@
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
             <input id="edit-picker" class="edit-picker" type="text" size="26" style="pointer-events:auto;"><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <span>
+            <strong>Note:</strong> <em>Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em>
+            </span>
         </label>
         <label>
             <span>
@@ -43,17 +63,14 @@
             </span>
             <input id="edit-sort" value="Check" type="text" size="26"/>
         </label>
-        <label>
+        <label class="my-0">
             <input id="hide-materials-checkbox-edit" type="checkbox">
-            Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            Hide from Students
         </label>
-        <label hidden id="edit-url-title-label">
-            <span>
-                <strong>Edit link title:</strong>
-            </span>
-            <input id="edit-url-title" type="text" size="26" disabled>
-        </label>
+        <p class="my-0">
+            <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
+            <em>These materials will always be available to course staff (full and limited access graders), regardless of release date. </em>
+        </p>
         <label hidden id="edit-url-url-label">
             <span>
                 <strong>Edit link url:</strong>
@@ -86,16 +103,16 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                let url_title = document.getElementById("edit-url-title");
+                let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");
-                let url_title_val = url_title.disabled ? null : url_title.value;
                 let url_url_val = url_url.disabled ? null : url_url.value;
+                let file_path = document.getElementById("new-file-name").value;
                 let overwrite = false;
                 let overwrite_elem = $('#overwrite-submit');
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, url_title_val, overwrite);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, title, overwrite, file_path);
         };
 
         const edit_fp = flatpickr('.edit-picker', {
@@ -116,11 +133,11 @@
                         }
 
                     ],
-                    onClick: (index, fp) => {
+                    onClick: (index, edit_fp) => {
                         let date;
                         switch (index) {
                             case 0:
-                                date = new Date("1001-01-01 00:00:00");
+                                date = new Date('{{ beginning_of_time_date }}');
                                 break;
                             case 1:
                                 date = new Date();
@@ -130,10 +147,10 @@
                                 date.setDate(date.getDate() + 1);
                                 break;
                             case 3:
-                                date = new Date("9998-01-01 00:00:00");
+                                date = new Date("9998-01-01T00:00:00");
                                 break;
                         }
-                        fp.setDate(date);
+                        edit_fp.setDate(date);
                     }
                 }
             )],
@@ -143,9 +160,9 @@
             enableSeconds: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-              fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-              fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            onReady: (a, b, edit_fp) => {
+              edit_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+              edit_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
     $('.form-body').on('scroll', function() {

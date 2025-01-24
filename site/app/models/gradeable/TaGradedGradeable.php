@@ -18,19 +18,26 @@ use FilesystemIterator;
  * @method \DateTime|null getUserViewedDate()
  */
 class TaGradedGradeable extends AbstractModel {
-    /** @prop @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
+    /** @prop
+     * @var GradedGradeable A reference to the graded gradeable this Ta grade belongs to */
     private $graded_gradeable = null;
-    /** @prop @var int The id of this gradeable data */
+    /** @prop
+     * @var int The id of this gradeable data */
     protected $id = 0;
-    /** @prop @var string[] indexed by user_id. Overall comment made by each grader. */
+    /** @prop
+     * @var string[] indexed by user_id. Overall comment made by each grader. */
     protected $overall_comments = [];
-    /** @prop @var \DateTime|null The date the user viewed their grade */
+    /** @prop
+     * @var \DateTime|null The date the user viewed their grade */
     protected $user_viewed_date = null;
-    /** @prop @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
+    /** @prop
+     * @var GradedComponentContainer[] The GradedComponentContainers, indexed by component id */
     private $graded_component_containers = [];
-    /** @prop @var GradedComponent[] The components that have been marked for deletion */
+    /** @prop
+     * @var GradedComponent[] The components that have been marked for deletion */
     private $deleted_graded_components = [];
-    /** @prop @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
+    /** @prop
+     * @var array[] The list of attachments indexed by user_id, ["name" => name, "path" => path] for each */
     private $attachments = [];
 
 
@@ -326,12 +333,11 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable is completely graded
-     * @return bool
      */
-    public function isComplete() {
+    public function isComplete(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            if (!$container->isComplete()) {
+            if (!$container->isComplete($grader)) {
                 return false;
             }
         }
@@ -340,12 +346,12 @@ class TaGradedGradeable extends AbstractModel {
 
     /**
      * Gets if this graded gradeable has any grades
-     * @return bool
+     * @param User|null $grader If provided, only checks if this grader has any grades
      */
-    public function anyGrades() {
+    public function anyGrades(User $grader = null): bool {
         /** @var GradedComponentContainer $container */
         foreach ($this->graded_component_containers as $container) {
-            if ($container->anyGradedComponents()) {
+            if ($container->anyGradedComponents($grader)) {
                 return true;
             }
         }

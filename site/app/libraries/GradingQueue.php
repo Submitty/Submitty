@@ -314,10 +314,10 @@ class GradingQueue {
             $elapsed_time .= str_pad(strval(floor($job_file["elapsed_time"] / 60)), 2, "0", STR_PAD_LEFT) . ":"
                 . str_pad(strval($job_file["elapsed_time"] % 60), 2, "0", STR_PAD_LEFT);
             $ongoing_job_info[$machine][] = [
-                "semester" => $file_segments[0],
+                "term" => $file_segments[0],
                 "course" => $file_segments[1],
                 "gradeable_id" => $file_segments[2],
-                "user_id" => $file_segments[3],
+                "user_id" => $file_segments[3] ?? "",
                 "regrade" => $job_file["regrade"],
                 "elapsed_time" => $elapsed_time,
                 "error" => $job_file["error"],
@@ -389,7 +389,7 @@ class GradingQueue {
                 }
             }
             $capability = "default";
-            if (in_array("required_capabilities", $entry->getQueueObj())) {
+            if (array_key_exists("required_capabilities", $entry->getQueueObj())) {
                 $capability = $entry->getQueueObj()["required_capabilities"];
             }
 

@@ -2,7 +2,6 @@
 /* exported updateSuperuserEmailOptions */
 /* eslint no-undef: "off" */
 
-
 function sendEmail(url) {
     const emailContent = $('#email-content').val();
     const emailSubject = $('#email-subject').val();
@@ -19,22 +18,22 @@ function sendEmail(url) {
         url: url,
         type: 'POST',
         data: {
-            'email_content': emailContent,
-            'email_subject': emailSubject,
-            'email_full_access': emailFullAcess,
-            'email_limited_access': emailLimitedAccess,
-            'email_instructor': emailInstructor,
-            'email_student': emailStudent,
-            'email_to_secondary': emailToSecondary,
-            'email_faculty': emailFaculty,
+            email_content: emailContent,
+            email_subject: emailSubject,
+            email_full_access: emailFullAcess,
+            email_limited_access: emailLimitedAccess,
+            email_instructor: emailInstructor,
+            email_student: emailStudent,
+            email_to_secondary: emailToSecondary,
+            email_faculty: emailFaculty,
             csrf_token: csrfToken,
         },
         cache: false,
-        error: function(err) {
+        error: function (err) {
             window.alert('Something went wrong. Please try again.');
             console.error(err);
         },
-        success: function(data) {
+        success: function (data) {
             try {
                 const parsedData = JSON.parse(data);
                 if (parsedData['status'] === 'success') {
@@ -55,7 +54,6 @@ function sendEmail(url) {
     });
 }
 
-
 function updateSuperuserEmailOptions(which) {
     const instructor = $('#email-instructor');
     const full = $('#email-full-access');
@@ -65,34 +63,34 @@ function updateSuperuserEmailOptions(which) {
 
     if (which === 'instructor') {
         if (!instructor.prop('checked')) {
-            full.prop('checked',false);
-            limited.prop('checked',false);
-            student.prop('checked',false);
+            full.prop('checked', false);
+            limited.prop('checked', false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'full-access') {
         if (full.prop('checked')) {
-            instructor.prop('checked',true);
+            instructor.prop('checked', true);
         }
         else {
-            limited.prop('checked',false);
-            student.prop('checked',false);
+            limited.prop('checked', false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'limited-access') {
         if (limited.prop('checked')) {
-            instructor.prop('checked',true);
-            full.prop('checked',true);
+            instructor.prop('checked', true);
+            full.prop('checked', true);
         }
         else {
-            student.prop('checked',false);
+            student.prop('checked', false);
         }
     }
     else if (which === 'student') {
         if (student.prop('checked')) {
-            instructor.prop('checked',true);
-            full.prop('checked',true);
-            limited.prop('checked',true);
+            instructor.prop('checked', true);
+            full.prop('checked', true);
+            limited.prop('checked', true);
         }
     }
 

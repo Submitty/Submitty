@@ -9,39 +9,33 @@
 # Submitty util module depends on:
 
 # For QR bulk upload
-opencv-python-headless==4.6.0.66
+opencv-python-headless==4.10.0.84
 
-# jsonschema & jsonref & pytz & tzlocal
-pytz==2022.7.1 # Submitty-util specific.
-
-
+# Docker gets broken with 2.32.0 current release (before a hotfix is applied)
+requests==2.32.3
 python-pam==2.0.2
-ruamel.yaml==0.17.30
-psycopg2-binary==2.9.6
+ruamel.yaml==0.18.7
+psycopg2-binary==2.9.10
 sqlalchemy==1.4.29
-pylint==2.17.2
-psutil==5.9.5
-python-dateutil==2.8.2
-watchdog==2.3.0
-xlsx2csv==0.8.1
+psutil==6.1.1
+python-dateutil==2.9.0.post0
+watchdog==4.0.1
+xlsx2csv==0.8.4
 pause==0.3
-paramiko==2.11.0
-tzlocal==2.1
-PyPDF2==2.4.1
-distro==1.8.0
-jsonschema==3.2.0
-jsonref==0.2
-docker==6.1.2
-urllib3==2.0.3
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-clang==14.0
+paramiko==3.5.0
+tzlocal==5.2
+PyPDF2==3.0.1
+distro==1.9.0
+jsonschema==4.23.0
+jsonref==1.1.0
+docker==7.1.0
+urllib3==2.3.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.9
-pdf2image==1.16.3
-numpy==1.24.3
+pdf2image==1.17.0
+numpy==2.2.1
 
 # python libraries for OCR for digit recognition
-onnx==1.14.0
-onnxruntime==1.11.1
+onnx==1.17.0
+onnxruntime==1.20.1

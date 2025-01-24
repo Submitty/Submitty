@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 """
-Use this script to add a user to courses. Any user added to a course
-will be an instructor.
+Use this script to add a user to courses. By default, the user
+will be an instructor but you can specify a different group
+with an argument.
 """
 
 import argparse
@@ -30,6 +31,8 @@ def parse_args():
     parser.add_argument('course', help='title of the course')
     parser.add_argument('registration_section', nargs='?', default=None,
                         help='registration section that the user is added into')
+    parser.add_argument('--user_group', default=1,
+                        help='group the user belongs to 1:Instructor 2:Full Access Grader 3:Limited Access Grader 4:Student')
 
     return parser.parse_args()
 
@@ -39,6 +42,7 @@ def main():
     user_id = args.user_id
     semester = args.semester
     course = args.course
+    user_group = args.user_group
     registration_section = args.registration_section
 
     conn_str = db_utils.generate_connect_string(
@@ -63,10 +67,10 @@ def main():
     if registration_section and not registration_section.isdigit():
         registration_section = None
     select = courses_table.select().where(and_(
-        courses_table.c.semester == bindparam('semester'),
+        courses_table.c.term == bindparam('term'),
         courses_table.c.course == bindparam('course')
     ))
-    row = connection.execute(select, semester=semester, course=course).fetchone()
+    row = connection.execute(select, term=semester, course=course).fetchone()
     # course does not exist, so just skip this argument
     if row is None:
         print("Course does not exist.", file=sys.stderr)
@@ -75,14 +79,14 @@ def main():
     courses_u_table = Table('courses_users', metadata, autoload=True)
     select = courses_u_table.select().where(and_(
         and_(
-            courses_u_table.c.semester == bindparam('semester'),
+            courses_u_table.c.term == bindparam('term'),
             courses_u_table.c.course == bindparam('course')
         ),
         courses_u_table.c.user_id == bindparam('user_id')
     ))
     row = connection.execute(
         select,
-        semester=semester,
+        term=semester,
         course=course,
         user_id=user_id
     ).fetchone()
@@ -92,9 +96,9 @@ def main():
         connection.execute(
             query,
             user_id=user_id,
-            semester=semester,
+            term=semester,
             course=course,
-            user_group=1,
+            user_group=user_group,
             registration_section=registration_section
         )
     else:

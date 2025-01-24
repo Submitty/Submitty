@@ -36,35 +36,48 @@ use app\libraries\DateUtils;
  * @method string   getType()
  */
 class Notification extends AbstractModel {
-    /** @prop @var bool Notification fetched from DB */
+    /** @prop
+     * @var bool Notification fetched from DB */
     protected $view_only;
 
-    /** @prop @var string Type of component */
+    /** @prop
+     * @var string Type of component */
     protected $component;
-    /** @prop @var string Current logged in user */
+    /** @prop
+     * @var string Current logged in user */
     protected $current_user;
 
-    /** @prop @var string Notification source user (can be null) */
+    /** @prop
+     * @var string Notification source user (can be null) */
     protected $notify_source;
-    /** @prop @var string Notification target user(s) (null implies all users) */
+    /** @prop
+     * @var string Notification target user(s) (null implies all users) */
     protected $notify_target;
-    /** @prop @var string Notification text content */
+    /** @prop
+     * @var string Notification text content */
     protected $notify_content;
-    /** @prop @var string Notification information about redirection link */
+    /** @prop
+     * @var string Notification information about redirection link */
     protected $notify_metadata;
-    /** @prop @var bool Should $notify_source be ignored from $notify_target */
+    /** @prop
+     * @var bool Should $notify_source be ignored from $notify_target */
     protected $notify_not_to_source;
 
-    /** @prop @var int Notification ID */
+    /** @prop
+     * @var int Notification ID */
     protected $id;
-    /** @prop @var bool Is notification already seen */
+    /** @prop
+     * @var bool Is notification already seen */
     protected $seen;
-    /** @prop @var real Time elapsed from creation of notification in secs */
+    /** @prop
+     * @var real Time elapsed from creation of notification in secs */
     protected $elapsed_time;
-    /** @prop @var string Timestamp for creation of notification */
+    /** @prop
+     * @var string Timestamp for creation of notification */
     protected $created_at;
 
-    /** @prop @var string Type of notification used for settings */
+    /** @prop
+     * @var string Type of notification used for settings */
     protected $type;
 
 

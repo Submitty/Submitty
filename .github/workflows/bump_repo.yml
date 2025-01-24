@@ -1,0 +1,40 @@
+name: Submitty Dependency Update
+
+on:
+  repository_dispatch:
+    types: [repo-release]
+
+jobs:
+  repo-up:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Update version
+        id: update-version
+        run: >
+          python3 .setup/bin/update_repo_version.py
+          -r ${{ github.event.client_payload.repo_name }}
+          -v ${{ github.event.client_payload.tag }}
+          >> $GITHUB_OUTPUT
+      - name: Create Pull Request
+        uses: Submitty/peter-evans-create-pull-request@v23.07.00
+        with:
+          token: ${{ secrets.SUBMITTYBOT_DEPENDENCY_TOKEN }}
+          commit-message: >
+            Update ${{ github.event.client_payload.repo_name }}
+            to ${{ github.event.client_payload.tag }}
+          branch: repo-up/${{ github.event.client_payload.repo_name }}
+          title: >
+            [Dependency] Bump ${{ github.event.client_payload.repo_name }}
+            from ${{ steps.update-version.outputs.old_version }}
+            to ${{ github.event.client_payload.tag }}
+          body: "Bumps [${{ github.event.client_payload.repo_name }}]\
+                (https://github.com/${{ github.event.client_payload.repo }})
+                from ${{ steps.update-version.outputs.old_version }}
+                to ${{ github.event.client_payload.tag }}.\n\n---\n
+                [See release notes](https://github.com/\
+                ${{ github.event.client_payload.repo }}/releases/tag/\
+                ${{ github.event.client_payload.tag }})"

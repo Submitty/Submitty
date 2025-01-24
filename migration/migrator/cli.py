@@ -72,6 +72,10 @@ def parse_args(argv, config_path=None):
         help='Mark migrations as run without actually running them'
     )
 
+    sub = subparsers.add_parser(
+        'load_triggers', help='Load master database trigger functions'
+    )
+
     sub = subparsers.add_parser('dump', help='Dump DB schema to file')
     args = parser.parse_args(argv)
     args.environments = get_environments(args.environments)

@@ -114,6 +114,9 @@
           "type" : "string"
         }
       },
+      "environment_variables" : {
+        "type" : "object"
+      },
       "resource_limits" : {
           "type" : "object",
           "description" : "Limits on the system resources that may be consumed by a student process",
@@ -1381,6 +1384,9 @@
             },
             "extra_student_output" : {
               "type" : "boolean"
+            },
+            "tolerance" : {
+              "type" : "number"
             }
           }
         },

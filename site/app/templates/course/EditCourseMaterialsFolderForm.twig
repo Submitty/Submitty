@@ -2,6 +2,7 @@
 {% block popup_id %}edit-course-materials-folder-form{% endblock %}
 {% block title %}Edit Course Material Folder{% endblock %}
 {% block body %}
+    {{ add_twig_module_js('courseMaterials/upload.js') }}
     <div id="material-folder-edit-form" class="flex-col flex-col-space" data-directory = "Check">
         <p>NOTE: Sorting rank will edit the rank of the folder only.</p>
         <label>
@@ -47,13 +48,18 @@
                 <strong>Choose a time to release the files being uploaded:</strong>
             </span>
             <input id="edit-folder-picker" class="edit-folder-picker" type="text" size="26" onchange="enableFullUpdate()" style="pointer-events:auto;" ><br>
-            <span><em>Note: Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em></span>
+            <span>
+            <strong>Note:</strong> <em>Everyone with grading access will be able to view all the materials irrespective of the release date/time.</em>
+            </span>
         </label>
-        <label>
+        <label class="my-0">
             <input id="hide-folder-materials-checkbox-edit" type="checkbox" onchange="handleHideMaterialsChange()">
-            Hide from Students<br>
-            <em>Note: Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL.</em>
+            Hide from Students
         </label>
+        <p class="my-0">
+            <em><strong>Note:</strong> Hidden course materials are omitted from the course materials directory listing; however, these materials can still be accessed via the URL. </em> <br>
+            <em>These materials will always be available to course staff (full and limited access graders), regardless of release date. </em>
+        </p>
         <script>
             function handleHideMaterialsChange() {
                 enableFullUpdate();
@@ -97,7 +103,7 @@
                 sectionsEdit = null;
                 partialSections = null;
             }
-            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null);
+            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null);
         };
 
         function enableFullUpdate() {
@@ -128,11 +134,11 @@
                             }
 
                         ],
-                        onClick: (index, fp) => {
+                        onClick: (index, edit_folder_fp) => {
                             let date;
                             switch (index) {
                                 case 0:
-                                    date = new Date("1001-01-01 00:00:00");
+                                    date = new Date('{{ beginning_of_time_date }}');
                                     break;
                                 case 1:
                                     date = new Date();
@@ -142,10 +148,10 @@
                                     date.setDate(date.getDate() + 1);
                                     break;
                                 case 3:
-                                    date = new Date("9998-01-01 00:00:00");
+                                    date = new Date("9998-01-01T00:00:00");
                                     break;
                             }
-                            fp.setDate(date);
+                            edit_folder_fp.setDate(date);
                         }
                     }
             )],
@@ -156,9 +162,9 @@
             enableSeconds: true,
             time_24hr: true,
             dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+            onReady: (a, b, edit_folder_fp) => {
+                edit_folder_fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+                edit_folder_fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
             }
         });
     $('.form-body').on('scroll', function() {

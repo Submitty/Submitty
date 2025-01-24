@@ -45,14 +45,6 @@ extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // 
 // =====================================================================================
 // =====================================================================================
 
-bool command_available_in_env(const nlohmann::json &program_object, const bool &running_in_docker) {
-  bool onlyDocker = program_object.value("onlyDocker", false);
-  if (!running_in_docker && onlyDocker) {
-    return false;
-  }
-  return true;
-}
-
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
   // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
@@ -70,22 +62,24 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     for (auto& entry : allowed_autograding_commands.items()) {
       nlohmann::json program_obj = entry.value();
       if (program_obj["path"] == program) {
-        if (command_available_in_env(program_obj, running_in_docker)) {
-          full_path_executable = program;
-          return true;
-        }
-        return false;
+        full_path_executable = program;
+        return true;
       }
     }
   }
   else {
     if (allowed_autograding_commands.contains(program)) {
       nlohmann::json program_obj = allowed_autograding_commands[program];
-      if (command_available_in_env(program_obj, running_in_docker)) {
-        full_path_executable = program_obj["path"];
-        return true;
-      }
+      full_path_executable = program_obj["path"];
+      return true;
     }
+  }
+  // if we are docker, allow any program
+  if (running_in_docker) {
+    if (full_path_executable.empty()) {
+      full_path_executable = program;
+    }
+    return true;
   }
   return false;
 }
@@ -935,35 +929,17 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   if (my_path != NULL) {
     // std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
-  setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
+
+  /*************************************************
+  *
+  * SET ENVIROMENT VARIABLES
+  *
+  **************************************************/
+  set_environment_variables(whole_config.value("environment_variables",nlohmann::json()));
 
   my_path = getenv("PATH");
 
   // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
-
-  // set the locale so that special characters (e.g., the copyright
-  // symbol) are not interpreted as ascii
-  setenv("LC_ALL", "en_US.UTF-8", 1);
-
-
-  // Set a default for OpenMP desired threads
-  // Can be overridden by student to be higher or lower.
-  // Instructor still controls the RLIMIT_NPROC max threads.
-  // (without this, default desired threads may be based on the system specs)
-  setenv("OMP_NUM_THREADS","4",1);
-
-
-  // Set an environment variable to override the defaults for the
-  // initial java virtual machine heap (xms) and maximum virtual
-  // machine heap.
-  setenv("JAVA_TOOL_OPTIONS","-Xms128m -Xmx256m",1);
-  // NOTE: Instructors can still override this setting with the
-  // command line.  E.g.,
-  //    java -Xms128m -Xmx256m -cp . MyProgram
-
-
-  // Haskell compiler needs a home environment variable (but it can be anything)
-  setenv("HOME","/tmp",1);
 
 
   // print this out here (before losing our output)

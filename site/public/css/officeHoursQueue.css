@@ -17,11 +17,6 @@ th {
     margin-bottom: 0.5rem;
 }
 
-.enable-audible,
-.disable-audible {
-    display: none;
-}
-
 /* stylelint-disable selector-class-pattern */
 .current_queue_row,
 .current_queue_row a > i.fas {
@@ -103,4 +98,18 @@ th {
     .desktop-hide {
         display: none !important;
     }
+}
+
+#student-queue-table {
+    margin-top: 15px;
+}
+
+#student-queue-table > caption {
+    padding: 5px;
+    border: 1px solid var(--standard-light-gray);
+    font-weight: 600;
+}
+
+#times-helped-cell {
+    background-color: var(--standard-vibrant-green);
 }

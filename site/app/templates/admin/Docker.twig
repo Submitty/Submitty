@@ -1,4 +1,4 @@
-<div class="content">
+<div class="content" data-testid="systemwide_info">
     <h1>Submitty Docker Interface</h1>
 
     <h2>System Wide information:</h2>
@@ -39,7 +39,7 @@
         <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
             <th style="vertical-align: middle;">{{worker['name']}}</th>
             <td>{{worker['num_autograding_workers']}}</td>
-            <td>{% if worker['name'] in machine_system_details|keys %}
+            <td data-testid="system_info">{% if worker['name'] in machine_system_details|keys %}
                     {{ machine_system_details[worker['name']]['os'] }} <br />
                     Disk Usage: {{ machine_system_details[worker['name']]['disk'] }} <br/>
                     Load: {{ machine_system_details[worker['name']]['load'] }} <br />
@@ -54,7 +54,7 @@
                     Not yet retrieved
                 {% endif %}
             </td>
-            <td>{{ machine_docker_version[worker['name']] }}</td>
+            <td data-testid="docker_version">{{ machine_docker_version[worker['name']] }}</td>
             {% for capability in capabilities %}
                 {% if capability in worker['capabilities'] %}
                     <td><i class="fas fa-check"></i></td>
@@ -87,12 +87,14 @@
         <thead>
             <tr>
                 <th>Image Name</th>
+                <th>Owner</th>
                 <th>Id</th>
                 <th>Size</th>
                 <th>Tag</th>
                 <th>Created</th>
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
+                <th>Remove</th>
             </tr>
         </thead>
         <tbody>
@@ -112,6 +114,7 @@
                     {% set used_name = null %}
                 {% endif %}
                 <td>{{ name }}</th>
+                <td>{{ docker_image_owners[key]|default("") }}</td>
                 <td>
                     {% if used_name in image_info|keys %}
                         {{ image_info[used_name]["id"] | trim("sha256:")}}
@@ -139,8 +142,13 @@
                 </td>
                 <td>
                     {% for capability in value %}
-                        <span class="badge badge-{{ capability_to_color[capability] }}">{{capability}}</span>
+                        <span class="badge badge-{{ capability_to_color[capability] % 8 + 1 }}">{{capability}}</span>
                     {% endfor %}
+                </td>
+                <td>
+                    {% if (docker_image_owners[key] is defined and user_id == docker_image_owners[key]) or superuser %}
+                    <button class="send-button btn btn-default" id="{{ key }}" data-image-id="{{ key }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

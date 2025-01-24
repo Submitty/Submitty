@@ -83,6 +83,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirFileFail() {
         FileUtils::createDir($this->path);
@@ -97,6 +98,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirRecurseFail() {
         FileUtils::createDir($this->path);
@@ -446,6 +448,7 @@ STRING;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveChmodFail() {
         $this->getFunctionMock("app\\libraries", "chmod")
@@ -661,7 +664,7 @@ STRING;
         $this->assertEquals(
             $stat[0],
             ['name' => 'big.txt',
-             'type' => 'text/plain',
+             'type' => 'application/octet-stream',
              'error' => 'File "big.txt" too large got (2.0000953674316MB)',
              'size' => 100 + Utils::returnBytes(ini_get('upload_max_filesize')),
              'is_zip' => false,
@@ -676,7 +679,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'just_big_enough.txt',
-             'type' => 'text/plain',
+             'type' => 'application/octet-stream',
              'error' => 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
              'is_zip' => false,

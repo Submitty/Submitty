@@ -10,7 +10,7 @@
         "show_post": true,
         "post_content_placeholder": "Enter your post here...",
         "show_categories": true,
-        "post_box_id": 0,
+        "post_box_id": 1,
         "show_thread_status": true,
         "show_anon": true,
         "anon_edit_post_id": "thread_post_anon_edit",
@@ -19,6 +19,8 @@
         "show_expiration" : true,
         "submit_label": "Update Post",
         "categories" : categories,
+        "attachment_script" : attachment_script,
+        "data_testid" : "forum-update-post",
     } %}
     <script>
         $("#thread_form").submit(function() {
@@ -27,7 +29,7 @@
                 return false;
             }
         });
-
+        document.querySelector('.popup-box').onclick = null;
     </script>
 {% endblock %}
 {% block form %}

@@ -2,7 +2,6 @@
    buildCourseUrl, toggleOtherAnnotations */
 /* exported loaded, renderPDFToolbar */
 
-
 if (PDFAnnotate.default) {
     // eslint-disable-next-line no-global-assign
     PDFAnnotate = PDFAnnotate.default;
@@ -10,21 +9,21 @@ if (PDFAnnotate.default) {
 
 // eslint-disable-next-line no-var
 var loaded = sessionStorage.getItem('toolbar_loaded');
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
     sessionStorage.removeItem('toolbar_loaded');
 };
-//Toolbar stuff
+// Toolbar stuff
 function renderPDFToolbar() {
     document.getElementById('pdf_annotation_icons').addEventListener('click', handleToolbarClick);
-    $('#zoom-custom').val(Number(localStorage.getItem('scale'))*100 || '100');
+    $('#zoom-custom').val(Number(localStorage.getItem('scale')) * 100 || '100');
     sessionStorage.setItem('toolbar_loaded', true);
     function setActiveToolbarItem(option) {
         const selected = $('.tool-selected');
         const clicked_button = $(`a[value=${option}]`);
         if (option !== selected.attr('value')) {
-            //There are two classes for the icons; toolbar-action and toolbar-item.
-            //toolbar-action are single use buttons such as download and clear
-            //toolbar-item are continuous options such as pen, text, etc.
+            // There are two classes for the icons; toolbar-action and toolbar-item.
+            // toolbar-action are single use buttons such as download and clear
+            // toolbar-item are continuous options such as pen, text, etc.
             if (!clicked_button.hasClass('toolbar-action')) {
                 $(selected[0]).removeClass('tool-selected');
                 clicked_button.addClass('tool-selected');
@@ -100,7 +99,7 @@ function renderPDFToolbar() {
             }
         }
         else {
-            //For color and size select
+            // For color and size select
             switch (option) {
                 case 'pen':
                     $('#pen_selection').toggle();
@@ -138,9 +137,9 @@ function renderPDFToolbar() {
             data: {
                 annotation_layer,
                 GENERAL_INFORMATION,
-                'csrf_token': csrfToken,
+                csrf_token: csrfToken,
             },
-            success: function(data) {
+            success: function (data) {
                 const response = JSON.parse(data);
                 if (response.status === 'success') {
                     $('#save_status').text('Saved');
@@ -152,12 +151,11 @@ function renderPDFToolbar() {
                     alert(response.message);
                 }
             },
-            error: function() {
+            error: function () {
                 alert('Something went wrong, please contact a administrator.');
             },
         });
     }
-
 
     function handleToolbarClick(e) {
         setActiveToolbarItem(e.target.getAttribute('value'));
@@ -206,7 +204,7 @@ function renderPDFToolbar() {
     // Pen stuff
     let penSize = 3;
     let penColor = '#FF0000';
-    let scrollLock= false;
+    let scrollLock = false;
     function initPen() {
         const init_size = localStorage.getItem('pen/size') || 5.0;
         const init_color = localStorage.getItem('main_color') || '#000000';

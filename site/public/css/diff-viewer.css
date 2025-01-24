@@ -1,6 +1,7 @@
 @import url("google/inconsolata.css");
 
 .diff-container-box {
+    display: grid;
     overflow: auto;
     background-color: var(--standard-pale-gray);
     border: 1px solid var(--standard-light-gray);
@@ -8,29 +9,41 @@
 
 .diff-code {
     font-family: monospace;
-    color: var(--btn-text-black);
+    color: var(--diff-char);
+    background-color: var(--diff-background-all);
+    line-height: 1.8;
 }
 
 .diff-code .row {
     width: 100%;
 }
 
-.diff-code .bad {
-    background-color: var(--alert-background-bronze);
+.diff-code .bad-actual {
+    background-color: var(--diff-background-actual);
+    color: var(--diff-char);
+}
+
+.diff-code .bad-expected {
+    background-color: var(--diff-background-expected);
+    color: var(--diff-char);
 }
 
 .highlight-hover {
     background-color: var(--standard-light-blue-gray) !important;
 }
 
-.highlight-char {
-    background-color: var(--focus-danger-red);
+.highlight-char-actual {
+    background-color: var(--diff-char-background-actual);
+}
+
+.highlight-char-expected {
+    background-color: var(--diff-char-background-expected);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .line_number {
-    color: gray;
-    border-right: 1px solid lightgrey;
+    color: var(--standard-medium-gray);
+    border-right: 1px solid var(--standard-light-gray);
     text-align: right;
     width: auto;
 }

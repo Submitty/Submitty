@@ -7,14 +7,6 @@
             <span id="rebuild-status-label">Build Status: </span>
             <div id="rebuild-status"></div>
         </div>
-
-        <div class="column-wrapper">
-            <a class="btn btn-primary"
-                href="{{ late_days_forensics_url }}"style="float: right">
-                Late Days Forensics
-            </a>
-            </form>
-        </div>
     </div>
 
     <form id="late-day-form" class="exception-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
@@ -32,18 +24,18 @@
             <legend class="option-title">Single Student Entry</legend>
             <label for="user_id">
                 Student ID:
-                <input class="option-input" type="text" name="user_id" id="user_id">
+                <input class="option-input" type="text" name="user_id" id="user_id" data-testid="user-id">
             </label>
             <label for="datestamp">
                 Date to be Applied:
-                <input class="option-input" type="text" name="datestamp" id="datestamp">
+                <input class="option-input" type="text" name="datestamp" id="datestamp" data-testid="datestamp">
             </label>
             <label for="late_days">
                 Total Late Days:
-                <input class="option-input" type="number" name="late_days" id="late_days">
+                <input class="option-input" type="number" name="late_days" id="late_days" data-testid="late-days">
             </label>
             <div>
-                <input class="btn btn-primary" type="submit" value="Submit">
+                <input class="btn btn-primary" data-testid="submit-btn" type="submit" value="Submit">
             </div>
         </fieldset>
         <fieldset>
@@ -87,8 +79,9 @@
                         <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedFamilyName() }}</td>
                         <td data-before-content="Total Allowed Late Days">{{ user.getAllowedLateDays() }}</td>
                         <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
-                        <td data-before-content="Delete">
+                        <td id="Delete">
                             <a
+                                id="delete-button" 
                                 aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >

@@ -46,7 +46,7 @@ Form
 
 <label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
     <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
-<select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
+<select name="min_grading_group" id="minimum_grading_group" data-testid="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
     {% endfor %}
@@ -58,14 +58,28 @@ Form
         How should graders be assigned to grade this item?
         <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
+	<input type="radio" name="grader_assignment_method" value="2" data-testname="grader_assignment_method" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="all_access">All Access Grading</label>
 
-    <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
+    <input type="radio" name="grader_assignment_method" value="1" data-testname="grader_assignment_method" id="registration_section"
         {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
 
-    <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
+    <input type='radio' name="grader_assignment_method" value="0" data-testname="grader_assignment_method" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
+</fieldset>
+<br />
+<fieldset>
+    <legend>
+        What should the default anonymization of students be for instructors and full access graders? </br>
+        <i>(Individual instructors and full access graders can override this setting for themselves on the
+        gradeable's index page.)</i>
+    </legend>
+    <input type="radio" name="instructor_blind" value="1" id="unblind_instructor_grading"
+        {{ (gradeable.getInstructorBlind() == 1) ? 'checked' : '' }}> <label for="unblind_instructor_grading">Unblinded Grading</label>
+
+    <input type="radio" name="instructor_blind" value="2" id="blind_instructor_grading"
+        {{ (gradeable.getInstructorBlind() == 2 or action == "new") ? 'checked' : '' }}><label for="blind_instructor_grading">Blinded Grading</label>
+
 </fieldset>
 <br />
 {% if electronic %}
@@ -97,6 +111,29 @@ Form
         <input type="radio" name="peer_blind" value="3" id="double_blind_peer_grading"
             {{ (gradeable.getPeerBlind() == 3 or action == "new") ? 'checked' : '' }}><label for="double_blind_peer_grading">Double Blinded Grading</label>
 
+    </fieldset>
+    <br />
+    <fieldset>
+        <legend>
+            Which tabs should be visible to peer graders?
+        </legend>
+        <input type="checkbox" name="peer_panel" value="1" id="peer_autograding"
+            {{ (gradeable.getPeerAutograding() == true) ? 'checked' : ''}}><label for="autograding">Autograding</label>
+        <input type="checkbox" name="peer_panel" value="2" id="peer_rubric"
+            {{ (gradeable.getPeerRubric() == true) ? 'checked' : '' }}> <label for="rubric">Rubric</label>
+
+        <input type="checkbox" name="peer_panel" value="3" id="peer_files"
+            {{ (gradeable.getPeerFiles() == true) ? 'checked' : '' }}><label for="files">Files</label>
+
+        <input type="checkbox" name="peer_panel" value="4" id="peer_solutions"
+            {{ (gradeable.getPeerSolutions() == true) ? 'checked' : '' }}><label for="solutions">Solution/Notes</label>
+
+        {% if isDiscussionPanel %}
+
+            <input type="checkbox" name="peer_panel" value="5" id="peer_discussion"
+                {{ (gradeable.getPeerDiscussion() == true) ? 'checked' : '' }}><label for="discussion">Discussion</label>
+
+        {% endif %}
     </fieldset>
 
 {% endif %}
@@ -270,7 +307,7 @@ Form
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
         $('#minimum_grading_group').change(onMinGraderChange);
-        
+
         // update "all" check boxes
         {% if 1 in graders_from_usertypes|keys %}
         {% for grader in graders_from_usertypes[1] %}

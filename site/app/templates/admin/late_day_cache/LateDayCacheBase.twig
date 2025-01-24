@@ -1,0 +1,26 @@
+<div id="message"></div>
+<div class="content">
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <h1 style="margin:0px;">Bulk Late Day Usage</h1>
+
+        <div id="rebuild-status-panel" style="left:0px;display:none">
+            <span id="rebuild-status-label">Build Status: </span>
+            <div id="rebuild-status"></div>
+        </div>
+
+        <div class="column-wrapper">
+            <button class="btn btn-default" tabindex="0" id="calculate-btn" onclick="calculateLateDayCache()">Calculate Info</button>
+            <button class="btn btn-danger" tabindex="0" id="flush-btn" onclick="flushLateDayCache()">Delete All</button>
+            </form>
+        </div>
+    </div>
+    <p>
+        Use this table to determine each students late day usage. Cells represent the change in late days at the gradeable or the late day update. 
+    </p>
+    <br>
+    <p>
+        You'll need to manually press the "Calculate Info" button to view the most recent changes reflected in the late day usage.
+    </p>
+    <br>
+    <div class="page-content">{{ include('admin/late_day_cache/LateDayCacheTablePlugin.twig') }}</div>
+</div>

@@ -220,3 +220,130 @@ vectorOfLines wordsToLines(vectorOfWords text) {
   }
   return contents;
 }
+
+/* METHOD: stringToWordsAndSpaceList
+ * ARGS: text: string
+ * ARGS: vectorOfWords
+ * ARGS: spaceVector: Reference to a vectorOfSpaces
+ * PURPOSE: converts a string into a vector whose length is number of lines in the string
+ * and each element in the vector is a vector containing the words  in each line.
+ * Sets the spaceVector to a vector containing number of spaces between two words in line
+ */
+void stringToWordsAndSpaceList(std::string const &text, vectorOfWords &contents, vectorOfSpaces &spaceVector) {
+  assert (contents.size() == 0);
+  assert (spaceVector.size() == 0);
+  std::stringstream input(text);
+  int lineNum = 0;
+  std::string line;
+  while (getline(input, line)) {
+    std::vector<std::string> words;
+    std::vector<int> gaps;
+    int count = 0;
+    std::string word;
+    bool gap = true;
+    for (char chr : line) {
+      if (std::isspace(chr)) {
+        if (!gap) {
+          words.push_back(word);
+          word.clear();
+          gap = true;
+        }
+        count += 1;
+      } else {
+        if (gap) {
+          gaps.push_back(count);
+          count=0;
+          gap = false;
+        }
+        word.push_back(chr);
+      }
+    }
+    if (!gap) {
+      words.push_back(word);
+    }
+    gaps.push_back(count);
+    contents.push_back(words);
+    spaceVector.push_back(gaps);
+    assert (gaps.size() == words.size()+1);
+    lineNum += 1;
+  }
+}
+
+std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces studentSpaces) {
+  assert (studentFileWords.size() == studentSpaces.size());
+  int num_lines = studentFileWords.size();
+  std::vector<std::string> updatedLines;
+  for (size_t i = 0; i < num_lines; i++) {
+    assert (studentFileWords[i].size()+1 == studentSpaces[i].size());
+    size_t num_words = studentFileWords[i].size();
+    std::string line = "";
+    for (size_t j = 0; j < num_words; j++) {
+      line += std::string(studentSpaces[i][j],' ');
+      line += studentFileWords[i][j];
+    }
+    line += std::string(studentSpaces[i][num_words],' ');
+    updatedLines.push_back(line);
+  }
+  const char* const delim = "\n";
+  std::ostringstream imploded;
+  std::copy(updatedLines.begin(), updatedLines.end(),
+            std::ostream_iterator<std::string>(imploded, delim));
+  return imploded.str();
+}
+
+bool isNumber(const std::string &str) {
+  std::string stripped_str = isolateAlphanumAndNumberPunctuation(str);
+  bool atLeastOneDigit = false;
+  bool dotFound = false;
+  for (char const &c : stripped_str) {
+    if (std::isdigit(c)) {
+      atLeastOneDigit = true;
+    }
+    else if (c == '.') {
+      if (dotFound) {
+        return false;
+      }
+      dotFound = true;
+    }
+    else {
+      return false;
+    }
+  }
+  return atLeastOneDigit;
+}
+
+/* METHOD: isolateAlphanumAndNumberPunctuation
+ * ARGS: str: string
+ * RETURN: string
+ * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ */
+std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
+  if (str.empty())
+  {
+    return str;
+  }
+  std::string::const_iterator begin = str.begin();
+  while (!isalnum(*begin) && !(*begin == '.')) {
+    begin++;
+    if (begin == str.end())
+    {
+      return "";
+    }
+  }
+  std::string::const_reverse_iterator end = str.rbegin();
+  while (!isalnum(*end) && !(*end == '.')) {
+    end++;
+  }
+  return std::string(begin, end.base());
+}
+
+bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces) {
+  int len = std::min(studentSpaces.size(), expectedSpaces.size());
+  for (size_t i = 0; i < len; i++)
+  {
+    if (studentSpaces[i] != expectedSpaces[i]) {
+      return false;
+    }
+  }
+  return true;
+}

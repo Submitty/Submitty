@@ -25,7 +25,8 @@ CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'c
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     JSON = json.load(open_file)
-DAEMONCGI_GROUP = JSON['daemoncgi_group']
+DAEMONPHPCGI_GROUP = JSON['daemonphpcgi_group']
+CGI_USER = JSON['cgi_user']
 
 with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
     JSON = json.load(open_file)
@@ -120,7 +121,8 @@ def create_or_update_repo(folder, subdirectory, which_branch):
     os.chdir(folder)
     for root, dirs, files in os.walk(folder):
         for entry in files + dirs:
-            shutil.chown(os.path.join(root, entry), group=DAEMONCGI_GROUP)
+            shutil.chown(os.path.join(root, entry), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
+    shutil.chown(folder, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 
 # =======================================================================
@@ -130,6 +132,7 @@ parser.add_argument("--non-interactive", action='store_true', default=False)
 parser.add_argument("semester", help="semester")
 parser.add_argument("course", help="course code")
 parser.add_argument("repo_name", help="repository name")
+parser.add_argument("--subdirectory", help="vcs subdirectory", default="")
 args = parser.parse_args()
 
 conn_string = db_utils.generate_connect_string(
@@ -145,8 +148,8 @@ connection = engine.connect()
 metadata = MetaData(bind=engine)
 
 courses_table = Table('courses', metadata, autoload=True)
-select = courses_table.select().where(courses_table.c.semester == bindparam('semester')).where(courses_table.c.course == bindparam('course'))
-course = connection.execute(select, semester=args.semester, course=args.course).fetchone()
+select = courses_table.select().where(courses_table.c.term == bindparam('term')).where(courses_table.c.course == bindparam('course'))
+course = connection.execute(select, term=args.semester, course=args.course).fetchone()
 
 if course is None:
     raise SystemExit("Semester '{}' and Course '{}' not found".format(args.semester, args.course))
@@ -154,12 +157,12 @@ if course is None:
 vcs_semester = os.path.join(VCS_FOLDER, args.semester)
 if not os.path.isdir(vcs_semester):
     os.makedirs(vcs_semester, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_semester, group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_semester, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 vcs_course = os.path.join(vcs_semester, args.course)
 if not os.path.isdir(vcs_course):
     os.makedirs(vcs_course, mode=0o770, exist_ok=True)
-    shutil.chown(vcs_course, group=DAEMONCGI_GROUP)
+    shutil.chown(vcs_course, user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 is_team = False
 
@@ -191,19 +194,35 @@ eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
 is_team = False
 if eg is not None:
     is_team = eg.eg_team_assignment
+    # gradeable is not a vcs gradeable
+    if eg.eg_vcs_host_type == -1:
+        print(("Warning: Semester '{}' and Course '{}' contains gradeable_id '{}' but it is not a VCS gradeable.").format(args.semester, args.course, args.repo_name))
+        print("exiting")
+        sys.exit()
+# gradeable does not exist in the course
 elif not args.non_interactive:
-    print ("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.".format(args.semester, args.course, args.repo_name))
-    response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student? (y/n) ")
-    if not response.lower() == 'y':
+    print (("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.").format(args.semester, args.course, args.repo_name))
+    # if the repo_name matches any repo_name in the different gradeables, we should ask the user if they want to continue
+    gradeables = course_connection.execute(eg_table.select()).fetchall()
+    is_repo_name_in_gradeables = False
+    for gradeable in gradeables:
+        # the eg_vcs_partial_path has pattern like `gradeable_id/user_id`, so we need to use regex to match the gradeable_id
+        if gradeable.eg_vcs_host_type == 1 and re.match(f'^{args.repo_name}/', gradeable.eg_vcs_partial_path):
+            print("Found matching gradeable_id '{}' in the course that uses the requested repo name.".format(gradeable.g_id))
+            is_repo_name_in_gradeables = True
+            response = input ("Should we continue and make individual repositories named '"+args.repo_name+"' for each student/team? (y/n) ")
+            if not response.lower() == 'y':
+                print ("exiting")
+                sys.exit()
+
+    if is_repo_name_in_gradeables == False:
+        print ("ERROR: Please make the gradeable before attempting to run this script!")
         print ("exiting")
         sys.exit()
 
-subdirectory = ''
-if eg.eg_vcs_subdirectory != '':
-    subdirectory = eg.eg_vcs_subdirectory
+subdirectory = args.subdirectory
 
-
-# Load the git branch for autgrading from the course config file
+# Load the git branch for autograding from the course config file
 course_config_file = os.path.join('/var/local/submitty/courses/',
                                   args.semester, args.course,
                                   'config', 'config.json')
@@ -219,7 +238,7 @@ print ("The git autograding branch for this course is: " + course_git_autogradin
 
 if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     os.makedirs(os.path.join(vcs_course, args.repo_name), mode=0o770)
-    shutil.chown(os.path.join(vcs_course, args.repo_name), group=DAEMONCGI_GROUP)
+    shutil.chown(os.path.join(vcs_course, args.repo_name), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 if is_team:
     teams_table = Table('gradeable_teams', course_metadata, autoload=True)
@@ -231,8 +250,8 @@ if is_team:
 
 else:
     users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.semester == bindparam('semester')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
-    users = connection.execute(select, semester=args.semester, course=args.course)
+    select = users_table.select().where(users_table.c.term == bindparam('term')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    users = connection.execute(select, term=args.semester, course=args.course)
 
     for user in users:
         create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), subdirectory, course_git_autograding_branch)

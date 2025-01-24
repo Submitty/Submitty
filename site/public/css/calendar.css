@@ -1,7 +1,7 @@
 /* the entire table of calendar */
 .table-calendar {
     text-align: left;
-    border: 1px solid black;
+    border: 1px solid var(--default-black);
 }
 
 /* the title at the top of the calendar table, showing month, year */
@@ -12,6 +12,38 @@
 
 .cal-title {
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.cal-month-title {
+    text-align: center;
+    font-size: 25px;
+    font-weight: 600;
+    width: auto;
+    height: 50px;
+    background: 1px solid var(--standard-light-gray);
+    padding: 0;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-black);
+}
+
+.cal-year-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    width: 65px;
+    height: 50px;
+    background: 1px solid var(--standard-light-gray);
+    padding: 0;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-black);
+}
+
+[data-theme="dark"] .dropdown-custom option {
+    background-color: var(--background-blue);
 }
 
 .cal-btn {
@@ -60,13 +92,9 @@ a.cal-btn:focus {
     float: right;
 }
 
-.cal-month-title {
-    font-size: 26px;
-    text-transform: uppercase;
-    border: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
+#calendar-today-button{
+    float:right;
+    margin-right: 10px;
 }
 
 .cal-toolbar {
@@ -74,18 +102,7 @@ a.cal-btn:focus {
     margin-top: 0;
 }
 
-h2.cal-month-title {
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
 
-.cal-year-title {
-    font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 0;
-    line-height: 100%;
-}
 
 /* the row of Monday, Tuesday, ... */
 .cal-week-title-row {
@@ -154,6 +171,18 @@ h2.cal-month-title {
     height: 100px;
 }
 
+.cal-day-cell-twoweek{
+    min-height: 100px;
+    max-height: 390px;
+    height: 200px;
+}
+
+.cal-day-cell-week{
+    min-height: 100px;
+    max-height: 780px;
+    height: 400px;
+}
+
 .cal-cell-expand {
     height: 195px;
 }
@@ -163,8 +192,7 @@ h2.cal-month-title {
     max-height: 160px;
     width: 100%;
     display: block;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
 }
 
 /* each item in the day cell */
@@ -203,6 +231,7 @@ a.cal-gradeable-status-text {
     padding: 0;
     border: none;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-text:hover {
@@ -220,25 +249,23 @@ a.cal-gradeable-status-text:focus {
 
 /** Announcement **/
 a.cal-gradeable-status-ann {
-    color: #218ffd!important;  /* This color is from DS website */
     padding: 0;
     font-style: italic;
     border-style: solid;
     border-width: 3px;
     box-shadow: none;
+    cursor: default;
 }
 
 a.cal-gradeable-status-ann:hover {
-    color: #218ffd;
+    cursor: default;
     padding: 0;
     font-style: italic;
-    cursor: default;
     border-style: solid;
     border-width: 3px!important;
 }
 
 a.cal-gradeable-status-ann:focus {
-    color: #218ffd;
     padding: 0;
     font-style: italic;
     border: none;
@@ -266,7 +293,7 @@ a.cal-gradeable-status-link:focus {
 }
 
 .calendar-color-blue {
-    background-color: #218ffd;
+    background-color: var(--standard-medium-vibrant-blue);
     color: var(--text-black)!important;
 }
 
@@ -278,6 +305,56 @@ div.calendar-submit {
 }
 div.calendar-submit label { text-align: "right"; }
 div.calendar-submit label::after { content: ":"; }
+
+/* Calendar Options Menu */
+div.filter-courses-menu {
+    display: inline-grid;
+    line-height: 1.5;
+}
+
+div.options-colors {
+    display: grid;
+}
+
+div.cal-option-area {
+    margin-top: 0.3rem;
+}
+
+h2.cal-options-section-head {
+    margin-top: 0;
+}
+
+label.course-color-label {
+    margin-right: 0.2rem;
+}
+
+.line-break {
+    margin-bottom: 0;
+    margin-top:0.3rem;
+}
+
+/* Calendar Legend */
+div.cal-legend {
+    display: flex;
+    margin-top: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid var(--default-black);
+    border-bottom: none;
+    background-color: var(--standard-hover-light-gray);
+}
+
+div.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid var(--default-black);
+    border-radius: 4px;
+}
+
+.legend-label {
+    padding-left: 0.3rem;
+    padding-right: 1rem;
+}
 
 @media (max-width: 800px) {
     #calendar-list {

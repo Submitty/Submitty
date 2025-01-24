@@ -5,9 +5,11 @@ namespace app\views\course;
 use app\entities\course\CourseMaterial;
 use app\libraries\FileUtils;
 use app\views\AbstractView;
+use app\libraries\DateUtils;
 
 class CourseMaterialsView extends AbstractView {
     public function listCourseMaterials(array $course_materials_db) {
+        $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('course-materials.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
@@ -26,7 +28,7 @@ class CourseMaterialsView extends AbstractView {
         $folder_ids = [];
         $links = [];
         $base_view_url = $this->core->buildCourseUrl(['course_material']);
-
+        $beginning_of_time_date = DateUtils::BEGINNING_OF_TIME;
         /** @var CourseMaterial $course_material */
         foreach ($course_materials_db as $course_material) {
             $rel_path = substr($course_material->getPath(), strlen($base_course_material_path) + 1);
@@ -95,7 +97,7 @@ class CourseMaterialsView extends AbstractView {
             $dirs = explode("/", $rel_path);
             $file_name = array_pop($dirs);
             if ($course_material->isLink()) {
-                $file_name = $course_material->getUrlTitle() . $course_material->getPath();
+                $file_name = $course_material->getTitle() . $course_material->getPath();
             }
             $path_to_place = &$final_structure;
             $path = "";
@@ -138,6 +140,8 @@ class CourseMaterialsView extends AbstractView {
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
 
+        $folder_paths = $this->compileAllFolderPaths($final_structure);
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "user_group" => $this->core->getUser()->getGroup(),
             "user_section" => $this->core->getUser()->getRegistrationSection(),
@@ -153,7 +157,9 @@ class CourseMaterialsView extends AbstractView {
             "date_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('date_time_picker'),
             "course_materials" => $final_structure,
             "folder_ids" => $folder_ids,
-            "links" => $links
+            "links" => $links,
+            "folder_paths" => $folder_paths,
+            "beginning_of_time_date" => $beginning_of_time_date
         ]);
     }
 
@@ -242,5 +248,45 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $folder_visibilities[$current_path] = $cur_visibility;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @return array<string> List of folders paths.
+     */
+    private function compileAllFolderPaths(array $course_materials): array {
+        $folder_paths = [];
+        $this->compileAllFolderPathsR($course_materials, $folder_paths, "");
+        return $folder_paths;
+    }
+
+    /**
+     * Recurses through folders and compiles an array of all the paths to folders.
+     * Helper recursive function.
+     *
+     * @param array<mixed> $course_materials - Dictionary: path name => CourseMaterial.
+     * @param array<string>  $folder_paths - List we append
+     * @param string $full_path - Current path we are examining files in.
+     */
+    private function compileAllFolderPathsR(
+        array $course_materials,
+        array &$folder_paths,
+        string $full_path
+    ): void {
+        foreach ($course_materials as $name => $course_material) {
+            if (is_array($course_material)) {
+                $inner_full_path = "";
+                if (empty($full_path)) {
+                    $inner_full_path = $name;
+                }
+                else {
+                    $inner_full_path = $full_path . '/' . $name;
+                }
+                array_push($folder_paths, $inner_full_path);
+                $this->compileAllFolderPathsR($course_material, $folder_paths, $inner_full_path);
+            }
+        }
     }
 }

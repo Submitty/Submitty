@@ -195,6 +195,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testCheckUploadedImageFileImageSizeFalse() {
         try {
@@ -291,6 +292,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -311,6 +313,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -343,6 +346,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -363,6 +367,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -383,6 +388,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -403,6 +409,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -435,6 +442,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -455,6 +463,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -491,6 +500,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -511,6 +521,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -531,6 +542,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Tester",
             'user_preferred_familyname' => null,
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
             'user_email_secondary_notify' => false,
@@ -551,6 +563,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_familyname' => "Hacker",
             'user_preferred_familyname' => "Hacks",
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => "aphacker@example.com",
             'user_email_secondary' => "aphacker@exampletwo.com",
             'user_email_secondary_notify' => false,

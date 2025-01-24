@@ -93,15 +93,58 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                 db_conn varchar;
                 query_string text;
             BEGIN
-                db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+                db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
                 IF (TG_OP = 'INSERT') THEN
                     -- FULL data sync on INSERT of a new user record.
                     SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-                    query_string := 'INSERT INTO users (user_id, user_pronouns, user_numeric_id, user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_last_initial_format, user_email, user_email_secondary, user_email_secondary_notify, user_updated, instructor_updated, user_group, registration_section, registration_type, manual_registration) ' ||
-                            'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_pronouns) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_givenname) || ', ' || quote_nullable(user_row.user_preferred_givenname) || ', ' || quote_literal(user_row.user_familyname) || ', ' ||
-                            '' || quote_nullable(user_row.user_preferred_familyname) || ', ' || quote_literal(user_row.user_last_initial_format) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_email_secondary) || ', ' || quote_literal(user_row.user_email_secondary_notify) || ', ' || quote_literal(user_row.user_updated) || ', ' ||
-                            '' || quote_literal(user_row.instructor_updated) || ', ' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || quote_literal(NEW.registration_type) || ', ' || NEW.manual_registration || ')';
+                    query_string := 'INSERT INTO users (
+                        user_id,
+                        user_numeric_id,
+                        user_pronouns,
+                        display_pronouns,
+                        user_givenname,
+                        user_preferred_givenname,
+                        user_familyname,
+                        user_preferred_familyname,
+                        user_last_initial_format,
+                        user_email,
+                        user_email_secondary,
+                        user_email_secondary_notify,
+                        time_zone,
+                        user_preferred_locale,
+                        display_image_state,
+                        user_updated,
+                        instructor_updated,
+                        user_group,
+                        registration_section,
+                        registration_type,
+                        manual_registration,
+                        display_name_order
+                    ) VALUES ('
+                        || quote_literal(user_row.user_id) || ', '
+                        || quote_nullable(user_row.user_numeric_id) || ', ' 
+                        || quote_literal(user_row.user_pronouns) || ', ' 
+                        || quote_literal(user_row.display_pronouns) || ', '
+                        || quote_literal(user_row.user_givenname) || ', ' 
+                        || quote_nullable(user_row.user_preferred_givenname) || ', ' 
+                        || quote_literal(user_row.user_familyname) || ', '
+                        || quote_nullable(user_row.user_preferred_familyname) || ', ' 
+                        || quote_literal(user_row.user_last_initial_format) || ', ' 
+                        || quote_literal(user_row.user_email) || ', ' 
+                        || quote_literal(user_row.user_email_secondary) || ', ' 
+                        || quote_literal(user_row.user_email_secondary_notify) || ', ' 
+                        || quote_literal(user_row.time_zone) || ', '
+                        || quote_nullable(user_row.user_preferred_locale) || ', '
+                        || quote_literal(user_row.display_image_state) || ', '
+                        || quote_literal(user_row.user_updated) || ', '
+                        || quote_literal(user_row.instructor_updated) || ', '
+                        || NEW.user_group || ', ' 
+                        || quote_nullable(NEW.registration_section) || ', ' 
+                        || quote_literal(NEW.registration_type) || ', '
+                        || NEW.manual_registration || ', '
+                        || quote_literal(user_row.display_name_order)
+                    || ')';
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing INSERT';
                     END IF;
@@ -110,7 +153,13 @@ CREATE FUNCTION public.sync_courses_user() RETURNS trigger
                     -- User update on registration_section
                     -- CASE clause ensures user's rotating section is set NULL when
                     -- registration is updated to NULL.  (e.g. student has dropped)
-                    query_string = 'UPDATE users SET user_group=' || NEW.user_group || ', registration_section=' || quote_nullable(NEW.registration_section) || ', rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', registration_type=' || quote_literal(NEW.registration_type) || ', manual_registration=' || NEW.manual_registration || ' WHERE user_id=' || QUOTE_LITERAL(NEW.user_id);
+                    query_string = 'UPDATE users SET '
+                        || 'user_group=' || NEW.user_group || ', '
+                        || 'registration_section=' || quote_nullable(NEW.registration_section) || ', '
+                        || 'rotating_section=' || CASE WHEN NEW.registration_section IS NULL THEN 'null' ELSE 'rotating_section' END || ', '
+                        || 'registration_type=' || quote_literal(NEW.registration_type) || ', '
+                        || 'manual_registration=' || NEW.manual_registration
+                    || ' WHERE user_id=' || quote_literal(NEW.user_id);
                     IF query_string IS NULL THEN
                         RAISE EXCEPTION 'query_string error in trigger function sync_courses_user() when doing UPDATE';
                     END IF;
@@ -136,7 +185,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     query_string := 'DELETE FROM sections_registration WHERE sections_registration_id = ' || quote_literal(OLD.registration_section_id);
     -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
     IF query_string IS NULL THEN
@@ -170,7 +219,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', OLD.semester, OLD.course);
+    db_conn := format('dbname=submitty_%s_%s', OLD.term, OLD.course);
     -- Need to delete anon_id entry from gradeable_anon otherwise foreign key constraint will be violated and execution will fail
     query_string := 'DELETE FROM gradeable_anon WHERE user_id = ' || quote_literal(OLD.user_id) || '; '
                     || 'DELETE FROM users WHERE user_id = ' || quote_literal(OLD.user_id);
@@ -238,7 +287,7 @@ DECLARE
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
-    db_conn := format('dbname=submitty_%s_%s', NEW.semester, NEW.course);
+    db_conn := format('dbname=submitty_%s_%s', NEW.term, NEW.course);
 
     IF (TG_OP = 'INSERT') THEN
         query_string := 'INSERT INTO sections_registration (sections_registration_id, course_section_id) VALUES(' || quote_literal(NEW.registration_section_id) || ',' || quote_literal(NEW.course_section_id) || ')';
@@ -289,10 +338,28 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
                 RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
             END IF;
             -- Propagate UPDATE to course DBs
-            FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
-                RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
-                db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-                query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_pronouns=' || quote_literal(NEW.user_pronouns) || ', user_givenname=' || quote_literal(NEW.user_givenname) || ', user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', user_familyname=' || quote_literal(NEW.user_familyname) || ', user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', user_last_initial_format=' || quote_literal(NEW.user_last_initial_format) || ', user_email=' || quote_literal(NEW.user_email) || ', user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ',user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', time_zone=' || quote_literal(NEW.time_zone)  || ', display_image_state=' || quote_literal(NEW.display_image_state)  || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+            FOR course_row IN SELECT term, course FROM courses_users WHERE user_id=NEW.user_id LOOP
+                RAISE NOTICE 'Term: %, Course: %', course_row.term, course_row.course;
+                db_conn := format('dbname=submitty_%s_%s', course_row.term, course_row.course);
+                query_string := 'UPDATE users SET '
+                    || 'user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', '
+                    || 'user_pronouns=' || quote_literal(NEW.user_pronouns) || ', '
+                    || 'display_pronouns=' || quote_literal(NEW.display_pronouns) || ', '
+                    || 'user_givenname=' || quote_literal(NEW.user_givenname) || ', '
+                    || 'user_preferred_givenname=' || quote_nullable(NEW.user_preferred_givenname) || ', '
+                    || 'user_familyname=' || quote_literal(NEW.user_familyname) || ', '
+                    || 'user_preferred_familyname=' || quote_nullable(NEW.user_preferred_familyname) || ', '
+                    || 'user_last_initial_format=' || quote_literal(NEW.user_last_initial_format) || ', '
+                    || 'user_email=' || quote_literal(NEW.user_email) || ', '
+                    || 'user_email_secondary=' || quote_literal(NEW.user_email_secondary) || ', '
+                    || 'user_email_secondary_notify=' || quote_literal(NEW.user_email_secondary_notify) || ', '
+                    || 'time_zone=' || quote_literal(NEW.time_zone) || ', '
+                    || 'user_preferred_locale=' || quote_nullable(NEW.user_preferred_locale) || ', '
+                    || 'display_image_state=' || quote_literal(NEW.display_image_state) || ', '
+                    || 'display_name_order=' || quote_literal(NEW.display_name_order)  || ', '
+                    || 'user_updated=' || quote_literal(NEW.user_updated) || ', '
+                    || 'instructor_updated=' || quote_literal(NEW.instructor_updated)
+                || ' WHERE user_id=' || quote_literal(NEW.user_id);
                 -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
                 IF query_string IS NULL THEN
                     RAISE EXCEPTION 'query_string error in trigger function sync_user()';
@@ -306,7 +373,62 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
         $$;
 
 
+--
+-- Name: update_previous_registration_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_previous_registration_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (
+		(NEW.registration_section IS NULL AND OLD.registration_section IS NOT NULL)
+		OR NEW.registration_section != OLD.registration_section
+	) THEN
+		NEW.previous_registration_section := OLD.registration_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
 SET default_tablespace = '';
+
+
+--
+-- Name: community_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.community_events (
+    id integer NOT NULL,
+    community_path character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
+    extra_info character varying(255),
+    link_name character varying(255),
+    release_date timestamp(6) without time zone,
+    closing_date timestamp(6) without time zone
+);
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.community_events_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.community_events_id_seq OWNED BY public.community_events.id;
 
 
 --
@@ -314,11 +436,13 @@ SET default_tablespace = '';
 --
 
 CREATE TABLE public.courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
+    self_registration_type smallint DEFAULT 0,
+    default_section_id character varying(255),
     CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
@@ -330,7 +454,7 @@ CREATE TABLE public.courses (
 --
 
 CREATE TABLE public.courses_registration_sections (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     registration_section_id character varying(255) NOT NULL,
     course_section_id character varying(255) DEFAULT ''::character varying
@@ -342,15 +466,26 @@ CREATE TABLE public.courses_registration_sections (
 --
 
 CREATE TABLE public.courses_users (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     user_id character varying NOT NULL,
     user_group integer NOT NULL,
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    previous_registration_section character varying(255),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+);
+
+
+--
+-- Name: docker_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_images (
+    image_name character varying NOT NULL,
+    user_id character varying
 );
 
 
@@ -360,15 +495,17 @@ CREATE TABLE public.courses_users (
 
 CREATE TABLE public.emails (
     id bigint NOT NULL,
-    user_id character varying NOT NULL,
+    user_id character varying,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp without time zone NOT NULL,
     sent timestamp without time zone,
     error character varying DEFAULT ''::character varying NOT NULL,
     email_address character varying(255) DEFAULT ''::character varying NOT NULL,
-    semester character varying,
-    course character varying
+    term character varying,
+    course character varying,
+    to_name character varying,
+    CONSTRAINT name_or_email CHECK (((user_id IS NOT NULL) <> (to_name IS NOT NULL)))
 );
 
 
@@ -393,11 +530,43 @@ ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
 
 
 --
+-- Name: global_calendar_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.global_calendar_items (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.global_calendar_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.global_calendar_items_id_seq OWNED BY public.global_calendar_items.id;
+
+
+--
 -- Name: mapped_courses; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.mapped_courses (
-    semester character varying(255) NOT NULL,
+    term character varying(255) NOT NULL,
     course character varying(255) NOT NULL,
     registration_section character varying(255) NOT NULL,
     mapped_course character varying(255) NOT NULL,
@@ -467,7 +636,11 @@ CREATE TABLE public.sessions (
     session_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
     csrf_token character varying(255) NOT NULL,
-    session_expires timestamp(6) with time zone NOT NULL
+    session_expires timestamp(0) with time zone NOT NULL,
+    session_created timestamp(0) with time zone DEFAULT NULL::timestamp with time zone,
+    browser_name character varying(50) DEFAULT 'Unknown'::character varying,
+    browser_version character varying(15) DEFAULT ''::character varying,
+    platform character varying(50) DEFAULT 'Unknown'::character varying
 );
 
 
@@ -509,6 +682,10 @@ CREATE TABLE public.users (
     user_email_secondary_notify boolean DEFAULT false,
     user_pronouns character varying(255) DEFAULT ''::character varying,
     user_last_initial_format integer DEFAULT 0 NOT NULL,
+    enforce_single_session boolean DEFAULT false,
+    display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
+    display_pronouns boolean DEFAULT false,
+    user_preferred_locale character varying,
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
@@ -548,10 +725,24 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
+-- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('public.community_events_id_seq'::regclass);
+
+
+--
 -- Name: emails id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
+
+
+--
+-- Name: global_calendar_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.global_calendar_items ALTER COLUMN id SET DEFAULT nextval('public.global_calendar_items_id_seq'::regclass);
 
 
 --
@@ -569,11 +760,19 @@ ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: community_events community_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events
+    ADD CONSTRAINT community_events_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: courses courses_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.courses
-    ADD CONSTRAINT courses_pkey PRIMARY KEY (semester, course);
+    ADD CONSTRAINT courses_pkey PRIMARY KEY (term, course);
 
 
 --
@@ -581,7 +780,7 @@ ALTER TABLE ONLY public.courses
 --
 
 ALTER TABLE ONLY public.courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (semester, course, registration_section_id);
+    ADD CONSTRAINT courses_registration_sections_pkey PRIMARY KEY (term, course, registration_section_id);
 
 
 --
@@ -589,7 +788,15 @@ ALTER TABLE ONLY public.courses_registration_sections
 --
 
 ALTER TABLE ONLY public.courses_users
-    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (semester, course, user_id);
+    ADD CONSTRAINT courses_users_pkey PRIMARY KEY (term, course, user_id);
+
+
+--
+-- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_image_name_key UNIQUE (image_name);
 
 
 --
@@ -605,7 +812,7 @@ ALTER TABLE ONLY public.emails
 --
 
 ALTER TABLE ONLY public.mapped_courses
-    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (semester, course, registration_section);
+    ADD CONSTRAINT mapped_courses_pkey PRIMARY KEY (term, course, registration_section);
 
 
 --
@@ -695,6 +902,13 @@ CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_us
 
 
 --
+-- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
+
+
+--
 -- Name: courses_registration_sections delete_sync_registration_id; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -741,7 +955,7 @@ CREATE TRIGGER user_sync_users AFTER UPDATE ON public.users FOR EACH ROW EXECUTE
 --
 
 ALTER TABLE ONLY public.courses
-    ADD CONSTRAINT courses_fkey FOREIGN KEY (semester) REFERENCES public.terms(term_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_fkey FOREIGN KEY (term) REFERENCES public.terms(term_id) ON UPDATE CASCADE;
 
 
 --
@@ -749,7 +963,7 @@ ALTER TABLE ONLY public.courses
 --
 
 ALTER TABLE ONLY public.courses_registration_sections
-    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_registration_sections_fkey FOREIGN KEY (term, course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --
@@ -757,7 +971,7 @@ ALTER TABLE ONLY public.courses_registration_sections
 --
 
 ALTER TABLE ONLY public.courses_users
-    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (semester, course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT courses_users_course_fkey FOREIGN KEY (term, course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --
@@ -766,6 +980,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
@@ -789,7 +1011,7 @@ ALTER TABLE ONLY public.saml_mapped_users
 --
 
 ALTER TABLE ONLY public.mapped_courses
-    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (semester, mapped_course) REFERENCES public.courses(semester, course) ON UPDATE CASCADE;
+    ADD CONSTRAINT mapped_courses_fkey FOREIGN KEY (term, mapped_course) REFERENCES public.courses(term, course) ON UPDATE CASCADE;
 
 
 --

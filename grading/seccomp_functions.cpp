@@ -170,6 +170,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("PROCESS_CONTROL_ADVANCED");
   }
 
   // ---------------------------------------------------------------
@@ -186,6 +187,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    categories.insert("UNKNOWN");
   }
 
   // ---------------------------------------------------------------
@@ -300,6 +302,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_SCHEDULING");
     categories.insert("FILE_MANAGEMENT_RARE");
     categories.insert("PROCESS_CONTROL_ADVANCED");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
   }
 
   // ---------------------------------------------------------------

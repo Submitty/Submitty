@@ -75,8 +75,8 @@
             else total_score += max_score;
         });
 
-        $("#totalScore").html(total_score);
-        $("#totalEC").html("(" + total_ec + ")");
+        $("#totalScore").text(total_score.toFixed(2));
+        $("#totalEC").text(`(${total_ec.toFixed(2)})`);
     }
 
     $(document).ready(function() {
@@ -103,6 +103,7 @@
                 $('#mult-field-' + numNumeric, '.numerics-table').remove();
             }
             --numNumeric;
+            calculateTotalScore();
         }
 
         function addText(label) {
@@ -125,15 +126,20 @@
             if (isNaN(requestedText) || requestedText < 0) {
                 requestedText = 0;
             }
-            while (numText < requestedText) {
-                addText('');
-            }
-            while (numText > requestedText) {
-                removeText();
+            if(requestedText == 0 && $('#numeric_num-items').val() == 0){
+                alert('You must have at least one item');
+                $('#save_status').text('Some Changes Failed!').css('color', 'red');
+            } else {
+                while (numText < requestedText) {
+                    addText('');
+                }
+                while (numText > requestedText) {
+                    removeText();
+                }
+                // When changing to a valid text item count, save the rubric
+                saveRubric(false);
             }
 
-            // When changing text item count, save the rubric
-            saveRubric(false);
         });
 
         $('#numeric_num-items').on('change', function (e) {
@@ -141,15 +147,20 @@
             if (isNaN(requestedNumeric) || requestedNumeric < 0) {
                 requestedNumeric = 0;
             }
-            while (numNumeric < requestedNumeric) {
-                addNumeric(numNumeric + 1, 0, false);
-            }
-            while (numNumeric > requestedNumeric) {
-                removeNumeric();
-            }
 
-            // When numeric item count, save the rubric
-            saveRubric(false);
+            if(requestedNumeric == 0 && $('#numeric_num_text_items').val() == 0){
+                alert('You must have at least one item');
+                $('#save_status').text('Some Changes Failed!').css('color', 'red');
+            } else {
+                while (numNumeric < requestedNumeric) {
+                    addNumeric(numNumeric + 1, 0, false);
+                }
+                while (numNumeric > requestedNumeric) {
+                    removeNumeric();
+                }
+                // When numeric item count, save the rubric
+                saveRubric(false);
+            }
         });
 
         let components = {{ gradeable_components_enc|raw }};

@@ -75,9 +75,16 @@ class CalendarInfo extends AbstractModel {
         $i = 1;
         /** @var Course $course */
         foreach ($courses as $course) {
-            $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
-            if ($i < 21) {
-                $i++;
+            if (isset($_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()])) { //Check if color cookie exists
+                $info->colors[$course->getTerm() . $course->getTitle()] = $_COOKIE['calendar_color_' . $course->getTitle() . $course->getTerm()];
+            }
+            else { //Cookie not set, generate one as default
+                $info->colors[$course->getTerm() . $course->getTitle()] = "var(--category-color-$i)";
+                setcookie('calendar_color_' . $course->getTitle() . $course->getTerm(), "var(--category-color-$i)", time() + 3600);
+                $i = $i + 1;
+                if ($i > 8) {
+                    $i = 1;
+                }
             }
         }
 
@@ -87,6 +94,8 @@ class CalendarInfo extends AbstractModel {
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
             GradeableList::CLOSED => $gradeable_list->getClosedGradeables(),
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
+            GradeableList::FUTURE => $gradeable_list->getFutureGradeables(),
+            GradeableList::BETA => $gradeable_list->getBetaGradeables()
         ];
 
         foreach ($gradeable_list_sections as $section => $gradeables) {
@@ -116,6 +125,8 @@ class CalendarInfo extends AbstractModel {
                     'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format($date_format) : '',
                     'status' => (string) $section,
                     'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
+                    'submission_open' => $gradeable->isSubmissionOpen(),
+                    'is_student' => $info->core->getUser()->getAccessLevel() === User::LEVEL_USER,
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
                     'class' => 'btn-nav',
@@ -165,7 +176,17 @@ class CalendarInfo extends AbstractModel {
         return $info;
     }
 
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
     public function getItemsByDate(): array {
+        return $this->items_by_date;
+    }
+
+    /**
+     * @return array<string, array<string,bool|string>>>
+     */
+    public function getItemsByDateInCourses(): array {
         return $this->items_by_date;
     }
 

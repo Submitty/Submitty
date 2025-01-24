@@ -27,14 +27,14 @@
             </div>
         </div>
         <br>
-      <textarea id="toolbox-textarea" name="sql" ></textarea>
+      <textarea id="toolbox-textarea" name="sql" style="margin-bottom: 2px;" aria-label="Input SQL"></textarea>
       <br />
       <button id='run-sql-btn' class="btn btn-primary">Run Query</button>
       <button id='download-sql-btn' class="btn btn-primary" disabled>Download CSV</button>
     </div>
 
     <div>
-      <h3>Query Results</h3>
+      <h2>Query Results</h2>
       <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
       <table id="query-results" class="table table-striped mobile-table">
       </table>

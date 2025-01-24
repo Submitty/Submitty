@@ -2,6 +2,7 @@
 
 namespace tests\app\controllers\student;
 
+use app\models\gradeable\GradeableUtils;
 use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
@@ -25,6 +26,7 @@ use tests\utils\NullOutput;
 
 /**
  * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class SubmissionControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
@@ -74,6 +76,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'user_givenname' => 'Test',
             'user_familyname' => 'Person',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => '',
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false,
@@ -161,7 +164,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'vcs_partial_path' => '',
-            'vcs_host_type' => -1,
+            'vcs_host_type' => GradeableUtils::VCS_TYPE_NONE,
             'team_assignment' => false,
             'team_size_max' => 1,
             'ta_grading' => true,
@@ -192,7 +195,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'allowed_minutes' => null,
             'depends_on' => null,
             'depends_on_points' => null,
-            'allow_custom_marks' => true
+            'allow_custom_marks' => true,
+            'any_manual_grades' => false
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
@@ -351,6 +355,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Basic upload, only one part and one file, simple sanity check.
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testUploadOneBucket() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -404,6 +409,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      *
      * @numParts 2
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testUploadTwoBuckets() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -470,6 +476,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Test what happens if we're uploading a zip that contains a directory.
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testZipWithDirectory() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -532,6 +539,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Upload a second version of a gradeable with no previous files and different files per upload. Test
      * that both versions exist and neither bled over to the other.
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSecondVersionNoPrevious() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -604,6 +612,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * @numParts 2
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSecondVersionPreviousTwoParts() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -642,6 +651,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Upload a second version of a gradeable that includes previous files, but there's no overlap in file names
      * so we should have one file in version 1 and two files in version 2
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSecondVersionPreviousNoOverlap() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -695,6 +705,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * This should only include the version that was uploaded (and not use the previous).
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSecondVersionPreviousOverlap() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -753,6 +764,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * that overlaps the file from the first version.
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSecondVersionPreviousOverlapZip() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -811,6 +823,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * be left alone.
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testZipInsideZip() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -855,6 +868,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * in the zip (the one not in a zip contains a single 'a' while the two files in the zip are blank).
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSameFilenameInZip() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -879,6 +893,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * This tests the same thing as testSameFilenameInZip(), however we submit "test.txt" before "zippedfiles.zip"
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testSameFilenameInZipReversed() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -908,6 +923,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testFilenameWithSpaces() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -934,6 +950,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testZipContaingFilesWithSpaces() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1130,6 +1147,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorMissingPreviousFile() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1237,12 +1255,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
+        $this->assertEquals("The tmp file 'broken.zip' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorOnCopyingPrevious() {
         $this->addUploadFile('test1.txt');
@@ -1279,6 +1298,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorOnCopyingFile() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1299,6 +1319,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorCleanupTempFiles() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1381,6 +1402,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorBrokenHistoryFile() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1403,6 +1425,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * We're testing that rolling back the history works on failure to upload the second version of the file
      *
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorHistorySecondVersion() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1449,6 +1472,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorWriteSettingsFile() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
@@ -1472,6 +1496,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testErrorWriteTimestampFile() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')

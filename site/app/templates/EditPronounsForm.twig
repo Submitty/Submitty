@@ -15,6 +15,7 @@
             <label for="user-pronouns-change">Pronouns:&emsp;</label>
             <input type="text"
                    name="user_pronouns_change"
+                   data-testid="pronouns-input"
                    value="{{ user_pronouns }}"
                    id="user-pronouns-change"
                    list="default_pronouns_list"
@@ -27,7 +28,16 @@
                     <option value="(Type Custom Here)"></option>
                 </datalist>
             </input>
-            <button aria-label="Clear pronoun input" type="button" style="background: none;border:none;" onclick="clearPronounsBox();"><i class="fas fa-trash" style="padding:0.5rem;" title="Clear pronouns field"></i></button>
+            <button aria-label="Clear pronoun input" data-testid="clear-pronoun-input" type="button" style="background: none;border:none;" onclick="clearPronounsBox();"><i class="fas fa-trash" style="padding:0.5rem;" title="Clear pronouns field"></i></button>
+        </div>
+        <br>
+        <div class="edit_user_row ui-front">
+            <label for="pronouns-forum-display">Display Pronouns in Discussion Forum:&emsp;</label>
+            <input type="checkbox"
+                aria-label="Display Pronouns in Discussion Forum"
+                data-testid="pronouns-forum-display"
+                id="pronouns-forum-display"
+                {{ display_pronouns ? 'checked' : false }}>
         </div>
     </div>
 {% endblock %}
@@ -38,5 +48,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" id="edit-pronouns-submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" id="edit-pronouns-submit" data-testid="edit-pronouns-submit" />
 {% endblock %}

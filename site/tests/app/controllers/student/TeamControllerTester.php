@@ -50,39 +50,21 @@ class TeamControllerTester extends BaseUnitTest {
     }
 
     public function testSetTeamName() {
-        $gradeable = $this->createMockGradeable();
-        $this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
-        $details = [
-            'team_id' => 'test',
-            'registration_section' => 0,
-            'rotating_section' => -1,
-            'users' => [
-                [
-                    'state' => 1,
-                    'user_id' => 'test',
-                    'user_givenname' => 'User',
-                    'user_familyname' => 'One',
-                    'user_pronouns' => '',
-                    'user_email' => 'user1@example.com',
-                    'user_email_secondary' => null,
-                    'user_email_secondary_notify' => false
-                ]
-            ],
-            'team_name' => null
-        ];
-        $team = new Team($this->core, $details);
-        $submitter = $this->createMockModel(Submitter::class);
-        $submitter->method('getTeam')->willReturn($team);
-        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
-        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
-        $this->core->getQueries()->method('getGradedGradeable')
-            ->with($gradeable, $this->core->getUser()->getId(), $this->core->getUser()->getId())
-            ->willReturn($graded_gradeable);
+        $this->createMockTeam();
         $this->core->getQueries()->expects($this->once())
             ->method('updateTeamName')
             ->with('test', 'newname');
         $controller = new TeamController($this->core);
         $_POST['team_name'] = 'newname';
+        $controller->setTeamName($this->config['gradeable_id']);
+    }
+
+    public function testSetTeamNameWithSpecialCharacters() {
+        $this->createMockTeam();
+        $this->core->getQueries()->expects($this->never())
+            ->method('updateTeamName');
+        $controller = new TeamController($this->core);
+        $_POST['team_name'] = 'TeamName#123&';
         $controller->setTeamName($this->config['gradeable_id']);
     }
 
@@ -124,6 +106,38 @@ class TeamControllerTester extends BaseUnitTest {
         }
 
         return $gradeable;
+    }
+
+    private function createMockTeam() {
+        $gradeable = $this->createMockGradeable();
+        $this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $details = [
+            'team_id' => 'test',
+            'registration_section' => 0,
+            'rotating_section' => -1,
+            'users' => [
+                [
+                    'state' => 1,
+                    'user_id' => 'test',
+                    'user_givenname' => 'User',
+                    'user_familyname' => 'One',
+                    'user_pronouns' => '',
+                    'display_pronouns' => false,
+                    'user_email' => 'user1@example.com',
+                    'user_email_secondary' => null,
+                    'user_email_secondary_notify' => false
+                ]
+            ],
+            'team_name' => null
+        ];
+        $team = new Team($this->core, $details);
+        $submitter = $this->createMockModel(Submitter::class);
+        $submitter->method('getTeam')->willReturn($team);
+        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
+        $graded_gradeable->method('getSubmitter')->willReturn($submitter);
+        $this->core->getQueries()->method('getGradedGradeable')
+            ->with($gradeable, $this->core->getUser()->getId(), $this->core->getUser()->getId())
+            ->willReturn($graded_gradeable);
     }
 
     /** @dataProvider provideTestCleanInviteId */

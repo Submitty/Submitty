@@ -18,7 +18,7 @@
         <thead>
             <tr>
                 <th>
-                    Semester
+                    Term
                 </th>
                 <th>
                     Course
@@ -65,7 +65,7 @@
         <thead>
             <tr>
                 <th>Machine</th>
-                <th>Semester</th>
+                <th>Term</th>
                 <th>Course</th>
                 <th>Gradeable Id</th>
                 <th>User Id</th>
@@ -78,7 +78,7 @@
                 {% for info in worker_info %}
                     <tr>
                         <td> {{machine}} </td>
-                        <td> {{info["semester"]}} </td>
+                        <td> {{info["term"]}} </td>
                         <td> {{info["course"]}} </td>
                         <td> {{info["gradeable_id"]}} </td>
                         <td> {{info["user_id"]}} </td>

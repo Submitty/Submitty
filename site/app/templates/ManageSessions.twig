@@ -1,0 +1,55 @@
+<div class="content">
+    <div class="sessions-container">
+        <form method='POST' action="manage_sessions/logout_all">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-danger" id="terminate-all-button" {{ user_sessions|length == 1 ? 'disabled' : '' }}>
+                Logout from all
+            </button>
+            <em>(Except current)</em>
+        </form>
+        <form method='POST' action='manage_sessions/update_single_session'>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            Enforce single session: <input type="checkbox" class="enforce-checkbox" name="single_session" onchange="this.form.submit()" {{ (secure_session) ? 'checked' : '' }}><br>
+            <em>Note: If this option is checked then only one session can be active at a time.</em>
+        </form>
+        <table class="table table-bordered" id="sessions-table">
+            <thead>
+                <tr>
+                    <th class="session-th">Login Timestamp (month/day/year)</th>
+                    <th class="session-th">Browser Name</th>
+                    <th class="session-th">Platform</th>
+                    <th class="session-th">Action</th>
+                </tr>
+            </thead>
+            {% for session in user_sessions %}
+                <tr {{ session.isCurrent(current_session_id) ? 'id="current-session-row"' : '' }}>
+                    {% if session.isCurrent(current_session_id) %}
+                        <div id="current-timestamp">
+                            <td>
+                            <button class="rounded-green">Current</button>
+                            {{ session.getSessionCreated ? (session.getSessionCreated | date('m/d/Y H:i:s T')) : '' }}
+                            </td>
+                        </div>
+                    {% else %}
+                        <td>{{ session.getSessionCreated ? (session.getSessionCreated | date('m/d/Y H:i:s T')) : '' }}</td>
+                    {% endif %}
+                    <td>{{ session.getBrowserName }} {{ session.getBrowserVersion }}</td>
+                    <td>{{ session.getPlatform }}</td>
+                    <td>
+                    {% if session.isCurrent(current_session_id) %}
+                        <form action="authentication/logout">
+                            <input type="submit" class="btn btn-danger" value="Logout">
+                        </form>
+                    {% else %}
+                        <form method='POST' action="manage_sessions/logout" class="other-session">
+                            <input type="hidden" name="session_id" value="{{ session.getSessionId }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <input type="submit" class="btn btn-danger" value="Logout">
+                        </form>
+                    {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>

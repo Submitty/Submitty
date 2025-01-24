@@ -28,6 +28,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => 'Test',
             'user_familyname' => 'Person',
             'user_pronouns' => '',
+            'display_pronouns' => false,
             'user_email' => null,
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
@@ -41,6 +42,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
     /**
      * @dataProvider userDataProvider
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testReadFileSite($user_details): void {
         $this->getFunctionMock('app\controllers', 'header')

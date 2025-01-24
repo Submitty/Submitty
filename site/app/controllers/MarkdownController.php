@@ -8,17 +8,17 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MarkdownController extends AbstractController {
     /**
-     * @Route("/markdown", methods={"POST"})
      * @return WebResponse
      */
+    #[Route("/markdown", methods: ["POST"])]
     public function displayMarkdown() {
         return new WebResponse(MarkdownView::class, 'renderMarkdown', $_POST['content']);
     }
 
     /**
-     * @Route("/markdown/area", methods={"POST"})
      * @return WebResponse
      */
+    #[Route("/markdown/area", methods: ["POST"])]
     public function displayMarkdownArea() {
         return new WebResponse(MarkdownView::class, 'renderMarkdownArea', $_POST['data']);
     }

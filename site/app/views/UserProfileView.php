@@ -34,6 +34,7 @@ class UserProfileView extends AbstractView {
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Profile');
+        $this->output->addSelect2WidgetCSSAndJs(); /* Adding select2 CSS and JS widgets*/
 
         $user_utc_offset = DateUtils::getUTCOffset($user->getTimeZone());
         $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'
@@ -42,11 +43,18 @@ class UserProfileView extends AbstractView {
 
         $this->core->getOutput()->addInternalModuleJs('user-profile.js');
 
+        $curr_locale = $this->core->getConfig()->getLocale()->getName();
+        $supported_locales = $this->core->getSupportedLocales() ?? [];
+        $locale_names = array_map(fn(string $locale): string => mb_convert_case(\Locale::getDisplayName($locale, $curr_locale), MB_CASE_TITLE, 'UTF-8'), $supported_locales);
+        $supported_locales = array_combine($supported_locales, $locale_names);
+        $default_locale_name = mb_convert_case(\Locale::getDisplayName($this->core->getConfig()->getDefaultLocaleName(), $curr_locale), MB_CASE_TITLE, 'UTF-8');
+
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
             "user_given" => $autofill_preferred_name[0],
             "user_family" => $autofill_preferred_name[1],
             "user_pronouns" => $user->getPronouns(),
+            "display_pronouns" => $user->getDisplayPronouns(),
             "show_change_password" => $database_authentication,
             "csrf_token" => $csrf_token,
             "access_level" => Access::ACCESS_LEVELS[$user->getAccessLevel()],
@@ -54,7 +62,9 @@ class UserProfileView extends AbstractView {
             "change_password_url" => $this->output->buildUrl(['user_profile', 'change_password']),
             'available_time_zones' => implode(',', DateUtils::getOrderedTZWithUTCOffset()),
             'user_time_zone_with_offset' => $user_time_zone_with_offset,
-            'user_utc_offset' => $user_utc_offset
+            'user_utc_offset' => $user_utc_offset,
+            'supported_locales' => $supported_locales,
+            'default_locale_name' => $default_locale_name
         ]);
     }
 }

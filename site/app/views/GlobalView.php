@@ -2,8 +2,15 @@
 
 namespace app\views;
 
+use app\libraries\FileUtils;
+use app\entities\banner\BannerImage;
+
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only) {
+    /**
+     * @param array<array<string>> $audio
+     * @param array<BannerImage> $eventBannerImages
+     */
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -17,17 +24,16 @@ class GlobalView extends AbstractView {
             }
         }
 
-        $course_name = ucwords(strtolower($this->core->getFullCourseName()));
-        // We assume that if there is no page breadcrumb (only course), we are on gradeables
-        if ($course_name == ucwords(strtolower($page_name))) {
-            $page_name = "Gradeables";
-        }
-
         $page_title = "Submitty";
         if ($this->core->getUser() === null) {
             $page_title = "Login";
         }
         elseif ($this->core->getConfig()->isCourseLoaded()) {
+            $course_name = ucwords(strtolower($this->core->getFullCourseName()));
+            // We assume that if there is no page breadcrumb (only course), we are on gradeables
+            if ($course_name === ucwords(strtolower($page_name))) {
+                $page_name = "Gradeables";
+            }
             $page_title = $page_name . " - " . $course_name;
         }
         elseif (!empty($page_name) && $page_name !== "Submitty") {
@@ -35,8 +41,42 @@ class GlobalView extends AbstractView {
             $page_title = $page_name;
         }
 
+        $images_data_array = [];
+        $error_image_data = '_NONE_';
+
+
+        $currentDate = new \DateTime();
+        foreach ($eventBannerImages as $banner) {
+            $semiPath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName());
+            $pathName = FileUtils::joinPaths($semiPath, $banner->getName());
+            $extraPathName = FileUtils::joinPaths($semiPath, $banner->getExtraInfo());
+            if (!is_file($extraPathName)) {
+                $images_data_array[] = [
+                    "name" => $banner->getName(),
+                    "id" => $banner->getId(),
+                    "data" => base64_encode(file_get_contents($pathName)),
+                    "extra_info" => "",
+                    "link_name" => $banner->getLinkName()
+                ];
+                continue;
+            }
+
+            $extraFile = base64_encode(file_get_contents($extraPathName));
+
+            $images_data_array[] = [
+                "name" => $banner->getName(),
+                "id" => $banner->getId(),
+                "data" => base64_encode(file_get_contents($pathName)),
+                "extra_info" => $extraFile,
+                "link_name" => $banner->getLinkName()
+            ];
+        }
+
+        $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
+            "audio" => $audio,
             "css" => $css,
             "js" => $js,
             "page_title" => $page_title,
@@ -58,7 +98,11 @@ class GlobalView extends AbstractView {
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
             "content_only" => $content_only,
             "manifast_path" => $this->core->getOutput()->getManifastPath(),
-            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath()
+            "service_worker_path" => $this->core->getOutput()->getServiceWorkerPath(),
+            "imageDataArray" => $images_data_array,
+            "errorImageData" => $error_image_data,
+            "html_lang" => $html_lang,
+            "server_time" => time()
         ]);
     }
 

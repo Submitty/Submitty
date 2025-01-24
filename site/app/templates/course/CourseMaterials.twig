@@ -6,6 +6,12 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
+    
+    <div class="action-buttons" style="float: right; margin-bottom: 20px;">
+        <a onclick="markAllViewed()" id="deleteButton" class="btn btn-primary key_to_click">Mark All as Viewed</a>
+    </div>
+    
+
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         {# button to open all of the subfolders and cookie it#}            
         <a onclick="toggleFoldersOpen();" id="cm-toggle-folders-btn" class="btn btn-primary key_to_click" tabindex="0">Open/Close All Folders</a>
@@ -40,46 +46,46 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, base_course_material_path, directory_priorities, 
+        {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, "", base_course_material_path, directory_priorities, 
         material_list, date_format, folder_ids, seen, folder_visibilities, "root") }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
     {% for name, course_material in course_materials %}
         {% set sub_path = "#{current_path}/#{name}" %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
         {% else %}
-            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, date_format, folder_ids, seen) }}
+            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, date_format, folder_ids, seen) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, date_format, folder_ids, seen) %}
+{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, path, date_format, folder_ids, seen) %}
     {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
         <div class="file-container">
             <div class="file-viewer">
                 {% if course_material.isLink %}
                     <i class="fas fa-link" style="vertical-align: text-bottom;"></i>
-                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getUrlTitle }}</a>
+                    <a href="{{ course_material.getUrl }}" onclick="markViewed([{{ course_material.getId }}])" onauxclick="markViewed([{{ course_material.getId }}])">{{ course_material.getTitle }}</a>
                 {% else %}
+                    {% set displayName = course_material.getTitle|default(name) %}
                     <i class="fas fa-file" style="vertical-align: text-bottom;"></i>
                     {% set extension = name|split('.')|last|lower %}
-                    {% if '.' ~ extension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                        <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ name }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
+                    {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif'] %}
+                        <a class="popout-item" target="_blank" href="{{ links[course_material.getId] }}" aria-label="Pop up {{ displayName }} in a new window" tabindex="0" style="text-decoration: none;">{{ name }} <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
                     {% else %}
-                        {{ name }}
+                        {{ displayName }}
                     {% endif %}
-                    <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ name }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+                    <a class="key_to_click" onclick='downloadCourseMaterial("{{ course_material.getId }}")' aria-label="Download {{ displayName }}" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
                 {% endif %}
                 {% if user_group == 1 %}
+                    {% set title_name = course_material.getTitle %}
                     {% if course_material.isLink %}
-                        {% set url_title = course_material.getUrlTitle %}
                         {% set url_url = course_material.getUrl %}
                     {% else %}
-                        {% set url_title = "" %}
                         {% set url_url = "" %}
                     {% endif %}
                     <a
@@ -91,8 +97,9 @@
                         data-sections={{course_material.getSections|map(s => s.getSectionId)|json_encode|raw}}
                         data-hidden-state="{{course_material.isHiddenFromStudents}}"
                         data-release-time="{{ course_material.getReleaseDate|date(date_format) }}"
-                        data-is-link="{{ course_material.isLink }}" data-link-title="{{ url_title }}"
+                        data-is-link="{{ course_material.isLink }}" data-title="{{ title_name }}"
                         data-link-url="{{ url_url }}"
+                        data-path = "{{ path }}"
                     >
                         <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>
                     </a>
@@ -155,9 +162,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
     {% if indent == -1 %}
-        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path, directory_priorities,
+        {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path, directory_priorities,
         material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
@@ -177,7 +184,7 @@
                 {% endif %}
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
-                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, folder_path,
+                {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path,
                 directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
             </div>
         </div>
@@ -201,7 +208,7 @@
             const warningIds = {"hide-materials-checkbox": "upload-form", "hide-materials-checkbox-edit": "edit-form", "hide-folder-materials-checkbox-edit": "edit-folder-form"};
             var callerId = clicked.target ? clicked.target.id : clicked; //can be an event or id itself
             var caller = $('#'+callerId);
-            var warningMessage = $('#'+callerId+' ~ #'+warningIds[callerId]+'-hide-warning');
+            var warningMessage = $('#'+warningIds[callerId]+'-hide-warning');
             if (caller.hasClass('partial-checkbox')) {
                 caller.removeClass('partial-checkbox');
                 caller.siblings()[0].remove();
@@ -211,10 +218,10 @@
                 caller.prop('checked', true);
             }
             if(caller.is(':checked') && warningMessage.length === 0) {
-                var callerParent = caller.parent().get(0);
-                callerParent.insertAdjacentHTML(
-                    'beforeend',
-                    '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width">\nWarning:
+                var callerParentNext = caller.parent().next().get(0);
+                callerParentNext.insertAdjacentHTML(
+                    'afterend',
+                    '<span id="'+warningIds[callerId]+`-hide-warning" class="red-message full-width mt-0">\nWarning:
                     Students can view the hidden course material by guessing the corresponding
                     course material ID (a simple number). It is recommended to instead use the release date feature
                     if it is necessary to prevent students from accessing course materials.\n</span>`

@@ -38,7 +38,9 @@
         From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
-    <br />
+    <p>
+        The 'default section' is assigned to students who have self-registered for this course.
+    </p>
     <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
@@ -51,6 +53,9 @@
                             <th>Section</th>
                             <th>Course ID</th>
                             <th>Count</th>
+                            {% if is_self_register %}
+                                <th>Default Section</td>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -62,12 +67,32 @@
                                 <td>Section {{ section['sections_registration_id'] }} </td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                                {% if is_self_register %}
+                                    <td>
+                                        <input 
+                                            type="radio" 
+                                            name="default_section" 
+                                            value="{{ section['sections_registration_id'] }}" 
+                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                        />
+                                    </td>
+                                {% endif %}
                             </tr>
                             {% else %}
                             <tr>
                                 <td>Section {{ section['sections_registration_id'] }}</td>
                                 <td> {{ section['course_section_id'] }} </td>
                                 <td>0</td>
+                                {% if is_self_register %}
+                                    <td>
+                                        <input 
+                                            type="radio" 
+                                            name="default_section" 
+                                            value="{{ section['sections_registration_id'] }}" 
+                                            {{ section['sections_registration_id'] == default_section ? 'checked' : '' }}
+                                        />
+                                    </td>
+                                {% endif %}
                             </tr>
                             {% endif %}
                             {% endif %}
@@ -77,6 +102,9 @@
                             <td>Section NULL</td>
                             <td>NULL</td>
                             <td>{{ reg_sections_count['NULL'] }}</td>
+                            {% if is_self_register %}
+                                <td></td>
+                            {% endif %}
                         </tr>
                         {% else %}
                         <tr>
@@ -97,8 +125,9 @@
 							<span class="option-title">Add Registration Section</span>
               <br>
 							<span class="option-alt">
-								Enter a registration section which is not already a registration section.
-							</span>
+                            <strong>Format:</strong> Alphanumeric (a-z, A-Z, 0-9), underscores, hyphens, with no space and maximum 20 characters.<br>
+                            Enter a registration section which is not already a registration section.
+                        </span>
 						</label>
                     </div>
                 </div>

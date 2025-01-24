@@ -10,13 +10,24 @@ class UsersView extends AbstractView {
      * @param array  $sorted_students students sorted by registration sections
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
+     * @param array<string, bool> $can_rejoin Maps users' names in the null section
+     * to whether they can rejoin the course or not.
      * @param array  $download_info user information for downloading
      * @param array  $formatted_tzs array containing a formatted time zone string for each user
      * @param bool   $use_database
-     * @param string  $active_columns array of bools, columns that are visible (serialized as string)
+     * @param string  $active_student_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
-    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $formatted_tzs, $use_database = false, $active_columns = '1-1-1-1-1-1-1-1-1-1-1-1') {
+    public function listStudents(
+        array $sorted_students,
+        array $reg_sections,
+        array $rot_sections,
+        array $can_rejoin,
+        array $download_info,
+        array $formatted_tzs,
+        bool $use_database = false,
+        string $active_student_columns = '1-1-1-1-1-1-1-1-1-1-1-1'
+    ): string {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
@@ -32,6 +43,7 @@ class UsersView extends AbstractView {
             "formatted_tzs" => $formatted_tzs,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
+            "can_rejoin" => $can_rejoin,
             "use_database" => $use_database,
             'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
             "delete_user_url" => $this->core->buildCourseUrl(['delete_user']),
@@ -41,8 +53,8 @@ class UsersView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
-            "semester" => $this->core->getConfig()->getTerm(),
-            "active_columns" => explode('-', $active_columns)
+            "term" => $this->core->getConfig()->getTerm(),
+            "active_student_columns" => explode('-', $active_student_columns)
         ]);
     }
 
@@ -52,14 +64,16 @@ class UsersView extends AbstractView {
      * @param array  $rot_sections associative array representing rotating sections in the system
      * @param array  $download_info grader information for downloading
      * @param bool   $use_database
+     * @param string  $active_grader_columns array of bools, columns that are visible (serialized as string)
      * @return string
      */
-    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false) {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false, $active_grader_columns = '1-1-1-1-1-1-1') {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
+        $this->core->getOutput()->addInternalJs('manage-graders-columns.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -89,7 +103,8 @@ class UsersView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info),
             "course" => $this->core->getConfig()->getCourse(),
-            "semester" => $this->core->getConfig()->getTerm()
+            "term" => $this->core->getConfig()->getTerm(),
+            "active_grader_columns" => explode('-', $active_grader_columns)
         ]);
     }
 
@@ -110,7 +125,7 @@ class UsersView extends AbstractView {
         ]);
     }
 
-    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
+    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section, ?string $default_section, bool $is_self_register) {
         $this->core->getOutput()->addBreadcrumb('Manage Sections');
         $reg_sections_count = [];
         foreach ($students as $student) {
@@ -134,7 +149,9 @@ class UsersView extends AbstractView {
             "max_section" => $max_section,
             "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
             "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "default_section" => $default_section,
+            "is_self_register" => $is_self_register
         ]);
     }
 }

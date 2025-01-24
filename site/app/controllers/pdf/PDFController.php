@@ -44,9 +44,7 @@ class PDFController extends AbstractController {
         return $path;
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")]
     public function showStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path): void {
         $filename = html_entity_decode($filename);
         $anon_path = urldecode($anon_path);
@@ -79,9 +77,7 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput(['PDF'], 'showPDFEmbedded', $gradeable_id, $id, $filename, $path, $anon_path, null, $annotation_jsons, true, 1, true);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/download_pdf")]
     public function downloadStudentPDF(string $gradeable_id, string $filename, string $path, string $anon_path, string $student_id = ""): void {
         $filename = html_entity_decode($filename);
         $anon_path = urldecode($anon_path);
@@ -138,9 +134,7 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput($pdf_array, 'downloadPDFEmbedded', $gradeable_id, $id, $filename, $real_path, $annotation_jsons, $rerender_annotated_pdf, true, 1, true);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/{target_dir}", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/{target_dir}", methods: ["POST"])]
     public function savePDFAnnotation(string $gradeable_id, string $target_dir): JsonResponse {
         //Save the annotation layer to a folder.
         $annotation_info = $_POST['GENERAL_INFORMATION'];
@@ -195,9 +189,7 @@ class PDFController extends AbstractController {
         return JsonResponse::getSuccessResponse('Annotation saved successfully!');
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf", methods: ["POST"])]
     public function showGraderPDFEmbedded(string $gradeable_id) {
         // This is the embedded pdf annotator that we built.
         // User can be a team

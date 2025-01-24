@@ -25,8 +25,12 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getDisplayedFamilyName()  Returns the preferred family name if one exists and is not null or blank,
  *                                        otherwise return the legal family name field for the user.
  * @method string getPronouns() Returns the pronouns of the loaded user
+ * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
+ * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
+ * @method string getDisplayNameOrder()
+ * @method void setDisplayNameOrder()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -83,12 +87,15 @@ class User extends AbstractModel {
      */
     const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
 
-    /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    /** @prop
+     * @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @prop @var string The id of this user which should be a unique identifier */
+    /** @prop
+     * @var string The id of this user which should be a unique identifier */
     protected $id;
-    /** @prop @var string Alternate ID for a user, such as a campus assigned ID */
+    /** @prop
+     * @var string Alternate ID for a user, such as a campus assigned ID */
     protected $numeric_id = null;
     /**
      * @prop
@@ -96,43 +103,73 @@ class User extends AbstractModel {
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @prop @var string The given name of the user */
+    /** @prop
+     * @var string The given name of the user */
     protected $legal_given_name;
-    /** @prop @var string The preferred given name of the user */
+    /** @prop
+     * @var string The preferred given name of the user */
     protected $preferred_given_name = "";
-    /** @prop @var  string The given name to be displayed by the system (either given name or preferred given name) */
+    /** @prop
+     * @var  string The given name to be displayed by the system (either given name or preferred given name) */
     protected $displayed_given_name;
-    /** @prop @var string The family name of the user */
+    /** @prop
+     * @var string The family name of the user */
     protected $legal_family_name;
-    /** @prop @var string The preferred family name of the user */
+    /** @prop
+     * @var string The preferred family name of the user */
     protected $preferred_family_name = "";
-    /** @prop @var  string The family name to be displayed by the system (either family name or preferred family name) */
+    /** @prop
+     * @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
-    /** @prop @var string The pronouns of the user */
+    /** @prop
+     * @var string The pronouns of the user */
     protected $pronouns = "";
-    /** @prop @var int The display format for the last initial of the user */
+    /** @prop
+     * @var bool The display pronouns option of the user */
+    protected bool $display_pronouns = false;
+    /** @prop
+     * @var int The display format for the last initial of the user */
     protected $last_initial_format = 0;
-    /** @prop @var string The primary email of the user */
+    /** @prop
+     * @var string The order in which the user's given and family names are displayed */
+    protected $display_name_order = "GIVEN_F";
+    /** @prop
+     * @var string The primary email of the user */
     protected $email;
-    /** @prop @var string The secondary email of the user */
+    /** @prop
+     * @var string The secondary email of the user */
     protected $secondary_email;
-    /** @prop @var string Determines whether or not user chose to receive emails to secondary email */
+    /** @prop
+     * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
-    /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
+    /** @prop
+     * @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
-    /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
+    /** @prop
+     * @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
-    /** @prop @var string What is the registration section that the user was assigned to for the course */
+    /** @prop
+     * @var bool Should the user only have one active session at a time? */
+    protected bool $enforce_single_session;
+    /** @prop
+     * @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @prop @var string Unique id for course section */
+    /** @prop
+     * @var string Unique id for course section */
     protected $course_section_id = null;
-    /** @prop @var int What is the assigned rotating section for the user */
+    /** @prop
+     * @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
     /** @var string Appropriate time zone string from DateUtils::getAvailableTimeZones() */
     protected $time_zone;
-    /** @prop @var string What is the registration subsection that the user was assigned to for the course */
+    /** @prop
+     * @var string|null The name of the preferred locale */
+    protected $preferred_locale = null;
+    /** @prop
+     * @var string What is the registration subsection that the user was assigned to for the course */
     protected $registration_subsection = "";
-    /** @prop @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
+    /** @prop
+     * @var string What is the registration type of the user (graded, audit, withdrawn, staff) for the course */
     protected $registration_type;
 
     /**
@@ -159,13 +196,16 @@ class User extends AbstractModel {
      */
     protected $instructor_updated = false;
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $grading_registration_sections = [];
 
-    /** @prop @var array */
+    /** @prop
+     * @var array */
     protected $notification_settings = [];
 
-    /** @prop @var string The display_image_state string which can be used to instantiate a DisplayImage object */
+    /** @prop
+     * @var string The display_image_state string which can be used to instantiate a DisplayImage object */
     protected $display_image_state;
 
     /** @var array A cache of [gradeable id] => [anon id] */
@@ -200,6 +240,14 @@ class User extends AbstractModel {
 
         $this->setPronouns($details['user_pronouns']);
 
+        if (isset($details['display_name_order'])) {
+            $this->setDisplayNameOrder($details['display_name_order']);
+        }
+
+        if (isset($details['display_pronouns'])) {
+            $this->setDisplayPronouns($details['display_pronouns']);
+        }
+
         $this->setLegalFamilyName($details['user_familyname']);
         if (isset($details['user_preferred_familyname'])) {
             $this->setPreferredFamilyName($details['user_preferred_familyname']);
@@ -221,7 +269,7 @@ class User extends AbstractModel {
         if ($this->access_level > 3 || $this->access_level < 1) {
             $this->access_level = 3;
         }
-
+        $this->enforce_single_session = isset($details['enforce_single_session']) && $details['enforce_single_session'] === true;
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
@@ -241,6 +289,11 @@ class User extends AbstractModel {
         }
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
+
+        if (isset($details['user_preferred_locale'])) {
+            $this->preferred_locale = $details['user_preferred_locale'];
+            $this->core->getConfig()->setLocale($this->preferred_locale);
+        }
 
         if (isset($details['registration_subsection'])) {
             $this->setRegistrationSubsection($details['registration_subsection']);
@@ -263,6 +316,19 @@ class User extends AbstractModel {
         }
         else {
             return $ret;
+        }
+    }
+
+    /**
+     * set true or false to variable display_pronouns
+     * @param bool $new_display_pronouns new display_pronouns option
+     */
+    public function setDisplayPronouns(?bool $new_display_pronouns): void {
+        if ($new_display_pronouns === null) {
+            $this->display_pronouns = false;
+        }
+        else {
+            $this->display_pronouns = $new_display_pronouns;
         }
     }
 
@@ -320,6 +386,26 @@ class User extends AbstractModel {
      */
     public function getNiceFormatTimeZone(): string {
         return $this->time_zone === 'NOT_SET/NOT_SET' ? 'NOT SET' : $this->time_zone;
+    }
+
+
+    /**
+     * Get the user's preferred locale.
+     */
+    public function getPreferredLocale(): string|null {
+        return $this->preferred_locale;
+    }
+
+    /**
+     * Update the user's preferred locale.
+     *
+     * @param string|null $locale The desired new locale, must be one of Core::getSupportedLocales()
+     */
+    public function setPreferredLocale(string|null $locale): void {
+        if (is_null($locale) || in_array($locale, $this->core->getSupportedLocales())) {
+            $this->core->getQueries()->updateSubmittyUserPreferredLocale($this, $locale);
+            $this->preferred_locale = $locale;
+        }
     }
 
 
@@ -609,8 +695,9 @@ class User extends AbstractModel {
                 return preg_match("~^[1-4]{1}$~", $data) === 1;
             case 'registration_section':
                 //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
+                // AND between 0 and 20 chars.
                 //"NULL" registration section should be validated as a datatype, not as a string.
-                return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+                return preg_match("~^(?!^null$)[a-z0-9_\-]{1,20}$~i", $data) === 1 || is_null($data);
             case 'course_section_id':
                 //Course Section Id section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
                 return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);

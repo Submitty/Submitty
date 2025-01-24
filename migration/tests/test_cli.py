@@ -55,7 +55,7 @@ class TestCli(unittest.TestCase):
             config_path = tempfile.mkdtemp()
             with self.assertRaises(ValueError) as cm:
                 migrator.cli.parse_args(['-e', 'system', 'bad'], Path(config_path))
-            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback', 'dump')", str(cm.exception))
+            self.assertEqual("argument command: invalid choice: 'bad' (choose from 'create', 'status', 'migrate', 'rollback', 'load_triggers', 'dump')", str(cm.exception))
         finally:
             shutil.rmtree(config_path)
 
@@ -264,6 +264,24 @@ class TestCli(unittest.TestCase):
             expected.command = 'dump'
             expected.config_path = config_path.resolve()
             expected.environments = ['system']
+            expected.config = 'config_object'
+            self.assertEqual(expected, mock_method.call_args[0][0])
+        finally:
+            shutil.rmtree(str(config_path))
+
+    @patch('migrator.main.load_triggers')
+    def test_run_load_triggers(self, mock_method):
+        try:
+            config_path = Path(tempfile.mkdtemp()).resolve()
+            with patch.object(migrator.cli, 'Config', return_value='config_object') as mock_class:
+                migrator.cli.run(['-e', 'master', 'load_triggers'], config_path)
+            self.assertTrue(mock_class.called)
+            self.assertTrue(mock_method.called)
+            expected = argparse.Namespace()
+            expected.choose_course = None
+            expected.command = 'load_triggers'
+            expected.config_path = config_path.resolve()
+            expected.environments = ['master']
             expected.config = 'config_object'
             self.assertEqual(expected, mock_method.call_args[0][0])
         finally:

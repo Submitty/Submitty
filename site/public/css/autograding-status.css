@@ -38,7 +38,7 @@
 
 div.stack-trace-wrapper {
     list-style-type: none;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid var(--standard-medium-gray);
 }
 
 div.stack-trace-wrapper > .tab {

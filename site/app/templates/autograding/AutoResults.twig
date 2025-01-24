@@ -36,7 +36,7 @@
          >
 
             <div class="box-title-total">
-                {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
+                {{ Badge.render(nonhidden_earned, nonhidden_max, false, true) }}
                 <h4>Autograding Total {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
             </div>
         </div>
@@ -48,7 +48,7 @@
                 {% endif %}
             >
                 <div class="box-title-total">
-                    {{ Badge.render(hidden_earned, hidden_max, false) }}
+                    {{ Badge.render(hidden_earned, hidden_max, false, true) }}
                     <h4>Autograding Total <i>(With Hidden Points)</i></h4>
                 </div>
             </div>
@@ -116,7 +116,7 @@
                     {% set can_view = (not testcase.hidden or show_hidden) %}
                     {% set can_view_details = (not testcase.hidden or ((show_hidden_details or testcase.release_hidden_details) and show_hidden)) %}
 
-                    <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
+                    <div class="box results-box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
                         <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
 
                                 {% if can_view_details and testcase.has_extra_results %}
@@ -144,7 +144,7 @@
                             {# Badge #}
                             {% if testcase.has_points %}
                                 {% if not testcase.hidden or show_hidden %}
-                                    {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit) }}
+                                    {{ Badge.render(testcase.points, testcase.points_total, testcase.extra_credit, true) }}
                                 {% else %}
                                     <div class="badge">
                                         Hidden

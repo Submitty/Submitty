@@ -5,15 +5,15 @@
 	<div><span class='line_number'>&nbsp;4</span><span class='line_code'>adjective ==&gt; silly</span></div>
 	<div><span class='line_number'>&nbsp;5</span><span class='line_code'>noun ==&gt; mouse</span></div>
 	<div class='highlight' id='id_expected_0'>
-	<div class='bad'><span class='line_number'>&nbsp;6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char'>hungr</span><span class='line_code_inner'>y</span></span></div>
+	<div class='bad-expected'><span class='line_number'>&nbsp;6</span><span class='line_code'>adjective ==&gt; <span class='highlight-char-expected'>hungr</span><span class='line_code_inner'>y</span></span></div>
 	</div>
 	<div><span class='line_number'>&nbsp;7</span><span class='line_code'>noun ==&gt; computer</span></div>
 	<div><span class='line_number'>&nbsp;8</span><span class='line_code'>adjective ==&gt; cute</span></div>
 	<div><span class='line_number'>&nbsp;9</span><span class='line_code'>Look, Brad ...</span></div>
-	<div><span class='line_number'>10</span><span class='line_code'>  I can see you're really happy about this ...</span></div>
+	<div><span class='line_number'>10</span><span class='line_code'>  I can see you&#039;re really happy about this ...</span></div>
 	<div><span class='line_number'>11</span><span class='line_code'>  I honestly think you ought to eat calmly ...</span></div>
 	<div><span class='line_number'>12</span><span class='line_code'>  take a silly mouse and think things over ...</span></div>
-	<div><span class='line_number'>13</span><span class='line_code'>  I know I've made some very hungry decisions recently,</span></div>
+	<div><span class='line_number'>13</span><span class='line_code'>  I know I&#039;ve made some very hungry decisions recently,</span></div>
 	<div><span class='line_number'>14</span><span class='line_code'>  but I can give you my complete computer that my work will be backaaaaaaaaaaaaaa</span></div>
 	<div><span class='line_number'>15</span><span class='line_code'>  to cute.</span></div>
 	<div><span class='line_number'>16</span><span class='line_code'></span></div>

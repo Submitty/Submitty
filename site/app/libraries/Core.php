@@ -8,14 +8,18 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
-use Doctrine\DBAL\Logging\DebugStack;
+use app\entities\Session;
+use app\repositories\SessionRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Log\NullLogger;
+use BrowscapPHP\Browscap;
 
 /**
  * Class Core
@@ -38,14 +42,8 @@ class Core {
     /** @var EntityManager */
     private $submitty_entity_manager;
 
-    /** @var DebugStack */
-    private $submitty_debug_stack;
-
     /** @var EntityManager */
     private $course_entity_manager;
-
-    /** @var DebugStack */
-    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -62,8 +60,6 @@ class Core {
     /** @var User */
     private $user = null;
 
-    /** @var string */
-    private $user_id = null;
 
     /** @var Output */
     private $output = null;
@@ -175,25 +171,17 @@ class Core {
         $this->session_manager = $manager;
     }
 
-    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
+    private function createEntityManager(AbstractDatabase $database): EntityManager {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
-        $config = ORMSetup::createAnnotationMetadataConfiguration(
+        $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
             FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
             $cache
         );
 
-        if ($debug_stack) {
-            $config->setSQLLogger($debug_stack);
-        }
-
-        $conn = [
-            'driver' => 'pdo_pgsql',
-            'pdo' => $database->getConnection(),
-        ];
-        return EntityManager::create($conn, $config);
+        return new EntityManager($database->getConnection(), $config);
     }
 
     /**
@@ -212,11 +200,10 @@ class Core {
         $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
-        $this->submitty_db->connect();
+        $this->submitty_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -231,11 +218,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->submitty_db) {
             return [];
         }
-        $queries = $this->submitty_db->getPrintQueries();
-        foreach ($this->submitty_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->submitty_db->getPrintQueries();
     }
 
     public function loadCourseDatabase(): void {
@@ -243,11 +226,10 @@ class Core {
             return;
         }
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-        $this->course_db->connect();
+        $this->course_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
+        $this->course_entity_manager = $this->createEntityManager($this->course_db);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
@@ -266,11 +248,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->course_db) {
             return [];
         }
-        $queries = $this->course_db->getPrintQueries();
-        foreach ($this->course_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->course_db->getPrintQueries();
     }
 
     public function hasDBPerformanceWarning(): bool {
@@ -282,19 +260,7 @@ class Core {
             return true;
         }
 
-        $queries = [];
-        if ($this->course_debug_stack !== null) {
-            foreach ($this->course_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-        if ($this->submitty_debug_stack !== null) {
-            foreach ($this->submitty_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-
-        return count($queries) !== count(array_unique($queries));
+        return false;
     }
 
     private function logPerformanceWarning(): void {
@@ -310,8 +276,12 @@ class Core {
         }
 
         foreach ($ignore_list as $regex) {
-            $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
-            $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            if ($this->getConfig()->getTerm() !== null) {
+                $regex = str_replace("<term>", $this->getConfig()->getTerm(), $regex);
+            }
+            if ($this->getConfig()->getCourse() !== null) {
+                $regex = str_replace("<course>", $this->getConfig()->getCourse(), $regex);
+            }
             $regex = str_replace("<gradeable>", "[A-Za-z0-9\\-\\_]+", $regex);
             if (preg_match("#^" . $regex . "(\?.*)?$#", $_SERVER['REQUEST_URI']) === 1) {
                 return; // this route matches an ignore rule
@@ -320,7 +290,7 @@ class Core {
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+        Logger::debug("Excessive or duplicate queries observed: {$num_queries} queries executed.\nMethod: {$_SERVER['REQUEST_METHOD']}");
     }
 
     /**
@@ -418,7 +388,6 @@ class Core {
 
     public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
-        $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
         $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
@@ -481,6 +450,19 @@ class Core {
     }
 
     /**
+     * Get the session id of the current session otherwise return false
+     *
+     * @return string|bool
+     */
+    public function getCurrentSessionId() {
+        $session_id = $this->session_manager->getCurrentSessionId();
+        if ($session_id) {
+            return $session_id;
+        }
+        return false;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager, returning bool
      * on whether this was done or not
      *
@@ -532,9 +514,43 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $user_id = $this->authentication->getUserId();
+                // Get information about user's browser
+                try {
+                    $path = FileUtils::joinPaths(
+                        $this->getConfig()->getSubmittyInstallPath(),
+                        'site',
+                        'vendor',
+                        'browscap',
+                        'browscap-php',
+                        'resources'
+                    );
+                    $fs_adapter = new FilesystemAdapter("", 0, $path);
+                    $cache = new Psr16Cache($fs_adapter);
+                    $logger = new NullLogger();
+                    $bc = new Browscap($cache, $logger);
+                    $browser_info = $bc->getBrowser();
+                    $browser_info = [
+                        'browser' => $browser_info->browser,
+                        'version' => $browser_info->version,
+                        'platform' => $browser_info->platform,
+                    ];
+                }
+                catch (\Exception $e) {
+                    $browser_info = [
+                        'browser' => 'Unknown',
+                        'version' => '',
+                        'platform' => 'Unknown',
+                    ];
+                }
+                $new_session_id = $this->session_manager->newSession($user_id, $browser_info);
+                if ($this->database_queries->getSingleSessionSetting($user_id)) {
+                    /** @var SessionRepository $repo */
+                    $repo = $this->getSubmittyEntityManager()->getRepository(Session::class);
+                    $repo->removeUserSessionsExcept($user_id, $new_session_id);
+                }
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
-                    $this->session_manager->newSession($user_id),
+                    $new_session_id,
                     $user_id,
                     $persistent_cookie
                 );
@@ -752,6 +768,13 @@ class Core {
     }
 
     /**
+     * Gets the time for the given string in the config timezone
+     */
+    public function getDateTimeSpecific(string $time_string): \DateTime {
+        return new \DateTime($time_string, $this->getConfig()->getTimezone());
+    }
+
+    /**
      * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
      * assuming that we
      *
@@ -832,7 +855,7 @@ class Core {
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
-                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                    if ($this->session_manager->checkAndUpdateSession()) {
                         $new_token = TokenManager::generateSessionToken(
                             $session_id,
                             $token->claims()->get('sub')
@@ -876,5 +899,38 @@ class Core {
         }
 
         return $logged_in;
+    }
+
+    /**
+     * Get the lang data for the current locale.
+     *
+     * @return array<mixed>|null
+     */
+    public function getLang(): array|null {
+        if ($this->config !== null) {
+            return $this->config->getLocale()->getLangData();
+        }
+        return null;
+    }
+
+    /**
+     * Gets a list of supported locales.
+     *
+     * @return array<string>|null
+     */
+    public function getSupportedLocales() {
+        if ($this->config !== null) {
+            FileUtils::getDirContents(FileUtils::joinPaths($this->config->getSubmittyInstallPath(), "site", "cache", "lang"), $files);
+            if (empty($files)) {
+                return [];
+            }
+            $files = array_filter($files, fn(string $file): bool => str_ends_with($file, ".php"));
+            $files = array_map(function (string $file) {
+                $parts = explode(DIRECTORY_SEPARATOR, $file);
+                return substr(end($parts), 0, -4);
+            }, $files);
+            return $files;
+        }
+        return null;
     }
 }

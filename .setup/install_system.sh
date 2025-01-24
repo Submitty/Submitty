@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
 LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -51,6 +52,7 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+DAEMONPHPCGI_GROUP=submitty_daemonphpcgi
 
 # VERSIONS
 source ${CURRENT_DIR}/bin/versions.sh
@@ -64,31 +66,31 @@ export UTM=0
 export VAGRANT=0
 export NO_SUBMISSIONS=0
 export WORKER=0
-export WORKER_PAIR=0
 
 # Read through the flags passed to the script reading them in and setting
 # appropriate bash variables, breaking out of this once we hit something we
 # don't recognize as a flag
+echo ""
+echo "Running setup:"
 while :; do
     case $1 in
         --utm)
             export UTM=1
             export DEV_VM=1
+            echo "utm"
             ;;
         --vagrant)
             export VAGRANT=1
             export DEV_VM=1
+            echo "vagrant"
             ;;
         --worker)
             export WORKER=1
+            echo "worker"
             ;;
         --no_submissions)
             export NO_SUBMISSIONS=1
-            echo 'no_submissions'
-            ;;
-        --worker-pair)
-            export WORKER_PAIR=1
-            echo "worker_pair"
+            echo "no_submissions"
             ;;
         *) # No more options, so break out of the loop.
             break
@@ -116,6 +118,8 @@ if [ ${DEV_VM} == 1 ] && [ ${WORKER} == 0 ]; then
 
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
+    chmod 755 -R /usr/local/submitty/GIT_CHECKOUT
+
     # Set up some convinence stuff for the root user on ssh
 
     INSTALL_HELP=$(cat <<'EOF'
@@ -125,18 +129,21 @@ The vagrant box comes with some handy aliases:
     submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
     submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
     submitty_code_watcher        - runs .setup/bin/code_watcher.py
+    submitty_test                - runs .setup/SUBMITTY_TEST.sh
     submitty_restart_autograding - restart systemctl for autograding
     submitty_restart_services    - restarts all Submitty related systemctl
     lichen_install               - runs Lichen/install_lichen.sh
-    migrator                     - run the migrator tool
+    migrator                     - runs the migrator tool
     vagrant_info                 - print out the MotD again
     ntp_sync                     - Re-syncs NTP in case of time drift
+    recreate_sample_courses      - runs .setup/bin/recreate_sample_courses.sh
 
 Saved variables:
-    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
     SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
     DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
-    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+    CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP,
+    DAEMONPHPCGI_GROUP
 EOF
 )
 
@@ -144,6 +151,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export RAINBOWGRADES_REPOSITORY=${RAINBOWGRADES_REPOSITORY}
 export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
@@ -155,6 +163,7 @@ export CGI_USER=${CGI_USER}
 export CGI_GROUP=${CGI_GROUP}
 export DAEMONPHP_GROUP=${DAEMONPHP_GROUP}
 export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
+export DAEMONPHPCGI_GROUP=${DAEMONPHPCGI_GROUP}
 alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
@@ -168,9 +177,11 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
+alias recreate_sample_courses='sudo bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/recreate_sample_courses.sh'
 systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_daemon_jobs_handler
@@ -196,6 +207,10 @@ else
 
 fi
 
+INSTALL_SYS_DIR=$(mktemp -d)
+chmod 777 "${INSTALL_SYS_DIR}"
+pushd "${INSTALL_SYS_DIR}" > /dev/null
+
 COURSE_BUILDERS_GROUP=submitty_course_builders
 DB_USER=submitty_dbuser
 DATABASE_PASSWORD=submitty_dbuser
@@ -209,15 +224,6 @@ DB_COURSE_PASSWORD=submitty_dbuser
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
 bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
-
-
-#################################################################
-# Node Package Setup
-####################
-# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
-# (this happens if we re-run install_system on an existing installation).
-# So let's manually set the umask just for this call.
-(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -258,6 +264,12 @@ else
     echo "${DAEMONCGI_GROUP} already exists"
 fi
 
+if ! cut -d ':' -f 1 /etc/group | grep -q ${DAEMONPHPCGI_GROUP} ; then
+    addgroup ${DAEMONPHPCGI_GROUP}
+else
+    echo "${DAEMONPHPCGI_GROUP} already exists"
+fi
+
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
 # managers to write website customization files and run course
 # management scripts.
@@ -289,14 +301,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}" -s /bin/bash
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}" -s /bin/bash
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
+    usermod -a -G "${DAEMONPHPCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
     #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
@@ -314,21 +328,35 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
-    if [ ${WORKER_PAIR} == 1 ]; then
+    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}" -s /bin/bash
+    if [ ${WORKER} == 0 ] && [ ${DEV_VM} == 1 ] && [ -f ${SUBMITTY_REPOSITORY}/.vagrant/workers.json ]; then
         echo -e "attempting to create ssh key for submitty_daemon..."
         su submitty_daemon -c "cd ~/"
         su submitty_daemon -c "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"
         su submitty_daemon -c "echo 'successfully created ssh key'"
-        su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@192.168.56.21"
+
+        while read -r IP
+        do
+            su submitty_daemon -c "sshpass -p 'submitty' ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no submitty@${IP}"
+        done <<< "$(jq -r ".[].ip_addr" "${SUBMITTY_REPOSITORY}/.vagrant/workers.json")"
+        echo "DONE"
     fi
 fi
 
-# The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
+# The VCS directories (/var/local/submitty/vcs) are owned by root:$DAEMONCGI_GROUP
 usermod -a -G "${DAEMONPHP_GROUP}" "${DAEMON_USER}"
 usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
+usermod -a -G "${DAEMONPHPCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
+
+# Add RainbowGrades repo as safe directory for GIT
+gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
+gitconfig_content="[safe]
+    directory = ${RAINBOWGRADES_REPOSITORY}
+    directory = *"
+echo "$gitconfig_content" > "$gitconfig_path"
+sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
 
 usermod -a -G docker "${DAEMON_USER}"
 
@@ -388,10 +416,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
@@ -464,7 +499,7 @@ if [ ${WORKER} == 0 ]; then
         # a2ensite git
 
         sed -i '25s/^/\#/' /etc/pam.d/common-password
-        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass sha512/pam_unix.so obscure minlen=1 sha512/' /etc/pam.d/common-password
+        sed -i '26s/pam_unix.so obscure use_authtok try_first_pass yescrypt/pam_unix.so obscure minlen=1 yescrypt/' /etc/pam.d/common-password
 
         # Create folder and give permissions to PHP user for xdebug profiling
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
@@ -476,12 +511,12 @@ if [ ${WORKER} == 0 ]; then
         # In case you reprovision without wiping the drive, don't paste this twice
         if [ -z $(grep 'xdebug\.remote_enable' /etc/php/${PHP_VERSION}/mods-available/xdebug.ini) ]
         then
-            # Tell it to send requests to our host on port 9000 (PhpStorm default)
+            # Tell it to send requests to our host on port 9003 (PhpStorm default)
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-[xdebug]
-xdebug.remote_enable=1
-xdebug.remote_port=9000
-xdebug.remote_connect_back=1
+xdebug.start_with_request=trigger
+xdebug.client_port=9003
+xdebug.discover_client_host=true
+xdebug.mode=debug
 EOF
         fi
 
@@ -489,9 +524,9 @@ EOF
         then
             # Allow remote profiling and upload outputs to the shared folder
             cat << EOF >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
-xdebug.profiler_enable_trigger=1
-xdebug.profiler_output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
+xdebug.output_dir=${SUBMITTY_REPOSITORY}/.vagrant/Ubuntu/profiler
 EOF
+            sed -i -e "s/xdebug.mode=debug/xdebug.mode=debug,profile/g" /etc/php/${PHP_VERSION}/mods-available/xdebug.ini
         fi
     fi
 
@@ -532,7 +567,7 @@ EOF
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong
     # with our version of PHP.
-    DISABLED_FUNCTIONS="popen,pclose,proc_open,chmod,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,"
+    DISABLED_FUNCTIONS="popen,pclose,proc_open,php_real_logo_guid,php_egg_logo_guid,php_ini_scanned_files,"
     DISABLED_FUNCTIONS+="php_ini_loaded_file,readlink,symlink,link,set_file_buffer,proc_close,proc_terminate,"
     DISABLED_FUNCTIONS+="proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,putenv,get_current_user,"
     DISABLED_FUNCTIONS+="magic_quotes_runtime,set_magic_quotes_runtime,import_request_variables,ini_alter,"
@@ -669,6 +704,7 @@ ${DATABASE_PASSWORD}
 ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
+en_US
 ${SUBMISSION_URL}
 
 
@@ -683,7 +719,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT} --worker-pair ${WORKER_PAIR}
+" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
         sed -i -e 's/"url": ""/"url": "ldap:\/\/localhost"/g' ${SUBMITTY_INSTALL_DIR}/config/authentication.json
@@ -846,6 +882,9 @@ if [ ${WORKER} == 0 ]; then
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 
 fi
+
+popd > /dev/null
+rm -rf "${INSTALL_SYS_DIR}"
 
 
 echo "

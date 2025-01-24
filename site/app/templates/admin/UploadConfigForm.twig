@@ -25,17 +25,15 @@
 
     <br><br>
 
-    <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ upload_url }}" id="upload_form" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <label>Upload Config: <input type="file" name="config_upload" /><br /></label>
-        <input type="submit" value="Upload" /><br />
-        <button type='reset'>Cancel Upload</button>
+        <label>Upload Config: <input type="file" id="file_upload" name="config_upload" /><br /></label>
     </form>
     <br>
 
     <br>
     {% if gradeable_id|length %}
-        <a class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
+        <a data-testid="back-to-autograding" class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
     {% endif %}
 </div>
 
@@ -45,35 +43,6 @@
     <br>
     <b>located in {{ target_dir }}</b>
     <br>&nbsp;<br>
-    <script>
-        function openRenamePopup(file_path){
-            let url = buildCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
-            $('#alert_in_use').html('');
-            $('#gradeables_using_config').empty();
-            $.ajax({
-                url : url,
-                success(data){
-                    var gradeable_ids = JSON.parse(data)['data'];
-                    if(gradeable_ids.length > 0){
-                        $('#alert_in_use').html("Note: Currently these gradeables are using this config, rename at your own risk");
-                        for(var i = 0; i < gradeable_ids.length; i++){
-                            $('#gradeables_using_config').append("<li>" + gradeable_ids[i] + "</li>");
-                        }
-                    }
-                }
-            });
-            $('#rename_config_popup').css('display', 'block');
-            $('#curr_config_name').val(file_path);
-        }
-
-        function openDeletePopup(file_path) {
-            let message = $('[data-name="delete-config-message"]');
-            message.html('');
-            message.append('<b>'+file_path+'</b>');
-            $('[name="config_path"]').val(file_path);
-            $('#delete_config_popup').css("display", "block");
-        }
-    </script>
     <ul style="list-style-type: none;">
         {{ _self.display_files(all_files, 1, false, inuse_config, display_url) }}
     </ul>

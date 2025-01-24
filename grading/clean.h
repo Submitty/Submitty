@@ -20,6 +20,7 @@
 
 typedef std::vector<std::vector<std::string> > vectorOfWords;
 typedef std::vector<std::string> vectorOfLines;
+typedef std::vector<std::vector<int>> vectorOfSpaces;
 
 
 /* METHOD: clean
@@ -88,5 +89,45 @@ std::string wordsToString(vectorOfWords text);
  * is a line of text
  */
 vectorOfLines wordsToLines(vectorOfWords text);
+
+/* METHOD: stringToWordsAndSpaceList
+ * ARGS: text: string
+ * ARGS: spaceVector: Reference to a vectorOfSpaces
+ * RETURN: vectorOfWords
+ * PURPOSE: converts a string into a vector whose length is number of lines in the string
+ * and each element in the vector is a vector containing the words  in each line.
+ * Sets the spaceVector to a vector containing number of spaces between two words in line
+ */
+void stringToWordsAndSpaceList(std::string const &input, vectorOfWords &contents, vectorOfSpaces &spaceVector);
+
+/* METHOD: recreateStudentFile
+ * ARGS: studentFileWords: updated student words vector
+ * ARGS: studentSpaces: Spaces vector of original student submitted file
+ * RETURN: string
+ * PURPOSE: creates a string from vectorOfWords given spaces between words
+ */
+std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces studentSpaces);
+
+/* METHOD: isNumber
+ * ARGS: str: string
+ * RETURN: bool
+ * PURPOSE: check if a string is a number
+ */
+bool isNumber(const std::string &str);
+
+/* METHOD: isolateAlphanumAndNumberPunctuation
+ * ARGS: str: string
+ * RETURN: string
+ * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ */
+std::string isolateAlphanumAndNumberPunctuation(const std::string &str);
+
+/* METHOD: whiteSpaceListsEqual
+ * ARGS: expectedSpaces: vector of space count
+ * ARGS: studentSpaces: vector of space count
+ * RETURN: bool
+ * PURPOSE: check if two space space vectors are equal
+ */
+bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces);
 
 #endif //__CLEAN__

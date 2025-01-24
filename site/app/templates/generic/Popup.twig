@@ -1,17 +1,18 @@
 {# This is the control shown/hidden #}
-<div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;" onclick="{{ block('close_click_action') }}">
+<div class="popup-form" id="{% block popup_id %}popup-form{% endblock %}" style="display: none;">
     {% block form %}
         {# This lets us center the window #}
-        <div class="popup-box">
+        <div class="popup-box" onclick="{{ block('close_click_action') }}">
             {# Actual displayed window #}
-            <div class="popup-window" onclick="event.stopPropagation()">
+            <div class="popup-window" onclick="event.stopPropagation()" data-testid="popup-window">
                 {% block title_panel %}
                     <div class="form-title">
                         {% block title_tag %}
                             <h1>{% block title %}Untitled Form{% endblock %}</h1>
                             <button
+                                data-testid="close-button"
                                 onclick="{{ block('close_click_action') }}"
-                                class="btn btn-default close-button key_to_click"
+                                class="btn btn-default close-button"
                                 tabindex="-1" type="button"
                             >Close</button>
                         {% endblock %}
@@ -26,12 +27,12 @@
                                     {% block buttons %}
                                         {% block close_button %}
                                             <a
-                                              {% block close_button_id %}{% endblock %}
-                                              onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}'){% endblock %}"
-                                              class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
-                                              tabindex="0"
+                                                {% block close_button_id %}{% endblock %}
+                                                onclick="{% block close_click_action %}closePopup('{{ block('popup_id') }}');{% endblock %}"
+                                                class="btn {% block close_button_classes %}btn-default{% endblock %} close-button key_to_click"
+                                                tabindex="0"
                                             >
-                                              {% block close_button_text %}Close{% endblock %}
+                                            {% block close_button_text %}Close{% endblock %}
                                             </a>
                                             <script>
                                               //Detects if the escape key is pressed and if the popup is open. If so, close the popup
@@ -54,11 +55,3 @@
         </div>
     {% endblock %}
 </div>
-
-<script>
-    $(".popup-window").draggable();
-
-    function closePopup(id) {
-        $('#' + id).hide();
-    }
-</script>

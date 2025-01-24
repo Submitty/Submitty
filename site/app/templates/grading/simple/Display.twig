@@ -16,18 +16,11 @@
     <div class="column-wrapper" style="margin: 1em 0;">
         <div id="checkpoint-fixed" class="column-wrapper">
             {% include "grading/simple/StudentSearch.twig" %}
-            {% if action == 'lab' %}
-                <div>
-                    <p class="not-sticky">Undo/Redo Changes</p>
-                    <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
-                    <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
-                </div>
-            {% endif %}
         </div>
 
         <div>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+            <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
 
@@ -184,7 +177,7 @@
                 {# Section header #}
                 <tbody>
                     <tr class="info">
-                        <td colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
+                        <td data-testid="gradeable-sections" colspan="6" style="text-align: left; z-index: 1; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -228,7 +221,7 @@
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
     <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
-            style='background: #7bd0f7;'
+            class="highlighted-row"
         {% endif %}
     >
         <td class="">{{ index + 1 }}</td>

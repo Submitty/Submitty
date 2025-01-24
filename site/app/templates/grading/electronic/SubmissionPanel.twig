@@ -1,8 +1,15 @@
-<div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}">
+<div id="submission_browser"  class="rubric_panel" data-gradeable-id="{{gradeable_id}}" data-anon-submitter-id="{{anon_submitter_id}}" data-testid="submission-browser">
     <div >
         <div id="directory_view">
             <span style="line-height: 40px;">
+                {% if not student_grader %}
                 <span class="grading_label">Submissions and Results Browser</span>
+                {% endif %}
+                
+                {% if student_grader %}
+                <span class="grading_label">Submissions Browser</span>
+                {% endif %}
+
                 <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
                 {# check if there are vcs files, if yes display the toggle button, else don't display it #}
@@ -10,7 +17,9 @@
                     <button class="btn btn-default expand-button" data-linked-type="checkout" data-clicked-state="wasntClicked"  id="togglCheckoutButton">Open/Close Checkout</button>
                 {% endif %}
 
-                <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% if not student_grader %}
+                    <button class="btn btn-default expand-button" data-linked-type="results" data-clicked-state="wasntClicked"  id="toggleResultButton">Open/Close Results</button>
+                {% endif %}
 
                 <script>
                     $(document).ready(function(){
@@ -27,20 +36,24 @@
                         $('#' + currentCodeStyleRadio).prop('checked', true);
                     });
                 </script>
-                <button class="btn btn-default key_to_click" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)">Download Zip File</button>
+
+                <button class="btn btn-default" tabindex="0" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ anon_submitter_id }}', {{ active_version }}, null, true)" data-testid="download-zip-file">Download Zip File</button>
 
                 <span style="padding-right: 10px; white-space: nowrap;"> <input aria-label="Auto open" type="checkbox" id="autoscroll_id" onclick="updateCookies();" class="key_to_click" tabindex="0"> <label for="autoscroll_id">Auto open</label> </span>
             </span>
             <br />
             {# Files #}
             <div class="inner-container open" id="file-container" style="padding-top: 10px;">
-                {{ _self.display_files(submissions, "s", 0, "submissions") }}
+                {{ _self.display_files(submissions, "s", 0, "submissions", blind_grader) }}
                 {% if has_vcs_files %} {# if there are checkout files, then display folder, otherwise don't #}
                     {{ _self.display_files(checkout, "c", 0, "checkout") }}
                 {% endif %}
                 {% if not student_grader %}
-                    {{ _self.display_files(results, "r", 0, "results") }}
+                    {{ _self.display_files(results, "r", 0, "results", blind_grader) }}
                     {{ _self.display_files(results_public, "rp", 0, "results_public") }}
+                {% endif %}
+                {% if not anon_mode and not blind_grader %}
+                    {{ _self.display_file("user_assignment_settings.json", user_assignment_settings_path, "u", 0, "user_assignment_settings.json", blind_grader) }}
                 {% endif %}
             </div>
             {# /Files #}
@@ -58,19 +71,20 @@
     </div>
 </div>
 
-{% macro display_files(files, id, indent, title) %}
+{% macro display_files(files, id, indent, title, blind_grader) %}
     {# Files on top #}
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title) }}
+        {{ _self.display_file(dir, path, id ~ "f" ~ loop.index, indent, title, blind_grader) }}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files|filter((path,dir) => path is iterable) %}
-        {{ _self.display_dir(dir, path, id ~ "d" ~ loop.index, indent, title) }}
+        {{ _self.display_dir(dir, path, id ~ "d" ~ loop.index, indent, title, blind_grader) }}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(dir, path, id, indent, title) %}
+{% macro display_file(dir, path, id, indent, title, blind_grader) %}
+    {% if not (blind_grader and (dir == 'queue_file.json' or dir == '.user_assignment_access.json')) %}
     <div>
         <div class="file-viewer">
             <a class='openAllFile{{ title }} openable-element-{{ title }} key_to_click' file-url="{{ path|url_encode }}" onclick='openFrame("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}", "{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
@@ -78,16 +92,20 @@
                 {{ dir }}</a> &nbsp;
             <a id = 'open_file_{{ dir|url_encode }}' onclick='popOutSubmittedFile("{{ dir|url_encode }}", "{{ path|url_encode }}")' aria-label="Pop up the file in a new window" class="key_to_click" tabindex="0"><i class="fas fa-window-restore" title="Pop up the file in a new window"></i></a>
             <a onclick='viewFileFullPanel("{{ dir|url_encode|e('js') }}", "{{ path|url_encode|e('js') }}")' aria-label="Show file in full panel" class="key_to_click" tabindex="0"><i class="fas fa-share" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ path|url_encode }}", "{{ title }}")' aria-label="Download the file" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path|url_encode }}", "{{ dir == "user_assignment_settings.json" ? "submission_versions" : title }}")' aria-label="Download the file" class="key_to_click" tabindex="0">
+    <i class="fas fa-download" title="Download the file"></i>
+</a>
+
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
+    {% endif %}
 {% endmacro %}
 
-{% macro display_dir(dir, contents, id, indent, title) %}
+{% macro display_dir(dir, contents, id, indent, title, blind_grader) %}
     <div>
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
+            <a data-testid="folders" class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }} key_to_click' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();' data-viewer_id="{{ id }}">
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>
@@ -96,7 +114,7 @@
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
 
             {# Recurse #}
-            {{ _self.display_files(contents, id, indent + 1, title) }}
+            {{ _self.display_files(contents, id, indent + 1, title, blind_grader) }}
 
         </div>
     </div>

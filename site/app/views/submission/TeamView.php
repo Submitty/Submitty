@@ -4,6 +4,7 @@ namespace app\views\submission;
 
 use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
+use app\models\Team;
 
 class TeamView extends AbstractView {
     /**
@@ -28,6 +29,7 @@ class TeamView extends AbstractView {
             "seeking_instructions" => $this->core->getConfig()->getSeekMessageInstructions(),
             "team" => $team,
             "team_name" => $team == null ? null : $team->getTeamName(),
+            "team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
             "change_team_name_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'setname']),
             "user" => $this->core->getUser(),
             "lock" => $lock,

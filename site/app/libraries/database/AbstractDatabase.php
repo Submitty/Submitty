@@ -3,12 +3,20 @@
 namespace app\libraries\database;
 
 use app\exceptions\DatabaseException;
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Exception as DBALException;
+use Doctrine\DBAL\Logging\Middleware;
 
+/**
+ * @psalm-import-type Params from DriverManager
+ */
 abstract class AbstractDatabase {
     /**
-     * @var \PDO|null
+     * @var Connection|null
      */
-    protected $link = null;
+    protected $conn = null;
 
     /**
      * @var array
@@ -17,15 +25,7 @@ abstract class AbstractDatabase {
 
     protected $row_count = 0;
 
-    /**
-     * @var int
-     */
-    protected $query_count = 0;
-
-    /**
-     * @var array
-     */
-    protected $all_queries = [];
+    protected ?QueryLogger $query_logger = null;
 
     /**
      * @var bool
@@ -34,15 +34,6 @@ abstract class AbstractDatabase {
 
     protected $username = null;
     protected $password = null;
-
-    /**
-     * Should we emulate prepares within PDO. Generally we want to leave this to false, but for some
-     * drivers (such as PDO_MySQL, it may be beneficial for performance to turn this to true
-     * @var bool
-     */
-    protected $emulate_prepares = false;
-
-    protected $columns = [];
 
     /**
      * Database constructor. This function (overridden in all children) sets our
@@ -62,13 +53,16 @@ abstract class AbstractDatabase {
         }
     }
 
-    abstract public function getDSN();
+    /**
+     * @psalm-return Params
+     */
+    abstract public function getConnectionDetails(): array;
 
-    public function getConnection(): \PDO {
-        if ($this->link === null) {
+    public function getConnection(): Connection {
+        if ($this->conn === null) {
             throw new DatabaseException("Database not yet connected");
         }
-        return $this->link;
+        return $this->conn;
     }
 
     /**
@@ -86,68 +80,63 @@ abstract class AbstractDatabase {
     abstract public function fromPHPToDatabaseArray($array);
 
     /**
-     * Connects to a database through the PDO extension (@link http://php.net/manual/en/book.pdo.php).
-     * We wrap the potential exception that would get thrown by the PDO constructor so that we can
+     * Connects to a database through the DBAL library.
+     * We wrap the potential exception that would get thrown by the DBAL constructor so that we can
      * bubble up the message, without exposing any of the parameters used by the connect function
      * as we don't wany anyone to get the DB details.
      *
      * @throws DatabaseException
      */
-    public function connect() {
+    public function connect(bool $debug = false) {
         // Only start a new connection if we're not already connected to a DB
-        if ($this->link === null) {
-            $this->query_count = 0;
-            $this->all_queries = [];
+        if ($this->conn === null) {
             try {
-                if (isset($this->username) && isset($this->password)) {
-                    $this->link = new \PDO($this->getDSN(), $this->username, $this->password);
+                $config = new Configuration();
+                if ($debug) {
+                    $this->query_logger = new QueryLogger();
+                    $logger_middleware = new Middleware($this->query_logger);
+                    $config->setMiddlewares([$logger_middleware]);
                 }
-                elseif (isset($this->username)) {
-                    $this->link = new \PDO($this->getDSN(), $this->username);
-                }
-                else {
-                    $this->link = new \PDO($this->getDSN());
-                }
-
-                $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
-                $this->link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $details = $this->getConnectionDetails();
+                $this->conn = DriverManager::getConnection($details, $config);
             }
-            catch (\PDOException $pdoException) {
-                throw new DatabaseException($pdoException->getMessage());
+            catch (DBALException $dbalException) {
+                throw new DatabaseException($dbalException->getMessage());
             }
         }
     }
 
     /**
-     * "Disconnect" from current PDO connection by just setting the link to null, and PDO will take care of actually
-     * recycling the connection upon the GC destruction of the PDO object. This will additionally commit any open
-     * transactions before disconnecting.
+     * "Disconnect" from the underlying connection and set it to null for any further new connections.
+     * This will additionally rollback any open transactions before disconnecting.
      */
     public function disconnect() {
         if ($this->transaction) {
             $this->rollback();
         }
-        $this->link = null;
+        if ($this->conn !== null) {
+            $this->conn->close();
+        }
+        $this->conn = null;
     }
 
     /**
      * @return bool Returns true if we're connected to a database, else return false
      */
     public function isConnected() {
-        return $this->link !== null;
+        return $this->conn !== null;
     }
 
     /**
-     * Run a query against the connected PDO DB.
+     * Run a query against the connected DBAL DB.
+     * This function will throw an exception if it fails.
+     * Otherwise, it can be assumed it succeeded.
      *
      * @param string $query
      * @param array $parameters
-     *
-     * @return boolean true if query succeeded, else false.
      */
-    public function query($query, $parameters = []) {
+    public function query($query, $parameters = []): void {
         try {
-            $this->query_count++;
             foreach ($parameters as &$parameter) {
                 if (gettype($parameter) === "boolean") {
                     $parameter = $this->convertBoolean($parameter);
@@ -158,37 +147,24 @@ abstract class AbstractDatabase {
                     }
                 }
             }
-            $this->all_queries[] = [$query, $parameters];
-            $statement = $this->link->prepare($query);
-            $result = $statement->execute($parameters);
+            $statement = $this->conn->prepare($query);
+            $result = $statement->executeQuery($parameters);
 
             $this->row_count = null;
             $identity = QueryIdentifier::identify($query);
             if (
                 in_array($identity, [QueryIdentifier::UPDATE, QueryIdentifier::DELETE, QueryIdentifier::INSERT])
             ) {
-                $this->row_count = $statement->rowCount();
+                $this->row_count = $result->rowCount();
             }
             elseif ($identity === QueryIdentifier::SELECT) {
-                $columns = $this->getColumnData($statement);
-                $this->results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-                // Under normal circumstances, we don't really need to worry about $this->results being false.
-                // @codeCoverageIgnoreStart
-                if ($this->results === false) {
-                    return false;
-                }
-                // @codeCoverageIgnoreEnd
-                foreach ($this->results as $idx => $result) {
-                    $this->results[$idx] = $this->transformResult($result, $columns);
-                }
+                $this->results = $result->fetchAllAssociative();
                 $this->row_count = count($this->results);
             }
         }
-        catch (\PDOException $pdoException) {
-            throw new DatabaseException($pdoException->getMessage(), $query, $parameters);
+        catch (DBALException $dbalException) {
+            throw new DatabaseException($dbalException->getMessage(), $query, $parameters);
         }
-
-        return $result;
     }
 
     /**
@@ -208,57 +184,18 @@ abstract class AbstractDatabase {
     public function queryIterator(string $query, array $parameters = [], $callback = null) {
         $lower = trim(strtolower($query));
         if (!str_starts_with($lower, "select")) {
-            return $this->query($query, $parameters);
+            $this->query($query, $parameters);
+            return true;
         }
         try {
-            $this->query_count++;
-            $this->all_queries[] = [$query, $parameters];
-            $statement = $this->link->prepare($query);
-            $statement->execute($parameters);
+            $statement = $this->conn->prepare($query);
+            $result = $statement->executeQuery($parameters);
             $this->row_count = null;
-            return new DatabaseRowIterator($statement, $this, $callback);
+            return new DatabaseRowIterator($result, $callback);
         }
-        catch (\PDOException $exception) {
+        catch (DBALException $exception) {
             throw new DatabaseException($exception->getMessage(), $query, $parameters);
         }
-    }
-
-    /**
-     * @param \PDOStatement $statement
-     *
-     * @return array
-     */
-    public function getColumnData($statement) {
-        $columns = [];
-        for ($i = 0; $i < $statement->columnCount(); $i++) {
-            $col = $statement->getColumnMeta($i);
-            if ($col !== false) {
-                $columns[$col['name']] = $col;
-            }
-        }
-        return $columns;
-    }
-
-    /**
-     * @param array $result
-     * @param array $columns
-     *
-     * @return mixed
-     */
-    public function transformResult(array $result, array $columns) {
-        foreach ($result as $col => $value) {
-            if (isset($columns[$col])) {
-                $column = $columns[$col];
-                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== \PDO::PARAM_INT) {
-                    $value = (int) $value;
-                }
-                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== \PDO::PARAM_BOOL) {
-                    $value = (bool) $value;
-                }
-                $result[$col] = $value;
-            }
-        }
-        return $result;
     }
 
     /**
@@ -267,7 +204,7 @@ abstract class AbstractDatabase {
      */
     public function beginTransaction(): void {
         if (!$this->transaction) {
-            $this->transaction = $this->link->beginTransaction();
+            $this->transaction = $this->conn->beginTransaction();
         }
     }
 
@@ -276,14 +213,14 @@ abstract class AbstractDatabase {
      */
     public function commit(): void {
         if ($this->transaction) {
-            $this->link->commit();
+            $this->conn->commit();
             $this->transaction = false;
         }
     }
 
     public function rollback(): void {
         if ($this->transaction) {
-            $this->link->rollBack();
+            $this->conn->rollBack();
             $this->transaction = false;
         }
     }
@@ -320,7 +257,7 @@ abstract class AbstractDatabase {
 
     /**
      * If the last query was a SELECT, returns the number of rows returned else if
-     * it's a UPDATE, DELETE, or INSERT, we use PDOStatement::rowCount to get the
+     * it's a UPDATE, DELETE, or INSERT, we use Result::rowCount to get the
      * number of affected rows.
      *
      * @link http://php.net/manual/en/pdostatement.rowcount.php
@@ -332,24 +269,30 @@ abstract class AbstractDatabase {
     }
 
     /**
-     * Return count of total queries run against current PDO connection
+     * Return count of total queries run against current DBAL connection
      */
     public function getQueryCount(): int {
-        return count($this->all_queries);
+        if ($this->query_logger === null) {
+            return 0;
+        }
+        return count($this->query_logger->getQueries());
     }
 
     public function getQueries(): array {
-        return $this->all_queries;
+        if ($this->query_logger === null) {
+            return [];
+        }
+        return $this->query_logger->getQueries();
     }
 
     /**
-     * Get all queries run against the current PDO connection, with placeholders replaced by their values
+     * Get all queries run against the current DBAL connection, with placeholders replaced by their values
      *
      * @return string[]
      */
     public function getPrintQueries(): array {
         $print = [];
-        foreach ($this->all_queries as $query) {
+        foreach ($this->query_logger->getQueries() as $query) {
             $print[] = DatabaseUtils::formatQuery($query[0], $query[1]);
         }
         return $print;
@@ -357,7 +300,7 @@ abstract class AbstractDatabase {
 
     public function hasDuplicateQueries(): bool {
         $queries = [];
-        foreach ($this->all_queries as $query) {
+        foreach ($this->query_logger->getQueries() as $query) {
             $queries[] = $query[0];
         }
         return count($queries) !== count(array_unique($queries));
@@ -380,7 +323,7 @@ abstract class AbstractDatabase {
      * @return mixed ID of the last inserted row
      */
     public function getLastInsertId($name = null) {
-        return $this->link->lastInsertId($name);
+        return $this->conn->lastInsertId($name);
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace app\libraries;
 
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Token\Plain as Token;
+use Lcobucci\JWT\UnencryptedToken as Token;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
@@ -111,7 +111,7 @@ class TokenManager {
         ];
         foreach ($headers as $key => $value) {
             if ($token->headers()->get($key) !== $value) {
-                throw new \InvalidArgumentException("Invalid value for ${key}: ${value}");
+                throw new \InvalidArgumentException("Invalid value for {$key}: {$value}");
             }
         }
 

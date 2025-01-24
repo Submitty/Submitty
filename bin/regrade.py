@@ -104,7 +104,7 @@ def replay(starttime,endtime):
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
             # FIXME : This will need to be adjust for team assignments
             # and assignments with special required capabilities!
-            item = {"semester": what[0],
+            item = {"term": what[0],
                     "course": what[1],
                     "gradeable": what[3],
                     "user": what[4],
@@ -116,7 +116,7 @@ def replay(starttime,endtime):
                     "queue_time": queue_time,
                     "regrade": True,
                     "max_possible_grading_time" : -1 }
-            file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
+            file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
             file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
             with open(file_name, "w") as open_file:
                 json.dump(item, open_file, sort_keys=True, indent=4)
@@ -232,7 +232,7 @@ def main():
                             is_vcs_checkout = True
                             revision = obj[0]['revision']
 
-                obj = {"semester": my_semester,
+                obj = {"term": my_semester,
                        "course": my_course,
                        "gradeable": my_gradeable,
                        "user": my_user,
@@ -253,12 +253,12 @@ def main():
 
     # Check before adding a very large number of systems to the queue
     if len(grade_queue) > 50 and not args.no_input:
-        inp = input("Found {:d} matching submissions. Add to queue? [y/n]".format(len(grade_queue)))
+        inp = input("Found {:d} matching submissions. Add to queue? [y/N]".format(len(grade_queue)))
         if inp.lower() not in ["yes", "y"]:
             raise SystemExit("Aborting...")
 
     for item in grade_queue:
-        file_name = "__".join([item['semester'], item['course'], item['gradeable'], item['who'], item['version']])
+        file_name = "__".join([item['term'], item['course'], item['gradeable'], item['who'], item['version']])
         file_name = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", file_name)
         with open(file_name, "w") as open_file:
             json.dump(item, open_file, sort_keys=True, indent=4)

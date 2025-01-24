@@ -1,5 +1,5 @@
 <div id="grade_inquiry_info" class="rubric_panel">
-    <div id="grade_inquiry_inner_info" class="{{ graded_gradeable.hasActiveGradeInquiry() ? 'inquiry_alert' }}">
+    <div id="grade_inquiry_inner_info" class="{{ graded_gradeable.hasActiveGradeInquiry() ? 'inquiry_alert' }}" data-testid="grade-inquiry-inner-info">
 <div class="inner-container" style="padding:20px;">
             {{ render_template(['submission', 'Homework'], 'showGradeInquiryDiscussion', graded_gradeable, can_inquiry) }}
         </div>

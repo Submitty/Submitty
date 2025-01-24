@@ -10,7 +10,7 @@ from typing import Set
 
 from sqlalchemy.exc import OperationalError
 
-from . import db, get_dir_path, get_migrations_path, get_environments
+from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_environments
 from .dumper import dump_database
 from .loader import load_module, load_migrations
 
@@ -238,11 +238,11 @@ def handle_migration(args):
 
             courses = {}
             for course in database.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY semester, course'
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course'
             ):
-                if course['semester'] not in courses:
-                    courses[course['semester']] = []
-                courses[course['semester']].append(course['course'])
+                if course['term'] not in courses:
+                    courses[course['term']] = []
+                courses[course['term']].append(course['course'])
             database.close()
 
             for semester in courses:
@@ -280,6 +280,10 @@ def handle_migration(args):
     for missing_migration in all_missing_migrations:
         if missing_migration.exists():
             missing_migration.unlink()
+
+    print('Loading trigger functions...', end='')
+    load_triggers(args, False)
+    print('DONE')
 
 
 def migrate_environment(database, environment, args, all_missing_migrations):
@@ -470,3 +474,73 @@ def dump(args):
         semester = f"{'s' if today.month < 7 else 'f'}{str(today.year)[-2:]}"
         dump_database(f'submitty_{semester}_sample', data_dir / 'course_tables.sql')
         print('DONE')
+
+
+def load_triggers(args, output=True):
+    for environment in args.environments:
+        if environment not in ('master', 'course'):
+            continue
+
+        trigger_dir = get_triggers_path() / environment
+        sql = [(f, f.read_text()) for f in trigger_dir.iterdir()
+               if f.is_file() and f.suffix == '.sql']
+
+        if len(sql) == 0:
+            if output:
+                print('Loading trigger functions to {}...DONE'.format(environment))
+            continue
+
+        db_config = deepcopy(args.config.database)
+        db_config['dbname'] = 'submitty'
+        try:
+            masterdb = db.Database(db_config, 'master')
+        except OperationalError as exc:
+            raise SystemExit(
+                '\n' * (not output) +  # make sure to appear on new line
+                'Error connecting to master database:\n  {}'.format(str(exc.orig).split('\n')[0])
+            )
+
+        if environment == 'master':
+            if output:
+                print('Loading trigger functions to master...')
+            for file, data in sql:
+                if output:
+                    print('  ' + file.stem)
+                masterdb.execute(data)
+            masterdb.commit()
+            masterdb.close()
+            if output:
+                print('DONE')
+
+        elif environment == 'course':
+            courses = masterdb.execute(
+                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;'
+            ).all()
+            masterdb.close()
+            first_err = True  # make sure first error appears on new line
+            for course in courses:
+                db_config = deepcopy(args.config.database)
+                db_config['dbname'] = 'submitty_{}_{}'.format(course['term'], course['course'])
+                try:
+                    coursedb = db.Database(db_config, 'course')
+                except OperationalError as exc:
+                    if not output and first_err:
+                        print()
+                        first_err = False
+                    print('Failed to connect to course db \'{}\'\n  Error: {}'.format(
+                        db_config['dbname'],
+                        str(exc.orig).split('\n')[0]
+                    ))
+                    continue
+
+                if output:
+                    print('Loading trigger functions to {}.{}...'
+                          .format(course['term'], course['course']))
+                for file, data in sql:
+                    if output:
+                        print('  ' + file.stem)
+                    coursedb.execute(data)
+                coursedb.commit()
+                coursedb.close()
+                if output:
+                    print('DONE')

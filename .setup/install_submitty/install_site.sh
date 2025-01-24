@@ -21,10 +21,10 @@ set_permissions () {
     extension="${filename##*.}"
     # filename="${filename%.*}"
     case "${extension}" in
-        css|otf|jpg|png|ico|txt|twig|map)
+        css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|cgi)
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
             chmod 445 ${fullpath}
             ;;
         html)
@@ -63,6 +63,13 @@ PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
+
+for arg in "$@"
+do
+    if [ "$arg" == "browscap" ]; then
+        BROWSCAP=true
+    fi
+done
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
@@ -151,8 +158,12 @@ fi
 # create doctrine proxy classes directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/doctrine-proxy
 
-# create doctrine proxy classes
-php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+# clear old lang cache
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/lang" ]; then
+    rm -rf "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+fi
+# create lang cache directory
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
 
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
@@ -165,10 +176,6 @@ chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
     chown ${PHP_USER}:${PHP_GROUP} "${SUBMITTY_INSTALL_DIR}/${entry:12}"
 done
-
-# Update permissions & ownership for cache directory
-chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
-chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
 
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
@@ -209,8 +216,27 @@ else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+
+# create doctrine proxy classes
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+
+# load lang files
+php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
+
+# Update permissions & ownership for cache directory
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/site/cache
+chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/cache
+
+if [[ "${CI}" != true && "${BROWSCAP}" = true ]]; then
+    echo -e "Checking for and fetching latest browscap.ini if needed"
+    # browscap.ini is needed for users' browser identification, this information is shown on session management page
+    # fetch and convert browscap.ini to cache, may take some time on initial setup or if there's an update
+    ${SUBMITTY_INSTALL_DIR}/sbin/update_browscap.php
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/browscap/browscap-php/resources
+fi
 
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
@@ -296,6 +322,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/jquery-ui
     cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
     cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
+    #luxon
+    mkdir ${VENDOR_FOLDER}/luxon
+    cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
     cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
@@ -324,6 +353,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # js-cookie
     mkdir ${VENDOR_FOLDER}/js-cookie
     cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
+    #vue
+    mkdir ${VENDOR_FOLDER}/vue
+    cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -346,12 +378,18 @@ chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a+x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a-x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

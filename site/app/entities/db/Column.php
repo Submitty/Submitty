@@ -4,63 +4,39 @@ declare(strict_types=1);
 
 namespace app\entities\db;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="columns", schema="information_schema")
- */
+#[ORM\Entity]
+#[ORM\Table(name: "columns", schema: "information_schema")]
 class Column {
-  /**
-   * @ORM\Id
-   * @ORM\Column(name="table_catalog",type="string")
-   * @var string
-   */
-    protected $database;
+    #[ORM\Id]
+    #[ORM\Column(name: "table_catalog", type: Types::STRING)]
+    protected string $database;
 
-  /**
-   * @ORM\Id
-   * @ORM\Column(name="table_schema",type="string")
-   * @var string
-   */
-    protected $schema;
+    #[ORM\Id]
+    #[ORM\Column(name: "table_schema", type: Types::STRING)]
+    protected string $schema;
 
-  /**
-   * @ORM\Id
-   * @ORM\Column(name="table_name",type="string")
-   * @var string
-   */
-    protected $table_name;
+    #[ORM\Id]
+    #[ORM\Column(name: "table_name", type: Types::STRING)]
+    protected string $table_name;
 
-  /**
-   * @ORM\Id
-   * @ORM\Column(name="column_name",type="string")
-   * @var string
-   */
-    protected $name;
+    #[ORM\Id]
+    #[ORM\Column(name: "column_name", type: Types::STRING)]
+    protected string $name;
 
-  /**
-   * @ORM\Column(name="ordinal_position",type="integer")
-   * @var int
-   */
-    protected $position;
+    #[ORM\Column(name: "ordinal_position", type: Types::INTEGER)]
+    protected int $position;
 
-  /**
-   * @ORM\Column(name="data_type",type="string")
-   * @var string
-   */
-    protected $type;
+    #[ORM\Column(name: "data_type", type: Types::STRING)]
+    protected string $type;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="\app\entities\db\Table",inversedBy="columns")
-   * @ORM\JoinColumns({
-   * @ORM\JoinColumn(name="table_catalog", referencedColumnName="table_catalog"),
-   * @ORM\JoinColumn(name="table_schema", referencedColumnName="table_schema"),
-   * @ORM\JoinColumn(name="table_name", referencedColumnName="table_name")
-   * })
-   * @var Table
-   */
-    protected $table;
+    #[ORM\ManyToOne(targetEntity: Table::class, inversedBy: "columns")]
+    #[ORM\JoinColumn(name: "table_catalog", referencedColumnName: "table_catalog")]
+    #[ORM\JoinColumn(name: "table_schema", referencedColumnName: "table_schema")]
+    #[ORM\JoinColumn(name: "table_name", referencedColumnName: "table_name")]
+    protected ?Table $table;
 
     public function __construct() {
         throw new \RuntimeException("Cannot create new information_schema.column");

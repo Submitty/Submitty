@@ -39,6 +39,8 @@ class Output {
     private $page_name = "";
     private $loaded_views = [];
 
+    /** @var Set<array{string,string}> */
+    private $audio;
     /** @var Set */
     private $css;
     /** @var Set */
@@ -75,6 +77,7 @@ class Output {
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
 
+        $this->audio = new Set();
         $this->css = new Set();
         $this->js = new Set();
         $this->module_js = new Set();
@@ -115,12 +118,24 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
+        $this->twig->addFunction(new \Twig\TwigFunction("localize", function ($key, $default, $vals = []) {
+            $config = $this->core->getConfig();
+            if ($config) {
+                $val = $config->getLocale()->fetchKey($key, $vals);
+                if ($val) {
+                    return $val;
+                }
+            }
+
+            return $default;
+        }));
+
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
-<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
+<img alt="{$title}" src="data:{$mime_type};base64,{$base64_data}" />
 HTML;
         }, ['is_safe' => ['html']]));
 
@@ -181,10 +196,12 @@ HTML;
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('js-cookie', 'js.cookie.min.js'));
+        $this->addVendorJs(FileUtils::joinPaths('luxon', 'luxon.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
+        $this->addInternalJs('markdown.js');
     }
 
     /**
@@ -512,6 +529,14 @@ HTML;
         return $this->getOutput();
     }
 
+    public function addAudio(string $filename, string $url): void {
+        $this->audio->add([$filename, $url]);
+    }
+
+    public function addInternalAudio(string $file, string $folder = 'audio'): void {
+        $this->addAudio($file, $this->timestampResource($file, $folder));
+    }
+
     public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
@@ -534,6 +559,17 @@ HTML;
 
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
+    }
+
+    /**
+     * @param array<mixed>$args
+     */
+    public function renderVue(string $page, array $args = []): string {
+        $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
+        $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
+        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
+
+        return $this->renderTwigTemplate('Vue.twig', ["page" => $page, "args" => $args]);
     }
 
     public function addVendorJs($file) {
@@ -612,6 +648,13 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
+    /**
+     * @return Set<array{string,string}>
+     */
+    public function getAudio(): Set {
+        return $this->audio;
+    }
+
     public function getCss(): Set {
         return $this->css;
     }
@@ -666,5 +709,25 @@ HTML;
         /** @var \Twig\Extension\CoreExtension $extension */
         $extension = $this->twig->getExtension(\Twig\Extension\CoreExtension::class);
         $extension->setTimezone($tz);
+    }
+
+    /**
+     * Adds the necessary CSS and JS to use a Select2 widget.
+     * Select2 widgets allow you to preselect from options as well as
+     * type your own option.
+     *
+     * @return void
+     */
+    public function addSelect2WidgetCSSAndJs(): void {
+        $this->addVendorJs(FileUtils::joinPaths('select2', 'js', 'select2.min.js'));
+        $this->addVendorCss(FileUtils::joinPaths('select2', 'css', 'select2.min.css'));
+        $this->addVendorCss(FileUtils::joinPaths(
+            'select2',
+            'bootstrap5-theme',
+            'select2-bootstrap-5-theme.min.css'
+        ));
+        $this->addInternalCss("select-widgets.css");
+        $this->addInternalJs("select-widgets.js");
+        $this->addInternalCss("select2-override.css");
     }
 }

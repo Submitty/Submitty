@@ -7,7 +7,6 @@ use app\entities\VcsAuthToken;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\ResponseInterface;
 use app\libraries\response\WebResponse;
-use app\libraries\routers\AccessControl;
 use app\libraries\TokenManager;
 use app\libraries\Utils;
 use app\repositories\VcsAuthTokenRepository;
@@ -15,9 +14,7 @@ use app\views\AuthTokenView;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AuthTokenController extends AbstractController {
-    /**
-     * @Route("/authentication_tokens", methods={"GET"})
-     */
+    #[Route("/authentication_tokens", methods: ["GET"])]
     public function vcsAuthTokens(): WebResponse {
         $em = $this->core->getSubmittyEntityManager();
         /** @var VcsAuthTokenRepository $repo */
@@ -53,10 +50,7 @@ class AuthTokenController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     * @Route("/authentication_tokens/api", methods={"POST"})
-     */
+    #[Route("/authentication_tokens/api", methods: ["POST"])]
     public function fetchApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
         $this->core->getQueries()->refreshUserApiKey($user_id);
@@ -67,10 +61,7 @@ class AuthTokenController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
-    /**
-     * @AccessControl(level="FACULTY")
-     * @Route("/authentication_tokens/api/invalidate", methods={"POST"})
-     */
+    #[Route("/authentication_tokens/api/invalidate", methods: ["POST"])]
     public function invalidateApiToken(): RedirectResponse {
         $user_id = $this->core->getUser()->getId();
         $this->core->getQueries()->refreshUserApiKey($user_id);
@@ -78,9 +69,7 @@ class AuthTokenController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
-    /**
-     * @Route("/authentication_tokens/vcs", methods={"POST"})
-     */
+    #[Route("/authentication_tokens/vcs", methods: ["POST"])]
     public function createVcsAuthToken(): ResponseInterface {
         if (!isset($_POST['name']) || !isset($_POST['expiration']) || $_POST['name'] === "") {
             $this->core->addErrorMessage("Name or expiration not provided");
@@ -122,9 +111,7 @@ class AuthTokenController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['authentication_tokens']));
     }
 
-    /**
-     * @Route("/authentication_tokens/vcs/revoke", methods={"POST"})
-     */
+    #[Route("/authentication_tokens/vcs/revoke", methods: ["POST"])]
     public function revokeVcsToken(): RedirectResponse {
         if (!isset($_POST['id'])) {
             $this->core->addErrorMessage("ID wasn't specified.");

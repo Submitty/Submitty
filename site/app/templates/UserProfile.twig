@@ -1,6 +1,6 @@
 <div class="content">
     <h1>
-        My Profile
+    {{ localize('My_Profile.My_Profile', "My Profile") }}
     </h1>
     <div class="user-info-wrapper">
         <div id="user-card-img">
@@ -13,8 +13,8 @@
                 {% endif %}
             </div>
             <span class="edit-user-img">
-                <button class="icon" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
-                    <i class="fas fa-upload"></i> Upload profile photo
+                <button class="icon" data-testid="upload-photo-button" tabindex="0" onclick="showUpdateProfilePhotoForm()" aria-label="Edit user profile photo" title="Edit user profile photo">
+                    <i class="fas fa-upload"></i> {{ localize('My_Profile.Upload_profile_photo', "Upload profile photo") }}
                 </button>
             </span>
             <span class="red-message" id="flagged-message" data-flagged="{{ user.getDisplayImageState }}">Your preferred image was flagged as inappropriate.</span>
@@ -22,52 +22,74 @@
         <div id="user-card">
             <div class="user-info-cont">
                 <div class="user-info-title" id="basic_info">
-                    <span>Basic Information</span>
+                    <span>
+                    {{ localize('My_Profile.Basic_Information', "Basic Information" )}}
+                    </span>
                 </div>
                 <div class="user-info">
-                    <div class="flex-row" id="username-row">
+                    <div class="flex-row" id="username-row" data-testid="username-row">
                         <span class="label">
-                            Username:
+                        {{ localize('My_Profile.Username', "Username" )}}:
                         </span>
                         <span class="value">
                             {{ user.getId() }}
                         </span>
                     </div>
-                    <div class="flex-row" id="givenname-row">
+                    <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
-                            First Name:
+                        {{ localize('My_Profile.First_Name', "First Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="familyname-row">
+                    <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
-                            Last Name:
+                        {{ localize('My_Profile.Last_Name', "Last Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="last-initial-format-row">
+                    <div class="flex-row" id="last-initial-format-row" data-testid="last-initial-format-row">
                         <span class="label">
-                            Abbreviated Name:
+                            {{ localize('My_Profile.Abbreviated_Name', "Abbreviated Name") }}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateLastInitialFormatForm()" aria-label="Edit user last initial format" title="Edit user last initial format">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayAbbreviatedName() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="pronouns-row">
+                    <div class="flex-row" id="pronouns-row" data-testid="pronouns-row">
                         <span class="label">
-                            Pronouns:
+                             {{ localize('My_Profile.Pronouns', "Pronouns" )}}:
                         </span>
-                        <button id='pronouns_val' class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                        <button id='pronouns_val' data-testid="pronouns-val" class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
                             <i class="fas fa-pencil-alt"></i> {{ user.getPronouns() }}
                         </button>
                     </div>
-                    <div class="flex-row" id="email-row">
+                    <div class="flex-row" id="pronouns-display-row">
                         <span class="label">
-                            Primary Email:
+                            {{ localize('My_Profile.Pronouns_Forum', "Display Pronouns in Discussion Forum" )}}:
+                        </span>
+                        <button id='display_pronouns_val' data-testid="display-pronouns-val" class="icon" tabindex="0" onclick="showUpdatePronounsForm()" aria-label="Edit user pronouns" title="Edit user pronouns">
+                            {% if user.getDisplayPronouns() %}
+                                <i class="fas fa-pencil-alt"></i> True
+                            {% else %}
+                                <i class="fas fa-pencil-alt"></i> False
+                            {% endif %}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="display-name-order-row" data-testid="display-name-order-row">
+                        <span class="label">
+                            Display Name Order:
+                        </span>
+                        <button id='display_name_order_val' class="icon" tabindex="0" onclick="showDisplayNameOrderForm()" aria-label="Edit user display name order" title="Edit user display name order">
+                            <i class="fas fa-pencil-alt"></i> {% if user.getDisplayNameOrder() is same as("GIVEN_F")%}Given Name First{% else %}Family Name First{% endif %}
+                        </button>
+                    </div>
+                    <div class="flex-row" id="email-row" data-testid="email-row">
+                        <span class="label">
+                            {{ localize('My_Profile.Primary_Email', "Primary Email" )}}:
                         </span>
                         <span class="value">
                             {{ user.getEmail() }}
@@ -75,7 +97,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-row">
                         <span class="label">
-                            Secondary Email:
+                            {{ localize('My_Profile.Secondary_Email', "Secondary Email" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {{ user.getSecondaryEmail() }}
@@ -83,7 +105,7 @@
                     </div>
                     <div class="flex-row" id="secondary-email-notify-row">
                         <span class="label">
-                            Send Email to Secondary Address:
+                            {{ localize('My_Profile.Send_Email', "Send Email to Secondary Address" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdateSecondaryEmailForm()" aria-label="Edit user secondary email" title="Edit user secondary email">
                             <i class="fas fa-pencil-alt"></i> {% if user.getEmailBoth() %}True{% else %}False{% endif %}
@@ -92,7 +114,7 @@
                     {% if display_access_level %}
                         <div class="flex-row" id="access-row">
                             <span class="label">
-                                Access Level:
+                                {{ localize('My_Profile.Access_Level', "Access Level" )}}:
                             </span>
                             <span class="value">
                                 {{ access_level }}
@@ -119,7 +141,7 @@
                          data-user_time_zone="{{ user_time_zone_with_offset }}"
                          data-available_time_zones="{{ available_time_zones }}"
                    >Time Zone (<span id="utc_offset_stub">UTC Offset <span id="user_utc_offset">{{ user_utc_offset }}</span></span>):
-                       <a target=_blank href="https://submitty.org/student#how-can-i-specify-my-local-timezone" aria-label="How can I specify my local timezone">
+                       <a target="_blank" href="https://submitty.org/student/account/local_timezone" aria-label="How can I specify my local timezone?">
                            <i style="font-style:normal;" class="fa-question-circle"></i>
                        </a>
                    </span>
@@ -127,8 +149,32 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="time_zone_drop_down">Select Timezone: </label>
-                        <select id="time_zone_drop_down"></select>
+                        <select id="time_zone_drop_down" data-testid="time-zone-dropdown"></select>
                     </div>
+                </div>
+            </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
+                    <span>Preferred Locale (Language/Region):
+                        <a target="_blank" href="https://submitty.org/developer/development_instructions/localization" aria-label="How can I contribute to Language Translation?">
+                            <i style="font-style:normal;" class="fa-question-circle"></i>
+                        </a>
+                    </span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="pref_locale_select">Choose a locale:</label>
+                        {% set user_locale = user.getPreferredLocale() %}
+                        <select id="pref_locale_select">
+                            <option value="0">[Default] | {{ default_locale_name }}</option>
+                            {% for locale, locale_name in supported_locales %}
+                            <option value="{{ locale }}" {% if locale == user_locale %}selected{% endif %}>{{ locale_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if user_locale != 'en_US' and user_locale != '' %}
+                    <div class="tip-note" style="text-align: right; margin-left: 25%;">Note: Support for languages other than English is currently incomplete. If you would like to contribute to translation, see our guidelines <a href="https://submitty.org/developer/development_instructions/localization">here</a>.</div>
+                    {% endif %}
                 </div>
             </div>
             <div class="user-info-cont">
@@ -138,7 +184,7 @@
                 <div class="user-info">
                     <div class="flex-row-col">
                         <label for="theme_change_select">Choose a color theme</label>
-                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme">
+                        <select id="theme_change_select" class="form-control" aria-label="Change Submitty's Theme" data-testid="theme-change-dropdown">
                             <option value="system">Follow Device Theme</option>
                             <option value="system_black">Follow Device Theme (Black)</option>
                             <option value="light">Light Mode</option>
@@ -148,10 +194,34 @@
                     </div>
                 </div>
             </div>
+            <div class="user-info-cont">
+                <div class="user-info-title">
+                    <span>Sidebar Preference:</span>
+                </div>
+                <div class="user-info">
+                    <div class="flex-row-col">
+                        <label for="desktop_sidebar_preference">Choose a sidebar preference</label>
+                        <select id="desktop_sidebar_preference" class="form-control" aria-label="Change Sidebar Preference" data-testid="desktop-sidebar-preference-dropdown">
+                            <option value="automatic">[Default] | Collapse On Narrow View</option>
+                            <option value="manual">Disable Automatic Collapse</option>
+                        </select>
+                    </div>
+                </div>
+            </div>            
             <div>
-            <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
-            <button class="addpwa btn btn-primary">Install App</button>
-            <span class="option-alt" id="pwa-uninstall-lable">The Submitty Progressive Web App (PWA) has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
+                <span class="option-alt" id="browser-support">Submitty supports an installable Progressive Web App (PWA) which requires Chrome, see <a href="https://support.google.com/chrome/answer/9658361">here</a> for installation instructions</span>
+                <button class="addpwa btn btn-primary">Install App</button>
+                <span class="option-alt" id="pwa-uninstall-lable">The Submitty Progressive Web App (PWA) has already been installed, see <a href="https://support.google.com/chrome/answer/9658361">here</a> to uninstall it</span>
+            </div>
+            <div class="flex-row-col">
+                <button class="btn btn-primary" id="auth-tokens-btn" onclick="location.href='authentication_tokens';">
+                    <i class="fa fa-key"></i>
+                    Authentication Tokens
+                </button>
+                <button class="btn btn-primary" onclick="location.href='manage_sessions';">
+                    <i class="fa fa-user-shield"></i>
+                    Manage Sessions
+                </button>
             </div>
         </div>
     </div>
@@ -161,6 +231,7 @@
 {% include 'EditProfilePhotoForm.twig' %}
 {% include 'EditSecondaryEmailForm.twig' %}
 {% include 'EditPronounsForm.twig' %}
+{% include 'EditDisplayNameOrderForm.twig' %}
 {% if show_change_password %}
     {% include 'ChangePasswordForm.twig' %}
 {% endif %}
