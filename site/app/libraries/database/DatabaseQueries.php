@@ -9428,15 +9428,8 @@ ORDER BY
     }
 
     /**
-     * Deletes a graded component from the database, including associated marks.
-     *
      * @param GradedComponent $graded_component The graded component to delete.
-     * 
-     * The deletion process involves two steps:
-     * 1. Removing all marks associated with the graded component.
-     * 2. Removing the graded component record from the database.
-    */
-
+     */
     public function deleteGrade(GradedComponent $graded_component) {
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
         $params = [
