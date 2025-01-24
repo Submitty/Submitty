@@ -2826,7 +2826,7 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 --
 
 ALTER TABLE ONLY public.active_graders
-    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id);
+    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
 
 
 --
@@ -2834,7 +2834,7 @@ ALTER TABLE ONLY public.active_graders
 --
 
 ALTER TABLE ONLY public.active_graders
-    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id);
+    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
@@ -2850,7 +2850,7 @@ ALTER TABLE ONLY public.active_graders
 --
 
 ALTER TABLE ONLY public.active_graders
-    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id);
+    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
