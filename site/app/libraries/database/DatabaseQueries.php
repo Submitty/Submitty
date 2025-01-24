@@ -9430,7 +9430,7 @@ ORDER BY
     /**
      * @param GradedComponent $graded_component The graded component to delete.
      */
-    public function deleteGrade(GradedComponent $graded_component): void { 
+    public function deleteGrade(GradedComponent $graded_component): void {
         $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
         $params = [
             $graded_component->getTaGradedGradeable()->getId(),
