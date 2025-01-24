@@ -249,7 +249,7 @@ class SimpleGraderController extends AbstractController {
 
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
-            if ($data === '' || $data === null || $data === "0") {
+            if ($data === '' || $data === "0") {
                 // If the component is empty, delete it
                 $this->core->getQueries()->deleteGrade($component_grade);
                 continue;
