@@ -9400,48 +9400,42 @@ ORDER BY
     }
 
     /**
-     * Adds a component grader to the current_gradable_grader table
-     *
-     * @param \app\models\gradeable\Component $component
+     * Adds a component grader to the active_graders table
+     * @param Component $component
      * @param bool $isTeam
      * @param string $grader_id
      * @param string $graded_id
      * @return void
      */
-    public function addComponentGrader($component, $isTeam, $grader_id, $graded_id) {
+    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id) {
             $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
-        ", [
+            ", [
             $component->getId(),
             $grader_id,
             $isTeam ? null : $graded_id,
             $isTeam ? $graded_id : null,
             $this->core->getDateTimeNow(),
-        ]);
+            ]);
     }
 
     /**
-     * Removes a component grader to the active graders table
-     * @param \app\models\gradeable\Component $component
-     * @param bool $isTeam
+     * Removes a component grader to the active_graders table
+     * @param Component $component
      * @param string $grader_id
      * @param string $graded_id
      * @return void
      */
-    public function removeComponentGrader($component, $isTeam, $grader_id, $graded_id) {
-        if ($isTeam) {
+    public function removeComponentGrader(Component $component, string $grader_id, string $graded_id) {
             $this->course_db->query("
             DELETE FROM active_graders
-            WHERE gc_id = ? AND grader_id = ? AND ag_user_id IS NULL AND ag_team_id = ?
-        ", [$component->getId(), $grader_id, $graded_id]);
-        }
-        else {
-            $this->course_db->query("
-            DELETE FROM active_graders
-            WHERE gc_id = ? AND grader_id = ? AND ag_user_id = ? AND ag_team_id IS NULL
-        ", [$component->getId(), $grader_id, $graded_id]);
-        }
+            WHERE gc_id = ? AND grader_id = ? AND ag_user_id IS NULL AND (ag_user_id = ? OR ag_team_id = ?)
+            ", [
+            $component->getId(),
+            $grader_id,
+            $graded_id,
+            ]);
     }
     /**
      * @param string $image the full name of the image to get

@@ -22,10 +22,10 @@ def up(config, database, semester, course):
             ag_user_id character varying(255),
             ag_team_id character varying(255),
             timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-            FOREIGN KEY (grader_id) REFERENCES users(user_id),
+            FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE,
             FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id) ON DELETE CASCADE,
-            FOREIGN KEY (ag_user_id) REFERENCES users(user_id),
-            FOREIGN KEY (ag_team_id) REFERENCES gradeable_teams(team_id),
+            FOREIGN KEY (ag_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (ag_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE,
             CONSTRAINT ag_user_team_id_check CHECK ((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)),
             UNIQUE (grader_id, gc_id, ag_user_id),
             UNIQUE (grader_id, gc_id, ag_team_id)

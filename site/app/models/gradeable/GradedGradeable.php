@@ -72,7 +72,7 @@ class GradedGradeable extends AbstractModel {
      * @param array<array<int, string>> $active_graders_names The names for the active graders this graded gradeable
      * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
-    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $active_graders, array $active_graders_timestamps, array $active_graders_names) {
+    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $active_graders = [], array $active_graders_timestamps = [], array $active_graders_names = []) {
         parent::__construct($core);
 
         // Check the gradeable instance

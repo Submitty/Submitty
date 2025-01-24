@@ -233,7 +233,7 @@ class ReportController extends AbstractController {
     }
 
     private function genDummyGradedGradeable(Gradeable $gradeable, Submitter $submitter) {
-        $gg = new GradedGradeable($this->core, $gradeable, $submitter, [], [], [], []);
+        $gg = new GradedGradeable($this->core, $gradeable, $submitter, []);
         $gg->setAutoGradedGradeable(new AutoGradedGradeable($this->core, $gg, []));
         return $gg;
     }
