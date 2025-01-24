@@ -56,7 +56,7 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
                 ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - name: Run stylelint
         run: npm run css-stylelint
 
@@ -79,7 +79,7 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
                 ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - name: Run eslint
         run: npm run eslint
       - name: Run npm build (tsc and esbuild)
@@ -104,13 +104,15 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
               ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - run: npm run test
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: site/tests/report/jest/clover.xml
           flags: js
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   php-lint:
@@ -121,7 +123,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.31.1
+      - uses: shivammathur/setup-php@2.32.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -157,7 +159,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.31.1
+      - uses: shivammathur/setup-php@2.32.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -177,10 +179,12 @@ jobs:
       - name: Run php unit tests
         run: php vendor/bin/phpunit
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: site/tests/report/clover.xml
           flags: php
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   python-lint:
@@ -234,10 +238,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload submitty python utils Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: python_submitty_utils/coverage.xml
           flags: python_submitty_utils
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Migrator unit test
       - name: Run migrator python unit tests
@@ -246,10 +252,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload migrator Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: migration/coverage.xml
           flags: migrator
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Auto grader unit test
       - name: Run autograder python unit tests
@@ -258,10 +266,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload autograder Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: autograder/coverage.xml
           flags: autograder
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       #  submitty_daemon_jobs unit tests
       - name: Install bulk upload dependencies
@@ -277,10 +287,12 @@ jobs:
           coverage xml -i
 
       - name: Upload submitty_daemon_jobs Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   yaml-lint:
     name: YAML Lint
@@ -336,13 +348,13 @@ jobs:
             exit 1
           fi
 
-          LINES_DIFF=$(($(wc -l < "$PR_FILE") - $(wc -l < "$MAIN_FILE")))
+          LINES_DIFF=$(( $(wc -l < "$PR_FILE") - $(wc -l < "$MAIN_FILE") ))
 
           if [ $LINES_DIFF -gt 0 ]; then
             echo "::error::colors.css has increased in size by $LINES_DIFF lines in this PR."
             echo "::error::Please use existing colors in colors.css instead of adding new ones, to keep the size of the file manageable."
             echo "::error::If adding to colors.css really is necessary for your PR, this requirement may be waived on maintainer review."
-            exit $LINES_DIFF
+            exit 1
           else
             echo "No lines added. OK."
           fi
@@ -632,8 +644,7 @@ jobs:
       - name: Install node dependencies
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
-          npm install file-saver --save
-          npm install --production=false
+          npm ci
 
       - name: Run accessibility test
         uses: cypress-io/github-action@v6
@@ -750,12 +761,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-videos
+          name: Cypress-System-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
       - name: Check for site errors
@@ -799,8 +810,7 @@ jobs:
       - name: Install node dependencies
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
-          npm install file-saver --save
-          npm install --production=false
+          npm ci
 
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v6
@@ -818,12 +828,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: Cypress-${{matrix.containers}}-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-videos
+          name: Cypress-${{matrix.containers}}-Videos
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
 
 

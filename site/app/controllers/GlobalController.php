@@ -294,7 +294,6 @@ class GlobalController extends AbstractController {
 
         if (
             $this->core->getUser()->accessAdmin()
-            && $this->core->getConfig()->displayRainbowGradesSummary()
         ) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(["gradebook"]),
@@ -344,8 +343,8 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['reports']),
-                "title" => "Grade Reports",
+                "href" => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
+                "title" => "Grades Configuration",
                 "id" => "nav-sidebar-reports",
                 "icon" => "fa-chart-bar"
             ]);
@@ -476,7 +475,7 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // INSTRUCTOR IN ANY COURSE
-        if ($is_instructor) {
+        if ($is_instructor || $this->core->getUser()->isSuperUser()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['autograding_status']),
                 "title" => "Autograding Status",
@@ -488,6 +487,55 @@ class GlobalController extends AbstractController {
             "class" => "nav-row short-line",
         ]);
     }
+
+    public function calculateLunarNewYearDate(int $year): \DateTime {
+        // Use a table or algorithm to calculate the Chinese New Year
+        // Here we will use an approximation based on known patterns
+        // Chinese New Year is based on lunar cycles, and for simplicity,
+        // we will use a hardcoded table for the 21st century.
+
+        $LunarNewYearDates = [
+            2024 => '02/10',
+            2025 => '01/29',
+            2026 => '02/17',
+            2027 => '02/06',
+            2028 => '01/26',
+            2029 => '02/13',
+            2030 => '02/03',
+            2031 => '01/23',
+            2032 => '02/11',
+            2033 => '01/31',
+            2034 => '02/19',
+            2035 => '02/08',
+            2036 => '01/28',
+            2037 => '02/15',
+            2038 => '02/04',
+            2039 => '01/24',
+            2040 => '02/13',
+            2041 => '02/02',
+            2042 => '01/22',
+            2043 => '02/10',
+            2044 => '01/30',
+            2045 => '02/17',
+        ];
+
+        if (array_key_exists($year, $LunarNewYearDates)) {
+            $dateString = $LunarNewYearDates[$year] . '/' . $year;
+            $LunarNewYear = \DateTime::createFromFormat('m/d/Y', $dateString);
+        }
+        else {
+            // If the year is not in the table, return a default date or handle the error
+            throw new \Exception('Lunar New Year date for year ' . $year . ' is not available.');
+        }
+
+        // Set time to midnight to avoid ambiguity
+        $LunarNewYear->setTime(0, 0, 0);
+
+        return $LunarNewYear;
+    }
+
+
+
 
 
     public function calculateHanukkahDate(int $year): \DateTime {
@@ -513,26 +561,47 @@ class GlobalController extends AbstractController {
         $hour = (int) $now->format('G');
         $minute = (int) $now->format('i');
         $second = (int) $now->format('s');
+
+        // Check if the current date falls within Lunar New Year (+/- 3 days)
+        $LunarNewYearStart = $this->calculateLunarNewYearDate($yearint);
+
+        // Create a period from 3 days before to 3 days after the Lunar New Year
+        $LunarNewYearPeriodStart = clone $LunarNewYearStart;
+        $LunarNewYearPeriodStart->modify('-3 days');
+        $LunarNewYearPeriodEnd = clone $LunarNewYearStart;
+        $LunarNewYearPeriodEnd->modify('+3 days');
+
         switch ($month) {
             case 12:
-                //December (Christmas, Hanukkah)
+                // December (Christmas, Hanukkah)
                 $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
-                $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime = clone $hanukkahStartDateTime;
                 $hanukkahEndDateTime->modify('+8 days');
 
-                if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
+                // Determine if today is during Hanukkah
+                $isHanukkah = ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime);
+                // Determine if today is within Christmas week
+                $isChristmasWeek = ($day >= 22 && $day <= 28);
+
+                $decemberImages = ['moorthy_duck/12-December.svg'];
+
+                if ($isHanukkah) {
                     // Select the menorah duck image based on the day of Hanukkah
                     $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
                     // Ensure datecounter is between 1 and 8
                     $datecounter = max(1, min(8, $datecounter));
                     $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
-                    $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
+                    $decemberImages[] = $menorah_duck;
                 }
-                else {
-                    $decemberImages = ['moorthy_duck/12-December.svg'];
+
+                if ($isChristmasWeek) {
+                    $decemberImages[] = 'moorthy_duck/santa_duck.svg';
                 }
+
+                // Randomly select one of the images in the array
                 $duck_img = $decemberImages[array_rand($decemberImages)];
                 break;
+
             case 11:
                 //November (Thanksgiving)
                 //last week of November
@@ -548,10 +617,24 @@ class GlobalController extends AbstractController {
                 }
                 break;
             case 9:
-                //September (leaf)
-                $duck_img = 'moorthy_duck/09-september.svg';
+                // First two weeks of September
+                if ($day <= 14) {
+                    $duck_img = 'moorthy_duck/back_to_school_duck.svg';
+                }
+                else {
+                    // Original case for September
+                    $duck_img = 'moorthy_duck/09-september.svg';
+                }
                 break;
             case 8:
+                // Last week of August
+                if ($day >= 25) {
+                    $duck_img = 'moorthy_duck/back_to_school_duck.svg';
+                }
+                else {
+                    //August (vacation)
+                    $duck_img = 'moorthy_duck/08-august.svg';
+                }
                 break;
             case 7:
                 //July (Independence)
@@ -572,6 +655,10 @@ class GlobalController extends AbstractController {
                 if ($day === 5) {
                     $duck_img = 'moorthy_duck/quantum-duck-light.svg';
                 }
+                elseif ($day >= 24 && $day <= 30) {
+                    // Arbor day
+                    $duck_img = 'moorthy_duck/tree_duck.svg';
+                }
                 else {
                     //April (Flowers)
                     $duck_img = 'moorthy_duck/04-april.svg';
@@ -583,8 +670,19 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/03-march.svg';
                 }
                 break;
+
             case 2:
-                $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
+                    $februaryImages = [
+                        'moorthy_duck/lunar_newyear_duck_01.svg',
+                        'moorthy_duck/lunar_newyear_duck_02.svg',
+                        'moorthy_duck/black-history-duck.svg'
+                    ];
+                }
+                else {
+                    $februaryImages = ['moorthy_duck/black-history-duck.svg'];
+                }
+
                 if ($day <= 3) {
                     $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
@@ -594,14 +692,26 @@ class GlobalController extends AbstractController {
                 }
                 $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
+
             case 1:
-                //January (Snowflakes)
-                $duck_img = 'moorthy_duck/01-january.svg';
+                if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
+                    $januaryImages = [
+                        'moorthy_duck/lunar_newyear_duck_01.svg',
+                        'moorthy_duck/lunar_newyear_duck_02.svg',
+                        'moorthy_duck/01-january.svg'
+                    ];
+                }
+                else {
+                    //January (Snowflakes)
+                    $januaryImages = ['moorthy_duck/01-january.svg'];
+                }
 
                 if ($day >= 28) {
-                    $duck_img = 'moorthy_duck/party-duck/party-duck-10th.svg';
+                    $januaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
+                $duck_img = $januaryImages[array_rand($januaryImages)];
                 break;
+
             default:
                 break;
         }

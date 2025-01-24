@@ -3,7 +3,7 @@
         <p>Loading...</p>
     </div>
     <div id="rg_web_ui">
-        <h1>Rainbow Grades Customization</h1>
+        <h1>Rainbow Grades Configuration</h1>
 
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
@@ -14,6 +14,34 @@
                     <a href="http://www.submitty.org/instructor/course_settings/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
             </div>
         {% endif %}
+
+        <div class="report-title-cont">
+            Web interface for creation and customization of Rainbow Grades for this course.
+            <a target=_blank
+               href="https://submitty.org/instructor/course_settings/rainbow_grades/"
+            >
+                Rainbow Grades Documentation
+                <i style="font-style:normal;" class="fa-question-circle"></i>
+            </a>
+        </div>
+
+        <div id="grade-report-summary" class="report-card">
+            <div class="report-title-cont">
+                Pushing this button will update the grade summary data used to generate the rainbow grades reports.
+            </div>
+            <div class="report-card-btn-cont">
+                <button id="grade-summaries-button"
+                        onclick="location.href='{{ summaries_url }}'"
+                        class="btn btn-primary"
+                        tabindex="0"
+                >
+                    Generate Grade Summaries
+                </button>
+                <div class="card-btn-info">
+                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                </div>
+            </div>
+        </div>
 
         <div id="save_status_container" class="customization_item">
             <div id="build_buttons">
@@ -121,7 +149,7 @@
                             <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}" data-testid="display-{{ display_option.id|replace({'_': '-'}) }}"
                                    {% if display_option.isUsed == true %}checked{% endif %}
                             >
-                            <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
+                            <label style="display: table-cell; width: 200px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
                             <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
                         </div>
                         {% set counter = counter + 1 %}
@@ -402,6 +430,55 @@ To remove a curve simply blank all boxes."></i>
                                     <td><a onclick="deleteRow(this)"><i class="fas fa-trash"></i></a></td>
                                 </tr>
                             {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="performance-warnings" class="customization_item">
+                <h2>Academic Performance Warnings</h2>
+                <p class="rg_info_message">Automatically generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.</p>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
+                <div class="option">
+                    <label for="performance-warnings-message">
+                        <span>Message:</span>
+                        <input class="option-input" type="text" name="performance-warnings-message" id="performance-warnings-message">
+                    </label>
+                    <label for="performance-warnings-gradeables">
+                        <span>Gradeables:</span>
+                        <select name="performance-warnings-gradeables[]" id="performance-warnings-gradeables">
+                            <option> -- select an option -- </option>{# Browser automatically selects first option. This option will be removed after page loads #}
+                            {% for index, value in gradeables %}
+                                <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label for="performance-warnings-score">
+                        <span>Target Score:</span>
+                        <input class="option-input" type="number" name="performance-warnings-score" id="performance-warnings-score">
+                    </label>
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('performanceWarnings'); manageWarningsGradeables('submit');" aria-label="submit">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {# This is a data table #}
+                    <table id="performance-warnings-table" class="table table-striped table-bordered persist-area mobile-table">
+                        <thead>
+                        <tr>
+                            <th>Message</th>
+                            <th>Gradeables</th>
+                            <th>Target Score</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="performance-warnings-table-body">
+                        {% for entry in warning %}
+                            <tr>
+                                <td>{{ entry.msg }}</td>
+                                <td>{{ entry.ids|join(', ') }}</td>
+                                <td>{{ entry.value }}</td>
+                                <td><a onclick="deleteRow(this); manageWarningsGradeables('delete');"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
