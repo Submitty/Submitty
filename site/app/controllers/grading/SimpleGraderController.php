@@ -249,15 +249,20 @@ class SimpleGraderController extends AbstractController {
 
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
-            if ($data === '' || $data === "0") {
-                // If the component is empty, delete it
-                $this->core->getQueries()->deleteGrade($component_grade);
-                continue;
-            }
             if ($component->isText()) {
+                if ($data === '') {
+                    // If the component is empty, delete it
+                    $ta_graded_gradeable->deleteGradedComponent($component);
+                    continue;
+                }
                 $component_grade->setComment($data);
             }
             else {
+                if ($data === '' || $data === '0') {
+                    // If the component is empty, delete it
+                    $ta_graded_gradeable->deleteGradedComponent($component);
+                    continue;
+                }
                 // This catches both the not-set and blank-data case for numeric cells
                 if (
                     !is_numeric($data)

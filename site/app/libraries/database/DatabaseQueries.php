@@ -9426,18 +9426,4 @@ ORDER BY
         }
         return $this->submitty_db->getRowCount() > 0;
     }
-
-    /**
-     * @param GradedComponent $graded_component The graded component to delete.
-     */
-    public function deleteGrade(GradedComponent $graded_component): void {
-        $this->deleteGradedComponentMarks($graded_component, $graded_component->getDbMarkIds());
-        $params = [
-            $graded_component->getTaGradedGradeable()->getId(),
-            $graded_component->getComponentId(),
-            $graded_component->getGrader()->getId()
-        ];
-        $query = "DELETE FROM gradeable_component_data WHERE gd_id=? AND gc_id=? AND gcd_grader_id=?";
-        $this->course_db->query($query, $params);
-    }
 }
