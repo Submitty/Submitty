@@ -29,7 +29,8 @@ class NotificationView extends AbstractView {
             'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
             'csrf_token' => $this->core->getCsrfToken(),
             'defaults' => User::constructNotificationSettings([]),
-            'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings'])
+            'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings']),
+            'self_registration_type' => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
         ]);
     }
 }
