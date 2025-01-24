@@ -9412,7 +9412,13 @@ ORDER BY
             $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
-        ", [$component->getId(), $grader_id, $isTeam ? null : $graded_id, $isTeam ? $graded_id : null, $this->core->getDateTimeNow()]);
+        ", [
+            $component->getId(),
+            $grader_id,
+            $isTeam ? null : $graded_id,
+            $isTeam ? $graded_id : null,
+            $this->core->getDateTimeNow(),
+        ]);
     }
 
     /**
