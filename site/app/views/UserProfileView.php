@@ -23,10 +23,10 @@ class UserProfileView extends AbstractView {
         string $csrf_token
     ) {
         $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
-        if ($user->getPreferredGivenName() != "") {
+        if ($user->getPreferredGivenName() !== "" && $user->getPreferredGivenName() !== null) {
             $autofill_preferred_name[0] = $user->getPreferredGivenName();
         }
-        if ($user->getPreferredFamilyName() != "") {
+        if ($user->getPreferredFamilyName() !== "" && $user->getPreferredFamilyName() !== null) {
             $autofill_preferred_name[1] = $user->getPreferredFamilyName();
         }
 
