@@ -167,7 +167,7 @@ class ForumController extends AbstractController {
             foreach ($inputCategoriesIds as $category_id) {
                 $match_found = false;
                 foreach ($rows as $index => $values) {
-                    if ($values["category_id"] === $category_id) {
+                    if ($values->getId() === $category_id) {
                         $match_found = true;
                         break;
                     }
@@ -202,7 +202,7 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $rows = $repo->getCategories();
         foreach ($rows as $index => $values) {
-            if (((int) $values["category_id"]) !== $category_id) {
+            if (((int) $values->getId()) !== $category_id) {
                 return true;
             }
         }
@@ -330,7 +330,7 @@ class ForumController extends AbstractController {
 
         $current_order = [];
         foreach ($rows as $row) {
-            $current_order[] = (int) $row['category_id'];
+            $current_order[] = (int) $row->getId();
         }
         $new_order = [];
         foreach ($_POST['categorylistitem'] as $item) {
