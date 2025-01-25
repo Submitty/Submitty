@@ -20,12 +20,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class ConfigurationController extends AbstractController {
     // The message that should be returned to the user if they fail the required validation to enable the nightly
     // rainbow grades build checkbox
-    const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
-    'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
-    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
-    const NO_SELF_REGISTER = 0; // Self registration disabled
-    const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
-    const ALL_SELF_REGISTER = 2; // Self registration allowed, and all users who register are automatically added
+    public const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
+        'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
+        'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
+    public const NO_SELF_REGISTER = 0; // Self registration disabled
+    public const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
+    public const ALL_SELF_REGISTER = 2; // Self registration allowed, and all users who register are automatically added
 
     /**
      * @return MultiResponse
@@ -191,7 +191,7 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'all_self_registration') {
-            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
+            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry === 'true' ? ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
             $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $_POST['default_section']);
             $name = 'self_registration_type';
             $entry = $entry === 'true' ? ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER;

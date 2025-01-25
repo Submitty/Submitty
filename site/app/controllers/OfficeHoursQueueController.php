@@ -730,7 +730,7 @@ class OfficeHoursQueueController extends AbstractController {
         $result = $this->core->getQueries()->studentQueueSearch($user_id);
         $data = [];
         foreach ($result as $row) {
-                $data[] = $row;
+            $data[] = $row;
         }
         $responseData = json_encode($data);
         return JsonResponse::getSuccessResponse($responseData);

@@ -16,7 +16,7 @@ use DateTime;
  * they logged in.
  */
 class SessionManager {
-    const SESSION_EXPIRATION = "2 weeks";
+    public const SESSION_EXPIRATION = "2 weeks";
 
     /**
      * @var Core

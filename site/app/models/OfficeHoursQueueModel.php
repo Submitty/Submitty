@@ -350,8 +350,8 @@ class OfficeHoursQueueModel extends AbstractModel {
             $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
         }
         else {
-          //Check assuming their time_in is current time because then it assumes
-          //everyone not helped this week is in front of them
+            //Check assuming their time_in is current time because then it assumes
+            //everyone not helped this week is in front of them
             $time_in = $this->core->getDateTimeNow();
         }
         return $this->core->getQueries()->getNumberAheadInQueueThisWeek($this->getCurrentQueueCode(), $time_in);
@@ -362,8 +362,8 @@ class OfficeHoursQueueModel extends AbstractModel {
             $time_in = DateUtils::parseDateTime($this->getCurrentQueueTimeIn(), $this->core->getConfig()->getTimezone());
         }
         else {
-          //Check assuming their time_in is current time because then it assumes
-          //everyone not helped today is in front of them
+            //Check assuming their time_in is current time because then it assumes
+            //everyone not helped today is in front of them
             $time_in = $this->core->getDateTimeNow();
         }
         return $this->core->getQueries()->getNumberAheadInQueueToday($this->getCurrentQueueCode(), $time_in);

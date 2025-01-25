@@ -3,9 +3,9 @@
 namespace app\libraries;
 
 abstract class GradeableType {
-    const ELECTRONIC_FILE = 0;
-    const CHECKPOINTS     = 1;
-    const NUMERIC_TEXT    = 2;
+    public const ELECTRONIC_FILE = 0;
+    public const CHECKPOINTS     = 1;
+    public const NUMERIC_TEXT    = 2;
 
     public static function typeToString(int $type): string {
         switch ($type) {

@@ -60,32 +60,32 @@ class User extends AbstractModel {
      * Access groups, lower is more access
      */
 
-    const GROUP_INSTRUCTOR            = 1;
-    const GROUP_FULL_ACCESS_GRADER    = 2;
-    const GROUP_LIMITED_ACCESS_GRADER = 3;
-    const GROUP_STUDENT               = 4;
+    public const GROUP_INSTRUCTOR            = 1;
+    public const GROUP_FULL_ACCESS_GRADER    = 2;
+    public const GROUP_LIMITED_ACCESS_GRADER = 3;
+    public const GROUP_STUDENT               = 4;
     /** Logged out */
-    const GROUP_NONE                  = 5;
+    public const GROUP_NONE                  = 5;
 
     /**
      * Access levels, lower level means more access
      */
-    const LEVEL_SUPERUSER             = 1;
-    const LEVEL_FACULTY               = 2;
-    const LEVEL_USER                  = 3;
+    public const LEVEL_SUPERUSER             = 1;
+    public const LEVEL_FACULTY               = 2;
+    public const LEVEL_USER                  = 3;
 
     /**
      * Profile image set return codes
      */
-    const PROFILE_IMG_SET_FAILURE = 0;
-    const PROFILE_IMG_SET_SUCCESS = 1;
+    public const PROFILE_IMG_SET_FAILURE = 0;
+    public const PROFILE_IMG_SET_SUCCESS = 1;
     /** Profile image quota of 50 images exhausted */
-    const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
+    public const PROFILE_IMG_QUOTA_EXHAUSTED = 2;
 
     /**
      * Last initial display formats
      */
-    const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
+    public const LAST_INITIAL_FORMATS = [ "Single", "Multi", "Hyphen-Multi", "None" ];
 
     /** @prop
      * @var bool Is this user actually loaded (else you cannot access the other member variables) */
@@ -578,7 +578,7 @@ class User extends AbstractModel {
                 $spaced = preg_split('/\s+/', $family_name, -1, PREG_SPLIT_NO_EMPTY);
                 foreach ($spaced as $part) {
                     $dashed = explode('-', $part);
-                    $l = array_map(fn(string $part) => $part[0], $dashed);
+                    $l = array_map(fn (string $part) => $part[0], $dashed);
                     $last_initial .= implode('-', $l) . '.';
                 }
                 break;
@@ -645,7 +645,8 @@ class User extends AbstractModel {
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
                 }
-            } while (in_array($random, $anon_ids));
+            }
+            while (in_array($random, $anon_ids));
             $this->core->getQueries()->insertGradeableAnonId($this->id, $g_id, $random);
         }
         return $anon_id ?? $random ?? null;
@@ -662,8 +663,8 @@ class User extends AbstractModel {
 
         switch ($field) {
             case 'user_id':
-                 //Username / user_id must contain only lowercase alpha,
-                 //numbers, underscores, hyphens
+                //Username / user_id must contain only lowercase alpha,
+                //numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
             case 'user_legal_givenname':
             case 'user_legal_familyname':

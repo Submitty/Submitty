@@ -50,7 +50,7 @@ class Team extends AbstractModel {
     protected $team_name;
     /** @prop
      * @var number Maximum length of the team name */
-    const MAX_TEAM_NAME_LENGTH = 30;
+    public const MAX_TEAM_NAME_LENGTH = 30;
     /**
      * Team constructor.
      * @param Core  $core
@@ -110,7 +110,8 @@ class Team extends AbstractModel {
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
                 }
-            } while (in_array($random, $anon_ids));
+            }
+            while (in_array($random, $anon_ids));
             $this->anon_id = $random;
             $this->core->getQueries()->updateTeamAnonId($this->getId(), $random);
         }

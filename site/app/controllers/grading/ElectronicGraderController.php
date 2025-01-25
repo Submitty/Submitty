@@ -160,9 +160,9 @@ class ElectronicGraderController extends AbstractController {
         [ [A,[C,E]],[B,[F,D]], ...]
         A grades C and E, B grades F and D ..and so on!
         */
-            $max_offset = count($student_array);
-            $offset_array = [];
-            $temp_offset = [];
+        $max_offset = count($student_array);
+        $offset_array = [];
+        $temp_offset = [];
         for ($i = 1; $i < $max_offset; ++$i) {
             array_push($temp_offset, $i);
         }
@@ -189,7 +189,7 @@ class ElectronicGraderController extends AbstractController {
             }
             array_push($final_grading_info, [$n_array_peers[0][$i],$temp]);
         }
-            return $final_grading_info;
+        return $final_grading_info;
     }
 
     /**
@@ -303,9 +303,9 @@ class ElectronicGraderController extends AbstractController {
         $student_list = [];
         $students = $this->core->getQueries()->getUsersByRegistrationSections($order->getSectionNames());
         foreach ($students as $student) {
-             $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-             $sorted_students[$reg_sec][] = $student;
-             array_push($student_list, ['user_id' => $student->getId()]);
+            $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $sorted_students[$reg_sec][] = $student;
+            array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
                 if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                     array_push($student_array, $student->getId());
@@ -743,8 +743,8 @@ class ElectronicGraderController extends AbstractController {
                 ];
             }
             if ($peer) {
-                 // If a team assignment => Team Peer Grading Stats Should be Visible
-                 // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
+                // If a team assignment => Team Peer Grading Stats Should be Visible
+                // Stats are broken, Update this after Teams work fine with Randomized Peer Assignments
                 if ($gradeable->isTeamAssignment()) {
                     $sections['stu_grad'] = [
                        'total_components' => count($gradeable->getPeerComponents()), // Multiply it by number of teams assigned to grade
@@ -1997,9 +1997,9 @@ class ElectronicGraderController extends AbstractController {
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
-                return $component->toArray();
+            return $component->toArray();
         }, array_filter($gradeable->getComponents(), function (Component $component) use ($gradeable) {
-                return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+            return $this->core->getAccess()->canI('grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
         }));
         $return['components'] = array_values($return['components']);
         return $return;

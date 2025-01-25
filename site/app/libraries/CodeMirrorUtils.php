@@ -3,14 +3,14 @@
 namespace app\libraries;
 
 class CodeMirrorUtils {
-    const DEFAULT_CSS_FILES = [
+    public const DEFAULT_CSS_FILES = [
         'codemirror/codemirror.css',
         'codemirror/theme/eclipse.css',
         'codemirror/theme/monokai.css',
         'codemirror-spell-checker/spell-checker.min.css'
     ];
 
-    const DEFAULT_JS_FILES = [
+    public const DEFAULT_JS_FILES = [
         'codemirror/codemirror.js',
         'codemirror/addon/display/autorefresh.js',
         'codemirror/addon/display/placeholder.js',
@@ -28,7 +28,7 @@ class CodeMirrorUtils {
         'codemirror-spell-checker/spell-checker.min.js',
     ];
 
-    const DEFAULT_JS_FILES_CODEMIRROR_6 = [
+    public const DEFAULT_JS_FILES_CODEMIRROR_6 = [
         'codemirror6/autocomplete/dist/index.js',
         'codemirror6/commands/dist/index.js',
         'codemirror6/language/dist/index.js',
@@ -36,13 +36,13 @@ class CodeMirrorUtils {
         'codemirror6/view/dist/index.js',
     ];
 
-    const DEFAULT_MIME_TYPE = 'text/plain';
+    public const DEFAULT_MIME_TYPE = 'text/plain';
 
     /**
      * Defines a map between languages (keys) that submitty developers/users have been using and the mime-types (values)
      * that CodeMirror uses for their mode.
      */
-    const MIME_TYPE_MAP = [
+    public const MIME_TYPE_MAP = [
         'bash' => 'text/x-sh',
         'c' => 'text/x-csrc',
         'clike' => 'text/x-csrc',
