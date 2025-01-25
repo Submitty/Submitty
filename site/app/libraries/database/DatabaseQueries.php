@@ -3616,7 +3616,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getAllGradeablesIdsAndTitles() {
         $this->course_db->query("SELECT g_id, g_title FROM gradeable ORDER BY g_title ASC");
         $results = $this->course_db->rows();
-    
         // Add default value for g_datatest_id
         foreach ($results as &$result) {
             $result['g_datatest_id'] = $result['g_id'];

@@ -316,7 +316,7 @@ describe('navigation page', () => {
     });
 });
 
-describe('locked gradeables', () =>{
+describe('locked gradeables', () => {
     it('should create the locked gradeable first', () => {
         cy.login('instructor');
         cy.visit(['sample']);
@@ -328,7 +328,8 @@ describe('locked gradeables', () =>{
         cy.get('[data-testid="no_ta_grade"]').click();
         cy.get('[data-testid="create-gradeable-btn"]').should('not.be.disabled').click();
         cy.get('#gradeable-lock').select('Closed Team Homework [ closed_team_homework ]');
-        cy.get('#gradeable-lock-points').should('be.visible').clear().type(10);        
+        cy.get('#gradeable-lock-points').should('be.visible').clear();
+        cy.get('#gradeable-lock-points').type(10);
     });
 
     it('should show the locked gradeable for the instructor and message', () => {
@@ -341,24 +342,16 @@ describe('locked gradeables', () =>{
         cy.get('[data-testid="test_gradeable"]').find('[data-testid="submit-btn"]').then(($button) => {
             // Get the text from the onclick attribute
             const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-        
             // Extract the prerequisite text
             const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-        
             cy.on('window:alert', (alertText) => {
                 // Validate the alert text
                 expect(alertText).to.equal(`Please complete ${prerequisite}.`);
             });
-        
             // Trigger the button click
             cy.wrap($button).click();
         });
-
-        
-        
     });
-
-
     it('should show the locked gradeable for the ta and message', () => {
         cy.login('ta');
         cy.visit(['sample']);
@@ -366,18 +359,14 @@ describe('locked gradeables', () =>{
         cy.get('[data-testid="test_gradeable"]').find('[data-testid="submit-btn"]').then(($button) => {
             // Get the text from the onclick attribute
             const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-        
             // Extract the prerequisite text
             const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-        
             cy.on('window:alert', (alertText) => {
                 // Validate the alert text
                 expect(alertText).to.equal(`Please complete ${prerequisite}.`);
             });
-        
             // Trigger the button click
             cy.wrap($button).click();
         });
     });
-
-})
+});
