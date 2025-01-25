@@ -2115,13 +2115,13 @@ function loadThreadHandler() {
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status !== 0) {
                     // AJAX request fails outside of network issues caused by WebSocket thread updates
-                    console.error("Request failed:", textStatus, errorThrown);
+                    console.error('Request failed:', textStatus, errorThrown);
                     window.alert('Something went wrong while trying to display thread details. Please try again.');
                 }
-            }
+            },
         });
     });
 }
