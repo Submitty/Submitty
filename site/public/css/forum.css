@@ -733,7 +733,7 @@
 
 [data-theme="dark"] .filter-inactive {
     background: var(--btn-default-white);
-    color: var(--default-black) !important;
+    color: var(--default-black);
 }
 
 .thread-resolved {
