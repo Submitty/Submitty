@@ -34,13 +34,8 @@ class Category {
     #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
     protected Collection $threads;
 
-    public function getVisibleDate(): string {
-        if ($this->visible_date === null) {
-            return "";
-        }
-        else {
-            return $this->visible_date;
-        }
+    public function getVisibleDate(): ?string {
+        return $this->visible_date;
     }
 
     public function getId(): int {
