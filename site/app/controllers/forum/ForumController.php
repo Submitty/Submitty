@@ -2,6 +2,7 @@
 
 namespace app\controllers\forum;
 
+use app\entities\forum\Category;
 use app\libraries\Core;
 use app\libraries\ForumUtils;
 use app\models\Notification;
@@ -157,7 +158,8 @@ class ForumController extends AbstractController {
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $rows = $repo->getCategories();
         if (is_array($inputCategoriesIds)) {
             if (count($inputCategoriesIds) < 1) {
                 return false;
@@ -197,7 +199,8 @@ class ForumController extends AbstractController {
 
     private function isCategoryDeletionGood($category_id) {
         // Check if not the last category which exists
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $rows = $repo->getCategories();
         foreach ($rows as $index => $values) {
             if (((int) $values["category_id"]) !== $category_id) {
                 return true;
@@ -322,7 +325,8 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $rows = $repo->getCategories();
 
         $current_order = [];
         foreach ($rows as $row) {
@@ -1227,7 +1231,8 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
-        if (empty($this->core->getQueries()->getCategories())) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        if (empty($repo->getCategories())) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
@@ -1249,7 +1254,8 @@ class ForumController extends AbstractController {
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
-        $result["all_categories_list"] = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $result["all_categories_list"] = $repo->getCategories();
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
             $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);

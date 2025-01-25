@@ -2,7 +2,9 @@
 
 namespace app\views\forum;
 
+use app\entities\forum\Category;
 use app\libraries\DateUtils;
+use app\repositories\forum\CategoryRepository;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
@@ -164,7 +166,8 @@ class ForumThreadView extends AbstractView {
      */
     public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, bool $ajax = false): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
 
         $cookieSelectedCategories = $this->getSavedForumCategories($currentCourse, $categories);
         $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
@@ -530,7 +533,8 @@ class ForumThreadView extends AbstractView {
     public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads, int $block_number): string {
         $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, true);
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
         // getting the forum page buttons
         $button_params = $this->getAllForumButtons(true, -1, null, $show_deleted, $show_merged_threads);
@@ -1016,7 +1020,8 @@ class ForumThreadView extends AbstractView {
 
         $category_colors;
 
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
         $buttons = [
@@ -1068,7 +1073,8 @@ class ForumThreadView extends AbstractView {
         $category_colors;
 
         if ($this->core->getUser()->accessGrading()) {
-            $categories = $this->core->getQueries()->getCategories();
+            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+            $categories = $repo->getCategories();
         }
 
         $buttons = [
