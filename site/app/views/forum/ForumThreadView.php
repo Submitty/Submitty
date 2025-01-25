@@ -1016,10 +1016,6 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
-        $categories = "";
-
-        $category_colors;
-
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $categories = $repo->getCategories();
         $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
