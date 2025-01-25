@@ -127,6 +127,10 @@
     flex-direction: column;
 }
 
+#nav-sidebar-plagiarism i.fa-exclamation-triangle {
+    display: inline-block; 
+}
+
 i.fa-exclamation-triangle {
     margin-right: 5px;
     padding-bottom: 2px;
