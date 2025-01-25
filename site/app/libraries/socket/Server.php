@@ -107,9 +107,9 @@ class Server implements MessageComponentInterface {
     /**
      * Push a given message to all-but-sender connections on the same course and page
      */
-    private function broadcast(string $from, string $content, string $page_name): void {
+    private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
         foreach ($this->clients[$page_name] as $client) {
-            if ($this->getSocketUserID($client) !== $from) {
+            if ($client !== $from) {
                 $client->send($content);
             }
         }
@@ -186,7 +186,6 @@ class Server implements MessageComponentInterface {
                 return;
             }
 
-            $user_agent = $from->httpRequest->getHeader('User-Agent')[0] ?? '';
             $msg = json_decode($msgString, true);
 
             if (isset($msg["type"]) && $msg["type"] === "new_connection") {
@@ -204,14 +203,15 @@ class Server implements MessageComponentInterface {
                     $from->close();
                 }
             }
-            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page']) && $user_agent === 'websocket-client-php') {
-                // Only broadcast Websocket messages strictly from the PHP client
-                $sender = $msg['user_id'];
+            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
+                // user_id is only sent with socket clients open from a php user_agent
                 unset($msg['user_id']);
-
                 $new_msg_string = json_encode($msg);
-                $this->broadcast($sender, $new_msg_string, $msg['page']);
+                $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
+            }
+            else {
+                $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
             }
         }
         catch (\Throwable $t) {
