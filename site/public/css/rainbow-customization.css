@@ -128,7 +128,9 @@
 }
 
 #nav-sidebar-plagiarism i.fa-exclamation-triangle {
-    display: inline-block; 
+    margin-right: 0px;
+    padding-bottom: 0px;
+    display: inline-block;
 }
 
 i.fa-exclamation-triangle {
