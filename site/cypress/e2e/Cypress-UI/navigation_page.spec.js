@@ -325,7 +325,6 @@ describe('locked gradeables', () => {
         cy.get('[data-testid="create-gradeable-title"]').type('Test Gradeable');
         cy.get('[data-testid="create-gradeable-id"]').type('test_gradeable');
         cy.get('[data-testid="create-gradeable-btn"]').click();
-        cy.get('[data-testid="no_ta_grade"]').click();
         cy.get('[data-testid="create-gradeable-btn"]').should('not.be.disabled').click();
         cy.get('#gradeable-lock').select('Closed Team Homework [ closed_team_homework ]');
         cy.get('#gradeable-lock-points').should('be.visible').clear();
