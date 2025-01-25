@@ -25,21 +25,23 @@ class Category {
     #[ORM\Column(type: Types::STRING)]
     protected string $color;
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    protected ?\DateTimeImmutable $visible_date;
+    private ?int $diff = null;
+
     /**
      * @var Collection<Thread>
      */
     #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
     protected Collection $threads;
 
-    #[ORM\Column(
-        name: "visible_date",
-        type: Types::DATETIME_IMMUTABLE,
-        options: ["default" => "CURRENT_TIMESTAMP"]
-    )]
-    private \DateTimeImmutable $visibleDate;
+    public function __construct()
+    {
+        $this->visible_date = null;
+    }
 
-    public function getVisibleDate(): \DateTimeImmutable {
-        return $this->visibleDate;
+    public function getVisibleDate(): ?\DateTimeImmutable {
+        return $this->visible_date;
     }
 
     public function getId(): int {
@@ -52,5 +54,9 @@ class Category {
 
     public function getColor(): string {
         return $this->color;
+    }
+
+    public function getDiff(): ?int {
+        return $this->diff;
     }
 }
