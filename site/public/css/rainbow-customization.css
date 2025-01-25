@@ -127,12 +127,6 @@
     flex-direction: column;
 }
 
-#nav-sidebar-plagiarism i.fa-exclamation-triangle {
-    margin-right: 0px;
-    padding-bottom: 0px;
-    display: inline-block;
-}
-
 i.fa-exclamation-triangle {
     margin-right: 5px;
     padding-bottom: 2px;
@@ -213,6 +207,12 @@ hr {
 }
 
 div:has(.override) ~ div.gradeable-li-right-of-input i.fa-exclamation-triangle {
+    display: inline-block;
+}
+
+#nav-sidebar-plagiarism i.fa-exclamation-triangle {
+    margin-right: 0;
+    padding-bottom: 0;
     display: inline-block;
 }
 
