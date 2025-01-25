@@ -15,7 +15,7 @@ class CategoryRepository extends EntityRepository {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('category')
             ->addSelect(
-                "EXTRACT(HOUR FROM CURRENT_TIMESTAMP() - category.visibleDate) AS diff"
+                "EXTRACT(HOUR, CURRENT_TIMESTAMP() - category.visible_date) AS HIDDEN diff"
             )
             ->from(Category::class, 'category')
             ->addOrderBy('category.rank', 'ASC', 'NULLS LAST')
