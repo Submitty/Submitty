@@ -54,7 +54,7 @@
                     <option value="">Select prerequisite gradeable (Off)</option>
                     {% for template in template_list %}
                         {% if template.g_id != gradeable.getId() %}
-                            <option value="{{ template.g_id }}" data-testid="{{ template.g_datatest_id }}" {% if template.g_id == gradeable.getDependsOn() %} selected {% endif %}>{{ template.g_title }} [ {{ template.g_id }} ]</option>
+                            <option value="{{ template.g_id }}" {% if template.g_id == gradeable.getDependsOn() %} selected {% endif %}>{{ template.g_title }} [ {{ template.g_id }} ]</option>
                         {% endif %}
                     {% endfor %}
                 </select>
