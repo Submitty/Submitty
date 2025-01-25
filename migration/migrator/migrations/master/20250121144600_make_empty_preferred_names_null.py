@@ -29,3 +29,5 @@ def down(config, database):
 
     database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_givenname_not_empty")
     database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_familyname_not_empty")
+    database.execute("UPDATE users SET user_preferred_givenname = '' WHERE user_preferred_givenname IS NULL")
+    database.execute("UPDATE users SET user_preferred_familyname = '' WHERE user_preferred_familyname IS NULL")
