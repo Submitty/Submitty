@@ -2054,7 +2054,7 @@ function sortTable(sort_element_index, reverse = false) {
 }
 
 function loadThreadHandler() {
-    $('a.thread_box_link').click(function (event) {
+    $('a.thread_box_link').click(async function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
             return;
@@ -2115,9 +2115,13 @@ function loadThreadHandler() {
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
             },
-            error: function () {
-                window.alert('Something went wrong while trying to display thread details. Please try again.');
-            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status !== 0) {
+                    // AJAX request fails outside of network issues caused by WebSocket thread updates
+                    console.error("Request failed:", textStatus, errorThrown);
+                    window.alert('Something went wrong while trying to display thread details. Please try again.');
+                }
+            }
         });
     });
 }
