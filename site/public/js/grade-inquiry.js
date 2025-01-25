@@ -142,14 +142,7 @@ function onGradeInquirySubmitClicked(button) {
                     const data = json['data'];
 
                     if (data.type === 'new_post') {
-                        newPostRender(gc_id, data.post_id, data.new_post);
                         text_area.val('');
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
                     }
                 }
                 else {
