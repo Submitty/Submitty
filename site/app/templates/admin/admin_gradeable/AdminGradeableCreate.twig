@@ -136,9 +136,9 @@
         <div class="gradeable_type_options electronic_file" id="electronic_file">
             <fieldset>
                 <legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend>
-                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" data-testid="yes_ta_grade" class="bool_val auto_save date-related"
                         {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
-                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" data-testid="no_ta_grade" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
 
@@ -185,10 +185,10 @@
                     {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                    <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                    <input type="radio" id = "team_yes_radio" name="team_assignment" value="true" data_test_id="team_yes_radio"
                             {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
-                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false" data_testid="team_no_radio"
                             {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
                 </div>
                 {# (VPAT) Closes fieldset for team assignment radio group #}
