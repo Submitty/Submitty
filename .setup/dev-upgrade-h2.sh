@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck enable=all
 
+set -e
+
 display_help() {
     echo "Usage:"
     echo "$0 up|down [Options]"
@@ -119,7 +121,11 @@ update_apache() {
 
     info "Double check that HTTP/2 module is enabled"
     phpver=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+    #TODO: REMOVE THIS https://github.com/Submitty/Submitty/issues/11253
+    # ERROR: Module php8.1 does not exist!
+    set +e
     a2dismod "php${phpver}" mpm_prefork
+    set -e
     a2enmod mpm_event http2
 
     info "Checking the integrity of Apache configuration"

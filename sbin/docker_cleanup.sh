@@ -1,5 +1,7 @@
 #!/bin/bash                                                                                                                                               
 
+set -e
+
 # An apparent bug in docker may leave stuck zombie networks after
 # autograding has finished.  This docker_cleanup script will be run by
 # the daemon user as root to detect and forceably remove any stuck
