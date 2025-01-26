@@ -55,11 +55,16 @@ class Category {
     }
 
     public function getDiff(): int {
-        if ($this->visible_date === null) {
+        if (empty($this->visible_date)) {
+            return 0;
+        }
+        try {
+            $visibleDate = new \DateTimeImmutable($this->visible_date);
+        } catch (\Exception $e) {
             return 0;
         }
         $now = new \DateTimeImmutable();
-        $interval = $now->diff($this->visible_date);
-        return $interval->h + ($interval->days * 24);
+        $interval = $now->diff($visibleDate);
+        return ($interval->days * 24) + $interval->h;
     }
 }
