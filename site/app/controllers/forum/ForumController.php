@@ -184,7 +184,7 @@ class ForumController extends AbstractController {
             foreach ($inputCategoriesName as $category_name) {
                 $match_found = false;
                 foreach ($rows as $index => $values) {
-                    if ($values["category_desc"] === $category_name) {
+                    if ($values->getDescription() === $category_name) {
                         $match_found = true;
                         break;
                     }
