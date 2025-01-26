@@ -387,7 +387,7 @@ class ForumController extends AbstractController {
             $categories_ids[] = (int) $category_id;
         }
         if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
-            return $this->core->getOutput()->renderJsonFail("One of the fields was empty or bad. Please re-submit your thread!");
+            return $this->core->getOutput()->renderJsonFail("One of the fields was empty or bad. Please re-submit your thread.");
         }
         elseif (!$this->isValidCategories($categories_ids)) {
             return $this->core->getOutput()->renderJsonFail("You must select valid categories. Please re-submit your thread.");
