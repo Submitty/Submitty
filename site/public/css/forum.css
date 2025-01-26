@@ -256,20 +256,33 @@
 }
 
 .upduck-container{
-    display: inline-block;
+    display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 5px;
 }
 
 .upduck-button {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
     background: none; 
     border: none; 
     padding: 0; 
     cursor: pointer; 
     outline: none;
     vertical-align: middle;
+}
+
+.upduck-count, .reply-button {
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .upduck-container {
+        flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        gap: 2px; /* Reduce spacing for compact layout */
+    }
 }
 
 .like-counter{
