@@ -68,6 +68,8 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="title"]').type('Test pronouns display');
         cy.get('[data-testid="reply_box_1"]').type('My pronouns is');
         cy.get('.cat-buttons').contains('Question').click();
+        // wait for the current state to be saved to local storage before submitting
+        cy.wait(3000);
         cy.get('[data-testid="forum-publish-thread"]').click();
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test pronouns display');
         cy.get('[data-testid="post-user-pronouns"]').should('contain', 'They/Them');
