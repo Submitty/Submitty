@@ -48,5 +48,6 @@
   "/courses/<term>/<course>/users",
   "/courses/<term>/<course>/queue/student_search",
   "/courses/<term>/<course>/register",
-  "/courses/<term>/<course>/gradeable/<gradeable>/components/marks/save_order"
+  "/courses/<term>/<course>/gradeable/<gradeable>/components/marks/save_order",
+  "/calendar"
 ]
