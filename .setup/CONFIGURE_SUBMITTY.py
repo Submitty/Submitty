@@ -533,7 +533,7 @@ if not args.worker:
     if not os.path.isfile(WORKERS_JSON):
         capabilities = ["default"]
         if args.setup_for_sample_courses:
-            capabilities.extend(["cpp", "python", "et-cetera", "notebook"])
+            capabilities.extend(["cpp", "python", "et-cetera", "notebook", "unsupported"])
 
         worker_dict = {
             "primary": {
@@ -564,13 +564,24 @@ if not args.worker:
 
     if not os.path.isfile(CONTAINERS_JSON):
         container_dict = {
-            "default": [
+            "default":  [
                           "submitty/clang:6.0",
                           "submitty/autograding-default:latest",
                           "submitty/java:11",
                           "submitty/python:3.6",
                           "submittyrpi/csci1200:default"
-                       ]
+                        ],
+            "python":   [
+                          "submitty/autograding-default:latest",
+                          "submitty/python:3.6",
+                        ],
+            "cpp":      [
+                          "submitty/clang:6.0",
+                          "submitty/autograding-default:latest",
+                        ],
+            "notebook": [
+                          "submitty/autograding-default:latest",
+                        ]
         }
 
         with open(CONTAINERS_JSON, 'w') as container_file:
