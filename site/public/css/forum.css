@@ -224,7 +224,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
-    color: var(--standard-hover-light-gray) !important;
+    color: var(--focus-dropdown) !important;
 }
 
 .red-hover:hover {
@@ -654,7 +654,6 @@
 }
 
 .well blockquote {
-    border-color: var(--standard-light-gray);
     border-color: var(--standard-light-gray);
 }
 
