@@ -1,5 +1,5 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filter_withdrawn_update */
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -110,22 +110,126 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function inquiry_update() {
-    const button = document.getElementById('inquiryButton');
-    const status = Cookies.get('inquiry_status');
+function filter_withdrawn_update() {
+    // set up, by default this will hide withdrawned student
+    const filterWithdrawnCheckbox = $('[data-testid="toggle-filter-withdrawn"]');
+    if (Cookies.get('filter_student') === undefined) {
+        $('[data-student="electronic-grade-withdrawn"]').hide();
+        filterWithdrawnCheckbox.prop('checked', true);
+    }
+    else if (Cookies.get('filter_student') === 'false') {
+        $('[data-student="electronic-grade-withdrawn"]').show();
+        filterWithdrawnCheckbox.prop('checked', false);
+    }
+    else {
+        $('[data-student="electronic-grade-withdrawn"]').hide();
+        filterWithdrawnCheckbox.prop('checked', true);
+    }
 
+    // filter student who withdrawned from this course
+    filterWithdrawnCheckbox.on('change', () => {
+        if (Cookies.get('filter_student') === 'false') {
+            $('[data-student="electronic-grade-withdrawn"]').hide();
+            Cookies.set('filter_student', true);
+        }
+        else {
+            $('[data-student="electronic-grade-withdrawn"]').show();
+            Cookies.set('filter_student', false);
+        }
+    });
+}
+
+function inquiry_update() {
+    const check_inquiry = $('[data-testid="toggle-grade-inquiry"]');
+    const status = Cookies.get('inquiry_status');
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
+                $(this).closest('.grade-table').hide();
+                check_inquiry.prop('checked', true);
             }
         });
-        button.textContent = 'Grade Inquiry Only: On';
+    }
+    check_inquiry.on('change', () => {
+        if (status === 'on') {
+            Cookies.set('inquiry_status', 'off');
+        }
+        else {
+            Cookies.set('inquiry_status', 'on');
+        }
+        location.reload();
+    });
+}
+
+function switch_view() {
+    // true means view all, false means view assigned section
+    const view_status = $('[data-testid="view-sections"]');
+    if (Cookies.get('view') === undefined) {
+        Cookies.set('view', 'assigned', { path: '/' });
+        localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
+        location.reload();
+    }
+    else if (Cookies.get('view') === 'all') {
+        view_status.prop('checked', false);
     }
     else {
-        $('.grade-button').each(function () {
-            $(this).closest('.grade-table').show(); // show all gradeable items
-        });
-        button.textContent = 'Grade Inquiry Only: Off';
+        view_status.prop('checked', true);
     }
+    view_status.on('change', () => {
+        if (Cookies.get('view') === 'all') {
+            Cookies.set('view', 'assigned', { path: '/' });
+            localStorage.setItem('general-setting-navigate-assigned-students-only', 'true');
+        }
+        else {
+            Cookies.set('view', 'all', { path: '/' });
+            localStorage.setItem('general-setting-navigate-assigned-students-only', 'false');
+        }
+        location.reload();
+    });
+}
+
+function change_anon() {
+    const gradeable_id = document.getElementById('toggle-anon-button').getAttribute('data-gradeable-id');
+    const anon_status = $('[data-testid="toggle-anon-button"]');
+    Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
+    if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
+        Cookies.set(`anon_mode_${gradeable_id}`, 'off');
+    }
+    else if (Cookies.get(`anon_mode_${gradeable_id}`) === 'off') {
+        anon_status.prop('checked', false);
+    }
+    else {
+        anon_status.prop('checked', true);
+    }
+    anon_status.on('change', () => {
+        if (Cookies.get(`anon_mode_${gradeable_id}`) === 'on') {
+            Cookies.set(`anon_mode_${gradeable_id}`, 'off');
+        }
+        else {
+            Cookies.set(`anon_mode_${gradeable_id}`, 'on');
+        }
+        location.reload();
+    });
+}
+
+function changeSortOrder() {
+    const sort_status = $('[data-testid="random-default-order"]');
+    if (Cookies.get('sort') === undefined) {
+        Cookies.set('sort', 'id');
+    }
+    else if (Cookies.get('sort') === 'id') {
+        sort_status.prop('checked', false);
+    }
+    else {
+        sort_status.prop('checked', true);
+    }
+    sort_status.on('change', () => {
+        if (Cookies.get('sort') === 'id') {
+            Cookies.set('sort', 'random');
+        }
+        else {
+            Cookies.set('sort', 'id');
+        }
+        location.reload();
+    });
 }
