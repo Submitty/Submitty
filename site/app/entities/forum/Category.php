@@ -25,8 +25,8 @@ class Category {
     #[ORM\Column(type: Types::STRING)]
     protected string $color;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    protected ?\DateTimeImmutable $visible_date;
+    #[ORM\Column(type: Types::STRING)]
+    protected string $visible_date;
 
     /**
      * @var Collection<Thread>
@@ -34,7 +34,11 @@ class Category {
     #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
     protected Collection $threads;
 
-    public function getVisibleDate(): ?\DateTimeImmutable {
+    public function __construct() {
+        $this->visible_date = "";
+    }
+
+    public function getVisibleDate(): string {
         return $this->visible_date;
     }
 
