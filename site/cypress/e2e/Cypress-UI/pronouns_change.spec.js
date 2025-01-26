@@ -70,7 +70,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('.cat-buttons').contains('Question').click();
         // wait for the current state to be saved to local storage before submitting
         // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(3000);
+        cy.wait(1000);
         cy.get('[data-testid="forum-publish-thread"]').click();
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test pronouns display');
         cy.get('[data-testid="post-user-pronouns"]').should('contain', 'They/Them');
