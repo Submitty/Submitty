@@ -83,6 +83,7 @@ def parse_args():
     return parser.parse_args()
 
 
+# NOTE: no need to check worker install because psql should never be installed
 def main():
     """Primary function"""
     if not cmd_exists('psql'):
