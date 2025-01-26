@@ -15,6 +15,7 @@
 #
 ################################################################################################
 
+set -e
 set_permissions () {
     local fullpath=$1
     filename=$(basename -- "$fullpath")
@@ -216,13 +217,15 @@ else
     su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
-
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
+#TODO: REMOVE THIS https://github.com/Submitty/Submitty/issues/11254
+set +e
+
 # create doctrine proxy classes
 php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
-
+set -e
 # load lang files
 php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
 
@@ -401,6 +404,7 @@ find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
 PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+# Use set +e to allow capturing of the exit code
 set +e
 systemctl is-active --quiet php${PHP_VERSION}-fpm
 if [[ "$?" == "0" ]]; then
