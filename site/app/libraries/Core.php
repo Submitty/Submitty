@@ -180,7 +180,6 @@ class Core {
             FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
             $cache
         );
-        $config->addCustomDatetimeFunction('EXTRACT', ExtractFunction::class);
 
         return new EntityManager($database->getConnection(), $config);
     }
