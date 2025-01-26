@@ -177,10 +177,10 @@
     }
 
     .course-button {
-        padding: 10px;
+        padding: 20px;
         text-align: center;
-        width: 220px;
-        min-width: min-content;
+        
+        min-width: 100%;
         max-width: max-content;
     }
 
