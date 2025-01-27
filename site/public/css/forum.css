@@ -389,7 +389,7 @@
 
 .thread-merged,
 .thread-locked {
-    color: var(--btn-default-white);
+    color: var(--standard-pale-gray);
 }
 
 .thead-content {
