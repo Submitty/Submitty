@@ -783,7 +783,7 @@ class ForumController extends AbstractController {
             'type' => $type,
             'thread_id' => $thread_id,
             'post_id' => $post_id,
-            'reply_level' => $post->getReplyLevel() + 1,
+            'reply_level' => $post->getReplyLevel(),
             'post_box_id' => 1,
         ]);
         $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
