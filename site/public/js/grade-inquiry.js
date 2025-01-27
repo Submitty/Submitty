@@ -130,7 +130,6 @@ function onGradeInquirySubmitClicked(button) {
 
     // prevent double submission
     form.data('submitted', true);
-    const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
@@ -138,10 +137,9 @@ function onGradeInquirySubmitClicked(button) {
         success: function (response) {
             try {
                 const json = JSON.parse(response);
-                if (json['status'] === 'success') {
-                    const data = json['data'];
 
-                    if (data.type === 'new_post') {
+                if (json['status'] === 'success') {
+                    if (json['data']['type'] === 'new_post') {
                         text_area.val('');
                     }
                 }
