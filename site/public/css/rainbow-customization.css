@@ -214,6 +214,7 @@ div:has(.override) ~ div.gradeable-li-right-of-input i.fa-exclamation-triangle {
     margin-right: 0;
     padding-bottom: 0;
     display: inline-block;
+    border-bottom: 0;
 }
 
 .input-field {
