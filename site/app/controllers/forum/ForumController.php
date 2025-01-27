@@ -13,7 +13,6 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
-use app\views\forum\ForumThreadView;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Common\Collections\ArrayCollection;
 use app\libraries\socket\Client;
@@ -726,7 +725,7 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $order);
         if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id : {$thread_id}");
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id: {$thread_id}");
         }
 
         $post = $thread->getPosts()->filter(function ($x) use ($post_id) {
@@ -734,7 +733,7 @@ class ForumController extends AbstractController {
         })->first();
 
         if ($post === false) {
-            return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
+            return $this->core->getOutput()->renderJsonFail("Unable to find post: {$post_id}");
         }
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
                 return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
@@ -770,28 +769,23 @@ class ForumController extends AbstractController {
         if ($did_edit_thread) {
             $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
             $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
-            $this->sendSocketMessage([
-                'type' => 'edit_thread',
-                'thread_id' => $thread_id,
-                'post_id' => $post_id,
-                'reply_level' => 1,
-                'post_box_id' => 1,
-            ]);
+            $type = "edit_thread";
         }
         else {
             $subject = "Post Edited: " . Notification::textShortner($post->getContent());
             $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             if ($order === 'tree') {
-                ForumThreadView::BuildReplyHeirarchy($thread->getFirstPost());
+                ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
             }
-            $this->sendSocketMessage([
-                'type' => 'edit_post',
-                'thread_id' => $thread_id,
-                'post_id' => $post_id,
-                'reply_level' => $post->getReplyLevel(),
-                'post_box_id' => 1,
-            ]);
+            $type = "edit_post";
         }
+        $this->sendSocketMessage([
+            'type' => $type,
+            'thread_id' => $thread_id,
+            'post_id' => $post_id,
+            'reply_level' => $post->getReplyLevel(),
+            'post_box_id' => 1,
+        ]);
         $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
         $this->core->getNotificationFactory()->onPostModified($event);
         $this->core->getCourseEntityManager()->flush();
@@ -817,7 +811,7 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, "tree", true);
         if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id : {$thread_id}");
+            return $this->core->getOutput()->renderJsonFail("Invalid thread id: {$thread_id}");
         }
 
         $post = $thread->getPosts()->filter(function ($x) use ($post_id) {
@@ -825,14 +819,15 @@ class ForumController extends AbstractController {
         })->first();
 
         if ($post === false) {
-            return $this->core->getOutput()->renderJsonFail("Unable to find post : {$post_id}");
+            return $this->core->getOutput()->renderJsonFail("Unable to find post: {$post_id}");
         }
         if (!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post->getAuthor()->getId()])) {
-                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
+            return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
         }
         if ($post->getThread()->isLocked() && !$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderJsonFail("Thread is locked");
         }
+        $type = "post";
         if ($post->isDeleted()) {
             if ($thread->getFirstPost() !== $post && $post->getParent()->isDeleted()) {
                 return $this->core->getOutput()->renderJsonFail("Parent post must be restored first.");
@@ -842,44 +837,38 @@ class ForumController extends AbstractController {
                 if ($thread->getFirstPost()->getId() === $post->getId()) {
                     $thread->setDeleted(false);
                 }
-                $this->core->getCourseEntityManager()->flush();
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
                 $subject = "Restored: " . Notification::textShortner($post->getContent());
                 $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
-                $this->core->getNotificationFactory()->onPostModified($event);
-                $type = "post";
-                return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
             }
         }
         else {
-            $type = $thread->getFirstPost()->getId() === $post->getId() ? "thread" : "post";
-            $this->recursiveDeletePost($post, $thread);
-            $this->core->getCourseEntityManager()->flush();
+            $this->recursiveDeletePost($post);
+            if ($thread->getFirstPost()->getId() === $post->getId()) {
+                $thread->setDeleted(true);
+                $type = "thread";
+            }
             $metadata = json_encode([]);
             $subject = "Deleted: " . Notification::textShortner($post->getContent());
             $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
-            $this->core->getNotificationFactory()->onPostModified($event);
             $this->core->getQueries()->removeNotificationsPost($post_id);
-
             $this->sendSocketMessage(array_merge(
                 ['type' => 'delete_post', 'thread_id' => $thread_id],
                 $type === "post" ? ['post_id' => $post_id] : []
             ));
-
-            return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
+        $this->core->getCourseEntityManager()->flush();
+        $this->core->getNotificationFactory()->onPostModified($event);
+        return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
     }
 
-    private function recursiveDeletePost(Post $post, Thread $thread): void {
-        if ($thread->getFirstPost()->getId() === $post->getId()) {
-            $thread->setDeleted(true);
-        }
+    private function recursiveDeletePost(Post $post): void {
         $post->setDeleted(true);
         foreach ($post->getChildren() as $child) {
-            $this->recursiveDeletePost($child, $thread);
+            $this->recursiveDeletePost($child);
         }
     }
 

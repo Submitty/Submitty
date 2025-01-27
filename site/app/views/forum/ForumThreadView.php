@@ -396,18 +396,7 @@ class ForumThreadView extends AbstractView {
         }
         return $button_params;
     }
-    /**
-     * @param Post[] $reply_hierarchy
-     * @return Post[]
-     */
-    public static function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
-        $reply_hierarchy[] = $post;
-        $post->setReplyLevel($reply_level);
-        foreach ($post->getChildren() as $child) {
-            ForumThreadView::BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
-        }
-        return $reply_hierarchy;
-    }
+
 
     /**
      * Renders or formats a list of posts.
@@ -431,7 +420,7 @@ class ForumThreadView extends AbstractView {
 
         $posts = [];
         if ($display_option == "tree") {
-            $posts = ForumThreadView::BuildReplyHeirarchy($first_post);
+            $posts = ForumUtils::BuildReplyHeirarchy($first_post);
         }
         else {
             // posts were ordered at query-time by repository
