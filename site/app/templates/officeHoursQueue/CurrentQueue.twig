@@ -17,7 +17,7 @@
         <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
           <th scope="row" class="row_number">{{entry['row_number'] }}</th>
           <td>
-            {{ viewer.getDisplayNameFromUserId(entry['user_id']) }}
+            {{ entry['helper_preferred_givenname'] ?? entry['helper_givenname'] }} {{ entry['helper_preferred_familyname'] ?? entry['helper_familyname'] }}
             <a class="post-user-info" onclick="unhideId(this,'{{ entry['user_id'] }}')" onkeypress="unhideId(this,'{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id" tabindex="0">
               <i class="fas fa-eye"></i>
             </a>
