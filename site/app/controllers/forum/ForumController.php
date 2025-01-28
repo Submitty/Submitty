@@ -1457,8 +1457,8 @@ class ForumController extends AbstractController {
             return JsonResponse::getFailResponse("Invalid or missing post_id");
         }
 
-        if (!$this->core->getUser()->accessGrading()) {
-            return JsonResponse::getFailResponse("no permission");
+        if ($this->core->getUser()->getGroup() > 2) {
+            return JsonResponse::getFailResponse("You do not have permission to view this.");
         }
         $post_id = intval($post_id);
         $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);

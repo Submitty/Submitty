@@ -83,7 +83,7 @@
         liked by teaching staff
     </span>
     {% if userGroup <= 2 %} {# Show only for instructor #}
-        <i class="fas fa-users icon-mark-stats" onclick="showUpduckUsers({{ post.id }}, '{{ csrf_token }}');" title="See who liked this post" style="cursor: pointer; margin-left: 10px;"></i>
+        <i class="fas fa-users icon-mark-stats" onclick="showUpduckUsers({{ post.id }});" title="See who liked this post" style="cursor: pointer; margin-left: 10px;"></i>
     {% endif %}
 </span>
     
