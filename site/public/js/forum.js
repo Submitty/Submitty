@@ -2699,8 +2699,8 @@ function showUpduckUsers(post_id, csrf_token) {
                 displayErrorMessage('Failed to retrieve users who liked this post.');
             }
         },
-        error: function () {
-            displayErrorMessage('Something went wrong while trying to display who liked this post. Please try again.');
+        error: () => {
+            displayErrorMessage('AJAX error while retrieving users for post.');
         },
     });
 }
