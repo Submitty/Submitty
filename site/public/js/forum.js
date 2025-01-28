@@ -2673,6 +2673,7 @@ function showUpduckUsers(post_id, csrf_token) {
         success: function (data) {
             if (data.status === 'success') {
                 $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
                 // eslint-disable-next-line no-undef
                 captureTabInModal('popup-post-likes');
 
@@ -2689,6 +2690,10 @@ function showUpduckUsers(post_id, csrf_token) {
                     }
                     $('#popup-post-likes .form-body').append(userList);
                 }
+                $('#popup-post-likes .close-button').off('click').on('click', function () {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
             }
             else {
                 displayErrorMessage('Failed to retrieve users who liked this post.');
