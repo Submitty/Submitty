@@ -1450,7 +1450,7 @@ class ForumController extends AbstractController {
 
 
 
-    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["POST"])]
+    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["GET"])]
     public function getPostLikesDetails(): JsonResponse {
         $post_id = $_POST['post_id'] ?? null;
         if ($post_id === null || $post_id === '' || !ctype_digit($post_id)) {

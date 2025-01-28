@@ -2666,7 +2666,7 @@ function pinAnnouncement(thread_id, type, csrf_token) {
 function showUpduckUsers(post_id, csrf_token) {
     const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
     $.ajax({
-        type: 'POST',
+        type: 'GET',
         url: url,
         data: { post_id: post_id, csrf_token: csrfToken },
         dataType: 'json',
