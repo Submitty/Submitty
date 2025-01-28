@@ -2668,7 +2668,7 @@ function showUpduckUsers(post_id, csrf_token) {
     $.ajax({
         type: 'POST',
         url: url,
-        data: { post_id: post_id, csrf_token: csrfToken },
+        data: { post_id: post_id, csrf_token: csrf_token },
         dataType: 'json',
         success: function (data) {
             if (data.status === 'success') {
