@@ -441,6 +441,8 @@ CREATE TABLE public.courses (
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
+    self_registration_type smallint DEFAULT 0,
+    default_section_id character varying(255),
     CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
@@ -474,6 +476,16 @@ CREATE TABLE public.courses_users (
     previous_registration_section character varying(255),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+);
+
+
+--
+-- Name: docker_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_images (
+    image_name character varying NOT NULL,
+    user_id character varying
 );
 
 
@@ -780,6 +792,14 @@ ALTER TABLE ONLY public.courses_users
 
 
 --
+-- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_image_name_key UNIQUE (image_name);
+
+
+--
 -- Name: emails emails_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -960,6 +980,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --

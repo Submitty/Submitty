@@ -77,6 +77,7 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory' => 'false',
             'vcs_subdirectory' => '',
             'syllabus_bucket' => 'Homework',
+            'autograding_config_path' => ''
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
@@ -86,6 +87,7 @@ class AdminGradeableController extends AbstractController {
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
+        $values['autograding_config_path'] = $_POST['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
         if ($_POST['type'] === 'Electronic File') {
             if (array_key_exists('vcs', $_POST)) {
                 if (!array_key_exists('repository_type', $_POST['vcs'])) {

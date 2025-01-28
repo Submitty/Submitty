@@ -866,14 +866,14 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
 
             if (total_size >= max_file_size) {
                 alert('ERROR! Uploaded file(s) exceed max file size.\n'
-                + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
 
             if (total_size >= max_post_size) {
                 alert('ERROR! Uploaded file(s) exceed max PHP POST size.\n'
-                + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
@@ -909,7 +909,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -999,7 +999,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1188,7 +1188,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1250,7 +1250,7 @@ function handleDownloadImages(csrf_token) {
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1386,7 +1386,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
                 console.log(data);
             }
         },
@@ -1495,7 +1495,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
+                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
                 console.log(data);
             }
         },
