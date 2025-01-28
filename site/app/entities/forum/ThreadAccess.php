@@ -28,4 +28,12 @@ class ThreadAccess {
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
+    
+    public function getThread(): Thread {
+        return $this->thread;
+    }
+
+    public function setTimestamp(string $newTimestamp): void {
+        $this->timestamp = $newTimestamp;
+    }
 }
