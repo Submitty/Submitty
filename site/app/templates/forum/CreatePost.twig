@@ -82,7 +82,7 @@
     <span data-testid="instructor-like" id="likedByInstructor_{{ post.id }}" class="liked-by-instructor" style="{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
         liked by teaching staff
     </span>
-    {% if userGroup <= 2 and post_up_duck.upduck_count > 0 %} {# Show only for instructors and if there are likes #}
+    {% if userGroup <= 2 %} {# Show only for instructor #}
         <i class="fas fa-users icon-mark-stats" onclick="showUpduckUsers({{ post.id }}, '{{ csrf_token }}');" title="See who liked this post" style="cursor: pointer; margin-left: 10px;"></i>
     {% endif %}
 </span>

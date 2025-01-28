@@ -796,7 +796,6 @@ SQL;
             FROM forum_upducks f
             JOIN users u ON f.user_id = u.user_id
             WHERE f.post_id = ?
-            ORDER BY u.user_id ASC
         ", [$post_id]);
 
         $rows = $this->course_db->rows();
