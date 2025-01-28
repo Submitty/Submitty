@@ -63,8 +63,8 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             }
             print("Images found on machine:")
             for image in image_set:
-                print(image)
-            print("\n")
+                print(f"{image} (id {client.images.get(image).id})")
+            print("") # single newline
             image_ids = set([client.images.get(im).id for im in image_set])
             images_to_update_ids = set([client.images.get(im).id for im in images_to_update])
             images_to_remove = set.difference(image_ids, images_to_update_ids)
