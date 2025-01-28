@@ -133,8 +133,8 @@ class UserEntity {
      */
     public function getDisplayInfo(): array {
         $out = [];
-        $out["given_name"] = is_null($this->user_preferred_givenname) ? $this->user_preferred_givenname : $this->user_givenname;
-        $out["family_name"] = is_null($this->user_preferred_familyname) ? $this->user_preferred_familyname : $this->user_familyname;
+        $out["given_name"] = $this->user_preferred_givenname ?? $this->user_givenname;
+        $out["family_name"] = $this->user_preferred_familyname ?? $this->user_familyname;
         $out["user_email"] = $this->user_email;
         $out["pronouns"] = $this->user_pronouns;
         $out["display_pronouns"] = $this->display_pronouns;
