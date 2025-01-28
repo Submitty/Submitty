@@ -2690,7 +2690,7 @@ function showUpduckUsers(post_id, csrf_token) {
                     }
                     $('#popup-post-likes .form-body').append(userList);
                 }
-                $('#popup-post-likes .close-button').off('click').on('click', function () {
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
                     $('#popup-post-likes').hide();
                     $('body').removeClass('popup-active');
                 });
