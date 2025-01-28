@@ -11,10 +11,22 @@ def up(config, database):
     :type database: migrator.db.Database
     """
 
-    database.execute("UPDATE users SET user_preferred_givenname = NULL WHERE user_preferred_givenname = ''")
-    database.execute("UPDATE users SET user_preferred_familyname = NULL WHERE user_preferred_familyname = ''")
-    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_givenname_not_empty CHECK (user_preferred_givenname <> '')")
-    database.execute("ALTER TABLE users ADD CONSTRAINT user_preferred_familyname_not_empty CHECK (user_preferred_familyname <> '')")
+    database.execute("""
+    UPDATE users SET user_preferred_givenname = NULL 
+    WHERE user_preferred_givenname = ''
+    """)
+    database.execute("""
+    UPDATE users SET user_preferred_familyname = NULL 
+    WHERE user_preferred_familyname = ''
+    """)
+    database.execute("""
+    ALTER TABLE users ADD CONSTRAINT user_preferred_givenname_not_empty 
+    CHECK (user_preferred_givenname <> '')
+    """)
+    database.execute("""
+    ALTER TABLE users ADD CONSTRAINT user_preferred_familyname_not_empty 
+    CHECK (user_preferred_familyname <> '')
+    """)
 
 
 def down(config, database):
@@ -27,7 +39,17 @@ def down(config, database):
     :type database: migrator.db.Database
     """
 
-    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_givenname_not_empty")
-    database.execute("ALTER TABLE users DROP CONSTRAINT user_preferred_familyname_not_empty")
-    database.execute("UPDATE users SET user_preferred_givenname = '' WHERE user_preferred_givenname IS NULL")
-    database.execute("UPDATE users SET user_preferred_familyname = '' WHERE user_preferred_familyname IS NULL")
+    database.execute("""
+    ALTER TABLE users DROP CONSTRAINT user_preferred_givenname_not_empty
+    """)
+    database.execute("""
+    ALTER TABLE users DROP CONSTRAINT user_preferred_familyname_not_empty
+    """)
+    database.execute("""
+    UPDATE users SET user_preferred_givenname = '' 
+    WHERE user_preferred_givenname IS NULL
+    """)
+    database.execute("""
+    UPDATE users SET user_preferred_familyname = '' 
+    WHERE user_preferred_familyname IS NULL
+    """)
