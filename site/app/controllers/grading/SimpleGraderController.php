@@ -246,39 +246,33 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
-
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
-
+            if ($data === '' || (!$component->isText() && $data === '0')) {
+                // If the component is empty or (not text and value is zero), delete it
+                $ta_graded_gradeable->deleteGradedComponent($component);
+                continue;
+            }
             if ($component->isText()) {
                 $component_grade->setComment($data);
             }
             else {
-                // This catches both the not-set and blank-data case for numeric cells
-                if ($data !== '') {
-                    if (
-                        !is_numeric($data)
-                        || $data < 0
-                    ) {
-                        return JsonResponse::getFailResponse("Save error: score must be a positive number");
-                    }
-                    if ($component->getUpperClamp() < $data) {
-                        return JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp");
-                    }
-                    $db_data = $component_grade->getTotalScore();
-                    if ($original_data != $db_data) {
-                        return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
-                    }
-                    $component_grade->setScore($data);
+                // Numeric case
+                if (!is_numeric($data) || $data < 0) {
+                    return JsonResponse::getFailResponse("Save error: score must be a positive number");
                 }
-                else {
-                    continue;
+                if ($component->getUpperClamp() < $data) {
+                    return JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp");
                 }
+                $db_data = $component_grade->getTotalScore();
+                if ($original_data != $db_data) {
+                    return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
+                }
+                $component_grade->setScore($data);
             }
             $component_grade->setGradeTime($this->core->getDateTimeNow());
             $return_data[$component->getId()] = $data;
         }
-
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         $return_data['date'] = $this->core->getDateTimeNow()->format('c');
