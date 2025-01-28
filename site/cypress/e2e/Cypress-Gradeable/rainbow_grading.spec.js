@@ -2,7 +2,8 @@ import { skipOn } from '@cypress/skip-test';
 skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Test Rainbow Grading', () => {
         beforeEach(() => {
-            cy.login('instructor');
+            // instructor2 has access to the testing course
+            cy.login('instructor2');
             cy.visit(['testing', 'config']);
             cy.get('[data-testid="display-rainbow-grades-summary"]').check();
             cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
@@ -198,7 +199,7 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
                 }
             });
             cy.logout();
-            cy.login('instructor');
+            cy.login('instructor2');
             cy.visit(['testing', 'config']);
             cy.get('[data-testid="display-rainbow-grades-summary"]').uncheck();
             cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
