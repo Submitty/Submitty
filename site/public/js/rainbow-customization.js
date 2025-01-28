@@ -172,10 +172,6 @@ function getSection() {
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
 
-        if (label === '') {
-            $('#save_status').text('All sections MUST have a label before saving');
-        }
-
         // Add to sections
         sections[section] = label;
     });
@@ -831,13 +827,11 @@ function saveChanges() {
         processData: false,
         contentType: false,
         success: function (response) {
-            console.log(response);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
             else {
-                // lets keep the alert, because users may not notice it even if it fails
-                alert(`An error occurred: ${response.data}`);
+                console.error(response);
             }
         },
         // error: function (jqXHR, textStatus, errorThrown) {
