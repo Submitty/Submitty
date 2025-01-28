@@ -1460,7 +1460,7 @@ class ForumController extends AbstractController {
         if (!$this->core->getUser()->accessGrading()) {
             return JsonResponse::getFailResponse("no permission");
         }
-        $post_id = (int) $post_id;
+        $post_id = intval($post_id);
         $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);
 
         return JsonResponse::getSuccessResponse(['users' => $users]);
