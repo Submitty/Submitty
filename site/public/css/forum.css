@@ -96,7 +96,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box {
-    padding: 5px;
+    padding: 6px;
     overflow-y: auto;
     word-wrap: break-word;
     align-items: stretch;
@@ -111,6 +111,10 @@
 #thread_list a {
     text-decoration: none;
     color: var(--text-black);
+}
+
+.label_forum {
+    white-space: pre;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -772,7 +776,8 @@
 .thread_box .flex-row,
 .thread-box-full .flex-row {
     align-items: stretch;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    gap: 8px;
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .content .thread_box_link {
@@ -871,7 +876,7 @@
 
 .pinned-thread {
     display: inline-block;
-    padding: 5px;
+    padding: 6px;
     cursor: pointer;
 }
 
