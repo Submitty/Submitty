@@ -272,7 +272,7 @@ class SimpleGraderController extends AbstractController {
             }
             $component_grade->setGradeTime($this->core->getDateTimeNow());
             $return_data[$component->getId()] = $data;
-        }        
+        }     
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         $return_data['date'] = $this->core->getDateTimeNow()->format('c');
