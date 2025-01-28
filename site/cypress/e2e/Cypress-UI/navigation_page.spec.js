@@ -171,8 +171,32 @@ describe('tests navigation buttons for each level of access', () => {
         checkButtons('grades_released_lab', null, null);
     });
 
-    it('should show the correct alert message for team homework', () => {
+    it('should show the correct alert message for team homework in case of instructor', () => {
         cy.login('instructor');
+        cy.visit(['sample']);
+
+        cy.get('[data-testid="open_team_homework"]').find('[data-testid="submit-btn"]').click();
+
+        // Capture and verify the alert text
+        cy.on('window:alert', (alertText) => {
+            expect(alertText).to.equal('You must be on a team to submit to this gradeable.');
+        });
+    });
+
+    it('should show the correct alert message for team homework in case of ta', () => {
+        cy.login('ta');
+        cy.visit(['sample']);
+
+        cy.get('[data-testid="open_team_homework"]').find('[data-testid="submit-btn"]').click();
+
+        // Capture and verify the alert text
+        cy.on('window:alert', (alertText) => {
+            expect(alertText).to.equal('You must be on a team to submit to this gradeable.');
+        });
+    });
+
+    it('should show the correct alert message for team homework in case of student', () => {
+        cy.login('student');
         cy.visit(['sample']);
 
         cy.get('[data-testid="open_team_homework"]').find('[data-testid="submit-btn"]').click();
@@ -281,7 +305,7 @@ describe('navigation page', () => {
         validate_navigation_page_sections(sections);
     });
 
-    it('should show full access grader content for ta', () => {
+    it('should show full access grader content for TA', () => {
         cy.login('ta');
         cy.visit(['sample']);
 
