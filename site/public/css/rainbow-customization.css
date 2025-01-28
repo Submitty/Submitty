@@ -210,13 +210,6 @@ div:has(.override) ~ div.gradeable-li-right-of-input i.rainbow-grades-warning-tr
     display: inline-block;
 }
 
-#nav-sidebar-plagiarism i.rainbow-grades-warning-triangle {
-    margin-right: 0;
-    padding-bottom: 0;
-    display: inline-block;
-    border-bottom: 0;
-}
-
 .input-field {
     display: flex;
     align-items: center;
