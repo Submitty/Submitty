@@ -624,7 +624,7 @@ class ForumController extends AbstractController {
                     'type' => 'new_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level,
+                    'reply_level' => $reply_level + 1,
                     'post_box_id' => $max_post_box_id
                 ]);
             }
@@ -877,7 +877,7 @@ class ForumController extends AbstractController {
                     'type' => 'edit_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level,
+                    'reply_level' => $reply_level + 1,
                     'post_box_id' => $post_box_id,
                 ]);
             }
