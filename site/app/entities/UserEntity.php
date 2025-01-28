@@ -33,13 +33,13 @@ class UserEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_givenname;
 
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::STRING, nullable: true)]
     protected string|null $user_preferred_givenname;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $user_familyname;
 
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::STRING, nullable: true)]
     protected string|null $user_preferred_familyname;
 
     #[ORM\Column(type: Types::STRING)]
