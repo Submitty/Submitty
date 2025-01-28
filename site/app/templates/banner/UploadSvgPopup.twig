@@ -1,0 +1,52 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}upload-svg{% endblock %}
+{% block title %}Add SVG{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <div> UPload an SVG Image </div>
+    <p>
+        This moorthy duck gif will be used for letting students know there is are new events happening!
+    </p>
+
+    <div id="upload-boxes">
+        <div id="upload2" class="file-input">
+            <label class="label key_to_click" for="input-file2" tabindex="0">"Drag your file here or click to open file browser"</label>
+            <input type="file" name="files" id="input-file2" onchange="addFilesFromInput(2,false)" multiple />
+            <table class="file-upload-table" id="file-upload-table-2">
+                <tr style="background:transparent; display:none;">
+                    <th>File Name:</th>
+                    <th>Size:</th>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+
+        function makeSubmissionSvg() {
+            handleUploadSvg();
+        }
+        $(function() {
+            $("#submit-svg").click(function(e){ // Submit button
+                makeSubmissionSvg();
+                e.stopPropagation();
+            });
+        });
+
+
+        dropzone = document.getElementById("upload2");
+        dropzone.addEventListener("dragenter", draghandle, false);
+        dropzone.addEventListener("dragover", draghandle, false);
+        dropzone.addEventListener("dragleave", draghandle, false);
+        dropzone.addEventListener("drop", dropWithMultipleZips, false);
+
+
+    </script>
+
+
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="close-button btn btn-primary" id="submit-svg" type="submit" value="Submit"/>
+{% endblock %}

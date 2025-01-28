@@ -66,6 +66,8 @@
         </label>
     </div>
 
+
+
     <script>
         $('#url_link_address').hide();
         $('#extra_name').hide();
@@ -85,12 +87,13 @@
             });
         });
 
-        createArray(1);
+        createArray(2);
         var dropzone = document.getElementById("upload1");
         dropzone.addEventListener("dragenter", draghandle, false);
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
         dropzone.addEventListener("drop", dropWithMultipleZips, false);
+
 
         const upload_fp = flatpickr('.upload_picker', {
             plugins: [ShortcutButtonsPlugin(

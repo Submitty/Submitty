@@ -148,7 +148,13 @@
                 </ul>
             </div>
             <div id="menu-overlay"></div>
-            <nav class="flex-row shadow">
+            <nav class="flex-row shadow" id="main-container"
+            style="display: flex; justify-content: center; align-items: center; height: 85px;"
+            >   
+
+                {#COMMUNITY EVENT BANNERS COME IN HERE#}
+                {% include 'nav_content.twig' %}
+
                 <div id="nav-links">
                     <a id="home-button"
                         class="black-btn"
@@ -184,37 +190,55 @@
                     </div>
                 </div>
                 <div style="display: flex">
+
+
+
+
                     <span id="duckdiv" style="position: relative">
-                    {% if not enable_banner %}
-                    <a id="duck-desktop"
-                        href="http://submitty.org/developer/rcos_moorthy"
-                        target="_blank"
-                        aria-label="Learn more about Moorthy"
-                    >
-                    {% endif %}
-                        <img id="moorthy-duck"
-                                src="{{ base_url }}/img/{{ duck_img }}"
-                                alt="Moorthy - Submitty's Duck Mascot!"
-                                height="80"
-                                {% if enable_banner %}
-                                class="key_to_click"
-                                onclick="ducky();"
-                                tabindex="0"
-                                {% endif %}
-                        />
-                    {% if not enable_banner %}
-                    </a>
+                    <img id="moorthy-duck"
+                            src="{{ base_url }}/img/{{ duck_img }}"
+                            alt="Moorthy - Submitty's Duck Mascot!"
+                            height="80"
+                            class="key_to_click"
+                            {% if user_given_name != "" %}
+                            onclick="onMoorthyClick();"
+                            {% endif %}
+                            tabindex="0"
+                    />
+                    </span>
+
+
+                    {% if user_given_name == "" %}
+                    <script>
+                        localStorage.setItem('open', false);
+                        localStorage.setItem('duckTalking', false);
+                    </script>
                     {% endif %}
 
-                    {% if enable_banner %}
-                    <img id="submitty-banner"
-                            src="{{ base_url }}/img/submitty-banner.png"
-                            alt="Happy Submitty Week!"
-                            height="70"
-                            style="position:absolute;right: -380px; top:6px;display:none;"
-                    />
-                    {% endif %}
-                    </span>
+
+
+
+                    <script>
+                        function onMoorthyClick() {
+                            if (localStorage.getItem('bannerArray') && JSON.parse(localStorage.getItem('bannerArray')).length > 0) {
+                                if (localStorage.getItem('open') === 'true') {
+                                    localStorage.setItem('open', false);
+                                    initializeBanner();
+                                } 
+                                else {
+                                    localStorage.setItem('open', true);
+                                    initializeBanner();   
+                                }
+                            }
+                            else {
+                                window.open('http://submitty.org/developer/rcos_moorthy', '_blank');
+                            }
+                        }   
+                    </script>
+
+
+
+                    
                     <span>
                         <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                             <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">

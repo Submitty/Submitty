@@ -16,7 +16,8 @@ use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 
 /**
- * @AccessControl(level="SUPERUSER")
+ * @AccessControl(level="FACULTY")
+ * @AccessControl(level="FACULTY")
  */
 class BannerController extends AbstractController {
     /**
@@ -32,8 +33,51 @@ class BannerController extends AbstractController {
         return new WebResponse(BannerView::class, 'showEventBanners', $communityEventBanners);
     }
 
+    #[Route("/community_event/upload_svg", methods: ["POST"])]
+    public function ajaxUploadSvg(): JsonResponse {
+        $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
+        if (!isset($_FILES["files2"]) || empty($_FILES["files2"]["name"])) {
+            return JsonResponse::getErrorResponse("No files were submitted.");
+        }
+    
+        foreach ($_FILES["files2"]["name"] as $index => $file_name) {
+            if (is_uploaded_file($_FILES["files2"]["tmp_name"][$index])) {
+                $destination_path = FileUtils::joinPaths($upload_path, $file_name);
+    
+                if (strlen($destination_path) > 255) {
+                    return JsonResponse::getErrorResponse("File path is too long.");
+                }
+
+                if (!is_dir($upload_path)) {
+                    if (!mkdir($upload_path, 0755, true)) {
+                        return JsonResponse::getErrorResponse("Failed to create the directory '{$upload_path}'.");
+                    }
+                }
+
+    
+                if (!@copy($_FILES["files2"]["tmp_name"][$index], $destination_path)) {
+                    $error = error_get_last();
+    
+                    // Return detailed error message
+                    return JsonResponse::getErrorResponse(
+                        "Failed to upload file '{$file_name}'. Error: {$error['message']} in {$error['file']} on line {$error['line']}"
+                    );
+                }
+    
+                if (!@unlink($_FILES["files2"]["tmp_name"][$index])) {
+                    return JsonResponse::getErrorResponse("Failed to delete the temporary file '{$file_name}'.");
+                }
+            } else {
+                return JsonResponse::getErrorResponse("The file '{$file_name}' was not properly uploaded.");
+            }
+        }
+        return JsonResponse::getSuccessResponse("Files uploaded successfully.");
+    }
+
     #[Route("/community_event/upload", methods: ["POST"])]
     public function ajaxUploadEventFiles(): JsonResponse {
+
+
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
 
         if (isset($_POST['release_time'])) {
@@ -55,6 +99,8 @@ class BannerController extends AbstractController {
         }
 
         $uploaded_files = $_FILES["files1"];
+
+
         $count_item = count($uploaded_files["name"]);
         $bigger_banner_name = $_POST['extra_name'];
         $link_name = $_POST['link_name'];
@@ -118,11 +164,8 @@ class BannerController extends AbstractController {
 
                 if (!$all_match) {
                     [$width, $height] = getimagesize($uploaded_files["tmp_name"][$j]);
-                    if ($width > 500 || $height > 100) {
+                    if ($width != 500 || $height != 100) {
                         return JsonResponse::getErrorResponse("File dimensions must be no more than 500x100 pixels.");
-                    }
-                    if ($width < 200 || $height < 10) {
-                        return JsonResponse::getErrorResponse("File dimensions must be no less than 200x10 pixels.");
                     }
                 }
 

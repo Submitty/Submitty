@@ -5,9 +5,12 @@
 &nbsp;
 </p>
 
-<button class="upload-banner btn btn-primary" onclick="newUploadBanner()"> Upload a New Community Event </button>
+  <button class="upload-banner btn btn-primary" onclick="newUploadBanner()" style="margin: 20px 0;"> 
+    Upload a New Community Event 
+  </button>
 
-<br>
+
+
 
 
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -35,8 +38,27 @@
     <p> Id: {{id}} </p>
     <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
     <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
+
+
 </div>
 {% endfor %}
-</div>
+<br>
+<hr style="border: 1px solid #ccc; margin: 20px 0;">
 
-{{ include('banner/UploadBannerPopup.twig') }}
+
+  <button class="upload-svg btn btn-primary" onclick="newUploadSVG()" style="margin: 20px 0;"> 
+    Upload a New Notification Duck
+  </button>
+
+
+
+<br>
+{% if duckGif and duckGif != "" %}
+<img src="data:image/gif;base64,{{duckGif}}" alt="GIF image">
+{% endif %}
+
+</div>
+  {{ include('banner/UploadBannerPopup.twig') }}
+  <br />
+  {{ include('banner/UploadSvgPopup.twig') }}
+

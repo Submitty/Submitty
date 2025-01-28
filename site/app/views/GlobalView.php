@@ -46,6 +46,10 @@ class GlobalView extends AbstractView {
 
 
         $currentDate = new \DateTime();
+
+        $pathName2 = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", "moorthy_chat_gif.gif");
+
+
         foreach ($eventBannerImages as $banner) {
             $semiPath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events", $banner->getClosingDate()->format('Y'), $banner->getFolderName());
             $pathName = FileUtils::joinPaths($semiPath, $banner->getName());
@@ -54,7 +58,7 @@ class GlobalView extends AbstractView {
                 $images_data_array[] = [
                     "name" => $banner->getName(),
                     "id" => $banner->getId(),
-                    "data" => base64_encode(file_get_contents($pathName)),
+                    "data" => base64_encode(file_get_contents($pathName)), //THIS IS GOOD
                     "extra_info" => "",
                     "link_name" => $banner->getLinkName()
                 ];
@@ -102,7 +106,8 @@ class GlobalView extends AbstractView {
             "imageDataArray" => $images_data_array,
             "errorImageData" => $error_image_data,
             "html_lang" => $html_lang,
-            "server_time" => time()
+            "server_time" => time(),
+            "duckGif" => file_exists($pathName2) ? base64_encode(file_get_contents($pathName2)) : ""
         ]);
     }
 
