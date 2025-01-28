@@ -437,6 +437,8 @@ class NavigationView extends AbstractView {
             ]);
         }
 
+        $prerequisite = 'Please complete ';
+
         if ($graded_gradeable !== null) {
             /** @var TaGradedGradeable $ta_graded_gradeable */
             $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -601,6 +603,7 @@ class NavigationView extends AbstractView {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 $title = "MUST BE ON A TEAM TO SUBMIT";
+                $prerequisite = "You must be on a team to submit to this gradeable";
                 $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
@@ -608,11 +611,10 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
             $title = "LOCKED";
-            $prerequisite = $gradeable->getPrerequisite();
+            $prerequisite .= $gradeable->getPrerequisite();
         }
         return new Button($core, [
             "title" => $title,
