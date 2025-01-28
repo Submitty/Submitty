@@ -25,8 +25,8 @@ class Category {
     #[ORM\Column(type: Types::STRING)]
     protected string $color;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $visible_date;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $visible_date=null;
 
     /**
      * @var Collection<Thread>
@@ -34,12 +34,12 @@ class Category {
     #[ORM\ManyToMany(targetEntity: Thread::class, mappedBy: "categories")]
     protected Collection $threads;
 
-    public function __construct() {
-        $this->visible_date = "";
-    }
-
     public function getVisibleDate(): string {
-        return $this->visible_date;
+        if ($this->visible_date === null) {
+            return "";
+        } else {
+            return $this->visible_date;
+        }
     }
 
     public function getId(): int {

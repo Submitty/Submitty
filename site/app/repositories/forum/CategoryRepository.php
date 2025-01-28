@@ -15,7 +15,8 @@ class CategoryRepository extends EntityRepository {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('category')
             ->from(Category::class, 'category')
-            ->addOrderBy('category.rank', 'ASC', 'NULLS LAST')
+            ->addOrderBy('category.rank', 'ASC')
+            ->addOrderBy('CASE WHEN category.rank IS NULL THEN 1 ELSE 0 END', 'ASC')
             ->addOrderBy('category.category_id', 'ASC');
         return $qb->getQuery()->getResult();
     }
