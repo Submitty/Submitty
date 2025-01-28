@@ -246,10 +246,8 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
-        
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
-        
             if ($data === '' || (!$component->isText() && $data === '0')) {
                 // If the component is empty or (not text and value is zero), delete it
                 $ta_graded_gradeable->deleteGradedComponent($component);
@@ -257,7 +255,8 @@ class SimpleGraderController extends AbstractController {
             }
             if ($component->isText()) {
                 $component_grade->setComment($data);
-            } else {
+            }
+            else {
                 // Numeric case
                 if (!is_numeric($data) || $data < 0) {
                     return JsonResponse::getFailResponse("Save error: score must be a positive number");
@@ -273,8 +272,7 @@ class SimpleGraderController extends AbstractController {
             }
             $component_grade->setGradeTime($this->core->getDateTimeNow());
             $return_data[$component->getId()] = $data;
-        }
-        
+        }        
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         $return_data['date'] = $this->core->getDateTimeNow()->format('c');
