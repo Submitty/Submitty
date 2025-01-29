@@ -127,7 +127,7 @@
     flex-direction: column;
 }
 
-i.rainbow-grades-warning-triangle {
+.rainbow-grades-warning-triangle {
     margin-right: 5px;
     padding-bottom: 2px;
     display: none;
@@ -136,12 +136,12 @@ i.rainbow-grades-warning-triangle {
     border-bottom: 1px dotted var(--standard-vibrant-yellow);
 }
 
-[data-theme="dark"] i.rainbow-grades-warning-triangle {
+[data-theme="dark"] .rainbow-grades-warning-triangle {
     color: var(--standard-light-yellow);
     border-bottom: 1px dotted var(--standard-light-yellow);
 }
 
-i.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
+.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     margin-left: -110px;
     margin-top: 25px;
     font-family: "Source Sans Pro", sans-serif;
@@ -150,11 +150,11 @@ i.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     padding: 5px;
 }
 
-[data-theme="dark"] i.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
+[data-theme="dark"] .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     color: var(--text-black);
 }
 
-i.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
+.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
     content: "";
     position: absolute;
     top: -14%;
@@ -206,7 +206,7 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-div:has(.override) ~ div.gradeable-li-right-of-input i.rainbow-grades-warning-triangle {
+div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-triangle {
     display: inline-block;
 }
 
