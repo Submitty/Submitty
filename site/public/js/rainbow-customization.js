@@ -150,7 +150,6 @@ function UpdateVisibilityBuckets() {
             prev_bucket = bucket;
         }
     });
-    saveChanges();
 }
 
 function getDisplay() {
@@ -802,19 +801,21 @@ $(document).ready(() => {
         saveChanges();
     });
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
+    // This mutation observer catches changes to bucket assignments (available buckets to assigned buckets, and vice versa)
+    const targetBucketReassignment = document.querySelector('#buckets_used_list');
+    const observerBucketReassignment = new MutationObserver((mutations) => {
         saveChanges();
     });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
+    const configBucketReassignment = { attributes: true, childList: true, characterData: true };
+    observerBucketReassignment.observe(targetBucketReassignment, configBucketReassignment);
+
+    // This mutation observer catches automatic bucket assignments on page load
+    const targetAutomaticBucketAssignment = document.querySelector('.bucket_detail_div');
+    const observerAutomaticBucketAssignment = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    const configAutomaticBucketAssignment = { attributes: true, attributeFilter: ['style'] };
+    observerAutomaticBucketAssignment.observe(targetAutomaticBucketAssignment, configAutomaticBucketAssignment);
 });
 
 function saveChanges() {
