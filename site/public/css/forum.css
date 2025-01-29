@@ -114,11 +114,6 @@
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
-.label_forum {
-    white-space: pre;
-}
-
-/* stylelint-disable-next-line selector-class-pattern */
 .create_thread_button {
     border-radius: 3px;
     width: 100%;
