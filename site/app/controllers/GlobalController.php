@@ -649,6 +649,10 @@ class GlobalController extends AbstractController {
                     // International Transgender Day of Visibility is March 31.
                     $duck_img = 'moorthy_duck/trans-duck.svg';
                 }
+                elseif ($day >= 24 && $day <= 30) {
+                    // Arbor day
+                    $duck_img = 'moorthy_duck/tree_duck.svg';
+                }
                 else {
                     //April (Flowers)
                     $duck_img = 'moorthy_duck/04-april.svg';
