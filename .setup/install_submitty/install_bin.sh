@@ -69,6 +69,10 @@ find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 
+# submitty_daemon needs to check for zombie networks during autograding
+chown root:"${DAEMON_GROUP}" ${SUBMITTY_INSTALL_DIR}/sbin/docker_cleanup.sh
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/docker_cleanup.sh
+
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 

@@ -48,7 +48,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue); min-width: 120px; "title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -109,11 +109,11 @@
 				{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 				{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
 				{% if link | length > 0 %}
-						<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+						<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} data-testid="{{ button.title }}" title="{{ button.title }}" {{ onclick }} >
 							{{ button.display_text | raw }}
 						</a>
 				{% else %}
-						<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+						<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" data-testid="{{ button.title }}" title="{{ button.title }}" {{ onclick }} >
 							{{ button.display_text | raw }}
 						</button>
 				{% endif %}

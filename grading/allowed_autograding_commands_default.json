@@ -44,6 +44,7 @@
     "echo":                    { "path": "/bin/echo" },
     "iverilog":                { "path": "/usr/bin/iverilog" },
     "vvp":                     { "path": "/usr/bin/vvp" },
+    "wget":                    { "path": "/usr/bin/wget" },
 
     // Submitty Analysis Tools
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
@@ -128,5 +129,7 @@
     "strace":                  { "path": "/usr/bin/strace" },
 
     // Matlab
-    "matlab":                  { "path": "/usr/local/bin/matlab" }
+    "matlab":                  { "path": "/usr/local/bin/matlab" },
+
+    "jupyter":                 { "path": "/usr/local/bin/jupyter" }
 }

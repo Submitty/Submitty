@@ -486,7 +486,7 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = rawurlencode("/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json");
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
@@ -1193,7 +1193,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);

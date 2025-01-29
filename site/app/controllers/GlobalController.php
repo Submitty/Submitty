@@ -294,7 +294,6 @@ class GlobalController extends AbstractController {
 
         if (
             $this->core->getUser()->accessAdmin()
-            && $this->core->getConfig()->displayRainbowGradesSummary()
         ) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(["gradebook"]),
@@ -344,8 +343,8 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => $this->core->buildCourseUrl(['reports']),
-                "title" => "Grade Reports",
+                "href" => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']),
+                "title" => "Grades Configuration",
                 "id" => "nav-sidebar-reports",
                 "icon" => "fa-chart-bar"
             ]);
@@ -476,7 +475,7 @@ class GlobalController extends AbstractController {
 
         // --------------------------------------------------------------------------
         // INSTRUCTOR IN ANY COURSE
-        if ($is_instructor) {
+        if ($is_instructor || $this->core->getUser()->isSuperUser()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['autograding_status']),
                 "title" => "Autograding Status",
@@ -574,24 +573,35 @@ class GlobalController extends AbstractController {
 
         switch ($month) {
             case 12:
-                //December (Christmas, Hanukkah)
+                // December (Christmas, Hanukkah)
                 $hanukkahStartDateTime = $this->calculateHanukkahDate($yearint);
-                $hanukkahEndDateTime = $this->calculateHanukkahDate($yearint);
+                $hanukkahEndDateTime = clone $hanukkahStartDateTime;
                 $hanukkahEndDateTime->modify('+8 days');
 
-                if ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime) {
+                // Determine if today is during Hanukkah
+                $isHanukkah = ($now >= $hanukkahStartDateTime && $now <= $hanukkahEndDateTime);
+                // Determine if today is within Christmas week
+                $isChristmasWeek = ($day >= 22 && $day <= 28);
+
+                $decemberImages = ['moorthy_duck/12-December.svg'];
+
+                if ($isHanukkah) {
                     // Select the menorah duck image based on the day of Hanukkah
                     $datecounter = (int) $now->diff($hanukkahStartDateTime)->format('%a') + 1;
                     // Ensure datecounter is between 1 and 8
                     $datecounter = max(1, min(8, $datecounter));
                     $menorah_duck = 'moorthy_duck/menorah-duck/' . $datecounter . '.svg';
-                    $decemberImages = ['moorthy_duck/12-December.svg', $menorah_duck];
+                    $decemberImages[] = $menorah_duck;
                 }
-                else {
-                    $decemberImages = ['moorthy_duck/12-December.svg'];
+
+                if ($isChristmasWeek) {
+                    $decemberImages[] = 'moorthy_duck/santa_duck.svg';
                 }
+
+                // Randomly select one of the images in the array
                 $duck_img = $decemberImages[array_rand($decemberImages)];
                 break;
+
             case 11:
                 //November (Thanksgiving)
                 //last week of November
