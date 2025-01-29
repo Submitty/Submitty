@@ -55,7 +55,7 @@ class Category {
     }
 
     public function getDiff(): int {
-        if (empty($this->visible_date)) {
+        if ($this->visible_date === null) {
             return 0;
         }
         try {
