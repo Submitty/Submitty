@@ -18,9 +18,9 @@ def up(config, database, semester, course):
         """
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT true NOT NULL;
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT true NOT NULL;
-            ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_notification_state BOOLEAN DEFAULT false NOT NULL;            
-            UPDATE gradeable SET g_notification_state = true WHERE g_grade_released_date < NOW();
-        """ 
+            ALTER TABLE gradeable ADD COLUMN IF NOT EXISTS g_notification_state BOOLEAN DEFAULT true NOT NULL;
+            UPDATE gradeable SET g_notification_state = false WHERE g_grade_released_date >= NOW();
+        """
     )
 
 
