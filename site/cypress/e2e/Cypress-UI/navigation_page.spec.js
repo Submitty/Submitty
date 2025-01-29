@@ -181,7 +181,7 @@ describe('navigation page', () => {
             future: 5,
             beta: 3,
             open: 8,
-            closed: 4,
+            closed: 6,
             items_being_graded: 9,
             graded: 11,
         };
@@ -276,7 +276,7 @@ describe('navigation page', () => {
         const sections = {
             beta: 3,
             open: 8,
-            closed: 4,
+            closed: 6,
             items_being_graded: 9,
             graded: 11,
         };
@@ -292,7 +292,7 @@ describe('navigation page', () => {
 
         const sections = {
             open: 8,
-            closed: 4,
+            closed: 6,
             items_being_graded: 5,
             graded: 9,
         };
