@@ -317,30 +317,12 @@ describe('navigation page', () => {
 });
 
 describe('locked gradeables', () => {
-    it('should create the locked gradeable first', () => {
-        cy.login('instructor');
-        cy.visit(['sample']);
-        cy.get('[data-testid="sidebar"]').contains('New Gradeable').click();
-        cy.get('[data-testid="radio-student-upload"]').should('be.visible').click();
-        cy.get('[data-testid="create-gradeable-title"]').type('Cypress Test Gradeable');
-        cy.get('[data-testid="create-gradeable-id"]').type('cypress_test_gradeable');
-        cy.get('[data-testid="create-gradeable-btn"]').click();
-        cy.get('[data-testid="create-gradeable-btn"]').should('not.be.disabled').click();
-        cy.get('[data-testid="gradeable-lock"]').select('Closed Team Homework [ closed_team_homework ]');
-        cy.get('#gradeable-lock-points').should('be.visible').clear();
-        cy.get('#gradeable-lock-points').type(10);
-        cy.get('#gradeable-lock-points').trigger('input');
-        cy.get('#gradeable-lock-points').trigger('change');
-    });
 
     it('should show the locked gradeable for the instructor and message', () => {
         cy.login('instructor');
         cy.visit(['sample']);
-        cy.get('[data-testid="cypress_test_gradeable"]').should('exist');
-        cy.get('[data-testid="cypress_test_gradeable"]').find('[data-testid="quick-link-btn"]').should('exist').click();
-        cy.get('[data-testid="cypress_test_gradeable"]').find('[data-testid="quick-link-btn"]').should('exist').click();
-
-        cy.get('[data-testid="cypress_test_gradeable"]').find('[data-testid="submit-btn"]').then(($button) => {
+        cy.get('[data-testid="locked_homework"]').should('exist');
+        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
             // Get the text from the onclick attribute
             const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
             // Extract the prerequisite text
@@ -354,11 +336,29 @@ describe('locked gradeables', () => {
         });
     });
 
-    it('should show the locked gradeable for the ta and message', () => {
+    it('should show the locked gradeable for the TA and message', () => {
         cy.login('ta');
         cy.visit(['sample']);
-        cy.get('[data-testid="cypress_test_gradeable"]').should('exist');
-        cy.get('[data-testid="cypress_test_gradeable"]').find('[data-testid="submit-btn"]').then(($button) => {
+        cy.get('[data-testid="locked_homework"]').should('exist');
+        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
+            // Get the text from the onclick attribute
+            const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
+            // Extract the prerequisite text
+            const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
+            cy.on('window:alert', (alertText) => {
+                // Validate the alert text
+                expect(alertText).to.equal(`Please complete ${prerequisite}.`);
+            });
+            // Trigger the button click
+            cy.wrap($button).click();
+        });
+    });
+
+    it('should show the locked gradeable for the student and message', () => {
+        cy.login('student');
+        cy.visit(['sample']);
+        cy.get('[data-testid="locked_homework"]').should('exist');
+        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
             // Get the text from the onclick attribute
             const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
             // Extract the prerequisite text
