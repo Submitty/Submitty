@@ -317,7 +317,6 @@ describe('navigation page', () => {
 });
 
 describe('locked gradeables', () => {
-
     it('should show the locked gradeable for the instructor and message', () => {
         cy.login('instructor');
         cy.visit(['sample']);
