@@ -654,11 +654,11 @@ class GlobalController extends AbstractController {
                 //April (Flowers)
                 if ($day === 5) {
                     $duck_img = 'moorthy_duck/quantum-duck-light.svg';
-                } 
+                }
                 elseif ($day <= 3) {
                     // International Transgender Day of Visibility is March 31.
                     $duck_img = 'moorthy_duck/trans-duck.svg';
-                } 
+                }
                 elseif ($day >= 24 && $day <= 30) {
                     // Arbor day
                     $duck_img = 'moorthy_duck/tree_duck.svg';
@@ -672,7 +672,7 @@ class GlobalController extends AbstractController {
                 //Saint Patrick's Day (Shamrock)
                 if ($day >= 14 && $day <= 20) {
                     $duck_img = 'moorthy_duck/03-march.svg';
-                } 
+                }
                 elseif ($day >= 28) {
                     // International Transgender Day of Visibility is March 31.
                     $duck_img = 'moorthy_duck/trans-duck.svg';
