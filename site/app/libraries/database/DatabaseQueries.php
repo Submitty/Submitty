@@ -963,7 +963,7 @@ SQL;
      *
      * @param  integer      $post_id
      * @param  integer      $thread_id
-     * @param  integer      $newStatus - 1 implies deletion and 0 as restoration
+     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
      * @return boolean|null Is first post of thread
      */
     public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
@@ -974,7 +974,7 @@ SQL;
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if (!$newStatus) {
-            // On restore, parent post must have deleted = false
+            // On undelete, parent post must have deleted = false
             if ($parent_id != -1) {
                 if ($this->getPost($parent_id)['deleted']) {
                     return null;
@@ -4837,8 +4837,8 @@ SQL;
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
 WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
-    SELECT course FROM courses_users WHERE user_id = ?
-) AND c.term = t.term_id
+    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
+) AND c.term = t.term_id ORDER BY t.term_id ASC
 SQL;
         $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
         $return = [];
