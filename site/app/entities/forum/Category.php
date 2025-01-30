@@ -26,7 +26,7 @@ class Category {
     protected string $color;
 
     #[ORM\Column(type: Types::STRING, nullable: true)]
-    protected ?string $visible_date=null;
+    protected ?string $visible_date = null;
 
     /**
      * @var Collection<Thread>
@@ -37,7 +37,8 @@ class Category {
     public function getVisibleDate(): string {
         if ($this->visible_date === null) {
             return "";
-        } else {
+        }
+        else {
             return $this->visible_date;
         }
     }
@@ -60,7 +61,8 @@ class Category {
         }
         try {
             $visibleDate = new \DateTimeImmutable($this->visible_date);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return 0;
         }
         $now = new \DateTimeImmutable();

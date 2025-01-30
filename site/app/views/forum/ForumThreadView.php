@@ -4,7 +4,6 @@ namespace app\views\forum;
 
 use app\entities\forum\Category;
 use app\libraries\DateUtils;
-use app\repositories\forum\CategoryRepository;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
@@ -1066,7 +1065,6 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
-        $category_colors;
 
         if ($this->core->getUser()->accessGrading()) {
             $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
