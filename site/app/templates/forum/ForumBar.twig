@@ -139,7 +139,7 @@
 			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
 			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
 				{% for category in categories %}
-					{% if category.visibleDate is null or category.diff > 0 %}
+					{% if category.visibleDate is null or category.diff >= 0 %}
 						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.id }}" data-cat_id="{{ category.id }}" data-btn-selected="false">{{ category.description }}</button>
 					{% endif %}
 				{% endfor %}

@@ -63,7 +63,7 @@ class Category {
             $visibleDate = new \DateTimeImmutable($this->visible_date);
         }
         catch (\Exception $e) {
-            return 0;
+            return -1;
         }
         $now = new \DateTimeImmutable();
         $interval = $visibleDate->diff($now);
