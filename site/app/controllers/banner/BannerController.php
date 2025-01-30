@@ -35,6 +35,10 @@ class BannerController extends AbstractController {
 
     #[Route("/community_event/upload_svg", methods: ["POST"])]
     public function ajaxUploadSvg(): JsonResponse {
+        if (count($_FILES["files2"]["name"]) != 1) {
+            return JsonResponse::getErrorResponse("You can only upload one svg file");
+        }
+
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "community_events");
         if (!isset($_FILES["files2"]) || empty($_FILES["files2"]["name"])) {
             return JsonResponse::getErrorResponse("No files were submitted.");
@@ -43,6 +47,10 @@ class BannerController extends AbstractController {
         foreach ($_FILES["files2"]["name"] as $index => $file_name) {
             if (is_uploaded_file($_FILES["files2"]["tmp_name"][$index])) {
                 $destination_path = FileUtils::joinPaths($upload_path, $file_name);
+
+                if ($file_name != "moorthy_chat_gif.gif") {
+                    return JsonResponse::getErrorResponse("The name has to be: moorthy_chat_gif.gif");
+                }
     
                 if (strlen($destination_path) > 255) {
                     return JsonResponse::getErrorResponse("File path is too long.");

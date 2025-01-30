@@ -46,15 +46,25 @@
 <hr style="border: 1px solid #ccc; margin: 20px 0;">
 
 
-  <button class="upload-svg btn btn-primary" onclick="newUploadSVG()" style="margin: 20px 0;"> 
-    Upload a New Notification Duck
-  </button>
 
 
 
-<br>
 {% if duckGif and duckGif != "" %}
-<img src="data:image/gif;base64,{{duckGif}}" alt="GIF image">
+The moorthy gif to be displayed for new banners: <img src="data:image/gif;base64,{{duckGif}}" alt="GIF image" style="max-width: 100px">
+{% else %}
+
+<p>
+  Upload an gif file here that will be displayed to notify students of a new event happening! <br> <br>
+  PLEASE NOTE! <br>
+  You must name your gif: moorthy_chat_gif.gif <br>
+  A gif file for displaying new events will only be able to be uploaded ONCE <br>
+</p>
+
+
+<button class="upload-svg btn btn-primary" onclick="newUploadSVG()" style="margin: 20px 0;"> 
+  Upload a New Notification Duck
+</button>
+
 {% endif %}
 
 </div>

@@ -207,26 +207,24 @@
                     />
                     </span>
 
-
                     {% if user_given_name == "" %}
                     <script>
+                    
                         localStorage.setItem('open', false);
                         localStorage.setItem('duckTalking', false);
                     </script>
                     {% endif %}
 
-
-
-
                     <script>
+                    
                         function onMoorthyClick() {
                             if (localStorage.getItem('bannerArray') && JSON.parse(localStorage.getItem('bannerArray')).length > 0) {
                                 if (localStorage.getItem('open') === 'true') {
-                                    localStorage.setItem('open', false);
-                                    initializeBanner();
+                                    localStorage.setItem('open', 'false');
+                                    initializeBanner(); //need to initalize banner for essentially a "reload" of the system
                                 } 
                                 else {
-                                    localStorage.setItem('open', true);
+                                    localStorage.setItem('open', 'true');
                                     initializeBanner();   
                                 }
                             }
