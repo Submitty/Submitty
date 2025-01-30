@@ -96,7 +96,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box {
-    padding: 6px;
+    padding: 5px;
     overflow-y: auto;
     word-wrap: break-word;
     align-items: stretch;
@@ -772,8 +772,7 @@
 .thread_box .flex-row,
 .thread-box-full .flex-row {
     align-items: stretch;
-    justify-content: flex-start;
-    gap: 8px;
+    justify-content: flex-end;
 }
 /* stylelint-disable-next-line selector-class-pattern */
 .content .thread_box_link {
@@ -872,7 +871,7 @@
 
 .pinned-thread {
     display: inline-block;
-    padding: 6px;
+    padding: 5px;
     cursor: pointer;
 }
 
