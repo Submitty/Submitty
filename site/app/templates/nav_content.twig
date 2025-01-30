@@ -39,7 +39,6 @@ function initializeBanner() {
     
     var bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
     var openBanner = localStorage.getItem('open') != "false"; 
-    console.log("openBanner value", openBanner);
     var imageDataArray = {{ imageDataArray | json_encode | raw }}; 
 
     if (!bannerArray) { // there are no bannners
