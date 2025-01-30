@@ -185,15 +185,15 @@ describe('Test Rainbow Grading', () => {
             cy.login(username);
             cy.visit(['testing', 'grades']);
             if (username === 'aphacker') {
-                checkRainbowGrades('aphacker', 'aphacker', 121238953, 'Alyssa P', 'Hacker');
+                checkRainbowGrades('aphacker', 121238953, 'Alyssa P', 'Hacker');
                 checkRainbowGradesOption();
             }
             else if (username === 'bitdiddle') {
-                checkRainbowGrades('bitdiddle', 'bitdiddle', 141574736, 'Ben', 'Bitdiddle');
+                checkRainbowGrades('bitdiddle', 141574736, 'Ben', 'Bitdiddle');
                 checkRainbowGradesOption();
             }
             else if (username === 'student') {
-                checkRainbowGrades('student', 'student', 410853871, 'Joe', 'Student');
+                checkRainbowGrades('student', 410853871, 'Joe', 'Student');
                 checkRainbowGradesOption();
             }
         });
@@ -227,13 +227,13 @@ const checkTextbox = (testId, expectedInitial, input) => {
     }
     cy.get('@textbox').should('have.value', expectedInitial);
 };
-const checkRainbowGrades = (username, numericId, firstName, lastname) => {
-    [username, numericId, firstName, lastname].forEach((value) => {
+const checkRainbowGrades = (username, numericId, givenName, familyName) => {
+    [username, numericId, givenName, familyName].forEach((value) => {
         cy.get('[data-testid="rainbow-grades"]').should('contain', value);
     });
 };
 const checkRainbowGradesOption = () => {
-    ['USERNAME', 'NUMERIC ID', 'FIRST', 'LAST', 'OVERALL', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((element) => {
+    ['USERNAME', 'NUMERIC ID', 'GIVEN', 'FAMILY', 'OVERALL', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((element) => {
         cy.get('[data-testid="rainbow-grades"]').should('contain', element);
     });
 };
