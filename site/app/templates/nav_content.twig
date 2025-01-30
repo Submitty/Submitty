@@ -198,6 +198,7 @@ function nextBanner() {
 
 
 {% if imageDataArray | length != 0 %}
+    <div id="display-container">
     <div id="hola" style="z-index: 2; position: absolute; top: 52px; right: 50%; transform: translate(50%, -50%); text-align: center; display: none;"> 
         <div style="display: grid; grid-template-columns: 1fr;">
             <!-- Placeholder for image -->
@@ -232,7 +233,17 @@ function nextBanner() {
         </div>
         </div>
     </div>
+    </div>
 
 {{ include('banner/BiggerBanner.twig') }}
+
+<style>
+@media (max-width: 600px) {
+    #display-container {
+        display: none !important;
+    }
+}
+
+</style>
 
 {% endif %}
