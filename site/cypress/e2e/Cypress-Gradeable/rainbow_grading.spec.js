@@ -1,4 +1,3 @@
-import { skipOn } from '@cypress/skip-test';
 describe('Test Rainbow Grading', () => {
     beforeEach(() => {
         // instructor2 has access to the testing course
