@@ -100,6 +100,7 @@
             {% if other_textarea_attributes is defined %}
                 {{ other_textarea_attributes }}
             {% endif %}
+            style="overflow-y:auto; max-height:300px; resize:vertical;"
         >{{ markdown_area_value is defined ? markdown_area_value : '' }}</textarea>
         <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "100px" }}; max-height:{{ max_height is defined ? max_height : "none" }}" hidden></div>
     </div>
