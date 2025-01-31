@@ -358,7 +358,7 @@ class MiscController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $blind_grading = ($peer && $gradeable->getPeerBlind() !== Gradeable::UNBLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER);
         if ($blind_grading || $is_anon === "true") {
             $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
@@ -392,7 +392,7 @@ class MiscController extends AbstractController {
         if ($gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION) {
             $access_args["section"] = $graded_gradeable->getSubmitter()->getRotatingSection();
         }
-        else if ($gradeable->getGraderAssignmentMethod() === Gradeable::REGISTRATION_SECTION) {
+        elseif ($gradeable->getGraderAssignmentMethod() === Gradeable::REGISTRATION_SECTION) {
             $access_args["section"] = $graded_gradeable->getSubmitter()->getRegistrationSection();
         }
         //See which directories we are allowed to read.
