@@ -14,7 +14,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: brew install virtualbox vagrant
+      - run: brew install vagrant
+      - name: install virtual box 7.0.20
+        run: |
+          curl -LO https://download.virtualbox.org/virtualbox/7.0.20/VirtualBox-7.0.20-163906-OSX.dmg
+          hdiutil mount VirtualBox-7.0.20-163906-OSX.dmg
+          sudo installer -pkg /Volumes/VirtualBox/VirtualBox.pkg -target /
+          hdiutil unmount /Volumes/VirtualBox
       # Installing this is skipped in CI as using it was causing some corruption in
       # attempting to mount the shared folder. The guest and host guest additions
       # versions are close enough that we are fine without it.

@@ -7,7 +7,7 @@
     font-weight: 500;
 }
 
-.card {
+.report-card {
     display: flex;
     text-align: center;
     flex-direction: column;
@@ -15,12 +15,12 @@
     margin-bottom: 14px;
 }
 
-.title-cont {
+.report-title-cont {
     flex: 1;
     margin-right: 15px;
 }
 
-.card-btn-cont {
+.report-card-btn-cont {
     flex: 1;
     text-align: center;
     margin: 12px 0;
@@ -30,7 +30,7 @@
     margin-top: 8px;
 }
 
-.card-btn-cont .btn {
+.report-card-btn-cont .btn {
     white-space: normal;
     width: 90%;
 }
@@ -47,13 +47,13 @@
 }
 
 @media (min-width: 780px) {
-    .card {
+    .report-card {
         padding: 24px 0;
         text-align: left;
         flex-direction: row;
     }
 
-    .card-btn-cont {
+    .report-card-btn-cont {
         margin: 0;
     }
 

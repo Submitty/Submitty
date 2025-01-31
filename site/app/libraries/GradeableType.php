@@ -14,7 +14,7 @@ abstract class GradeableType {
             case static::CHECKPOINTS:
                 return "Checkpoints";
             case static::NUMERIC_TEXT:
-                return "Numeric/Text";
+                return "Numeric";
             default:
                 throw new \InvalidArgumentException("Invalid specified type");
         }

@@ -671,6 +671,12 @@ class GlobalController extends AbstractController {
                 }
                 if (empty($aprilImages)) {
                     // April Flowers
+                elseif ($day >= 24 && $day <= 30) {
+                    // Arbor day
+                    $duck_img = 'moorthy_duck/tree_duck.svg';
+                }
+                else {
+                    //April (Flowers)
                     $duck_img = 'moorthy_duck/04-april.svg';
                 }
                 else {
@@ -700,6 +706,7 @@ class GlobalController extends AbstractController {
                     $duck_img = $marchImages[array_rand($marchImages)];
                 }
                 break;
+
             case 2:
                 // February
                 if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
