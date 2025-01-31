@@ -883,7 +883,7 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 $on_calendar,
-                $connected_gradeable
+                $connected_gradeable,
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,
