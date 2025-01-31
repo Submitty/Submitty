@@ -59,9 +59,17 @@
                             height="30"
                         >
                     </i>
-                    <span data-testid="thread-like-count" 
-                        id="Thread_likeCounter_{{thread.thread_id}}" 
-                        class="thread-like-counter">{{ thread.sum_ducks }}</span>
+                    <span data-testid="thread-like-count"
+                        id="Thread_likeCounter_{{thread.thread_id}}"
+                        class="thread-like-counter"
+                        style="margin-right: 5px;">
+                        {{ thread.sum_ducks }}
+                    </span>
+                    <span data-testid="thread-post-count"
+                        id="Thread_postCounter_{{thread.thread_id}}"
+                        class="thread-post-counter">
+                        {{ thread.post_id }}
+                    </span>
                 </span>
                 <div class="post-action-container" data-testid="post-action-container">
 
