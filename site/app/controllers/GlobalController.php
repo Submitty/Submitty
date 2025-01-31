@@ -610,14 +610,12 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/11-november.svg';
                 }
                 break;
-            
             case 10:
                 // October (Halloween)
                 if ($day >= 25) {
                     $duck_img = 'moorthy_duck/halloween.png';
                 }
                 break;
-            
             case 9:
                 // First two weeks of September
                 if ($day <= 14) {
@@ -628,7 +626,6 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/09-september.svg';
                 }
                 break;
-            
             case 8:
                 // Last week of August
                 if ($day >= 25) {
@@ -639,24 +636,20 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/08-august.svg';
                 }
                 break;
-            
             case 7:
                 // July (Independence)
                 if ($day <= 7) {
                     $duck_img = 'moorthy_duck/07-july.svg';
                 }
                 break;
-            
             case 6:
                 // June (Pride)
                 $duck_img = 'moorthy_duck/06-june.svg';
                 break;
-            
             case 5:
                 // May (Graduation)
                 $duck_img = 'moorthy_duck/05-may.svg';
                 break;
-            
             case 4:
                 // April
                 $aprilImages = [];
@@ -684,7 +677,6 @@ class GlobalController extends AbstractController {
                     $duck_img = $aprilImages[array_rand($aprilImages)];
                 }
                 break;
-            
             case 3:
                 // March
                 $marchImages = [];
@@ -708,7 +700,6 @@ class GlobalController extends AbstractController {
                     $duck_img = $marchImages[array_rand($marchImages)];
                 }
                 break;
-            
             case 2:
                 // February
                 if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
@@ -733,7 +724,6 @@ class GlobalController extends AbstractController {
                 }
                 $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
-            
             case 1:
                 // January
                 if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
