@@ -26,6 +26,13 @@ aside {
         transition: margin 0.3s ease-out;
     }
 
+    aside ul li a span i.fa-exclamation-triangle {
+        margin: 0 0 0 15px;
+        display: inline-block;
+        border-bottom-width: 0;
+        padding-bottom: 0;
+    }
+
     aside li {
         list-style: none;
     }
@@ -102,5 +109,12 @@ aside {
 
     [data-theme="dark"] aside ul {
         background-color: var(--background-blue);
+    }
+
+    [data-theme="dark"] aside ul li a span i.fa-exclamation-triangle {
+        margin: 0 0 0 15px;
+        display: inline-block;
+        border-bottom-width: 0;
+        padding-bottom: 0;
     }
 }
