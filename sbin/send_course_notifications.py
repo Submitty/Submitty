@@ -86,7 +86,7 @@ def notify_pending_gradeables():
             JOIN gradeable ON gradeable.g_id =  electronic_gradeable.g_id
             WHERE gradeable.g_grade_released_date <= NOW()
             AND electronic_gradeable.eg_student_view = true
-            AND gradeable.g_notification_state = false;
+            AND gradeable.g_notification_sent = false;
         """
         )
         for row in gradeables:
@@ -173,7 +173,7 @@ def notify_pending_gradeables():
         # Update all successfully sent notifications for current course
         if len(notified_gradeables) > 0:
             course_db.execute(
-                f"""UPDATE gradeable SET g_notification_state = true
+                f"""UPDATE gradeable SET g_notification_sent = true
                 WHERE g_id in ({", ".join(notified_gradeables)})"""
             )
             total_notified_gradeables += 1
