@@ -11,7 +11,7 @@ class AbstractBuilder {
         this.reorderable_widgets_div = document.createElement('div');
         this.itempool_div = document.createElement('div');
 
-        this.selector_options = ['Multiple Choice', 'Markdown', 'Short Answer', 'Image'];
+        this.selector_options = ['Markdown', 'Multiple Choice', 'Short Answer', 'Image'];
 
         // Handle many of the different button clicks that might occur within the notebook builder
         this.attachment_div.onclick = (event) => {

@@ -256,6 +256,40 @@ button,
     appearance: button;
 }
 
+/* Hotkeys&Settings */
+
+.ta-grading-setting-list {
+    width: 100%;
+}
+
+.ta-grading-setting-list tr {
+    border: 1px solid var(--standard-light-gray);
+    border-left: none;
+    border-right: none;
+}
+
+.ta-grading-setting-list td{
+    padding: 4px;
+}
+
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center;
+}
+
+.hotkeys-title-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hotkeys-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 /****************************
  * TABLE STYLES
  ***************************/
@@ -2396,11 +2430,14 @@ End of slider switch
 }
 /* stylelint-enable no-descending-specificity */
 
-.notebook-output-cell {
+.notebook-output-cell-content {
     background-color: var(--standard-light-gray);
     padding: 1em;
     margin-bottom: 1em;
-    border-radius: 0 0 0.5em 0.5em;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
+}
+
+.notebook-cell {
+    padding: 0 0.5em;
 }

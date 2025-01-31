@@ -230,6 +230,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
             grader_id: grader_id,
             peer_component: component.peer,
             allow_custom_marks: allowCustomMarks,
+            component_version_conflict: componentVersionConflict,
             itempool_id: Object.prototype.hasOwnProperty.call(itempool_items, component.id) ? itempool_items[component.id] : '',
             ta_grading_peer: taGradingPeer,
         }));

@@ -45,7 +45,6 @@ describe('Docker UI Test', () => {
         cy.get('#update-machines')
             .should('have.text', ' Update dockers and machines')
             .click();
-        cy.wait(100);
         // Should prompt a success message
         cy.get('.alert-success')
             .invoke('text')
@@ -53,6 +52,7 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker_version"]')
                 .invoke('text')
@@ -90,7 +90,8 @@ describe('Docker UI Test', () => {
     it('Should not add invalid image', () => {
         // Check invalid format
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/invalid-image');
         cy.get('#docker-warning')
             .should('be.visible');
@@ -99,13 +100,13 @@ describe('Docker UI Test', () => {
 
         // Check valid format but invalid image
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/invalid-image:0.0');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-error')
             .should('have.text', 'submitty/invalid-image not found on DockerHub');
     });
@@ -118,18 +119,19 @@ describe('Docker UI Test', () => {
         cy.get('#capability-form')
             .select('cpp');
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/autograding-default:latest');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-success')
             .should('have.text', 'submitty/autograding-default:latest'
             + ' found on DockerHub and queued to be added!');
 
         // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('#capabilities-list')
                 .invoke('text')
@@ -144,25 +146,26 @@ describe('Docker UI Test', () => {
 
         // Try to add it again, should fail
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/autograding-default:latest');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
 
-        cy.wait(100);
         cy.get('.alert-error')
             .should('have.text', 'submitty/autograding-default:latest '
             + 'already exists in capability cpp');
     });
 
-    it('Should add new image', () => {
+    it('Should add new image and remove it', () => {
         cy.reload();
         // Add a new image
         cy.get('#capability-form')
             .select('python');
         cy.get('#add-field')
-            .clear()
+            .clear();
+        cy.get('#add-field')
             .type('submitty/python:2.7');
         cy.get('#send-button')
             .should('not.be.disabled')
@@ -170,5 +173,15 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('have.text', 'submitty/python:2.7 found on DockerHub'
             + ' and queued to be added!');
+
+        cy.reload();
+        // Remove the image
+        cy.get('[data-image-id="submitty/python:2.7"]')
+            .should('be.visible', { timeout: 10000 })
+            .click();
+        // Confirm dialog return true
+        cy.on('window:confirm', () => true);
+        cy.get('[data-image-id="submitty/python:2.7"]')
+            .should('not.exist');
     });
 });

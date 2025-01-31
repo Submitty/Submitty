@@ -14,6 +14,7 @@ use app\models\gradeable\GradeInquiry;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
+use app\entities\forum\Thread;
 use app\views\AbstractView;
 use app\libraries\NumberUtils;
 use app\libraries\CodeMirrorUtils;
@@ -25,6 +26,7 @@ class ElectronicGraderView extends AbstractView {
      * @param Gradeable $gradeable
      * @param array[] $sections
      * @param SimpleStat[] $component_averages
+     * @param SimpleStat|null $manual_average
      * @param SimpleStat|null $autograded_average
      * @param SimpleStat|null $overall_average
      * @param int $total_submissions
@@ -42,6 +44,7 @@ class ElectronicGraderView extends AbstractView {
         Gradeable $gradeable,
         array $sections,
         array $component_averages,
+        $manual_average,
         $autograded_average,
         $overall_scores,
         $overall_average,
@@ -273,6 +276,7 @@ class ElectronicGraderView extends AbstractView {
             if (count($component_averages) !== 0) {
                 foreach ($component_averages as $comp) {
                     /* @var SimpleStat $comp */
+                    $manual_average += $comp->getAverageScore();
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
                     $percentage = 0;
@@ -348,6 +352,7 @@ class ElectronicGraderView extends AbstractView {
             "overall_percentage" => $overall_percentage,
             "autograded_percentage" => $autograded_percentage,
             "autograded_average" => $autograded_average,
+            "manual_average" => $manual_average,
             "component_averages" => $component_averages,
             "component_percentages" => $component_percentages,
             "component_overall_score" => $component_overall_score,
@@ -692,7 +697,7 @@ HTML;
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component, $this->core->getUser());
                 $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
 
-                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete()) {
+                if ($component->isPeerComponent() && $row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
                     $info["graded_groups"][] = 4;
                 }
                 elseif (($component->isPeerComponent() && $graded_component != null)) {
@@ -703,7 +708,7 @@ HTML;
                     //peer submitted but not graded
                     $info["graded_groups"][] = "peer-null";
                 }
-                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete()) {
+                elseif ($component->isPeerComponent() && !$row->getOrCreateTaGradedGradeable()->isComplete($this->core->getUser())) {
                     //peer not submitted
                     $info["graded_groups"][] = "peer-no-submission";
                 }
@@ -971,6 +976,11 @@ HTML;
         $isStudentInfoPanel = true;
         $isDiscussionPanel = false;
         $isGradeInquiryPanel = false;
+        $isPeerAutograding = $gradeable->getPeerAutograding();
+        $isPeerRubric = $gradeable->getPeerRubric();
+        $isPeerFiles = $gradeable->getPeerFiles();
+        $isPeerSolutions = $gradeable->getPeerSolutions();
+        $isPeerDiscussion = $gradeable->getPeerDiscussion();
         $is_peer_grader = false;
         // WIP: Replace this logic when there is a definitive way to get my peer-ness
         // If this is a peer gradeable but I am not allowed to view the peer panel, then I must be a peer.
@@ -985,6 +995,7 @@ HTML;
                 $is_peer_grader = true;
             }
         }
+        $isPeerGrader = $is_peer_grader;
         if ($graded_gradeable->getGradeable()->isDiscussionBased()) {
             $isDiscussionPanel = true;
         }
@@ -1091,6 +1102,12 @@ HTML;
                 ['grading', 'ElectronicGrader'],
                 'renderGradingPanelHeader',
                 $isPeerPanel,
+                $isPeerGrader,
+                $isPeerAutograding,
+                $isPeerRubric,
+                $isPeerFiles,
+                $isPeerSolutions,
+                $isPeerDiscussion,
                 $isStudentInfoPanel,
                 $isDiscussionPanel,
                 $isGradeInquiryPanel,
@@ -1258,9 +1275,15 @@ HTML;
         ]);
     }
 
-    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
+    public function renderGradingPanelHeader(bool $isPeerPanel, bool $isPeerGrader, bool $isPeerAutograding, bool $isPeerRubric, bool $isPeerFiles, bool $isPeerSolutions, bool $isPeerDiscussion, bool $isStudentInfoPanel, bool $isDiscussionPanel, bool $isGradeInquiryPanel, bool $is_notebook, string $error_color, string $error_message): string {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/GradingPanelHeader.twig", [
             'isPeerPanel' => $isPeerPanel,
+            'isPeerGrader' => $isPeerGrader,
+            'isPeerAutograding' => $isPeerAutograding,
+            'isPeerRubric' => $isPeerRubric,
+            'isPeerFiles' => $isPeerFiles,
+            'isPeerSolutions' => $isPeerSolutions,
+            'isPeerDiscussion' => $isPeerDiscussion,
             'isStudentInfoPanel' => $isStudentInfoPanel,
             'isDiscussionPanel' => $isDiscussionPanel,
             'isGradeInquiryPanel' => $isGradeInquiryPanel,
@@ -1325,8 +1348,6 @@ HTML;
             <span class="col grading_label">Discussion Posts</span>
 HTML;
 
-        $currentCourse = $this->core->getConfig()->getCourse();
-
         //Empty thread input
         if ($threadIds === "{}") {
             $threadIds = [];
@@ -1341,27 +1362,24 @@ HTML;
             $id = $submitter->getId();
             $submitters = [$id];
         }
-        foreach ($threadIds as $threadId) {
-            $posts = [];
-            foreach ($submitters as $s_id) {
-                $posts = array_merge($posts, $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $s_id));
-            }
-            if (count($posts) > 0) {
-                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $id);
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $threads = $repo->getThreadsForGrading($threadIds, $submitters);
+        foreach ($threads as $thread) {
+            if (count($thread->getPosts()) > 0) {
+                $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $thread, false, "alpha", []);
             }
             else {
                 $posts_view .= <<<HTML
-                    <h3 style="text-align: center;">No posts for thread id: {$threadId}</h3> <br/>
+                <h3 style="text-align: center;">No posts for thread id: {$thread->getId()}</h3> <br/>
 HTML;
             }
-
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $thread->getId()])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style="margin-top:15px; text-decoration: none;" onClick="" data-testid="go-to-thread"> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
         }
 
-        if (empty($threadIds)) {
+        if (count($threads) === 0) {
             $posts_view .= <<<HTML
                 <h3 style="text-align: center;">No thread id specified.</h3> <br/>
 HTML;
@@ -1592,6 +1610,7 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
+        $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -1618,6 +1637,7 @@ HTML;
                 "has_active_version" => $has_active_version,
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
+                "show_clear_conflicts" => $show_clear_conflicts,
                 "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,

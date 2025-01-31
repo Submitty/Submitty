@@ -51,11 +51,32 @@ if [[ "$table_count" -ne "5" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
     exit
 fi
+archived=0
+self_registration_type=0
+while :; do
+    case $1 in
+        --archive)
+            archived=1
+            echo "archive"
+            ;;
+        --all-self-registration)
+            self_registration_type=2
+            echo "all self registration"
+            ;;
+        --request-self-registration)
+            self_registration_type=1
+            echo "request self registration"
+            ;;
+        *) # No more options, so break out of the loop.
+            break
+    esac
 
+    shift
+done
 # Check that there are exactly 4 command line arguments.
 if [[ "$#" -ne "4" ]] ; then
     echo "ERROR: Usage, wrong number of arguments"
-    echo "   create_course.sh  <semester>  <course>  <instructor username>  <ta group>"
+    echo "   create_course.sh  [--all-self-registration|--request-self-registration|--archive] <semester>  <course>  <instructor username>  <ta group>"
     exit
 fi
 
@@ -68,7 +89,10 @@ echo -e "\nCREATE COURSE:"
 echo -e "  semester:     $semester"
 echo -e "  course:       $course"
 echo -e "  instructor:   $instructor"
-echo -e "  ta_www_group: $ta_www_group\n"
+echo -e "  ta_www_group: $ta_www_group"
+echo -e "  status:       $archived"
+echo -e "  self_registration_type: $self_registration_type\n"
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -306,8 +330,8 @@ if [[ "$?" -ne "0" ]] ; then
     exit
 fi
 
-PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (term, course, group_name, owner_name)
-VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}');"
+PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "INSERT INTO courses (term, course, group_name, owner_name, self_registration_type)
+VALUES ('${semester}', '${course}', '${ta_www_group}', '${instructor}', ${self_registration_type});"
 if [[ "$?" -ne "0" ]] ; then
     echo "ERROR: Failed to add this course to the master Submitty database."
     echo "HINT:  'insert or update on table \"courses\" violates foreign key constraint...'"
@@ -323,11 +347,17 @@ if [[ $? -ne "0" ]] ; then
     exit
 fi
 
+if [[ "$archived" -eq "1" ]] ; then 
+    PGPASSWORD=${DATABASE_PASS} psql ${CONN_STRING} -d submitty -c "UPDATE courses SET status=2 WHERE term='${semester}' AND course='${course}';"
+    echo "Archived Course ${course}"
+fi
+
+
+
 echo -e "\nSUCCESS!\n\n"
 
 ########################################################################################################################
 ########################################################################################################################
-
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
 echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${semester}/${course}"
 

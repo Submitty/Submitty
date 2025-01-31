@@ -78,7 +78,34 @@ class CourseMaterial {
     #[ORM\Column(type: Types::STRING, nullable: true)]
     protected ?string $title;
 
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalender, ?string $gradeableName) {
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $uploaded_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $uploaded_date;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $last_edit_by;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $last_edit_date;
+
+    /**
+     * Constructs a new instance of a CourseMaterial.
+     *
+     * @param int $type The type of the course material.
+     * @param string $path The file system path to the course material.
+     * @param \DateTime $release_date The release date of the course material.
+     * @param bool $hidden_from_students Indicates whether the course material is hidden from students.
+     * @param float $priority The priority or ordering of the course material.
+     * @param ?string $url The URL of the course material, applicable if it's a link type.
+     * @param ?string $title The title of the course material.
+     * @param ?string $uploaded_by The user ID of the person who uploaded the course material.
+     * @param ?\DateTime $uploaded_date The date and time when the course material was uploaded.
+     * @param ?string $last_edit_by The user ID of the last person who edited the course material.
+     * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
+     */
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalender, ?string $gradeableName, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -89,6 +116,10 @@ class CourseMaterial {
         $this->title = $title;
         $this->on_calendar = $onCalender ?? false;
         $this->gradeable = $gradeableName ?? 'none';
+        $this->uploaded_by = $uploaded_by;
+        $this->uploaded_date = $uploaded_date;
+        $this->last_edit_by = $last_edit_by;
+        $this->last_edit_date = $last_edit_date;
     }
 
     /**
@@ -124,6 +155,23 @@ class CourseMaterial {
 
     public function getReleaseDate(): \DateTime {
         return $this->release_date;
+    }
+
+
+    public function getUploadedBy(): string | null {
+        return $this->uploaded_by;
+    }
+
+    public function getUploadedDate(): \DateTime | null {
+        return $this->uploaded_date;
+    }
+
+    public function getLastEditBy(): string | null {
+        return $this->last_edit_by;
+    }
+
+    public function getLastEditDate(): \DateTime | null {
+        return $this->last_edit_date;
     }
 
     public function isHiddenFromStudents(): bool {
@@ -217,5 +265,20 @@ class CourseMaterial {
 
     public function setGradeable(string $gradeableString): void {
         $this->gradeable = $gradeableString;
+
+    public function setUploadedBy(string $uploaded_by): void {
+        $this->uploaded_by = $uploaded_by;
+    }
+
+    public function setUploadDate(\DateTime $uploaded_date): void {
+        $this->uploaded_date = $uploaded_date;
+    }
+
+    public function setLastEditBy(string $last_edit_by): void {
+        $this->last_edit_by = $last_edit_by;
+    }
+
+    public function setLastEditDate(\DateTime $last_edit_date): void {
+        $this->last_edit_date = $last_edit_date;
     }
 }

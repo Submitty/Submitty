@@ -110,23 +110,6 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function grade_inquiry_only() {
-    location.reload();
-    $('[data-testid=grade-button]').each(function () {
-        const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
-        if (!hasGradeInquiry) {
-            $(this).closest('[data-testid="grade-table"]').hide(); // hide gradeable items without active inquiries
-        }
-    });
-}
-
-function reverse_inquiry_only() {
-    location.reload();
-    $('[data-testid=grade-button]').each(function () {
-        $(this).closest('[data-testid="grade-table"]').show(); // show all gradeable items
-    });
-}
-
 function inquiry_update() {
     const button = document.getElementById('inquiryButton');
     const status = Cookies.get('inquiry_status');

@@ -22,9 +22,8 @@
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/graded_gradeable",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/status",
   "/courses/<term>/<course>/gradeable/<gradeable>/update",
-  "/courses/<term>/<course>/forum",
+  "/courses/<term>/<course>/gradeable/<gradeable>/download_zip",
   "/courses/<term>/<course>/forum/threads/new",
-  "/courses/<term>/<course>/forum/threads/[0-9]+",
   "/courses/<term>/<course>/forum/threads/merge",
   "/courses/<term>/<course>/forum/posts/new",
   "/courses/<term>/<course>/forum/posts/modify",
@@ -47,5 +46,7 @@
   "/courses/<term>/<course>/upload",
   "/courses/<term>/<course>/email_status_page",
   "/courses/<term>/<course>/users",
-  "/courses/<term>/<course>/queue/student_search"
+  "/courses/<term>/<course>/queue/student_search",
+  "/courses/<term>/<course>/register",
+  "/courses/<term>/<course>/gradeable/<gradeable>/components/marks/save_order"
 ]

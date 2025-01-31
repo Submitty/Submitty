@@ -446,7 +446,8 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setPriority($_POST['sort_priority']);
         }
 
-
+        $course_material->setLastEditBy($this->core->getUser()->getId());
+        $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
 
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
@@ -506,6 +507,9 @@ class CourseMaterialsController extends AbstractController {
                                     null,
                                     null,
                                     false,
+                                    $course_material->getUploadedBy(),
+                                    $course_material->getUploadedDate(),
+                                    null,
                                     null
                                 );
                                 $this->core->getCourseEntityManager()->persist($course_material_dir);
@@ -880,6 +884,10 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $title_name : null,
                 $on_calendar,
                 $connected_gradeable
+                uploaded_by: $this->core->getUser()->getId(),
+                uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
+                last_edit_by: null,
+                last_edit_date: null
             );
             $this->core->getCourseEntityManager()->persist($course_material);
             if ($details['section_lock']) {

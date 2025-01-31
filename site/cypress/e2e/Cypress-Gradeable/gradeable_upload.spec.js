@@ -16,10 +16,10 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="submit"]').click();
         cy.get('[data-testid="upload-gradeable-btn"]', { timeout: 10000 }).should('not.exist');
         cy.get('body').should('contain.text', 'Edit Gradeable');
-        cy.get('[data-testid="ta_view_start_date"]').should('have.value', '2024-01-11 23:59:59');
+        cy.get('[data-testid="ta-view-start-date"]').should('have.value', '2024-01-11 23:59:59');
         cy.get('[data-testid="team_lock_date"]').should('have.value', '2024-01-15 23:59:59');
-        cy.get('[data-testid="submission_open_date"]').should('have.value', '2024-01-15 23:59:59');
-        cy.get('[data-testid="submission_due_date"]').should('have.value', '2024-02-15 23:59:59');
+        cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
+        cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
     });
 

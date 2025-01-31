@@ -94,6 +94,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             null,
             null,
             false,
+            "testUser",
+            $this->core->getDateTimeNow(),
+            null,
             null
         );
         $course_material->setId(0);

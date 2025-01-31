@@ -67,19 +67,19 @@
         renderPDFToolbar();
     });
     //TODO: move to js file
-    let colorEvent;
-    if(document.createEvent){
-        colorEvent = document.createEvent("HTMLEvents");
-        colorEvent.initEvent('colorchange', true, true);
-    }
-    else {
-        colorEvent = document.createEventObject();
-        colorEvent.eventType = "colorchange";
-    }
-
-    colorEvent.eventName = "colorchange";
-
     function emitEvent(elem){
+        let colorEvent;
+        if(document.createEvent){
+            colorEvent = document.createEvent("HTMLEvents");
+            colorEvent.initEvent('colorchange', true, true);
+        }
+        else {
+            colorEvent = document.createEventObject();
+            colorEvent.eventType = "colorchange";
+        }
+
+        colorEvent.eventName = "colorchange";
+
         if(document.createEvent){
             elem.dispatchEvent(colorEvent);
         }

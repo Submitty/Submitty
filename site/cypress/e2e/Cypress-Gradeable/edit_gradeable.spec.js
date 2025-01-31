@@ -107,7 +107,9 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         cy.get('[value="Add New Component"]').click();
 
-        cy.get('[title="Delete this component"]').eq(-1).click().then(() => {
+        cy.get('[title="Delete this component"]').eq(-1).as('delete-me-button');
+        cy.get('@delete-me-button').click();
+        cy.get('@delete-me-button').then(() => {
             cy.on('window:confirm', (str) => {
                 expect(str).to.equal('Are you sure you want to delete this component?');
             });
@@ -138,7 +140,8 @@ describe('Tests cases revolving around modifying gradeables', () => {
         cy.get('#page_4_nav').click();
         cy.get('#peer_graders_list').should('exist');
 
-        cy.get('#clear_peer_matrix').click().then(() => {
+        cy.get('#clear_peer_matrix').click();
+        cy.get('#clear_peer_matrix').then(() => {
             cy.on('window:confirm', () => false);
         });
 
@@ -208,7 +211,7 @@ describe('Tests cases revolving around modifying gradeables', () => {
 
         ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
             logoutLogin(user, ['sample']);
-            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first"]').should('have.class', 'disabled');
+            cy.get('[title="Please complete Autograde and TA Homework (C System Calls) first with a score of 10 point(s)."]').should('have.class', 'disabled');
         });
 
         logoutLogin('instructor', ['sample', 'gradeable', 'open_peer_homework', 'update']);

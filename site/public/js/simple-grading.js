@@ -423,7 +423,7 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                if (elem.data('maxclamp') && elem.data('maxclamp') < this.value) {
+                if (elem.data('maxclamp') !== null && elem.data('maxclamp') < this.value) {
                     alert(`Score should be less than or equal to the max clamp value: ${elem.data('maxclamp')}`);
                     this.value = 0;
                 }
@@ -812,11 +812,11 @@ function setupSimpleGrading(action) {
     });
 
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
-    registerKeyHandler({ name: 'Search', code: 'Enter', locked: true }, () => {});
-    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight', locked: true }, () => {});
-    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft', locked: true }, () => {});
-    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp', locked: true }, () => {});
-    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown', locked: true }, () => {});
+    registerKeyHandler({ name: 'Search', code: 'Enter' }, () => {});
+    registerKeyHandler({ name: 'Move Right', code: 'ArrowRight' }, () => {});
+    registerKeyHandler({ name: 'Move Left', code: 'ArrowLeft' }, () => {});
+    registerKeyHandler({ name: 'Move Up', code: 'ArrowUp' }, () => {});
+    registerKeyHandler({ name: 'Move Down', code: 'ArrowDown' }, () => {});
 
     // check if a cell is focused, then update value
     function keySetCurrentCell(event, options) {
