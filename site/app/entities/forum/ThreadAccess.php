@@ -33,7 +33,7 @@ class ThreadAccess {
         return $this->thread;
     }
 
-    public function setTimestamp(string $newTimestamp): void {
-        $this->timestamp = $newTimestamp;
+    public function setTimestamp(DateTime $timestamp): void {
+        $this->timestamp = $timestamp;
     }
 }
