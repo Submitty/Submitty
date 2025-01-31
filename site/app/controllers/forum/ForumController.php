@@ -711,7 +711,7 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
 
         //$this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
-
+        $this->core->getCourseEntityManager()->flush();
 
         $response = ['user' => $current_user, 'last_viewed_timestamp' => $last_viewed_timestamp];
         return JsonResponse::getSuccessResponse($response);
