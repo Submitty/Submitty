@@ -5,6 +5,9 @@
 &nbsp;
 </p>
 
+{% if duckGif and duckGif != "" %}
+
+
   <button class="upload-banner btn btn-primary" onclick="newUploadBanner()" style="margin: 20px 0;"> 
     Upload a New Community Event 
   </button>
@@ -49,7 +52,6 @@
 
 
 
-{% if duckGif and duckGif != "" %}
 The moorthy gif to be displayed for new banners: <img src="data:image/gif;base64,{{duckGif}}" alt="GIF image" style="max-width: 100px">
 {% else %}
 

@@ -153,7 +153,7 @@
             >   
 
                 {#COMMUNITY EVENT BANNERS COME IN HERE#}
-                {% include 'nav_content.twig' %}
+                {% include 'CommunityEventContent.twig' %}
 
                 <div id="nav-links">
                     <a id="home-button"
@@ -216,16 +216,20 @@
                     {% endif %}
 
                     <script>
-                    
+                        let imageDataArray = {{ imageDataArray | json_encode | raw }};
+                        let baseUrl = "{{ base_url }}";
+                        let duckImg = "{{ duck_img }}";
+                        let duckGif = "{{ duckGif }}";
+
                         function onMoorthyClick() {
                             if (localStorage.getItem('bannerArray') && JSON.parse(localStorage.getItem('bannerArray')).length > 0) {
                                 if (localStorage.getItem('open') === 'true') {
                                     localStorage.setItem('open', 'false');
-                                    initializeBanner(); //need to initalize banner for essentially a "reload" of the system
+                                    initializeBanner(imageDataArray, baseUrl, duckImg, duckGif); //need to initalize banner for essentially a "reload" of the system
                                 } 
                                 else {
                                     localStorage.setItem('open', 'true');
-                                    initializeBanner();   
+                                    initializeBanner(imageDataArray, baseUrl, duckImg, duckGif);
                                 }
                             }
                             else {
