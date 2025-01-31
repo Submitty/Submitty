@@ -1,8 +1,8 @@
 """
-Script to be called as cron job to release notification regarding released
-gradeable scores.This script scans over all current courses, determining
-if any current electronic gradeable with student view has a grade release
-date in the past with no notification sent to students.
+Handles generating course-related notifications in Submitty.
+
+This is done by scanning each course database for related actions,
+such as releasing grade notifications.
 """
 import json
 import os
@@ -17,9 +17,9 @@ try:
     )
     with open(os.path.join(CONFIG_PATH, "submitty_users.json"),
               "r", encoding="utf-8") as file:
+        # submitty_daemon user authentication
         USER_DATA = json.load(file)
 
-        # Confirm that submitty_daemon user is running this script
         if USER_DATA["daemon_user"] != getpass.getuser():
             raise RuntimeError("- script must be run by the daemon user")
     with open(os.path.join(CONFIG_PATH, "submitty.json"),
@@ -65,15 +65,16 @@ def connect_db(db_name):
 
     engine = create_engine(connection)
     db = engine.connect()
+
     return db
 
 
-def notify_pending_gradeables():
-    """Send pending gradeable notifications, if any."""
+def notify_gradeable_scores():
+    """Send gradeable notifications for released scores, if any."""
+    notified = 0
     master_db = connect_db("submitty")
-    course_query = "SELECT term, course FROM courses WHERE status = '1';"
-    courses = master_db.execute(course_query)
-    total_notified_gradeables = 0
+    active_courses_query = "SELECT term, course FROM courses WHERE status = '1';"
+    courses = master_db.execute(active_courses_query)
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
@@ -87,51 +88,23 @@ def notify_pending_gradeables():
             WHERE gradeable.g_grade_released_date <= NOW()
             AND electronic_gradeable.eg_student_view = true
             AND gradeable.g_notification_sent = false;
-        """
+            """
         )
-        for row in gradeables:
-            gradeable = {"id": row[0], "title": row[1]}
+
+        for g in gradeables:
+            gradeable = {"id": g[0], "title": g[1]}
             timestamp = str(datetime.datetime.now())
 
-            # Construct gradeable URL into valid JSON string
+            # Construct gradeable URL into a valid JSON format
             gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
                              f"/gradeable/{gradeable['id']}")
             metadata = json.dumps({"url": gradeable_url})
 
-            # Send out notifications
-            notification_list = []
+            # Formulate respective recipient lists
+            general_list, email_list = [], []
             notification_content = "Grade Released: " + gradeable["title"]
-            if len(notification_content) > 40:
-                # Max length for content of notification is 40
-                notification_content = notification_content[:36] + "..."
-            notification_recipients = course_db.execute(
-                """
-                SELECT users.user_id , users.user_email
-                FROM users
-                JOIN notification_settings
-                ON notification_settings.user_id = users.user_id
-                WHERE all_released_grades = true;
-            """
-            )
-            for recipient in notification_recipients:
-                user_id = recipient[0]
-                values = (f"('grading','{metadata}','{notification_content}',"
-                          f"'{timestamp}','submitty-admin','{user_id}')")
-                notification_list.append(values)
-            # Send notifications to all potential recipients
-            if len(notification_list) > 0:
-                course_db.execute(
-                    f"""INSERT INTO notifications
-                    (component, metadata, content, created_at, from_user_id,
-                    to_user_id)
-                    VALUES {", ".join(notification_list)};"""
-                )
-
-            # Send out emails using both course and master database
-            email_list = []
             email_subject = (f"[Submitty {course}] Grade Released: "
                              f"{gradeable['title']}")
-
             email_body = (f"An Instructor has released scores in:\n{course}"
                           f"\n\nScores have been released for "
                           f"{gradeable['title']}.\n\nAuthor: System\n"
@@ -142,30 +115,61 @@ def notify_pending_gradeables():
                           "Please refer to the course syllabus for contact "
                           "information for your teaching staff.")
 
-            email_recipients = course_db.execute(
+            if len(notification_content) > 40:
+                notification_content = notification_content[:36] + "..."
+
+            # Fetch all potential recipients (general and/or email)
+            notification_recipients = course_db.execute(
                 """
-                SELECT users.user_id , users.user_email
+                SELECT
+                users.user_id,
+                users.user_email,
+                (notification_settings.all_released_grades) AS general_enabled,
+                (notification_settings.all_released_grades_email) AS email_enabled
                 FROM users
                 JOIN notification_settings
                 ON notification_settings.user_id = users.user_id
-                WHERE notification_settings.all_released_grades_email = true;
-            """
+                WHERE notification_settings.all_released_grades = true
+                OR notification_settings.all_released_grades_email = true;
+                """
             )
 
-            for recipient in email_recipients:
-                user_id, user_email = recipient[0], recipient[1]
-                email_list.append(
-                    f"('{email_subject}', '{email_body}', '{timestamp}', "
-                    f"'{user_id}', '{user_email}', '{term}', '{course}')"
+            for r in notification_recipients:
+                user_id, user_email, general, email = r[0], r[1], r[2], r[3]
+
+                if general:
+                    general_list.append(
+                        f"('grading','{metadata}','{notification_content}',"
+                        f"'{timestamp}','submitty-admin','{user_id}')"
+                    )
+
+                if email:
+                    email_list.append(
+                        f"('{email_subject}', '{email_body}', '{timestamp}', "
+                        f"'{user_id}', '{user_email}', '{term}', '{course}')"
+                    )
+
+            # Insert notifications
+            if general_list:
+                course_db.execute(
+                    f"""INSERT INTO notifications
+                    (component, metadata, content, created_at, from_user_id,
+                    to_user_id)
+                    VALUES {", ".join(general_list)};"""
                 )
 
-            if len(email_list) > 0:
+            if email_list:
                 master_db.execute(
                     f"""INSERT INTO emails
                     (subject, body, created, user_id, email_address, term,
                     course)
                     VALUES {", ".join(email_list)};"""
                 )
+
+            m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
+                 f"{len(general_list)} general, {len(email_list)} "
+                 f"email recipients\n")
+            LOG_FILE.write(m)
 
             # Add successfully notified gradeables to update state
             notified_gradeables.append(f"'{gradeable['id']}'")
@@ -176,24 +180,25 @@ def notify_pending_gradeables():
                 f"""UPDATE gradeable SET g_notification_sent = true
                 WHERE g_id in ({", ".join(notified_gradeables)})"""
             )
-            total_notified_gradeables += 1
+            notified += 1
 
         # Close the course database connection
         course_db.close()
-    return total_notified_gradeables
+
+    return notified
 
 
 def main():
-    """Driver method to release pending notifications for gradeables"""
+    """Driver method to release course notifications"""
     try:
-        notified = notify_pending_gradeables()
+        notified = notify_gradeable_scores()
         m = (f"[{datetime.datetime.now()}] Successfully released {notified} "
              f"gradeable notification{'s' if notified != 1 else ''}")
-        LOG_FILE.write(m+"\n")
+        LOG_FILE.write(f"{m}\n")
     except Exception as notification_error:  # pylint: disable=broad-except
         m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
              f"{str(notification_error)}")
-        LOG_FILE.write(m + "\n")
+        LOG_FILE.write(f"{m}\n")
         print(m)
 
 
