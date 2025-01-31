@@ -17,7 +17,6 @@ use app\libraries\routers\AccessControl;
 
 /**
  * @AccessControl(level="FACULTY")
- * @AccessControl(level="FACULTY")
  */
 class BannerController extends AbstractController {
     /**
