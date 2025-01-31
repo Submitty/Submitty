@@ -669,7 +669,7 @@ class GlobalController extends AbstractController {
                     // Arbor Day
                     $aprilImages[] = 'moorthy_duck/tree_duck.svg';
                 }
-                if (count($aprilImages)===0) {
+                if (count($aprilImages) === 0) {
                     // April Flowers
                     $duck_img = 'moorthy_duck/04-april.svg';
                 }
@@ -692,7 +692,7 @@ class GlobalController extends AbstractController {
                     // International Transgender Day of Visibility is March 31.
                     $marchImages[] = 'moorthy_duck/trans-duck.svg';
                 }
-                if (count($marchImages)===0) {
+                if (count($marchImages) === 0) {
                     // Original Duck
                     $duck_img = 'moorthy_duck/00-original.svg';
                 }
