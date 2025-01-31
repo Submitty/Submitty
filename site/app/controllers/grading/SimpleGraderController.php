@@ -246,8 +246,10 @@ class SimpleGraderController extends AbstractController {
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
+
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
+
             if ($data === '' || (!$component->isText() && $data === '0')) {
                 $ta_graded_gradeable->deleteGradedComponent($component);
                 continue;
