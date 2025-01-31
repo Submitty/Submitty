@@ -265,7 +265,7 @@ class CourseMaterial {
 
     public function setGradeable(string $gradeableString): void {
         $this->gradeable = $gradeableString;
-
+    }
     public function setUploadedBy(string $uploaded_by): void {
         $this->uploaded_by = $uploaded_by;
     }
