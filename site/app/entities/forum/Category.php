@@ -67,6 +67,6 @@ class Category {
         }
         $now = new \DateTimeImmutable();
         $interval = $visibleDate->diff($now);
-        return ($interval->days * 24) + $interval->h;
+        return (int) (($visibleDate > $now ? -1 : 1) * ($interval->days * 24) + $interval->h);
     }
 }

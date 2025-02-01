@@ -5826,11 +5826,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategories\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategoriesIdForThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -12079,11 +12074,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 11
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
-			count: 2
 			path: app/views/forum/ForumThreadView.php
 
 		-

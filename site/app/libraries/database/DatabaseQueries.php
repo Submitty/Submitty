@@ -5082,11 +5082,6 @@ AND gc_id IN (
         $this->course_db->commit();
     }
 
-    public function getCategories() {
-        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
-        return $this->course_db->rows();
-    }
-
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
         $this->course_db->query("SELECT title FROM threads WHERE id = ? and merged_thread_id = -1 and merged_post_id = -1", [$thread_id]);
         $result_rows = $this->course_db->rows();

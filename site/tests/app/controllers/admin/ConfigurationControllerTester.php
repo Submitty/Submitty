@@ -9,6 +9,7 @@ use app\libraries\FileUtils;
 use app\libraries\SessionManager;
 use app\libraries\Utils;
 use app\models\Config;
+use app\repositories\forum\CategoryRepository;
 use app\views\admin\ConfigurationView;
 use tests\utils\NullOutput;
 
@@ -414,7 +415,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['name'] = 'forum_enabled';
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
-        $queries
+        $categoryRepository = $this->createMock(CategoryRepository::class);
+        $categoryRepository
             ->expects($this->once())
             ->method('getCategories')
             ->with()
@@ -470,7 +472,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['name'] = 'forum_enabled';
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
-        $queries
+        $categoryRepository = $this->createMock(CategoryRepository::class);
+        $categoryRepository
             ->expects($this->once())
             ->method('getCategories')
             ->with()

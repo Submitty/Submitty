@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\forum\Category;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
@@ -202,8 +203,9 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {
+            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
             // Only create default categories when there is no existing categories (only happens when first enabled)
-            if (empty($this->core->getQueries()->getCategories())) {
+            if (empty($repo->getCategories())) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
                 foreach ($categories as $rank => $category) {
                     $this->core->getQueries()->addNewCategory($category, $rank);
