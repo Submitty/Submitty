@@ -110,6 +110,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
+ * @method void setNotificationSent($notification_sent)
+ * @method bool getNotificationSent()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -347,6 +349,9 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
+    /** @prop
+     * @var bool has the gradeable notification for released scores been released*/
+    protected $notification_sent = false;
 
     /**
      * Gradeable constructor.
@@ -425,6 +430,7 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
+            $this->setNotificationSent($details['notification_sent'] ?? false);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }

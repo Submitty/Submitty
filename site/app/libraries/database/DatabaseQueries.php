@@ -5951,6 +5951,7 @@ AND gc_id IN (
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
               g_allowed_minutes AS allowed_minutes,
+              g_notification_sent as notification_sent,
               eg.*,
               gamo.*,
               gc.*,
@@ -6832,6 +6833,7 @@ AND gc_id IN (
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
+                $gradeable->getNotificationSent(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
@@ -6848,7 +6850,8 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?
+                  g_allow_custom_marks=?,
+                  g_notification_sent=?
                 WHERE g_id=?",
                 $params
             );

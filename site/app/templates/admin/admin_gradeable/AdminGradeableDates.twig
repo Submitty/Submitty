@@ -57,7 +57,7 @@
         </div>
 
         <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
-            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}" data-notification="{{ gradeable.getNotificationSent() }}">
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
