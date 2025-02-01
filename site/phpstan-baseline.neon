@@ -5826,16 +5826,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategoriesIdForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategoriesIdForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCountNullUsersRotatingSections\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php

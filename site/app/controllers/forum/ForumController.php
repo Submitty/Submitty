@@ -1258,11 +1258,11 @@ class ForumController extends AbstractController {
         $result["all_categories_list"] = $repo->getCategories();
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
+            $result["categories_list"] = $repo->getCategoriesIdForThread($post["thread_id"]);
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
+            $result["categories_list"] = $repo->getCategoriesIdForThread($result["id"]);
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
@@ -1379,9 +1379,10 @@ class ForumController extends AbstractController {
 
     private function getThreadContent($thread_id, &$output) {
         $result = $this->core->getQueries()->getThread($thread_id);
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $output['categories_ids'] = $repo->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
         $output['expiration'] = $result["pinned_expiration"];
     }

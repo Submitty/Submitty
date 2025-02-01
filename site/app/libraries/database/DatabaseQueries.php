@@ -544,15 +544,6 @@ SQL;
         );
     }
 
-    public function getCategoriesIdForThread($thread_id) {
-        $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
-        $categories_list = [];
-        foreach ($this->course_db->rows() as $row) {
-            $categories_list[] = (int) $row["category_id"];
-        }
-        return $categories_list;
-    }
-
     /**
      * toggles a like from upduck to off or off to upduck
      *

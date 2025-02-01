@@ -20,4 +20,20 @@ class CategoryRepository extends EntityRepository {
             ->addOrderBy('category.category_id', 'ASC');
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * @param int $thread_id
+     * @return int[]
+     */
+    public function getCategoriesIdForThread(int $thread_id): array {
+        $qb = $this->createQueryBuilder('c');
+        $qb->select('c.category_id')
+            ->join('c.threads', 't')
+            ->where('t.id = :thread_id')
+            ->setParameter('thread_id', $thread_id);
+
+        $result = $qb->getQuery()->getSingleColumnResult();
+
+        return array_map('intval', $result);
+    }
 }
