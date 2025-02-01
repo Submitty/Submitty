@@ -100,8 +100,13 @@
         <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" {% if button.getName() %} data-testid="{{ button.getName() }}" {% endif %} tabindex="0"
             {% if button.isDisabled() %}
                 style="pointer-events: auto;"
-                onclick="alert('{{ button.getPrerequisite() }}.')"
-                title='{{ button.getPrerequisite() }}.' 
+                {% if button.getPrerequisite() is none %}
+                    onclick="alert('You must be on a team to submit this gradeable');"
+                    title="You must be on a team to submit this gradeable"
+                {% else %}
+                    onclick="alert('Please complete {{ button.getPrerequisite() }}.');"
+                    title="Please complete {{ button.getPrerequisite() }}."
+                {% endif %}
             {% else %}
                 {# assigns the href unless button has onclick affect #}
                 {% if not button.hasOnclick() %}
