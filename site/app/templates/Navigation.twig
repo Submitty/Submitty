@@ -101,8 +101,8 @@
             {% if button.isDisabled() %}
                 style="pointer-events: auto;"
                 {% if button.getPrerequisite() is none %}
-                    onclick="alert('You must be on a team to submit this gradeable.');"
-                    title="You must be on a team to submit this gradeable"
+                    onclick="alert('You must be on a team to submit to this gradeable.');"
+                    title="You must be on a team to submit to this gradeable"
                 {% else %}
                     onclick="alert('Please complete {{ button.getPrerequisite() }}.');"
                     title="Please complete {{ button.getPrerequisite() }}."
