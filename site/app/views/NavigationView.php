@@ -452,7 +452,7 @@ class NavigationView extends AbstractView {
 
 
             //If the button is autograded and has been submitted once, give a progress bar.
-            if ( 
+            if (
                 !is_nan($points_percent)
                 && $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete()
                 && ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)
