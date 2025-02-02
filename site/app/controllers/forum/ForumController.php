@@ -698,7 +698,7 @@ class ForumController extends AbstractController {
         $thread_id = $_POST["thread_id"];
         $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
         $current_user = $this->core->getUser()->getId();
-        $thread_access = $this->core->getCourseEntityManager()->find(ThreadAccess::class, array("thread" => $thread_id, "user_id" => $current_user));
+        $thread_access = $this->core->getCourseEntityManager()->find(ThreadAccess::class, ["thread" => $thread_id, "user_id" => $current_user]);
 
         $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
         $thread_access->setTimestamp($last_viewed_timestamp);
