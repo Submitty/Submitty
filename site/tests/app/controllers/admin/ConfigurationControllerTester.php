@@ -3,6 +3,7 @@
 namespace tests\app\controllers\admin;
 
 use app\controllers\admin\ConfigurationController;
+use app\entities\forum\Category;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\FileUtils;
@@ -11,6 +12,7 @@ use app\libraries\Utils;
 use app\models\Config;
 use app\repositories\forum\CategoryRepository;
 use app\views\admin\ConfigurationView;
+use Doctrine\ORM\EntityManager;
 use tests\utils\NullOutput;
 
 class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
@@ -415,12 +417,6 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['name'] = 'forum_enabled';
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
-        $categoryRepository = $this->createMock(CategoryRepository::class);
-        $categoryRepository
-            ->expects($this->once())
-            ->method('getCategories')
-            ->with()
-            ->willReturn([]);
         $queries
             ->expects($this->exactly(4))
             ->method('addNewCategory')
@@ -450,7 +446,18 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
                         return 3;
                 }
             }));
-
+        $categoryRepository = $this->createMock(CategoryRepository::class);
+        $categoryRepository
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn([]);
+        $entityManager = $this->createMock(EntityManager::class);
+        $entityManager
+            ->method('getRepository')
+            ->with(Category::class)
+            ->willReturn($categoryRepository);
+        $core->setCourseEntityManager($entityManager);
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
         $expected = [
@@ -472,15 +479,21 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['name'] = 'forum_enabled';
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
         $categoryRepository = $this->createMock(CategoryRepository::class);
         $categoryRepository
             ->expects($this->once())
             ->method('getCategories')
             ->with()
             ->willReturn(['Category']);
-        $queries
-            ->expects($this->exactly(0))
-            ->method('addNewCategory');
+        $entityManager = $this->createMock(EntityManager::class);
+        $entityManager
+            ->method('getRepository')
+            ->with(Category::class)
+            ->willReturn($categoryRepository);
+        $core->setCourseEntityManager($entityManager);
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
         $expected = [
