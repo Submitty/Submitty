@@ -101,22 +101,26 @@
 }
 
 /* status-log-scrollbar */
+/* stylelint-disable-next-line selector-id-pattern */
 #save_status_log::-webkit-scrollbar {
     height: 4px;
     width: 4px;
     border-radius: 2px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #save_status_log::-webkit-scrollbar-track {
     background: var(--standard-light-gray);
     border-radius: 2px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #save_status_log::-webkit-scrollbar-thumb {
     background: var(--standard-medium-gray);
     border-radius: 2px;
 }
 
+/* stylelint-disable-next-line selector-id-pattern */
 #save_status_log::-webkit-scrollbar-thumb:hover {
     background: #555555;
 }
