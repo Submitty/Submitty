@@ -100,7 +100,7 @@
     overflow: auto;
 }
 
-/*status-log-scrollbar*/
+/* status-log-scrollbar */
 #save_status_log::-webkit-scrollbar {
     height: 4px;
     width: 4px;
@@ -118,7 +118,7 @@
 }
 
 #save_status_log::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: #555555;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
