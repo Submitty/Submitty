@@ -28,7 +28,7 @@ class ThreadAccess {
     public function getTimestamp(): DateTime {
         return $this->timestamp;
     }
-    
+
     public function getThread(): Thread {
         return $this->thread;
     }
