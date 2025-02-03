@@ -683,10 +683,6 @@ class GlobalController extends AbstractController {
                     $februaryImages = ['moorthy_duck/black-history-duck.svg'];
                 }
 
-                if ($day <= 3) {
-                    $februaryImages[] = 'moorthy_duck/00-original.svg';
-                }
-                //Valentines (Hearts)
                 if ($day >= 11 && $day <= 17) {
                     $februaryImages[] = 'moorthy_duck/02-february.svg';
                 }
@@ -704,10 +700,6 @@ class GlobalController extends AbstractController {
                 else {
                     //January (Snowflakes)
                     $januaryImages = ['moorthy_duck/01-january.svg'];
-                }
-
-                if ($day >= 28) {
-                    $januaryImages[] = 'moorthy_duck/00-original.svg';
                 }
                 $duck_img = $januaryImages[array_rand($januaryImages)];
                 break;
