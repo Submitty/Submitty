@@ -186,6 +186,12 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
         form[0].reportValidity();
         return false;
     }
+
+    localStorage.setItem('open_attachments', JSON.stringify(
+        [...document.querySelectorAll('.attachment-container')].filter(att => !att.classList.contains('hidden'))
+        .map(att => att.getAttribute('data-attachment-id'))
+    ));
+
     if (test_category) {
         if ((!form.prop('ignore-cat')) && form.find('.btn-selected').length === 0 && ($('.cat-buttons input').is(':checked') === false)) {
             alert('At least one category must be selected.');
