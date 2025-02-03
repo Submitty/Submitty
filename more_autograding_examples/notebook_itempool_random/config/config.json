@@ -206,7 +206,7 @@ This message will appear in a blue box at the top of the page.",
           "testcases" : [
               { "title":"Animal 3", "testcase_label":"animal_3",
                 "validation":[ { "method":"diff", "actual_file":"animal_3.txt", "expected_file":"animal_3_answer.txt",
-                                 "show_expected":"always","show_actual":"always",
+                                 "show_expected":"never","show_actual":"never",
                                  "failure_message":"Incorrect Answer (note: make sure your answer is lowercase)" } ] }
           ]
         },    
