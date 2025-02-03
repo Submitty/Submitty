@@ -331,6 +331,12 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
                 hljs.highlightAll();
+
+                // scroll into an active text area if it exists
+                const activeReplyBox = document.querySelector('.post_content_reply[data-active="true"]');
+                if (activeReplyBox) {
+                    activeReplyBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
             catch (error) {
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
@@ -2048,7 +2054,7 @@ function sortTable(sort_element_index, reverse = false) {
 }
 
 function loadThreadHandler() {
-    $('a.thread_box_link').click(function (event) {
+    $('a.thread_box_link').click(async function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
             return;
@@ -2109,8 +2115,12 @@ function loadThreadHandler() {
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
             },
-            error: function () {
-                window.alert('Something went wrong while trying to display thread details. Please try again.');
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status !== 0) {
+                    // AJAX request fails outside of network issues caused by WebSocket thread updates
+                    console.error('Request failed:', textStatus, errorThrown);
+                    window.alert('Something went wrong while trying to display thread details. Please try again.');
+                }
             },
         });
     });
@@ -2661,4 +2671,43 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
+}
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { post_id: post_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
+                // eslint-disable-next-line no-undef
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                }
+                else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+    });
 }
