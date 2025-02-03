@@ -29,10 +29,6 @@ class ThreadAccess {
         return $this->timestamp;
     }
 
-    public function getThread(): Thread {
-        return $this->thread;
-    }
-
     public function setTimestamp(DateTime $timestamp): void {
         $this->timestamp = $timestamp;
     }
