@@ -166,33 +166,32 @@ describe('Docker UI Test', () => {
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
-            .type('submitty/python:2.7');
+            .type('submitty/pdflatex:2021');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
         cy.get('.alert-success')
-            .should('have.text', 'submitty/python:2.7 found on DockerHub'
+            .should('have.text', 'submitty/pdflatex found on DockerHub'
             + ' and queued to be added!');
 
         cy.reload();
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('[data-image-id="submitty/python:2.7"]')
+            return cy.get('[data-image-id="submitty/pdflatex:2021"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Remove');
                 });
         }, 10000);
 
-
         // Remove the image
-        cy.get('[data-image-id="submitty/python:2.7"]')
+        cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('be.visible', { timeout: 10000 })
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
-        cy.get('[data-image-id="submitty/python:2.7"]')
+        cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('not.exist');
     });
 });
