@@ -125,9 +125,6 @@ This message will appear in a blue box at the top of the page.",
                     "method":"diff", "comparison" : "byLine", "lineSwapOk" : true,
                     "actual_file":"math_4.txt", "expected_file":"math_4_answer.txt",
                     "show_expected":"never","show_actual":"never"
-                    //,
-                    // FIXME, THIS ALWAYS PRINTS
-                    //"failure_message":"Incorrect Answer"
                 } ] }
           ]
         },
