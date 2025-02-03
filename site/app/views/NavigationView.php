@@ -905,7 +905,8 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-default btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);
-        } elseif ($list_section === GradeableList::GRADED && $gradeable->getNotificationSent()) {
+        }
+        elseif ($list_section === GradeableList::GRADED && $gradeable->getNotificationSent()) {
             $button = new Button($this->core, [
                 "subtitle" => "RESEND NOTIFICATION",
                 "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'

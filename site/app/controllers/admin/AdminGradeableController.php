@@ -1786,13 +1786,14 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Can't close submissions for ";
                 $success = false;
             }
-        } else if ($action === "resend_notification") {
+        } elseif ($action === "resend_notification") {
             if ($gradeable->getNotificationSent()) {
                 $gradeable->setNotificationSent(false);
-                $message .= "Notification has been resent for ";
+                $message .= "Notifications have been resent for ";
                 $success = true;
-            } else {
-                $message .= "Notification has yet to be sent for ";
+            }
+            else {
+                $message .= "Notifications have yet to be sent for ";
                 $success = false;
             }
         }

@@ -41,6 +41,7 @@ except Exception as config_fail_error:  # pylint: disable=broad-except
     sys.exit(1)
 
 DATA_DIR_PATH = SUBMITTY_CONFIG["submitty_data_dir"]
+COURSES_PATH = os.path.join(DATA_DIR_PATH, 'courses')
 BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 TODAY = datetime.datetime.now()
@@ -79,6 +80,15 @@ def notify_gradeable_scores():
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
         notified_gradeables = []
+        course_config_path = os.path.join(
+            COURSES_PATH, term, course, 'config', 'config.json')
+
+        # Retrieve the course name from the course config.json, if available
+        with open(course_config_path, 'r') as f:
+            data = json.load(f)
+
+            if 'course_name' in data['course_details']:
+                course = data['course_details']['course_name']
 
         gradeables = course_db.execute(
             """
@@ -102,8 +112,8 @@ def notify_gradeable_scores():
 
             # Formulate respective recipient lists
             general_list, email_list = [], []
-            notification_content = "Grade Released: " + gradeable["title"]
-            email_subject = (f"[Submitty {course}] Grade Released: "
+            notification_content = "Scores Released: " + gradeable["title"]
+            email_subject = (f"[Submitty {course}] Scores Released: "
                              f"{gradeable['title']}")
             email_body = (f"An Instructor has released scores in:\n{course}"
                           f"\n\nScores have been released for "
@@ -168,7 +178,7 @@ def notify_gradeable_scores():
 
             m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
                  f"{len(general_list)} general, {len(email_list)} "
-                 f"email recipients\n")
+                 f"email\n")
             LOG_FILE.write(m)
 
             # Add successfully notified gradeables to update state
