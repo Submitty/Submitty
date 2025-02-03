@@ -190,7 +190,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;overflow:auto;padding:5px;">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
@@ -227,7 +227,7 @@
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}
-                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle fa-rb tooltip">
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                         <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
                                     </i>
                                     <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
@@ -279,7 +279,7 @@
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                        <i class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                                             <span class="tooltiptext tooltipbottom">
                                                                 WARNING: Max Score has been overridden in Rainbow Grades
                                                                 <br><br>
