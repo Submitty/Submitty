@@ -82,13 +82,14 @@ def notify_gradeable_scores():
         notified_gradeables = []
         course_config_path = os.path.join(
             COURSES_PATH, term, course, 'config', 'config.json')
+        course_name = course
 
         # Retrieve the course name from the course config.json, if available
         with open(course_config_path, 'r') as f:
             data = json.load(f)
 
             if 'course_name' in data['course_details']:
-                course = data['course_details']['course_name']
+                course_name = data['course_details']['course_name']
 
         gradeables = course_db.execute(
             """
@@ -113,10 +114,10 @@ def notify_gradeable_scores():
             # Formulate respective recipient lists
             general_list, email_list = [], []
             notification_content = "Scores Released: " + gradeable["title"]
-            email_subject = (f"[Submitty {course}] Scores Released: "
+            email_subject = (f"[Submitty {course_name}] Scores Released: "
                              f"{gradeable['title']}")
-            email_body = (f"An Instructor has released scores in:\n{course}"
-                          f"\n\nScores have been released for "
+            email_body = (f"An Instructor has released scores in:\n"
+                          f"{course_name}\n\nScores have been released for "
                           f"{gradeable['title']}.\n\nAuthor: System\n"
                           f"Click here for more info: {gradeable_url}\n\n"
                           "--\n"
