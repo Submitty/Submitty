@@ -46,9 +46,11 @@ class MachineUpdateThread(threading.Thread):
         self.stats = stats
         self.args = args
         self.msg = "RESULT:\n"
+        self.success = False
     def run(self):
-        success = update_machine(self.machine,self.stats,self.args, self)
-        if success == False:
+        print(f"Starting thread for machine: {self.machine}. Full output will print when all threads complete.")
+        self.success = update_machine(self.machine,self.stats,self.args, self)
+        if self.success == False:
             self.add_message(print_red(f"FAILURE TO UPDATE MACHINE {self.machine}"))
             raise SystemExit("ERROR: FAILURE TO UPDATE ONE OR MORE MACHINES")
         else:
@@ -203,7 +205,7 @@ def copy_code_to_worker(worker, user, host, submitty_repository, thread_object: 
     rsync_exclude = os.path.join(submitty_repository, ".setup", "worker_rsync_exclude.txt")
 
     # rsync the file
-    print(f"{worker}: performing rsync to {worker}...")
+    thread_object.add_message(f"{worker}: performing rsync to {worker}...")
     # If this becomes too slow, we can exclude directories using --exclude.
     # e.g. --exclude=.git --exclude=.setup/data --exclude=site
     command = "rsync -a --exclude-from={3} --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(
@@ -250,7 +252,6 @@ def update_machine(machine,stats,args, thread_object: MachineUpdateThread):
             return False
         thread_object.add_message(f"{machine}: beginning installation...\n")
         success = install_worker(user, host, machine, thread_object)
-        thread_object.add_message(print_green(f"{machine}: install {success} (gcm)"))
         if success == False:
             thread_object.add_message(print_red(f"ERROR: Failed to install Submitty software update on {machine}"))
             return False
@@ -287,7 +288,7 @@ if __name__ == "__main__":
 
     submitty_repository = submitty_config['submitty_repository']
 
-    threads = []
+    threads: list[MachineUpdateThread] = []
 
     # Start a thread for each enabled machine
     for machine, stats in autograding_workers.items():
@@ -302,4 +303,7 @@ if __name__ == "__main__":
     
     for thread in threads:
         thread.join()
+    for thread in threads:
         print(thread.msg)
+        if not thread.success:
+            raise RuntimeError(print_red(f"Machine {thread.machine} Failed. Stopping update."))
