@@ -225,7 +225,7 @@
 {# Render one student's row in the table #}
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
     <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
-        {% if grade.getSubmitter().getUser().getRegistration_type() == "withdrawn"%}
+        {% if grade.getSubmitter().getUser().getRegistration_type() == "withdrawn" %}
             class="simple-grade-withdrawn"
         {% else %}
             class="simple-grade-active"
