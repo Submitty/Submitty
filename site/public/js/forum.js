@@ -2672,3 +2672,42 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { post_id: post_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
+                // eslint-disable-next-line no-undef
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                }
+                else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+    });
+}
