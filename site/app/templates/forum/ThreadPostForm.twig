@@ -255,12 +255,7 @@
         //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
         //from an input with 'post-content-reply' class
         $('.post_content_reply').focus(function(){
-            this.dataset.active = 'true';
             $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
-        });
-
-        $('.post_content_reply').blur(function(){
-            delete this.dataset.active;
         });
 
         $(':not(.post_content_reply, .skip-first-post)').focus(function(){

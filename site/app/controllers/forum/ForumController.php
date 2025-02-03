@@ -624,7 +624,7 @@ class ForumController extends AbstractController {
                     'type' => 'new_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level + 1,
+                    'reply_level' => $reply_level,
                     'post_box_id' => $max_post_box_id
                 ]);
             }
@@ -865,7 +865,7 @@ class ForumController extends AbstractController {
                     'type' => 'edit_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level + 1,
+                    'reply_level' => $reply_level,
                     'post_box_id' => $post_box_id,
                 ]);
             }
@@ -919,7 +919,6 @@ class ForumController extends AbstractController {
                 $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
-                $this->sendSocketMessage(['type' => 'merge_thread', 'thread_id' => $child_thread_id, 'merge_thread_id' => $parent_thread_id]);
                 $this->core->addSuccessMessage("Threads merged!");
                 $thread_id = $parent_thread_id;
             }
@@ -1448,25 +1447,6 @@ class ForumController extends AbstractController {
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
     }
-
-
-
-    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["GET"])]
-    public function getPostLikesDetails(): JsonResponse {
-        $post_id = $_GET['post_id'] ?? null;
-        if ($post_id === null || $post_id === '' || !ctype_digit($post_id)) {
-            return JsonResponse::getFailResponse("Invalid or missing post_id");
-        }
-
-        if ($this->core->getUser()->getGroup() > 2) {
-            return JsonResponse::getFailResponse("You do not have permission to view this.");
-        }
-        $post_id = intval($post_id);
-        $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);
-
-        return JsonResponse::getSuccessResponse(['users' => $users]);
-    }
-
 
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update

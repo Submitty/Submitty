@@ -7,10 +7,6 @@ input[disabled]:not(#admin-gradeable-peers-submit) {
     background: var(--standard-medium-gray);
 }
 
-[data-theme="dark"] input[disabled]:not(#admin-gradeable-peers-submit) {
-    background: var(--standard-dark-gray);
-}
-
 input.readonly.peerstudents {
     border: 1px solid var(--standard-light-gray);
     background-color: var(--standard-pale-gray);

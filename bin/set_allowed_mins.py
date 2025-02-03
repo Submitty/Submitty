@@ -75,7 +75,6 @@ def main():
         json_string = config_file.read()
     CONFIG_FILE = json.loads(json_string)
     timelimit_case = None
-    # Check if time limit exists
     for testcase in CONFIG_FILE['testcases']:
         if testcase['title'] == "Check Time Limit":
             if 'validation' in testcase and len(testcase['validation']) > 0:
@@ -83,23 +82,20 @@ def main():
                     timelimit_case = testcase
                     break
 
-    allowed_minutes = override = None
-    # If time limit exists, set it to the correct time limit
     if timelimit_case is not None:
         allowed_minutes = timelimit_case['validation'][0]['allowed_minutes']
+        override = None
         if 'override' in timelimit_case['validation'][0]:
             override = timelimit_case['validation'][0]['override']
-
-    # sets allowed_minutes and override in the database
-    try:
-        db, metadata = setup_db()
-        send_data(db, allowed_minutes, override)
-    except exc.IntegrityError:
-        sys.exit(1)
-    except IOError:
-        print("WARNING: You do not have access to set allowed minutes from CLI." +
-              " Please use website to set that.")
-        exit()
+        try:
+            db, metadata = setup_db()
+            send_data(db, allowed_minutes, override)
+        except exc.IntegrityError:
+            sys.exit(1)
+        except IOError:
+            print("WARNING: You do not have access to set allowed minutes from CLI." +
+                  " Please use website to set that.")
+            exit()
 
 
 if __name__ == "__main__":

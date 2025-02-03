@@ -278,10 +278,14 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $sectionID The sectionID
      * @param string $label The label you would like to assign to the sectionID
+     * @throws BadArgumentException The passed in section label is empty
      */
     public function addSection(string $sectionID, string $label): void {
-        // If label is not set, use sectionID as default
-        $this->section->$sectionID = $label === '' ? $sectionID : $label;
+        if ($label === '') {
+            throw new BadArgumentException('The section label may not be empty.');
+        }
+
+        $this->section->$sectionID = $label;
     }
 
     /**

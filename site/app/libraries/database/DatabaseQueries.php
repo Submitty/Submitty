@@ -784,25 +784,6 @@ SQL;
         return $this->course_db->rows();
     }
 
-        /**
-         * Gets the list of users who liked a given post.
-         *
-         * @param int $post_id
-         * @return string[] Array of user ids who liked this post.
-         */
-    public function getUsersWhoLikedPost(int $post_id): array {
-        $this->course_db->query("
-            SELECT u.user_id 
-            FROM forum_upducks f
-            JOIN users u ON f.user_id = u.user_id
-            WHERE f.post_id = ?
-        ", [$post_id]);
-
-        $rows = $this->course_db->rows();
-        // return user_id/formatted name
-        return array_map(fn($row) => $row['user_id'], $rows);
-    }
-
     public function getPostOldThread($post_id) {
         $this->course_db->query("SELECT id, merged_thread_id, title FROM threads WHERE merged_thread_id <> -1 AND merged_post_id = ?", [$post_id]);
         $rows = $this->course_db->rows();
@@ -4856,8 +4837,8 @@ SQL;
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
 WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
-    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
-) AND c.term = t.term_id ORDER BY t.term_id ASC
+    SELECT course FROM courses_users WHERE user_id = ?
+) AND c.term = t.term_id
 SQL;
         $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
         $return = [];
