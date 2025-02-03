@@ -603,15 +603,15 @@ class GlobalController extends AbstractController {
                 break;
 
             case 11:
-                //November (Thanksgiving)
-                //last week of November
+                // November (Thanksgiving)
+                // Last week of November
                 $tgt_date = date('Y-W-n', strtotime("fourth Thursday of November $year"));
                 if ($tgt_date === $now->format('Y-W-n')) {
                     $duck_img = 'moorthy_duck/11-november.svg';
                 }
                 break;
             case 10:
-                //October (Halloween)
+                // October (Halloween)
                 if ($day >= 25) {
                     $duck_img = 'moorthy_duck/halloween.png';
                 }
@@ -632,46 +632,80 @@ class GlobalController extends AbstractController {
                     $duck_img = 'moorthy_duck/back_to_school_duck.svg';
                 }
                 else {
-                    //August (vacation)
+                    // August (vacation)
                     $duck_img = 'moorthy_duck/08-august.svg';
                 }
                 break;
             case 7:
-                //July (Independence)
+                // July (Independence)
                 if ($day <= 7) {
                     $duck_img = 'moorthy_duck/07-july.svg';
                 }
                 break;
             case 6:
-                //June (Pride)
+                // June (Pride)
                 $duck_img = 'moorthy_duck/06-june.svg';
                 break;
             case 5:
-                //May (Graduation)
+                // May (Graduation)
                 $duck_img = 'moorthy_duck/05-may.svg';
                 break;
             case 4:
-                //April (Flowers)
-                if ($day === 5) {
-                    $duck_img = 'moorthy_duck/quantum-duck-light.svg';
+                // April
+                $aprilImages = [];
+                // Eid-al-Fitr 2025
+                if ($day <= 2) {
+                    $aprilImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
                 }
-                elseif ($day >= 24 && $day <= 30) {
-                    // Arbor day
-                    $duck_img = 'moorthy_duck/tree_duck.svg';
+                if ($day <= 3) {
+                    // International Transgender Day of Visibility is March 31.
+                    $aprilImages[] = 'moorthy_duck/trans-duck.svg';
+                }
+                if ($day === 5) {
+                    // Quantum Duck
+                    $aprilImages[] = 'moorthy_duck/quantum-duck-light.svg';
+                }
+                if ($day >= 24 && $day <= 30) {
+                    // Arbor Day
+                    $aprilImages[] = 'moorthy_duck/tree_duck.svg';
+                }
+                if (count($aprilImages) === 0) {
+                    // April Flowers
+                    $duck_img = 'moorthy_duck/04-april.svg';
                 }
                 else {
-                    //April (Flowers)
-                    $duck_img = 'moorthy_duck/04-april.svg';
+                    $duck_img = $aprilImages[array_rand($aprilImages)];
                 }
                 break;
             case 3:
-                //Saint Patrick's Day (Shamrock)
+                // March
+                $marchImages = [];
+                // Saint Patrick's Day (Shamrock)
                 if ($day >= 14 && $day <= 20) {
-                    $duck_img = 'moorthy_duck/03-march.svg';
+                    $marchImages[] = 'moorthy_duck/03-march.svg';
+                }
+                if ($day >= 26) {
+                    // Eid-al-Fitr 2025
+                    $marchImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
+                }
+                if ($day >= 28) {
+                    // International Transgender Day of Visibility is March 31.
+                    $marchImages[] = 'moorthy_duck/trans-duck.svg';
+                }
+                if (count($marchImages) === 0) {
+                    // Original Duck
+                    $duck_img = 'moorthy_duck/00-original.svg';
+                }
+                else {
+                    $duck_img = $marchImages[array_rand($marchImages)];
+                }
+                elseif ($day >= 28) {
+                    // International Transgender Day of Visibility is March 31.
+                    $duck_img = 'moorthy_duck/trans-duck.svg';
                 }
                 break;
-
             case 2:
+                // February
                 if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
                     $februaryImages = [
                         'moorthy_duck/lunar_newyear_duck_01.svg',
@@ -680,10 +714,12 @@ class GlobalController extends AbstractController {
                     ];
                 }
                 else {
+                    // Black History Duck
                     $februaryImages = ['moorthy_duck/black-history-duck.svg'];
                 }
 
                 if ($day <= 3) {
+                    // Party Duck
                     $februaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
                 //Valentines (Hearts)
@@ -692,8 +728,8 @@ class GlobalController extends AbstractController {
                 }
                 $duck_img = $februaryImages[array_rand($februaryImages)];
                 break;
-
             case 1:
+                // January
                 if ($now >= $LunarNewYearPeriodStart && $now <= $LunarNewYearPeriodEnd) {
                     $januaryImages = [
                         'moorthy_duck/lunar_newyear_duck_01.svg',
@@ -707,6 +743,7 @@ class GlobalController extends AbstractController {
                 }
 
                 if ($day >= 28) {
+                    // Party Duck
                     $januaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg';
                 }
                 $duck_img = $januaryImages[array_rand($januaryImages)];
