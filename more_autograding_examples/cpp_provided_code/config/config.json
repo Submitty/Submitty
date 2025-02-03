@@ -14,13 +14,13 @@
             "title" : "Compilation",
             "command" : "clang++ -Wall -o a.out *cpp",
             "executable_name" : "a.out",
-            "points" : 2
+            "points" : 1
         },
 
         {
             "title" : "Testing",
             "command" : "./a.out",
-            "points" : 5,
+            "points" : 4,
             "validation" : [
                 {
                     "method" : "diff",
