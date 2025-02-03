@@ -784,6 +784,25 @@ SQL;
         return $this->course_db->rows();
     }
 
+        /**
+         * Gets the list of users who liked a given post.
+         *
+         * @param int $post_id
+         * @return string[] Array of user ids who liked this post.
+         */
+    public function getUsersWhoLikedPost(int $post_id): array {
+        $this->course_db->query("
+            SELECT u.user_id 
+            FROM forum_upducks f
+            JOIN users u ON f.user_id = u.user_id
+            WHERE f.post_id = ?
+        ", [$post_id]);
+
+        $rows = $this->course_db->rows();
+        // return user_id/formatted name
+        return array_map(fn($row) => $row['user_id'], $rows);
+    }
+
     public function getPostOldThread($post_id) {
         $this->course_db->query("SELECT id, merged_thread_id, title FROM threads WHERE merged_thread_id <> -1 AND merged_post_id = ?", [$post_id]);
         $rows = $this->course_db->rows();
