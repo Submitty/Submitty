@@ -126,7 +126,7 @@ function filter_withdrawn_update() {
         filterWithdrawnCheckbox.prop('checked', true);
     }
 
-    // filter student who withdrawned from this course
+    // filter students who withdrew from this course
     filterWithdrawnCheckbox.on('change', () => {
         if (Cookies.get('filter_student') === 'false') {
             $('[data-student="electronic-grade-withdrawn"]').hide();
