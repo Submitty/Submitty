@@ -5,11 +5,8 @@ describe('TA Grading details page', () => {
         cy.get('[data-testid="view-your-sections"]').should('contain', 'Only Assigned Sections');
         cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="random-default-order"]').should('contain', 'Randomize Order');
-
         cy.get('[data-testid="toggle-anon-button"]').should('contain', 'Anonymize Student Name');
-
         cy.get('[data-testid="toggle-grade-inquiry"]').should('contain', 'Only Grade Inquiry');
-
         cy.get('[data-testid="stats-and-charts"]').should('contain', 'Statistics & Charts');
         cy.get('[data-testid="grade-button"]').should('be.visible');
         cy.get('[data-testid="collapse-all-sections"]').should('contain', 'Collapse All Sections');
