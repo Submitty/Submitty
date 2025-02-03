@@ -18,7 +18,7 @@ use ReflectionClass;
 use tests\BaseUnitTest;
 
 class SqlToolboxControllerTester extends BaseUnitTest {
-   /** @var SqlToolboxController */
+    /** @var SqlToolboxController */
     protected $controller;
 
     /** @var Core */

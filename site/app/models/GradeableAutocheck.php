@@ -122,8 +122,8 @@ class GradeableAutocheck extends AbstractModel {
                 else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
-            // Try to find the file in the details directory. Do not print an error,
-            // as the file is likely student generated.
+                // Try to find the file in the details directory. Do not print an error,
+                // as the file is likely student generated.
             }
             else {
                 if (file_exists($results_path . "/details/" . $details["expected_file"])) {

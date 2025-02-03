@@ -111,13 +111,15 @@ class LateDays extends AbstractModel {
                     'gg' => $gg
                 ];
             }, $graded_gradeables),
-            array_map(function ($update) {
-                return [
-                    'timestamp' => $update['since_timestamp'],
-                    'update' => $update
-                ];
-            },
-            $this->late_days_updates)
+            array_map(
+                function ($update) {
+                    return [
+                        'timestamp' => $update['since_timestamp'],
+                        'update' => $update
+                    ];
+                },
+                $this->late_days_updates
+            )
         );
 
         // Sort by 'timestamp'

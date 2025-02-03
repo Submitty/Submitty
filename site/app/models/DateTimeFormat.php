@@ -7,10 +7,10 @@ use app\libraries\Core;
 
 class DateTimeFormat extends AbstractModel {
     // Set of legal specifiers
-    const SPECIFIERS = ['MDY', 'DMY'];
+    public const SPECIFIERS = ['MDY', 'DMY'];
 
     // Keys available to use with getDateFormat
-    const DATE_FORMATS_KEYS = [
+    public const DATE_FORMATS_KEYS = [
         'gradeable',
         'gradeable_with_seconds',
         'forum',
@@ -22,7 +22,7 @@ class DateTimeFormat extends AbstractModel {
     ];
 
     // Internationalized DateTime formatting strings
-    const DATE_FORMATS = [
+    public const DATE_FORMATS = [
         'MDY' => [
             'gradeable' => 'm/d/Y @ h:i A T',
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',

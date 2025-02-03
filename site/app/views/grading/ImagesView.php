@@ -9,13 +9,13 @@ use app\libraries\Utils;
 
 class ImagesView extends AbstractView {
     /** Defines the html for the icon used to flag an image */
-    const FLAG_ICON_HTML = '<i class="fas fa-flag"></i>';
+    public const FLAG_ICON_HTML = '<i class="fas fa-flag"></i>';
 
     /** Defines the html for the icon used to unflag an image */
-    const UNDO_ICON_HTML = '<i class="fas fa-undo"></i>';
+    public const UNDO_ICON_HTML = '<i class="fas fa-undo"></i>';
 
     /** Defines the maximum dimension for images being displayed on the student photos page */
-    const IMG_MAX_DIMENSION = 200;
+    public const IMG_MAX_DIMENSION = 200;
 
     /**
      * @param User[] $students

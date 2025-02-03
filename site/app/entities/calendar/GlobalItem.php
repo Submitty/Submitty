@@ -11,8 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: "global_calendar_items")]
 class GlobalItem {
-    const TEXT = 0;
-    const ANNOUNCEMENT = 1;
+    public const TEXT = 0;
+    public const ANNOUNCEMENT = 1;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

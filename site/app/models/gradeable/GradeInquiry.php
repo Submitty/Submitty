@@ -15,8 +15,8 @@ use app\models\AbstractModel;
  * @method int getGcId()
  */
 class GradeInquiry extends AbstractModel {
-    const STATUS_RESOLVED = 0;
-    const STATUS_ACTIVE = -1;
+    public const STATUS_RESOLVED = 0;
+    public const STATUS_ACTIVE = -1;
 
     /** @var int The unique Id of this grade inquiry */
     private $id = 0;

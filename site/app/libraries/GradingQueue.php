@@ -30,12 +30,12 @@ class GradingQueue {
     private $grading_path = '';
     private $grading_remaining = [];
 
-    const GRADING_FILE_PREFIX = 'GRADING_';
-    const VCS_FILE_PREFIX = 'VCS__';
-    const QUEUE_FILE_SEPARATOR = '__';
+    public const GRADING_FILE_PREFIX = 'GRADING_';
+    public const VCS_FILE_PREFIX = 'VCS__';
+    public const QUEUE_FILE_SEPARATOR = '__';
 
-    const NOT_QUEUED = -1;
-    const GRADING = 0;
+    public const NOT_QUEUED = -1;
+    public const GRADING = 0;
 
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
