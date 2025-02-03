@@ -54,7 +54,7 @@ describe('Docker UI Test', () => {
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('[data-testid="docker_version"]')
+            return cy.get('[data-testid="docker-version"]')
                 .invoke('text')
                 .then((text) => {
                     return text !== 'Error';
