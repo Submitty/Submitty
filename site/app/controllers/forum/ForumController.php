@@ -1449,6 +1449,25 @@ class ForumController extends AbstractController {
         ]);
     }
 
+
+
+    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["GET"])]
+    public function getPostLikesDetails(): JsonResponse {
+        $post_id = $_GET['post_id'] ?? null;
+        if ($post_id === null || $post_id === '' || !ctype_digit($post_id)) {
+            return JsonResponse::getFailResponse("Invalid or missing post_id");
+        }
+
+        if ($this->core->getUser()->getGroup() > 2) {
+            return JsonResponse::getFailResponse("You do not have permission to view this.");
+        }
+        $post_id = intval($post_id);
+        $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);
+
+        return JsonResponse::getSuccessResponse(['users' => $users]);
+    }
+
+
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update
      * @param array<mixed> $msg_array
