@@ -710,7 +710,6 @@ class GlobalController extends AbstractController {
                 if ($day >= 28) {
                     // $januaryImages[] = 'moorthy_duck/party-duck/party-duck-10th.svg'; Replaced the party duck
                     $januaryImages[] = 'moorthy_duck/00-original.svg';
-
                 }
                 $duck_img = $januaryImages[array_rand($januaryImages)];
                 break;
