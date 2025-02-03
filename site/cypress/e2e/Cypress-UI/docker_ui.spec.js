@@ -175,6 +175,17 @@ describe('Docker UI Test', () => {
             + ' and queued to be added!');
 
         cy.reload();
+        // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-image-id="submitty/python:2.7"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Remove');
+                });
+        }, 10000);
+
+
         // Remove the image
         cy.get('[data-image-id="submitty/python:2.7"]')
             .should('be.visible', { timeout: 10000 })
