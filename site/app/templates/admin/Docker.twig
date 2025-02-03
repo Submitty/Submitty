@@ -129,7 +129,7 @@
                 </td>
                 <td>
                     {% if is_super_user or (docker_image_owners[image.primary_name] is defined and user_id == docker_image_owners[image.primary_name]) %}
-                        <button class="send-button btn btn-default" id="{{ image.id }}" data-image-id="{{ image.id }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
+                        <button class="send-button btn btn-default" id="{{ image.primary_name }}" data-image-id="{{ image.primary_name }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
                     {% endif %}
                 </td>
             </tr>
