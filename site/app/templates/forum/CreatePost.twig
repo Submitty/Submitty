@@ -25,7 +25,7 @@
 
             {% else %}
 
-                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover"></i></a>
+                <a class="pinned-thread key_to_click" tabindex="0" onClick="bookmarkThread({{ activeThread.id }}, '1');" title="Bookmark Thread" aria-label="Bookmark Thread"><i class="fas fa-bookmark golden_hover red-hover"></i></a>
 
             {% endif %}
 
@@ -74,15 +74,18 @@
         <a class="btn btn-primary btn-sm pin-and-email-message text-decoration-none key_to_click" onclick="sendAnnouncement({{activeThread.id }});"> Pin &amp; email this thread </a>
     {% endif %}
 
-    <span class="upduck-container">
-        <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" onClick="toggleLike({{post.id}}, '{{current_user}}')" title="Like the post">
-            <img id="likeIcon_{{post.id}}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
-        </button>
-        <span data-testid="like-count" id="likeCounter_{{post.id}}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
-        <span data-testid="instructor-like" id="likedByInstructor_{{post.id}}" class="liked-by-instructor" style = "{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
-            liked by teaching staff
-        </span>
+<span class="upduck-container">
+    <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" onClick="toggleLike({{ post.id }}, '{{ current_user }}')" title="Like the post">
+        <img id="likeIcon_{{ post.id }}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
+    </button>
+    <span data-testid="like-count" id="likeCounter_{{ post.id }}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
+    <span data-testid="instructor-like" id="likedByInstructor_{{ post.id }}" class="liked-by-instructor" style="{{ post_up_duck.taTrue ? '' : 'display: none;' }}">
+        liked by teaching staff
     </span>
+    {% if userGroup <= 2 %} {# Show only for instructor #}
+        <i class="fas fa-users icon-mark-stats" onclick="showUpduckUsers({{ post.id }});" title="See who liked this post" style="cursor: pointer; margin-left: 10px;"></i>
+    {% endif %}
+</span>
     
 
     <span class="post-action-container">
@@ -120,7 +123,7 @@
                 {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                     {#pass#}
                 {% else %}
-                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread.id }}, {{ post.id }}, '{{ post.author.id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">Delete</a>
+                    <a class="dropdown-item key_to_click" tabindex = "1" data-testid="delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread.id }}, {{ post.id }}, '{{ post.author.id }}', '{{ post_date }}', '{{ csrf_token }}' ); return false;" title="{{ post_buttons.delete.ud_button_title }}" aria-label="{{ post_buttons.delete.ud_button_title }}">{{ post_buttons.delete.ud_toggle_status == "true" ? "Delete" : "Restore" }}</a>
                     <a class="dropdown-item key_to_click" tabindex = "2" data-testid="edit-post-button" onClick="showEditPostForm({{ post.id }}, {{ post.thread.id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}" aria-label="{{ post_buttons.edit.edit_button_title }}">Edit</a>
                 {% endif %}
             {% endif %}

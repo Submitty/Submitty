@@ -624,7 +624,7 @@ class ForumController extends AbstractController {
                     'type' => 'new_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level,
+                    'reply_level' => $reply_level + 1,
                     'post_box_id' => $max_post_box_id
                 ]);
             }
@@ -705,11 +705,11 @@ class ForumController extends AbstractController {
     }
 
     /**
-     * Alter content/delete/undelete post of a thread
+     * Alter content/delete/restore post of a thread
      *
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
      *
-     * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => undelete
+     * @param int $modify_type (0/1/2) 0 => delete, 1 => edit content, 2 => restore
      */
     #[Route("/courses/{_semester}/{_course}/forum/posts/modify", methods: ["POST"])]
     public function alterPost($modify_type) {
@@ -761,20 +761,20 @@ class ForumController extends AbstractController {
 
             return $this->core->getOutput()->renderJsonSuccess(['type' => $type]);
         }
-        elseif ($modify_type == 2) { //undelete post or thread
+        elseif ($modify_type == 2) { //restore post or thread
             $thread_id = $_POST["thread_id"];
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if (is_null($result)) {
-                $error = "Parent post must be undeleted first.";
+                $error = "Parent post must be restored first.";
                 return $this->core->getOutput()->renderJsonFail($error);
             }
             else {
-                // We want to reload same thread again, in both case (thread/post undelete)
+                // We want to reload same thread again, in both case (thread/post restored)
                 $thread_title = $this->core->getQueries()->getThread($thread_id)['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Undeleted: " . Notification::textShortner($post["content"]);
-                $content = "In " . $full_course_name . "\n\nThe following post was undeleted.\n\nThread: " . $thread_title . "\n\n" . $post["content"];
+                $subject = "Restored: " . Notification::textShortner($post["content"]);
+                $content = "In " . $full_course_name . "\n\nThe following post was restored.\n\nThread: " . $thread_title . "\n\n" . $post["content"];
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
@@ -865,7 +865,7 @@ class ForumController extends AbstractController {
                     'type' => 'edit_post',
                     'thread_id' => $thread_id,
                     'post_id' => $post_id,
-                    'reply_level' => $reply_level,
+                    'reply_level' => $reply_level + 1,
                     'post_box_id' => $post_box_id,
                 ]);
             }
@@ -919,6 +919,7 @@ class ForumController extends AbstractController {
                 $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
+                $this->sendSocketMessage(['type' => 'merge_thread', 'thread_id' => $child_thread_id, 'merge_thread_id' => $parent_thread_id]);
                 $this->core->addSuccessMessage("Threads merged!");
                 $thread_id = $parent_thread_id;
             }
@@ -1184,7 +1185,9 @@ class ForumController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($thread_id, $option, $show_deleted);
         if (is_null($thread)) {
-            return $this->core->getOutput()->renderJsonFail("Invalid thread id (NON-EXISTENT ID)");
+            $this->core->addErrorMessage("Requested thread does not exist.");
+            $this->core->redirect(($this->core->buildCourseUrl(['forum'])));
+            return;
         }
 
         $this->core->getQueries()->markNotificationAsSeen($user, -2, (string) $thread_id);
@@ -1445,6 +1448,25 @@ class ForumController extends AbstractController {
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
     }
+
+
+
+    #[Route("/courses/{_semester}/{_course}/forum/posts/likes/details", methods: ["GET"])]
+    public function getPostLikesDetails(): JsonResponse {
+        $post_id = $_GET['post_id'] ?? null;
+        if ($post_id === null || $post_id === '' || !ctype_digit($post_id)) {
+            return JsonResponse::getFailResponse("Invalid or missing post_id");
+        }
+
+        if ($this->core->getUser()->getGroup() > 2) {
+            return JsonResponse::getFailResponse("You do not have permission to view this.");
+        }
+        $post_id = intval($post_id);
+        $users = $this->core->getQueries()->getUsersWhoLikedPost($post_id);
+
+        return JsonResponse::getSuccessResponse(['users' => $users]);
+    }
+
 
     /**
      * this function opens a WebSocket client and sends a message with the corresponding update

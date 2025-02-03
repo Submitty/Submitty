@@ -832,11 +832,11 @@ class ForumThreadView extends AbstractView {
             $classes[] = "first_post";
         }
         $isNewPost = false;
-        if ($thread->getNewPosts($user->getId())->contains($post) || $user->getId() === $post->getAuthor()->getId()) {
+        if ($thread->getNewPosts($user->getId())->contains($post)) {
             $classes[] = "new_post";
             $isNewPost = true;
             if ($post->getAuthor()->accessGrading()) {
-                $classes[] = "important new_post important-new";
+                $classes[] = "important important-new";
             }
         }
         else {
@@ -873,7 +873,7 @@ class ForumThreadView extends AbstractView {
         if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessFullGrading())) {
             if ($deleted && $user->accessGrading()) {
                 $ud_toggle_status = "false";
-                $ud_button_title = "Undelete post";
+                $ud_button_title = "Restore post";
                 $ud_button_icon = "fa-undo";
             }
             else {
