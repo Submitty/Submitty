@@ -45,7 +45,7 @@ class MachineUpdateThread(threading.Thread):
         self.machine = machine
         self.stats = stats
         self.args = args
-        self.msg = "RESULT:\n"
+        self.msg = ""
         self.success = False
     def run(self):
         print(f"Starting thread for machine: {self.machine}. Full output will print when all threads complete.")
@@ -106,16 +106,16 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                     image_id = client.images.get(imageRemoved).id
                     thread_object.add_message("Removed image " + imageRemoved)
                 except docker.errors.ImageNotFound as e:
-                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {imageRemoved}", file=sys.stderr))
+                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {imageRemoved}"))
                     continue
                 try:
                     client.images.remove(image_id, True)
                 except Exception as e:
-                    thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}", file=sys.stderr))
+                    thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}"))
                     traceback.print_exc(file=sys.stderr)
 
         except Exception as e:
-            thread_object.add_message(print_red(f"ERROR: An error occurred: {e}", file=sys.stderr))
+            thread_object.add_message(print_red(f"ERROR: An error occurred: {e}"))
             traceback.print_exc(file=sys.stderr)
 
         for image in images_to_update:
@@ -124,7 +124,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                 repo, tag = image.split(':')
                 client.images.pull(repository=repo, tag=tag)
             except Exception as e:
-              thread_object.add_message(print_red(f"{worker}: ERROR: Could not pull {image}: {e}", file=sys.stderr))
+              thread_object.add_message(print_red(f"{worker}: ERROR: Could not pull {image}: {e}"))
               traceback.print_exc()
 
               # check for machine
@@ -170,14 +170,19 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
             return False
         try:
             success = True
+            print(f"============Detailed Command Output for {machine} ============")
             for command in commands:
                 thread_object.add_message(f'{machine}: performing {command}')
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
-                thread_object.add_message(stdout.read().decode('utf-8') )
+                
+                print(machine + ": ", stdout.read().decode('utf-8') )
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
+                    print(f'{machine}: {command} failed!')
                     thread_object.add_message(print_red(f"ERROR: Failure performing {operation} on {user}@{host}"))
                     success = False
+                else:
+                    print(f'{machine}: {command} success!')
         except Exception as e:
             thread_object.add_message(print_red(f"ERROR: Failure performing {operation} on {host} due to error {str(e)}"))
             success = False
@@ -303,7 +308,8 @@ if __name__ == "__main__":
     
     for thread in threads:
         thread.join()
+    print("================== Simplified Output ==================")
     for thread in threads:
         print(thread.msg)
         if not thread.success:
-            raise RuntimeError(print_red(f"Machine {thread.machine} Failed. Stopping update."))
+            print_red(f"====================================================== ERROR: Machine {thread.machine} FAILED ======================================================")
