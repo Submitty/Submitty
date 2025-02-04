@@ -19,19 +19,22 @@ export async function runSqlQuery() {
 
         const json = await resp.json();
         const error = document.getElementById('query-results-error');
-        const error_mesage = document.getElementById('query-results-error-message');
+        const error_message = document.getElementById('query-results-error-message');
+        const info = document.getElementById('query-results-info');
+        const info_message = document.getElementById('query-results-info-message');
         const table = document.getElementById('query-results');
         table.innerHTML = '';
 
+        error.style.display = 'none';
+        info.style.display = 'none';
+
         if (json.status !== 'success') {
-            error_mesage.textContent = json.message;
+            error_message.textContent = json.message;
             error.style.display = 'block';
             return;
         }
 
-        error.style.display = 'none';
-
-        const data = json.data;
+        const data = json.data.data;
 
         if (data.length === 0) {
             const row = document.createElement('tr');
@@ -41,6 +44,9 @@ export async function runSqlQuery() {
             table.appendChild(row);
             return;
         }
+
+        info_message.textContent = json.data.message;
+        info.style.display = 'block';
 
         const header = document.createElement('thead');
         const header_row = document.createElement('tr');

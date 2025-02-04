@@ -21,6 +21,10 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 
 class SqlToolboxController extends AbstractController {
+
+    private const MAX_ROWS = 1000;
+
+
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {
         return new WebResponse(
@@ -48,8 +52,20 @@ class SqlToolboxController extends AbstractController {
 
         try {
             $this->core->getCourseDB()->beginTransaction();
-            $this->core->getCourseDB()->query($query);
-            return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
+            $limitedQuery = rtrim($query, ';');
+            $countQuery = "SELECT COUNT(*) as total FROM ({$limitedQuery}) as count_query";
+            $this->core->getCourseDB()->query($countQuery);
+            $totalRows = $this->core->getCourseDB()->rows()[0]['total'];
+            $limitedQuery = "SELECT * FROM ({$limitedQuery}) as results LIMIT " . self::MAX_ROWS;
+            $this->core->getCourseDB()->query($limitedQuery);
+            $rows = $this->core->getCourseDB()->rows();
+        
+            return JsonResponse::getSuccessResponse([
+                'data' => $rows,
+                'message' => $totalRows > self::MAX_ROWS 
+                    ? "Output was truncated. Showing " . count($rows) . " of {$totalRows} total rows." 
+                    : "Showing " . count($rows) . " of {$totalRows} total rows."
+            ]);
         }
         catch (DatabaseException $exc) {
             return JsonResponse::getFailResponse("Error running query: " . $exc->getMessage());
