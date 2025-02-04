@@ -87,7 +87,7 @@ describe('Test cases for TA grading page', () => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
         cy.get('body').type('{G}');
         cy.get('[data-testid="component-container"]').its('length').should('eq', 4);
-        cy.get('[data-testid="component-container"]').eq(0).should('contain', 'Currently being graded by: Quinn I.');
+        cy.get('[data-testid="component-container"]').eq(0).should('contain', 'Last opened by: Quinn I.');
     });
     it ('Grader should be able to save and move with arrows', () => {
         cy.login('instructor');
