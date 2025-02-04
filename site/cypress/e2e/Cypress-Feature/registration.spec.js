@@ -1,6 +1,7 @@
 import { getFullCurrentSemester } from '../../support/utils';
 
 const openMessage = `The course testing for ${getFullCurrentSemester()} is open to self registration`;
+const openMessageFull = `The course Testing Course (testing) for ${getFullCurrentSemester()} is open to self registration`;
 const selectMessage = 'You may select below to add yourself to the course.';
 const notifiedMessage = 'Your instructor will be notified and can then choose to keep you in the course.';
 
@@ -31,16 +32,32 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="all-self-registration"]').should('be.checked');
         cy.get('[data-testid="default-section-id"]').select('5');
         cy.logout();
+        // Check instructors view
         cy.login();
         cy.get('[data-testid="courses-header"]').eq(0).should('have.text', 'My Courses');
         cy.get('[data-testid="courses-header"]').eq(1).should('have.text', 'Courses Available for Self Registration');
         cy.get('[data-testid="courses-header"]').eq(2).should('have.text', 'My Archived Courses');
         cy.logout();
+        // Check normal view (with no course name)
         cy.login('gutmal');
         cy.visit();
         cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
         cy.get('[data-testid="testing-button"]').click();
         cy.get('[data-testid="no-access-message"]').should('contain', openMessage)
+            .and('contain', selectMessage)
+            .and('contain', notifiedMessage);
+        cy.logout();
+        // Set course name
+        cy.login('instructor2');
+        cy.visit(['testing', 'config']);
+        cy.get('[data-testid="course-name"').type('Testing Course{enter}');
+        cy.logout();
+        // Check with course name
+        cy.login('gutmal');
+        cy.visit();
+        cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
+        cy.get('[data-testid="testing-button"]').click();
+        cy.get('[data-testid="no-access-message"]').should('contain', openMessageFull)
             .and('contain', selectMessage)
             .and('contain', notifiedMessage);
         cy.get('[data-testid="register-button"]').click();

@@ -250,7 +250,7 @@ class ForumThreadView extends AbstractView {
                 "display_option" => $display_option,
                 "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken(),
-                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
+                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']),
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
@@ -396,18 +396,7 @@ class ForumThreadView extends AbstractView {
         }
         return $button_params;
     }
-    /**
-     * @param Post[] $reply_hierarchy
-     * @return Post[]
-     */
-    private function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
-        $reply_hierarchy[] = $post;
-        $post->setReplyLevel($reply_level);
-        foreach ($post->getChildren() as $child) {
-            $this->BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
-        }
-        return $reply_hierarchy;
-    }
+
 
     /**
      * Renders or formats a list of posts.
@@ -431,7 +420,7 @@ class ForumThreadView extends AbstractView {
 
         $posts = [];
         if ($display_option == "tree") {
-            $posts = $this->BuildReplyHeirarchy($first_post);
+            $posts = ForumUtils::BuildReplyHeirarchy($first_post);
         }
         else {
             // posts were ordered at query-time by repository
@@ -873,7 +862,7 @@ class ForumThreadView extends AbstractView {
         if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessFullGrading())) {
             if ($deleted && $user->accessGrading()) {
                 $ud_toggle_status = "false";
-                $ud_button_title = "Undelete post";
+                $ud_button_title = "Restore post";
                 $ud_button_icon = "fa-undo";
             }
             else {

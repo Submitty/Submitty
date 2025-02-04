@@ -4,6 +4,7 @@ namespace app\libraries;
 
 use app\libraries\Utils;
 use app\libraries\FileUtils;
+use app\entities\forum\Post;
 
 /**
  * Class ForumUtils
@@ -124,5 +125,18 @@ class ForumUtils {
             ];
         }
         return $post_attachment;
+    }
+
+        /**
+         * @param Post[] $reply_hierarchy
+         * @return Post[]
+         */
+    public static function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
+        $reply_hierarchy[] = $post;
+        $post->setReplyLevel($reply_level);
+        foreach ($post->getChildren() as $child) {
+            ForumUtils::BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
+        }
+        return $reply_hierarchy;
     }
 }

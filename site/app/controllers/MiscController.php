@@ -13,6 +13,8 @@ use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\Gradeable;
+use app\models\User;
 use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -348,12 +350,20 @@ class MiscController extends AbstractController {
     public function downloadSubmissionZip($gradeable_id, $submitter_id, $version, $is_anon, $origin = null) {
 
         $anon_id = $submitter_id;
-        if ($is_anon === "true") {
-            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
-        }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
+        $blind_grading = ($peer && $gradeable->getPeerBlind() !== Gradeable::UNBLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER);
+        if ($blind_grading || $is_anon === "true") {
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        }
+        if ($submitter_id === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildCourseUrl());
@@ -378,8 +388,15 @@ class MiscController extends AbstractController {
         }
 
         $folder_names = [];
+        $access_args = ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()];
+        if ($gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION) {
+            $access_args["section"] = $graded_gradeable->getSubmitter()->getRotatingSection();
+        }
+        elseif ($gradeable->getGraderAssignmentMethod() === Gradeable::REGISTRATION_SECTION) {
+            $access_args["section"] = $graded_gradeable->getSubmitter()->getRegistrationSection();
+        }
         //See which directories we are allowed to read.
-        if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+        if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
             $folder_names[] = "checkout";
@@ -389,10 +406,10 @@ class MiscController extends AbstractController {
         // If the request is coming from the submissions page, then the results and results_public folder
         // should not be included, otherwise include them
         if ($origin != 'submission') {
-            if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+            if ($this->core->getAccess()->canI("path.read.results", $access_args)) {
                 $folder_names[] = "results";
             }
-            if ($this->core->getAccess()->canI("path.read.results_public", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+            if ($this->core->getAccess()->canI("path.read.results_public", $access_args)) {
                 $folder_names[] = "results_public";
             }
         }

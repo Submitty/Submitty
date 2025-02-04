@@ -17,7 +17,7 @@
             Click <a href="{{main_url}}"> here </a> to back to homepage and see your courses list.
         {% endif %}
     {% else %}
-        The course <b>{{ course_name != course_id ? 'course_name (course_id)' : course_name  }}</b> for <b>{{ semester }}</b> is open to self registration <br />
+        The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration <br />
         You may select below to add yourself to the course. <br/>
         Your instructor will be notified and can then choose to keep you in the course.
         {% if course_home_url != '' %}

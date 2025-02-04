@@ -172,10 +172,6 @@ function getSection() {
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
 
-        if (label === '') {
-            $('#save_status').text('All sections MUST have a label before saving');
-        }
-
         // Add to sections
         sections[section] = label;
     });
@@ -801,19 +797,21 @@ $(document).ready(() => {
         saveChanges();
     });
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
+    // This mutation observer catches changes to bucket assignments (available buckets to assigned buckets, and vice versa)
+    const targetBucketReassignment = document.querySelector('#buckets_used_list');
+    const observerBucketReassignment = new MutationObserver((mutations) => {
         saveChanges();
     });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
+    const configBucketReassignment = { attributes: true, childList: true, characterData: true };
+    observerBucketReassignment.observe(targetBucketReassignment, configBucketReassignment);
+
+    // This mutation observer catches automatic bucket assignments on page load
+    const targetAutomaticBucketAssignment = document.querySelector('.bucket_detail_div');
+    const observerAutomaticBucketAssignment = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    const configAutomaticBucketAssignment = { attributes: true, attributeFilter: ['style'] };
+    observerAutomaticBucketAssignment.observe(targetAutomaticBucketAssignment, configAutomaticBucketAssignment);
 });
 
 function saveChanges() {
@@ -821,7 +819,14 @@ function saveChanges() {
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
-    formData.append('json_string', buildJSON());
+    try {
+        formData.append('json_string', buildJSON());
+    }
+    catch (err) {
+        console.error(err);
+        $('#save_status').text('An error occurred while saving.');
+        return;
+    }
 
     $.ajax({
         url: url,
@@ -831,13 +836,11 @@ function saveChanges() {
         processData: false,
         contentType: false,
         success: function (response) {
-            console.log(response);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
             else {
-                // lets keep the alert, because users may not notice it even if it fails
-                alert(`An error occurred: ${response.data}`);
+                console.error(response);
             }
         },
         // error: function (jqXHR, textStatus, errorThrown) {

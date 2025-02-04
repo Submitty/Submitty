@@ -107,10 +107,12 @@ jobs:
       - run: npm ci
       - run: npm run test
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: site/tests/report/jest/clover.xml
           flags: js
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   php-lint:
@@ -177,10 +179,12 @@ jobs:
       - name: Run php unit tests
         run: php vendor/bin/phpunit
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: site/tests/report/clover.xml
           flags: php
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
   python-lint:
@@ -234,10 +238,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload submitty python utils Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: python_submitty_utils/coverage.xml
           flags: python_submitty_utils
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Migrator unit test
       - name: Run migrator python unit tests
@@ -246,10 +252,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload migrator Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: migration/coverage.xml
           flags: migrator
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       # Auto grader unit test
       - name: Run autograder python unit tests
@@ -258,10 +266,12 @@ jobs:
           coverage run -m unittest discover
           coverage xml
       - name: Upload autograder Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: autograder/coverage.xml
           flags: autograder
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       #  submitty_daemon_jobs unit tests
       - name: Install bulk upload dependencies
@@ -277,10 +287,12 @@ jobs:
           coverage xml -i
 
       - name: Upload submitty_daemon_jobs Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: sbin/submitty_daemon_jobs/coverage.xml
           flags: submitty_daemon_jobs
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   yaml-lint:
     name: YAML Lint
