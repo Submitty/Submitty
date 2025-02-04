@@ -8,7 +8,6 @@ use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
@@ -207,7 +206,7 @@ class DatabaseQueries {
         FROM posts
         ORDER BY author_user_id, timestamp desc),
         F AS
-        (SELECT student_id, count (student_id)
+        (SELECT student_id, count (DISTINCT poll_id)
         FROM poll_responses
         GROUP BY student_id),
         G AS
@@ -784,6 +783,25 @@ SQL;
         return $this->course_db->rows();
     }
 
+        /**
+         * Gets the list of users who liked a given post.
+         *
+         * @param int $post_id
+         * @return string[] Array of user ids who liked this post.
+         */
+    public function getUsersWhoLikedPost(int $post_id): array {
+        $this->course_db->query("
+            SELECT u.user_id 
+            FROM forum_upducks f
+            JOIN users u ON f.user_id = u.user_id
+            WHERE f.post_id = ?
+        ", [$post_id]);
+
+        $rows = $this->course_db->rows();
+        // return user_id/formatted name
+        return array_map(fn($row) => $row['user_id'], $rows);
+    }
+
     public function getPostOldThread($post_id) {
         $this->course_db->query("SELECT id, merged_thread_id, title FROM threads WHERE merged_thread_id <> -1 AND merged_post_id = ?", [$post_id]);
         $rows = $this->course_db->rows();
@@ -956,42 +974,6 @@ SQL;
         $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
         return null;
     }
-    /**
-     * Set delete status for given post and all descendant
-     *
-     * If delete status of the first post in a thread is changed, it will also update thread delete status
-     *
-     * @param  integer      $post_id
-     * @param  integer      $thread_id
-     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
-     * @return boolean|null Is first post of thread
-     */
-    public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
-        $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
-        $parent_id = $this->course_db->row()["parent_id"];
-        $children = [$post_id];
-        $get_deleted = $newStatus == 0;
-        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
-
-        if (!$newStatus) {
-            // On undelete, parent post must have deleted = false
-            if ($parent_id != -1) {
-                if ($this->getPost($parent_id)['deleted']) {
-                    return null;
-                }
-            }
-        }
-        if ($parent_id == -1) {
-            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
-            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
-            return true;
-        }
-        else {
-            foreach ($children as $post_id) {
-                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $post_id]);
-            }
-        } return false;
-    }
 
     public function getParentPostId($child_id) {
         $this->course_db->query("SELECT parent_id from posts where id = ?", [$child_id]);
@@ -1045,79 +1027,6 @@ SQL;
             }
         }
         return $return;
-    }
-
-    /**
-     * @param string[] $attachments_deleted
-     * @param string[] $attachments_added
-     */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
-        try {
-            $markdown = $markdown ? 1 : 0;
-            // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
-            // forum_posts_history will store all history state of the post(if edited at any point of time)
-            $this->course_db->beginTransaction();
-            // Insert first version of post during first edit
-            $this->course_db->query(
-                "INSERT INTO forum_posts_history (post_id, edit_author, content, edit_timestamp, has_attachment, version_id)
-                    SELECT id, author_user_id, content, timestamp, has_attachment, version_id
-                        FROM posts
-                        WHERE id = ?
-                        AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?);",
-                [$post_id, $post_id]
-            );
-            // Get latest version number
-            $this->course_db->query("SELECT version_id FROM posts WHERE id = ?", [$post_id]);
-            $version_id = $this->course_db->row()["version_id"] + 1;
-            // Update attachments
-            if (count($attachments_deleted) > 0) {
-                $placeholders = $this->createParameterList(count($attachments_deleted));
-                $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
-            }
-            if (count($attachments_added) > 0) {
-                $rows = [];
-                $params = [];
-                // Format placeholders and parameters for single query
-                foreach ($attachments_added as $img) {
-                    $params[] = $this->createParameterList(4);
-                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
-                }
-                $placeholders = implode(", ", $params);
-                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
-            }
-            $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
-            // Update current post
-            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ?, has_attachment = ?, version_id = ? where id = ?", [$content, $anon, $markdown, $hasAttachment, $version_id, $post_id]);
-            // Insert latest version of post into forum_posts_history
-            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp, version_id) SELECT id, ?, content, current_timestamp, version_id FROM posts WHERE id = ?", [$user, $post_id]);
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", [ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id]);
-            $this->course_db->commit();
-        }
-        catch (DatabaseException $dbException) {
-            $this->course_db->rollback();
-            return false;
-        } return true;
-    }
-
-    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration) {
-        try {
-            $this->course_db->beginTransaction();
-            if ($expiration == null) {
-                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
-            }
-            else {
-                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ?, pinned_expiration = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $expiration, $thread_id]);
-            }
-            $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", [$thread_id]);
-            foreach ($categories_ids as $category_id) {
-                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$thread_id, $category_id]);
-            }
-            $this->course_db->commit();
-        }
-        catch (DatabaseException $dbException) {
-            $this->course_db->rollback();
-            return false;
-        } return true;
     }
 
     /**
@@ -4807,7 +4716,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? {$include_archived} AND {$force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -4837,8 +4746,8 @@ SQL;
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
 WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
-    SELECT course FROM courses_users WHERE user_id = ?
-) AND c.term = t.term_id
+    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
+) AND c.term = t.term_id ORDER BY t.term_id ASC
 SQL;
         $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
         $return = [];
@@ -9370,5 +9279,60 @@ ORDER BY
                 (SELECT user_id FROM saml_mapped_users);
         ");
         return $this->rowsToArray($this->submitty_db->rows());
+    }
+
+    /**
+     * @param string $image the full name of the image to get
+     * @return string|false the user id of the image's owner or false if the image is not in the db
+     */
+    public function getDockerImageOwner(string $image): string|false {
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
+        if ($this->submitty_db->row() === []) {
+            return false;
+        }
+        return $this->submitty_db->row()['user_id'] ?? '';
+    }
+
+    /**
+     * @return array<string, string> the owners of all docker images, indexed by image name
+     */
+    public function getAllDockerImageOwners(): array {
+        $result = [];
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images");
+        foreach ($this->submitty_db->rows() as $row) {
+            $result[$row['image_name']] = $row['user_id'] ?? '';
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $image the full name of the image to set ownership
+     * @param string $user_id the user id of its owner.
+     */
+    public function setDockerImageOwner(string $image, string $user_id): void {
+        $current_owner = $this->getDockerImageOwner($image);
+        if ($current_owner === false) {
+            $this->submitty_db->query("INSERT INTO docker_images (image_name, user_id) values (?, ?)", [$image,$user_id]);
+        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+        // Only sysadmin will be able to remove it.
+        }
+        elseif ($current_owner !== $user_id) {
+            $this->submitty_db->query("UPDATE docker_images SET user_id = NULL WHERE image_name = ?", [$image]);
+        }
+    }
+
+    /**
+     * @param string $image the full name of the image to remove
+     * @param User $user the user who is removing the image
+     * @return bool true if image was deleted, false otherwise
+     */
+    public function removeDockerImageOwner(string $image, User $user): bool {
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=?", [$image]);
+        }
+        else {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
+        }
+        return $this->submitty_db->getRowCount() > 0;
     }
 }
