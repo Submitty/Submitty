@@ -93,6 +93,7 @@ function onReplyTextAreaKeyUp(textarea) {
         $('.gi-show-not-empty').show();
         $('.gi-show-empty').hide();
     }
+    resizeTextarea(textarea);
 }
 
 function onGradeInquirySubmitClicked(button) {
@@ -262,6 +263,17 @@ function newDiscussionRender(discussion) {
     }
 }
 
+function resizeTextarea(textarea) {
+    if (!(textarea instanceof Element)) {
+        return;
+    }
+    textarea.style.height = "auto"; 
+    textarea.style.height = textarea.scrollHeight + "px";
+    const parentBody = textarea.closest('.markdown-area-body');
+    if (parentBody) {
+        parentBody.style.height = textarea.scrollHeight + "px";
+    }
+}
 $(document).ready(() => {
     loadDraft();
     onReady();

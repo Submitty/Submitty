@@ -186,14 +186,22 @@
     background: var(--default-white);
     border-radius: 0 0 6px 6px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: auto !important;
+    min-height: 100px;
+    max-height: none;
+    align-items: stretch;
 }
 
 .markdown-area textarea {
-    resize: vertical; 
-    overflow-y: auto;
-    max-height: 300px; 
+    resize: none;
+    height: auto;
     min-height: 100px;
+    max-height: none;
+    overflow-y: hidden;
     tab-size: 4;
+    flex-grow: 1;
 }
 
 .markdown-preview {
@@ -205,7 +213,7 @@
     overflow: auto;
     resize: none;
     min-height: 100px;
-    max-height: 300px;
+    max-height: none;
     width: fill-available;
 }
 
