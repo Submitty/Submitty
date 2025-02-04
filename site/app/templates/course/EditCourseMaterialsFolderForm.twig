@@ -75,15 +75,20 @@
         "current_gradeable" : current_gradeable,
     } only %}
     <script>
+            var showMenu = document.getElementById('show-menu');
+
             showMenu.addEventListener('change', function () {
                 var showMenu = document.getElementById('show-menu');
                 console.log('Showing On Calendar:', showMenu.value);
             });
-                var showMenu = document.getElementById('show-menu');
                 console.log('ShowingING On Calendar:', showMenu.value);
 
                 if (showMenu == null) console.log("aw");
         function submitFolderEdit(fullUpdate){ // Submit button
+
+            console.log(showMenu.value);
+
+
             let sectionsEdit = [];
             let partialSections = [];
             let cmTime = document.getElementById("edit-folder-picker").value;
