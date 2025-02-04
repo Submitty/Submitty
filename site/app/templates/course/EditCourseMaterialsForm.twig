@@ -80,11 +80,16 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <hr>
-    {% include "course/CourseMaterialsCalendarMenu.twig" with {
-        "div_class": 'edit-cm-file-cal-menu',
-        "gradeables" : gradeables,
-        "current_gradeable" : current_gradeable,
-    } only %}
+
+{% embed "course/CourseMaterialsCalendarMenu.twig" with {
+    "div_class": 'edit-cm-file-cal-menu',
+    "div_id": '1',
+    "gradeables" : gradeables,
+    "current_gradeable" : current_gradeable,
+} only %}
+{% endembed %}
+
+
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
@@ -113,6 +118,20 @@
                 let calendarDisplay = document.getElementById('show-menu').value;
                 let associatedDate = calendarDisplay === "date" ? document.getElementById("associated-date").value : "none";
                 let gradeableChosen = calendarDisplay === "gradeable" ? document.getElementById("gradeable-select").value : "none";
+
+                console.log(calendarDisplay);
+                console.log(associatedDate);
+                console.log(gradeableChosen);
+
+
+                        let container = document.getElementById('1');
+                        if (container) {
+                            let showMenua = container.querySelector("#show-menu");
+                            if (showMenua) {
+                                console.log(showMenua.value);
+                            }
+                        }
+                return;
 
                 let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");

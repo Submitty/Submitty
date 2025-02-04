@@ -118,6 +118,14 @@
         </div>
     </div>
     <hr>
+{% embed "course/CourseMaterialsCalendarMenu.twig" with {
+    "div_class": 'edit-cm-file-cal-menu',
+    "div_id": '3',
+    "gradeables" : gradeables,
+    "current_gradeable" : current_gradeable,
+} only %}
+{% endembed %}
+
 
     <script>    
         function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
