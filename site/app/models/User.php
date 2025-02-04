@@ -107,7 +107,7 @@ class User extends AbstractModel {
      * @var string The given name of the user */
     protected $legal_given_name;
     /** @prop
-     * @var string|null The preferred given name of the user */
+     * @var ?string The preferred given name of the user */
     protected $preferred_given_name;
     /** @prop
      * @var  string The given name to be displayed by the system (either given name or preferred given name) */
@@ -116,7 +116,7 @@ class User extends AbstractModel {
      * @var string The family name of the user */
     protected $legal_family_name;
     /** @prop
-     * @var string|null The preferred family name of the user */
+     * @var ?string The preferred family name of the user */
     protected $preferred_family_name;
     /** @prop
      * @var  string The family name to be displayed by the system (either family name or preferred family name) */
