@@ -25,6 +25,11 @@ use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
+enum GradingAction {
+    case OPEN_COMPONENT;
+    case CLOSE_COMPONENT;
+}
+
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
@@ -2360,13 +2365,10 @@ class ElectronicGraderController extends AbstractController {
      * @param string $gradeable_id
      * @param string $anon_id
      * @param string $component_id
-     * @param string $action
+     * @param GradingAction $action
      * @return JsonResponse
      */
-    public function changeComponentGraders(string $gradeable_id, string $anon_id, string $component_id, string $action) {
-        if ($action !== "add" && $action !== "remove") {
-            return JsonResponse::getErrorResponse('Invalid action');
-        }
+    public function changeComponentGraders(string $gradeable_id, string $anon_id, string $component_id, GradingAction $action) {
         $grader = $this->core->getUser();
 
         // Get the gradeable
@@ -2408,7 +2410,7 @@ class ElectronicGraderController extends AbstractController {
             "gradeable_id" => $gradeable_id,
             "grader_id" => $this->core->getUser()->getId(),
             "component_id" => $component_id,
-            "action" => $action === "add" ? "OPEN_COMPONENT" : "CLOSE_COMPONENT",
+            "action" => $action === GradingAction::OPEN_COMPONENT ? "OPEN_COMPONENT" : "CLOSE_COMPONENT",
             "submitter_id" => $submitter_id
         ];
         Logger::logTAGrading($logger_params);
@@ -2416,7 +2418,7 @@ class ElectronicGraderController extends AbstractController {
         $graders = $graded_gradeable->getActiveGraders();
         $timestamps = $graded_gradeable->getActiveGradersTimestamps();
         $graders_names = $graded_gradeable->getActiveGradersNames();
-        if ($action === "add") {
+        if ($action === GradingAction::OPEN_COMPONENT) {
             $this->core->getQueries()->addComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
         }
         else {
@@ -2448,7 +2450,7 @@ class ElectronicGraderController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/open_component", methods: ["POST"])]
     public function ajaxOpenGradedComponent($gradeable_id) {
-        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', 'add');
+        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::OPEN_COMPONENT);
     }
 
     /**
@@ -2457,7 +2459,7 @@ class ElectronicGraderController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
     public function ajaxCloseGradedComponent($gradeable_id) {
-        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', 'remove');
+        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::CLOSE_COMPONENT);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {

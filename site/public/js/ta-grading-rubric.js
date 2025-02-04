@@ -96,31 +96,6 @@ const PDF_PAGE_INSTRUCTOR = -2;
 var AJAX_USE_ASYNC = true;
 
 /**
- *
- * @param {DateTime} dateTime input date time
- * @returns {string} time ago
- */
-const timeAgo = (dateTime) => {
-    const units = [
-        'year',
-        'month',
-        'week',
-        'day',
-        'hour',
-        'minute',
-        'second',
-    ];
-
-    const diff = dateTime.diffNow().shiftTo(...units);
-    const unit = units.find((unit) => diff.get(unit) !== 0) || 'second';
-
-    const relativeFormatter = new Intl.RelativeTimeFormat('en', {
-        numeric: 'auto',
-    });
-    return relativeFormatter.format(Math.min(Math.trunc(diff.as(unit)), 0), unit);
-};
-
-/**
  * Keep All of the ajax functions at the top of this file
  *
  */
@@ -2421,7 +2396,7 @@ async function loadComponentData(gradeable, graded_gradeable) {
         if (graded_gradeable.active_graders[component.id]) {
             ACTIVE_GRADERS_LIST[component.id] = graded_gradeable.active_graders[component.id]?.map((_, index) => {
                 const grader = graded_gradeable.active_graders[component.id][index];
-                const graderAge = timeAgo(luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]));
+                const graderAge = luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]).toRelative();
                 return `${grader} (${graderAge})`;
             }) ?? [];
         }
@@ -2768,7 +2743,7 @@ async function openComponentGrading(component_id) {
         for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
             ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
                 const grader = response.data.active_graders[component][index];
-                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                const graderAge = luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]).toRelative();
                 return `${grader} (${graderAge})`;
             }) ?? [];
         }
@@ -2938,7 +2913,7 @@ async function closeComponentGrading(component_id, saveChanges) {
         for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
             ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
                 const grader = response.data.active_graders[component][index];
-                const graderAge = timeAgo(luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]));
+                const graderAge = luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]).toRelative();
                 return `${grader} (${graderAge})`;
             }) ?? [];
         }

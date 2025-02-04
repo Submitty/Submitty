@@ -101,7 +101,7 @@ class GradedGradeable extends AbstractModel {
      * Gets the active graders for this graded gradeable
      * @return array<array<int, string>>
      */
-    public function getActiveGraders() {
+    public function getActiveGraders(): array {
         return $this->active_graders;
     }
 
@@ -109,7 +109,7 @@ class GradedGradeable extends AbstractModel {
      * Gets the active graders timestamps for this graded gradeable
      * @return array<array<int, string>>
      */
-    public function getActiveGradersTimestamps() {
+    public function getActiveGradersTimestamps(): array {
         return $this->active_graders_timestamps;
     }
 
@@ -117,7 +117,7 @@ class GradedGradeable extends AbstractModel {
      * Gets the active graders names for this graded gradeable
      * @return array<array<int, string>>
      */
-    public function getActiveGradersNames() {
+    public function getActiveGradersNames(): array {
         return $this->active_graders_names;
     }
 

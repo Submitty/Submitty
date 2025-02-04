@@ -31,7 +31,6 @@ def up(config, database, semester, course):
             UNIQUE (grader_id, gc_id, ag_team_id)
         );
     """)
-    pass
 
 
 def down(config, database, semester, course):
@@ -47,4 +46,3 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    pass

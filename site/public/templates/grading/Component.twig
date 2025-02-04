@@ -47,7 +47,7 @@ Required Input:
     {# /Title bar #}
     {% if graders is not empty %}
         <b class="grader-names" data-testid="grader-names">
-        Currently being graded by: {{ graders|join(", ")}}
+        Last opened by: {{ graders|join(", ")}}
         </b>
     {% endif %}
 
