@@ -27,6 +27,7 @@ beforeEach(() => {
         <button id="download-sql-btn">Download CSV</button>
         </form>
         <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
+        <div id='query-results-info' class='yellow-message'><pre id='query-results-info-message'></pre></div>
         <table id='query-results'></table>
     `;
 });
@@ -67,16 +68,19 @@ test('csv generation', () => {
 test('success with results', async () => {
     mockFetch({
         status: 'success',
-        data: [
-            {
-                col_1: 'foo',
-                col_2: 'bar',
-            },
-            {
-                col_1: 'baz',
-                col_2: 'qux',
-            },
-        ],
+        data: {
+            results: [
+                {
+                    col_1: 'foo',
+                    col_2: 'bar',
+                },
+                {
+                    col_1: 'baz',
+                    col_2: 'qux',
+                },
+            ],
+            message: 'Showing 2 of 2 total rows',
+        },
     });
 
     await runSqlQuery();
@@ -89,7 +93,10 @@ test('success with results', async () => {
 test('success with no results', async () => {
     mockFetch({
         status: 'success',
-        data: [],
+        data: {
+            results: [],
+            message: 'Showing 0 of 0 total rows',
+        },
     });
 
     await runSqlQuery();
@@ -122,7 +129,7 @@ test('thrown exception is caught and logged to console.error', async () => {
 
     await runSqlQuery();
 
-    const exceptionString = "TypeError: Cannot read properties of undefined (reading 'length')";
+    const exceptionString = "TypeError: Cannot read properties of undefined (reading 'results')";
 
     expect(console.error.mock.calls.length).toEqual(1);
     expect(console.error.mock.calls[0][0].toString()).toEqual(exceptionString);
@@ -133,7 +140,10 @@ test('thrown exception is caught and logged to console.error', async () => {
 test('init binds submit button', async () => {
     mockFetch({
         status: 'success',
-        data: [],
+        data: {
+            results: [],
+            message: 'Showing 0 of 0 total rows',
+        },
     });
 
     init();

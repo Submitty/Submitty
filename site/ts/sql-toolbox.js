@@ -34,7 +34,7 @@ export async function runSqlQuery() {
             return;
         }
 
-        const data = json.data.data;
+        const data = json.data.results;
 
         if (data.length === 0) {
             const row = document.createElement('tr');

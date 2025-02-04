@@ -93,17 +93,31 @@ class SqlToolboxControllerTester extends BaseUnitTest {
 
         /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
-        $courseDb->expects($this->once())->method('query')->with('SELECT * FROM foo;');
-        $courseDb->expects($this->once())->method('rows')->with()->willReturn($testData);
-
+        $courseDb
+                ->expects($this->exactly(2))
+                ->method('query')
+                ->withConsecutive(
+                    ['SELECT COUNT(*) as total FROM (SELECT * FROM foo) as count_query'],
+                    ['SELECT * FROM (SELECT * FROM foo) as results LIMIT 1000']
+                );
+            $courseDb
+                ->expects($this->exactly(2))
+                ->method('rows')
+                ->willReturnOnConsecutiveCalls(
+                    [['total' => 2]],
+                    $testData
+                );
         $_POST['sql'] = ' SELECT * FROM foo; ';
 
         $response = $this->controller->runQuery();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $expected = [
-            'status' => 'success',
-            'data' => $testData,
-        ];
+                'status' => 'success',
+                'data' => [
+                    'data' => $testData,
+                    'message' => 'Showing 2 of 2 total rows.'
+                ]
+            ];
         $this->assertSame($expected, $response->json);
     }
 
@@ -154,9 +168,13 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->setUpDatabase();
         /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
-        $courseDb->expects($this->once())->method('query')->with('SELECT * FROM INVALID')->willThrowException(new DatabaseException('foo'));
-
+            $courseDb
+                ->expects($this->once())
+                ->method('query')
+                ->with('SELECT COUNT(*) as total FROM (SELECT * FROM INVALID) as count_query')
+                ->willThrowException(new DatabaseException('foo'));
         $response = $this->controller->runQuery();
+
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame($expected, $response->json);
     }

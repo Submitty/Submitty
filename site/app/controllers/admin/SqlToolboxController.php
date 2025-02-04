@@ -21,7 +21,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 
 class SqlToolboxController extends AbstractController {
-
     private const MAX_ROWS = 1000;
 
 
@@ -59,11 +58,10 @@ class SqlToolboxController extends AbstractController {
             $limitedQuery = "SELECT * FROM ({$limitedQuery}) as results LIMIT " . self::MAX_ROWS;
             $this->core->getCourseDB()->query($limitedQuery);
             $rows = $this->core->getCourseDB()->rows();
-        
             return JsonResponse::getSuccessResponse([
-                'data' => $rows,
-                'message' => $totalRows > self::MAX_ROWS 
-                    ? "Output was truncated. Showing " . count($rows) . " of {$totalRows} total rows." 
+                'results' => $rows,
+                'message' => $totalRows > self::MAX_ROWS
+                    ? "Output was truncated. Showing " . count($rows) . " of {$totalRows} total rows."
                     : "Showing " . count($rows) . " of {$totalRows} total rows."
             ]);
         }
