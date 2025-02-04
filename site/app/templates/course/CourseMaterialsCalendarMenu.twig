@@ -1,11 +1,11 @@
 <div class="{{div_class}}">
     <label for="show-menu">Show On Calendar: </label>
-    hi
     <select name="show-menu" id="show-menu">
         <option value="none">None</option>
         <option value="gradeable">On Gradeable</option>
         <option value="date">On Date</option>
     </select>
+
     <div id="cal-gradeable-div">
         <label for="associated-gradeable">Associated Gradeable: </label>
         {% include "misc/GradeableSelect.twig" with {

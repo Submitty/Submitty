@@ -118,11 +118,7 @@
         </div>
     </div>
     <hr>
-    {% include "course/CourseMaterialsCalendarMenu.twig" with {
-        "div_class": 'upload-cm-cal-menu',
-        "gradeables" : gradeables,
-        "current_gradeable" : current_gradeable,
-    } only %}
+
     <script>    
         function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue);

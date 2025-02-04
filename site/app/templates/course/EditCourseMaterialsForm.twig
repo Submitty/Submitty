@@ -109,14 +109,17 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
+
+                let calendarDisplay = document.getElementById('show-menu').value;
+                let associatedDate = calendarDisplay === "date" ? document.getElementById("associated-date").value : "none";
+                let gradeableChosen = calendarDisplay === "gradeable" ? document.getElementById("gradeable-select").value : "none";
+
                 let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");
                 let url_url_val = url_url.disabled ? null : url_url.value;
                 let file_path = document.getElementById("new-file-name").value;
                 let overwrite = false;
                 let overwrite_elem = $('#overwrite-submit');
-
-                let 
 
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
