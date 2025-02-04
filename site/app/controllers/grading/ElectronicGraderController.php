@@ -25,11 +25,6 @@ use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-enum GradingAction {
-    case OPEN_COMPONENT;
-    case CLOSE_COMPONENT;
-}
-
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
