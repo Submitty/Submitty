@@ -267,11 +267,11 @@ function resizeTextarea(textarea) {
     if (!(textarea instanceof Element)) {
         return;
     }
-    textarea.style.height = "auto"; 
-    textarea.style.height = textarea.scrollHeight + "px";
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
     const parentBody = textarea.closest('.markdown-area-body');
     if (parentBody) {
-        parentBody.style.height = textarea.scrollHeight + "px";
+        parentBody.style.height = `${textarea.scrollHeight + 32}px`;
     }
 }
 $(document).ready(() => {
