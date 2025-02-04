@@ -244,8 +244,14 @@ class SimpleGraderController extends AbstractController {
         $return_data = [];
 
         foreach ($gradeable->getComponents() as $component) {
-            $data = $_POST['scores'][$component->getId()] ?? '';
-            $original_data = $_POST['old_scores'][$component->getId()] ?? '';
+            $data = $_POST['scores'][$component->getId()];
+            if (!isset($data)) {
+                continue;
+            }
+            $original_data = $_POST['old_scores'][$component->getId()];
+            if (!isset($original_data)) {
+                return JsonResponse::getFailResponse("Save error: old score not set");
+            }
 
             $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
             $component_grade->setGrader($grader);
