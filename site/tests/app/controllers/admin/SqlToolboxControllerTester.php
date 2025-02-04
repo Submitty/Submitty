@@ -114,7 +114,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $expected = [
                 'status' => 'success',
                 'data' => [
-                    'data' => $testData,
+                    'results' => $testData,
                     'message' => 'Showing 2 of 2 total rows.'
                 ]
             ];
