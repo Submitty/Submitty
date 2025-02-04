@@ -2662,3 +2662,16 @@ function pinAnnouncement(thread_id, type, csrf_token) {
         });
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const openAttachments = JSON.parse(localStorage.getItem('open_attachments')) || [];
+
+    openAttachments.forEach(id => {
+        const attachment = document.querySelector(`.attachment-container[data-attachment-id="${id}"]`);
+        if (attachment) {
+            attachment.classList.remove('hidden'); 
+        }
+    });
+
+    localStorage.removeItem('open_attachments');
+});
