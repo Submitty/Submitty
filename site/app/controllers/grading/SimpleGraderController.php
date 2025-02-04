@@ -257,7 +257,8 @@ class SimpleGraderController extends AbstractController {
             if ($data === '' || (!$component->isText() && $data === '0')) {
                 $ta_graded_gradeable->deleteGradedComponent($component);
                 continue;
-            } else {
+            }
+            else {
                 $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
                 $component_grade->setGrader($grader);
             }
