@@ -171,7 +171,7 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
         cy.get('.alert-success')
-            .should('have.text', 'submitty/pdflatex found on DockerHub'
+            .should('have.text', 'submitty/pdflatex:2021 found on DockerHub'
             + ' and queued to be added!');
 
         cy.reload();
