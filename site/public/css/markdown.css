@@ -189,8 +189,9 @@
 }
 
 .markdown-area textarea {
-    resize: none;
-    overflow-y: hidden;
+    resize: vertical; 
+    overflow-y: auto;
+    max-height: 300px; 
     min-height: 100px;
     tab-size: 4;
 }
