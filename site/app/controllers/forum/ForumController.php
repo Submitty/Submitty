@@ -703,7 +703,7 @@ class ForumController extends AbstractController {
         $current_user = $this->core->getUser()->getId();
         $thread_access = $this->core->getCourseEntityManager()->find(ThreadAccess::class, ["thread" => $thread_id, "user_id" => $current_user]);
 
-        if(is_null($thread_access)) {
+        if (is_null($thread_access)) {
             return $this->core->getOutput()->renderJsonFail("Failed to mark post unread: thread access for post not found.");
         }
         $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
