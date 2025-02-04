@@ -56,16 +56,17 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         client = docker.from_env()
         try:
             # List all images
-            image_set = {
-                image_name
+            image_dict = dict([
+                (image_name, image.id)
                 for image in client.images.list()
                 for image_name in image.attrs["RepoTags"]
-            }
+            ])
             print("Images found on machine:")
-            for image in image_set:
-                print(f"{image} (id {client.images.get(image).id})")
-            print("") # single newline
-            image_ids = set([client.images.get(im).id for im in image_set])
+            for image_name, image_id in image_dict.items():
+                print(f"{image_name} (id {image_id})")
+            print("")
+
+            image_ids = set(image_dict.values())
             images_to_update_ids = set([client.images.get(im).id for im in images_to_update])
             images_to_remove = set.difference(image_ids, images_to_update_ids)
 
