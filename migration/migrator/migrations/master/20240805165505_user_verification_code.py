@@ -19,7 +19,7 @@ def up(config, database):
             user_familyname character varying NOT NULL,
             user_email character varying NOT NULL,
             verification_code character varying(50) NOT NULL DEFAULT 'none',
-            verification_expiration timestamp DEFAULT now()
+            verification_expiration timestamp DEFAULT NOW()
         )
     ''')
 
