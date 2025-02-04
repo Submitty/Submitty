@@ -1798,7 +1798,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 40
+			count: 29
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -1808,7 +1808,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 19
+			count: 13
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -1823,11 +1823,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:alterAnnouncement\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:alterPost\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -1878,16 +1873,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editCategory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editPost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -4977,22 +4962,17 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 13
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Foreach overwrites \\$post_id with its value variable\\.$#"
-			count: 1
+			count: 12
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 15
+			count: 14
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 27
+			count: 24
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -5472,76 +5452,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editCategory\\(\\) has parameter \\$visible_date with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$anon with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$content with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$markdown with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$original_creator with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$post_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$expiration with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$lock_thread_date with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$status with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$thread_title with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7522,11 +7432,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:visitThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
