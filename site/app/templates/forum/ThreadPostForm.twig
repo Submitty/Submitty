@@ -124,7 +124,7 @@
                  diff is used for comparison between the given date of category and the current date of user 
                  when date is above then current date then output is less than zero.
                  and when date is below then current date the optput is greater then zero #}
-                {% if category.visibleDate is null or category.diff >= 0 %}
+                {% if category.visibleDate is null or category.diff > 0 %}
                 <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.description }}
                     <input type="checkbox" name="cat[]" value="{{ category.id }}" data-testid="{{ category.id }}" aria-label="Category {{ category.description }}">
                 </div>

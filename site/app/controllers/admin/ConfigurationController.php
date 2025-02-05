@@ -205,7 +205,7 @@ class ConfigurationController extends AbstractController {
         if ($name === 'forum_enabled' && $entry == 1) {
             $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
             // Only create default categories when there is no existing categories (only happens when first enabled)
-            if (empty($repo->getCategories())) {
+            if (count($repo->getCategories()) === 0) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
                 foreach ($categories as $rank => $category) {
                     $this->core->getQueries()->addNewCategory($category, $rank);

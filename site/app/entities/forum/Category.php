@@ -38,6 +38,10 @@ class Category {
         return $this->visible_date;
     }
 
+    public function getThreads(): Collection {
+        return $this->threads;
+    }
+
     public function getId(): int {
         return $this->category_id;
     }
