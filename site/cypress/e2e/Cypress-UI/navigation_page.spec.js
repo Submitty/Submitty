@@ -172,7 +172,7 @@ describe('tests navigation buttons for each level of access', () => {
     });
 
     ['instructor', 'ta', 'student'].forEach((user) => {
-        it(`should show the correct alert message for team homework in case of ${user}`, () => {
+        it(`should show the correct alert message for team homework for ${user}`, () => {
             cy.login(user);
             cy.visit(['sample']);
             cy.get('[data-testid="open_team_homework"]').find('[data-testid="submit-btn"]').click();
@@ -281,7 +281,7 @@ describe('navigation page', () => {
         validate_navigation_page_sections(sections);
     });
 
-    it('should show full access grader content for TA', () => {
+    it('should show full access grader content for ta', () => {
         cy.login('ta');
         cy.visit(['sample']);
 
