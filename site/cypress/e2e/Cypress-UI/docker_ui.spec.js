@@ -183,7 +183,7 @@ describe('Docker UI Test', () => {
                 .then((text) => {
                     return text.includes('Remove');
                 });
-        }, 10000);
+        }, 15000);
 
         // Remove the image
         cy.get('[data-image-id="submitty/pdflatex:2021"]')
@@ -191,6 +191,13 @@ describe('Docker UI Test', () => {
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
+        //now wait until the image is removed
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-image-id="submitty/pdflatex:2021"]')
+                    .should('not.exist');
+        }, 15000);
+
+
         cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('not.exist');
     });

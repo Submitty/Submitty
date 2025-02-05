@@ -244,6 +244,11 @@ class DockerInterfaceController extends AbstractController {
             $jsonFilePath,
             $json,
         );
+
+        if (!$this->updateDocker()) {
+            return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
+        }
+
         return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
     }
 }
