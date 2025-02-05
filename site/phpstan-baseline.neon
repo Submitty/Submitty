@@ -11547,11 +11547,6 @@ parameters:
 			path: app/views/PollView.php
 
 		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/views/UserProfileView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/ConfigurationView.php
