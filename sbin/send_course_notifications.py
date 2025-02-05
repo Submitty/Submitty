@@ -82,14 +82,7 @@ def notify_gradeable_scores():
         notified_gradeables = []
         course_config_path = os.path.join(
             COURSES_PATH, term, course, 'config', 'config.json')
-        course_name = course
-
-        # Retrieve the course name from the course config.json, if available
-        with open(course_config_path, 'r') as f:
-            data = json.load(f)
-
-            if 'course_name' in data['course_details']:
-                course_name = data['course_details']['course_name']
+        course_name = course.strip().upper()
 
         gradeables = course_db.execute(
             """
@@ -101,6 +94,60 @@ def notify_gradeable_scores():
             AND gradeable.g_notification_sent = false;
             """
         )
+
+        # Following still requires extensive testing, but works for now (need to extend to notification state)
+        # Still need to filter out version conflicts
+        available_grades = course_db.execute(
+            """
+            SELECT
+                g.g_id AS g_id,
+                g.g_title AS g_title,
+                gd.gd_user_id AS user_id,
+                egd.autograding_complete AS autograding,
+                gcd.gcd_grader_id AS grader_id,
+                COUNT(DISTINCT gc.gc_id) AS total_components,
+                COUNT(DISTINCT gcd.gc_id) AS graded_components,
+                CASE
+                    WHEN egv.active_version IS NOT NULL
+                        AND egv.active_version != gcd.gcd_graded_version
+                    THEN TRUE
+                    ELSE FALSE
+                END AS version_conflict
+            FROM gradeable AS g
+            INNER JOIN electronic_gradeable AS eg
+                ON g.g_id = eg.g_id
+            INNER JOIN gradeable_component AS gc
+                ON g.g_id = gc.g_id
+            INNER JOIN gradeable_component_data AS gcd
+                ON gc.gc_id = gcd.gc_id
+            INNER JOIN gradeable_data AS gd
+                ON gcd.gd_id = gd.gd_id
+            LEFT JOIN electronic_gradeable_data AS egd
+                ON gc.g_id = egd.g_id
+            LEFT JOIN electronic_gradeable_version AS egv
+                ON g.g_id = egv.g_id
+                AND gd.gd_user_id = egv.user_id
+            WHERE g.g_grade_released_date <= NOW()
+                AND eg.eg_student_view = TRUE
+                AND gcd.gcd_grader_id IS NOT NULL
+                AND (egd.autograding_complete IS NULL OR egd.autograding_complete = TRUE)
+            GROUP BY g.g_id, g.g_title, gd.gd_user_id, egd.autograding_complete, gcd.gcd_grader_id, egv.active_version, gcd.gcd_graded_version
+            HAVING COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id);
+            """
+        )
+
+        print(available_grades)
+
+        if gradeables:
+            # Retrieve the full course name from the course config.json
+            with open(course_config_path, 'r') as f:
+                data = json.load(f)
+
+                if 'course_name' in data['course_details']:
+                    full_name = data['course_details']['course_name'].strip()
+
+                    if len(full_name) > 0:
+                        course_name += ": " + full_name
 
         for g in gradeables:
             gradeable = {"id": g[0], "title": g[1]}
@@ -114,7 +161,7 @@ def notify_gradeable_scores():
             # Formulate respective recipient lists
             general_list, email_list = [], []
             notification_content = "Scores Released: " + gradeable["title"]
-            email_subject = (f"[Submitty {course_name}] Scores Released: "
+            email_subject = (f"[Submitty {course}] Scores Released: "
                              f"{gradeable['title']}")
             email_body = (f"An Instructor has released scores in:\n"
                           f"{course_name}\n\nScores have been released for "
