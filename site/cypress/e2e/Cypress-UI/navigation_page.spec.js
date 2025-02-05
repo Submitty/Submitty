@@ -171,7 +171,7 @@ describe('tests navigation buttons for each level of access', () => {
         checkButtons('grades_released_lab', null, null);
     });
 
-    ['instructor', 'ta', 'student'].forEach((user) => {
+    ['instructor', 'ta', 'grader', 'student',].forEach((user) => {
         it(`should show the correct alert message for team homework for ${user}`, () => {
             cy.login(user);
             cy.visit(['sample']);
