@@ -115,22 +115,26 @@
                     sectionsEdit = null;
                 }
 
-                let calendarDisplay = document.getElementById('show-menu').value;
-                let associatedDate = calendarDisplay === "date" ? document.getElementById("associated-date").value : "none";
-                let gradeableChosen = calendarDisplay === "gradeable" ? document.getElementById("gradeable-select").value : "none";
 
+                let calendarDisplay = 'none';
+                let associatedDate = 'none';
+                let gradeableChosen = 'none';
+
+
+                let container = document.getElementById('1');
+                if (container) {
+                    let showMenua = container.querySelector('#show-menu');
+                    if (showMenua) {
+                        calendarDisplay = container.querySelector('#show-menu').value;
+                        associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
+                        gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                    }
+                }
                 console.log(calendarDisplay);
                 console.log(associatedDate);
                 console.log(gradeableChosen);
 
 
-                        let container = document.getElementById('1');
-                        if (container) {
-                            let showMenua = container.querySelector("#show-menu");
-                            if (showMenua) {
-                                console.log(showMenua.value);
-                            }
-                        }
                 return;
 
                 let title = document.getElementById("edit-title").value;
