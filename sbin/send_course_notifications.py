@@ -95,44 +95,35 @@ def notify_gradeable_scores():
             """
         )
 
-        # Following still requires extensive testing, but works for now (need to extend to notification state)
-        # Still need to filter out version conflicts
+        # Following still needs to fix version conflicts
         available_grades = course_db.execute(
             """
             SELECT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
-                gd.gd_user_id AS user_id,
+                egv.user_id AS user_id,
+                eg.eg_use_ta_grading AS eg_use_ta_grading,
                 egd.autograding_complete AS autograding,
-                gcd.gcd_grader_id AS grader_id,
-                COUNT(DISTINCT gc.gc_id) AS total_components,
-                COUNT(DISTINCT gcd.gc_id) AS graded_components,
-                CASE
-                    WHEN egv.active_version IS NOT NULL
-                        AND egv.active_version != gcd.gcd_graded_version
-                    THEN TRUE
-                    ELSE FALSE
-                END AS version_conflict
+                egv.active_version AS active_version,
+                gcd.gcd_graded_version AS gcd_graded_version
             FROM gradeable AS g
             INNER JOIN electronic_gradeable AS eg
                 ON g.g_id = eg.g_id
+            INNER JOIN electronic_gradeable_version AS egv
+                ON g.g_id = egv.g_id
             INNER JOIN gradeable_component AS gc
                 ON g.g_id = gc.g_id
-            INNER JOIN gradeable_component_data AS gcd
+            LEFT JOIN gradeable_component_data AS gcd
                 ON gc.gc_id = gcd.gc_id
-            INNER JOIN gradeable_data AS gd
-                ON gcd.gd_id = gd.gd_id
             LEFT JOIN electronic_gradeable_data AS egd
                 ON gc.g_id = egd.g_id
-            LEFT JOIN electronic_gradeable_version AS egv
-                ON g.g_id = egv.g_id
-                AND gd.gd_user_id = egv.user_id
             WHERE g.g_grade_released_date <= NOW()
                 AND eg.eg_student_view = TRUE
-                AND gcd.gcd_grader_id IS NOT NULL
-                AND (egd.autograding_complete IS NULL OR egd.autograding_complete = TRUE)
-            GROUP BY g.g_id, g.g_title, gd.gd_user_id, egd.autograding_complete, gcd.gcd_grader_id, egv.active_version, gcd.gcd_graded_version
-            HAVING COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id);
+                AND COALESCE(egd.autograding_complete, TRUE)
+            GROUP BY g.g_id, g.g_title, egv.user_id, eg.eg_use_ta_grading, egd.autograding_complete, egv.active_version, gcd.gcd_graded_version, egd.g_version
+            HAVING
+                (COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id) OR (eg.eg_use_ta_grading = 'false' AND egd.autograding_complete = 'true'))
+                AND (egv.active_version = gcd.gcd_graded_version AND egv.active_version = egd.g_version);
             """
         )
 
