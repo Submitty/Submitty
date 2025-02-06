@@ -121,6 +121,44 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
+    public function testRunQueryTruncated(): void {
+        $this->setUpDatabase();
+
+        $testData = [];
+        for ($i = 1; $i <= 1000; $i++) {
+            $testData[] = [$i, "Person {$i}", "submitty{$i}@example.com"];
+        }
+
+        $courseDb = $this->core->getCourseDB();
+        $courseDb
+            ->expects($this->exactly(2))
+            ->method('query')
+            ->withConsecutive(
+                ['SELECT COUNT(*) as total FROM (SELECT * FROM foo) as count_query'],
+                ['SELECT * FROM (SELECT * FROM foo) as results LIMIT 1000']
+            );
+        $courseDb
+            ->expects($this->exactly(2))
+            ->method('rows')
+            ->willReturnOnConsecutiveCalls(
+                [['total' => 1500]],
+                $testData
+            );
+
+        $_POST['sql'] = ' SELECT * FROM foo; ';
+
+        $response = $this->controller->runQuery();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $expected = [
+            'status' => 'success',
+            'data' => [
+                'results' => $testData,
+                'message' => 'Output was truncated. Showing 1000 of 1500 total rows.'
+            ]
+        ];
+        $this->assertSame($expected, $response->json);
+    }
+
     public function invalidQueryDataProvider(): array {
         return [
             ['INSERT INTO foo VALUES (1)'],
