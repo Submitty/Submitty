@@ -91,7 +91,7 @@ class MiscController extends AbstractController {
 
         $max_size = 50 * 1024 * 1024; // 50MB limit
         if (filesize($file_path) > $max_size) {
-            return JsonResponse::getFailResponse('This PDF is too large to be viewed online. Please download it instead.');            
+            return JsonResponse::getFailResponse('This PDF is too large to be viewed online. Please download it instead.');
         }
 
         $pdf64 = base64_encode(file_get_contents($file_path));
