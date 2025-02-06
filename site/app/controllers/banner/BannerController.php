@@ -16,7 +16,7 @@ use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 
 /**
- * @AccessControl(level="FACULTY")
+ * @AccessControl(level="SUPERUSER")
  */
 class BannerController extends AbstractController {
     /**
