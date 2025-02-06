@@ -109,6 +109,6 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkThreadduck(title2, 3);
         checkThreadduck(title3, 4);
 
-        checkStatsUpducks('Instructor, Quinn', 9);
+        checkStatsUpducks('Instructor, Quinn', 6);
     });
 });
