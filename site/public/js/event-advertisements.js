@@ -1,3 +1,4 @@
+/* eslint no-undef: "off" */
 function updateImageData(imageData) {
     const imgElement = document.getElementById('current-banner');
     if (imgElement) {
