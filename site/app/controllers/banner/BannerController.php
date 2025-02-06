@@ -42,7 +42,7 @@ class BannerController extends AbstractController {
         if (!isset($_FILES["files2"]) || empty($_FILES["files2"]["name"])) {
             return JsonResponse::getErrorResponse("No files were submitted.");
         }
-    
+
         foreach ($_FILES["files2"]["name"] as $index => $file_name) {
             if (is_uploaded_file($_FILES["files2"]["tmp_name"][$index])) {
                 $destination_path = FileUtils::joinPaths($upload_path, $file_name);
@@ -50,7 +50,7 @@ class BannerController extends AbstractController {
                 if ($file_name != "moorthy_chat_gif.gif") {
                     return JsonResponse::getErrorResponse("The name has to be: moorthy_chat_gif.gif");
                 }
-    
+
                 if (strlen($destination_path) > 255) {
                     return JsonResponse::getErrorResponse("File path is too long.");
                 }
@@ -61,20 +61,18 @@ class BannerController extends AbstractController {
                     }
                 }
 
-    
                 if (!@copy($_FILES["files2"]["tmp_name"][$index], $destination_path)) {
                     $error = error_get_last();
-    
-                    // Return detailed error message
                     return JsonResponse::getErrorResponse(
                         "Failed to upload file '{$file_name}'. Error: {$error['message']} in {$error['file']} on line {$error['line']}"
                     );
                 }
-    
+
                 if (!@unlink($_FILES["files2"]["tmp_name"][$index])) {
                     return JsonResponse::getErrorResponse("Failed to delete the temporary file '{$file_name}'.");
                 }
-            } else {
+            }
+            else {
                 return JsonResponse::getErrorResponse("The file '{$file_name}' was not properly uploaded.");
             }
         }

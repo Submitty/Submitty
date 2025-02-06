@@ -1,10 +1,11 @@
 function updateImageData(imageData) {
     let imgElement = document.getElementById('current-banner');
     if (imgElement) {
-        imgElement.src = "data:image/png;base64," + imageData.data;
-        imgElement.alt = imageData.name + "_" + imageData.id;
-    } else {
-        console.error("Image element with id 'current-banner' not found");
+        imgElement.src = `data:image/png;base64,${imageData.data}`;
+        imgElement.alt = `${imageData.name}_${imageData.id}`;
+    }
+    else {
+        console.error('Image element with id \'current-banner\' not found');
     }
 }
 
@@ -14,51 +15,48 @@ function duckTalking(base_url, duck_img, duckGif) {
 
     const bannerArray = localStorage.getItem('bannerArray');
 
-    if (bannerArray && JSON.parse(bannerArray).length > 0 && 
-        localStorage.getItem('open') !== 'true' && 
-        localStorage.getItem('duckTalking') === 'true') {
-        
+    if (bannerArray && JSON.parse(bannerArray).length > 0 && localStorage.getItem('open') !== 'true' && localStorage.getItem('duckTalking') === 'true') {
         imageElement.src = `data:image/gif;base64,${duckGif}`;
-    } else {
+    }
+    else {
         imageElement.src = `${base_url}/img/${duck_img}`;
     }
 }
 
 function includesBanner(bannerArray, banner) {
-    return bannerArray.some(item => item.id === banner.id);
+    return bannerArray.some((item) => item.id === banner.id);
 }
 
 function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
     if (localStorage.getItem('open') !== 'true' && localStorage.getItem('open') !== 'false') {
-        localStorage.setItem('open', 'false'); 
+        localStorage.setItem('open', 'false');
     }
 
     let bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
-    const openBanner = localStorage.getItem('open') !== "false"; 
+    const openBanner = localStorage.getItem('open') !== "false";
 
-    if (!bannerArray) { 
+    if (!bannerArray) {
         localStorage.setItem('bannerArray', JSON.stringify([]));
         bannerArray = [];
         localStorage.setItem('removedArray', JSON.stringify([]));
-        localStorage.setItem('currEventIndex', 0);    
+        localStorage.setItem('currEventIndex', 0);
         localStorage.setItem('open', 'false');
-    }    
+    }
 
     let removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
 
-    bannerArray = bannerArray.filter(item => imageDataArray.some(img => img.id === item.id));
-    removedArray = removedArray.filter(item => imageDataArray.some(img => img.id === item.id));
+    bannerArray = bannerArray.filter((item) => imageDataArray.some(img => img.id === item.id));
+    removedArray = removedArray.filter((item) => imageDataArray.some(img => img.id === item.id));
     localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
     localStorage.setItem('removedArray', JSON.stringify(removedArray));
 
-    //update banners to add in new banners
     let updated = false;
-    imageDataArray.forEach(item => {
+    imageDataArray.forEach((item) => {
         if (!includesBanner(bannerArray, item) && !includesBanner(removedArray, item)) {
             bannerArray.unshift(item);
             updated = true;
         }
-    });
+    });    
 
     if (updated) {
         localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
@@ -68,18 +66,19 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
 
     bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
     removedArray = JSON.parse(localStorage.getItem('removedArray'));
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
-    let eventsHolder = document.getElementById('event-holder');
+    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
+    const eventsHolder = document.getElementById('event-holder');
 
     if (bannerArray.length > 0 && openBanner) {
-        let imageData = bannerArray[currEventIndex];
+        const imageData = bannerArray[currEventIndex];
         updateImageData(imageData);
         if (eventsHolder) {
             eventsHolder.style.setProperty('display', 'block', 'important');
             localStorage.setItem('duckTalking', 'false');
         }
-    } else if (bannerArray.length <= 0 || !openBanner) {
-        localStorage.setItem('currEventIndex', 0);  
+    }
+    else if (bannerArray.length <= 0 || !openBanner) {
+        localStorage.setItem('currEventIndex', 0);
         if (eventsHolder) {
             eventsHolder.style.setProperty('display', 'none');
         }
@@ -89,27 +88,28 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
 }
 
 function inquireBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
     const imageData = bannerArray[currEventIndex];
 
-    if (imageData.extra_info === "" && imageData.link_name !== "") {
+    if (imageData.extra_info === '' && imageData.link_name !== '') {
         window.open(imageData.link_name, '_blank');
-    } else if (imageData.extra_info !== "") {
+    }
+    else if (imageData.extra_info !== '') {
         displayBigBanner(imageData.extra_info, imageData.link_name);
     }
 }
 
 function closeBanner(imageDataArray, base_url, duck_img, duckGif) {
-    localStorage.setItem('open', 'false');   
+    localStorage.setItem('open', 'false');
     initializeBanner(imageDataArray, base_url, duck_img, duckGif);
 }
 
 function removeBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
-    let removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
+    const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+    const removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
 
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
 
     if (currEventIndex >= 0 && currEventIndex < bannerArray.length) {
         removedArray.push(bannerArray[currEventIndex]);
@@ -117,17 +117,18 @@ function removeBanner(imageDataArray, base_url, duck_img, duckGif) {
 
         localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
         localStorage.setItem('removedArray', JSON.stringify(removedArray));
-    } else {
-        console.log("Invalid index for the banner.");
+    }
+    else {
+        console.log('Invalid index for the banner.');
     }
 
     initializeBanner(imageDataArray, base_url, duck_img, duckGif);
 }
 
 function previousBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
-    
+
     currEventIndex = (currEventIndex - 1 + bannerArray.length) % bannerArray.length;
     localStorage.setItem('currEventIndex', currEventIndex);
 
@@ -135,7 +136,7 @@ function previousBanner(imageDataArray, base_url, duck_img, duckGif) {
 }
 
 function nextBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0); 
+    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
 
     currEventIndex = (currEventIndex + 1) % bannerArray.length;

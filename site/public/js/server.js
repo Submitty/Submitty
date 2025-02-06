@@ -6,7 +6,7 @@
    markViewed openDiv changeColor downloadCourseMaterialZip downloadSubmissionZip downloadStudentAnnotations
    downloadTestCaseResult downloadCourseMaterial downloadFile toggleDiv checkVersionChange versionChange gradeableChange
    removeMessagePopup validateHtml togglePageDetails copyToClipboard downloadCSV setFolderRelease
-   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner newUploadImagesForm
+   newEditCourseMaterialsForm newEditCourseMaterialsFolderForm newUploadCourseMaterialsForm newUploadBanner displayBigBanner newUploadImagesForm
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
@@ -318,11 +318,11 @@ function newUploadBanner() {
     $('[name="upload"]', form).val(null);
 }
 
-function displayBigBanner(imageSrc, link=null) {
+function displayBigBanner(imageSrc, link = null) {
     $('.popup-form').css('display', 'none');
     const form = $('#enlarged-banner');
     console.log(imageSrc);
-    $('#big-banner').attr('src', "data:image/png;base64," + imageSrc);
+    $('#big-banner').attr('src', `data:image/png;base64,${imageSrc}`);
     if (link && link.length > 0) {
         $('#big-banner-link').attr('href', link);
     }

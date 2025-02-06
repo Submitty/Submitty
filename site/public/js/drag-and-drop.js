@@ -166,8 +166,6 @@ function addFilesFromInput(part, check_duplicate_zip = true) {
     $(`#input-file${part}`).val('');
 }
 
-
-
 function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
     const formData = new FormData();
     formData.append('close_time', closeTime);
@@ -222,7 +220,6 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
 function handleUploadSvg() {
     const formData = new FormData();
     formData.append('csrf_token', window.csrfToken);
-;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
             if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
@@ -268,7 +265,6 @@ function handleUploadSvg() {
         },
     });
 }
-
 
 // Check for duplicate file names. This function returns an array.
 // First element:
