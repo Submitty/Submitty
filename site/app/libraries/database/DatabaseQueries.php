@@ -543,6 +543,10 @@ SQL;
         );
     }
 
+    /**
+     * @param string $thread_id Id of thread.
+     * @return int[]
+     */
     public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
         $categories_list = [];
