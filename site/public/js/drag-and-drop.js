@@ -1,4 +1,4 @@
-/* exported handleUploadBanner, handleUploadSvg, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported handleUploadSvg, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
 /* exported handleUploadBanner, handleUploadSvg, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,

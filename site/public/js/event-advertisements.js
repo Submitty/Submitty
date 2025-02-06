@@ -1,5 +1,5 @@
 function updateImageData(imageData) {
-    let imgElement = document.getElementById('current-banner');
+    const imgElement = document.getElementById('current-banner');
     if (imgElement) {
         imgElement.src = `data:image/png;base64,${imageData.data}`;
         imgElement.alt = `${imageData.name}_${imageData.id}`;
@@ -11,7 +11,9 @@ function updateImageData(imageData) {
 
 function duckTalking(base_url, duck_img, duckGif) {
     const imageElement = document.querySelector('#moorthy-duck');
-    if (!imageElement) return;
+    if (!imageElement) {
+        return;
+    }
 
     const bannerArray = localStorage.getItem('bannerArray');
 
@@ -33,7 +35,7 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
     }
 
     let bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
-    const openBanner = localStorage.getItem('open') !== "false";
+    const openBanner = localStorage.getItem('open') !== 'false';
 
     if (!bannerArray) {
         localStorage.setItem('bannerArray', JSON.stringify([]));
@@ -45,8 +47,8 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
 
     let removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
 
-    bannerArray = bannerArray.filter((item) => imageDataArray.some(img => img.id === item.id));
-    removedArray = removedArray.filter((item) => imageDataArray.some(img => img.id === item.id));
+    bannerArray = bannerArray.filter((item) => imageDataArray.some((img) => img.id === item.id));
+    removedArray = removedArray.filter((item) => imageDataArray.some((img) => img.id === item.id));
     localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
     localStorage.setItem('removedArray', JSON.stringify(removedArray));
 
@@ -56,7 +58,7 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
             bannerArray.unshift(item);
             updated = true;
         }
-    });    
+    });
 
     if (updated) {
         localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
