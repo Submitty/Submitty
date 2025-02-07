@@ -118,13 +118,12 @@
         </div>
     </div>
     <hr>
-{% embed "course/CourseMaterialsCalendarMenu.twig" with {
-    "div_class": 'edit-cm-file-cal-menu',
-    "div_id": '3',
-    "gradeables" : gradeables,
-    "current_gradeable" : current_gradeable,
-} only %}
-{% endembed %}
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-file-cal-menu',
+        "div_id": '3',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+    } only %}
 
 
     <script>    
@@ -134,7 +133,26 @@
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
 
-                var calenderMenu = document.getElementById('show-menu').value;
+
+
+
+                let calendarDisplay = 'none';
+                let associatedDate = 'none';
+                let gradeableChosen = 'none';
+
+
+                let container = document.getElementById('3');
+                if (container) {
+                    let showMenua = container.querySelector('#show-menu');
+                    if (showMenua) {
+                        calendarDisplay = container.querySelector('#show-menu').value;
+                        associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
+                        gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                    }
+                }
+
+
+
                 var gradeableInputValue = document.getElementById('gradeable-select').value;
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;

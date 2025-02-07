@@ -87,9 +87,24 @@
                 if (showMenu == null) console.log("aw");
         function submitFolderEdit(fullUpdate){ // Submit button
 
-            console.log(showMenu.value);
 
 
+            let calendarDisplay = 'none';
+            let associatedDate = 'none';
+            let gradeableChosen = 'none';
+
+
+            let container = document.getElementById('2');
+            if (container) {
+                let showMenua = container.querySelector('#show-menu');
+                if (showMenua) {
+                    calendarDisplay = container.querySelector('#show-menu').value;
+                    associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
+                    gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                }
+            }
+
+        
             let sectionsEdit = [];
             let partialSections = [];
             let cmTime = document.getElementById("edit-folder-picker").value;

@@ -81,13 +81,12 @@
     </div>
     <hr>
 
-{% embed "course/CourseMaterialsCalendarMenu.twig" with {
-    "div_class": 'edit-cm-file-cal-menu',
-    "div_id": '1',
-    "gradeables" : gradeables,
-    "current_gradeable" : current_gradeable,
-} only %}
-{% endembed %}
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-file-cal-menu',
+        "div_id": '1',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+    } only %}
 
 
     <script>
