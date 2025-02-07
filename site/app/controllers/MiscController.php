@@ -88,7 +88,7 @@ class MiscController extends AbstractController {
                 JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
         }
-        // Encoding PDF File
+
         $pdf64 = base64_encode(file_get_contents($file_path));
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($pdf64)
