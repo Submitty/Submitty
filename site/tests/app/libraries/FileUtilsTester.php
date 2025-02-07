@@ -572,7 +572,7 @@ STRING;
         $this->assertEquals(
             $stat[0],
             ['name' => 'bad.txt',
-             'type' => 'text/plain',
+             'type' => 'Unknown',
              'error' => 'The file was only partially uploaded',
              'size' => 100,
              'is_zip' => false,
