@@ -91,11 +91,11 @@ class EmailEntity {
         return $this->email_address;
     }
 
-    public function getTerm(): ?string {
+    public function getTerm(): string {
         return $this->term ?? "";
     }
 
-    public function getCourse(): ?string {
+    public function getCourse(): string {
         return $this->course ?? "";
     }
 
