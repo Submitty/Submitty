@@ -267,14 +267,22 @@ function resizeTextarea(textarea) {
     if (!(textarea instanceof Element)) {
         return;
     }
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    textarea.style.height = '100px';
+    const currentScrollHeight = textarea.scrollHeight;
+    const clientHeight = textarea.clientHeight;
+    const scrollTop = textarea.scrollTop;
+    if (scrollTop > 0 || currentScrollHeight > clientHeight) {
+        textarea.style.height = `${currentScrollHeight}px`;
+    }
     const parentBody = textarea.closest('.markdown-area-body');
     if (parentBody) {
         parentBody.style.height = `${textarea.scrollHeight + 32}px`;
     }
 }
 $(document).ready(() => {
+    document.querySelectorAll('.markdown-area textarea').forEach(textarea => {
+        resizeTextarea(textarea);
+    });
     loadDraft();
     onReady();
 });

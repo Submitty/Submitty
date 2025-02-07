@@ -196,12 +196,9 @@
 
 .markdown-area textarea {
     resize: none;
-    height: auto;
-    min-height: 100px;
-    max-height: none;
     overflow-y: hidden;
+    min-height: 100px;
     tab-size: 4;
-    flex-grow: 1;
 }
 
 .markdown-preview {
@@ -213,7 +210,6 @@
     overflow: auto;
     resize: none;
     min-height: 100px;
-    max-height: none;
     width: fill-available;
 }
 
