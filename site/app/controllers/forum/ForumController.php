@@ -11,6 +11,8 @@ use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
+use app\libraries\routers\AccessControl;
+use app\libraries\routers\Enabled;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -1273,24 +1275,18 @@ class ForumController extends AbstractController {
         $result = $this->core->getQueries()->getPostOldThread($post_id);
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
         $result["all_categories_list"] = $repo->getCategories();
-        $categories = new ArrayCollection($repo->getCategories());
+        $thread_repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
-            $result["categories_list"] = $categories->filter(function ($category) use ($post) {
-                return $category->getThreads()->contains(function ($thread) use ($post) {
-                    return $thread->getId() == $post['thread_id'];
-                });
-            })->map(function ($x) {
+            $thread = $thread_repo->getThreadDetail($post['thread_id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
                 return $x->getId();
             })->toArray();
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
-            $result["categories_list"] = $categories->filter(function ($category) use ($result) {
-                return $category->getThreads()->contains(function ($thread) use ($result) {
-                    return $thread->getId() == $result['id'];
-                });
-            })->map(function ($x) {
+            $thread = $thread_repo->getThreadDetail($result['id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
                 return $x->getId();
             })->toArray();
         }
@@ -1409,17 +1405,9 @@ class ForumController extends AbstractController {
 
     private function getThreadContent($thread_id, &$output) {
         $result = $this->core->getQueries()->getThread($thread_id);
-        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
-        $categories = new ArrayCollection($repo->getCategories());
         $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
-        $output['categories_ids'] = $categories->filter(function ($category) use ($thread_id) {
-            return $category->getThreads()->contains(function ($thread) use ($thread_id) {
-                return $thread->getId() == $thread_id;
-            });
-        })->map(function ($x) {
-            return $x->getId();
-        })->toArray();
+        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
         $output['expiration'] = $result["pinned_expiration"];
     }
