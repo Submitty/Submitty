@@ -89,7 +89,7 @@ class MiscController extends AbstractController {
             );
         }
 
-        $max_size = 50 * 1024 * 1024; // 50MB limit
+        $max_size = 20 * 1024 * 1024; // 20MB limit
         if (filesize($file_path) > $max_size) {
             return new MultiResponse(JsonResponse::getFailResponse("This PDF is too large to be viewed online. Please download it instead."));
         }
