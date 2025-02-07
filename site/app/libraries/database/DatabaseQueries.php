@@ -5950,8 +5950,7 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
-              g_allowed_minutes AS allowed_minutes,
-              g_notification_sent as notification_sent,
+              g_allowed_minutes AS allowed_minutes
               eg.*,
               gamo.*,
               gc.*,
@@ -6850,8 +6849,7 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?,
-                  g_notification_sent=?
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );

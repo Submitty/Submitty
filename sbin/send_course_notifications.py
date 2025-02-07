@@ -79,57 +79,56 @@ def notify_gradeable_scores():
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
-        notified_gradeables = []
+        general_list, email_list = [], []
+        notified = []
         course_config_path = os.path.join(
             COURSES_PATH, term, course, 'config', 'config.json')
         course_name = course.strip().upper()
 
-        gradeables = course_db.execute(
-            """
-            SELECT gradeable.g_id, gradeable.g_title
-            FROM electronic_gradeable
-            JOIN gradeable ON gradeable.g_id =  electronic_gradeable.g_id
-            WHERE gradeable.g_grade_released_date <= NOW()
-            AND electronic_gradeable.eg_student_view = true
-            AND gradeable.g_notification_sent = false;
-            """
-        )
-
-        # Following still needs to fix version conflicts
-        available_grades = course_db.execute(
+        # Following still needs to fix version conflicts and missing TA grades
+        available = course_db.execute(
             """
             SELECT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 egv.user_id AS user_id,
-                eg.eg_use_ta_grading AS eg_use_ta_grading,
-                egd.autograding_complete AS autograding,
-                egv.active_version AS active_version,
-                gcd.gcd_graded_version AS gcd_graded_version
+                u.user_email AS user_email,
+                ns.all_released_grades AS general_enabled,
+                ns.all_released_grades_email AS email_enabled
             FROM gradeable AS g
             INNER JOIN electronic_gradeable AS eg
                 ON g.g_id = eg.g_id
             INNER JOIN electronic_gradeable_version AS egv
-                ON g.g_id = egv.g_id
+                ON g.g_id = egv.g_id AND egv.g_notification_sent = 'false'
+            INNER JOIN users AS u
+                ON egv.user_id = u.user_id
+            INNER JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
             INNER JOIN gradeable_component AS gc
                 ON g.g_id = gc.g_id
-            LEFT JOIN gradeable_component_data AS gcd
+            LEFT JOIN gradeable_data AS gd
+                ON gd.gd_user_id = egv.user_id
+            INNER JOIN gradeable_component_data AS gcd
                 ON gc.gc_id = gcd.gc_id
+                AND gcd.gcd_graded_version = egv.active_version
             LEFT JOIN electronic_gradeable_data AS egd
-                ON gc.g_id = egd.g_id
+                ON g.g_id = egd.g_id
+                AND egd.user_id = egv.user_id
+                AND egd.g_version = egv.active_version
             WHERE g.g_grade_released_date <= NOW()
                 AND eg.eg_student_view = TRUE
                 AND COALESCE(egd.autograding_complete, TRUE)
-            GROUP BY g.g_id, g.g_title, egv.user_id, eg.eg_use_ta_grading, egd.autograding_complete, egv.active_version, gcd.gcd_graded_version, egd.g_version
+            GROUP BY g.g_id, g.g_title, egv.user_id, u.user_email,
+                ns.all_released_grades, ns.all_released_grades_email,
+                eg.eg_use_ta_grading, egd.autograding_complete,
+                egv.active_version, gcd.gcd_graded_version
             HAVING
-                (COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id) OR (eg.eg_use_ta_grading = 'false' AND egd.autograding_complete = 'true'))
-                AND (egv.active_version = gcd.gcd_graded_version AND egv.active_version = egd.g_version);
+                ((COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id))
+                OR (eg.eg_use_ta_grading = 'false' AND egv.active_version > '0'));
             """
         )
 
-        print(available_grades)
-
-        if gradeables:
+        if available:
             # Retrieve the full course name from the course config.json
             with open(course_config_path, 'r') as f:
                 data = json.load(f)
@@ -140,8 +139,15 @@ def notify_gradeable_scores():
                     if len(full_name) > 0:
                         course_name += ": " + full_name
 
-        for g in gradeables:
-            gradeable = {"id": g[0], "title": g[1]}
+        for g in available:
+            gradeable = {
+                "id": g[0],
+                "title": g[1],
+                "user_id": g[2],
+                "user_email": g[3],
+                "general": g[4],
+                "email": g[5]
+            }
             timestamp = str(datetime.datetime.now())
 
             # Construct gradeable URL into a valid JSON format
@@ -149,8 +155,6 @@ def notify_gradeable_scores():
                              f"/gradeable/{gradeable['id']}")
             metadata = json.dumps({"url": gradeable_url})
 
-            # Formulate respective recipient lists
-            general_list, email_list = [], []
             notification_content = "Scores Released: " + gradeable["title"]
             email_subject = (f"[Submitty {course}] Scores Released: "
                              f"{gradeable['title']}")
@@ -167,69 +171,57 @@ def notify_gradeable_scores():
             if len(notification_content) > 40:
                 notification_content = notification_content[:36] + "..."
 
-            # Fetch all potential recipients (general and/or email)
-            notification_recipients = course_db.execute(
-                """
-                SELECT
-                users.user_id,
-                users.user_email,
-                (notification_settings.all_released_grades) AS general_enabled,
-                (notification_settings.all_released_grades_email) AS email_enabled
-                FROM users
-                JOIN notification_settings
-                ON notification_settings.user_id = users.user_id
-                WHERE notification_settings.all_released_grades = true
-                OR notification_settings.all_released_grades_email = true;
-                """
+            if gradeable["general"]:
+                general_list.append(
+                    f"('grading','{metadata}','{notification_content}',"
+                    f"'{timestamp}','submitty-admin','{gradeable['user_id']}')"
+                )
+
+            if gradeable["email"]:
+                email_list.append(
+                    f"('{email_subject}', '{email_body}', '{timestamp}', "
+                    f"'{gradeable["user_id"]}', '{gradeable['user_email']}',"
+                    f"'{term}', '{course}')"
+                )
+
+            notified.append((gradeable["id"], gradeable["user_id"]))
+
+        # Insert notifications
+        if general_list:
+            course_db.execute(
+                f"""INSERT INTO notifications
+                (component, metadata, content, created_at, from_user_id,
+                to_user_id)
+                VALUES {", ".join(general_list)};"""
             )
 
-            for r in notification_recipients:
-                user_id, user_email, general, email = r[0], r[1], r[2], r[3]
+        if email_list:
+            master_db.execute(
+                f"""INSERT INTO emails
+                (subject, body, created, user_id, email_address, term,
+                course)
+                VALUES {", ".join(email_list)};"""
+            )
 
-                if general:
-                    general_list.append(
-                        f"('grading','{metadata}','{notification_content}',"
-                        f"'{timestamp}','submitty-admin','{user_id}')"
-                    )
-
-                if email:
-                    email_list.append(
-                        f"('{email_subject}', '{email_body}', '{timestamp}', "
-                        f"'{user_id}', '{user_email}', '{term}', '{course}')"
-                    )
-
-            # Insert notifications
-            if general_list:
-                course_db.execute(
-                    f"""INSERT INTO notifications
-                    (component, metadata, content, created_at, from_user_id,
-                    to_user_id)
-                    VALUES {", ".join(general_list)};"""
-                )
-
-            if email_list:
-                master_db.execute(
-                    f"""INSERT INTO emails
-                    (subject, body, created, user_id, email_address, term,
-                    course)
-                    VALUES {", ".join(email_list)};"""
-                )
-
-            m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
-                 f"{len(general_list)} general, {len(email_list)} "
-                 f"email\n")
-            LOG_FILE.write(m)
-
-            # Add successfully notified gradeables to update state
-            notified_gradeables.append(f"'{gradeable['id']}'")
+        m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
+             f"{len(general_list)} general, {len(email_list)} "
+             f"email\n")
+        LOG_FILE.write(m)
 
         # Update all successfully sent notifications for current course
-        if len(notified_gradeables) > 0:
+        if len(notified) > 0:
+            # Prepare the placeholders for both g_id and user_id in the query
+            placeholders = ", ".join(["%s, %s"] * len(notified))
+            values = [item for sublist in notified for item in sublist]
+
+            # Execute the query with the provided placeholders and values
             course_db.execute(
-                f"""UPDATE gradeable SET g_notification_sent = true
-                WHERE g_id in ({", ".join(notified_gradeables)})"""
+                f"""
+                UPDATE electronic_gradeable_version
+                SET g_notification_sent = true
+                WHERE (g_id, user_id) IN ({placeholders});
+                """, tuple(values)
             )
-            notified += 1
 
         # Close the course database connection
         course_db.close()

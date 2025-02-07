@@ -555,8 +555,7 @@ class AdminGradeableController extends AbstractController {
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
-            'is_bulk_upload' => $gradeable->isBulkUpload(),
-            'notification_sent' => $gradeable->getNotificationSent()
+            'is_bulk_upload' => $gradeable->isBulkUpload()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1784,17 +1783,6 @@ class AdminGradeableController extends AbstractController {
             }
             else {
                 $message .= "Can't close submissions for ";
-                $success = false;
-            }
-        }
-        elseif ($action === "resend_notification") {
-            if ($gradeable->getNotificationSent()) {
-                $gradeable->setNotificationSent(false);
-                $message .= "Notifications have been resent for ";
-                $success = true;
-            }
-            else {
-                $message .= "Notifications have yet to be sent for ";
                 $success = false;
             }
         }
