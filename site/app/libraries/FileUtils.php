@@ -581,7 +581,6 @@ class FileUtils {
                     'is_zip' => false,            //unknown at this point also
                     'success' => false,
                 ];
-
             }
 
             $tmp_name = $file['tmp_name'];
