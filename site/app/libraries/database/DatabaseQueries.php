@@ -1147,7 +1147,7 @@ WHERE term=? AND course=? AND user_id=?",
      * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty, string $term = '', string $course = ''): array {
         $args = ['-1'];
         $extra_join = '';
         $extra_where = '';
@@ -1168,11 +1168,13 @@ WHERE term=? AND course=? AND user_id=?",
             $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
             $extra_where = ' OR users.user_access_level <= 2';
         }
+        $terms = ($term === '' ? 'courses.term' : "'$term'");
+        $courses = ($course === '' ? 'courses.course' : "'$course'");
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.term = courses.term AND courses_users.course = courses.course
+                ON courses_users.term = " . $terms . " AND courses_users.course = " . $courses . "
                 " . $extra_join . "
                 WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
         );
