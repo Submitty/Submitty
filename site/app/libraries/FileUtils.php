@@ -588,7 +588,8 @@ class FileUtils {
             $type = mime_content_type($tmp_name);
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-                        //check if its a zip file
+
+            //check if its a zip file
             $is_zip = $type === 'application/zip';
             if ($is_zip) {
                 $zip_status = FileUtils::getZipFileStatus($tmp_name);
