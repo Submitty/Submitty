@@ -108,6 +108,6 @@
             {% endif %}
         >{{ markdown_area_value is defined ? markdown_area_value : '' }}</textarea>
         {# if min_height or max_height aren't defined, use values defined in markdown.css #}
-         <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "100px" }}; max-height:{{ max_height is defined ? max_height : "300px" }}" hidden></div>
+        <div id="{{ preview_div_id }}" class="fill-available markdown-preview" style="min-height:{{ min_height is defined ? min_height : "100px" }}; max-height:{{ max_height is defined ? max_height : "300px" }}" hidden></div>
     </div>
 </div>
