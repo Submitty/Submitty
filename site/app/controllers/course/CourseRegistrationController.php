@@ -30,19 +30,68 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
-    #[Route("/courses/{term}/{course}/register")]
-    public function selfRegister(string $term, string $course): RedirectResponse {
+    #[Route("/courses/{term}/{course}/alert_redirect")]
+    public function alertRedirect(string $term, string $course): RedirectResponse {
+        // Ensure course configuration and database are loaded
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
-        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
-            $this->core->addErrorMessage('Self registration is not allowed.');
+    
+        // Check if the user has confirmed the unregistration
+        if (isset($_GET['confirmed']) && $_GET['confirmed'] === 'true') {
+            // Perform unregistration if confirmed
+            $this->unregisterCourseUser($term, $course);
+            $this->core->addSuccessMessage('You have successfully unregistered from the course.');
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
-        else {
+    
+        // If not confirmed, show the confirmation alert
+        $confirmUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']) . '?confirmed=true';
+        $cancelUrl = $this->core->buildCourseUrl();
+    
+        echo "<script type='text/javascript'>
+                if (confirm('Are you sure you want to unregister from this course?')) {
+                    window.location.href = '$confirmUrl';
+                } else {
+                    window.location.href = '$cancelUrl';
+                }
+              </script>";
+        exit;  // Ensure the script runs and stops further PHP execution
+    }
+    
+    
+
+    #[Route("/courses/{term}/{course}/{action}")]
+    public function handleRegistration(string $term, string $course, string $action): RedirectResponse {
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+    
+        if ($action === 'register') {
+            if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
+                $this->core->addErrorMessage('Self registration is not allowed.');
+                return new RedirectResponse($this->core->buildUrl(['home']));
+            }
             $this->registerCourseUser($term, $course);
             return new RedirectResponse($this->core->buildCourseUrl());
         }
+    
+        if ($action === 'unregister_from_course') {
+            if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === 0) {
+                $this->core->addErrorMessage('Self unregistration is not allowed.');
+                return new RedirectResponse($this->core->buildUrl(['home']));
+            }
+        
+            // Redirect to the alert route
+            $alertRedirectUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']);
+            return new RedirectResponse($alertRedirectUrl);
+        }
+        
+        
+    
+        // Handle invalid actions
+        $this->core->addErrorMessage('Invalid action specified.');
+        return new RedirectResponse($this->core->buildUrl(['home']));
     }
+    
 
     public function registerCourseUser(string $term, string $course): void {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
@@ -50,5 +99,9 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
+    }
+    public function unregisterCourseUser(string $term, string $course): void {
+        $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
     }
 }

@@ -1212,6 +1212,27 @@ WHERE term=? AND course=? AND user_id=?",
         }
     }
 
+    public function unregisterCourseUser(User $user, $semester, $course) {
+        $this->submitty_db->query(
+            "DELETE FROM courses_users WHERE user_id = ? AND term = ? AND course = ?", 
+            [$user->getId(), $semester, $course]
+        );
+    
+        $this->course_db->query(
+            "UPDATE users SET 
+                rotating_section = NULL, 
+                registration_subsection = NULL, 
+                registration_type = NULL 
+            WHERE user_id = ?", 
+            [$user->getId()]
+        );
+    
+        $this->course_db->query(
+            "DELETE FROM grading_registration WHERE user_id = ?", 
+            [$user->getId()]
+        );
+    }
+
     /**
      * Gets the group that the user is in for a given class (used on homepage)
      *
