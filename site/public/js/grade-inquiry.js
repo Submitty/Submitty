@@ -280,7 +280,7 @@ function resizeTextarea(textarea) {
     }
 }
 $(document).ready(() => {
-    document.querySelectorAll('.markdown-area textarea').forEach(textarea => {
+    document.querySelectorAll('.markdown-area textarea').forEach((textarea) => {
         resizeTextarea(textarea);
     });
     loadDraft();
