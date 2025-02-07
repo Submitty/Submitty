@@ -86,11 +86,6 @@ parameters:
 			path: app/authentication/SamlAuthentication.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/AbstractController.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between non\\-empty\\-string and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/AbstractController.php
@@ -167,11 +162,6 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 3
-			path: app/controllers/DockerInterfaceController.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
@@ -204,11 +194,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
-			path: app/controllers/GlobalController.php
-
-		-
-			message: "#^Left side of && is always true\\.$#"
-			count: 1
 			path: app/controllers/GlobalController.php
 
 		-
@@ -298,16 +283,6 @@ parameters:
 			path: app/controllers/HomePageController.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 4
-			path: app/controllers/HomePageController.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with null will always evaluate to true\\.$#"
-			count: 1
-			path: app/controllers/HomePageController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
 			path: app/controllers/HomePageController.php
@@ -329,11 +304,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\HomePageController\\:\\:getGroupUsers\\(\\) has parameter \\$group_name with no type specified\\.$#"
-			count: 1
-			path: app/controllers/HomePageController.php
-
-		-
-			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
 			path: app/controllers/HomePageController.php
 
@@ -536,17 +506,17 @@ parameters:
 			path: app/controllers/MiscController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/MiscController.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/controllers/NavigationController.php
 
 		-
 			message: "#^Method app\\\\controllers\\\\NavigationController\\:\\:navigationPage\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/controllers/NavigationController.php
+
+		-
+			message: "#^Using nullsafe method call on non\\-nullable type app\\\\models\\\\User\\. Use \\-\\> instead\\.$#"
 			count: 1
 			path: app/controllers/NavigationController.php
 
@@ -1158,11 +1128,6 @@ parameters:
 
 		-
 			message: "#^Only booleans are allowed in a ternary operator condition, string\\|null given\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1827,23 +1792,13 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
-			message: "#^Result of && is always false\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
-			message: "#^Variable \\$title in isset\\(\\) always exists and is always null\\.$#"
-			count: 1
-			path: app/controllers/course/CourseMaterialsController.php
-
-		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 3
 			path: app/controllers/forum/ForumController.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 40
+			count: 29
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -1853,7 +1808,7 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 19
+			count: 13
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -1868,11 +1823,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:alterAnnouncement\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:alterPost\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -1923,16 +1873,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editCategory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editPost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:editThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -2183,11 +2123,6 @@ parameters:
 
 		-
 			message: "#^Elseif condition is always true\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Expression on left side of \\?\\? is not nullable\\.$#"
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -2812,16 +2747,6 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and false will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/grading/ElectronicGraderController.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between mixed and null will always evaluate to false\\.$#"
 			count: 2
 			path: app/controllers/grading/ElectronicGraderController.php
@@ -3198,16 +3123,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 2
 			path: app/controllers/student/TeamController.php
@@ -3516,11 +3431,6 @@ parameters:
 			path: app/entities/poll/Poll.php
 
 		-
-			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
-			count: 1
-			path: app/exceptions/BaseException.php
-
-		-
 			message: "#^Method app\\\\exceptions\\\\BaseException\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/exceptions/BaseException.php
@@ -3643,16 +3553,6 @@ parameters:
 		-
 			message: "#^Property app\\\\libraries\\\\Access\\:\\:\\$directories type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/libraries/Access.php
-
-		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
-			count: 2
-			path: app/libraries/Access.php
-
-		-
-			message: "#^Unreachable statement \\- code above always terminates\\.$#"
-			count: 2
 			path: app/libraries/Access.php
 
 		-
@@ -3786,11 +3686,6 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
-			count: 2
-			path: app/libraries/Core.php
-
-		-
 			message: "#^Only booleans are allowed in a negated boolean, app\\\\libraries\\\\database\\\\AbstractDatabase given\\.$#"
 			count: 2
 			path: app/libraries/Core.php
@@ -3808,11 +3703,6 @@ parameters:
 		-
 			message: "#^Parameter \\#3 \\$value of function curl_setopt expects bool, int given\\.$#"
 			count: 2
-			path: app/libraries/Core.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\Core\\:\\:\\$user_id is never read, only written\\.$#"
-			count: 1
 			path: app/libraries/Core.php
 
 		-
@@ -3849,11 +3739,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
 			count: 1
 			path: app/libraries/CustomCodeInlineRenderer.php
-
-		-
-			message: "#^Instanceof between DateTime and DateTime will always evaluate to true\\.$#"
-			count: 1
-			path: app/libraries/DateUtils.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
@@ -4083,11 +3968,6 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 5
-			path: app/libraries/FileUtils.php
-
-		-
-			message: "#^Call to function is_string\\(\\) with string will always evaluate to true\\.$#"
-			count: 1
 			path: app/libraries/FileUtils.php
 
 		-
@@ -4976,11 +4856,6 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
-			message: "#^Comparison operation \"\\>\" between int\\<1, max\\> and 0 is always true\\.$#"
-			count: 1
-			path: app/libraries/database/AbstractDatabase.php
-
-		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
@@ -5076,16 +4951,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Call to function is_array\\(\\) with array\\<string\\> will always evaluate to true\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with DateTime will always evaluate to false\\.$#"
-			count: 2
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Call to method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:getRowCount\\(\\) with incorrect case\\: getrowcount$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -5097,32 +4962,17 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 18
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Foreach overwrites \\$post_id with its value variable\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^If condition is always true\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Gradeable and app\\\\models\\\\gradeable\\\\Gradeable will always evaluate to true\\.$#"
-			count: 1
+			count: 12
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 16
+			count: 14
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 36
+			count: 24
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
@@ -5207,76 +5057,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:alreadyInAQueue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$current_user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_join with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_order with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_parameters with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_select with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$query_where with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$show_merged_thread with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$thread_status with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$unread_threads with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$want_categories with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:buildLoadThreadQuery\\(\\) has parameter \\$want_order with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5676,97 +5456,7 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$anon with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$content with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$markdown with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$original_creator with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$post_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editPost\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$categories_ids with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$expiration with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$lock_thread_date with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$status with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:editThread\\(\\) has parameter \\$thread_title with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:emptyQueue\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncements\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncements\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncementsId\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:existsAnnouncementsId\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6112,16 +5802,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getEmailListWithIds\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getFirstPostForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getFirstPostForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6646,16 +6326,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostHistory\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostHistory\\(\\) has parameter \\$post_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostOldThread\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -6667,36 +6337,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPosts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$current_user with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$filterOnUser with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$option with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$show_deleted with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getPostsForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7011,21 +6651,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has parameter \\$page with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getThreadsBefore\\(\\) has parameter \\$timestamp with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getTimeJoinedQueue\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7117,21 +6742,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnregisteredStudentsWithRotatingSection\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUnviewedPosts\\(\\) has parameter \\$user_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7417,16 +7027,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:leaveTeam\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:loadBookmarkedThreads\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:loadThreadBlock\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7851,11 +7451,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Only booleans are allowed in a ternary operator condition, app\\\\models\\\\Team\\|null given\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -7891,11 +7486,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between array\\<int\\> and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseRowIterator\\:\\:close\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
@@ -7922,11 +7512,6 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/libraries/database/PostgresqlDatabase.php
-
-		-
-			message: "#^Call to function is_array\\(\\) with array will always evaluate to true\\.$#"
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
 
@@ -8182,8 +7767,8 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
-			message: "#^Instanceof between bool and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
-			count: 2
+			message: "#^Instanceof between mixed and app\\\\libraries\\\\response\\\\WebResponse will always evaluate to false\\.$#"
+			count: 1
 			path: app/libraries/routers/WebRouter.php
 
 		-
@@ -8219,11 +7804,6 @@ parameters:
 		-
 			message: "#^Property app\\\\libraries\\\\routers\\\\WebRouter\\:\\:\\$parameters type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/libraries/routers/WebRouter.php
-
-		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\User and null will always evaluate to true\\.$#"
-			count: 2
 			path: app/libraries/routers/WebRouter.php
 
 		-
@@ -8532,11 +8112,6 @@ parameters:
 			path: app/models/Config.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/Config.php
-
-		-
 			message: "#^Variable property access on \\$this\\(app\\\\models\\\\Config\\)\\.$#"
 			count: 10
 			path: app/models/Config.php
@@ -8614,11 +8189,6 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 4
-			path: app/models/GradingOrder.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with array\\<string\\> will always evaluate to false\\.$#"
-			count: 2
 			path: app/models/GradingOrder.php
 
 		-
@@ -9407,21 +8977,6 @@ parameters:
 			path: app/models/User.php
 
 		-
-			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\AutoGradedVersion and app\\\\models\\\\gradeable\\\\AutoGradedVersion will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedGradeable.php
@@ -9444,16 +8999,6 @@ parameters:
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Result of \\|\\| is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedGradeable.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedVersion and null will always evaluate to false\\.$#"
-			count: 8
 			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
@@ -9508,11 +9053,6 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Call to function is_null\\(\\) with array\\<app\\\\models\\\\gradeable\\\\AutoGradedTestcase\\> will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -9697,11 +9237,6 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Offset 0 on array\\{total_elapsed_time\\: float, total_max_rss_size\\: int\\} in isset\\(\\) does not exist\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\AutoGradedVersion\\:\\:\\$files type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
@@ -9717,22 +9252,7 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
-			message: "#^Result of && is always false\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Strict comparison using \\!\\=\\= between DateTime\\|string and null will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/AutoGradedVersion.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between bool and 'true' will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -10017,22 +9537,7 @@ parameters:
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
-			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Mark and app\\\\models\\\\gradeable\\\\Mark will always evaluate to true\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -10237,11 +9742,6 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Result of \\|\\| is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
@@ -10282,11 +9782,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Call to function is_null\\(\\) with app\\\\models\\\\User will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 9
 			path: app/models/gradeable/Gradeable.php
@@ -10294,16 +9789,6 @@ parameters:
 		-
 			message: "#^Foreach overwrites \\$user with its value variable\\.$#"
 			count: 2
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\User and app\\\\models\\\\User will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\Component and app\\\\models\\\\gradeable\\\\Component will always evaluate to true\\.$#"
-			count: 1
 			path: app/models/gradeable/Gradeable.php
 
 		-
@@ -10757,16 +10242,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Result of && is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Strict comparison using \\!\\=\\= between DateTime and null will always evaluate to true\\.$#"
-			count: 2
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
 			path: app/models/gradeable/Gradeable.php
@@ -10917,11 +10392,6 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
@@ -10930,11 +10400,6 @@ parameters:
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\TaGradedGradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\GradedComponent and app\\\\models\\\\gradeable\\\\GradedComponent will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
@@ -11152,16 +10617,6 @@ parameters:
 			path: app/models/gradeable/LeaderboardConfig.php
 
 		-
-			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Mark\\:\\:__construct\\(\\) has parameter \\$details with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Mark.php
@@ -11197,19 +10652,9 @@ parameters:
 			path: app/models/gradeable/Mark.php
 
 		-
-			message: "#^Result of \\|\\| is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/Mark.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Component and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Mark.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\User and app\\\\models\\\\User will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/Submitter.php
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Submitter\\:\\:getAnonId\\(\\) has parameter \\$g_id with no type specified\\.$#"
@@ -11220,26 +10665,6 @@ parameters:
 			message: "#^Method app\\\\models\\\\gradeable\\\\Submitter\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/models/gradeable/Submitter.php
-
-		-
-			message: "#^Result of \\|\\| is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/Submitter.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\Team\\|app\\\\models\\\\User and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/models/gradeable/Submitter.php
-
-		-
-			message: "#^Call to function ctype_digit\\(\\) with \\*NEVER\\* will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Call to function is_int\\(\\) with int will always evaluate to true\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
 			message: "#^Call to method SplFileInfo\\:\\:getPathname\\(\\) with incorrect case\\: getPathName$#"
@@ -11253,11 +10678,6 @@ parameters:
 
 		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$graders might not exist\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Instanceof between app\\\\models\\\\gradeable\\\\GradedComponentContainer and app\\\\models\\\\gradeable\\\\GradedComponentContainer will always evaluate to true\\.$#"
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
 
@@ -11373,16 +10793,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\TaGradedGradeable\\:\\:\\$attachments type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Result of \\|\\| is always true\\.$#"
-			count: 1
-			path: app/models/gradeable/TaGradedGradeable.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between DateTime\\|string and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
 
@@ -11857,16 +11267,6 @@ parameters:
 			path: app/views/GlobalView.php
 
 		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\User and null will always evaluate to false\\.$#"
-			count: 1
-			path: app/views/GlobalView.php
-
-		-
-			message: "#^Ternary operator condition is always true\\.$#"
-			count: 1
-			path: app/views/GlobalView.php
-
-		-
 			message: "#^Method app\\\\views\\\\HomePageView\\:\\:showCourseCreationPage\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/HomePageView.php
@@ -12082,21 +11482,6 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\AutoGradedGradeable and null will always evaluate to true\\.$#"
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between float and 0 will always evaluate to false\\.$#"
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between float and 1 will always evaluate to false\\.$#"
-			count: 1
-			path: app/views/NavigationView.php
-
-		-
 			message: "#^Method app\\\\views\\\\NotificationView\\:\\:showNotificationSettings\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/NotificationView.php
@@ -12175,11 +11560,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\PollView\\:\\:showPollsStudent\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/PollView.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/views/UserProfileView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has no return type specified\\.$#"
@@ -12500,11 +11880,6 @@ parameters:
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
 			count: 2
 			path: app/views/calendar/CalendarView.php
-
-		-
-			message: "#^Call to function is_array\\(\\) with app\\\\entities\\\\course\\\\CourseMaterial will always evaluate to false\\.$#"
-			count: 1
-			path: app/views/course/CourseMaterialsView.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
@@ -13017,7 +12392,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Negated boolean expression is always false\\.$#"
+			message: "#^Offset string on array\\{\\} in isset\\(\\) does not exist\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -13034,11 +12409,6 @@ parameters:
 		-
 			message: "#^Property app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:\\$user_id_to_User_cache has no type specified\\.$#"
 			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
-			count: 2
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
@@ -13137,13 +12507,8 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
-			message: "#^Strict comparison using \\!\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to true\\.$#"
+			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
-			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\GradedGradeable and null will always evaluate to false\\.$#"
-			count: 1
 			path: app/views/submission/HomeworkView.php
 
 		-
