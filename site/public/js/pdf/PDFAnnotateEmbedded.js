@@ -235,7 +235,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 let pdfData;
                 try {
                     pdfData = JSON.parse(data);
-                    //Checking if the response is a failure due to large file size
+                    // Checking if the response is a failure due to large file size
                     if (pdfData.status === 'fail') {
                         alert(pdfData.message);
                         return;
