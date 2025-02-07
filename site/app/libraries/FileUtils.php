@@ -572,7 +572,6 @@ class FileUtils {
 
             //if the error flag is set for this file, no guarantee tmp_name points to a valid file, exit early
             if ($file['error'] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($file['error']);
                 return [
                     'name' => $name,
                     'type' => 'Unknown',
