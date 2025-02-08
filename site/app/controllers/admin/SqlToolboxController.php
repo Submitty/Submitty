@@ -51,18 +51,17 @@ class SqlToolboxController extends AbstractController {
 
         try {
             $this->core->getCourseDB()->beginTransaction();
-            $limitedQuery = rtrim($query, ';');
-            $countQuery = "SELECT COUNT(*) as total FROM ({$limitedQuery}) as count_query";
-            $this->core->getCourseDB()->query($countQuery);
-            $totalRows = $this->core->getCourseDB()->rows()[0]['total'];
-            $limitedQuery = "SELECT * FROM ({$limitedQuery}) as results LIMIT " . self::MAX_ROWS;
-            $this->core->getCourseDB()->query($limitedQuery);
-            $rows = $this->core->getCourseDB()->rows();
+            $this->core->getCourseDB()->query($query);
+            $allRows = $this->core->getCourseDB()->rows();
+
+            $totalRows = count($allRows);
+            $limitedRows = array_slice($allRows, 0, self::MAX_ROWS);
+
             return JsonResponse::getSuccessResponse([
-                'results' => $rows,
+                'results' => $limitedRows,
                 'message' => $totalRows > self::MAX_ROWS
-                    ? "Output was truncated. Showing " . count($rows) . " of {$totalRows} total rows."
-                    : "Showing " . count($rows) . " of {$totalRows} total rows."
+                    ? "Output was truncated. Showing " . count($limitedRows) . " of {$totalRows} total rows."
+                    : "Showing " . count($limitedRows) . " of {$totalRows} total rows."
             ]);
         }
         catch (DatabaseException $exc) {

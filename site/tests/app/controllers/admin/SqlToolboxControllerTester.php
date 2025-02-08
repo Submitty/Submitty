@@ -93,20 +93,9 @@ class SqlToolboxControllerTester extends BaseUnitTest {
 
         /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
-        $courseDb
-                ->expects($this->exactly(2))
-                ->method('query')
-                ->withConsecutive(
-                    ['SELECT COUNT(*) as total FROM (SELECT * FROM foo) as count_query'],
-                    ['SELECT * FROM (SELECT * FROM foo) as results LIMIT 1000']
-                );
-            $courseDb
-                ->expects($this->exactly(2))
-                ->method('rows')
-                ->willReturnOnConsecutiveCalls(
-                    [['total' => 2]],
-                    $testData
-                );
+        $courseDb->expects($this->once())->method('query')->with('SELECT * FROM foo;');
+        $courseDb->expects($this->once())->method('rows')->with()->willReturn($testData);
+
         $_POST['sql'] = ' SELECT * FROM foo; ';
 
         $response = $this->controller->runQuery();
@@ -124,27 +113,22 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function testRunQueryTruncated(): void {
         $this->setUpDatabase();
 
-        $testData = [];
-        for ($i = 1; $i <= 1000; $i++) {
-            $testData[] = [$i, "Person {$i}", "submitty{$i}@example.com"];
+        $allData = [];
+        for ($i = 1; $i <= 1500; $i++) {
+            $allData[] = [$i, "Person {$i}", "submitty{$i}@example.com"];
         }
+
+        $expectedData = array_slice($allData, 0, 1000);
 
         $courseDb = $this->core->getCourseDB();
         $courseDb
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('query')
-            ->withConsecutive(
-                ['SELECT COUNT(*) as total FROM (SELECT * FROM foo) as count_query'],
-                ['SELECT * FROM (SELECT * FROM foo) as results LIMIT 1000']
-            );
+            ->with('SELECT * FROM foo;');
         $courseDb
-            ->expects($this->exactly(2))
+            ->expects($this->once())
             ->method('rows')
-            ->willReturnOnConsecutiveCalls(
-                [['total' => 1500]],
-                $testData
-            );
-
+            ->willReturn($allData);
         $_POST['sql'] = ' SELECT * FROM foo; ';
 
         $response = $this->controller->runQuery();
@@ -152,7 +136,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $expected = [
             'status' => 'success',
             'data' => [
-                'results' => $testData,
+                'results' => $expectedData,
                 'message' => 'Output was truncated. Showing 1000 of 1500 total rows.'
             ]
         ];
@@ -206,13 +190,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->setUpDatabase();
         /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
-            $courseDb
-                ->expects($this->once())
-                ->method('query')
-                ->with('SELECT COUNT(*) as total FROM (SELECT * FROM INVALID) as count_query')
-                ->willThrowException(new DatabaseException('foo'));
+        $courseDb->expects($this->once())->method('query')->with('SELECT * FROM INVALID')->willThrowException(new DatabaseException('foo'));
         $response = $this->controller->runQuery();
-
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame($expected, $response->json);
     }
