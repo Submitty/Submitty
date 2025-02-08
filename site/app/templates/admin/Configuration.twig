@@ -16,7 +16,7 @@
             <br>
             <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
-        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" />
+        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
 
         <label for="course-home-url" class="config-row">
             <span class="option-title">Course Home URL</span>
