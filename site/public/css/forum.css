@@ -222,10 +222,6 @@
     text-shadow: gold 0 0 5px;
 }
 
-.not-active-thread-announcement:hover {
-    text-shadow: gold 0 0 5px;
-}
-
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
     color: var(--focus-dropdown) !important;
