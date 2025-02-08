@@ -56,7 +56,7 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
                 ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - name: Run stylelint
         run: npm run css-stylelint
 
@@ -79,7 +79,7 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
                 ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - name: Run eslint
         run: npm run eslint
       - name: Run npm build (tsc and esbuild)
@@ -104,7 +104,7 @@ jobs:
           key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
               ${{ runner.os }}-cache-node-modules-
-      - run: npm install
+      - run: npm ci
       - run: npm run test
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
@@ -633,8 +633,7 @@ jobs:
       - name: Install node dependencies
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
-          npm install file-saver --save
-          npm install --production=false
+          npm ci
 
       - name: Run accessibility test
         uses: cypress-io/github-action@v6
@@ -817,8 +816,7 @@ jobs:
       - name: Install node dependencies
         working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
         run: |
-          npm install file-saver --save
-          npm install --production=false
+          npm ci
 
       - name: Run cypress e2e tests with pam auth
         uses: cypress-io/github-action@v6

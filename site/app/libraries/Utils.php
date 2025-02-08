@@ -99,13 +99,12 @@ class Utils {
     /**
      * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
      */
-    public function isValidPassword(string $password): bool {
+    public static function isValidPassword(string $password): bool {
         $upperCase = preg_match('/[A-Z]/', $password);
         $lowerCase = preg_match('/[a-z]/', $password);
         $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
         $numericVal = preg_match('/[0-9]/', $password);
-        return
-            $upperCase >= 1 &&
+        return $upperCase >= 1 &&
             $lowerCase >= 1 &&
             $specialChar >= 1 &&
             $numericVal >= 1 &&
@@ -114,10 +113,10 @@ class Utils {
 
     /**
      * Check if the user ID meets requirements specified in the Submitty config file
+     *
+     * @param array<mixed> $requirements
      */
-    public function isAcceptedUserId(string $user_id, string $given_name, string $family_name, string $email): bool {
-        $requirements = $this->core->getConfig()->getUserIdRequirements();
-
+    public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
         if ($requirements['max_length'] < strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
             return false;
         }
@@ -158,23 +157,24 @@ class Utils {
 
     /**
      * Checks if the email extension is in the accepted emails part of the Submitty config file
+     *
+     * @param array<string> $accepted_emails
      */
-    public function isAcceptedEmail(string $email): bool {
-        $emails = $this->core->getConfig()->getAcceptedEmails();
+    public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
         $split_email = explode('@', $email);
         // No @ symbol found
         if (count($split_email) < 2) {
             return false;
         }
-        return in_array($email_extension, array_keys($emails), true);
+        return in_array($split_email[count($split_email) - 1], $accepted_emails, true);
     }
 
     /**
      * @return array<mixed>
      * Generates a random verification code for self account creation.
      */
-    public function generateVerificationCode(): array {
-        $code = $this->core->getConfig()->isDebug() ? '00000000' : Utils::generateRandomString();
+    public static function generateVerificationCode(bool $isDebug): array {
+        $code = $isDebug ? '00000000' : Utils::generateRandomString();
         $timestamp = time() + 60 * 15; // 15 minutes from now, may eventually set this as a configurable value.
         return ['code' => strval($code), 'exp' => $timestamp];
     }

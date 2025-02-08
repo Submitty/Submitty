@@ -5,8 +5,9 @@ namespace tests\app\libraries;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\User;
+use tests\BaseUnitTest;
 
-class UtilsTester extends \PHPUnit\Framework\TestCase {
+class UtilsTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
     public function testPad1() {
@@ -33,6 +34,34 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertNotEquals($first, $second);
         $this->assertEquals(32, strlen($first));
         $this->assertEquals(32, strlen($second));
+    }
+
+    public function testValidPassword() {
+        $good_password = 'GoodPassword#123';
+        $this->assertTrue(Utils::isValidPassword($good_password));
+        $bad_password_length = 'Bad#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_length));
+        $bad_password_numbers = 'BadPasswordWithoutNumbers@';
+        $this->assertFalse(Utils::isValidPassword($bad_password_numbers));
+        $bad_password_special = 'BadPasswordWithoutSpecialCharacter123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_special));
+        $bad_password_capital = 'badpasswordwithoutcapital#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_capital));
+        $bad_password_lowercase = 'BADPASSWORDWITHOUTLOWERCASE#123';
+        $this->assertFalse(Utils::isValidPassword($bad_password_lowercase));
+    }
+
+    public function testAcceptedEmail() {
+        $good_email_rpi = 'goodemail@rpi.edu';
+        $core = $this->createMockCore(['accepted_emails' => ['rpi.edu', 'gmail.com']]);
+        $reqs = $core->getConfig()->getAcceptedEmails();
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_rpi));
+        $good_email_gmail = 'goodemail@gmail.com';
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_gmail));
+        $bad_email_extension = 'goodemail@notanextension.edu';
+        $this->assertFalse(Utils::isAcceptedEmail($reqs, $bad_email_extension));
+        $accepts_multiple_at_signs = 'good@email@testing@rpi.edu';
+        $this->assertTrue(Utils::isAcceptedEmail($reqs, $accepts_multiple_at_signs));
     }
 
     public function testGenerateRandomString2() {

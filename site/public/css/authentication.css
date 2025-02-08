@@ -65,7 +65,7 @@
 .requirements-button {
     display: inline-block;
     font-weight: 400;
-    color: #212529;
+    color: var(--standard-deep-dark-grey);
     text-align: center;
     vertical-align: middle;
     background-color: transparent;
@@ -74,21 +74,8 @@
     font-size: x-small;
     line-height: 1;
     border-radius: 0.25rem;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-  
-
-@media (prefers-color-scheme: dark) {
-    .hidden-helper {
-        display: none;
-        position: absolute;
-        background-color: gray;
-        left: 42%;
-        height: 150px;
-        width: 225px;
-        padding-left: 10px;
-        padding-top: 10px;
-        border-radius: 20px;
-    }
 }
 
+[data-theme="dark"].requirements-button {
+    color: var(--text-white);
+}

@@ -115,8 +115,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 ]
             ],
             "accepted_emails" => [
-                "gmail.com" => true,
-                "rpi.edu" => true
+                "gmail.com",
+                "rpi.edu"
             ]
         ];
         $config = array_replace($config, $extra);
@@ -729,7 +729,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
         $config = new Config($this->core);
         $this->expectException(ConfigException::class);
-        $this->expectExceptionMessage("Missing config value for ldap options: ${option}");
+        $this->expectExceptionMessage("Missing config value for ldap options: {$option}");
         $config->loadMasterConfigs($this->config_path);
     }
 }

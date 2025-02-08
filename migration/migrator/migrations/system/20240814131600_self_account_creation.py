@@ -18,10 +18,10 @@ user_id_requirements = {
     }
 }
 
-accepted_emails = {
-    "gmail.com": True,
-    "rpi.edu": True
-}
+accepted_emails = [
+    "gmail.com",
+    "rpi.edu"
+]
 
 def up(config):
     """
@@ -31,11 +31,11 @@ def up(config):
     :type config: migrator.config.Config
     """
     edited_config = config.submitty
-    if ('user_create_account' not in edited_config):
+    if 'user_create_account' not in edited_config:
         edited_config['user_create_account'] = False
-    if ('user_id_requirements' not in edited_config):
+    if 'user_id_requirements' not in edited_config:
         edited_config['user_id_requirements'] = user_id_requirements
-    if ('accepted_emails' not in edited_config):
+    if 'accepted_emails' not in edited_config:
         edited_config['accepted_emails'] = accepted_emails
     
     with open(config.config_path / 'submitty.json', 'w') as file_path:

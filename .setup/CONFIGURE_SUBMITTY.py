@@ -645,10 +645,10 @@ user_id_requirements = {
     }
 }
 
-accepted_emails = {
-    "gmail.com": True,
-    "rpi.edu": True
-}
+accepted_emails = [
+    "gmail.com",
+    "rpi.edu"
+]
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
