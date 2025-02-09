@@ -12,7 +12,6 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
 use app\repositories\course\CourseMaterialRepository;
 use app\views\course\CourseMaterialsView;
