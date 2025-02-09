@@ -60,38 +60,34 @@ class CourseRegistrationController extends AbstractController {
     
     
 
-    #[Route("/courses/{term}/{course}/{action}")]
-    public function handleRegistration(string $term, string $course, string $action): RedirectResponse {
+    #[Route("/courses/{term}/{course}/register", name: "course_register")]
+    public function registerCourse(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
-    
-        if ($action === 'register') {
-            if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
-                $this->core->addErrorMessage('Self registration is not allowed.');
-                return new RedirectResponse($this->core->buildUrl(['home']));
-            }
-            $this->registerCourseUser($term, $course);
-            return new RedirectResponse($this->core->buildCourseUrl());
+
+        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
+            $this->core->addErrorMessage('Self registration is not allowed.');
+            return new RedirectResponse($this->core->buildUrl(['home']));
         }
-    
-        if ($action === 'unregister_from_course') {
-            if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === 0) {
-                $this->core->addErrorMessage('Self unregistration is not allowed.');
-                return new RedirectResponse($this->core->buildUrl(['home']));
-            }
-        
-            // Redirect to the alert route
-            $alertRedirectUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']);
-            return new RedirectResponse($alertRedirectUrl);
-        }
-        
-        
-    
-        // Handle invalid actions
-        $this->core->addErrorMessage('Invalid action specified.');
-        return new RedirectResponse($this->core->buildUrl(['home']));
+
+        $this->registerCourseUser($term, $course);
+        return new RedirectResponse($this->core->buildCourseUrl());
     }
-    
+
+    #[Route("/courses/{term}/{course}/unregister_from_course", name: "course_unregister")]
+    public function unregisterCourse(string $term, string $course): RedirectResponse {
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+
+        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === 0) {
+            $this->core->addErrorMessage('Self unregistration is not allowed.');
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
+
+        // Redirect to the alert route after unregistration
+        $alertRedirectUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']);
+        return new RedirectResponse($alertRedirectUrl);
+    }
 
     public function registerCourseUser(string $term, string $course): void {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
