@@ -695,9 +695,9 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
 
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            $max_size = 10 * 1024 * 1024;
             if ($file_size > $max_size) {
-                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
+                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024 / 1024) . " mb. Uploaded file(s) was " . ($file_size / 1024 / 1024) . " mb.");
             }
 
             if (!FileUtils::createDir($upload_path)) {
@@ -751,7 +751,6 @@ class CourseMaterialsController extends AbstractController {
                             if (!$res) {
                                 return JsonResponse::getErrorResponse("Failed to open zip archive");
                             }
-
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
