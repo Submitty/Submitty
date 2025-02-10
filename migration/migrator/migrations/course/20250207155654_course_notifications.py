@@ -18,7 +18,6 @@ def up(config, database, semester, course):
         """
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT true NOT NULL;
             ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT true NOT NULL;
-            ALTER TABLE gradeable DROP COLUMN IF EXISTS g_notification_sent;
             ALTER TABLE electronic_gradeable_version ADD COLUMN IF NOT EXISTS g_notification_sent BOOLEAN DEFAULT false NOT NULL;
             UPDATE electronic_gradeable_version egv
             SET g_notification_sent = true
