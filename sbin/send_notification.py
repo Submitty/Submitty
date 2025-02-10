@@ -217,44 +217,55 @@ def notify_gradeable_scores():
                     f"'{term}', '{course}')"
                 )
 
-            notified.append((gradeable["id"], gradeable["user_id"]))
+            notified.append(f"({gradeable['id']}, {gradeable['user_id']})")
 
-        # Insert notifications
-        if general_list:
-            course_db.execute(
-                f"""INSERT INTO notifications
-                (component, metadata, content, created_at, from_user_id,
-                to_user_id)
-                VALUES {", ".join(general_list)};"""
-            )
+        # Send notifications via a transaction
+        try:
+            course_db.begin()
+            master_db.begin()
 
-        if email_list:
-            master_db.execute(
-                f"""INSERT INTO emails
-                (subject, body, created, user_id, email_address, term,
-                course)
-                VALUES {", ".join(email_list)};"""
-            )
+            if general_list:
+                course_db.execute(
+                    f"""INSERT INTO notifications
+                    (component, metadata, content, created_at, from_user_id,
+                    to_user_id)
+                    VALUES {", ".join(general_list)};"""
+                )
 
-        m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
-             f"{len(general_list)} general, {len(email_list)} "
-             f"email\n")
-        LOG_FILE.write(m)
+            if email_list:
+                master_db.execute(
+                    f"""INSERT INTO emails
+                    (subject, body, created, user_id, email_address, term,
+                    course)
+                    VALUES {", ".join(email_list)};"""
+                )
 
-        # Update all successfully sent notifications for current course
-        if len(notified) > 0:
-            # Prepare the placeholders for both g_id and user_id in the query
-            placeholders = ", ".join(["%s, %s"] * len(notified))
-            values = [item for sublist in notified for item in sublist]
+            # Update all successfully sent notifications for current course
+            if len(notified) > 0:
+                course_db.execute(
+                    f"""
+                    UPDATE electronic_gradeable_version
+                    SET g_notification_sent = TRUE
+                    WHERE (g_id, user_id) IN ({", ".join(notified)});
+                    """
+                )
 
-            # Execute the query with the provided placeholders and values
-            course_db.execute(
-                f"""
-                UPDATE electronic_gradeable_version
-                SET g_notification_sent = true
-                WHERE (g_id, user_id) IN ({placeholders});
-                """, tuple(values)
-            )
+            course_db.commit()
+            master_db.commit()
+
+            m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
+                 f"{len(general_list)} general, {len(email_list)} "
+                 f"email\n")
+            LOG_FILE.write(m)
+        except Exception as notification_error:  # pylint: disable=broad-except
+            # Rollback the transaction if an error occurs
+            course_db.rollback()
+            master_db.rollback()
+
+            m = (f"[{timestamp}] ({course}) Error Sending Notification(s): "
+                 f"{str(notification_error)}\n")
+            LOG_FILE.write(m)
+            print(m)
 
         # Close the course database connection
         course_db.close()
