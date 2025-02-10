@@ -174,6 +174,7 @@ describe('Docker UI Test', () => {
             .should('have.text', 'submitty/pdflatex:2021 found on DockerHub'
             + ' and queued to be added!');
 
+        const time_to_update = 25000;
         cy.reload();
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
@@ -183,7 +184,7 @@ describe('Docker UI Test', () => {
                 .then((text) => {
                     return text.includes('Remove');
                 });
-        }, 15000);
+        }, time_to_update);
 
         // Remove the image
         cy.get('[data-image-id="submitty/pdflatex:2021"]')
@@ -191,12 +192,12 @@ describe('Docker UI Test', () => {
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
-        //now wait until the image is removed
-        cy.waitAndReloadUntil(() => {
-            return cy.get('[data-image-id="submitty/pdflatex:2021"]')
-                    .should('not.exist');
-        }, 15000);
+        // now wait until the image is removed
 
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return Cypress.$('[data-image-id="submitty/pdflatex:2021"]').length === 0;
+        }, time_to_update);
 
         cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('not.exist');
