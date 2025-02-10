@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 echo 'slapd/root_password password password' | debconf-set-selections &&\
     echo 'slapd/root_password_again password password' | debconf-set-selections && \
     DEBIAN_FRONTEND=noninteractive apt-get install -qqy slapd ldap-utils
