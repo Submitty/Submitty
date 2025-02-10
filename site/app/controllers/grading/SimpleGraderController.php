@@ -273,7 +273,7 @@ class SimpleGraderController extends AbstractController {
                     'date' => $removing ? "" : $time->format('Y-m-d H:i:s')
                 ]);
             }
-            else if ($index === $elem) {
+            elseif ($index === $elem) {
                 // Store the value of the updating component for the websocket message
                 $value = $data;
             }
