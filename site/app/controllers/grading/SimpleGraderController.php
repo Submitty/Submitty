@@ -245,8 +245,6 @@ class SimpleGraderController extends AbstractController {
 
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
-
-        // Numeric gradeable websocket message data
         $elem = isset($_POST['elem']) ? (int) $_POST['elem'] : null;
         $total = 0;
         $value = null;
