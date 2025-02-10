@@ -245,22 +245,27 @@ class SimpleGraderController extends AbstractController {
 
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
-
-        // Numeric gradeable websocket message data
         $elem = isset($_POST['elem']) ? (int) $_POST['elem'] : null;
         $total = 0;
         $value = null;
 
         foreach ($gradeable->getComponents() as $index => $component) {
-            $data = $_POST['scores'][$component->getId()] ?? '';
-            $original_data = $_POST['old_scores'][$component->getId()] ?? '';
-
-            $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-            $component_grade->setGrader($grader);
+            if (!array_key_exists($component->getId(), $_POST['scores'])) {
+                continue;
+            }
+            $data = $_POST['scores'][$component->getId()];
+            if (!array_key_exists($component->getId(), $_POST['old_scores'])) {
+                return JsonResponse::getFailResponse("Save error: old score data missing");
+            }
+            $original_data = $_POST['old_scores'][$component->getId()];
 
             if ($data === '' || (!$component->isText() && $data === '0')) {
                 $ta_graded_gradeable->deleteGradedComponent($component);
                 continue;
+            }
+            else {
+                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
             }
             if ($component->isText()) {
                 $component_grade->setComment($data);
@@ -286,7 +291,7 @@ class SimpleGraderController extends AbstractController {
             $return_data[$component->getId()] = $data;
 
             if ($index === $elem) {
-                // Store the value of the updating component for the websocket message
+                // Store the value of the updating component for the numeric gradeable websocket message
                 $value = $data;
             }
 
