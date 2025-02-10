@@ -85,46 +85,81 @@ def notify_gradeable_scores():
             COURSES_PATH, term, course, 'config', 'config.json')
         course_name = course.strip().upper()
 
-        # Following still needs to fix version conflicts and missing TA grades
         available = course_db.execute(
             """
-            SELECT
-                g.g_id AS g_id,
-                g.g_title AS g_title,
-                egv.user_id AS user_id,
+            WITH gradeables AS (
+                SELECT
+                    g.g_id AS g_id,
+                    g.g_title AS g_title,
+                    egv.active_version as egv_active_version,
+                    gcd.gcd_graded_version AS gcd_graded_version,
+                    COALESCE(egv.user_id, t.user_id) AS user_id,
+                    eg.eg_use_ta_grading AS eg_use_ta_grading,
+                    egd.autograding_complete AS autograding_complete,
+                    COUNT(gcd.gcd_graded_version) OVER(PARTITION BY g.g_id, egv.user_id)
+                        AS graded_components
+                    COUNT(gc.gc_id) OVER(PARTITION BY g.g_id, egv.user_id)
+                        AS total_components,
+                FROM gradeable AS g
+                INNER JOIN electronic_gradeable AS eg
+                    ON g.g_id = eg.g_id
+                    AND eg.eg_student_view = TRUE
+                    AND g.g_grade_released_date <= NOW()
+                INNER JOIN electronic_gradeable_version AS egv
+                    ON g.g_id = egv.g_id
+                    AND egv.active_version != '0'
+                    AND egv.g_notification_sent = FALSE
+                INNER JOIN gradeable_component AS gc
+                    ON g.g_id = gc.g_id
+                INNER JOIN gradeable_data AS gd
+                    ON g.g_id = gd.g_id
+                    AND (
+                        (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
+                        OR
+                        (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
+                    )
+                LEFT JOIN gradeable_teams AS gt
+                    ON gd.gd_team_id = gt.team_id
+                    AND gd.g_id = gt.g_id
+                LEFT JOIN teams AS t
+                    ON gt.team_id = t.team_id
+                LEFT JOIN electronic_gradeable_data AS egd
+                    ON g.g_id = egd.g_id
+                    AND (
+                        (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
+                        OR
+                        (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
+                    )
+                    AND egv.active_version = egd.g_version
+                LEFT JOIN gradeable_component_data AS gcd
+                    ON gd.gd_id = gcd.gd_id
+                    AND gc.gc_id = gcd.gc_id
+                    AND (eg.eg_use_ta_grading = FALSE OR gcd.gcd_graded_version IS NOT NULL)
+            )
+            SELECT DISTINCT
+                g_id,
+                g_title,
+                gcd_graded_version,
+                egv_active_version,
+                gradeables.user_id,
                 u.user_email AS user_email,
                 ns.all_released_grades AS general_enabled,
                 ns.all_released_grades_email AS email_enabled
-            FROM gradeable AS g
-            INNER JOIN electronic_gradeable AS eg
-                ON g.g_id = eg.g_id
-            INNER JOIN electronic_gradeable_version AS egv
-                ON g.g_id = egv.g_id AND egv.g_notification_sent = 'false'
+            FROM gradeables
             INNER JOIN users AS u
-                ON egv.user_id = u.user_id
-            INNER JOIN notification_settings AS ns
-                ON u.user_id = ns.user_id
-            INNER JOIN gradeable_component AS gc
-                ON g.g_id = gc.g_id
-            LEFT JOIN gradeable_data AS gd
-                ON gd.gd_user_id = egv.user_id
-            INNER JOIN gradeable_component_data AS gcd
-                ON gc.gc_id = gcd.gc_id
-                AND gcd.gcd_graded_version = egv.active_version
-            LEFT JOIN electronic_gradeable_data AS egd
-                ON g.g_id = egd.g_id
-                AND egd.user_id = egv.user_id
-                AND egd.g_version = egv.active_version
-            WHERE g.g_grade_released_date <= NOW()
-                AND eg.eg_student_view = TRUE
-                AND COALESCE(egd.autograding_complete, TRUE)
-            GROUP BY g.g_id, g.g_title, egv.user_id, u.user_email,
-                ns.all_released_grades, ns.all_released_grades_email,
-                eg.eg_use_ta_grading, egd.autograding_complete,
-                egv.active_version, gcd.gcd_graded_version
-            HAVING
-                ((COUNT(DISTINCT gc.gc_id) = COUNT(DISTINCT gcd.gc_id))
-                OR (eg.eg_use_ta_grading = 'false' AND egv.active_version > '0'));
+                ON gradeables.user_id = u.user_id
+            LEFT JOIN notification_settings AS ns
+                ON gradeables.user_id = ns.user_id
+            WHERE (
+                (eg_use_ta_grading = FALSE AND autograding_complete = TRUE)
+                OR
+                (graded_components = total_components)
+            )
+                AND u.user_id IS NOT NULL
+            GROUP BY g_id, g_title, gcd_graded_version, egv_active_version,
+                eg_use_ta_grading, gradeables.user_id, u.user_email, ns.all_released_grades,
+                ns.all_released_grades_email
+            HAVING (eg_use_ta_grading = FALSE OR egv_active_version = gcd_graded_version);
             """
         )
 

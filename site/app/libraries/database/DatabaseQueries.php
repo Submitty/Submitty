@@ -5859,7 +5859,7 @@ AND gc_id IN (
               g_min_grading_group AS min_grading_group,
               g_syllabus_bucket AS syllabus_bucket,
               g_allow_custom_marks AS allow_custom_marks,
-              g_allowed_minutes AS allowed_minutes
+              g_allowed_minutes AS allowed_minutes,
               eg.*,
               gamo.*,
               gc.*,
