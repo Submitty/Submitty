@@ -121,7 +121,8 @@ class NotificationController extends AbstractController {
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
-                $this->core->getUser()->getNotificationSettings()
+                $this->core->getUser()->getNotificationSettings(),
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
             )
         );
     }
