@@ -20,7 +20,7 @@ class NotificationView extends AbstractView {
         ]);
     }
 
-    public function showNotificationSettings($notification_saves, $self_registration_type) {
+    public function showNotificationSettings($notification_saves, int $self_registration_type) {
         $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildCourseUrl(['notifications']));
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->addBreadcrumb("Notification Settings");
