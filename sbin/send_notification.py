@@ -97,9 +97,9 @@ def notify_gradeable_scores():
                     eg.eg_use_ta_grading AS eg_use_ta_grading,
                     egd.autograding_complete AS autograding_complete,
                     COUNT(gcd.gcd_graded_version) OVER(PARTITION BY g.g_id, egv.user_id)
-                        AS graded_components
+                        AS graded_components,
                     COUNT(gc.gc_id) OVER(PARTITION BY g.g_id, egv.user_id)
-                        AS total_components,
+                        AS total_components
                 FROM gradeable AS g
                 INNER JOIN electronic_gradeable AS eg
                     ON g.g_id = eg.g_id
@@ -139,8 +139,6 @@ def notify_gradeable_scores():
             SELECT DISTINCT
                 g_id,
                 g_title,
-                gcd_graded_version,
-                egv_active_version,
                 gradeables.user_id,
                 u.user_email AS user_email,
                 ns.all_released_grades AS general_enabled,
