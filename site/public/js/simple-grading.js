@@ -501,7 +501,7 @@ function setupNumericTextCells() {
                     // constants
                     const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
                     const num_text = parseInt($('[data-numtext]').first().data('numtext'));
-                    const gradeable_id = parseInt($('[data-gradeable]').first().data('gradeable'));
+                    const gradeable_id = $('[data-gradeable]').first().data('gradeable');
 
                     // The csv length should be 3 (user information) + num_numeric + 1 (total if num_numeric exists) + num_text
                     const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
@@ -594,7 +594,7 @@ function setupNumericTextCells() {
                                             }
 
                                             if (returned_data['data'][x][status] === 'OK') {
-                                                cellElement.css('background-color', 'var(--main-body-white)');
+                                                cellElement.css('background-color', 'var(--default-white)');
                                             }
                                             // not saved
                                             else {
@@ -986,7 +986,7 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         elem.data('origval', value);
         elem.attr('data-origval', value);
         elem.val(value);
-        elem.css('background-color', 'var(--always-default-white)');
+        elem.css('background-color', 'var(--default-white)');
         // eslint-disable-next-line eqeqeq
         if (value === 0) {
             elem.css('color', 'var(--standard-light-medium-gray)');
