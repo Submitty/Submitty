@@ -252,15 +252,41 @@ class SimpleGraderController extends AbstractController {
         $value = null;
 
         foreach ($gradeable->getComponents() as $index => $component) {
-            $data = $_POST['scores'][$component->getId()] ?? '';
-            $original_data = $_POST['old_scores'][$component->getId()] ?? '';
+            if (!array_key_exists($component->getId(), $_POST['scores'])) {
+                continue;
+            }
+            $data = $_POST['scores'][$component->getId()];
+            if (!array_key_exists($component->getId(), $_POST['old_scores'])) {
+                return JsonResponse::getFailResponse("Save error: old score data missing");
+            }
+            $original_data = $_POST['old_scores'][$component->getId()];
+            $removing = $data === '' || (!$component->isText() && $data === '0');
+            $time = $this->core->getDateTimeNow();
 
-            $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
-            $component_grade->setGrader($grader);
+            if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+                // Send websocket message for each checkpoint update
+                $this->sendSocketMessage([
+                    'type' => 'update_checkpoint',
+                    'g_id' => $gradeable_id,
+                    'user' => $anon_id,
+                    'grader' => $removing ? "" : $grader->getId(),
+                    'elem' => (string) $index,
+                    'score' => (float) $data,
+                    'date' => $removing ? "" : $time->format('Y-m-d H:i:s')
+                ]);
+            }
+            else if ($index === $elem) {
+                // Store the value of the updating component for the websocket message
+                $value = $data;
+            }
 
-            if ($data === '' || (!$component->isText() && $data === '0')) {
+            if ($removing) {
                 $ta_graded_gradeable->deleteGradedComponent($component);
                 continue;
+            }
+            else {
+                $component_grade = $ta_graded_gradeable->getOrCreateGradedComponent($component, $grader, true);
+                $component_grade->setGrader($grader);
             }
             if ($component->isText()) {
                 $component_grade->setComment($data);
@@ -281,27 +307,8 @@ class SimpleGraderController extends AbstractController {
                 $total += $data;
             }
 
-            $time = $this->core->getDateTimeNow();
             $component_grade->setGradeTime($time);
             $return_data[$component->getId()] = $data;
-
-            if ($index === $elem) {
-                // Store the value of the updating component for the websocket message
-                $value = $data;
-            }
-
-            if (isset($_POST['scores'][$component->getId()]) && $gradeable->getType() === GradeableType::CHECKPOINTS) {
-                // Send websocket updates for each provided component (bulk updates possible via keyboard shortcuts)
-                $this->sendSocketMessage([
-                    'type' => 'update_checkpoint',
-                    'g_id' => $gradeable_id,
-                    'user' => $anon_id,
-                    'grader' => $grader->getId(),
-                    'elem' => (string) $index,
-                    'score' => (float) $data,
-                    'date' => $time->format('Y-m-d H:i:s')
-                ]);
-            }
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);

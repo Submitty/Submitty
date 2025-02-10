@@ -276,23 +276,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         },
         (returned_data) => {
             const returned_date = returned_data?.data?.date;
-            if (returned_date) {
-                if (!isNaN(new Date(returned_date).getTime())) {
-                    elems.each((idx, elem) => {
-                        elem = $(elem);
-                        elem.animate({ 'border-right-width': '0px' }, 400);
-                        elem.attr('data-score', elem.data('score'));
-                        elem.attr('data-grader', elem.data('grader'));
-                        elem.attr('data-date', returned_date);
-                        elem.find('.simple-grade-grader').text(elem.data('grader'));
-                        elem.find('.simple-grade-date').text(returned_date);
-                    });
-                }
-                else {
-                    console.log('Invalid date received:', returned_data.data.date);
-                }
-            }
-            else {
+            if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
                 elems.each((idx, elem) => {
                     elem = $(elem);
@@ -459,15 +443,7 @@ function setupNumericTextCells() {
                 elem: split_id[3],
                 old_scores: old_scores,
                 scores: scores,
-            },
-            () => {
-                // Finds the element that stores the total and updates it to reflect increase
-                // eslint-disable-next-line eqeqeq
-                if (row_el.find('.cell-total').text() != total) {
-                    row_el.find('.cell-total').text(total).hide().fadeIn('slow');
-                }
-            },
-            () => {
+            }, () => {}, () => {
                 elem.css('background-color', '--standard-light-pink');
             },
         );
