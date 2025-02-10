@@ -574,7 +574,7 @@ class FileUtils {
             if ($file['error'] !== UPLOAD_ERR_OK) {
                 return [
                     'name' => $name,
-                    'type' => 'Unknown',
+                    'type' => null,
                     'error' => ErrorMessages::uploadErrors($file['error']),
                     'size' => $file['size'] ?? 0, //this may or may not be set as well
                     'is_zip' => false,            //unknown at this point also
