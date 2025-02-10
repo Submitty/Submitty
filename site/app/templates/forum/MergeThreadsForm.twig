@@ -6,7 +6,7 @@
     {% if possibleMerges is empty %}
         <p class="yellow-message">The selected thread is the chronologically oldest thread. No merge action is available.</p>
     {% else %}
-        <div data-testid="merge-thread-container">
+        <div>
             <p>Merge current thread into:</p>
             <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
