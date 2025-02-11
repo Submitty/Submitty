@@ -354,7 +354,7 @@ class UsersController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalGivenName(trim($_POST['user_givenname']));
-        if (!isset($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
+        if (isset($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
             $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
