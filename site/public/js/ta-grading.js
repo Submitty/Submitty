@@ -225,8 +225,6 @@ function changeStudentArrowTooltips(data) {
             data = 'default';
         }
     }
-    console.log(inquiry_status);
-    console.log(data);
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -302,7 +300,6 @@ const orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function (component_id, saveChanges) {
     const ret = orig_toggleComponent(component_id, saveChanges);
     return ret.then(() => {
-        console.log(localStorage.getItem('general-setting-arrow-function'));
         changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || 'default');
     });
 };

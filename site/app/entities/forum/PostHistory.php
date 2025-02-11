@@ -30,6 +30,13 @@ class PostHistory {
     #[ORM\Id]
     protected int $version_id;
 
+    public function __construct(Post $post, int $version, UserEntity $edit_author) {
+        $this->post = $post;
+        $this->edit_author = $edit_author;
+        $this->content = $post->getContent();
+        $this->edit_timestamp = new DateTime("now");
+        $this->version_id = $version;
+    }
     public function getEditAuthor(): UserEntity {
         return $this->edit_author;
     }
@@ -42,6 +49,9 @@ class PostHistory {
         return $this->edit_timestamp;
     }
 
+    public function getVersion(): int {
+        return $this->version_id;
+    }
     /**
      * @return Collection<PostAttachment>
      */

@@ -480,6 +480,16 @@ CREATE TABLE public.courses_users (
 
 
 --
+-- Name: docker_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_images (
+    image_name character varying NOT NULL,
+    user_id character varying
+);
+
+
+--
 -- Name: emails; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -676,6 +686,8 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
+    CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
+    CONSTRAINT user_preferred_givenname_not_empty CHECK (((user_preferred_givenname)::text <> ''::text)),
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
@@ -779,6 +791,14 @@ ALTER TABLE ONLY public.courses_registration_sections
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_pkey PRIMARY KEY (term, course, user_id);
+
+
+--
+-- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_image_name_key UNIQUE (image_name);
 
 
 --
@@ -962,6 +982,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --
