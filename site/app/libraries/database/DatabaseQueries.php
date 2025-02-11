@@ -1033,7 +1033,7 @@ SQL;
      * @param User   $user
      * @param string $semester
      * @param string $course
-    */
+     */
     public function insertCourseUser(User $user, $semester, $course) {
         $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
@@ -1123,21 +1123,21 @@ WHERE term=? AND course=? AND user_id=?",
 
     public function unregisterCourseUser(User $user, $semester, $course) {
         $this->submitty_db->query(
-            "DELETE FROM courses_users WHERE user_id = ? AND term = ? AND course = ?", 
+            "DELETE FROM courses_users WHERE user_id = ? AND term = ? AND course = ?",
             [$user->getId(), $semester, $course]
         );
-    
+
         $this->course_db->query(
             "UPDATE users SET 
                 rotating_section = NULL, 
                 registration_subsection = NULL, 
                 registration_type = NULL 
-            WHERE user_id = ?", 
+            WHERE user_id = ?",
             [$user->getId()]
         );
-    
+
         $this->course_db->query(
-            "DELETE FROM grading_registration WHERE user_id = ?", 
+            "DELETE FROM grading_registration WHERE user_id = ?",
             [$user->getId()]
         );
     }
