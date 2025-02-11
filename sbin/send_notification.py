@@ -56,6 +56,24 @@ LOG_FILE = open(  # pylint: disable=consider-using-with
 )
 
 
+def get_course_name(term, course):
+    """Retrieve the course name from the course config.json."""
+    course_config_path = os.path.join(
+        COURSES_PATH, term, course, 'config', 'config.json')
+    course_name = course.strip().upper()
+
+    with open(course_config_path, 'r', encoding="utf-8") as f:
+        data = json.load(f)
+
+        if 'course_name' in data['course_details']:
+            full_name = data['course_details']['course_name'].strip()
+
+            if len(full_name) > 0:
+                course_name += ": " + full_name
+
+    return course_name
+
+
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
@@ -71,8 +89,117 @@ def connect_db(db_name):
     return db
 
 
+def construct_notification_lists(term, course, pending):
+    """Construct the notification lists for the current course."""
+    notifications, general_list, email_list = [], [], []
+    course_name = get_course_name(term, course)
+
+    for notification in pending:
+        timestamp = str(datetime.datetime.now())
+        gradeable = {
+            "id": notification[0],
+            "title": notification[1],
+            "user_id": notification[2],
+            "user_email": notification[3],
+            "general": notification[4],
+            "email": notification[5]
+        }
+
+        # Construct gradeable URL into a valid JSON format for metadata
+        gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
+                         f"/gradeable/{gradeable['id']}")
+        metadata = json.dumps({"url": gradeable_url})
+
+        notification_content = "Grade Released: " + gradeable["title"]
+        email_subject = (f"[Submitty {course}] Grade Released: "
+                         f"{gradeable['title']}")
+        email_body = (f"An Instructor has released scores in:\n"
+                      f"{course_name}\n\nScores are now available for "
+                      f"{gradeable['title']}.\n\nAuthor: System\n"
+                      f"Click here for more info: {gradeable_url}\n\n"
+                      "--\n"
+                      "NOTE: This is an automated email notification, "
+                      "which is unable to receive replies.\n"
+                      "Please refer to the course syllabus for contact "
+                      "information for your teaching staff.")
+
+        if len(notification_content) > 40:
+            notification_content = notification_content[:36] + "..."
+
+        if gradeable["general"] is True:
+            general_list.append(
+                f"('grading','{metadata}','{notification_content}',"
+                f"'{timestamp}','submitty-admin','{gradeable['user_id']}')"
+            )
+
+        if gradeable["email"] is True:
+            email_list.append(
+                f"('{email_subject}', '{email_body}', '{timestamp}', "
+                f"'{gradeable['user_id']}', '{gradeable['user_email']}',"
+                f"'{term}', '{course}')"
+            )
+
+        notifications.append(
+            f"('{gradeable['id']}', '{gradeable['user_id']}')"
+        )
+
+    return notifications, general_list, email_list
+
+
+def send_notifications(course, course_db, master_db, lists):
+    """Send out notifications for the current course."""
+    notifications, general_list, email_list = lists
+    timestamp = str(datetime.datetime.now())
+
+    try:
+        if general_list:
+            course_db.execute(
+                f"""INSERT INTO notifications
+                (component, metadata, content, created_at, from_user_id,
+                to_user_id)
+                VALUES {", ".join(general_list)};"""
+            )
+            course_db.commit()
+
+        if email_list:
+            master_db.execute(
+                f"""INSERT INTO emails
+                (subject, body, created, user_id, email_address, term,
+                course)
+                VALUES {", ".join(email_list)};"""
+            )
+            master_db.commit()
+
+        # Update all successfully sent notifications for current course
+        if len(notifications) > 0:
+            course_db.execute(
+                f"""
+                UPDATE electronic_gradeable_version
+                SET g_notification_sent = TRUE
+                WHERE (g_id, user_id) IN ({", ".join(notifications)});
+                """
+            )
+            course_db.commit()
+
+        course_db.flush()
+        master_db.flush()
+
+        m = (f"[{timestamp}] ({course}): {len(general_list)} "
+             f" general, {len(email_list)} email\n")
+        LOG_FILE.write(m)
+    except Exception as notification_error:  # pylint: disable=broad-except
+        # Rollback the transaction if an error occurs
+        course_db.rollback()
+        master_db.rollback()
+
+        m = (f"[{timestamp}] ({course}) Error Sending Notification(s): "
+             f"{str(notification_error)}\n")
+        LOG_FILE.write(m)
+        print(m)
+
+
 def notify_gradeable_scores():
-    """Send gradeable notifications for released scores, if any."""
+    """Send gradeable notifications for all active courses."""
     notified = 0
     master_db = connect_db("submitty")
     active_courses = "SELECT term, course FROM courses WHERE status = '1';"
@@ -80,11 +207,6 @@ def notify_gradeable_scores():
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
-        notifications, general_list, email_list = [], [], []
-        course_config_path = os.path.join(
-            COURSES_PATH, term, course, 'config', 'config.json')
-        course_name = course.strip().upper()
-
         pending = course_db.execute(
             """
             WITH gradeables AS (
@@ -169,116 +291,9 @@ def notify_gradeable_scores():
             """
         )
 
-        if pending:
-            # Retrieve the full course name from the course config.json
-            with open(course_config_path, 'r', encoding="utf-8") as f:
-                data = json.load(f)
-
-                if 'course_name' in data['course_details']:
-                    full_name = data['course_details']['course_name'].strip()
-
-                    if len(full_name) > 0:
-                        course_name += ": " + full_name
-
-        for notification in pending:
-            gradeable = {
-                "id": notification[0],
-                "title": notification[1],
-                "user_id": notification[2],
-                "user_email": notification[3],
-                "general": notification[4],
-                "email": notification[5]
-            }
-
-            timestamp = str(datetime.datetime.now())
-
-            # Construct gradeable URL into a valid JSON format
-            gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
-                             f"/gradeable/{gradeable['id']}")
-            metadata = json.dumps({"url": gradeable_url})
-
-            notification_content = "Grade Released: " + gradeable["title"]
-            email_subject = (f"[Submitty {course}] Grade Released: "
-                             f"{gradeable['title']}")
-            email_body = (f"An Instructor has released scores in:\n"
-                          f"{course_name}\n\nScores are now available for "
-                          f"{gradeable['title']}.\n\nAuthor: System\n"
-                          f"Click here for more info: {gradeable_url}\n\n"
-                          "--\n"
-                          "NOTE: This is an automated email notification, "
-                          "which is unable to receive replies.\n"
-                          "Please refer to the course syllabus for contact "
-                          "information for your teaching staff.")
-
-            if len(notification_content) > 40:
-                notification_content = notification_content[:36] + "..."
-
-            if gradeable["general"] is True:
-                general_list.append(
-                    f"('grading','{metadata}','{notification_content}',"
-                    f"'{timestamp}','submitty-admin','{gradeable['user_id']}')"
-                )
-
-            if gradeable["email"] is True:
-                email_list.append(
-                    f"('{email_subject}', '{email_body}', '{timestamp}', "
-                    f"'{gradeable['user_id']}', '{gradeable['user_email']}',"
-                    f"'{term}', '{course}')"
-                )
-
-            notifications.append(
-                f"('{gradeable['id']}', '{gradeable['user_id']}')"
-            )
-
-        # Send out notifications for the current course
-        timestamp = str(datetime.datetime.now())
-
-        try:
-            if general_list:
-                course_db.execute(
-                    f"""INSERT INTO notifications
-                    (component, metadata, content, created_at, from_user_id,
-                    to_user_id)
-                    VALUES {", ".join(general_list)};"""
-                )
-                course_db.commit()
-
-            if email_list:
-                master_db.execute(
-                    f"""INSERT INTO emails
-                    (subject, body, created, user_id, email_address, term,
-                    course)
-                    VALUES {", ".join(email_list)};"""
-                )
-                master_db.commit()
-
-            # Update all successfully sent notifications for current course
-            if len(notifications) > 0:
-                course_db.execute(
-                    f"""
-                    UPDATE electronic_gradeable_version
-                    SET g_notification_sent = TRUE
-                    WHERE (g_id, user_id) IN ({", ".join(notifications)});
-                    """
-                )
-                notified += len(notifications)
-                course_db.commit()
-
-            course_db.flush()
-            master_db.flush()
-
-            m = (f"[{timestamp}] ({course}): {len(general_list)} "
-                 f" general, {len(email_list)} email\n")
-            LOG_FILE.write(m)
-        except Exception as notification_error:  # pylint: disable=broad-except
-            # Rollback the transaction if an error occurs
-            course_db.rollback()
-            master_db.rollback()
-
-            m = (f"[{timestamp}] ({course}) Error Sending Notification(s): "
-                 f"{str(notification_error)}\n")
-            LOG_FILE.write(m)
-            print(m)
+        lists = construct_notification_lists(term, course, pending)
+        send_notifications(course, course_db, master_db, lists)
+        notified += len(lists[0])
 
         course_db.close()
 
