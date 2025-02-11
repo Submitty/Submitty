@@ -10,6 +10,7 @@ import datetime
 import sys
 import getpass
 from sqlalchemy import create_engine  # pylint: disable=import-error
+from sqlalchemy.orm import Session  # pylint: disable=import-error
 
 try:
     CONFIG_PATH = os.path.join(
@@ -65,7 +66,7 @@ def connect_db(db_name):
                       f"/{db_name}")
 
     engine = create_engine(connection)
-    db = engine.connect()
+    db = Session(engine.connect())
 
     return db
 
@@ -74,18 +75,17 @@ def notify_gradeable_scores():
     """Send gradeable notifications for released scores, if any."""
     notified = 0
     master_db = connect_db("submitty")
-    active_courses_query = "SELECT term, course FROM courses WHERE status = '1';"
-    courses = master_db.execute(active_courses_query)
+    active_courses = "SELECT term, course FROM courses WHERE status = '1';"
+    courses = master_db.execute(active_courses)
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
-        general_list, email_list = [], []
-        notified = []
+        notifications, general_list, email_list = [], [], []
         course_config_path = os.path.join(
             COURSES_PATH, term, course, 'config', 'config.json')
         course_name = course.strip().upper()
 
-        available = course_db.execute(
+        pending = course_db.execute(
             """
             WITH gradeables AS (
                 SELECT
@@ -161,7 +161,7 @@ def notify_gradeable_scores():
             """
         )
 
-        if available:
+        if pending:
             # Retrieve the full course name from the course config.json
             with open(course_config_path, 'r') as f:
                 data = json.load(f)
@@ -172,15 +172,16 @@ def notify_gradeable_scores():
                     if len(full_name) > 0:
                         course_name += ": " + full_name
 
-        for g in available:
+        for notification in pending:
             gradeable = {
-                "id": g[0],
-                "title": g[1],
-                "user_id": g[2],
-                "user_email": g[3],
-                "general": g[4],
-                "email": g[5]
+                "id": notification[0],
+                "title": notification[1],
+                "user_id": notification[2],
+                "user_email": notification[3],
+                "general": notification[4],
+                "email": notification[5]
             }
+
             timestamp = str(datetime.datetime.now())
 
             # Construct gradeable URL into a valid JSON format
@@ -188,11 +189,11 @@ def notify_gradeable_scores():
                              f"/gradeable/{gradeable['id']}")
             metadata = json.dumps({"url": gradeable_url})
 
-            notification_content = "Scores Released: " + gradeable["title"]
-            email_subject = (f"[Submitty {course}] Scores Released: "
+            notification_content = "Grade Released: " + gradeable["title"]
+            email_subject = (f"[Submitty {course}] Grade Released: "
                              f"{gradeable['title']}")
             email_body = (f"An Instructor has released scores in:\n"
-                          f"{course_name}\n\nScores have been released for "
+                          f"{course_name}\n\nScores are now available for "
                           f"{gradeable['title']}.\n\nAuthor: System\n"
                           f"Click here for more info: {gradeable_url}\n\n"
                           "--\n"
@@ -204,26 +205,25 @@ def notify_gradeable_scores():
             if len(notification_content) > 40:
                 notification_content = notification_content[:36] + "..."
 
-            if gradeable["general"]:
+            if gradeable["general"] is True:
                 general_list.append(
                     f"('grading','{metadata}','{notification_content}',"
                     f"'{timestamp}','submitty-admin','{gradeable['user_id']}')"
                 )
 
-            if gradeable["email"]:
+            if gradeable["email"] is True:
                 email_list.append(
                     f"('{email_subject}', '{email_body}', '{timestamp}', "
-                    f"'{gradeable["user_id"]}', '{gradeable['user_email']}',"
+                    f"'{gradeable['user_id']}', '{gradeable['user_email']}',"
                     f"'{term}', '{course}')"
                 )
 
-            notified.append(f"({gradeable['id']}, {gradeable['user_id']})")
+            notifications.append(f"('{gradeable['id']}', '{gradeable['user_id']}')")
 
-        # Send notifications via a transaction
+        # Send out notifications for the current course
+        timestamp = str(datetime.datetime.now())
+
         try:
-            course_db.begin()
-            master_db.begin()
-
             if general_list:
                 course_db.execute(
                     f"""INSERT INTO notifications
@@ -231,6 +231,7 @@ def notify_gradeable_scores():
                     to_user_id)
                     VALUES {", ".join(general_list)};"""
                 )
+                course_db.commit()
 
             if email_list:
                 master_db.execute(
@@ -239,23 +240,25 @@ def notify_gradeable_scores():
                     course)
                     VALUES {", ".join(email_list)};"""
                 )
+                master_db.commit()
 
             # Update all successfully sent notifications for current course
-            if len(notified) > 0:
+            if len(notifications) > 0:
                 course_db.execute(
                     f"""
                     UPDATE electronic_gradeable_version
                     SET g_notification_sent = TRUE
-                    WHERE (g_id, user_id) IN ({", ".join(notified)});
+                    WHERE (g_id, user_id) IN ({", ".join(notifications)});
                     """
                 )
+                notified += len(notifications)
+                course_db.commit()
 
-            course_db.commit()
-            master_db.commit()
+            course_db.flush()
+            master_db.flush()
 
-            m = (f"[{timestamp}] ({course}) {gradeable['title']}: "
-                 f"{len(general_list)} general, {len(email_list)} "
-                 f"email\n")
+            m = (f"[{timestamp}] ({course}): {len(general_list)} "
+                 f" general, {len(email_list)} email\n")
             LOG_FILE.write(m)
         except Exception as notification_error:  # pylint: disable=broad-except
             # Rollback the transaction if an error occurs
@@ -269,6 +272,9 @@ def notify_gradeable_scores():
 
         # Close the course database connection
         course_db.close()
+
+    # Close the master database connection
+    master_db.close()
 
     return notified
 
