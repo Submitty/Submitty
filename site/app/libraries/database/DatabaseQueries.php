@@ -1126,7 +1126,7 @@ WHERE term=? AND course=? AND user_id=?",
      * @param string $semester
      * @param string $course
      */
-    public function unregisterCourseUser(User $user, $semester, $course) {
+    public function unregisterCourseUser(User $user, $semester, $course): void {
         $this->submitty_db->query(
             "DELETE FROM courses_users WHERE user_id = ? AND term = ? AND course = ?",
             [$user->getId(), $semester, $course]
