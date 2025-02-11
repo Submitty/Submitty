@@ -1120,7 +1120,7 @@ WHERE term=? AND course=? AND user_id=?",
             }
         }
     }
-    
+
     /**
      * @param User   $user
      * @param string $semester
