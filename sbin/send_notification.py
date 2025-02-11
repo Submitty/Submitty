@@ -96,9 +96,11 @@ def notify_gradeable_scores():
                     COALESCE(egv.user_id, t.user_id) AS user_id,
                     eg.eg_use_ta_grading AS eg_use_ta_grading,
                     egd.autograding_complete AS autograding_complete,
-                    COUNT(gcd.gcd_graded_version) OVER(PARTITION BY g.g_id, egv.user_id)
+                    COUNT(gcd.gcd_graded_version)
+                        OVER(PARTITION BY g.g_id, egv.user_id)
                         AS graded_components,
-                    COUNT(gc.gc_id) OVER(PARTITION BY g.g_id, egv.user_id)
+                    COUNT(gc.gc_id)
+                        OVER(PARTITION BY g.g_id, egv.user_id)
                         AS total_components
                 FROM gradeable AS g
                 INNER JOIN electronic_gradeable AS eg
@@ -114,9 +116,9 @@ def notify_gradeable_scores():
                 INNER JOIN gradeable_data AS gd
                     ON g.g_id = gd.g_id
                     AND (
-                        (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
-                        OR
-                        (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
+                    (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
+                    OR
+                    (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
                     )
                 LEFT JOIN gradeable_teams AS gt
                     ON gd.gd_team_id = gt.team_id
@@ -126,15 +128,18 @@ def notify_gradeable_scores():
                 LEFT JOIN electronic_gradeable_data AS egd
                     ON g.g_id = egd.g_id
                     AND (
-                        (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
-                        OR
-                        (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
+                    (NOT eg.eg_team_assignment AND egv.user_id = gd.gd_user_id)
+                    OR
+                    (eg.eg_team_assignment AND egv.team_id = gd.gd_team_id)
                     )
                     AND egv.active_version = egd.g_version
                 LEFT JOIN gradeable_component_data AS gcd
                     ON gd.gd_id = gcd.gd_id
                     AND gc.gc_id = gcd.gc_id
-                    AND (eg.eg_use_ta_grading = FALSE OR gcd.gcd_graded_version IS NOT NULL)
+                    AND (
+                        eg.eg_use_ta_grading = FALSE
+                        OR gcd.gcd_graded_version IS NOT NULL
+                    )
             )
             SELECT DISTINCT
                 g_id,
@@ -152,12 +157,15 @@ def notify_gradeable_scores():
                 (eg_use_ta_grading = FALSE AND autograding_complete = TRUE)
                 OR
                 (graded_components = total_components)
-            )
-                AND u.user_id IS NOT NULL
+            ) AND u.user_id IS NOT NULL
             GROUP BY g_id, g_title, gcd_graded_version, egv_active_version,
-                eg_use_ta_grading, gradeables.user_id, u.user_email, ns.all_released_grades,
-                ns.all_released_grades_email
-            HAVING (eg_use_ta_grading = FALSE OR egv_active_version = gcd_graded_version);
+                eg_use_ta_grading, gradeables.user_id, u.user_email,
+                ns.all_released_grades, ns.all_released_grades_email
+            HAVING (
+                eg_use_ta_grading = FALSE
+                OR
+                egv_active_version = gcd_graded_version
+            );
             """
         )
 
@@ -218,7 +226,9 @@ def notify_gradeable_scores():
                     f"'{term}', '{course}')"
                 )
 
-            notifications.append(f"('{gradeable['id']}', '{gradeable['user_id']}')")
+            notifications.append(
+                f"('{gradeable['id']}', '{gradeable['user_id']}')"
+            )
 
         # Send out notifications for the current course
         timestamp = str(datetime.datetime.now())
