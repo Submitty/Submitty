@@ -160,12 +160,14 @@ class UserProfileController extends AbstractController {
             if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
                 if ($newGivenName === "" || $newGivenName === $user->getLegalGivenName()) {
                     $user->setPreferredGivenName(null);
-                } else {
+                }
+                else {
                     $user->setPreferredGivenName($newGivenName);
                 }
                 if ($newFamilyName === "" || $newFamilyName === $user->getLegalFamilyName()) {
                     $user->setPreferredFamilyName(null);
-                } else {
+                }
+                else {
                     $user->setPreferredFamilyName($newFamilyName);
                 }
                 //User updated flag tells auto feed to not clobber some of the user's data.
