@@ -1124,7 +1124,7 @@ SQL;
      * @param User   $user
      * @param string $semester
      * @param string $course
-     */
+    */
     public function insertCourseUser(User $user, $semester, $course) {
         $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];

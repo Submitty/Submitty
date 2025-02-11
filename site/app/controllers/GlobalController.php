@@ -216,7 +216,6 @@ class GlobalController extends AbstractController {
                 "title" => "Unregister from course",
                 "icon" => "fa-envelope",
             ]);
-            
         }
 
         // --------------------------------------------------------------------------
