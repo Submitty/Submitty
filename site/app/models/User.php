@@ -17,8 +17,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setNumericId(string $id)
  * @method string getPassword()
  * @method string getLegalGivenName() Get the given name of the loaded user
- * @method string getPreferredGivenName() Get the preferred given name of the loaded user
- * @method string getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
+ * @method string|null getPreferredGivenName() Get the preferred given name of the loaded user
+ * @method string|null getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
  *                                        otherwise return the legal given name field for the user.
  * @method string getLegalFamilyName() Get the family name of the loaded user
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
@@ -107,8 +107,8 @@ class User extends AbstractModel {
      * @var string The given name of the user */
     protected $legal_given_name;
     /** @prop
-     * @var string The preferred given name of the user */
-    protected $preferred_given_name = "";
+     * @var ?string The preferred given name of the user */
+    protected $preferred_given_name;
     /** @prop
      * @var  string The given name to be displayed by the system (either given name or preferred given name) */
     protected $displayed_given_name;
@@ -116,8 +116,8 @@ class User extends AbstractModel {
      * @var string The family name of the user */
     protected $legal_family_name;
     /** @prop
-     * @var string The preferred family name of the user */
-    protected $preferred_family_name = "";
+     * @var ?string The preferred family name of the user */
+    protected $preferred_family_name;
     /** @prop
      * @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
