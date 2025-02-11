@@ -158,19 +158,25 @@ class UserProfileController extends AbstractController {
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
-                $user->setPreferredGivenName($newGivenName === "" ? null : $newGivenName);
-                $user->setPreferredFamilyName($newFamilyName === "" ? null : $newFamilyName);
-                //User updated flag tells auto feed to not clobber some of the user's data.
-                if (!is_null($user->getPreferredGivenName())) {
-                    $user->setUserUpdated(true);
+                if ($newGivenName === "" || $newGivenName === $user->getLegalGivenName()) {
+                    $user->setPreferredGivenName(null);
+                } else {
+                    $user->setPreferredGivenName($newGivenName);
                 }
+                if ($newFamilyName === "" || $newFamilyName === $user->getLegalFamilyName()) {
+                    $user->setPreferredFamilyName(null);
+                } else {
+                    $user->setPreferredFamilyName($newFamilyName);
+                }
+                //User updated flag tells auto feed to not clobber some of the user's data.
+                $user->setUserUpdated(!is_null($user->getPreferredGivenName()));
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
                     'displayed_given_name' => $user->getDisplayedGivenName(),
                     'displayed_family_name' => $user->getDisplayedFamilyName(),
-                    'preferred_given_name' => $newGivenName,
-                    'preferred_family_name' => $newFamilyName
+                    'preferred_given_name' => $user->getPreferredGivenName() ?? "",
+                    'preferred_family_name' => $user->getPreferredFamilyName() ?? "",
 
                 ]);
             }
