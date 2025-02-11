@@ -240,6 +240,10 @@ function updateUserPreferredNames() {
                     // update the data attributes
                     given_name_field.data('current-name', data.preferred_given_name);
                     family_name_field.data('current-name', data.preferred_family_name);
+                    // Update abbreviated name
+                    $('#user-last-initial-format-preview').data('options', data.abreviation_options);
+                    $('#user-last-initial-format-preview').text(data.current_abbreviation);
+                    $('#last-initial-format-row .icon').html(`${icon} ${data.current_abbreviation}`);
                 }
                 else {
                     // eslint-disable-next-line no-undef
