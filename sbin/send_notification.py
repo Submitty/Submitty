@@ -171,7 +171,7 @@ def notify_gradeable_scores():
 
         if pending:
             # Retrieve the full course name from the course config.json
-            with open(course_config_path, 'r') as f:
+            with open(course_config_path, 'r', encoding="utf-8") as f:
                 data = json.load(f)
 
                 if 'course_name' in data['course_details']:
@@ -280,10 +280,8 @@ def notify_gradeable_scores():
             LOG_FILE.write(m)
             print(m)
 
-        # Close the course database connection
         course_db.close()
 
-    # Close the master database connection
     master_db.close()
 
     return notified

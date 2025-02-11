@@ -6741,7 +6741,6 @@ AND gc_id IN (
                 $gradeable->getMinGradingGroup(),
                 $gradeable->getSyllabusBucket(),
                 $gradeable->getAllowCustomMarks(),
-                $gradeable->getNotificationSent(),
                 $gradeable->getId()
             ];
             $this->course_db->query(
