@@ -332,7 +332,7 @@ class ForumController extends AbstractController {
 
         $current_order = [];
         foreach ($categories as $category) {
-            $current_order[] = (int) $category->getId();
+            $current_order[] = $category->getId();
         }
         $new_order = [];
         foreach ($_POST['categorylistitem'] as $item) {
@@ -1251,7 +1251,7 @@ class ForumController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
-        if (empty($repo->getCategories())) {
+        if (count($repo->getCategories()) === 0) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
