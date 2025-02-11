@@ -179,7 +179,7 @@ class UserProfileController extends AbstractController {
                     'displayed_family_name' => $user->getDisplayedFamilyName(),
                     'preferred_given_name' => $user->getPreferredGivenName() ?? "",
                     'preferred_family_name' => $user->getPreferredFamilyName() ?? "",
-                    'abreviation_options' => implode('|', array_map(fn($i) => $user->getDisplayAbbreviatedName($i), range(0, 3))),
+                    'abbreviation_options' => implode('|', array_map(fn($i) => $user->getDisplayAbbreviatedName($i), range(0, 3))),
                     'current_abbreviation' => $user->getDisplayAbbreviatedName()
                 ]);
             }
