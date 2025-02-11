@@ -53,8 +53,8 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
-        // eslint-disable-next-line no-restricted-syntax
         // NOTE: Will currently always be Error. Fix sysinfo logging to fix this.
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker_version"]')
                 .invoke('text')
