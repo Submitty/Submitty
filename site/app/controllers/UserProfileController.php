@@ -171,7 +171,7 @@ class UserProfileController extends AbstractController {
                     $user->setPreferredFamilyName($newFamilyName);
                 }
                 //User updated flag tells auto feed to not clobber some of the user's data.
-                $user->setUserUpdated(!is_null($user->getPreferredGivenName()));
+                $user->setUserUpdated(!is_null($user->getPreferredGivenName()) || !is_null($user->getPreferredFamilyName()));
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
