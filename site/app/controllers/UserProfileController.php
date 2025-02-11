@@ -152,21 +152,26 @@ class UserProfileController extends AbstractController {
     #[Route("/user_profile/change_preferred_names", methods: ["POST"])]
     public function changeUserName(): JsonResponse {
         $user = $this->core->getUser();
-        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
+        if (isset($_POST['given_name']) && isset($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
             $newFamilyName = trim($_POST['family_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
-                $user->setPreferredGivenName($newGivenName);
-                $user->setPreferredFamilyName($newFamilyName);
+                $user->setPreferredGivenName($newGivenName === "" ? null : $newGivenName);
+                $user->setPreferredFamilyName($newFamilyName === "" ? null : $newFamilyName);
                 //User updated flag tells auto feed to not clobber some of the user's data.
-                $user->setUserUpdated(true);
+                if (!is_null($user->getPreferredGivenName())) {
+                    $user->setUserUpdated(true);
+                }
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
-                    'given_name' => $newGivenName,
-                    'family_name' => $newFamilyName
+                    'displayed_given_name' => $user->getDisplayedGivenName(),
+                    'displayed_family_name' => $user->getDisplayedFamilyName(),
+                    'preferred_given_name' => $newGivenName,
+                    'preferred_family_name' => $newFamilyName
+
                 ]);
             }
             else {
