@@ -17,7 +17,7 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
         cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
     });
-    it('Web-Based Rainbow Grades Customization should work', () => {
+    it('Test Web-Based Rainbow Grades Customization', () => {
         // Ensure that elements requiring a manual_customization.json are only visible if file exists
         cy.window().its('manualCustomizationExists').then((manualCustomizationExists) => {
             if (manualCustomizationExists === true) {
@@ -128,7 +128,7 @@ describe('Test Rainbow Grading', () => {
         cy.get('@plagiarism-table-elements').eq(2).should('contain', '1');
         cy.get('@plagiarism-table-elements').eq(3).find('a').click();
     });
-    it('Manual Customization upload should work', () => {
+    it('Upload Manual Customization', () => {
         // Upload manual customization
         cy.get('[data-testid="btn-upload-customization"]').should('exist');
         cy.get('[data-testid="config-upload"]').should('exist');
@@ -163,7 +163,7 @@ describe('Test Rainbow Grading', () => {
             expect(gui_json.benchmark_percent).to.exist;
         });
     });
-    it('Enable viewing of rainbow grades and generating the rainbow grading', () => {
+    it('Build Rainbow Grades and View Table', () => {
         cy.get('[data-testid="display-grade-summary"]').check();
         cy.get('[data-testid="display-grade-summary"]').should('be.checked');
         cy.get('[data-testid="display-grade-details"]').check();
