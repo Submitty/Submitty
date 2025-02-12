@@ -158,7 +158,7 @@ class Utils {
     /**
      * Checks if the email extension is in the accepted emails part of the Submitty config file
      *
-     * @param array<mixed> $accepted_emails
+     * @param array<string> $accepted_emails
      */
     public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
         $split_email = explode('@', $email);
@@ -166,7 +166,7 @@ class Utils {
         if (count($split_email) < 2) {
             return false;
         }
-        return in_array($split_email[count($split_email) - 1], array_keys($accepted_emails), true);
+        return in_array($split_email[count($split_email) - 1], $accepted_emails, true);
     }
 
     /**

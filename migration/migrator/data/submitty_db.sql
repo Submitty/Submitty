@@ -668,8 +668,8 @@ CREATE TABLE public.unverified_users (
     user_password character varying,
     user_familyname character varying NOT NULL,
     user_email character varying NOT NULL,
-    verification_code character varying(50) DEFAULT 'none'::character varying NOT NULL,
-    verification_expiration timestamp without time zone DEFAULT NOW()
+    verification_code character varying(50),
+    verification_expiration timestamp with time zone DEFAULT now()
 );
 
 

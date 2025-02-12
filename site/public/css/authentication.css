@@ -75,21 +75,7 @@
     line-height: 1;
     border-radius: 0.25rem;
 }
-  
 
-@media (prefers-color-scheme: dark) {
-    .requirements-button {
-        display: inline-block;
-        font-weight: 400;
-        color: var(--text-white);
-        text-align: center;
-        vertical-align: middle;
-        background-color: transparent;
-        border: 1px solid;
-        padding: 0.3rem;
-        font-size: x-small;
-        line-height: 1;
-        border-radius: 0.25rem;
-    }
+[data-theme="dark"].requirements-button {
+    color: var(--text-white);
 }
-
