@@ -673,7 +673,6 @@ if not args.worker:
     config['user_create_account'] = USER_CREATE_ACCOUNT
     config['accepted_emails'] = accepted_emails
     config['user_id_requirements'] = user_id_requirements
-    config['is_ci'] = False
 
 config['worker'] = True if args.worker == 1 else False
 

@@ -311,7 +311,7 @@ class AuthenticationController extends AbstractController {
         return new WebResponse(AuthenticationView::class, 'userSelection', $users);
     }
 
-    public function sendVerificationEmail(string $email, string $verification_code, string $user_id): void {
+    private function sendVerificationEmail(string $email, string $verification_code, string $user_id): void {
         $subject = "Submitty Email Verification";
         $url = $this->core->getConfig()->getBaseUrl() . 'authentication/verify_email?verification_code=' . $verification_code;
         $body = <<<EMAIL
@@ -350,7 +350,14 @@ EMAIL;
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        return new WebResponse('Authentication', 'signupForm', ['email' => $this->core->getConfig()->getAcceptedEmails(), 'user_id' => $this->core->getConfig()->getUserIdRequirements()]);
+        return new WebResponse(
+            'Authentication', 
+            'signupForm', 
+            [
+                'accepted_emails' => $this->core->getConfig()->getAcceptedEmails(),
+                'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements()
+            ]
+        );
     }
 
     /**
