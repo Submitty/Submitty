@@ -2,7 +2,6 @@
 
 namespace app\controllers\forum;
 
-use app\entities\forum\Category;
 use app\entities\UserEntity;
 use app\libraries\Core;
 use app\libraries\ForumUtils;
@@ -19,6 +18,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use app\libraries\socket\Client;
 use app\entities\forum\Post;
 use app\entities\forum\Thread;
+use app\entities\forum\ThreadAccess;
+use app\entities\forum\Category;
 use WebSocket;
 
 /**
@@ -702,10 +703,18 @@ class ForumController extends AbstractController {
     public function markPostUnread(): JsonResponse {
         $thread_id = $_POST["thread_id"];
         $last_viewed_timestamp = $_POST["last_viewed_timestamp"];
-        // format the last viewed timestamp to be in the same format as the database
-        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone())->format("Y-m-d H:i:sO");
         $current_user = $this->core->getUser()->getId();
-        $this->core->getQueries()->visitThread($current_user, $thread_id, $last_viewed_timestamp);
+        $thread_access = $this->core->getCourseEntityManager()->find(ThreadAccess::class, ["thread" => $thread_id, "user_id" => $current_user]);
+
+        if (is_null($thread_access)) {
+            return JsonResponse::getFailResponse("Failed to mark post unread: thread access not found.");
+        }
+        $last_viewed_timestamp = DateUtils::parseDateTime($last_viewed_timestamp, $this->core->getUser()->getUsableTimeZone());
+        $thread_access->setTimestamp($last_viewed_timestamp);
+        $this->core->getCourseEntityManager()->flush();
+
+        // format the last viewed timestamp to be in a readable format again
+        $last_viewed_timestamp = $last_viewed_timestamp->format("Y-m-d H:i:sO");
         $response = ['user' => $current_user, 'last_viewed_timestamp' => $last_viewed_timestamp];
         return JsonResponse::getSuccessResponse($response);
     }
