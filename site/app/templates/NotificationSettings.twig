@@ -288,7 +288,7 @@
                 {% endif %}
             </div>
         
-            {% if core.getUser().accessFullGrading() and self_registration_type == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
+            {% if access_full_grading and self_registration_type == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
                 <div class="heading">
                     <h2>Registration</h2>
                     <hr>

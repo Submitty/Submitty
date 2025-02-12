@@ -30,7 +30,8 @@ class NotificationView extends AbstractView {
             'csrf_token' => $this->core->getCsrfToken(),
             'defaults' => User::constructNotificationSettings([]),
             'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings']),
-            'self_registration_type' => $self_registration_type
+            'self_registration_type' => $self_registration_type,
+            'access_full_grading' => $this->core->getUser()->accessFullGrading()
         ]);
     }
 }
