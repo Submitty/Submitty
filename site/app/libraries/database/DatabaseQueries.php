@@ -760,18 +760,18 @@ SQL;
     public function getUpDucks(): array {
         $this->course_db->query("
             SELECT 
-                p.author_user_id, 
-                COUNT(f.*) AS upducks 
+                f.user_id,
+                COUNT(*) AS upducks 
             FROM 
-                posts p 
+                forum_upducks f
             JOIN 
-                forum_upducks f 
+                posts p
             ON 
-                p.id = f.post_id 
+                f.post_id = p.id
             WHERE 
                 p.deleted = FALSE 
             GROUP BY 
-                p.author_user_id 
+                f.user_id
             ORDER BY 
                 upducks DESC
         ");
