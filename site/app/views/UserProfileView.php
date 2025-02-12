@@ -22,14 +22,6 @@ class UserProfileView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
-        if (!is_null($user->getPreferredGivenName())) {
-            $autofill_preferred_name[0] = $user->getPreferredGivenName();
-        }
-        if (!is_null($user->getPreferredFamilyName())) {
-            $autofill_preferred_name[1] = $user->getPreferredFamilyName();
-        }
-
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
@@ -51,8 +43,8 @@ class UserProfileView extends AbstractView {
 
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
-            "user_given" => $autofill_preferred_name[0],
-            "user_family" => $autofill_preferred_name[1],
+            "user_given" => $user->getPreferredGivenName() ?? "",
+            "user_family" => $user->getPreferredFamilyName() ?? "",
             "user_pronouns" => $user->getPronouns(),
             "display_pronouns" => $user->getDisplayPronouns(),
             "show_change_password" => $database_authentication,
