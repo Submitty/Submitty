@@ -10,7 +10,7 @@ const no_access_message = "You don't have access to this course.";
 describe('Tests for self registering for courses', () => {
     it('Should check for visibility of self registration notification setting when self registration is allowed for a course', () => {
         cy.visit(['testing', 'notifications', 'settings']);
-        cy.get('#self-registration').should('exist');
+        cy.get('[data-testid="self-registration"]').should('exist');
     });
 
     it('Should check for non-visibility of self registration notification setting when self registration is not allowed for a course', () => {
@@ -21,7 +21,7 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
 
         cy.visit(['testing', 'notifications', 'settings']);
-        cy.get('#self-registration').should('not.exist');
+        cy.get('[data-testid="self-registration"]').should('not.exist');
     });
 
     it('Should enable self registration, and allow user to register for courses.', () => {
