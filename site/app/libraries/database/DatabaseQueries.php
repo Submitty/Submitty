@@ -1176,7 +1176,11 @@ WHERE term=? AND course=? AND user_id=?",
                 FROM courses_users INNER JOIN courses
                 ON courses_users.term = ? AND courses_users.course = ? 
                 " . $extra_join . "
-                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where, [$terms, $courses]
+                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where,
+                [
+                    $terms,
+                    $courses
+                ]
         );
         return array_map(
             function ($row) {
