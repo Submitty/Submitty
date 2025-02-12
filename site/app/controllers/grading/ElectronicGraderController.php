@@ -2178,6 +2178,31 @@ class ElectronicGraderController extends AbstractController {
         foreach ($components as $key => $value) {
             $response_data['itempool_items'][$value->getId()] = $value->getItempool() === '' ? '' : $submitter_itempool_map[$value->getItempool()];
         }
+        $graders = $graded_gradeable->getActiveGraders();
+        $timestamps = $graded_gradeable->getActiveGradersTimestamps();
+        $graders_names = $graded_gradeable->getActiveGradersNames();
+
+        if ($gradeable->hasPeerComponent() && !$this->core->getUser()->accessGrading()) {
+            // If the user is a student, we don't want to show the peer grader's name
+            $response_data['active_graders'] = [];
+            $response_data['active_graders_timestamps'] = [];
+            return $response_data;
+        }
+        // Ensure the current grader is not in the list of active graders
+        foreach ($graders as $component_id => $component_graders) {
+            if (isset($timestamps[$component_id]) && isset($graders_names[$component_id])) {
+                for ($i = 0; $i < count($component_graders); $i++) {
+                    if ($component_graders[$i] === $grader->getId()) {
+                        // Use array_splice to remove the grader from the list of active graders
+                        array_splice($graders_names[$component_id], $i, 1);
+                        array_splice($timestamps[$component_id], $i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        $response_data['active_graders'] = $graders_names;
+        $response_data['active_graders_timestamps'] = $timestamps;
 
         return $response_data;
     }
@@ -2329,6 +2354,107 @@ class ElectronicGraderController extends AbstractController {
         catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
+    }
+
+    /**
+     * @param string $gradeable_id
+     * @param string $anon_id
+     * @param string $component_id
+     * @param GradingAction $action
+     * @return JsonResponse
+     */
+    public function changeComponentGraders(string $gradeable_id, string $anon_id, string $component_id, GradingAction $action) {
+        $grader = $this->core->getUser();
+
+        // Get the gradeable
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return JsonResponse::getErrorResponse('Failed to get gradeable');
+        }
+        // Make sure that this gradeable is an electronic file gradeable
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
+            return JsonResponse::getErrorResponse('This gradeable is not an electronic file gradeable');
+        }
+        // get the component
+        $component = $this->tryGetComponent($gradeable, $component_id);
+        if ($component === false) {
+            return JsonResponse::getErrorResponse('Failed to get component');
+        }
+
+        // Get user id from the anon id
+        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        if ($submitter_id === false) {
+            return JsonResponse::getErrorResponse('Failed to get submitter id');
+        }
+
+        // Get the graded gradeable
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        if ($graded_gradeable === false) {
+            return JsonResponse::getErrorResponse('Failed to get graded gradeable');
+        }
+
+
+        // checks if user has permission
+        if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
+            return JsonResponse::getErrorResponse('Insufficient permissions to save component/marks');
+        }
+
+        $logger_params = [
+            "course_semester" => $this->core->getConfig()->getTerm(),
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "gradeable_id" => $gradeable_id,
+            "grader_id" => $this->core->getUser()->getId(),
+            "component_id" => $component_id,
+            "action" => $action === GradingAction::OPEN_COMPONENT ? "OPEN_COMPONENT" : "CLOSE_COMPONENT",
+            "submitter_id" => $submitter_id
+        ];
+        Logger::logTAGrading($logger_params);
+
+        $graders = $graded_gradeable->getActiveGraders();
+        $timestamps = $graded_gradeable->getActiveGradersTimestamps();
+        $graders_names = $graded_gradeable->getActiveGradersNames();
+        if ($action === GradingAction::OPEN_COMPONENT) {
+            $this->core->getQueries()->addComponentGrader($component, $gradeable->isTeamAssignment(), $grader->getId(), $submitter_id);
+        }
+        else {
+            $this->core->getQueries()->removeComponentGrader($component, $grader->getId(), $submitter_id);
+        }
+
+        if ($gradeable->hasPeerComponent() && !$this->core->getUser()->accessGrading()) {
+            // return empty data for peers
+            return JsonResponse::getSuccessResponse(['active_graders' => [], 'active_graders_timestamps' => []]);
+        }
+        // If there are no graders for this component, use an empty array
+        if (isset($graders[$component_id])) {
+            // Ensure the current grader is not in the list of active graders
+            for ($i = 0; $i < count($graders[$component_id]); $i++) {
+                if ($graders[$component_id][$i] === $grader->getId()) {
+                    array_splice($timestamps[$component_id], $i, 1);
+                    array_splice($graders_names[$component_id], $i, 1);
+                    break;
+                }
+            }
+        }
+
+        return JsonResponse::getSuccessResponse(['active_graders' => $graders_names, 'active_graders_timestamps' => $timestamps]);
+    }
+
+    /**
+     * @param string $gradeable_id
+     * @return JsonResponse|void
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/open_component", methods: ["POST"])]
+    public function ajaxOpenGradedComponent($gradeable_id) {
+        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::OPEN_COMPONENT);
+    }
+
+    /**
+     * @param string $gradeable_id
+     * @return JsonResponse|void
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/close_component", methods: ["POST"])]
+    public function ajaxCloseGradedComponent($gradeable_id) {
+        return $this->changeComponentGraders($gradeable_id, $_POST['anon_id'] ?? '', $_POST['component_id'] ?? '', GradingAction::CLOSE_COMPONENT);
     }
 
     public function saveGradedComponent(TaGradedGradeable $ta_graded_gradeable, GradedComponent $graded_component, User $grader, float $custom_points, string $custom_message, array $mark_ids, int $component_version, bool $overwrite) {
