@@ -1,3 +1,5 @@
+import { buildUrl } from '/cypress/support/utils.js';
+
 describe('Test Rainbow Grading', () => {
     beforeEach(() => {
         // instructor2 has access to the testing course
@@ -171,7 +173,12 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
-        cy.visit(['testing', 'reports', 'summaries']);
+
+        // Generate grade summaries
+        cy.intercept('POST', buildUrl(['testing', 'reports', 'summaries'])).as('generate-grade-summaries');
+        cy.get('[data-testid="grade-summaries-button"]').click();
+        cy.wait('@generate-grade-summaries', { timeout: 15000 });
+
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="btn-build-customization"]').click();
         cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
