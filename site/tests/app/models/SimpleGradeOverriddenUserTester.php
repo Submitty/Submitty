@@ -23,7 +23,7 @@ class SimpleGradeOverriddenUserTester extends \PHPUnit\Framework\TestCase {
         $this->userDetails = [
             'user_id' => 'id',
             'user_givenname' => 'Alexander',
-            'user_preferred_givenname' => '',
+            'user_preferred_givenname' => null,
             'user_familyname' => 'Johnson',
             'marks' => 110,
             'comment' => 'Out of this world!'
