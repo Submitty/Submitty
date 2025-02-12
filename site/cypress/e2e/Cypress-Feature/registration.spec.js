@@ -8,39 +8,17 @@ const notifiedMessage = 'Your instructor will be notified and can then choose to
 const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
-    before(() => {
-        // Testing course is on by default, but want to test unchecking and re-checking.
-        cy.login('instructor2');
-        cy.visit(['testing', 'config']);
-        cy.get('[data-testid="all-self-registration"]').uncheck();
-        cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
-        cy.get('[data-testid="default-section-id"]').select('1');
-        cy.logout();
-    });
-
     it('Should check for visibility of self registration notification setting when self registration is allowed for a course', () => {
-        // Enable self-registration
-        cy.login('instructor2');
-        cy.visit(['testing', 'config']);
-        cy.get('[data-testid="all-self-registration"]').check();
-        cy.get('[data-testid="all-self-registration"]').should('be.checked');
-        cy.get('[data-testid="default-section-id"]').select('1');
-
         cy.visit(['testing', 'notifications', 'settings']);
         cy.get('#self-registration').should('exist');
-
-        // restore to previous state
-        cy.visit(['testing', 'config']);
-        cy.get('[data-testid="all-self-registration"]').uncheck();
     });
 
     it('Should check for non-visibility of self registration notification setting when self registration is not allowed for a course', () => {
-        // Enable self-registration
+        // Disable self-registration
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').uncheck();
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
-        cy.get('[data-testid="default-section-id"]').select('1');
 
         cy.visit(['testing', 'notifications', 'settings']);
         cy.get('#self-registration').should('not.exist');
