@@ -1168,15 +1168,15 @@ WHERE term=? AND course=? AND user_id=?",
             $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
             $extra_where = ' OR users.user_access_level <= 2';
         }
-        $terms = ($term === '' ? 'courses.term' : "'$term'");
-        $courses = ($course === '' ? 'courses.course' : "'$course'");
+        $terms = ($term === '' ? 'courses.term' : $term);
+        $courses = ($course === '' ? 'courses.course' : $course);
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.term = " . $terms . " AND courses_users.course = " . $courses . "
+                ON courses_users.term = ? AND courses_users.course = ? 
                 " . $extra_join . "
-                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where, [$terms, $courses]
         );
         return array_map(
             function ($row) {
