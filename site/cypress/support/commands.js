@@ -33,7 +33,7 @@ import { buildUrl } from './utils.js';
 *
 * @param {String} [username=instructor] - username & password of who to log in as
 */
-Cypress.Commands.add('login', (username = 'instructor', password = username) => {
+Cypress.Commands.add('login', (username = 'instructor') => {
     cy.url({ decode: true }).then(($url) => {
         cy.request({
             method: 'POST',
@@ -42,7 +42,7 @@ Cypress.Commands.add('login', (username = 'instructor', password = username) => 
             followRedirect: false,
             body: {
                 user_id: username,
-                password: password,
+                password: username,
                 __csrf: username,
             },
         }).then((response) => {
