@@ -1215,7 +1215,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
     const priority = parseFloat(sortPriority);
-    const max_total_size = 10 * 1024 * 1024; // 10 MB
 
     if (priority < 0 || isNaN(priority)) {
         alert('Floating point priority must be a number greater than 0.');
@@ -1248,7 +1247,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     } // remove slash
 
     let filesToBeAdded = false;
-    let file_size = 0;
+    
     if ($('#file_selection').is(':visible')) {
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
@@ -1266,11 +1265,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
                 else if (file_array[i][j].name.indexOf('<') !== -1
                     || file_array[i][j].name.indexOf('>') !== -1) {
                     alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
-                    return;
-                }
-                file_size += file_array[i][j].size;
-                if (file_size > max_total_size) {
-                    alert(`File(s) uploaded too large. Maximum size is ${max_total_size / 1024 / 1024} mb. Uploaded file(s) was ${file_size / 1024 / 1024} mb.`);
                     return;
                 }
 

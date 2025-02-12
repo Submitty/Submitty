@@ -694,9 +694,13 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
 
-            $max_size = 10 * 1024 * 1024;
+            //Retrieve the max size allowed from the course config
+            $course_config = $this->core->getConfig()->getCourseJson();
+            $max_size_mb = $course_config['course_details']['course_materials_upload_limit_mb'] ?? 10; // Default to 10MB if not set
+            $max_size = $max_size_mb * 1024 * 1024; // Convert MB to bytes
+
             if ($file_size > $max_size) {
-                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024 / 1024) . " mb. Uploaded file(s) was " . ($file_size / 1024 / 1024) . " mb.");
+                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . number_format($max_size / 1024 / 1024, 2) . " MB. Uploaded file(s) was " . number_format($file_size / 1024 / 1024, 2) . " MB. Please contact the system administrator if you need to increase the upload limit.");
             }
 
             if (!FileUtils::createDir($upload_path)) {
