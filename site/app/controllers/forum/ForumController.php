@@ -1432,7 +1432,7 @@ class ForumController extends AbstractController {
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
-            $user = $upducks[$i]["author_user_id"];
+            $user = $upducks[$i]["user_id"];
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
