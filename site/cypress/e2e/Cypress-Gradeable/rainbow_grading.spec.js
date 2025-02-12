@@ -5,6 +5,7 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="display-rainbow-grades-summary"]').check();
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
+        cy.get('[data-testid="display-grade-summary"]').should('be.visible'); // Ensure page is loaded
         reset();
     });
     it('Add grades to numeric gradeable', () => {
@@ -237,7 +238,7 @@ const checkRainbowGradesOption = () => {
     });
 };
 const reset = () => {
-    cy.get('[data-testid="display-grade-summary"]').should('be.visible').uncheck();
+    cy.get('[data-testid="display-grade-summary"]').uncheck();
     cy.get('[data-testid="display-grade-details"]').uncheck();
     cy.get('[data-testid="display-exam-seating"]').uncheck();
     cy.get('[data-testid="display-section"]').uncheck();
