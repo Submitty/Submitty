@@ -251,12 +251,12 @@ def send_pending_notifications():
                     AND gd.g_id = gt.g_id
                 LEFT JOIN teams AS t
                     ON gt.team_id = t.team_id
-                RIGHT JOIN electronic_gradeable_data AS egd
+                LEFT JOIN electronic_gradeable_data AS egd
                     ON g.g_id = egd.g_id
                     AND COALESCE(egv.user_id, egv.team_id)
                         = COALESCE(gd.gd_user_id, gd.gd_team_id)
                     AND egv.active_version = egd.g_version
-                RIGHT JOIN gradeable_component_data AS gcd
+                LEFT JOIN gradeable_component_data AS gcd
                     ON gd.gd_id = gcd.gd_id
                     AND gc.gc_id = gcd.gc_id
                     AND (
@@ -307,8 +307,8 @@ def main():
     """Driver method to release course notifications"""
     try:
         notified = send_pending_notifications()
-        m = (f"[{datetime.datetime.now()}] Successfully released {notified} "
-             f"gradeable notification{'s' if notified != 1 else ''}")
+        m = (f"[{datetime.datetime.now()}] Successfully updated notification "
+             f"status for {notified} submission{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n")
     except Exception as notification_error:  # pylint: disable=broad-except
         m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
