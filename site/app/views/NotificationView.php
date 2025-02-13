@@ -33,7 +33,7 @@ class NotificationView extends AbstractView {
             'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings']),
             'self_registration_type' => $self_registration_type,
             'access_full_grading' => $this->core->getUser()->accessFullGrading(),
-            'is_self_registration' => !ConfigurationController::NO_SELF_REGISTER
+            'is_self_registration' => $self_registration_type !== ConfigurationController::NO_SELF_REGISTER
         ]);
     }
 }
