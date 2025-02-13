@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 SUBMITTY_INSTALL_DIR=$1
 OUTPUT_FILE=$2
 
