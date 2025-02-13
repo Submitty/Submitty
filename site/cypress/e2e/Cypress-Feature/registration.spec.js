@@ -26,6 +26,7 @@ describe('Tests for self registering for courses', () => {
 
         cy.visit(['testing', 'notifications', 'settings']);
         cy.get('[data-testid="self-registration"]').should('exist');
+        cy.logout();
     });
 
     it('Should enable self registration, and allow user to register for courses.', () => {
