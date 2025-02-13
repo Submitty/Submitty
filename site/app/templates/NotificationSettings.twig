@@ -288,7 +288,7 @@
                 {% endif %}
             </div>
         
-            {% if access_full_grading and self_registration_type == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
+            {% if access_full_grading and is_self_registration %}
                 <div class="heading">
                     <h2>Registration</h2>
                     <hr>
@@ -304,14 +304,6 @@
                     <div 
                         class="option-input col-md-3 notification-setting-input"
                     >
-                            <input 
-                                type="checkbox" 
-                                aria-label="Notification All New Self Registrations" 
-                                name="self_registration" 
-                                data-testid="self-registration"
-                                id="self-registration" 
-                                disabled
-                            >
                     </div>
                     {% if email_enabled %}
                         <div 
