@@ -175,7 +175,7 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-benchmarks-perfect"]').check();
 
         // Generate grade summaries
-        cy.intercept('POST', buildUrl(['testing', 'reports', 'summaries'])).as('generate-grade-summaries');
+        cy.intercept('GET', buildUrl(['testing', 'reports', 'summaries'])).as('generate-grade-summaries');
         cy.get('[data-testid="grade-summaries-button"]').click();
         cy.wait('@generate-grade-summaries', { timeout: 30000 });
 
