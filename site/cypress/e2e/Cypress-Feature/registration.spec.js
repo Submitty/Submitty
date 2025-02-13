@@ -8,7 +8,7 @@ const notifiedMessage = 'Your instructor will be notified and can then choose to
 const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
-    before(() => {
+    beforeEach(() => {
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').uncheck();
