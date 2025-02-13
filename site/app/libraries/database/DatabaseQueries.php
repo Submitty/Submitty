@@ -6837,7 +6837,6 @@ AND gc_id IN (
                     WHERE g_id=?",
                     $params
                 );
-
                 // Below params contain grading interface panels
                 $params = [
                     $gradeable->getId(),
