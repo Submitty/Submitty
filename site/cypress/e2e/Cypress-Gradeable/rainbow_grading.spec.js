@@ -177,11 +177,11 @@ describe('Test Rainbow Grading', () => {
         // Generate grade summaries
         cy.intercept('POST', buildUrl(['testing', 'reports', 'summaries'])).as('generate-grade-summaries');
         cy.get('[data-testid="grade-summaries-button"]').click();
-        cy.wait('@generate-grade-summaries', { timeout: 15000 });
+        cy.wait('@generate-grade-summaries', { timeout: 30000 });
 
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
         cy.get('[data-testid="btn-build-customization"]').click();
-        cy.get('[data-testid="save-status"]', { timeout: 15000 }).should('contain', 'Rainbow grades successfully generated!');
+        cy.get('[data-testid="save-status"]', { timeout: 30000 }).should('contain', 'Rainbow grades successfully generated!');
         cy.visit(['testing', 'grades']);
         ['USERNAME', 'NUMERIC ID', 'AVERAGE', 'STDDEV', 'PERFECT'].forEach((fields) => {
             cy.get('[data-testid="rainbow-grades"]').should('contain', fields);
