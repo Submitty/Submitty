@@ -3,12 +3,7 @@
         <div class="{{ thread.class }}">
             <div class="flex-row"  data-testid="flex-row">
                 <span class="thread-left-cont">
-                    <span class="thread-list-item" data-testid="thread-list-item">
-                        {% if thread.current_user_posted %}
-                            <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
-                        {% endif %}
-                        {{ thread.title }}
-                    </span>
+                    <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
                     <span class="thread-content">{{ thread.content }}</span>
 
                     <span class="thread-info-bar">
@@ -18,18 +13,7 @@
 
                         {% if is_full_page is not defined or not is_full_page %}
                             <span class="post-cont">
-                                <i
-                                    class="post-count text-decoration-none" 
-                                    style="margin-right: 8px;" 
-                                    title="Total posts">
-                                    <img 
-                                        id="ThreadPostIcon_{{thread.thread_id}}"
-                                        src="{{'/img/post-icon.svg'}}"
-                                        alt="post-icon"
-                                        width="18"
-                                        height="18"
-                                    >
-                                </i>
+                                <i class="fas fa-comments" style="position: relative; top: 2px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
                                 <span data-testid="thread-post-count"
                                     id="Thread_postCounter_{{thread.thread_id}}"
                                     class="thread-post-counter">
@@ -90,18 +74,7 @@
                         style="margin-right: 25px;">
                         {{ thread.sum_ducks }}
                     </span>
-                    <i
-                        class="post-count text-decoration-none" 
-                        style="margin-right: 8px;" 
-                        title="Total posts">
-                        <img 
-                            id="ThreadPostIcon_{{thread.thread_id}}"
-                            src="{{'/img/post-icon.svg'}}"
-                            alt="post-icon"
-                            width="18"
-                            height="18"
-                        >
-                    </i>
+                    <i class="fas fa-comments" style="position: relative; top: -2px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
                     <span data-testid="thread-post-count"
                         id="Thread_postCounter_{{thread.thread_id}}"
                         class="thread-post-counter">
