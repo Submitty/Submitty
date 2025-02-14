@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget displayBigBanner */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
@@ -318,6 +318,37 @@ function newUploadBanner() {
     $('[name="upload"]', form).val(null);
 }
 
+function displayBigBanner(imageSrc, link = null) {
+    $('.popup-form').css('display', 'none');
+    const form = $('#enlarged-banner');
+    console.log(imageSrc);
+    $('#big-banner').attr('src', `data:image/png;base64,${imageSrc}`);
+    if (link && link.length > 0) {
+        $('#big-banner-link').attr('href', link);
+    }
+
+    form.css('display', 'block');
+    captureTabInModal('enlarged-banner');
+    form.find('.form-body').scrollTop(0);
+}
+
+function newUploadSVG() {
+    createArray(1);
+    const files = [];
+    $('.popup-form').css('display', 'none');
+    const form = $('#upload-svg');
+
+    $('[name="existing-file-list"]', form).html('');
+
+    const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
+    $('[name="existing-file-list"]', form).append(stringifiedFiles);
+
+    form.css('display', 'block');
+    captureTabInModal('upload-svg');
+    form.find('.form-body').scrollTop(0);
+    $('[name="upload"]', form).val(null);
+}
+
 function newEditCourseMaterialsFolderForm(tag) {
     const id = $(tag).data('id');
     const dir = $(tag).data('priority');
@@ -532,7 +563,7 @@ function captureTabInModal(formName, resetFocus = true) {
             e.preventDefault();
         }
     });
-
+    console.log(form);
     // Watch for the modal to be hidden
     const observer = new MutationObserver(() => {
         if (form[0].style.display === 'none') {
