@@ -14,12 +14,12 @@ def up(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+def up(config, database, semester, course):
     database.execute("""
         ALTER TABLE public.course_materials
-        ADD COLUMN IF NOT EXISTS on_calendar BOOLEAN DEFAULT false,
-        ADD COLUMN IF NOT EXISTS calendar_date BOOLEAN DEFAULT None, 
-        ADD COLUMN IF NOT EXISTS gradeable VARCHAR(255) DEFAULT 'none';
+        ADD COLUMN IF NOT EXISTS calendar_date TIMESTAMP DEFAULT NULL;
     """)
+
 
 
 

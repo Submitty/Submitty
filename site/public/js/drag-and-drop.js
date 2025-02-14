@@ -1210,7 +1210,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all, calendarMenu) {
     const submit_url = buildCourseUrl(['course_materials', 'upload']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1221,8 +1221,13 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         return;
     }
 
-    formData.append('calenderMenu', calenderMenu);
-    formData.append('gradeableInputValue', gradeableInputValue);
+
+    formData.append('calendar_display', calendarMenu.calendar_display);
+    formData.append('associated_date', calendarMenu.associated_date);
+    formData.append('greadable_chosen', calendarMenu.gradeable_chosen);
+
+
+
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);
@@ -1351,10 +1356,14 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
-    formData.append('calenderMenu', calenderMenu);
+    console.log(calendarMenu);
+    formData.append('calenderMenu', calendarMenu);
 
 
     const priority = parseFloat(sortPriority);
+
+    formData.append('calendar_display', calendarMenu.calendar_display);
+    formData.append('associated_date', calendarMenu.associated_date);
 
     if (priority < 0 || isNaN(priority)) {
         alert('Floating point priority must be a number greater than 0.');

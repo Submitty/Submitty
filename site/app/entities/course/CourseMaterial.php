@@ -45,8 +45,12 @@ class CourseMaterial {
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $on_calendar;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $gradeable;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $gradeable = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $calendar_date = null;
+    
 
     /**
      * @var Collection<CourseMaterialAccess>
@@ -105,7 +109,7 @@ class CourseMaterial {
      * @param ?string $last_edit_by The user ID of the last person who edited the course material.
      * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
      */
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalender, ?string $gradeableName, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalendar, ?string $gradeableName, ?Datetime $calendarTime, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -114,8 +118,10 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
-        $this->on_calendar = $onCalender ?? false;
-        $this->gradeable = $gradeableName ?? 'none';
+
+        $this->setGradeable($gradeableName);
+        $this->setCalendarDate($calendar_date);
+        $this->setOnCalendar($onCalendar);
         $this->uploaded_by = $uploaded_by;
         $this->uploaded_date = $uploaded_date;
         $this->last_edit_by = $last_edit_by;
@@ -194,7 +200,19 @@ class CourseMaterial {
         return $this->on_calendar;
     }
 
-    public function getGradeable(): string {
+    public function setOnCalendar(bool $val) {
+        if (!$val) {
+            $this->gradeable = null;
+            $this->calendar_date = null;
+        }
+        $this->on_calendar = $val;
+    }
+    
+    public function setCalendarDate(?\DateTime $calendar_date): void {
+        $this->calendar_date = $calendar_date;
+    }
+
+    public function getGradeable(): ?string {
         return $this->gradeable;
     }
 

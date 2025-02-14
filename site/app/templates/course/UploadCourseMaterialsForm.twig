@@ -127,8 +127,8 @@
 
 
     <script>    
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue);
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -136,24 +136,29 @@
 
 
 
-                let calendarDisplay = 'none';
-                let associatedDate = 'none';
-                let gradeableChosen = 'none';
-
-
                 let container = document.getElementById('3');
+
+                let calendarMenu = {
+                    calendar_display: 'none',
+                    associated_date: 'none',
+                    gradeable_chosen: 'none'
+                };
+
                 if (container) {
-                    let showMenua = container.querySelector('#show-menu');
-                    if (showMenua) {
-                        calendarDisplay = container.querySelector('#show-menu').value;
-                        associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
-                        gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                    let showMenu = container.querySelector('#show-menu');
+                    if (showMenu) {
+                        calendarMenu.calendar_display = showMenu.value;
+                        if (showMenu.value === 'date') {
+                            calendarMenu.associated_date = container.querySelector('#associated-date')?.value || 'none';
+                        } else if (showMenu.value === 'gradeable') {
+                            calendarMenu.gradeable_chosen = container.querySelector('#gradeable-select')?.value || 'none';
+                        }
                     }
                 }
 
+                console.log(calendarMenu);
 
 
-                var gradeableInputValue = document.getElementById('gradeable-select').value;
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var sort = document.getElementById("upload_sort").value;
@@ -184,7 +189,7 @@
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calenderMenu, gradeableInputValue);
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu);
                 }
                 else {
                     alert("Select at least one section");

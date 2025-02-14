@@ -362,7 +362,13 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
-        return JsonResponse::getErrorResponse("here");
+
+
+        $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
+
+        $associated_date = $_POST['associated_date'] != 'none' ? $_POST['associated_date'] : null;
+        
+
         $id = $_POST['id'] ?? '';
         if ($id === '') {
             return JsonResponse::getErrorResponse("Id cannot be empty");
@@ -571,15 +577,13 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
-        $on_calendar = false;
-        if (isset($_POST['calenderMenu'])) {
-            $on_calendar = $_POST['calenderMenu'];
-        }
 
-        $connected_gradeable = 'none';
-        if (isset($_POST['gradeableInputValue'])) {
-            $connected_gradeable = $_POST['gradeableInputValue'];
-        }
+
+
+        $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
+
+        $associated_date = $_POST['associated_date'];
+        
 
         $details = [];
         $expand_zip = "";
@@ -884,7 +888,7 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 $on_calendar,
-                $connected_gradeable,
+                $connected_gradeable, //remove this
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,

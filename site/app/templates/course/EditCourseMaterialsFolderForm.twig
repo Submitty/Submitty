@@ -76,33 +76,31 @@
         "current_gradeable" : current_gradeable,
     } only %}
     <script>
-            var showMenu = document.getElementById('show-menu');
-
-            showMenu.addEventListener('change', function () {
-                var showMenu = document.getElementById('show-menu');
-                console.log('Showing On Calendar:', showMenu.value);
-            });
-                console.log('ShowingING On Calendar:', showMenu.value);
-
-                if (showMenu == null) console.log("aw");
         function submitFolderEdit(fullUpdate){ // Submit button
 
 
-
-            let calendarDisplay = 'none';
-            let associatedDate = 'none';
-            let gradeableChosen = 'none';
-
-
             let container = document.getElementById('2');
+
+            let calendarMenu = {
+                calendar_display: 'none',
+                associated_date: 'none',
+                gradeable_chosen: 'none'
+            };
+
             if (container) {
-                let showMenua = container.querySelector('#show-menu');
-                if (showMenua) {
-                    calendarDisplay = container.querySelector('#show-menu').value;
-                    associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
-                    gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                let showMenu = container.querySelector('#show-menu');
+                if (showMenu) {
+                    calendarMenu.calendar_display = showMenu.value;
+                    if (showMenu.value === 'date') {
+                        calendarMenu.associated_date = container.querySelector('#associated-date')?.value || 'none';
+                    } else if (showMenu.value === 'gradeable') {
+                        calendarMenu.gradeable_chosen = container.querySelector('#gradeable-select')?.value || 'none';
+                    }
                 }
             }
+
+            console.log("ca", calendarMenu);
+
 
         
             let sectionsEdit = [];
@@ -138,7 +136,7 @@
                 sectionsEdit = null;
                 partialSections = null;
             }
-            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null);
+            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null, calendarMenu);
         };
 
         function enableFullUpdate() {
