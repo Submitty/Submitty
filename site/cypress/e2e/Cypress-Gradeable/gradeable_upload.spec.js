@@ -1,7 +1,22 @@
 import { getCurrentSemester } from '../../support/utils';
 import { getApiKey } from '../../support/utils';
-describe('Tests cases revolving around gradeable access and submition', () => {
+import { gradeable_json, rubric } from '../../support/api_testing_json';
+describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
+        // // API
+        getApiKey('instructor', 'instructor').then((key) => {
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: gradeable_json,
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.status).to.eql('success');
+            });
+        });
+
         cy.login('instructor');
 
         const testfile1 = 'cypress/fixtures/json_ui.json';
@@ -21,6 +36,22 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
         cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
+
+        cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
+        cy.get('body').should('contain.text', 'Edit Gradeable');
+        cy.get('[data-testid="download-gradeable-btn"]').click();
+
+        cy.readFile('cypress/downloads/api_testing.json').then((test_json) => {
+            expect(test_json.title).to.eql('API Testing');
+            expect(test_json.type).to.eql('Electronic File');
+            expect(test_json.id).to.eql('api_testing');
+            expect(test_json.instructions_url).to.eql('');
+            expect(test_json.syllabus_bucket).to.eql('homework');
+            expect(test_json.bulk_upload).to.eql(false);
+            expect(test_json.ta_grading).to.eql(true);
+            expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.rubric).to.eql(rubric);
+        });
     });
 
     it('Should get error JSON responses', () => {
