@@ -362,6 +362,7 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
+        return JsonResponse::getErrorResponse("here");
         $id = $_POST['id'] ?? '';
         if ($id === '') {
             return JsonResponse::getErrorResponse("Id cannot be empty");
