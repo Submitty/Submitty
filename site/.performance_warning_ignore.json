@@ -27,6 +27,7 @@
   "/courses/<term>/<course>/forum/threads/merge",
   "/courses/<term>/<course>/forum/posts/new",
   "/courses/<term>/<course>/forum/posts/modify",
+  "/courses/<term>/<course>/forum/posts/delete",
   "/courses/<term>/<course>/forum/stats",
   "/courses/<term>/<course>/sections",
   "/courses/<term>/<course>/plagiarism/configuration/new",
