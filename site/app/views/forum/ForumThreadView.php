@@ -4,7 +4,6 @@ namespace app\views\forum;
 
 use app\entities\forum\Category;
 use app\libraries\DateUtils;
-use app\repositories\forum\CategoryRepository;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
