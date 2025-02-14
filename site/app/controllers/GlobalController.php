@@ -653,7 +653,7 @@ class GlobalController extends AbstractController {
             case 4:
                 // April
                 $aprilImages = [];
-                if($day<=1){
+                if($day==1){
                     //April Fool's day Duck
                     $aprilImages[] = 'moorthy_duck\01-april.svg';
                 }
