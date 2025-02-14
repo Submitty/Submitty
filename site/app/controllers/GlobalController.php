@@ -653,8 +653,12 @@ class GlobalController extends AbstractController {
             case 4:
                 // April
                 $aprilImages = [];
-                // Eid-al-Fitr 2025
+                if($day<=1){
+                    //April Fool's day Duck
+                    $aprilImages[] = 'moorthy_duck\01-april.svg';
+                }
                 if ($day <= 2) {
+                    // Eid-al-Fitr 2025
                     $aprilImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
                 }
                 if ($day <= 3) {
