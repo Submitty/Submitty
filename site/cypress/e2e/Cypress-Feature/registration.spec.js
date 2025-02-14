@@ -13,9 +13,11 @@ describe('Tests for self registering for courses', () => {
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').uncheck();
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
+        cy.logout();
     });
 
     it('Should check for visibility of self registration notification option', () => {
+        cy.login('instructor2');
         cy.visit(['testing', 'notifications', 'settings']);
         cy.get('[data-testid="self-registration"]').should('not.exist');
 
