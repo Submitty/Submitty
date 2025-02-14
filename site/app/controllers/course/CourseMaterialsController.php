@@ -670,6 +670,16 @@ class CourseMaterialsController extends AbstractController {
                 );
             }
             $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
+
+            // Define max path length
+            define('MAX_PATH_LENGTH', 255);
+            // Ensure the key exists before checking the path length
+            if (isset($details['path'][0]) && strlen($details['path'][0]) > MAX_PATH_LENGTH) {
+                $excess_length = strlen($details['path'][0]) - MAX_PATH_LENGTH;
+                // Return an error response to the user
+                return JsonResponse::getErrorResponse("Error: The file title is too long. Please reduce it by " . $excess_length . " characters.");
+            }
+
             FileUtils::writeFile($details['path'][0], "");
         }
         else {
