@@ -79,6 +79,17 @@
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
+    <hr>
+
+{% embed "course/CourseMaterialsCalendarMenu.twig" with {
+    "div_class": 'edit-cm-file-cal-menu',
+    "div_id": '1',
+    "gradeables" : gradeables,
+    "current_gradeable" : current_gradeable,
+} only %}
+{% endembed %}
+
+
     <script>
         function submitEdit(){ // Submit button
                 let sectionsEdit = [];
@@ -103,12 +114,36 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all-sections-showing-no").is(':checked') == true){
                     sectionsEdit = null;
                 }
+
+
+                let calendarDisplay = 'none';
+                let associatedDate = 'none';
+                let gradeableChosen = 'none';
+
+
+                let container = document.getElementById('1');
+                if (container) {
+                    let showMenua = container.querySelector('#show-menu');
+                    if (showMenua) {
+                        calendarDisplay = container.querySelector('#show-menu').value;
+                        associatedDate = calendarDisplay === 'date' ? container.querySelector('#associated-date').value : 'none';
+                        gradeableChosen = calendarDisplay === 'gradeable' ? container.querySelector('#gradeable-select').value : 'none';
+                    }
+                }
+                console.log(calendarDisplay);
+                console.log(associatedDate);
+                console.log(gradeableChosen);
+
+
+                return;
+
                 let title = document.getElementById("edit-title").value;
                 let url_url = document.getElementById("edit-url-url");
                 let url_url_val = url_url.disabled ? null : url_url.value;
                 let file_path = document.getElementById("new-file-name").value;
                 let overwrite = false;
                 let overwrite_elem = $('#overwrite-submit');
+
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }

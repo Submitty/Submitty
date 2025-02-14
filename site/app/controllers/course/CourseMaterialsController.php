@@ -506,6 +506,7 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->getPriority(),
                                     null,
                                     null,
+                                    false,
                                     $course_material->getUploadedBy(),
                                     $course_material->getUploadedDate(),
                                     null,
@@ -569,6 +570,16 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
+        $on_calendar = false;
+        if (isset($_POST['calenderMenu'])) {
+            $on_calendar = $_POST['calenderMenu'];
+        }
+
+        $connected_gradeable = 'none';
+        if (isset($_POST['gradeableInputValue'])) {
+            $connected_gradeable = $_POST['gradeableInputValue'];
+        }
+
         $details = [];
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
@@ -871,6 +882,8 @@ class CourseMaterialsController extends AbstractController {
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
+                $on_calendar,
+                $connected_gradeable,
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,
