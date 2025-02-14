@@ -49,5 +49,6 @@
   "/courses/<term>/<course>/queue/student_search",
   "/courses/<term>/<course>/register",
   "/courses/<term>/<course>/gradeable/<gradeable>/components/marks/save_order",
+  "/courses/<term>/<course>/reports/summaries",
   "/courses/<term>/<course>/gradeable/<gradeable>/grading/csv"
 ]
