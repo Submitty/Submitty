@@ -12,7 +12,6 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
-use app\libraries\Utils;
 use app\entities\course\CourseMaterial;
 use app\repositories\course\CourseMaterialRepository;
 use app\views\course\CourseMaterialsView;
@@ -695,9 +694,13 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
 
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            //Retrieve the max size allowed from the course config
+            $course_config = $this->core->getConfig()->getCourseJson();
+            $max_size_mb = $course_config['course_details']['course_materials_upload_limit_mb'] ?? 10; // Default to 10MB if not set
+            $max_size = $max_size_mb * 1024 * 1024; // Convert MB to bytes
+
             if ($file_size > $max_size) {
-                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
+                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . number_format($max_size / 1024 / 1024, 2) . " MB. Uploaded file(s) was " . number_format($file_size / 1024 / 1024, 2) . " MB. Please contact the system administrator if you need to increase the upload limit.");
             }
 
             if (!FileUtils::createDir($upload_path)) {
@@ -751,7 +754,6 @@ class CourseMaterialsController extends AbstractController {
                             if (!$res) {
                                 return JsonResponse::getErrorResponse("Failed to open zip archive");
                             }
-
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];
