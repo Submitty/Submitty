@@ -54,6 +54,11 @@ class Job:
                 self.config.logger.log_stack_trace(
                     traceback.format_exc(),
                 )
+                # We apparently have a race condition where the queue
+                # file is incomplete and we fail to load the object
+                # file.  See also note in _assign_jobs.  Failure to
+                # load the file means that the job cannot be sorted or
+                # assigned to a worker.
                 return False
         # The queue object was either already loaded or was successfully loaded, so return True.
         return True
@@ -190,8 +195,12 @@ class FCFSScheduler(BaseScheduler):
     def __init__(self, config: Config, workers: List[Worker]):
         super().__init__(config, workers)
 
-    def _assign_jobs(self, jobs: List[Job]):
+    def _assign_jobs(self, jobs_with_None: List[Job]):
         idle_workers = [worker for worker in self.workers if worker.is_idle()]
+
+        # _try_load_queue_object returns a None queue_obj when there is a
+        # json parsing error.  Remove those jobs before sorting.
+        jobs = [item for item in jobs_with_None if item.queue_obj is not None]
 
         # sort jobs by priority
         # 1. VCS gradeable that has not yet been checked out
