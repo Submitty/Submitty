@@ -311,8 +311,8 @@
     /* discussion forum */
     --attachment-box-color: #4a4a4a;
     --file-upload-table-hover: #4a4a4a;
-    --deleted-discussion-post-grey: #36454f;
-    --deleted-and-unviewed-thread: #435060;
+    --deleted-discussion-post-grey: #283E57;
+    --deleted-and-unviewed-thread: #3E5F7A;
 
     /* these differ from the colors on the posts for some reason?
           so I will put them here for reference
