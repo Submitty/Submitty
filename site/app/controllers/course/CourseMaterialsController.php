@@ -468,6 +468,14 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
+                if (strlen($file_name) > 255) {
+                    $excess_chars = strlen($file_name) - 255;
+                    return JsonResponse::getErrorResponse("Filename cannot have a string length of more than 255 chars. You need to remove $excess_chars characters.");
+                }
+                if (strlen($new_path) > 255) {
+                    $excess_chars = strlen($new_path) - 255;
+                    return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars. You need to remove $excess_chars characters.");
+                }
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
                     $requested_path_directories = $requested_path;
