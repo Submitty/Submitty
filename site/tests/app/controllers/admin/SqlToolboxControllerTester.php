@@ -101,8 +101,44 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $response = $this->controller->runQuery();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $expected = [
+                'status' => 'success',
+                'data' => [
+                    'results' => $testData,
+                    'message' => 'Showing 2 of 2 total rows.'
+                ]
+            ];
+        $this->assertSame($expected, $response->json);
+    }
+
+    public function testRunQueryTruncated(): void {
+        $this->setUpDatabase();
+
+        $allData = [];
+        for ($i = 1; $i <= 1500; $i++) {
+            $allData[] = [$i, "Person {$i}", "submitty{$i}@example.com"];
+        }
+
+        $expectedData = array_slice($allData, 0, 1000);
+
+        $courseDb = $this->core->getCourseDB();
+        $courseDb
+            ->expects($this->once())
+            ->method('query')
+            ->with('SELECT * FROM foo;');
+        $courseDb
+            ->expects($this->once())
+            ->method('rows')
+            ->willReturn($allData);
+        $_POST['sql'] = ' SELECT * FROM foo; ';
+
+        $response = $this->controller->runQuery();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $expected = [
             'status' => 'success',
-            'data' => $testData,
+            'data' => [
+                'results' => $expectedData,
+                'message' => 'Output was truncated. Showing 1000 of 1500 total rows.'
+            ]
         ];
         $this->assertSame($expected, $response->json);
     }
@@ -155,7 +191,6 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         /** @var \app\libraries\database\AbstractDatabase&\PHPUnit\Framework\MockObject\MockObject */
         $courseDb = $this->core->getCourseDB();
         $courseDb->expects($this->once())->method('query')->with('SELECT * FROM INVALID')->willThrowException(new DatabaseException('foo'));
-
         $response = $this->controller->runQuery();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertSame($expected, $response->json);
