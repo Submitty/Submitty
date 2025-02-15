@@ -25,7 +25,7 @@ try:
         if USER_DATA["daemon_user"] != getpass.getuser():
             raise RuntimeError("- script must be run by the daemon user")
 
-    # Retrieve core submitty and database configurations
+    # Retrieve submitty database configurations
     with open(os.path.join(CONFIG_PATH, "submitty.json"),
               encoding="utf-8") as open_file:
         SUBMITTY_CONFIG = json.load(open_file)
@@ -103,10 +103,11 @@ def construct_notifications(term, course, pending):
         gradeable = {
             "id": notification[0],
             "title": notification[1],
-            "user_id": notification[2],
-            "user_email": notification[3],
-            "general": notification[4],
-            "email": notification[5]
+            "team_id": notification[2],
+            "user_id": notification[3],
+            "user_email": notification[4],
+            "general": notification[5],
+            "email": notification[6]
         }
 
         # Metadata-related content
@@ -144,14 +145,17 @@ def construct_notifications(term, course, pending):
                 f"'{term}', '{course}')"
             )
 
-        gradeables.append(f"('{gradeable['id']}', '{gradeable['user_id']}')")
+        gradeables.append(
+            f"('{gradeable['id']}', "
+            f"'{gradeable['team_id'] or gradeable['user_id']}')"
+        )
 
     return gradeables, general, email
 
 
 def send_notifications(course, course_db, master_db, lists):
     """Send pending gradeable notifications for the current course."""
-    notified, general, email = lists
+    gradeables, general, email = lists
     timestamp = str(datetime.datetime.now())
 
     try:
@@ -174,12 +178,14 @@ def send_notifications(course, course_db, master_db, lists):
             master_db.commit()
 
         # Update all successfully sent notifications for current course
-        if len(notified) > 0:
+        if len(gradeables) > 0:
+            values = ", ".join(gradeables)
             course_db.execute(
                 f"""
                 UPDATE electronic_gradeable_version
                 SET g_notification_sent = TRUE
-                WHERE (g_id, user_id) IN ({", ".join(notified)});
+                WHERE (g_id, user_id) IN ({values})
+                OR (g_id, team_id) IN ({values});
                 """
             )
             course_db.commit()
@@ -188,7 +194,7 @@ def send_notifications(course, course_db, master_db, lists):
         master_db.flush()
 
         m = (f"[{timestamp}] ({course}): Released {len(general)} general, "
-             f" {len(email)} email notifications\n")
+             f"{len(email)} email\n")
         LOG_FILE.write(m)
     except Exception as notification_error:  # pylint: disable=broad-except
         # Rollback the changes if an error occurs
@@ -218,6 +224,7 @@ def send_pending_notifications():
                 SELECT
                     g.g_id AS g_id,
                     g.g_title AS g_title,
+                    t.team_id AS team_id,
                     egv.active_version as egv_active_version,
                     gcd.gcd_graded_version AS gcd_graded_version,
                     COALESCE(egv.user_id, t.user_id) AS user_id,
@@ -234,12 +241,12 @@ def send_pending_notifications():
                 FROM gradeable AS g
                 INNER JOIN electronic_gradeable AS eg
                     ON g.g_id = eg.g_id
-                    AND eg.eg_student_view = TRUE
+                    AND eg.eg_student_view IS TRUE
                     AND g.g_grade_released_date <= NOW()
                 INNER JOIN electronic_gradeable_version AS egv
                     ON g.g_id = egv.g_id
                     AND egv.active_version != '0'
-                    AND egv.g_notification_sent = FALSE
+                    AND egv.g_notification_sent IS FALSE
                 INNER JOIN gradeable_component AS gc
                     ON g.g_id = gc.g_id
                 INNER JOIN gradeable_data AS gd
@@ -260,14 +267,15 @@ def send_pending_notifications():
                     ON gd.gd_id = gcd.gd_id
                     AND gc.gc_id = gcd.gc_id
                     AND (
-                        eg.eg_use_ta_grading = FALSE
+                        eg.eg_use_ta_grading IS FALSE
                         OR gcd.gcd_graded_version IS NOT NULL
                     )
             )
             SELECT DISTINCT
                 g_id,
                 g_title,
-                gradeables.user_id,
+                team_id,
+                u.user_id,
                 u.user_email AS user_email,
                 ns.all_released_grades AS general_enabled,
                 ns.all_released_grades_email AS email_enabled
@@ -277,15 +285,15 @@ def send_pending_notifications():
             LEFT JOIN notification_settings AS ns
                 ON gradeables.user_id = ns.user_id
             WHERE (
-                (eg_use_ta_grading = FALSE AND autograding_complete = TRUE)
+                (eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE)
                 OR
                 (graded_components = total_components)
             ) AND u.user_id IS NOT NULL
-            GROUP BY g_id, g_title, gcd_graded_version, egv_active_version,
-                eg_use_ta_grading, gradeables.user_id, u.user_email,
-                ns.all_released_grades, ns.all_released_grades_email
+            GROUP BY g_id, g_title, team_id, u.user_id, u.user_email,
+                ns.all_released_grades, ns.all_released_grades_email,
+                eg_use_ta_grading, gcd_graded_version, egv_active_version
             HAVING (
-                eg_use_ta_grading = FALSE
+                eg_use_ta_grading IS FALSE
                 OR
                 egv_active_version = gcd_graded_version
             );
