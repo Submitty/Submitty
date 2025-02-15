@@ -1596,11 +1596,24 @@ function openFrame(html_file, url_file, num, pdf_full_panel = true, panel = 'sub
         else if (url_file.includes('attachments')) {
             directory = 'attachments';
         }
+        function isNotRenderable(fileName) {
+            const fileExtension = fileName.split('.').pop();
+            if(fileExtension == fileName) return false;
+            const notSupportedExtensions = ['pptx', 'ppt', 'docx', 'doc', 'xlsx', 'xls', 'zip', 'rar', '7z'];
+            return notSupportedExtensions.includes(fileExtension);
+        }
         // handle pdf
         if (pdf_full_panel && url_file.substring(url_file.length - 3) === 'pdf') {
             viewFileFullPanel(html_file, url_file, 0, panel).then(() => {
                 loadPDFToolbar();
             });
+        }
+        else if (isNotRenderable(url_file)) {
+            const frameHtml = `
+                This file type is not supported for rendering. Please download the file and view it on your local machine.
+            `;
+            iframe.html(frameHtml);
+            iframe.addClass('open');
         }
         else {
             const forceFull = url_file.substring(url_file.length - 3) === 'pdf' ? 500 : -1;
