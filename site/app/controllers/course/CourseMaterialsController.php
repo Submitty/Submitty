@@ -478,7 +478,7 @@ class CourseMaterialsController extends AbstractController {
                     $excess_length = strlen($file_name) - MAX_PATH_LENGTH;
                     return JsonResponse::getErrorResponse("Error: The new file name is too long. Please reduce it by {$excess_length} characters.");
                 }
-                
+
                 $requested_path = explode("/", $requested_path);
                 if (count($requested_path) > 1) {
                     $requested_path_directories = $requested_path;
