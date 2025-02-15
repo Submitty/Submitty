@@ -5745,6 +5745,14 @@ AND gc_id IN (
         ", [$gradeable->getId()]);
     }
 
+    public function resetGradeableNotifications(Gradeable $gradeable): void {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET g_notification_sent = FALSE
+            WHERE g_id = ?;
+        ", [$gradeable->getId()]);
+    }
+
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -5865,7 +5873,8 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
-              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
+              (SELECT EXISTS (SELECT 1 FROM electronic_gradeable_version WHERE g_id = g.g_id AND g_notification_sent IS TRUE)) AS notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT

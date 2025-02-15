@@ -244,6 +244,20 @@ $(document).ready(() => {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
+
+        // Ask instructors if they wish to resend notifications due to a future release date with existing notifications
+        const notifications = document.querySelector('#container-rubric').dataset.notification_sent === '1';
+        const released_date = document.querySelector('#date_released');
+
+        if (notifications && released_date) {
+            const now = new Date();
+            const update = new Date(released_date.value);
+
+            if (notifications && update >= now) {
+                data['notifications_sent'] = confirm('Notifications have already been sent to students. Do you want to resend notifications?') !== true;
+            }
+        }
+
         // Redundant to send this data
         delete data.peer_panel;
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
