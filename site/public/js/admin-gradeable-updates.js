@@ -10,11 +10,11 @@ let previous_gradeable = '';
 let gradeable = '';
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
-        $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        $('#save_status').text('Some Changes Failed!').css('color', 'red');
     }
     else {
         if (updateInProgressCount === 0) {
-            $('#save_status').html('All Changes Saved');
+            $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
         }
     }
 }
@@ -54,7 +54,7 @@ function clearError(name, update) {
 }
 
 function setGradeableUpdateInProgress() {
-    $('#save_status').html('Saving...');
+    $('#save_status').text('Saving...').css('color', 'var(--text-black)');
     updateInProgressCount++;
 }
 
@@ -469,7 +469,7 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
                 confirm('Do you Want to go with ALL grade ALL?');
             }
             if (res.data === 'Clear Peer Matrix') {
-                $('#save_status').html('Peer Matrix Cleared');
+                $('#save_status').text('Peer Matrix Cleared').css('color', 'var(--text-black)');
             }
             setGradeableUpdateComplete();
             $('#peer_loader').addClass('hide');
@@ -506,7 +506,7 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
 }
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     if ('peer_graders_list' in p_values && $('#peer_graders_list').length) {
-        $('#save_status').html('Saving Changes');
+        $('#save_status').text('Saving Changes').css('color', 'var(--text-black)');
         const csvFile = $('#peer_graders_list').prop('files')[0];
         const reader = new FileReader();
         reader.readAsText(csvFile);
@@ -573,29 +573,29 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                         }
                         setGradeableUpdateComplete();
                         if (response.status === 'success') {
-                            $('#save_status').html('All Changes Saved');
+                            $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
                             successCallback(response.data);
                         }
                         else if (response.status === 'fail') {
-                            $('#save_status').html('Error Saving Changes');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             errorCallback(response.message, response.data);
                         }
                         else {
                             alert('Internal server error');
-                            $('#save_status').html('Error Saving Changes');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             console.error(response.message);
                         }
                         location.reload();
                     },
                     error: function (response) {
-                        $('#save_status').html('Error Saving Changes');
+                        $('#save_status').text('Error Saving Changes').css('color', 'red');
                         setGradeableUpdateComplete();
                         console.error(`Failed to parse response from server: ${response}`);
                     },
                 });
             }
             catch (e) {
-                $('#save_status').html('Error Saving Changes');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         };
     }
@@ -763,7 +763,7 @@ function serializeRubric() {
 function saveRubric(redirect = true) {
     const values = serializeRubric();
 
-    $('#save_status').html('Saving Rubric...');
+    $('#save_status').text('Saving Rubric...').css('color', 'var(--text-black)');
     $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
@@ -831,7 +831,7 @@ function serializeGraders() {
 function saveGraders() {
     const values = serializeGraders();
 
-    $('#save_status').html('Saving Graders...');
+    $('#save_status').text('Saving Graders...').css('color', 'var(--text-black)');
     $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
