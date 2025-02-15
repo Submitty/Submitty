@@ -61,6 +61,7 @@
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
+    flex-wrap: wrap;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -97,6 +98,7 @@
     margin-top: 10px;
     margin-bottom: 10px;
     overflow: auto;
+    width: 100%;  
 }
 
 /* status-log-scrollbar */
