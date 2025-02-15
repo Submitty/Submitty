@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
+use app\views\ErrorView;
 use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -18,6 +19,18 @@ class LeaderboardController extends AbstractController {
             $this->core->addErrorMessage("Invalid gradeable id");
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
+
+        if (
+            !$this->core->getUser()->accessGrading()
+            && (
+                !$gradeable->isSubmissionOpen()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
+                && !$gradeable->isTaGradeReleased()
+            )
+        ) {
+            return new WebResponse(ErrorView::class, "noGradeable", $gradeable_id);
+        } 
 
         $leaderboards = [];
 
