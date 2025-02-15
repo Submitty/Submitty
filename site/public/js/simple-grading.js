@@ -423,9 +423,12 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                if (elem.data('maxclamp') && elem.data('maxclamp') < this.value) {
-                    alert(`Score should be less than or equal to the max clamp value: ${elem.data('maxclamp')}`);
-                    this.value = 0;
+                if (elem.data('maxclamp') !== undefined) {
+                    const maxClamp = elem.data('maxclamp');
+                    if (maxClamp < this.value || maxClamp === 0) {
+                        alert(`Score should be less than or equal to the max clamp value: ${maxClamp}`);
+                        this.value = 0;
+                    }
                 }
             }
         }
