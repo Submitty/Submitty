@@ -4,6 +4,7 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
+use app\libraries\Logger;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
@@ -21,7 +22,7 @@ class CourseRegistrationController extends AbstractController {
 
         foreach ($zipped_instructors_settings as [$instructor, $instructor_setting]) {
             // If the instructor has notifications enabled for self registrations add to email list
-            if ($instructor_setting['self_registration_email']) {
+            if ($instructor_setting['self_registration_email'] === null || $instructor_setting['self_registration_email']) {
                 $emails[] = new Email(
                     $this->core,
                     [
