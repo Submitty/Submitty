@@ -54,7 +54,7 @@
                  {% if info.is_panel_expanded is defined and info.is_panel_expanded %} panel-active {% endif %}"
             >
                 {% for g_info in info.gradeables %}
-                <div id="{{ g_info.id }}" class="gradeable-row">
+                <div id="{{ g_info.id }}" data-testid="{{ g_info.id }}" class="gradeable-row">
                     <div class="course-main">
                         {% if g_info.edit_buttons or g_info.delete_buttons %}
                             {% for button in g_info.edit_buttons %}
@@ -97,11 +97,16 @@
     {% if button is null %}
         <div class="button-placeholder"></div>
     {% else %}
-        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" tabindex="0"
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }} {% if button.hasOnclick() %} key_to_click {% endif %}{% if button.isDisabled() %} disabled{% endif %}" {% if button.getName() %} data-testid="{{ button.getName() }}" {% endif %} tabindex="0"
             {% if button.isDisabled() %}
                 style="pointer-events: auto;"
-                onclick="alert('Please complete {{ button.getPrerequisite()}}.' )"
-                title='Please complete {{ button.getPrerequisite()}}.' 
+                {% if button.getPrerequisite() is none %}
+                    onclick="alert('You must be on a team to submit to this gradeable.');"
+                    title="You must be on a team to submit to this gradeable"
+                {% else %}
+                    onclick="alert('Please complete {{ button.getPrerequisite() }}.');"
+                    title="Please complete {{ button.getPrerequisite() }}."
+                {% endif %}
             {% else %}
                 {# assigns the href unless button has onclick affect #}
                 {% if not button.hasOnclick() %}

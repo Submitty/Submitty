@@ -12,7 +12,7 @@ use InvalidArgumentException;
  * Use this to add a check to a controller to see if that
  * feature is enabled within the Config. Whatever string
  * gets passed to this annotation is used in a
- * `is${feature}Enabled` check in the config model.
+ * `is{$feature}Enabled` check in the config model.
  *
  * Example Usage:
  *

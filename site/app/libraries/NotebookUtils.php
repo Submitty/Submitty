@@ -32,7 +32,7 @@ class NotebookUtils {
                         'label' => '',
                         'programming_language' => $filedata['metadata']['language_info']['name'] ?? 'python',
                         'initial_value' => is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'],
-                        'rows' => count($cell['source']),
+                        'rows' => is_array($cell['source']) ? count($cell['source']) : 1,
                         'filename' => $cell['id'] ?? 'notebook-cell-' . rand(),
                         'recent_submission' => '',
                         'version_submission' => '',

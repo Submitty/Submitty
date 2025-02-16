@@ -35,7 +35,18 @@ const upduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 0);
     cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
+    cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 1);
+};
+
+const upduckReply = (thread_title) => {
+    // Upduck the first reply
+    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
+    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
+    cy.get('[data-testid="upduck-button"]').eq(1).click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
 };
 
 const checkStatsUpducks = (fullName, numUpducks) => {
@@ -100,7 +111,10 @@ const removeUpduckPost = (thread_title) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').first().should('have.text', 1);
     cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
+    // wait for duck like to update
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
+    cy.get('[data-testid="like-count"]', { timeout: 10000 }).first().should('have.text', 0);
 };
 
 const staffUpduckPost = (user, thread_title) => {
@@ -108,6 +122,10 @@ const staffUpduckPost = (user, thread_title) => {
     upduckPost(thread_title);
     checkStaffUpduck(thread_title, 'be.visible');
 
+    // Ta will upduck reply in thread 2,3 and instructor will upduck reply in thread 1, 2 and 3
+    if (!(user === 'ta' && thread_title === title1)) {
+        upduckReply(thread_title);
+    }
     if (user !== 'instructor') {
         removeUpduckPost(thread_title);
         checkStaffUpduck(thread_title, 'be.not.visible');
@@ -119,12 +137,21 @@ const studentUpduckPost = (thread_title) => {
     upduckPost(thread_title);
     checkStaffUpduck(thread_title, 'be.not.visible');
     removeUpduckPost(thread_title);
+    // upduck reply, do not remove yet, for checking thread sum duck purpose
+    if (thread_title === title3) {
+        upduckReply(thread_title);
+    }
 };
 
 const checkStaffUpduck = (title, visible) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', title);
     cy.get('[data-testid="instructor-like"]').first().should(visible);
+};
+
+const checkThreadduck = (order, ducks) => {
+    // thread 1 suppose to have 2 total duck, thread 2 suppose to have 3 total ducks, thread 3 suppose to have 4 total ducks
+    cy.get('.thread_box').eq(order).find('[data-testid="thread-like-count"]').should('have.text', ducks);
 };
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
@@ -174,7 +201,14 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         staffUpduckPost('instructor', title1);
         staffUpduckPost('instructor', title2);
         staffUpduckPost('instructor', title3);
-        checkStatsUpducks('Instructor, Quinn', 3);
+
+        // Check thread sum duck
+        cy.visit(['sample', 'forum']);
+        checkThreadduck(2, 2);
+        checkThreadduck(1, 3);
+        checkThreadduck(0, 4);
+
+        checkStatsUpducks('Instructor, Quinn', 6);
 
         // Tutorial into Questions
         mergeThreads(title3, title2, merged1);

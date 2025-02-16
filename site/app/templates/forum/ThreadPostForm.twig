@@ -147,7 +147,7 @@
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Upload Attachment</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image</label>
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
@@ -255,7 +255,12 @@
         //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
         //from an input with 'post-content-reply' class
         $('.post_content_reply').focus(function(){
+            this.dataset.active = 'true';
             $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $('.post_content_reply').blur(function(){
+            delete this.dataset.active;
         });
 
         $(':not(.post_content_reply, .skip-first-post)').focus(function(){
