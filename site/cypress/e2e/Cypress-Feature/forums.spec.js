@@ -106,7 +106,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
     it('Create, reply to, merge, and delete threads', () => {
         // Add and Delete Image Attachment
-        // uploadAttachmentAndDelete(title4, attachment1);
+        uploadAttachmentAndDelete(title4, attachment1);
         createThread(title1, content1, 'Comment');
         createThread(title2, content2, 'Question');
         createThread(title3, content3, 'Tutorials');
