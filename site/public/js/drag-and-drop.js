@@ -1247,7 +1247,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     } // remove slash
 
     let filesToBeAdded = false;
-    
+
     if ($('#file_selection').is(':visible')) {
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
