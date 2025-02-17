@@ -690,6 +690,10 @@ class CourseMaterialsController extends AbstractController {
                 // Return an error response to the user
                 return JsonResponse::getErrorResponse("Error: The file title is too long. Please reduce it by " . $excess_length . " characters.");
             }
+            if (strlen($file_name) > MAX_PATH_LENGTH) {
+                $excess_length = strlen($file_name) - MAX_PATH_LENGTH;
+                return JsonResponse::getErrorResponse("Error: The file title is too long. Please reduce it by " . $excess_length . " characters.");
+            }
 
             FileUtils::writeFile($details['path'][0], "");
         }
