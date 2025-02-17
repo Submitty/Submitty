@@ -44,11 +44,29 @@ class CourseRegistrationController extends AbstractController {
         }
     }
 
+
     public function registerCourseUser(string $term, string $course): void {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-        $this->core->getUser()->setRegistrationSection($default_section);
-        $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
-        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
-        $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
+        $user = $this->core->getUser();
+        
+        // Check if the user already exists in the course
+        $existing_user = $this->core->getQueries()->getCourseUserById($user->getId(), $term, $course);
+        
+        if ($existing_user) {
+            // If user is in NULL section, update their section instead of re-inserting
+            if ($existing_user["registration_section"] === null) {
+                $this->core->getQueries()->updateUserRegistrationSection($user->getId(), $term, $course, $default_section);
+            }
+        } else {
+            // If user does not exist, insert them into the course
+            $user->setRegistrationSection($default_section);
+            $this->core->getQueries()->insertCourseUser($user, $term, $course);
+        }
+
+        // Notify instructors
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
+        $this->notifyInstructors($user->getId(), $term, $course, $instructor_ids);
     }
+
+    
 }

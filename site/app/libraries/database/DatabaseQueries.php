@@ -82,6 +82,16 @@ class DatabaseQueries {
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
+    public function updateCourseUserRegistrationSection($term, $course, $user_id, $registration_section) {
+        $this->submitty_db->query("
+            UPDATE courses_users 
+            SET registration_section = ? 
+            WHERE term = ? AND course = ? AND user_id = ?",
+            [$registration_section, $term, $course, $user_id]
+        );
+    }
+    
+
     /**
      * Gets all users from the submitty database, except nulls out password
      *
