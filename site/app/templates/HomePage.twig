@@ -31,17 +31,27 @@
                         <ul class="bare-list course-list">
                     {% endif %}
                     <li>
-                        <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}" data-testid="{{ course['title'] }}-button">
-                            {{ course['display_semester'] }} &nbsp; &nbsp;
-                            {{ course['title'] | upper }} &nbsp; &nbsp;
-                            {% if course['display_name'] != "" %}
-                                {{ course['display_name'] }} &nbsp; &nbsp;
+                        <div class="d-flex align-items-center">
+                            <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl(['courses', course['semester'], course['title']]) }}" data-testid="{{ course['title'] }}-button">
+                                {{ course['display_semester'] }} &nbsp; &nbsp;
+                                {{ course['title'] | upper }} &nbsp; &nbsp;
+                                {% if course['display_name'] != "" %}
+                                    {{ course['display_name'] }} &nbsp; &nbsp;
+                                {% endif %}
+                                {% if course['registration_section'] != null %}
+                                    (Section {{ course['registration_section'] }})
+                                {% endif %}
+                            </a>
+                        {% if course['registration_section'] == null %}
+                        {# added button #}
+                                <button 
+                                    class="btn btn-danger ml-2"
+                                    onclick="confirmUnregister('{{ course['semester'] }}', '{{ course['title'] }}')"
+                                    data-testid="unregister-{{ course['title'] }}-button">
+                                    Unregister
+                                </button>
                             {% endif %}
-                            {% if course['registration_section'] != null %}
-                                (Section {{ course['registration_section'] }})
-                            {% endif %}
-                            {{ user.accessAdmin() }}
-                        </a>
+                        </div>
                     </li>
                 {% endfor %}
                 {% if display_semester != '' %}
@@ -51,3 +61,36 @@
         {% endif %}
     {% endfor %}
 </div>
+
+{# added code #}
+{# pop up asking user to confirm #}
+<script>
+function confirmUnregister(semester, course) {
+    if (confirm('Are you sure you want to unregister from this course?')) {
+        fetch(buildUrl(['api', 'courses', 'unregister']), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'csrf-token': csrfToken
+            },
+            body: JSON.stringify({
+                semester: semester,
+                course: course
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to unregister: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while unregistering');
+        });
+    }
+}
+</script>
