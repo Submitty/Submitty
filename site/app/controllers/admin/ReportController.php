@@ -691,6 +691,7 @@ class ReportController extends AbstractController {
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
+                'omit_sections_from_stats' => (array) $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
