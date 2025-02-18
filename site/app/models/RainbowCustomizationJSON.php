@@ -24,6 +24,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * @var string[]
      */
+     private array $omit_section_from_stats = [];
+    /**
+     * @var string[]
+     */
     private array $display_benchmark = [];
     /**
      * @var string[]
@@ -224,6 +228,10 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->section = $json->section;
         }
 
+        if (isset($json->omit_section_from_stats)) {
+            $this->omit_section_from_stats = $json->omit_section_from_stats;
+        }
+
         if (isset($json->messages)) {
             $this->messages = $json->messages;
         }
@@ -321,6 +329,25 @@ class RainbowCustomizationJSON extends AbstractModel {
     public function getSection() {
         return $this->section;
     }
+
+    /**
+     * Get array of sections omitted from stats
+     *
+     * @return object[]
+     */
+    public function getOmmitedSection(): array {
+        return $this->omit_section_from_stats;
+    }
+
+    /**
+     * Add a omitted section object to the omit_section_from_stats array
+     *
+     * @param object $omit_section
+     */
+     public function addOmittedSection(object $omit_section): void {
+         /** add validation, check if it is a section */
+         $this->omit_section_from_stats[] = $omit_section;
+     }
 
     /**
      * Add a gradeable object to the gradeables array
