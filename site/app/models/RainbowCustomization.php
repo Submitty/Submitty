@@ -622,6 +622,12 @@ class RainbowCustomization extends AbstractModel {
             }
         }
 
+        if (isset($form_json->omit_section_from_stats)) {
+            foreach ($form_json->omit_section_from_stats as $omit_section) {
+                $this->RCJSON->addOmittedSection($omit_section);
+            }
+        }
+
         if (isset($form_json->gradeables)) {
             foreach ($form_json->gradeables as $gradeable) {
                 $this->RCJSON->addGradeable($gradeable);
