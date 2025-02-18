@@ -1973,9 +1973,12 @@ async function onCancelComponent(me) {
     const anon_id = getAnonId();
     const component = await ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
     const customMarkNote = $(`#component-${component_id}`).find('.mark-note-custom').val();
-    // If there is any changes made in comment of a component , prompt the TA
+    
     if ((component && component.comment !== customMarkNote) || (!component && customMarkNote !== '')) {
-        if (confirm('Are you sure you want to discard all changes to the student message?')) {
+        // Show custom modal instead of native confirm()
+        const result = await showDiscardModal();
+        
+        if (result) {  // User clicked "Discard"
             try {
                 await toggleComponent(component_id, false);
             }
@@ -1984,8 +1987,8 @@ async function onCancelComponent(me) {
                 alert(`Error closing component! ${err.message}`);
             }
         }
+        // Else: User clicked "Cancel", do nothing
     }
-    // There is no change in comment, i.e it is same as the saved comment (before)
     else {
         try {
             await toggleComponent(component_id, false);
@@ -1996,6 +1999,7 @@ async function onCancelComponent(me) {
         }
     }
 }
+
 
 function onCancelEditRubricComponent(me) {
     const component_id = getComponentIdFromDOMElement(me);
@@ -2058,6 +2062,7 @@ async function onToggleMark(me) {
  * @param me DOM Element of one of the custom mark's elements
  */
 async function onCustomMarkChange(me) {
+    const newCustomMarkNote = $(me).val();
     try {
         await updateCustomMark(getComponentIdFromDOMElement(me));
     }
@@ -2249,7 +2254,8 @@ function decimalLength(num) {
  * @param me DOM element of the input box
  */
 function onComponentTitleChange(me) {
-    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-title-text').text($(me).val());
+    const newTitle = $(me).val();
+    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-title-text').text(newTitle);
 }
 
 /**
@@ -2257,7 +2263,8 @@ function onComponentTitleChange(me) {
  * @param me DOM element of the input box
  */
 function onComponentPageNumberChange(me) {
-    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-page-number-text').text($(me).val());
+    const newPageNumber = $(me).val();
+    getComponentJQuery(getComponentIdFromDOMElement(me)).find('.component-page-number-text').text(newPageNumber);
 }
 
 /**
@@ -3210,7 +3217,7 @@ async function saveGradedComponent(component_id) {
     }));
     await ajaxSaveGradedComponent(
         gradeable_id, component_id, getAnonId(),
-        gradedComponent.graded_version,
+        gradedComponent.graded_version, 
         gradedComponent.custom_mark_selected ? gradedComponent.score : 0.0,
         gradedComponent.custom_mark_selected ? gradedComponent.comment : '',
         isSilentEditModeEnabled(),
@@ -3278,7 +3285,7 @@ function refreshInstructorEditComponent(component_id, showMarkList) {
 /**
  * Re-renders the component's header block with the data in the DOM
  * @param {int} component_id
- * @param {boolean} showMarkList Whether the header should be styled like the component is open
+ * @param {boolean} showMarkList Whether the header should be styled like the mark list is open
  * @return {Promise}
  */
 function refreshComponentHeader(component_id, showMarkList) {
