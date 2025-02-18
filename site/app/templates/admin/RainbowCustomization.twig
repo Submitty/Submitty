@@ -366,6 +366,8 @@ To remove a curve simply blank all boxes."></i>
                     {% for section, label in sections_and_labels %}
                         <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
                         <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                        <input type="checkbox" id="omit_section_checkbox{{ section }}" name="omit_section" value="{{ label }}" data-testid="omit-section-checkbox{{ section }}">
+                        <label for="omit_section{{ section }}" class="omit-section-label">{{ "omit from statistics" }}</label>
                     {% endfor %}
                 </div>
             </div>
