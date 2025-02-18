@@ -212,6 +212,10 @@ class CourseMaterial {
         $this->calendar_date = $calendar_date;
     }
 
+    public function getCalendarDate(): ?\DateTime {
+        return $this->calendar_date;
+    }
+
     public function getGradeable(): ?string {
         return $this->gradeable;
     }

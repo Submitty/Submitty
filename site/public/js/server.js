@@ -291,7 +291,7 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
-    setCalendarMenuValues('upload-cm-cal-menu');
+    setCalendarMenuValues('upload-cm-cal-menu', tag, "3");
 
     $('[name="existing-file-list"]', form).html('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
@@ -378,7 +378,7 @@ function newEditCourseMaterialsFolderForm(tag) {
     }
 
     // Calendar form
-    setCalendarMenuValues('edit-cm-folder-cal-menu');
+    setCalendarMenuValues('edit-cm-folder-cal-menu', tag, "2");
 
     $('#material-folder-edit-form', form).attr('data-id', id);
     $('#edit-folder-sort', form).attr('value', dir);
@@ -449,7 +449,7 @@ function newEditCourseMaterialsForm(tag) {
     }
 
     //Course Materials In Calendar Script
-    setCalendarMenuValues('edit-cm-file-cal-menu');
+    setCalendarMenuValues('edit-cm-file-cal-menu', tag, "1");
 
     editFilePathRecommendations();
     if (is_link === 1) {

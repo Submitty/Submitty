@@ -15,7 +15,10 @@ def up(config, database, semester, course):
     :type course: str
     """
 def up(config, database, semester, course):
-    database.execute("""ALTER TABLE course_materials ALTER COLUMN calendar_date TYPE TIMESTAMPTZ USING calendar_date::TIMESTAMPTZ;    """)
+    database.execute("""
+        ALTER TABLE public.course_materials
+        ADD COLUMN IF NOT EXISTS calendar_date TIMESTAMP DEFAULT NULL;
+    """)
 
 
 

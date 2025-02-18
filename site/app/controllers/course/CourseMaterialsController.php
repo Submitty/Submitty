@@ -376,9 +376,17 @@ class CourseMaterialsController extends AbstractController {
         /** @var CourseMaterial $course_material */
         $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['id' => $id]);
+
+
         if ($course_material == null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
+
+
+        $course_material->setCalendarDate($associated_date ? new \DateTime($associated_date) : null);
+        $course_material->setOnCalendar($calendar_display);
+
+
 
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
