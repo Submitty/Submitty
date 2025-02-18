@@ -214,7 +214,6 @@
 
 .not-active-thread-announcement i.fas,
 .pinned-thread i.fas {
-    color: var(--standard-hover-light-gray);
     -webkit-text-stroke: 1px var(--standard-gray-black);
 }
 
