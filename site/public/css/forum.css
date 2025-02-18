@@ -214,6 +214,7 @@
 
 .not-active-thread-announcement i.fas,
 .pinned-thread i.fas {
+    color: var(--standard-pale-gray);
     -webkit-text-stroke: 1px var(--standard-gray-black);
 }
 
@@ -223,7 +224,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
-    color: var(--focus-dropdown);
+    color: var(--standard-pale-gray);
 }
 
 .red-hover:hover {
@@ -875,7 +876,7 @@
 
 .pinned-thread .fa-ellipsis-v {
     font-size: 1.2em;
-    color: var(--default-black);
+    color: var(--standard-pale-gray);
 }
 
 .custom-dropdown-menu {
