@@ -640,6 +640,7 @@ if not args.worker:
     config['duck_special_effects'] = False
 
 config['worker'] = True if args.worker == 1 else False
+config['file_upload_limit_mb'] = 100
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)

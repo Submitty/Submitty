@@ -413,6 +413,11 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
 
+        if (isset($submitty_json['file_upload_limit_mb'])) {
+            $this->file_upload_limit = $submitty_json['file_upload_limit_mb'];
+        } else {
+            $this->file_upload_limit = 100; // Default value if not set
+        }
         $this->log_exceptions = true;
 
         $this->base_url = $submitty_json['submission_url'];
