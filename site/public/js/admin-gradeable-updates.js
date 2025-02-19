@@ -223,12 +223,24 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
+        const notifications_sent = document.querySelector('#container-rubric').dataset.notifications_sent === 'true';
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
             }
             if ($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
                 $(val).val('0');
+            }
+            // Ask for confirmation if the release is delegated to the future and notifications have been sent already
+            if (notifications_sent && val.name === 'grade_released_date') {
+                const updating = new Date($(val).val());
+                const original = new Date($(val).attr('data-original'));
+
+                if (original !== updating && updating >= new Date()) {
+                    data['notifications_sent'] = confirm(
+                        'Notifications have already been sent to students. Do you want to resend notifications?',
+                    ) !== true;
+                }
             }
             data[val.name] = $(val).val();
         };
@@ -244,20 +256,6 @@ $(document).ready(() => {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
-
-        // Ask instructors if they wish to resend notifications due to a future release date with existing notifications
-        const notifications = document.querySelector('#container-rubric').dataset.notification_sent === '1';
-        const released_date = document.querySelector('#date_released');
-
-        if (notifications && released_date) {
-            const now = new Date();
-            const update = new Date(released_date.value);
-
-            if (notifications && update >= now) {
-                data['notifications_sent'] = confirm('Notifications have already been sent to students. Do you want to resend notifications?') !== true;
-            }
-        }
-
         // Redundant to send this data
         delete data.peer_panel;
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
@@ -272,6 +270,10 @@ $(document).ready(() => {
                 for (const key in data) {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
+                    }
+                    if (key === 'grade_released_date' && data['notifications_sent'] !== undefined) {
+                        document.querySelector('#date_released').dataset.original = data[key];
+                        document.querySelector('#container-rubric').dataset.notifications_sent = data['notifications_sent'];
                     }
                 }
                 updateErrorMessage();

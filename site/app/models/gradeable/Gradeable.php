@@ -1024,6 +1024,7 @@ class Gradeable extends AbstractModel {
             }
         }
         $date_strings['late_days'] = strval($this->late_days);
+        $date_strings['notifications_sent'] = $this->getNotificationsSent();
         return $date_strings;
     }
 
