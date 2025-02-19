@@ -130,7 +130,15 @@
 				}
 
 				{{ "#categoryid_" ~ category.id }}.filter-active{
+					background-color: {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.id }}.filter-inactive{
 					color: white;
+					border: 1px solid {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.id }}.filter-active{
 					background-color: {{ category.color }}
 				}
 			{% endfor %}
