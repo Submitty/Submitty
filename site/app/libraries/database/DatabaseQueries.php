@@ -1128,14 +1128,13 @@ WHERE term=? AND course=? AND user_id=?",
      */
     public function unregisterCourseUser(User $user, $semester, $course): void {
         $this->submitty_db->query(
-            "DELETE FROM courses_users WHERE user_id = ? AND term = ? AND course = ?",
+            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
             [$user->getId(), $semester, $course]
         );
 
         $this->course_db->query(
             "UPDATE users SET 
                 rotating_section = NULL,
-                registration_subsection = NULL,
                 registration_type = NULL
             WHERE user_id = ?",
             [$user->getId()]
