@@ -6,6 +6,8 @@ use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
+use app\libraries\response\MultiResponse;
+use app\libraries\response\RedirectResponse;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradeableUtils;
@@ -55,7 +57,8 @@ class AdminGradeableController extends AbstractController {
      */
     #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
-    public function uploadGradeable(): JsonResponse {
+    public function uploadGradeable(): MultiResponse
+    {
         $values = [
             'title' => '',
             'instructions_url' => '',
@@ -83,9 +86,7 @@ class AdminGradeableController extends AbstractController {
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
             return JsonResponse::getErrorResponse('JSON requires id, title, and type. See documentation for information');
         }
-        if (isset($_POST['rubric'])) {
-            $values['rubric'] = $_POST['rubric'];
-        }
+
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
@@ -128,7 +129,7 @@ class AdminGradeableController extends AbstractController {
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
-            $values['ta_grading'] = 'true';
+            $values['ta_grading'] = $_POST['ta_grading'];
             if (array_key_exists('grade_inquiries', $_POST)) {
                 $values['grade_inquiry_allowed'] = 'true';
                 $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
@@ -157,15 +158,38 @@ class AdminGradeableController extends AbstractController {
             $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page
             if ($build_result !== null) {
-                return JsonResponse::getErrorResponse($build_result);
+                return new MultiResponse(JsonResponse::getErrorResponse($build_result), null,  new RedirectResponse($this->core->buildCourseUrl('gradeable')));
             }
-            return JsonResponse::getSuccessResponse($_POST['id']);
+            $rubric_components = [];
+            if (isset($_POST['rubric'])) {
+                $gradeable = $this->tryGetGradeable($values['id']);
+                foreach($_POST['rubric'] as $rubric_component) {
+                    try {
+                        $rubric_components[] = new Component($this->core, $gradeable, $rubric_component);
+                    }
+                    catch (\OutOfBoundsException $exception) {
+                        $this->core->addErrorMessage('Rubric component does not have all required parameters: ' . $exception->getMessage());
+                        return new MultiResponse(JsonResponse::getErrorResponse('Rubric component does not have all required parameters: ' . $exception), null,  new RedirectResponse($this->core->buildCourseUrl(['gradeable', $values['id'], 'update'])));
+                    }
+                    catch (\Exception $exception) {
+                        $this->core->addErrorMessage('An error has occurred: ' . $exception->getMessage());
+                        return new MultiResponse(JsonResponse::getErrorResponse('An error has occurred: ' . $exception), null, new RedirectResponse($this->core->buildCourseUrl(['gradeable', $values['id'] , 'update'])));
+                    }
+                }
+                $gradeable->setComponents($rubric_components);
+            }
+
+            $this->core->addSuccessMessage('Gradeable successfully created');
+            return new MultiResponse(JsonResponse::getSuccessResponse('Gradeable successfully created'), null,  new RedirectResponse($this->core->buildCourseUrl(['gradeable', $values['id']])));
+        
         }
         catch (ValidationException $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
+            $this->core->addErrorMessage('An error has occurred: ' . $e->getMessage());
+            return new MultiResponse(JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage()), null,  new RedirectResponse($this->core->buildCourseUrl(['gradeable'])));
         }
         catch (\Exception $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
+            $this->core->addErrorMessage('An error has occurred: ' . $e->getMessage());
+            return new MultiResponse(JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage()), null,  new RedirectResponse($this->core->buildCourseUrl(['gradeable'])));
         }
     }
 
@@ -1287,15 +1311,9 @@ class AdminGradeableController extends AbstractController {
             );
         }
 
-        if (isset($details['rubric'])) {
-            foreach ($details['rubric'] as $component) {
-                $gradeable->importComponent($component);
-            }
-        }
-        else {
-            // Generate a blank component to make the rubric UI work properly
-            $this->genBlankComponent($gradeable);
-        }
+     
+        // Generate a blank component to make the rubric UI work properly
+        $this->genBlankComponent($gradeable);
 
         // Save the gradeable to the database
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
