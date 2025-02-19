@@ -1,6 +1,7 @@
 """Migration for the Submitty system."""
 import json
 import os
+from pathlib import Path
 
 def up(config):
     """
@@ -15,14 +16,14 @@ def up(config):
         data = json.load(f)
 
     # Add the new setting if it doesn't exist
-    if "file_upload_limit_mb" not in data:
-        data["file_upload_limit_mb"] = 100  # Default limit: 50MB
+    if "course_material_file_upload_limit_mb" not in data:
+        data["course_material_file_upload_limit_mb"] = 100  # Default limit: 50MB
 
         # Save the updated config
         with open(CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
-        print("Migration complete: Added 'file_upload_limit_mb' to submitty.json")
+        print("Migration complete: Added 'course_material_file_upload_limit_mb' to submitty.json")
 
 
 def down(config):

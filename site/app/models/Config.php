@@ -151,6 +151,11 @@ class Config extends AbstractModel {
     /** @prop
      * @var string */
     protected $default_locale = 'en_US';
+    /**
+     * Maximum file upload size for course materials (in MB)
+     * @prop
+     * @var int */
+    protected $course_material_file_upload_limit_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
@@ -467,6 +472,13 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
+        if (isset($submitty_json['course_material_file_upload_limit_mb'])) {
+            $this->course_material_file_upload_limit_mb = (int) $submitty_json['course_material_file_upload_limit_mb'];
+        }
+        else {
+            $this->course_material_file_upload_limit_mb = 100; // Default to 100 MB if not set
+        }
+
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
@@ -636,6 +648,16 @@ class Config extends AbstractModel {
             $this->$key = $config[$section][$key];
         }
     }
+
+    /**
+     * Get the maximum file upload size for course materials in MB.
+     *
+     * @return int
+     */
+    public function getCourseMaterialsMaxFileUploadSize() {
+        return $this->course_material_file_upload_limit_mb;
+    }
+
 
     public function isSubmittyAdminUserVerified() {
         return !empty($this->verified_submitty_admin_user);
