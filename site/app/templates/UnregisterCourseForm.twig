@@ -1,0 +1,16 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}unregister-user-form{% endblock %}
+{% block title %}Unregister from Course{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <p>Unregister from course?</p>
+{% endblock %}
+{% block form %}
+    <form method="post" action="{{ unregister_course_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Confirm" />
+{% endblock %}

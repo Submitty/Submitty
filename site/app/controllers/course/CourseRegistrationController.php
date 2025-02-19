@@ -30,36 +30,6 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
-    #[Route("/courses/{term}/{course}/alert_redirect")]
-    public function alertRedirect(string $term, string $course): RedirectResponse {
-        // Ensure course configuration and database are loaded
-        $this->core->loadCourseConfig($term, $course);
-        $this->core->loadCourseDatabase();
-
-        // Check if the user has confirmed the unregistration
-        if (isset($_GET['confirmed']) && $_GET['confirmed'] === 'true') {
-            // Perform unregistration if confirmed
-            $this->unregisterCourseUser($term, $course);
-            $this->core->addSuccessMessage('You have successfully unregistered from the course.');
-            return new RedirectResponse($this->core->buildUrl(['home']));
-        }
-
-        // If not confirmed, show the confirmation alert
-        $confirmUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']) . '?confirmed=true';
-        $cancelUrl = $this->core->buildCourseUrl();
-
-        echo "<script type='text/javascript'>
-                if (confirm('Are you sure you want to unregister from this course?')) {
-                    window.location.href = '$confirmUrl';
-                } else {
-                    window.location.href = '$cancelUrl';
-                }
-              </script>";
-        exit;  // Ensure the script runs and stops further PHP execution
-    }
-
-
-
     #[Route("/courses/{term}/{course}/register", name: "course_register")]
     public function selfRegister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
@@ -75,19 +45,19 @@ class CourseRegistrationController extends AbstractController {
         }
     }
 
-    #[Route("/courses/{term}/{course}/unregister_from_course", name: "course_unregister")]
+    #[Route("/courses/{term}/{course}/unregister", name: "course_unregister")]
     public function selfUnregister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
 
-        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === 0) {
+        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
             $this->core->addErrorMessage('You cannot unregister from this course on your own.');
-            return new RedirectResponse($this->core->buildUrl(['home']));
+            return new RedirectResponse($this->core->buildCourseUrl());
         }
 
-        // Redirect to the alert route after unregistration
-        $alertRedirectUrl = $this->core->buildUrl(['courses', $term, $course, 'alert_redirect']);
-        return new RedirectResponse($alertRedirectUrl);
+        $this->unregisterCourseUser($term, $course);
+        $this->core->addSuccessMessage('You have successfully unregistered from the course.');
+        return new RedirectResponse($this->core->buildUrl(['home']));
     }
 
     public function registerCourseUser(string $term, string $course): void {
@@ -97,8 +67,8 @@ class CourseRegistrationController extends AbstractController {
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
     }
+
     public function unregisterCourseUser(string $term, string $course): void {
         $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
-        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
     }
 }

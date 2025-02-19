@@ -1134,15 +1134,10 @@ WHERE term=? AND course=? AND user_id=?",
 
         $this->course_db->query(
             "UPDATE users SET 
-                rotating_section = NULL, 
-                registration_subsection = NULL, 
-                registration_type = NULL 
+                rotating_section = NULL,
+                registration_subsection = NULL,
+                registration_type = NULL
             WHERE user_id = ?",
-            [$user->getId()]
-        );
-
-        $this->course_db->query(
-            "DELETE FROM grading_registration WHERE user_id = ?",
             [$user->getId()]
         );
     }
