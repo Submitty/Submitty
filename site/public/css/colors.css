@@ -87,7 +87,6 @@
     --standard-creamsicle-orange: #ff8040;
     --standard-peachpuff: #ffdab9;
     --standard-vibrant-yellow: #ffff00;
-    --standard-vibrant-purple: #cc66ff;
     --standard-plum-purple: #72518a;
     --standard-vibrant-pink: #fd4472;
     --standard-vibrant-pink-red: #c40233;
@@ -97,21 +96,16 @@
     --standard-deep-dark-green: #006600;
     --standard-mint-green: #00e08e;
     --standard-dark-mint-green: #00a368;
-    --standard-pale-lime-green: #dff0d8;
-    --standard-light-lime-green: #c3e3b5;
-    --standard-medium-lime-green: #99cb84;
     --standard-medium-dark-lime-green: #7dfa78;
     --standard-vibrant-dark-blue: #006699;
     --standard-bronze: #856404;
     --standard-pastel-pink: #f2dede;
     --standard-light-pink: #ff9999;
     --standard-tangerine-yellow: #ffcc00;
-    --standard-pastel-yellow: #fcf8e3;
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
     --standard-beige: #f5f5dc;
-    --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
     --standard-pastel-blue: #d9edf7;
     --standard-light-blue: #99ccff;
@@ -124,8 +118,6 @@
     --subtle-grey-background: #cccccc;
 
     /* dropdown buttons */
-    --hover-dropdown: #f5f5f5;
-    --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
 
 
@@ -139,7 +131,6 @@
 
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
-    --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /* is also for star color */
     --attachment-box-color: #f5f5f5;
@@ -161,12 +152,10 @@
     /* links */
     --external-link-blue: #2627ee;
     --external-link-hover: #131399;
-    --external-link-disabled: #888888;
     --external-link-active: #991313;
 
     /* sidebar */
     --selected-nav-sidebar: #d9e1e2;
-    --selected-nav-sidebar-text: #000000;
     --nav-sidebar-text: #006398;
     --sidebar-hover-text: #002334;
 
@@ -312,8 +301,6 @@
     --subtle-grey-background: #555555;
 
     /* dropdown buttons */
-    --hover-dropdown: #f5f5f5;
-    --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
 
 
@@ -342,7 +329,6 @@
 
     /* sidebar */
     --selected-nav-sidebar: #535353;
-    --selected-nav-sidebar-text: #6c6c6c;
     --nav-sidebar-text: #c8c8c8;
     --sidebar-hover-text: #ffffff;
 
