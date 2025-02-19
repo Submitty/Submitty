@@ -79,6 +79,15 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-total"]').eq(2).should('contain', '2 / 5');
         cy.get('[data-testid="grading-total"]').eq(3).should('contain', '0 / 0');
         cy.get('[data-testid="grading-total"]').eq(4).should('contain', '8 / 12');
+        cy.get('[data-testid="component-64"]').click(20, 25);
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
+            .should('contain', 'Save');
+        cy.clearCookies();
+        cy.login('ta');
+        cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'grade?who_id=apfzuObm3E7o2vy&sort=id&direction=ASC']);
+        cy.get('body').type('{G}');
+        cy.get('[data-testid="component-container"]').its('length').should('eq', 4);
+        cy.get('[data-testid="component-container"]').eq(0).should('contain', 'Last opened by: Quinn I.');
     });
     it ('Grader should be able to save and move with arrows', () => {
         cy.login('instructor');
@@ -90,6 +99,8 @@ describe('Test cases for TA grading page', () => {
         cy.get('[data-testid="grading-total"]').eq(0).should('contain', '2 / 2');
         cy.get('[data-testid="grading-total"]').eq(1).should('contain', '4 / 5');
         cy.get('body').type('{downArrow}');
+        cy.get('[data-testid="component-64"] [data-testid="save-tools-save"]')
+            .should('contain', 'Save');
         cy.get('body').type('{0}');
         cy.get('body').type('{downArrow}');
         cy.get('[data-testid="component-65"] [data-testid="save-tools-save"]')
