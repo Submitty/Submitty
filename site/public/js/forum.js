@@ -1809,12 +1809,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     if (!checkAreYouSureForm()) {
         return;
     }
-    const type = (isDeletion ? '0' : '2');
     const message = (isDeletion ? 'delete' : 'restore');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
-        const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
+        const url = buildCourseUrl(['forum', 'posts', 'delete']);
         $.ajax({
             url: url,
             type: 'POST',
@@ -2054,7 +2053,7 @@ function sortTable(sort_element_index, reverse = false) {
 }
 
 function loadThreadHandler() {
-    $('a.thread_box_link').click(function (event) {
+    $('a.thread_box_link').click(async function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
             return;
@@ -2115,8 +2114,12 @@ function loadThreadHandler() {
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
             },
-            error: function () {
-                window.alert('Something went wrong while trying to display thread details. Please try again.');
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status !== 0) {
+                    // AJAX request fails outside of network issues caused by WebSocket thread updates
+                    console.error('Request failed:', textStatus, errorThrown);
+                    window.alert('Something went wrong while trying to display thread details. Please try again.');
+                }
             },
         });
     });
@@ -2334,7 +2337,7 @@ function updateThread(e) {
     }
 
     $.ajax({
-        url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
+        url: buildCourseUrl(['forum', 'posts', 'modify']),
         type: 'POST',
         data: formData,
         processData: false,
@@ -2667,4 +2670,43 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
+}
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { post_id: post_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
+                // eslint-disable-next-line no-undef
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                }
+                else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+    });
 }
