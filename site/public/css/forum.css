@@ -58,7 +58,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .post_viewed_btn {
-    background-color: var(--standard-light-gray) !important;
+    background-color: var(--standard-light-gray);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -90,8 +90,8 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .first_post {
-    padding-left: 10px !important;
-    margin-top: 0 !important;
+    padding-left: 10px;
+    margin-top: 0;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -155,15 +155,15 @@
 }
 
 .category-item-box {
-    background-color: var(--standard-pale-gray) !important;
+    background-color: var(--standard-pale-gray);
 }
 
 .category-button {
-    color: var(--standard-gray-black) !important;
+    color: var(--standard-gray-black);
 }
 
 .edit-catergoty-name {
-    background-color: var(--always-default-white) !important;
+    background-color: var(--always-default-white);
 }
 
 .create-post-head {
@@ -214,7 +214,7 @@
 
 .not-active-thread-announcement i.fas,
 .pinned-thread i.fas {
-    color: var(--standard-hover-light-gray);
+    color: var(--standard-pale-gray);
     -webkit-text-stroke: 1px var(--standard-gray-black);
 }
 
@@ -224,7 +224,7 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .golden_hover {
-    color: var(--focus-dropdown) !important;
+    color: var(--standard-pale-gray);
 }
 
 .red-hover:hover {
@@ -238,7 +238,7 @@
 }
 
 .text-decoration-none {
-    text-decoration: none !important;
+    text-decoration: none;
 }
 
 
@@ -309,15 +309,15 @@
 }
 
 .current-favorite i.fas {
-    color: var(--standard-medium-red) !important;
+    color: var(--standard-medium-red);
 }
 
 .active-thread-remove-expiring-announcement i.fas {
-    color: var(--standard-tangerine-yellow) !important;
+    color: var(--standard-tangerine-yellow);
 }
 
 .active-thread-remove-announcement i.fas {
-    color: var(--submitty-logo-blue) !important;
+    color: var(--submitty-logo-blue);
 }
 
 .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
@@ -521,7 +521,7 @@
 }
 
 .cursor-pointer {
-    cursor: pointer !important;
+    cursor: pointer;
 }
 
 #search-hr {
@@ -544,15 +544,15 @@
 }
 
 .position-relative {
-    position: relative !important;
+    position: relative;
 }
 
 .position-absolute {
-    position: absolute !important;
+    position: absolute;
 }
 
 .right-zero {
-    right: 0 !important;
+    right: 0;
 }
 
 #merge-thread-btn {
@@ -732,7 +732,7 @@
 
 [data-theme="dark"] .filter-inactive {
     background: var(--btn-default-white);
-    color: var(--default-black) !important;
+    color: var(--default-black);
 }
 
 .thread-resolved {
@@ -876,7 +876,7 @@
 
 .pinned-thread .fa-ellipsis-v {
     font-size: 1.2em;
-    color: var(--default-black) !important;
+    color: var(--standard-pale-gray);
 }
 
 .custom-dropdown-menu {
