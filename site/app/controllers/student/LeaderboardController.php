@@ -30,7 +30,7 @@ class LeaderboardController extends AbstractController {
             )
         ) {
             return new WebResponse(ErrorView::class, "noGradeable", $gradeable_id);
-        } 
+        }
 
         $leaderboards = [];
 
