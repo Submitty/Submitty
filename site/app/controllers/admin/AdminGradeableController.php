@@ -348,7 +348,8 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'notifications_sent' => false
         ]);
     }
 

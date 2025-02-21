@@ -272,8 +272,8 @@ $(document).ready(() => {
                         clearError(key);
                     }
                     if (key === 'grade_released_date' && data['notifications_sent'] !== undefined) {
-                        document.querySelector('#date_released').dataset.original = data[key];
-                        document.querySelector('#container-rubric').dataset.notifications_sent = data['notifications_sent'];
+                        document.querySelector('#date_released')?.dataset.original = data[key];
+                        document.querySelector('#container-rubric')?.dataset.notifications_sent = data['notifications_sent'];
                     }
                 }
                 updateErrorMessage();
