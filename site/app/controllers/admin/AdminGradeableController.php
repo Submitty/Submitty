@@ -6,9 +6,6 @@ use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\libraries\response\MultiResponse;
-use app\libraries\response\RedirectResponse;
-use app\libraries\response\ResponseInterface;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradeableUtils;
@@ -58,8 +55,7 @@ class AdminGradeableController extends AbstractController {
      */
     #[Route("/api/{_semester}/{_course}/upload", methods: ["POST"])]
     #[Route("/courses/{_semester}/{_course}/upload", methods: ["POST"])]
-    public function uploadGradeable(): ResponseInterface
-    {
+    public function uploadGradeable(): JsonResponse {
         $values = [
             'title' => '',
             'instructions_url' => '',
@@ -166,7 +162,7 @@ class AdminGradeableController extends AbstractController {
                 $gradeable = $this->tryGetGradeable($values['id']);
                 // Delete the default blank component
                 $gradeable->deleteComponent($gradeable->getComponents()[0]);
-                foreach($_POST['rubric'] as $rubric_component) {
+                foreach ($_POST['rubric'] as $rubric_component) {
                     $component_values = [
                         'title',
                         'ta_comment',
@@ -198,7 +194,7 @@ class AdminGradeableController extends AbstractController {
             }
             return JsonResponse::getSuccessResponse($values['id']);
         }
-        catch (ValidationException|\Exception $e) {
+        catch (ValidationException | \Exception $e) {
             return JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage());
         }
     }
@@ -1321,7 +1317,6 @@ class AdminGradeableController extends AbstractController {
             );
         }
 
-     
         // Generate a blank component to make the rubric UI work properly
         $this->genBlankComponent($gradeable);
 

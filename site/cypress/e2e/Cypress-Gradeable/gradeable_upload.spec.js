@@ -85,7 +85,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                expect(response.body.message).to.eql('Gradeable already exists');
+                expect(response.body.message).to.eql('An error has occurred: Gradeable already exists');
             });
 
             // Invalid type error message
