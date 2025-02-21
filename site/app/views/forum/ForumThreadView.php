@@ -623,6 +623,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " new_thread";
             }
             if ($thread->isDeleted()) {
+                $class = str_replace(" new_thread", "", $class);
                 if ($isNewThread) {
                     $class .= " deleted-unviewed";
                 }
