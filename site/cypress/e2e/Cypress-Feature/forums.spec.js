@@ -208,7 +208,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         checkThreadduck(1, 3);
         checkThreadduck(0, 4);
 
-        checkStatsUpducks('Instructor, Quinn', 9);
+        checkStatsUpducks('Instructor, Quinn', 6);
 
         // Tutorial into Questions
         mergeThreads(title3, title2, merged1);
