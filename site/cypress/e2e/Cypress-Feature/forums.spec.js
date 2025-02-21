@@ -220,12 +220,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         removeThread(title1);
     });
 
-    describe('Should test the Users Who Liked This Post feature in the forum', () => {
-        beforeEach(() => {
-            cy.login('instructor');
-            cy.visit(['sample', 'forum']);
-            cy.get('#nav-sidebar-collapse-sidebar').click();
-        });
+    describe('Should test the users who liked this post feature in the forum', () => {
 
         it('Should display the list of users who liked a post', () => {
             // Create a thread to test
