@@ -1,0 +1,61 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}toggle-columns-form{% endblock %}
+{% block title %}Toggle Columns{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <p class="toggle-columns-instructions">
+        Select which columns you would like to display.
+    </p>
+    <div class="toggle-columns-menu">
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-index" data-testid="toggle-index">
+            <label for="toggle-index">Index</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-section" data-testid="toggle-section">
+            <label for="toggle-section">Section</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-user_id" data-testid="toggle-user_id">
+            <label for="toggle-user_id">User ID</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-user_given" data-testid="toggle-user_given">
+            <label for="toggle-user_given">User Given</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-user_family" data-testid="toggle-user_family">
+            <label for="toggle-user_family">User Family</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-autograding" data-testid="toggle-autograding">
+            <label for="toggle-autograding">Autograding</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-graded_questions" data-testid="toggle-graded_questions">
+            <label for="toggle-graded_questions">Graded Questions</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-grading" data-testid="toggle-grading">
+            <label for="toggle-grading">Grading</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-total" data-testid="toggle-total">
+            <label for="toggle-total">Total</label>
+        </div>
+        <div class="toggle-checkbox-area">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-active_version" data-testid="toggle-active_version">
+            <label for="toggle-active_version">Active Version</label>
+        </div>
+    </div>
+    <div class="toggle-all-buttons">
+        <a href="javascript:fillAllCheckboxes(true)" class="btn btn-primary">All On</a>
+        <a href="javascript:fillAllCheckboxes(false)" class="btn btn-primary">All Off</a>
+    </div>
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" id="toggle-details-col-submit" data-testid="toggle-details-col-submit" onclick="updateGradingDetailsColumns()"/>
+
+{% endblock %}

@@ -12187,47 +12187,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_mode with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$direction with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$overrides with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$past_grade_start_date with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$sort with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$view_all with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 

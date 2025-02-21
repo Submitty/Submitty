@@ -494,9 +494,18 @@ HTML;
      * @param bool $show_import_teams_button
      * @param bool $show_export_teams_button
      * @param bool $show_edit_teams
+     * @param string $past_grade_start_date
+     * @param bool $view_all
+     * @param string $sort
+     * @param string $direction
+     * @param bool $anon_mode
+     * @param array<string, bool> $overrides
+     * @param array<string, string> $anon_ids
+     * @param bool $inquiry_status
+     * @param array<string> $grading_details_columns
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $grading_details_columns) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -883,6 +892,9 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
+        $columns = array_filter($columns, function($column) use ($grading_details_columns) {
+            return !in_array($column['function'], $grading_details_columns, true);
+        });
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
@@ -934,6 +946,7 @@ HTML;
             "overrides" => $overrides,
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
+            "csrf_token" => $this->core->getCsrfToken(),
         ]);
     }
 

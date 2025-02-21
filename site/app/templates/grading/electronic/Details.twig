@@ -77,6 +77,7 @@
     {% endif %}
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="toggleColumnsForm()" data-testid="toggle-columns">Toggle Columns</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -127,7 +128,7 @@
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
-                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">
+                        <th style="text-align: center" data-col-title="{{ column.title }}">
                             <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
@@ -142,7 +143,7 @@
                             </a>
                         </th>
                     {% else %}
-                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th style="text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>
@@ -235,6 +236,8 @@
         {# /Empty teams #}
     </table>
 </div>
+
+{% include('grading/electronic/ToggleGradingDetailsColumns.twig') %}
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
     <tr class="grade-table" data-testid="grade-table"
