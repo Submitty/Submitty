@@ -623,6 +623,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " new_thread";
             }
             if ($thread->isDeleted()) {
+                $class = str_replace(" new_thread", "", $class);
                 if ($isNewThread) {
                     $class .= " deleted-unviewed";
                 }
@@ -900,7 +901,7 @@ class ForumThreadView extends AbstractView {
                 return $x->getId();
             })->contains($user->getId()),
             "taTrue" => !$post->getUpduckers()->filter(function ($x) {
-                return $x->accessFullGrading();
+                return $x->accessGrading();
             })->isEmpty(),
         ];
 
