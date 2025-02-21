@@ -164,24 +164,39 @@ class AdminGradeableController extends AbstractController {
             $rubric_components = [];
             if (isset($_POST['rubric'])) {
                 $gradeable = $this->tryGetGradeable($values['id']);
+                // Delete the default blank component
+                $gradeable->deleteComponent($gradeable->getComponents()[0]);
                 foreach($_POST['rubric'] as $rubric_component) {
-                   $rubric_component['id'] = 0;
+                    $component_values = [
+                        'title',
+                        'ta_comment',
+                        'student_comment',
+                        'text',
+                        'peer_component',
+                        'page',
+                    ];
+                    if (!empty(array_diff($component_values, array_keys($rubric_component)))) {
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component does not have all of the parameters');
+                    }
                     try {
-                        $rubric_components[] = Component::import($this->core, $gradeable, $rubric_component);
+                        $rubric_components[] = $gradeable->importComponent($rubric_component);
                     }
                     catch (\OutOfBoundsException $exception) {
-                        $this->core->addErrorMessage('Rubric component does not have all required parameters: ' . $exception->getMessage());
-
+                        // Delete gradeable as to not leave the gradeable in a 'broken' state, and users can fix the JSON file and create a
+                        // fully functioning gradeable in one go instead of debugging a non-complete gradeable
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component has extra parameters: ' . $exception->getMessage());
                     }
                     catch (\Exception $exception) {
-//                        $this->core->addErrorMessage('An error has occurred: ' . $exception->getMessage());
+                        $this->deleteGradeable($values['id']);
                         return JsonResponse::getErrorResponse('An error has occurred: ' . $exception->getMessage());
                     }
                 }
-                $gradeable->setComponents($rubric_components);
+                // Save to the database
+                $this->core->getQueries()->updateGradeable($gradeable);
             }
-            return new MultiResponse(JsonResponse::getSuccessResponse('Gradeable successfully created'), null,  new RedirectResponse($this->core->buildCourseUrl(['gradeable', $values['id']])));
-        
+            return JsonResponse::getSuccessResponse($values['id']);
         }
         catch (ValidationException|\Exception $e) {
             return JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage());
