@@ -291,12 +291,7 @@ def send_pending_notifications():
             ) AND u.user_id IS NOT NULL
             GROUP BY g_id, g_title, team_id, u.user_id, u.user_email,
                 ns.all_released_grades, ns.all_released_grades_email,
-                eg_use_ta_grading, gcd_graded_version, egv_active_version
-            HAVING (
-                eg_use_ta_grading IS FALSE
-                OR
-                egv_active_version = gcd_graded_version
-            );
+                eg_use_ta_grading, gcd_graded_version, egv_active_version;
             """
         )
 
