@@ -974,14 +974,14 @@ class ElectronicGraderController extends AbstractController {
 
 
         //Get grading_details Columns
-        $grading_details_columns= [];
+        $grading_details_columns = [];
         if (isset($_COOKIE['grading_details_columns'])) {
-            $grading_details_columns= json_decode(urldecode($_COOKIE['grading_details_columns']), true);
+            $grading_details_columns = json_decode(urldecode($_COOKIE['grading_details_columns']), true);
         }
         else {
             //Expires 10 years from today (functionally indefinite)
             if (setcookie('grading_details_columns', urlencode(json_encode([])), time() + 60 * 60 * 24 * 365 * 10, '/')) {
-                $grading_details_columns= [];
+                $grading_details_columns = [];
             }
         }
 
@@ -1083,7 +1083,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status,$grading_details_columns);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $grading_details_columns);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
