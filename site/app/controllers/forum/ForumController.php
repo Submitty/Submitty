@@ -1365,7 +1365,9 @@ class ForumController extends AbstractController {
                 "post_attachments" => ForumUtils::getForumAttachments(
                     $post_id,
                     $result->getThread()->getId(),
-                    $result->getAttachments()->map(function ($x) {
+                    $result->getAttachments()->filter(function ($x) {
+                        return $x->isCurrent();
+                    })->map(function ($x) {
                         return $x->getFileName();
                     })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
