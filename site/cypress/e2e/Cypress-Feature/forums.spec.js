@@ -68,11 +68,26 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
+// Checks if a thread with the specified title exists
+const threadExists = (title) => {
+    return cy.get('body').then(($body) => {
+        return $body.find('[data-testid="thread-list-item"]').filter(`:contains(${title})`).length > 0;
+    });
+};
+
+// Removes all threads matching the specified title
 const removeThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="thread-dropdown"]').first().click();
-    cy.get('[data-testid="delete-post-button"]').first().click();
-    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+    threadExists(title).then((exists) => {
+        if (!exists) {
+            return;
+        }
+        cy.get('[data-testid="thread-list-item"]').contains(title).click();
+        cy.get('[data-testid="thread-dropdown"]').first().click();
+        cy.get('[data-testid="delete-post-button"]').first().click();
+        cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist').then(() => {
+            removeThread(title); // keeps on deleting until all threads with the name are removed
+        });
+    });
 };
 
 const uploadAttachmentAndDelete = (title, attachment) => {
@@ -156,15 +171,19 @@ const checkThreadduck = (order, ducks) => {
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
+        cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        cy.log('Removing threads');
+        removeThread(title1);
+        removeThread(title2);
+        removeThread(title3);
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
         createThread(title1, title1, 'Comment');
         replyDisabled(title1, attachment1);
-        removeThread(title1);
     });
 
     it('Create, reply to, merge, and delete threads', () => {
@@ -215,8 +234,5 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
-
-        // Remove threads
-        removeThread(title1);
     });
 });
