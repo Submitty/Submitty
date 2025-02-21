@@ -221,7 +221,6 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 
     describe('Should test the users who liked this post feature in the forum', () => {
-
         it('Should display the list of users who liked a post', () => {
             // Create a thread to test
             createThread(title1, content1, 'Comment');
