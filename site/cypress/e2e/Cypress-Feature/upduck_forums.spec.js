@@ -36,7 +36,7 @@ const checkStatsUpducks = (fullName, numUpducks) => {
     // Check the stats page for a user with fullName and
     // number of upducks numUpducks
     cy.get('[data-testid="more-dropdown"]').click();
-    cy.get('#forum_stats').click();
+    cy.get('[data-testid="forum_stats"]').click();
     cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
     cy.get('[title="Back to threads"]').click();
 };
