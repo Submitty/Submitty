@@ -50,11 +50,7 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 const removeThread = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
     cy.get('[data-testid="thread-dropdown"]').first().click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
     cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
     cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
 };
