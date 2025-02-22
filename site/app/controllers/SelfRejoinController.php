@@ -215,7 +215,7 @@ class SelfRejoinController extends AbstractController {
             you may move the student to the Null section.
         EMAIL;
 
-        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, term: $term, course: $course);
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $emails = [];
         $details = ["subject" => $subject, "body" => $body];
         foreach ($instructor_ids as $instructor_id) {
