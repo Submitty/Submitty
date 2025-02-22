@@ -390,14 +390,16 @@ EMAIL;
             $this->core->addErrorMessage('You must specify an email to send the verification to.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
-        $unverified_users = $this->core->getQueries()->getUnverifiedUserIdEmailExists($_GET['email'], '');
-        if (count($unverified_users) === 0) {
+
+        $unverified_user = $this->core->getCourseEntityManager()->getRepository(UnverifiedUserEntity::class).findBy(['user_email' => $_GET['email']]);
+        if ($unverified_user === null) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
+
         $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
-        $this->core->getQueries()->updateUserVerificationValues($_GET['email'], $verification_values['code'], $verification_values['exp']);
-        $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_users['user_id']);
+        $unverified_user->setVerificationValues($verification_values);
+        $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserId());
         $this->core->addSuccessMessage('Verification email resent.');
         return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
     }
@@ -409,18 +411,20 @@ EMAIL;
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
+        $em = $this->core->getCourseEntityManager();
+        $unverified_user = $em->getRepository(UnverifiedUserEntity::class).findBy(['verification_code' => $_GET['verification_code']]);
 
-        $verification_values = $this->core->getQueries()->getUserVerificationValuesByCode($_GET['verification_code']);
-
-        if ($verification_values === []) {
+        if ($unverified_user === null) {
             $this->core->addErrorMessage('The verification code is not correct. Verify you entered the correct code or resend the verification email');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
 
         $this->core->addSuccessMessage('You have successfully verified your email.');
-        $user = $this->core->getQueries()->getUnverifiedUser($_GET['verification_code']);
-        $this->core->getQueries()->insertSubmittyUser($user);
-        $this->core->getQueries()->removeUnverifiedUser($_GET['verification_code'], $user->getId());
+        
+        $this->core->getQueries()->convertUnverifiedUser($unverified_user);
+
+        $em->remove($unverified_user);
+        $em->flush();
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
 

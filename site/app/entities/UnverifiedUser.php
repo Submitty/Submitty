@@ -17,15 +17,11 @@ use Doctrine\Common\Collections\Collection;
  * Should (eventually) replace app\libraries\User as we refactor more code to use Doctrine.
  */
 #[ORM\Entity]
-#[ORM\Table(name: "users")]
-class UserEntity {
+#[ORM\Table(name: "unverified_users")]
+class UnverifiedUserEntity {
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
     protected string $user_id;
-
-    public function getId(): string {
-        return $this->user_id;
-    }
 
     #[ORM\Column(type: Types::STRING)]
     protected string $password;
@@ -39,6 +35,12 @@ class UserEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_email;
 
+    #[ORM\Column(type: Types::STRING)]
+    protected ?string $verification_code;
+
+    #[ORM\Column(type: Types::Timestamp)]
+    protected string $verification_expiration;
+
     public function getUserInfo() {
         $out = [];
         $out["given_name"] = $this->user_givenname;
@@ -47,5 +49,18 @@ class UserEntity {
         $out["password"] = $this->password;
         $out[""] = $this->display_pronouns;
 
+    }
+
+    public function getVerificationValues(): array {
+        return ['verification_code' => $this->verification_code, 'verification_expiration' => $this->verification_expiration];
+    }
+
+    public function setVerificationValues(array $values): void {
+        $this->verification_code = $values['verification_code'] ?? null;
+        $this->verification_expiration = $values['verification_expiration'];
+    }
+
+    public function getId(): string {
+        return $this->user_id;
     }
 }

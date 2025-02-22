@@ -9,7 +9,7 @@ use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
 
 /**
- * Class User
+ * Class UnverifiedUser
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
@@ -19,6 +19,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getLegalFamilyName() Get the family name of the loaded user
  * @method string getVerificationCode()
  * @method int getVerificationExpiration()
+ * @method void setVerificationCode(string $verification_code)
+ * @method void setVerificationExpiration(int $verification_expiration)
  * @method string getEmail()
  * @method void setEmail(string $email)
  */
