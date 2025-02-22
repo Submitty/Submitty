@@ -144,7 +144,7 @@ jobs:
           composer require symfony/twig-bundle
           cd ..
       - name: Lint Twig Templates
-        run: php tmp/bin/console lint:twig --format=github app/
+        run: php tmp/bin/console lint:twig --format=github  --excludes=tmp --exclude=vendor ./
 
   php-lint:
     name: PHP Lint
