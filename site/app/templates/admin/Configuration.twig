@@ -317,7 +317,7 @@
                         id="all-self-registration"
                         data-testid="all-self-registration"
                         value="true"
-                        {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                        {{ fields['self_registration_type'] == all_self_register ? 'checked' : '' }}
                         onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
                     />
                     <div>
@@ -333,6 +333,9 @@
                         <br/>
                         <span class="option-title">Default Section</span>
                         <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
+                            {% if fields['default_section'] is null %}
+                                <option value="" selected> NULL </option>
+                            {% endif %}
                             {% for section in fields['registration_sections'] %}
                                 <option 
                                     value="{{ section['sections_registration_id'] }}" 
