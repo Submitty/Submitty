@@ -110,7 +110,7 @@ class AdminGradeableController extends AbstractController {
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
             }
-            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
+            $values['bulk_upload'] = $_POST['bulk_upload'] ? 'true' : 'false';
         }
 
         if (array_key_exists('team_gradeable', $_POST)) {
@@ -126,10 +126,10 @@ class AdminGradeableController extends AbstractController {
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
-            $values['ta_grading'] = $_POST['ta_grading'];
+            $values['ta_grading'] = $_POST['ta_grading'] ? 'true' : 'false';
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = 'true';
-                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ? 'true' : 'false';
+                $values['grade_inquiry_per_component_allowed'] = ($_POST['grade_inquiries_per_component'] ?? false) ? 'true' : 'false';
             }
         }
 
@@ -145,9 +145,9 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
-            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
-            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
-            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['has_due_date'] = $dates['has_due_date'] ?? true;
+            $values['has_release_date'] = $dates['has_released_date'] ??  true;
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
@@ -171,7 +171,7 @@ class AdminGradeableController extends AbstractController {
                         'peer_component',
                         'page',
                     ];
-                    if (!empty(array_diff($component_values, array_keys($rubric_component)))) {
+                    if (count(array_diff($component_values, array_keys($rubric_component))) !== 0) {
                         $this->deleteGradeable($values['id']);
                         return JsonResponse::getErrorResponse('Rubric component does not have all of the parameters');
                     }

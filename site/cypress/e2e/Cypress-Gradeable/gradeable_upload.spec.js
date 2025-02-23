@@ -1,6 +1,6 @@
 import { getCurrentSemester } from '../../support/utils';
 import { getApiKey } from '../../support/utils';
-import { gradeable_json, rubric } from '../../support/api_testing_json';
+import { gradeable_json, rubric, bad_rubric } from '../../support/api_testing_json';
 describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
         // // API
@@ -117,7 +117,40 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                expect(response.body.message).to.eql('Invalid type');
+                expect(response.body.message).to.eql('An error has occurred: Invalid type');
+            });
+
+            // Invalid rubric error message
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: {
+                    title: 'Testing Json',
+                    instructions_url: '',
+                    id: 'hw-invalid',
+                    type: 'Electronic File',
+                    vcs: {
+                        repository_type: 'submitty-hosted',
+                        vcs_path: 'path/to/vcs',
+                        vcs_subdirectory: 'subdirectory',
+                    },
+                    bulk_upload: false,
+                    team_gradeable: {
+                        team_size_max: 3,
+                        gradeable_teams_read: false,
+                    },
+                    grading_inquiry: {
+                        grade_inquiry_per_component_allowed: false,
+                    },
+                    ta_grading: false,
+                    syllabus_bucket: 'Homework',
+                    rubric: bad_rubric
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.message).to.eql('Rubric component does not have all of the parameters');
             });
 
             // No ID, Type, or Title

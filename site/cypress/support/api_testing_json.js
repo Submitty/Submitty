@@ -301,3 +301,37 @@ export const rubric = [
         ],
     },
 ];
+
+export const bad_rubric = [
+    {
+        titl_e: 'Extra Credit',
+        ta_comment: 'Code should be properly indented and readable.',
+        student_comment: 'Code should include a readme(block comments) section at the top.',
+        lower_clamp: 0,
+        default: 0,
+        max_value: 0,
+        upper_clamp: 5,
+        text: false,
+        peer_component: false,
+        page: 0,
+        is_itempool_linked: false,
+        itempool: '',
+        marks: [
+            {
+                points: 0,
+                title: 'No Credit',
+                publish: false,
+            },
+            {
+                points: 2,
+                title: 'Extra credit done poorly',
+                publish: false,
+            },
+            {
+                points: 5,
+                title: 'Extra credit is acceptable',
+                publish: false,
+            },
+        ],
+    },
+]
