@@ -99,10 +99,14 @@ class Output {
         return $this->render;
     }
 
+    public function getTwig() {
+        return $this->twig;
+    }
+
     public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
-        $debug = $full_load && $this->core->getConfig()->isDebug();
+        $debug = $full_load && $this->core->getConfig()?->isDebug();
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
@@ -151,7 +155,7 @@ HTML;
         }));
 
         if ($full_load) {
-            if ($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()?->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     'site_uploads'
