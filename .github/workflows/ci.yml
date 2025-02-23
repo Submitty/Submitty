@@ -136,15 +136,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Install Symfony's Full Framework
-        run: composer create-project symfony/skeleton tmp
-      - name: Install Twig Dependency
-        run: |
-          cd tmp
-          composer require symfony/twig-bundle
-          cd ..
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
       - name: Lint Twig Templates
-        run: php tmp/bin/console lint:twig --format=github app/ public/ room_templates/
+        run: php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
 
   php-lint:
     name: PHP Lint
