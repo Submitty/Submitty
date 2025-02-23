@@ -144,7 +144,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                     },
                     ta_grading: false,
                     syllabus_bucket: 'Homework',
-                    rubric: bad_rubric
+                    rubric: bad_rubric,
                 },
                 headers: {
                     Authorization: key,
