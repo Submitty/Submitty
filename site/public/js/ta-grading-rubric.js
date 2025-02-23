@@ -2855,10 +2855,9 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
  * @return {void}
  */
 async function closeComponentGrading(component_id, saveChanges) {
-    GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
-    COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
-
     if (saveChanges) {
+        GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
+        COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
         await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden
