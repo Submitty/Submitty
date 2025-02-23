@@ -99,6 +99,9 @@ class Output {
         return $this->render;
     }
 
+    /**
+     * @return \Twig\Environment|null
+     */
     public function getTwig() {
         return $this->twig;
     }
