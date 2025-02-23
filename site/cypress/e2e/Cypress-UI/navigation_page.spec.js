@@ -193,7 +193,7 @@ describe('navigation page', () => {
             future: 5,
             beta: 3,
             open: 8,
-            closed: 6,
+            closed: 4,
             items_being_graded: 9,
             graded: 11,
         };
@@ -288,7 +288,7 @@ describe('navigation page', () => {
         const sections = {
             beta: 3,
             open: 8,
-            closed: 6,
+            closed: 4,
             items_being_graded: 9,
             graded: 11,
         };
@@ -304,7 +304,7 @@ describe('navigation page', () => {
 
         const sections = {
             open: 8,
-            closed: 6,
+            closed: 4,
             items_being_graded: 5,
             graded: 9,
         };
@@ -329,44 +329,29 @@ describe('navigation page', () => {
 });
 
 describe('locked gradeables', () => {
-    it('should show the locked gradeable for the instructor and message', () => {
-        cy.login('instructor');
-        cy.visit(['sample']);
-        cy.get('[data-testid="locked_homework"]').should('exist');
-        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
-            // Get the text from the onclick attribute
-            const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-            // Extract the prerequisite text
-            const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-            cy.on('window:alert', (alertText) => {
-                // Validate the alert text
-                expect(alertText).to.equal(`Please complete ${prerequisite}.`);
+    ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
+        it(`should show the locked gradeable for ${user} and message`, () => {
+            cy.login(user);
+            cy.visit(['sample']);
+            cy.get('[data-testid="locked_homework"]').should('exist');
+            cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
+                // Get the text from the onclick attribute
+                const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
+                // Extract the prerequisite text
+                const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
+                cy.on('window:alert', (alertText) => {
+                    // Validate the alert text
+                    expect(alertText).to.equal(`Please complete ${prerequisite}.`);
+                });
+                // Trigger the button click
+                cy.wrap($button).click();
             });
-            // Trigger the button click
-            cy.wrap($button).click();
         });
     });
+    
 
     it('should show the locked gradeable for the TA and message', () => {
         cy.login('ta');
-        cy.visit(['sample']);
-        cy.get('[data-testid="locked_homework"]').should('exist');
-        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
-            // Get the text from the onclick attribute
-            const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-            // Extract the prerequisite text
-            const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-            cy.on('window:alert', (alertText) => {
-                // Validate the alert text
-                expect(alertText).to.equal(`Please complete ${prerequisite}.`);
-            });
-            // Trigger the button click
-            cy.wrap($button).click();
-        });
-    });
-
-    it('should show the locked gradeable for the student and message', () => {
-        cy.login('student');
         cy.visit(['sample']);
         cy.get('[data-testid="locked_homework"]').should('exist');
         cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
