@@ -696,7 +696,7 @@ class CourseMaterialsController extends AbstractController {
             }
 
             // Retrieve the max size allowed from the course config
-            $max_size_mb = $this->core->getConfig()->getCourseMaterialsMaxFileUploadSize() ?? 100;
+            $max_size_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
             $max_size = $max_size_mb * 1024 * 1024;
 
             if ($file_size > $max_size) {

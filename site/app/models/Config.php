@@ -79,6 +79,7 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method int getCourseMaterialFileUploadLimitMb()
  */
 
 class Config extends AbstractModel {
@@ -648,16 +649,6 @@ class Config extends AbstractModel {
             $this->$key = $config[$section][$key];
         }
     }
-
-    /**
-     * Get the maximum file upload size for course materials in MB.
-     *
-     * @return int
-     */
-    public function getCourseMaterialsMaxFileUploadSize() {
-        return $this->course_material_file_upload_limit_mb;
-    }
-
 
     public function isSubmittyAdminUserVerified() {
         return !empty($this->verified_submitty_admin_user);
