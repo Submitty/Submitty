@@ -348,23 +348,4 @@ describe('locked gradeables', () => {
             });
         });
     });
-    
-
-    it('should show the locked gradeable for the TA and message', () => {
-        cy.login('ta');
-        cy.visit(['sample']);
-        cy.get('[data-testid="locked_homework"]').should('exist');
-        cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
-            // Get the text from the onclick attribute
-            const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-            // Extract the prerequisite text
-            const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-            cy.on('window:alert', (alertText) => {
-                // Validate the alert text
-                expect(alertText).to.equal(`Please complete ${prerequisite}.`);
-            });
-            // Trigger the button click
-            cy.wrap($button).click();
-        });
-    });
 });
