@@ -195,7 +195,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 9,
-            graded: 11,
+            graded: 12,
         };
         const gradeable_id = 'future_no_tas_homework';
 
@@ -290,7 +290,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 9,
-            graded: 11,
+            graded: 12,
         };
         validate_navigation_page_sections(sections);
         cy.get('.gradeable-row').each(($el) => {
@@ -306,7 +306,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 5,
-            graded: 9,
+            graded: 10,
         };
         validate_navigation_page_sections(sections);
 
