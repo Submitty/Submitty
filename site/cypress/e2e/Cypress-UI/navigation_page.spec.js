@@ -333,8 +333,8 @@ describe('locked gradeables', () => {
         it(`should show the locked gradeable for ${user} and message`, () => {
             cy.login(user);
             cy.visit(['sample']);
-            cy.get('[data-testid="locked_homework"]').should('exist');
-            cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
+            cy.get('[data-testid="locked_team_homework"]').should('exist');
+            cy.get('[data-testid="locked_team_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
                 // Get the text from the onclick attribute
                 const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
                 // Extract the prerequisite text

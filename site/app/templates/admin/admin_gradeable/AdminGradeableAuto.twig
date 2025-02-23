@@ -50,7 +50,7 @@
         <fieldset>
             <legend>Previous Gradeable:</legend>
             <div class="option-input col-md-6" style="padding: 0;">
-                <select name="depends_on" id="gradeable-lock" data-testid="gradeable-lock">
+                <select name="depends_on" id="gradeable-lock">
                     <option value="">Select prerequisite gradeable (Off)</option>
                     {% for template in template_list %}
                         {% if template.g_id != gradeable.getId() %}
