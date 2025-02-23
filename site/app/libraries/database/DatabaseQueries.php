@@ -1246,6 +1246,9 @@ WHERE term=? AND course=? AND user_id=?",
     }
 
     protected function createParameterList($len) {
+        if ($len < 1) {
+            return '(NULL)';
+        }
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
