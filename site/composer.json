@@ -35,8 +35,10 @@
     "ramsey/uuid": "4.7.6",
     "symfony/cache": "6.4.7",
     "symfony/config": "6.4.4",
+    "symfony/finder": "^6.4",
     "symfony/http-foundation": "6.4.14",
     "symfony/routing": "6.1.11",
+    "symfony/twig-bundle": "^6.4",
     "textalk/websocket": "1.6.3",
     "twig/twig": "3.19.0"
   },
