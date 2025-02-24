@@ -55,6 +55,8 @@ class Gradeable(object):
         self.min_grading_group = 3
         self.grading_rotating = []
         self.submissions = []
+        self.depends_on = None
+        self.depends_on_points = None
         self.max_random_submissions = None
         self.max_individual_submissions = 3
         self.team_assignment = False
@@ -216,6 +218,10 @@ class Gradeable(object):
                 self.team_assignment = gradeable["eg_team_assignment"] is True
             if "eg_max_team_size" in gradeable:
                 self.max_team_size = gradeable["eg_max_team_size"]
+            if "eg_depends_on" in gradeable:
+                self.depends_on = gradeable["eg_depends_on"]
+            if "eg_depends_on_points" in gradeable:
+                self.depends_on_points = gradeable["eg_depends_on_points"]
             if "eg_team_lock_date" in gradeable:
                 self.team_lock_date = dateutils.parse_datetime(
                     gradeable["eg_team_lock_date"]
@@ -389,6 +395,8 @@ class Gradeable(object):
                 eg_peer_grading=self.peer_grading,
                 eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
                 eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
+                eg_depends_on=self.depends_on,
+                eg_depends_on_points=self.depends_on_points
             )
 
         for component in self.components:
