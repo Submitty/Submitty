@@ -107,7 +107,7 @@ class OfficeHoursQueueModel extends AbstractModel {
     }
 
     public function getName() {
-        if (!empty($this->core->getUser()->getPreferredGivenName()) && !empty($this->core->getUser()->getPreferredFamilyName())) {
+        if ($this->core->getUser()->getPreferredGivenName() && $this->core->getUser()->getPreferredFamilyName()) {
             return $this->core->getUser()->getPreferredGivenName() . " " . $this->core->getUser()->getPreferredFamilyName();
         }
         if (!isset($this->last_queue_details)) {
