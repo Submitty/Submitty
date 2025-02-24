@@ -77,16 +77,19 @@ const threadExists = (title) => {
 
 // Removes all threads matching the specified title
 const removeThread = (title) => {
+    cy.reload();
     threadExists(title).then((exists) => {
-        if (!exists) {
-            return;
+        if (exists) {
+            cy.get('[data-testid="thread-list-item"]').contains(title).click();
+            cy.get('[data-testid="thread-dropdown"]').first().click();
+            cy.get('[data-testid="delete-post-button"]').first().click();
+            cy.get('[data-testid="thread-list-item"]').contains(title).then(($thread) => {
+                console.log($thread);
+                if ($thread.length) {
+                    removeThread(title);
+                }
+            });
         }
-        cy.get('[data-testid="thread-list-item"]').contains(title).click();
-        cy.get('[data-testid="thread-dropdown"]').first().click();
-        cy.get('[data-testid="delete-post-button"]').first().click();
-        cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist').then(() => {
-            removeThread(title); // keeps on deleting until all threads with the name are removed
-        });
     });
 };
 
@@ -181,9 +184,16 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         removeThread(title3);
     });
 
+    it('Remove threads removes all threads with the same title', () => {
+        createThread(title1, content1, 'Comment');
+        createThread(title1, content1, 'Comment');
+        removeThread(title1);
+    });
+
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
         createThread(title1, title1, 'Comment');
         replyDisabled(title1, attachment1);
+        removeThread(title1);
     });
 
     it('Create, reply to, merge, and delete threads', () => {
@@ -234,5 +244,6 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
+        removeThread(title1);
     });
 });
