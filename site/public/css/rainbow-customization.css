@@ -150,19 +150,6 @@
     padding: 5px;
 }
 
-[data-theme="dark"] .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
-    color: var(--text-black);
-}
-
-.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
-    content: "";
-    position: absolute;
-    top: -14%;
-    right: 50%;
-    border: 9px solid transparent;
-    border-bottom-color: var(--standard-dark-gray);
-}
-
 .same-section-name-warning-triangle {
     margin-top: 4px;
     margin-bottom: 6px;
@@ -183,6 +170,19 @@
     color: var(--text-white);
     font-size: 16px;
     padding: 5px;
+}
+
+[data-theme="dark"] .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
+    color: var(--text-black);
+}
+
+.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
+    content: "";
+    position: absolute;
+    top: -14%;
+    right: 50%;
+    border: 9px solid transparent;
+    border-bottom-color: var(--standard-dark-gray);
 }
 
 [data-theme="dark"] .same-section-name-warning-triangle > .tooltiptext.tooltipbottom {

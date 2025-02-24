@@ -189,7 +189,7 @@ function DetectSameSectionName() {
 
     // Count number of each section name, skip invalid names
     $(".sections_and_labels").each(function () {
-        const label = this.value; 
+        const label = this.value;
         if (!label) {
             return;
         }
