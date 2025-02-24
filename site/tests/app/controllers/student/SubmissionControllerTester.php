@@ -196,7 +196,8 @@ class SubmissionControllerTester extends BaseUnitTest {
             'depends_on' => null,
             'depends_on_points' => null,
             'allow_custom_marks' => true,
-            'any_manual_grades' => false
+            'any_manual_grades' => false,
+            'notifications_sent' => false
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {

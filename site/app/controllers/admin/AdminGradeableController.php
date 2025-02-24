@@ -348,7 +348,8 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'notifications_sent' => false
         ]);
     }
 
@@ -556,6 +557,7 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
+            'notifications_sent' => $gradeable->getNotificationsSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1370,7 +1372,8 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory',
             'has_due_date',
             'has_release_date',
-            'allow_custom_marks'
+            'allow_custom_marks',
+            'notifications_sent'
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1480,6 +1483,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'notifications_sent' && $post_val === false && $gradeable->getNotificationsSent()) {
+                $this->core->getQueries()->resetGradeableNotifications($gradeable);
             }
 
             // Try to set the property
