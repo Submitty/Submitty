@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Because it seems I'm always re-adding the same print statements, might as well just collect them
 # into one file
 
