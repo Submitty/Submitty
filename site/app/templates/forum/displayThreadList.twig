@@ -3,50 +3,41 @@
         <div class="{{ thread.class }}">
             <div class="flex-row"  data-testid="flex-row">
                 <span class="thread-left-cont">
-                    <span class="thread-list-item" data-testid="thread-list-item">
-                        {% if thread.current_user_posted %}
-                            <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
-                        {% endif %}
-                        {{ thread.title }}
-                    </span>
-                    <span class="thread-content">{{ thread.content }}</span>
+                    <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
+                </span>
+                <span class="thread-right-cont">
+                    {% if thread.pinned %}
+                        {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
+                        {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
+                        <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
+                    {% endif %}
+                    {% if thread.favorite %}
+                        <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
+                    {% endif %}
+                    {% if thread.merged_thread_id != -1 %}
+                        <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
+                    {% endif %}
+                    {% if thread.status != 0 %}
+                        <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
+                        title="{{ thread.tooltip }}"
+                        aria-label="{{ thread.tooltip }}"
+                        ></i>
+                    {% endif %}
+                    {% if thread.is_locked %}
+                        <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
+                    {% endif %}
+                </span>
+            </div>
 
+            <span class="thread-content">{{ thread.content }}</span>
+
+            <span class="thread-info-bar">
+                <span class="thread-categories-bar">
                     {% for category in thread.categories %}
                         <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
                     {% endfor %}
                 </span>
-                <span class="thread-right-cont">
-                    <span>
-                        {% if thread.pinned %}
-                            {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
-                            {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
-                            <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
-                        {% endif %}
-                        {% if thread.favorite %}
-                            <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
-                        {% endif %}
-                        {% if thread.merged_thread_id != -1 %}
-                            <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
-                        {% endif %}
-
-                        {% if thread.status != 0 %}
-                            <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
-                               title="{{ thread.tooltip }}"
-                               aria-label="{{ thread.tooltip }}"
-                            ></i>
-                        {% endif %}
-
-                        {% if thread.is_locked %}
-                            <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
-                        {% endif %}
-                    </span>
-                    {% if thread.date.not_null %}
-                        <span class="thread-date">{{ thread.date.formatted }}</span>
-                    {% endif %}
-                </span>
-            </div>
-            {% if is_full_page is defined and is_full_page %}
-                <span>
+                <span class="upduck-post-cont">
                     <i  
                         data-testid="thread-upduck-button" 
                         class="upduck-button text-decoration-none" 
@@ -59,20 +50,21 @@
                             height="30"
                         >
                     </i>
-                    <span data-testid="thread-like-count" 
-                        id="Thread_likeCounter_{{thread.thread_id}}" 
-                        class="thread-like-counter">{{ thread.sum_ducks }}</span>
-                </span>
-                <div class="post-action-container" data-testid="post-action-container">
-
-                    <span>
-                    <strong class="post_user_id">{{thread.author_info.name}}</strong>
-                        {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                            <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
-                        {% endif %}
+                    <span data-testid="thread-like-count"
+                        id="Thread_likeCounter_{{thread.thread_id}}"
+                        class="thread-like-counter"
+                        style="margin-right: 25px;">
+                        {{ thread.sum_ducks }}
                     </span>
-                </div>
-            {% endif %}
+                    <i class="fas fa-comments" style="position: relative; top: -1px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                    <span data-testid="thread-post-count"
+                        id="Thread_postCounter_{{thread.thread_id}}"
+                        class="thread-post-counter">
+                        {{ thread.num_posts }}
+                    </span>
+                </span>
+            </span>
+
         </div>
     </a>
 

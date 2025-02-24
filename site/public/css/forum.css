@@ -770,6 +770,7 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,
 .thread-box-full .flex-row {
+    display: flex;
     align-items: stretch;
     justify-content: flex-end;
 }
@@ -780,11 +781,10 @@
 }
 
 .thread-right-cont {
-    display: flex;
     flex: 1;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-end;
+    display: inline-flex;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
 }
 
 .thread-left-cont {
@@ -889,4 +889,14 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+.post-cont {
+    display: inline-flex;
+    margin-left: 15px;
+}
+
+.upduck-post-cont {
+    display: inline-flex;
+    align-items: center;
 }
