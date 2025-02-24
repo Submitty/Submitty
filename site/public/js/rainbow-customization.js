@@ -185,10 +185,10 @@ function DetectSameSectionName() {
     let hasDuplicates = false;
 
     // Reset labels to remove override class
-    $(".sections_and_labels").removeClass('override');
+    $('.sections_and_labels').removeClass('override');
 
     // Count number of each section name, skip invalid names
-    $(".sections_and_labels").each(function () {
+    $('.sections_and_labels').each(function () {
         const label = this.value;
         if (!label) {
             return;
@@ -201,7 +201,7 @@ function DetectSameSectionName() {
     });
 
     // Add override class to duplicate section names only
-    $(".sections_and_labels").each(function () {
+    $('.sections_and_labels').each(function () {
         const label = this.value;
         if (labelCounts[label] > 1) {
             $(this).addClass('override');
@@ -210,7 +210,7 @@ function DetectSameSectionName() {
     });
 
     // Show/hide warning triangle
-    const warningIcon = $(`#section-duplicate-warning`);
+    const warningIcon = $('#section-duplicate-warning');
     if (hasDuplicates) {
         warningIcon.show();
     }
@@ -224,7 +224,7 @@ $(document).ready(() => {
     DetectSameSectionName();
 
     // Run at input events
-    $(".sections_and_labels").on("input", function () {
+    $('.sections_and_labels').on('input', function () {
         DetectSameSectionName();
     });
 });
