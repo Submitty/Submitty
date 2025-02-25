@@ -516,7 +516,7 @@ HTML;
         // title => displayed title in the table header
         // function => maps to a macro in Details.twig:render_student
         $columns = [];
-        $columns[] = ["title" => "", "function" => "index"];
+        $columns[] = ["title" => "#", "function" => "index"];
         $columns[] = ["title" => "Section", "function" => "section"];
 
         $team_and_anon = ($this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER &&
