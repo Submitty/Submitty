@@ -840,6 +840,7 @@ function saveChanges() {
         //     console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
         // },
         error: function (jqXHR, textStatus, errorThrown) {
+            // TODO: fix this, since I switched rainbow_grades_customization_save from JsonResponse to renderJsonSuccess/renderJsonFail
             console.log('AJAX error:', jqXHR, textStatus, errorThrown);
             let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
             try {

@@ -613,7 +613,8 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
-    public function writetocustomization(): JsonResponse {
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
+    public function writeToCustomization() {
         // Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -621,7 +622,7 @@ class ReportController extends AbstractController {
         if (isset($_POST["json_string"])) {
             try {
                 $customization->processForm();
-                return JsonResponse::getSuccessResponse();
+                return $this->core->getOutput()->renderJsonSuccess();
             }
             catch (\Exception $e) {
                 $msg = 'Error processing form';
@@ -631,12 +632,12 @@ class ReportController extends AbstractController {
             $msg = 'No JSON string provided';
         }
 
-        $this->core->addErrorMessage($msg);
-        return JsonResponse::getErrorResponse($msg);
+        return $this->core->getOutput()->renderJsonError($msg);
     }
 
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -648,15 +649,15 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
+                return $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
             }
             catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
-                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+                return $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
             }
             catch (\Exception $e) {
                 //Catches any other exceptions, should be "unexpected" issues
-                $this->core->getOutput()->renderJsonError($e->getMessage());
+                return $this->core->getOutput()->renderJsonError($e->getMessage());
             }
         }
         else {
@@ -711,6 +712,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ["POST"])]
     public function executeBuildForm(): JsonResponse {
         // Configure json to go into jobs queue
         $job_json = [
