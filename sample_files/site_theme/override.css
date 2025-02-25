@@ -5,6 +5,7 @@ body {
 
 /* Make the center site have a transparent white bg instead of the blue gradient */
 #submitty-body {
+    /* stylelint-disable-next-line declaration-no-important */
     background: rgba(240,240,240, 0.85) !important;
 }
 
