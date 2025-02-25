@@ -251,7 +251,7 @@
                 const histogram = document.getElementById('chartContainer');
 
                 for (option of Object.keys(updates)) {
-                    graph_data[0].y[responseIndexMap[option]] = updates[option];
+                    graph_data[0].y[responseIndexMap[option]] += updates[option];
                 }
                 
                 Plotly.restyle(histogram, { y: [graph_data[0].y] });

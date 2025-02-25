@@ -686,21 +686,18 @@ class PollController extends AbstractController {
 
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
+            $web_socket_message['message'][$response->getOption()->getResponse()] = -1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
                 $em->persist($response);
+                $web_socket_message['message'][$response->getOption()->getResponse()] += 1;
             }
         }
 
         $em->flush();
-
-        foreach ($poll->getOptions() as $option) {
-            $web_socket_message['message'][$option->getResponse()] = $option->getUserResponses()->count();
-        }
-
         $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
