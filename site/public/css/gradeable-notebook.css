@@ -100,6 +100,7 @@ img {
     margin-top: 10px;
 }
 
+/* stylelint-disable declaration-no-important */
 /* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
     background-color: var(--standard-input-background) !important;
@@ -107,6 +108,7 @@ img {
     border-radius: 4px !important;
     vertical-align: middle !important;
 }
+/* stylelint-enable declaration-no-important */
 
 /* stylelint-disable-next-line selector-class-pattern */
 .small-mirror .CodeMirror {

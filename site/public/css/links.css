@@ -110,6 +110,7 @@ a.btn {
     text-decoration: none;
 }
 
+/* stylelint-disable declaration-no-important */
 /* stylelint-disable-next-line no-descending-specificity */
 .black-btn,
 .black-btn > i.fas {
@@ -128,3 +129,4 @@ a.btn {
     color: #991313 !important;
     border-color: #991313 !important;
 }
+/* stylelint-enable declaration-no-important */

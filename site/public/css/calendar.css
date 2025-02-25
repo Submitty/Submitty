@@ -197,6 +197,7 @@ a.cal-btn:focus {
 
 /* each item in the day cell */
 .cal-gradeable-item {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black)!important;
     margin: 1px;
     text-decoration: none;
@@ -262,6 +263,7 @@ a.cal-gradeable-status-ann:hover {
     padding: 0;
     font-style: italic;
     border-style: solid;
+    /* stylelint-disable-next-line declaration-no-important */
     border-width: 3px!important;
 }
 
@@ -294,6 +296,7 @@ a.cal-gradeable-status-link:focus {
 
 .calendar-color-blue {
     background-color: var(--standard-medium-vibrant-blue);
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black)!important;
 }
 

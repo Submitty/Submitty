@@ -104,7 +104,9 @@ nav a > i.f {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /* stylelint-disable-next-line declaration-no-important */
     margin: 0 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     padding: 8px 14px !important;
 }
 
@@ -128,6 +130,7 @@ footer {
 
 /* stylelint-disable-next-line no-descending-specificity */
 footer a {
+    /* stylelint-disable-next-line declaration-no-important */
     text-decoration: none !important;
 }
 
@@ -166,6 +169,7 @@ footer .footer-separator {
 
     /* specificity less than no @media since :not stated (for speed) */
     #breadcrumbs > * {
+        /* stylelint-disable-next-line declaration-no-important */
         display: block !important;
     }
 
