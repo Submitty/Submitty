@@ -108,12 +108,14 @@
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
+/* stylelint-disable declaration-no-important */
 .CodeMirror {
     background-color: var(--standard-input-background) !important;
     border: 1px solid var(--standard-light-gray) !important;
     border-radius: 4px !important;
     vertical-align: middle !important;
 }
+/* stylelint-enable declaration-no-important */
 
 /**
  * Multiple choice widget styles

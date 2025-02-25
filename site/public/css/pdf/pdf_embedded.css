@@ -17,6 +17,7 @@
     box-shadow: 0 0 3px var(--standard-light-medium-gray);
 }
 
+/* stylelint-disable declaration-no-important */
 .pdfViewer .page {
     /* describe all css properties independently so js can read it easily across all platforms */
     margin-top: 5px !important;
@@ -25,3 +26,4 @@
     margin-left: auto !important;
     border: none !important;
 }
+/* stylelint-enable declaration-no-important */

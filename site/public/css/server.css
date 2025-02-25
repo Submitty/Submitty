@@ -849,6 +849,7 @@ td > a.active-sort {
     width: 100%;
     padding: 0 50px 50px;
     font-size: 18px;
+    /* stylelint-disable-next-line declaration-no-important */
     text-align: left !important;
 }
 
@@ -919,12 +920,14 @@ tbody.collapse.in {
     clear: both;
     font-weight: normal;
     line-height: 1.4286;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
     white-space: nowrap;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--standard-deep-dark-gray) !important;
     text-decoration: none;
     background-color: var(--btn-standard-pale-blue-gray);
@@ -1104,12 +1107,14 @@ div.full-height {
 /* Used to pick the Submitty logo to show based on the theme */
 [data-theme="dark"] #logo-submitty-light,
 #logo-submitty {
+    /* stylelint-disable-next-line declaration-no-important */
     display: block !important;
 }
 
 /* Used to pick the Submitty logo to show based on the theme */
 [data-theme="dark"] #logo-submitty,
 #logo-submitty-light {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1275,6 +1280,7 @@ body.no-scroll {
 
 .close-button {
     margin-right: 5px;
+    /* stylelint-disable-next-line declaration-no-important */
     border: 1px solid var(--default-black) !important;
 }
 
@@ -1713,6 +1719,7 @@ end of styles used in the admin gradeable page
     color: var(--alert-danger-red);
 }
 
+/* stylelint-disable declaration-no-important */
 .black-btn,
 .black-btn > i {
     color: var(--text-black) !important;
@@ -1733,6 +1740,7 @@ end of styles used in the admin gradeable page
     color: var(--external-link-active) !important;
     border-color: var(--external-link-active) !important;
 }
+/* stylelint-enable declaration-no-important */
 
 .flex-row {
     display: flex;
@@ -1784,6 +1792,7 @@ end of styles used in the admin gradeable page
 }
 
 .mobile-block {
+    /* stylelint-disable-next-line declaration-no-important */
     display: block !important;
 }
 
@@ -1849,11 +1858,13 @@ header > * {
 }
 
 .full-width {
+    /* stylelint-disable-next-line declaration-no-important */
     width: 100% !important;
     display: block;
 }
 
 .align-left {
+    /* stylelint-disable-next-line declaration-no-important */
     text-align: left !important;
 }
 
@@ -1900,6 +1911,7 @@ header > * {
     }
 
     .mobile-block {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 }

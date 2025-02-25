@@ -112,6 +112,7 @@
     width: 20em;
 }
 
+/* stylelint-disable declaration-no-important */
 .icon {
     background: none !important;
     border: none;
@@ -122,6 +123,7 @@
     font-size: 100%;
     cursor: pointer;
 }
+/* stylelint-enable declaration-no-important */
 
 .fas {
     color: var(--btn-default-text);
