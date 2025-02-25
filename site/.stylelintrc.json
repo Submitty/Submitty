@@ -6,7 +6,7 @@
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "media-feature-range-notation": null,
-    "declaration-no-important": [true, { "max": 91}]
+    "declaration-no-important": true
   },
   "ignoreFiles": [
     "vendor/**",
