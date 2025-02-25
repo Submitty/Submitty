@@ -372,7 +372,7 @@ To remove a curve simply blank all boxes."></i>
                 <div class="input-boxes">
                     {% for section, label in sections_and_labels %}
                         <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
-                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}" onkeyup="DetectSameSectionName();">
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
                     {% endfor %}
                 </div>
             </div>
