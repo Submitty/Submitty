@@ -64,7 +64,6 @@ const removeThread = (title) => {
             cy.get('[data-testid="thread-dropdown"]').first().click();
             cy.get('[data-testid="delete-post-button"]').first().click();
             cy.get('[data-testid="thread-list-item"]').contains(title).then(($thread) => {
-                console.log($thread);
                 if ($thread.length) {
                     removeThread(title);
                 }
