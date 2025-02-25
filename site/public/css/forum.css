@@ -243,10 +243,9 @@
 
 
 .post-action-container {
-    margin-top: 8px;
-    margin-left: 10px;
-    float: right;
-    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .post-email-toggle,
@@ -770,6 +769,7 @@
 /* stylelint-disable-next-line selector-class-pattern */
 .thread_box .flex-row,
 .thread-box-full .flex-row {
+    display: flex;
     align-items: stretch;
     justify-content: flex-end;
 }
@@ -779,17 +779,48 @@
     color: var(--text-black);
 }
 
-.thread-right-cont {
-    display: flex;
+.thread-title-cont {
+    flex: 3;
+}
+
+.thread-icons-cont {
     flex: 1;
-    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.thread-icons-cont:empty {
+    display: none;
+}
+
+.thread-info-container {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    align-items: center;
+}
+
+.sub-info-container {
+    display: flex;
+    flex-grow: 1;
+    column-gap: 16px;
     justify-content: space-between;
+    align-items: center;
+}
+
+.count-container {
+    white-space: nowrap;
+}
+
+.post-action-container {
+    margin-left: auto;
+}
+
+.thread-date {
+    display: flex;
+    flex-direction: column;
     align-items: flex-end;
 }
 
-.thread-left-cont {
-    flex: 3;
-}
 /* stylelint-disable-next-line selector-class-pattern */
 .viewed_post {
     background-color: var(--default-white);
