@@ -8,7 +8,6 @@ use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
-use app\models\RainbowCustomizationJSON;
 use app\views\admin\ConfigurationView;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -169,8 +168,6 @@ class ConfigurationController extends AbstractController {
             }
         }
         elseif ($name === 'auto_rainbow_grades') {
-            // Validation for auto_rainbow_grades checkbox
-
             $entry = $entry === "true";
         }
 
