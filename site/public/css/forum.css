@@ -779,17 +779,46 @@
     color: var(--text-black);
 }
 
-.thread-left-cont {
+.thread-title-cont {
     flex: 3;
 }
 
-.thread-right-cont {
+.thread-icons-cont {
     flex: 1;
     justify-content: flex-end;
 }
 
-.thread-right-cont:empty {
+.thread-icons-cont:empty {
     display: none;
+}
+
+.thread-info-container {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 16px;
+    align-items: center;
+}
+
+.sub-info-container {
+    display: flex;
+    flex-grow: 1;
+    column-gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.count-container {
+    white-space: nowrap;
+}
+
+.post-action-container {
+    margin-left: auto;
+}
+
+.thread-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -891,9 +920,4 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
-}
-
-.upduck-post-cont {
-    display: inline-flex;
-    align-items: center;
 }
