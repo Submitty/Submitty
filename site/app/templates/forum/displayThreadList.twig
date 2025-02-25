@@ -31,8 +31,8 @@
 
             <div class="thread-content">{{ thread.content }}</div>
 
-            <div class="thread-info-bar" style="display: flex; gap: 20px; align-items: center;">
-                <span class="thread-categories-bar">
+            <div class="thread-info-bar" style="display: flex; flex-wrap: wrap; column-gap: 15px; align-items: center;">
+                <span class="categories-container">
                     {% for category in thread.categories %}
                         {% set tag = category[0] %}
                         {% if (is_full_page is not defined or not is_full_page) and tag|length > 20 %}
@@ -41,58 +41,59 @@
                         <span class="label_forum" style="background-color: {{ category[1] }}">{{ tag }}</span>
                     {% endfor %}
                 </span>
-                {% set countsStyle = (is_full_page is defined and is_full_page) ? "" : "margin-left: auto;" %}
-                {% set postActionStyle = (is_full_page is defined and is_full_page) ? "margin-left: auto;" : "" %}
-                <span class="counts-container" style="{{ countsStyle }} white-space: nowrap;">
-                    <i  
-                        data-testid="thread-upduck-button" 
-                        class="upduck-button text-decoration-none" 
-                        title="Total upduck">
-                        <img 
-                            id="ThreadsumDucksIcon_{{thread.thread_id}}" 
-                            src="{{'/img/on-duck-button.svg'}}" 
-                            alt="sum_like"
-                            width="30" 
-                            height="30"
-                        >
-                    </i>
-                    <span data-testid="thread-like-count"
-                        id="Thread_likeCounter_{{thread.thread_id}}"
-                        class="thread-like-counter"
-                        style="margin-right: 21px;">
-                        {{ thread.sum_ducks }}
-                    </span>
-                    <i class="fas fa-comments" style="position: relative; top: -1px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
-                    <span data-testid="thread-post-count"
-                        id="Thread_postCounter_{{thread.thread_id}}"
-                        class="thread-post-counter">
-                        {{ thread.num_posts }}
-                    </span>
-                </span>
 
-                <span class="post-action-container" data-testid="post-action-container" style="{{ postActionStyle}}">
-                    {% if is_full_page is defined and is_full_page %}
-                        {% if thread.date.not_null %}
-                            <span class="thread-date">{{ thread.date.formatted }}</span>
-                        {% endif %}
-                        <span>
-                            <strong class="post_user_id">{{thread.author_info.name}}</strong>
-                            {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                                <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
+                <span class="info-container" style="display: flex; flex-grow: 1; column-gap: 15px; justify-content: space-between; align-items: center;">
+                    <span class="count-container" style="white-space: nowrap;">
+                        <i  
+                            data-testid="thread-upduck-button" 
+                            class="upduck-button text-decoration-none" 
+                            style="margin-right: 5px;" 
+                            title="Total upduck">
+                            <img 
+                                id="ThreadsumDucksIcon_{{thread.thread_id}}" 
+                                src="{{'/img/on-duck-button.svg'}}" 
+                                alt="sum_like"
+                                width="30" 
+                                height="30"
+                            >
+                        </i>
+                        <span data-testid="thread-like-count"
+                            id="Thread_likeCounter_{{thread.thread_id}}"
+                            class="thread-like-counter"
+                            style="margin-right: 20px;">
+                            {{ thread.sum_ducks }}
+                        </span>
+                        <i class="fas fa-comments" style="position: relative; top: -1px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                        <span data-testid="thread-post-count"
+                            id="Thread_postCounter_{{thread.thread_id}}"
+                            class="thread-post-counter">
+                            {{ thread.num_posts }}
+                        </span>
+                    </span>
+
+                    <span class="post-action-container" data-testid="post-action-container" style="margin-left: auto">
+                        {% if is_full_page is defined and is_full_page %}
+                            {% if thread.date.not_null %}
+                                <span class="thread-date">{{ thread.date.formatted }}</span>
                             {% endif %}
-                        </span>
-                    {% elseif thread.date.not_null %}
-                        {% set dateArray = thread.date.formatted|split(" ") %}
-                        <span class="thread-date" style="display: flex; flex-direction: column; align-items: flex-end;">
-                            <span class="date">{{ dateArray[0] }}</span>
-                            <span class="time">{{ dateArray[1] }} {{ dateArray[2] }}</span>
-                        </span>
-                    {% endif %}
+                            <span>
+                                <strong class="post_user_id">{{thread.author_info.name}}</strong>
+                                {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
+                                    <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
+                                {% endif %}
+                            </span>
+                        {% elseif thread.date.not_null %}
+                            {% set dateArray = thread.date.formatted|split(" ") %}
+                            <span class="thread-date" style="display: flex; flex-direction: column; align-items: flex-end;">
+                                <span class="date">{{ dateArray[0] }}</span>
+                                <span class="time">{{ dateArray[1] }} {{ dateArray[2] }}</span>
+                            </span>
+                        {% endif %}
+                    </span>
                 </span>
             </div>
 
         </div>
     </a>
-
 
 {% endfor %}
