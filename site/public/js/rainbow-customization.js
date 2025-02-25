@@ -224,7 +224,7 @@ $(document).ready(() => {
     DetectSameSectionName();
 
     // Run at input events
-    $('.sections_and_labels').on('input', function () {
+    $('.sections_and_labels').on('input', () => {
         DetectSameSectionName();
     });
 });
