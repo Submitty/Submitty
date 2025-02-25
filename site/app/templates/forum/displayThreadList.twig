@@ -6,38 +6,44 @@
                     <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
                 </span>
                 <span class="thread-right-cont">
-                    {% if thread.pinned %}
+                    {%- if thread.pinned -%}
                         {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
                         {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
                         <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
-                    {% endif %}
-                    {% if thread.favorite %}
+                    {%- endif -%}
+                    {%- if thread.favorite -%}
                         <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
-                    {% endif %}
-                    {% if thread.merged_thread_id != -1 %}
+                    {%- endif -%}
+                    {%- if thread.merged_thread_id != -1 -%}
                         <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
-                    {% endif %}
-                    {% if thread.status != 0 %}
+                    {%- endif -%}
+                    {%- if thread.status != 0 -%}
                         <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
                         title="{{ thread.tooltip }}"
                         aria-label="{{ thread.tooltip }}"
                         ></i>
-                    {% endif %}
-                    {% if thread.is_locked %}
+                    {%- endif -%}
+                    {%- if thread.is_locked -%}
                         <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
-                    {% endif %}
+                    {%- endif -%}
                 </span>
             </div>
 
-            <span class="thread-content">{{ thread.content }}</span>
+            <div class="thread-content">{{ thread.content }}</div>
 
-            <span class="thread-info-bar">
+            <div class="thread-info-bar" style="display: flex; gap: 20px; align-items: center;">
                 <span class="thread-categories-bar">
                     {% for category in thread.categories %}
-                        <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
+                        {% set tag = category[0] %}
+                        {% if (is_full_page is not defined or not is_full_page) and tag|length > 20 %}
+                            {% set tag = category[0]|slice(0, 17) ~ "..." %}
+                        {% endif %}
+                        <span class="label_forum" style="background-color: {{ category[1] }}">{{ tag }}</span>
                     {% endfor %}
                 </span>
-                <span class="upduck-post-cont">
+                {% set countsStyle = (is_full_page is defined and is_full_page) ? "" : "margin-left: auto;" %}
+                {% set postActionStyle = (is_full_page is defined and is_full_page) ? "margin-left: auto;" : "" %}
+                <span class="counts-container" style="{{ countsStyle }} white-space: nowrap;">
                     <i  
                         data-testid="thread-upduck-button" 
                         class="upduck-button text-decoration-none" 
@@ -53,7 +59,7 @@
                     <span data-testid="thread-like-count"
                         id="Thread_likeCounter_{{thread.thread_id}}"
                         class="thread-like-counter"
-                        style="margin-right: 25px;">
+                        style="margin-right: 21px;">
                         {{ thread.sum_ducks }}
                     </span>
                     <i class="fas fa-comments" style="position: relative; top: -1px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
@@ -63,7 +69,27 @@
                         {{ thread.num_posts }}
                     </span>
                 </span>
-            </span>
+
+                <span class="post-action-container" data-testid="post-action-container" style="{{ postActionStyle}}">
+                    {% if is_full_page is defined and is_full_page %}
+                        {% if thread.date.not_null %}
+                            <span class="thread-date">{{ thread.date.formatted }}</span>
+                        {% endif %}
+                        <span>
+                            <strong class="post_user_id">{{thread.author_info.name}}</strong>
+                            {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
+                                <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
+                            {% endif %}
+                        </span>
+                    {% elseif thread.date.not_null %}
+                        {% set dateArray = thread.date.formatted|split(" ") %}
+                        <span class="thread-date" style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <span class="date">{{ dateArray[0] }}</span>
+                            <span class="time">{{ dateArray[1] }} {{ dateArray[2] }}</span>
+                        </span>
+                    {% endif %}
+                </span>
+            </div>
 
         </div>
     </a>
