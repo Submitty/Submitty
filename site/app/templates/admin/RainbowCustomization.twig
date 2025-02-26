@@ -44,6 +44,7 @@
         </div>
 
         <div id="save_status_container" class="customization_item">
+         <div id="status_head">
             <div id="build_buttons">
                 <button
                     id="btn-build-customization"
@@ -57,15 +58,18 @@
                     Build
                 </button>
             </div>
-            <span id="status_label" style="padding-right: 4px;">Status: </span>
-            <div id="save_status" data-testid="save-status">
+            <div style="display: flex; align-items: center;">
+            <div id="status_label" style="padding-right: 4px;">Status: </div>
+            <div id="save_status" data-testid="save-status" style="margin-right: 60px;">
                 No changes to save
             </div>
+            </div>
             <div id="save_status_buttons">
-                <button style="margin-left: 60px; padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
+                <button style=" padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
                     Log
                 </button>
             </div>
+          </div>
             <div id="save_status_log"></div>
         </div>
         <div id="list_wrapper">
