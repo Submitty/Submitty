@@ -726,7 +726,7 @@ function initSocketClient() {
                 break;
             case 'edit_thread_likes':
                 updateThreadLikesDisplay(msg.thread_id, {
-                    likesCount: msg.likesCount
+                    likesCount: msg.likesCount,
                 });
                 break;
             default:
