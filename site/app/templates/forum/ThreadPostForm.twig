@@ -93,7 +93,7 @@
             "render_header" : render_markdown is defined and render_markdown ? render_markdown : false,
             "markdown_header_id" : "markdown_header_" ~ post_box_id,
             "min_height" : min_height,
-            "required" :  false,
+            "required" :  true,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
             "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
