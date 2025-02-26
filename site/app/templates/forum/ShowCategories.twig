@@ -15,7 +15,7 @@
     {% set all_categories_future = true %}
 
     {% for category in categories %}
-        {% if category.visible_date is null or category.diff > 0 %}
+        {% if category.visibleDate is null or category.diff > 0 %}
             {% set all_categories_future = false %}
         {% endif %}
     {% endfor %}
@@ -65,17 +65,17 @@
         <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" 
+                <li id="categorylistitem-{{ category.id }}"
                     class="category-sortable category-item-box" 
                     style="color: {{ category.color }};"
-                    data-category_desc="{{ category.category_desc }}"
-                    data-visible_date="{{ category.visible_date }}"
-                    data-category_id="{{ category.category_id }}"
+                    data-category_desc="{{ category.description }}"
+                    data-visible_date="{{ category.visibleDate }}"
+                    data-category_id="{{ category.id }}"
                     data-diff="{{ category.diff }}"
                 >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
-                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.category_desc }}</span>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;">{{ category.description }}</span>
                             <a class="post_button" title="Edit Category Description" aria-label="Edit Category Description"><i class="fas fa-edit category-button edit-category-desc-button"></i></a>
                         </span>
                     <span class="categorylistitem-editdesc" style="display: none;">
@@ -85,13 +85,13 @@
                     </span>
                     <div style="float: right;width: auto;">
                         <span class="categorylistitemdate-desc">
-                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;"> {{ category.visible_date }}</span>
+                            <span class="categorylistitem-desc-text" style="word-wrap: break-word;"> {{ category.visibleDate }}</span>
                             <i class="fas fa-edit category-button edit-category-date-button"></i>
                         </span>
 
 
                         <span class="categorylistitemdate-editdesc" style="display: none;">
-                                <input type="text" aria-label="New Date for Category" placeholder=" {{ category.visible_date }} " class="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
+                                <input type="text" aria-label="New Date for Category" placeholder=" {{ category.visibleDate }} " class="edit-category-date-input" style="padding: 0;" maxlength="11" onkeyup="checkInputMaxLength($(this))">
                                 <a class="post_button" title="Save Changes" aria-label="Save Changes"><i class="fas fa-check category-button save-date-button"></i></a>
                                 <a class="post_button" title="Cancel Changes" aria-label="Cancel Changes"><i class="fas fa-times category-button cancel-date-button"></i></a>
                         </span>
