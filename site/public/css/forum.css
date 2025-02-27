@@ -366,40 +366,42 @@
 .thread-favorite,
 .thread-merged,
 .thread-locked {
-    padding-left: 3px;
-    position: relative;
-    float: right;
-    display: inline-block;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: var(--standard-gray-black);
 }
 
+.thread-announcement {
+    color: var(--submitty-logo-blue);
+    order: 0;
+}
+
 .thread-announcement-expiring {
     color: var(--standard-tangerine-yellow);
+    order: 1;
 }
 
 .thread-favorite {
     color: var(--standard-medium-red);
+    order: 2;
 }
 
-.thread-announcement {
-    color: var(--submitty-logo-blue);
+.thread-merged {
+    color: var(--standard-pale-gray);
+    order: 3;
 }
 
-.thread-merged,
 .thread-locked {
     color: var(--standard-pale-gray);
-}
-
-.thead-content {
-    font-weight: normal;
+    order: 4;
 }
 
 .thread-status {
     padding-left: 3px;
-    position: relative;
-    float: right;
-    display: inline-block;
+    order: -1;
+}
+
+.thead-content {
+    font-weight: normal;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -778,7 +780,11 @@
 
 .thread-icons-cont {
     flex: 1;
-    justify-content: flex-end;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    gap: 3px;
+    max-width: 40%;
 }
 
 .thread-icons-cont:empty {
