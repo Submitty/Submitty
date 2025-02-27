@@ -249,6 +249,11 @@
                             a Submitty cron job will update Rainbow Grades every night at approximately 2am.<br>
                             The job will not run if this course is archived.
                         </span>
+                        <span class="red-message" id="customization-exists-warning" data-value="{{ not rainbowCustomizationExists }}" style="display: {{ fields['auto_rainbow_grades'] and not rainbowCustomizationExists ? 'block' : 'none' }};">
+                            <br> WARNING: Automatic rainbow grades generation will not occur until you have supplied a <br>
+                            customization.json file.  To have one generated for you, you may use the Grades Configuration tab. <br>
+                            You may also manually create the file and upload it to your course's rainbow_grades directory.
+                        </span>
                     </label>
                 </div>
             {% else %}
