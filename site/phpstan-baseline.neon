@@ -5186,16 +5186,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has parameter \\$len with no type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createPost\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
