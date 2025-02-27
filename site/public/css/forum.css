@@ -243,9 +243,10 @@
 
 
 .post-action-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    margin-top: 8px;
+    margin-left: 10px;
+    float: right;
+    white-space: nowrap;
 }
 
 .post-email-toggle,
@@ -813,7 +814,10 @@
     white-space: nowrap;
 }
 
-.post-action-container {
+.thread-action-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     margin-left: auto;
 }
 
