@@ -10,16 +10,6 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-grade-summary"]').should('be.visible'); // Ensure page is loaded
         reset();
     });
-    it('Add grades to numeric gradeable', () => {
-        const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
-
-        cy.visit(['testing', 'gradeable', 'numeric', 'grading']);
-        cy.get('#csvUpload').selectFile(gradesfile, { action: 'drag-drop' });
-        cy.on('window:confirm', () => true);
-
-        cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
-        cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
-    });
     it('Test Web-Based Rainbow Grades Customization', () => {
         // Ensure that elements requiring a manual_customization.json are only visible if file exists
         cy.window().its('manualCustomizationExists').then((manualCustomizationExists) => {
@@ -167,6 +157,16 @@ describe('Test Rainbow Grading', () => {
         });
     });
     it('Build Rainbow Grades and View Table', () => {
+        // Add grades to numeric gradeable
+        const gradesfile = 'cypress/fixtures/rainbowgrades_ci_numeric.csv';
+        cy.visit(['testing', 'gradeable', 'numeric', 'grading']);
+        cy.get('#csvUpload').selectFile(gradesfile, { action: 'drag-drop' });
+        cy.on('window:confirm', () => true);
+        cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=open_grading_now']);
+        cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
+
+        cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
+
         cy.get('[data-testid="display-grade-summary"]').check();
         cy.get('[data-testid="display-grade-summary"]').should('be.checked');
         cy.get('[data-testid="display-grade-details"]').check();
