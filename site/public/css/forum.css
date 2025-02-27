@@ -397,6 +397,7 @@
 }
 
 .thread-status {
+    margin-top: -3px;
     padding-left: 3px;
     order: -1;
 }
@@ -783,9 +784,12 @@
     flex: 1;
     display: flex;
     flex-direction: row-reverse;
+    align-items: flex-start;
     justify-content: flex-start;
     gap: 3px;
     max-width: 40%;
+    --custom-spacing: 0px;
+    margin-top: var(--custom-spacing);
 }
 
 .thread-icons-cont:empty {
@@ -795,9 +799,9 @@
 .thread-info-container {
     display: flex;
     flex-wrap: wrap;
-    --custom-gap: 16px;
-    column-gap: var(--custom-gap);
     align-items: center;
+    --custom-spacing: 16px;
+    column-gap: var(--custom-spacing);
 }
 
 .sub-info-container {
