@@ -28,7 +28,7 @@
 
             <div class="thread-content">{{ thread.content }}</div>
 
-            {% set categoriesCountGap = (is_full_page is defined and is_full_page) ? '16' : '10' %}
+            {% set categoriesCountGap = (is_full_page is defined and is_full_page) ? '16' : '8' %}
             <div class="thread-info-container" style="--custom-gap: {{ categoriesCountGap }}px;">
                 <span class="categories-container">
                     {% for category in thread.categories %}
