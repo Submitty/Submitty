@@ -221,23 +221,16 @@ def send_pending_notifications():
         pending = course_db.execute(
             """
             WITH gradeables AS (
-                SELECT
+                SELECT DISTINCT
                     g.g_id AS g_id,
                     g.g_title AS g_title,
                     t.team_id AS team_id,
-                    egv.active_version as egv_active_version,
-                    gcd.gcd_graded_version AS gcd_graded_version,
                     COALESCE(egv.user_id, t.user_id) AS user_id,
                     eg.eg_use_ta_grading AS eg_use_ta_grading,
                     egd.autograding_complete AS autograding_complete,
-                    COUNT(gcd.gcd_graded_version)
-                        OVER(PARTITION BY g.g_id,
-                            COALESCE(egv.user_id, t.user_id))
-                            AS graded_components,
-                    COUNT(gc.gc_id)
-                        OVER(PARTITION BY g.g_id,
-                            COALESCE(egv.user_id, t.user_id))
-                            AS total_components
+                    gc.gc_id AS component,
+                    CONCAT(gcd.gd_id, '-', gcd.gc_id, '-', gcd.gcd_grader_id)
+                        AS graded_component
                 FROM gradeable AS g
                 INNER JOIN electronic_gradeable AS eg
                     ON g.g_id = eg.g_id
@@ -254,8 +247,8 @@ def send_pending_notifications():
                     AND COALESCE(egv.user_id, egv.team_id)
                         = COALESCE(gd.gd_user_id, gd.gd_team_id)
                 LEFT JOIN gradeable_teams AS gt
-                    ON gd.gd_team_id = gt.team_id
-                    AND gd.g_id = gt.g_id
+                    ON gd.g_id = gt.g_id
+                    AND gd.gd_team_id = gt.team_id
                 LEFT JOIN teams AS t
                     ON gt.team_id = t.team_id
                 LEFT JOIN electronic_gradeable_data AS egd
@@ -266,38 +259,37 @@ def send_pending_notifications():
                 LEFT JOIN gradeable_component_data AS gcd
                     ON gd.gd_id = gcd.gd_id
                     AND gc.gc_id = gcd.gc_id
-                    AND (
-                        eg.eg_use_ta_grading IS FALSE
-                        OR gcd.gcd_graded_version IS NOT NULL
-                    )
+                    AND gcd.gcd_grader_id IS NOT NULL
+                    AND egv.active_version = gcd.gcd_graded_version
             )
             SELECT DISTINCT
                 g_id,
                 g_title,
                 team_id,
-                u.user_id,
+                u.user_id AS user_id,
                 u.user_email AS user_email,
                 ns.all_released_grades AS general_enabled,
                 ns.all_released_grades_email AS email_enabled
-            FROM gradeables
+            FROM gradeables AS g
             INNER JOIN users AS u
-                ON gradeables.user_id = u.user_id
+                ON g.user_id = u.user_id
             LEFT JOIN notification_settings AS ns
-                ON gradeables.user_id = ns.user_id
-            WHERE (
-                (eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE)
-                OR
-                (graded_components = total_components)
-            ) AND u.user_id IS NOT NULL
-            GROUP BY g_id, g_title, team_id, u.user_id, u.user_email,
+                ON u.user_id = ns.user_id
+            GROUP BY g_id, g_title, u.user_id, u.user_email, team_id,
                 ns.all_released_grades, ns.all_released_grades_email,
-                eg_use_ta_grading, gcd_graded_version, egv_active_version;
+                eg_use_ta_grading,autograding_complete
+            HAVING (
+                eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE
+                OR
+                COUNT(component) = COUNT(graded_component)
+            );
             """
         )
 
-        lists = construct_notifications(term, course, pending)
-        send_notifications(course, course_db, master_db, lists)
-        notified += len(lists[0])
+        if pending:
+            lists = construct_notifications(term, course, pending)
+            send_notifications(course, course_db, master_db, lists)
+            notified += len(lists[0])
 
         course_db.close()
 
