@@ -28,5 +28,7 @@ describe('Superuser Email All Functionality via Sidebar', () => {
         });
         cy.get('body').should('not.contain', 'FATAL ERROR');
         cy.get('body').should('not.contain', 'Typed property');
+
+        cy.contains(uniqueSubject);
     });
 });
