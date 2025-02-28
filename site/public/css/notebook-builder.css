@@ -107,6 +107,7 @@
     font-size: 80%;
 }
 
+/* stylelint-disable declaration-no-important */
 /* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
     background-color: var(--standard-input-background) !important;
@@ -114,6 +115,7 @@
     border-radius: 4px !important;
     vertical-align: middle !important;
 }
+/* stylelint-enable declaration-no-important */
 
 /**
  * Multiple choice widget styles

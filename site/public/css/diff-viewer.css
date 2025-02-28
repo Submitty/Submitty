@@ -29,6 +29,7 @@
 }
 
 .highlight-hover {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-light-blue-gray) !important;
 }
 
@@ -49,6 +50,7 @@
 }
 
 /* stylelint-disable selector-class-pattern */
+/* stylelint-disable declaration-no-important */
 
 /* Not sure why the linter can't use disable-next-line here... */
 .line_number,
@@ -72,6 +74,7 @@
     overflow-x: scroll !important;
 }
 
+/* stylelint-enable declaration-no-important */
 /* stylelint-disable-next-line selector-class-pattern */
 .line_code {
     white-space: pre;

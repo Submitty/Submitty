@@ -74,6 +74,7 @@
 }
 
 .fully-transparent {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
 }
 

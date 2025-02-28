@@ -46,6 +46,7 @@ tr > td:nth-child(5) {
 }
 
 .highlighted-row td:nth-child(n+1):nth-child(-n+5){
+    /* stylelint-disable-next-line declaration-no-important */
     background: var(--standard-focus-cornflower-blue) !important ;
 }
 
@@ -80,6 +81,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .sticky-top label,
 .sticky-top .not-sticky {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
