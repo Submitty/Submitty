@@ -151,8 +151,8 @@
 }
 
 .same-section-name-warning-triangle {
-    margin-top: 4px;
-    margin-bottom: 6px;
+    margin-top: 7px;
+    margin-bottom: 4px;
     display: none;
     color: var(--standard-vibrant-orange);
     border-bottom: 1px dotted var(--standard-vibrant-orange);
