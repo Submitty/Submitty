@@ -2792,16 +2792,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^Parameter \\#1 \\$score of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setScore\\(\\) expects float, string given\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/controllers/grading/popup_refactor/RubricGraderController.php
@@ -11560,11 +11550,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\PollView\\:\\:showPollsStudent\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/PollView.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/views/UserProfileView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has no return type specified\\.$#"
