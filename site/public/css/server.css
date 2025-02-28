@@ -2089,13 +2089,13 @@ input:checked + .slider::after {
 End of slider switch
  */
 
- .badge-1, .badge-2, .badge-3, .badge-4, .badge-5, .badge-6, .badge-7,
- .badge-8, .badge-9, .badge-10, .badge-11, .badge-12, .badge-13, .badge-14,
- .badge-15, .badge-16, .badge-17, .badge-18, .badge-19, .badge-20 {
+.badge-1, .badge-2, .badge-3, .badge-4, .badge-5, .badge-6, .badge-7,
+.badge-8, .badge-9, .badge-10, .badge-11, .badge-12, .badge-13, .badge-14,
+.badge-15, .badge-16, .badge-17, .badge-18, .badge-19, .badge-20 {
     color: var(--text-black);
     min-width: 10px;
     float: none;
- }
+}
 
 .badge-1 {
     background-color: var(--category-color-1);
