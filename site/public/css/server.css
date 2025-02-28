@@ -2089,7 +2089,6 @@ input:checked + .slider::after {
 End of slider switch
  */
 
- /* stylelint-disable indentation */
  .badge-1, .badge-2, .badge-3, .badge-4, .badge-5, .badge-6, .badge-7,
  .badge-8, .badge-9, .badge-10, .badge-11, .badge-12, .badge-13, .badge-14,
  .badge-15, .badge-16, .badge-17, .badge-18, .badge-19, .badge-20 {
@@ -2097,7 +2096,6 @@ End of slider switch
     min-width: 10px;
     float: none;
  }
- /* stylelint-enable indentation */
 
 .badge-1 {
     background-color: var(--category-color-1);
@@ -2179,7 +2177,6 @@ End of slider switch
     background-color: var(--category-color-20);
 }
 
-/* stylelint-disable indentation */
 [data-theme="dark"] .badge-1, [data-theme="dark"] .badge-2, [data-theme="dark"] .badge-3,
 [data-theme="dark"] .badge-4, [data-theme="dark"] .badge-5, [data-theme="dark"] .badge-6,
 [data-theme="dark"] .badge-7, [data-theme="dark"] .badge-8, [data-theme="dark"] .badge-9,
@@ -2193,7 +2190,6 @@ End of slider switch
     min-width: 10px;
     float: none;
 }
-/* stylelint-enable indentation */
 
 [data-theme="dark"] .badge-1 {
     color: var(--category-color-1);
@@ -2295,7 +2291,6 @@ End of slider switch
     border-color: var(--category-color-20);
 }
 /* stylelint-enable no-descending-specificity */
-/* stylelint-disable indentation */
 
 .notebook-output-cell-content {
     background-color: var(--standard-light-gray);
