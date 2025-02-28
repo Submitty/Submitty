@@ -320,4 +320,25 @@ class GradeableList extends AbstractModel {
         }
         return -1;
     }
+
+
+    public function toJson() {
+        $gradeables = [];
+        foreach ($this->gradeables as $gradeable) {
+            
+            $gradeables[] = [
+                'id' => $gradeable->getId(),
+                'title' => $gradeable->getTitle(),
+                'instructions_url' => $gradeable->getInstructionsUrl(),
+                'gradeable_type' => $gradeable->getType(),
+                'ta_view_start_date' => $gradeable->getTaViewStartDate(),
+                'grade_start_date' => $gradeable->getGradeStartDate(),
+                'grade_due_date' => $gradeable->getGradeDueDate(),
+                'grade_released_date' => $gradeable->getGradeReleasedDate(),
+                'min_grading_group' => $gradeable->getMinGradingGroup(),
+                'syllabus_bucket' => $gradeable->getSyllabusBucket()
+            ];
+        }
+        return $gradeables;
+    }
 }

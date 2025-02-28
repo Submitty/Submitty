@@ -13,9 +13,6 @@ use app\models\gradeable\GradeableList;
 use app\views\superuser\GradeablesView;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
 class GradeablesController extends AbstractController {
     /**
      * @AccessControl(level="SUPERUSER")
@@ -42,5 +39,20 @@ class GradeablesController extends AbstractController {
             JsonResponse::getSuccessResponse($gradeable_list->getGradeablesBySection()),
             new WebResponse(GradeablesView::class, 'showGradeablesList', $gradeable_list)
         );
+    }
+
+    #[Route("/api/{term}/{course}/gradeables/list", methods: ['GET'])]
+    public function viewUsersGradeableList(string $term, string $course): JsonResponse {
+        $user_id = $_GET['user_id'] ?? '';
+        if ($this->core->getUser()->getGroup() !== \app\models\User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+        if (!$this->core->getQueries()->courseExists($term, $course)) {
+            return JsonResponse::getFailResponse("Course $course for term $term does not exist");
+        }
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+        $gradeables = new GradeableList($this->core, $this->core->getUser());
+        return JsonResponse::getSuccessResponse($gradeables->toJson());
     }
 }
