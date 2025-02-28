@@ -48,11 +48,28 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
+// Checks if a thread with the specified title exists
+const threadExists = (title) => {
+    return cy.get('body').then(($body) => {
+        return $body.find('[data-testid="thread-list-item"]').filter(`:contains(${title})`).length > 0;
+    });
+};
+
+// Removes all threads matching the specified title
 const removeThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="thread-dropdown"]').first().click();
-    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
-    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+    cy.reload();
+    threadExists(title).then((exists) => {
+        if (exists) {
+            cy.get('[data-testid="thread-list-item"]').contains(title).click();
+            cy.get('[data-testid="thread-dropdown"]').first().click();
+            cy.get('[data-testid="delete-post-button"]').first().click();
+            cy.get('[data-testid="thread-list-item"]').contains(title).then(($thread) => {
+                if ($thread.length) {
+                    removeThread(title);
+                }
+            });
+        }
+    });
 };
 
 const uploadAttachmentAndDelete = (title, attachment) => {
@@ -89,9 +106,20 @@ const replyDisabled = (title, attachment) => {
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
+        cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        cy.log('Removing threads');
+        removeThread(title1);
+        removeThread(title2);
+        removeThread(title3);
+    });
+
+    it('Remove threads removes all threads with the same title', () => {
+        createThread(title1, content1, 'Comment');
+        createThread(title1, content1, 'Comment');
+        removeThread(title1);
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
@@ -116,8 +144,6 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
-
-        // Remove threads
         removeThread(title1);
     });
 });
