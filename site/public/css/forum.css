@@ -798,12 +798,12 @@
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: var(--deleted-discussion-post-grey);
-    color: var(--deleted-color);
+    color: var(--text-black);
 }
 
 .deleted-unviewed {
-    background-color: var(--deleted-and-unviewed-thread);
-    color: var(--deleted-color);
+    background-color: var(--deleted-and-unviewed-thread) !important;
+    color: var(--text-black) !important;
 }
 
 .deleted.active {
