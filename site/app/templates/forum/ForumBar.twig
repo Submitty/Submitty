@@ -77,7 +77,7 @@
 						{% if user_group <= more.required_rank %}
 							{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
 							{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-								<a id="{{ more.id }}" class="dropdown-item" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
+								<a id="{{ more.id }}" data-testid="{{ more.id }}" class="dropdown-item" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
 						{% endif %}
 					{% endfor %}
 					{% if core.getUser().accessGrading() %}
@@ -130,7 +130,15 @@
 				}
 
 				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+					background-color: {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-inactive{
 					color: white;
+					border: 1px solid {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-active{
 					background-color: {{ category.color }}
 				}
 			{% endfor %}
