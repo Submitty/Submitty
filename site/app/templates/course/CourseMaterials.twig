@@ -6,6 +6,12 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
+
+<script>
+    var courseMaterials = {{ calendar_info|json_encode(constant('JSON_PRETTY_PRINT'))|raw }};
+    console.log(courseMaterials);
+</script>
+
     
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         <a onclick="markAllViewed()" id="deleteButton" class="btn btn-primary key_to_click">Mark All as Viewed</a>
@@ -47,23 +53,23 @@
     {% endif %}
     <div class="inner-container" id="file-container">
         {{ _self.display_files(course_materials, links, user_group, user_section, "s", 0, display_file_url, "", base_course_material_path, directory_priorities, 
-        material_list, date_format, folder_ids, seen, folder_visibilities, "root") }}
+        material_list, date_format, folder_ids, seen, folder_visibilities, "root", calendar_info) }}
 
     </div>
 </div>
 
-{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path) %}
+{% macro display_files(course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, current_path, calendar_info) %}
     {% for name, course_material in course_materials %}
         {% set sub_path = "#{current_path}/#{name}" %}
         {% if course_material is iterable %}
-            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path) }}
+            {{ _self.display_folder(name, course_material, links, user_group, user_section, id ~ "d" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, folder_path ~ "/" ~ name, directory_priorities, material_list, date_format, folder_ids, seen,  folder_visibilities, sub_path, calendar_info) }}
         {% else %}
-            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, date_format, folder_ids, seen) }}
+            {{ _self.display_file(name, course_material, links, user_group, user_section, id ~ "f" ~ loop.index, indent, display_file_url, path ~ "/" ~ name, date_format, folder_ids, seen, calendar_info) }}
         {% endif %}
     {% endfor %}
 {% endmacro %}
 
-{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, path, date_format, folder_ids, seen) %}
+{% macro display_file(name, course_material, links, user_group, user_section, id, indent, display_file_url, path, date_format, folder_ids, seen, calendar_info) %}
     {% if user_group < 4 or ( not course_material.isHiddenFromStudents and (course_material.isSectionAllowed(user_section)) ) %}
         <div class="file-container">
             <div class="file-viewer">
@@ -88,6 +94,12 @@
                     {% else %}
                         {% set url_url = "" %}
                     {% endif %}
+
+                    <p>
+                        {{calendar_info}}
+                    </p>
+
+
                     <a
                         class="key_to_click"
                         tabindex="0"
@@ -100,6 +112,10 @@
                         data-is-link="{{ course_material.isLink }}" data-title="{{ title_name }}"
                         data-link-url="{{ url_url }}"
                         data-path = "{{ path }}"
+                        data-associated-date="{{ calendar_info[path].associatedDate }}"
+                        data-is-on-calendar="{{ calendar_info[path].isOnCalendar ? 'true' : 'false' }}"
+                        data-gradeable="{{ calendar_info[path].gradeable }}"
+
                     >
                         <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i>
                     </a>
@@ -162,10 +178,10 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) %}
+{% macro display_folder(name, course_materials, links, user_group, user_section, id, indent, display_file_url, path, folder_path, directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path, calendar_info) %}
     {% if indent == -1 %}
         {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path, directory_priorities,
-        material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+        material_list, date_format, folder_ids, seen, folder_visibilities, current_path, calendar_info) }}
     {% elseif user_group < 4 or folder_visibilities[current_path] %}
         <div class="folder-container">
             <div class="div-viewer view-row">
@@ -175,7 +191,7 @@
                 </a>
                 <a onclick="downloadCourseMaterialZip('{{ folder_ids[folder_path] }}')" aria-label="Download the folder: {{ name }}" class="key_to_click" tabindex="0"><i class="fas fa-download" title="Download the folder"></i></a>
                 {% if user_group == 1 %}
-                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                    <a class="key_to_click" tabindex="0" onclick='newEditCourseMaterialsFolderForm(this)' data-id="{{ folder_ids[folder_path] }}" data-priority="{{ directory_priorities[folder_path] }}" data-associated-date="{{ calendar_info[path].associatedDate }}" data-is-on-calendar="{{ calendar_info[path].isOnCalendar ? 'true' : 'false' }}" data-gradeable="{{ calendar_info[path].gradeable }}"> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a class="key_to_click" tabindex="0" onclick='newDeleteCourseMaterialForm("{{ folder_ids[folder_path]  }}", "{{ name }}", "{{ id }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                     <a onclick='setFolderRelease("{{ folder_path }}","","{{ id }}","{{ folder_ids[folder_path] }}")' class="btn btn-primary key_to_click" tabindex="0">Set Folder Release Date</a>
                 {% endif %}
@@ -185,7 +201,7 @@
             </div>
             <div id="div_viewer_{{ id }}" style="margin-left: 15px; display: none" data-file_name="{{ name }}">
                 {{ _self.display_files(course_materials, links, user_group, user_section, id, indent + 1, display_file_url, path, folder_path,
-                directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path) }}
+                directory_priorities, material_list, date_format, folder_ids, seen, folder_visibilities, current_path, calendar_info) }}
             </div>
         </div>
     {% endif %}
@@ -308,7 +324,7 @@
                         partialSections.push(...residualSections);
                     }
                 });
-                let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=newEditCourseMaterialsFolderForm]'));
+                let editButton = $(elem.siblings('.div-viewer').children('a[onclick^=]'));
                 editButton.attr('data-sections', JSON.stringify(commonSections));
                 editButton.attr('data-partial-sections', JSON.stringify(partialSections));
                 editButton.attr('data-release-time', releaseTime);
