@@ -6,12 +6,6 @@
         red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
-
-<script>
-    var courseMaterials = {{ calendar_info|json_encode(constant('JSON_PRETTY_PRINT'))|raw }};
-    console.log(courseMaterials);
-</script>
-
     
     <div class="action-buttons" style="float: right; margin-bottom: 20px;">
         <a onclick="markAllViewed()" id="deleteButton" class="btn btn-primary key_to_click">Mark All as Viewed</a>
@@ -94,11 +88,6 @@
                     {% else %}
                         {% set url_url = "" %}
                     {% endif %}
-
-                    <p>
-                        {{calendar_info}}
-                    </p>
-
 
                     <a
                         class="key_to_click"

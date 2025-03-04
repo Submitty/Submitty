@@ -118,10 +118,9 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
-
-        $this->setGradeable($gradeableName);
-        $this->setCalendarDate($calendar_date);
         $this->setOnCalendar($onCalendar);
+        $this->setGradeable($gradeableName);
+        $this->setCalendarDate($calendarTime);
         $this->uploaded_by = $uploaded_by;
         $this->uploaded_date = $uploaded_date;
         $this->last_edit_by = $last_edit_by;
@@ -285,7 +284,7 @@ class CourseMaterial {
         $this->on_calendar = $value;
     }
 
-    public function setGradeable(string $gradeableString): void {
+    public function setGradeable(?string $gradeableString): void {
         $this->gradeable = $gradeableString;
     }
     public function setUploadedBy(string $uploaded_by): void {

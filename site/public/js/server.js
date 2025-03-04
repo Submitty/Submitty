@@ -291,6 +291,8 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
+    const tag = null;
+
     setCalendarMenuValues('upload-cm-cal-menu', tag, "3");
 
     $('[name="existing-file-list"]', form).html('');

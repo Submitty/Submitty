@@ -357,6 +357,7 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
+
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
@@ -366,8 +367,8 @@ class CourseMaterialsController extends AbstractController {
 
         $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
 
-        $associated_date = $_POST['associated_date'] != 'none' ? $_POST['associated_date'] : null;
-        
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);    
+        $associated_gradeable = $_POST['associated_gradeable'] != 'none' ? $_POST['associated_gradeable'] : null;
 
         $id = $_POST['id'] ?? '';
         if ($id === '') {
@@ -383,7 +384,8 @@ class CourseMaterialsController extends AbstractController {
         }
 
 
-        $course_material->setCalendarDate($associated_date ? new \DateTime($associated_date) : null);
+        $course_material->setCalendarDate($associated_date);
+        $course_material->setGradeable($associated_gradeable);
         $course_material->setOnCalendar($calendar_display);
 
 
@@ -586,12 +588,16 @@ class CourseMaterialsController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
 
+        /* SET UPLOAD OF COURSE MATERIALS TO INCLUDE VALUES */
 
 
         $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
 
         $associated_date = $_POST['associated_date'];
-        
+        $associated_gradeable = $_POST['associated_gradeable'];
+
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);    
+
 
         $details = [];
         $expand_zip = "";
@@ -895,8 +901,9 @@ class CourseMaterialsController extends AbstractController {
                 $details['priority'],
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
-                $on_calendar,
-                $connected_gradeable, //remove this
+                $calendar_display,
+                $associated_gradeable, 
+                $associated_date,
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,

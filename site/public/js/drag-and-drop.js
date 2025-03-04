@@ -1224,7 +1224,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 
     formData.append('calendar_display', calendarMenu.calendar_display);
     formData.append('associated_date', calendarMenu.associated_date);
-    formData.append('greadable_chosen', calendarMenu.gradeable_chosen);
+    formData.append('associated_gradeable', calendarMenu.gradeable_chosen);
 
 
 
@@ -1357,6 +1357,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
     console.log(calendarMenu);
+
+    //calendarMenu.associated_date = calendarMenu.associated_date->format('Y-m-d H:i:sO');
+
     formData.append('calenderMenu', calendarMenu);
 
 
@@ -1364,6 +1367,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     formData.append('calendar_display', calendarMenu.calendar_display);
     formData.append('associated_date', calendarMenu.associated_date);
+    formData.append('associated_gradeable', calendarMenu.gradeable_chosen);
 
     if (priority < 0 || isNaN(priority)) {
         alert('Floating point priority must be a number greater than 0.');
