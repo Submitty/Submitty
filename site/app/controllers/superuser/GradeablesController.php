@@ -53,6 +53,6 @@ class GradeablesController extends AbstractController {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
         $gradeables = new GradeableList($this->core, $this->core->getUser());
-        return JsonResponse::getSuccessResponse($gradeables->toJson());
+        return JsonResponse::getSuccessResponse($gradeables->toJson(true));
     }
 }

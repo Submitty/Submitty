@@ -321,22 +321,41 @@ class GradeableList extends AbstractModel {
         return -1;
     }
 
+    private function sectionToString(int $section): string {
+        $value = 'INVALID';
+        switch ($section) {
+            case self::FUTURE:
+                return 'FUTURE';
+            case self::BETA:
+                return 'BETA';
+            case self::OPEN:
+                return 'OPEN';
+            case self::CLOSED:
+                return 'CLOSED';
+            case self::GRADING:
+                return 'GRADING';
+            case self::GRADED:
+                return 'GRADED';
+            default:
+                return 'INVALID';
+        } 
 
-    public function toJson() {
+    }
+
+    public function toJson(bool $is_student) {
         $gradeables = [];
-        foreach ($this->gradeables as $gradeable) {
-            
+
+        foreach ($this->getSubmittableElectronicGradeables() as $gradeable) {
+            $section = $this->getGradeableSection($this->core, $gradeable);
             $gradeables[] = [
                 'id' => $gradeable->getId(),
                 'title' => $gradeable->getTitle(),
                 'instructions_url' => $gradeable->getInstructionsUrl(),
                 'gradeable_type' => $gradeable->getType(),
-                'ta_view_start_date' => $gradeable->getTaViewStartDate(),
-                'grade_start_date' => $gradeable->getGradeStartDate(),
-                'grade_due_date' => $gradeable->getGradeDueDate(),
-                'grade_released_date' => $gradeable->getGradeReleasedDate(),
-                'min_grading_group' => $gradeable->getMinGradingGroup(),
-                'syllabus_bucket' => $gradeable->getSyllabusBucket()
+                'syllabus_bucket' => $gradeable->getSyllabusBucket(),
+                'section' => $section,
+                'section_name' => $this->sectionToString($section),
+                'due_date' => $gradeable->getDateDue()
             ];
         }
         return $gradeables;
