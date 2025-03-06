@@ -1,0 +1,22 @@
+---
+- name: Submitty Homework Creation
+  hosts: localhost
+  connection: local
+  
+  roles:
+    # This role is defined in the Submitty Repo under .setup/ansible/roles
+    - role: submitty_homework_api  # noqa syntax-check[specific]
+    - role: submitty_homework_api  # noqa syntax-check[specific]
+      vars:
+        vcs: https://github.com/IDzyre/Tutorial.git # This is a fork of the Submitty tutorial repository with an added folder for the config files, I will ask on Monday if I could/should put it in the actual tutorial repository.
+
+  vars_prompt:
+    - name: api_url
+      prompt: Enter the full API url (http://{domain.com}/api/{semester}/{course}/upload)
+      private: no
+    - name: passed_api_key
+      prompt: Enter your API key
+      private: yes
+    - name: vcs
+      prompt: Enter clone URL for Git repository if you are using one
+      private: no

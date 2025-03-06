@@ -1,0 +1,16 @@
+- name: Create gradeables with API
+  ansible.builtin.uri:
+    url: "{{ api_url }}"
+    method: POST
+    body_format: json
+    body: "{{ lookup('file', var_json_file) }}"
+    return_content: yes
+    headers: 
+      Authorization: "{{ api_key }}"
+  register: api_response
+
+- name: Fail when status is error
+  fail:
+    msg: "{{ (api_response.content | from_json).message }}"
+  when: 
+    - (api_response.content | from_json).status != 'success'
