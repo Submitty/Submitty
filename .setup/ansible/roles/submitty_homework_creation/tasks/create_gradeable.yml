@@ -5,12 +5,12 @@
     body_format: json
     body: "{{ lookup('file', var_json_file) }}"
     return_content: yes
-    headers: 
+    headers:
       Authorization: "{{ api_key }}"
   register: api_response
 
 - name: Fail when status is error
-  fail:
+  ansible.builtin.fail:
     msg: "{{ (api_response.content | from_json).message }}"
-  when: 
+  when:
     - (api_response.content | from_json).status != 'success'

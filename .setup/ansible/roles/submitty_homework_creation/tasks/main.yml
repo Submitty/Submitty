@@ -4,6 +4,7 @@
     dest: /tmp/Submitty
     force: yes
     update: yes
+    version: "main"
   when: vcs != ''
 
 - name: Find files in the directory
