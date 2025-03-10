@@ -7343,10 +7343,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
-        if (empty($this->course_db->row()['lock_thread_date'])) {
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
+        if ($lock_date === null) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
