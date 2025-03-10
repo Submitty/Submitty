@@ -623,7 +623,7 @@ SQL;
                 $str = "";
                 $arr = [];
                 foreach ($categories_ids as $id) {
-                    if (!empty($str)) {
+                    if ($str !== '') {
                         $str .= ", ";
                     }
                     $str .= "({$thread_id}, ?)";
