@@ -623,7 +623,7 @@ SQL;
                 $str = "";
                 $arr = [];
                 foreach ($categories_ids as $id) {
-                    if ($str !== '') {
+                    if (!empty($str)) {
                         $str .= ", ";
                     }
                     $str .= "({$thread_id}, ?)";
@@ -7345,7 +7345,7 @@ AND gc_id IN (
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
         $row = $this->course_db->row();
         $lock_date = $row['lock_thread_date'] ?? null;
-        if ($lock_date === null) {
+        if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
         $current_date = new \DateTime();
