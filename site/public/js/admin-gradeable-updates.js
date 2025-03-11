@@ -223,7 +223,7 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
-        const notifications_sent = document.querySelector('#container-rubric').dataset.notifications_sent === 'true';
+        const notifications_sent = Number(document.querySelector('#container-rubric').dataset.notifications_sent);
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -232,14 +232,14 @@ $(document).ready(() => {
                 $(val).val('0');
             }
             // Ask for confirmation if the release is delegated to the future and notifications have been sent already
-            if (notifications_sent && val.name === 'grade_released_date') {
+            if (notifications_sent > 0 && val.name === 'grade_released_date') {
                 const updating = new Date($(val).val());
                 const original = new Date($(val).attr('data-original'));
 
                 if (original !== updating && updating >= new Date()) {
                     data['notifications_sent'] = confirm(
-                        'Notifications have already been sent to students. Do you want to resend notifications?',
-                    ) !== true;
+                        `Notifications for this gradeable have already been sent to students. If you change the release date, would you like to resend notifications to students when the new release date is reached?`,
+                    ) ? 0 : notifications_sent;
                 }
             }
             data[val.name] = $(val).val();

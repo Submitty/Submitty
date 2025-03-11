@@ -178,6 +178,10 @@ table#grader-history td {
     font-style: italic;
 }
 
+#gradeable-notifications-message {
+    font-style: italic;
+}
+
 #timezone-container {
     float: right;
 }

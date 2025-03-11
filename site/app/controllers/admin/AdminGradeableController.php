@@ -349,7 +349,7 @@ class AdminGradeableController extends AbstractController {
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
-            'notifications_sent' => false
+            'notifications_sent' => 0
         ]);
     }
 
@@ -1372,8 +1372,7 @@ class AdminGradeableController extends AbstractController {
             'using_subdirectory',
             'has_due_date',
             'has_release_date',
-            'allow_custom_marks',
-            'notifications_sent'
+            'allow_custom_marks'
         ];
 
         $discussion_ids = 'discussion_thread_id';
@@ -1381,7 +1380,8 @@ class AdminGradeableController extends AbstractController {
         $numeric_properties = [
             'precision',
             'grader_assignment_method',
-            'depends_on_points'
+            'depends_on_points',
+            'notifications_sent'
         ];
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
@@ -1485,7 +1485,7 @@ class AdminGradeableController extends AbstractController {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
             }
 
-            if ($prop === 'notifications_sent' && $post_val === false && $gradeable->getNotificationsSent()) {
+            if ($prop === 'notifications_sent' && $post_val === "0" && $gradeable->getNotificationsSent() > 0) {
                 $this->core->getQueries()->resetGradeableNotifications($gradeable);
             }
 

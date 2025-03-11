@@ -166,7 +166,6 @@ def send_notifications(course, course_db, master_db, lists):
                 to_user_id)
                 VALUES {", ".join(general)};"""
             )
-            course_db.commit()
 
         if email:
             master_db.execute(
@@ -175,7 +174,6 @@ def send_notifications(course, course_db, master_db, lists):
                 course)
                 VALUES {", ".join(email)};"""
             )
-            master_db.commit()
 
         # Update all successfully sent notifications for current course
         if len(gradeables) > 0:
@@ -188,10 +186,10 @@ def send_notifications(course, course_db, master_db, lists):
                 OR (g_id, team_id) IN ({values});
                 """
             )
-            course_db.commit()
 
-        course_db.flush()
-        master_db.flush()
+        # Commit the changes to the individual databases
+        course_db.commit()
+        master_db.commit()
 
         m = (f"[{timestamp}] ({course}): Released {len(general)} general, "
              f"{len(email)} email\n")
