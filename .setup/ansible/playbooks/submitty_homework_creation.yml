@@ -3,10 +3,14 @@
   hosts: localhost
   connection: local
 
-  roles:
+  tasks:
     # This role is defined in the Submitty Repo under .setup/ansible/roles
-    - role: submitty_homework_creation
-    - role: submitty_homework_creation
+    - name: Create gradeable
+      ansible.builtin.include_role: 
+        name: submitty_homework_creation
+    - name: Create gradeable
+      ansible.builtin.include_role: 
+        name: submitty_homework_creation
       vars:
         vcs: https://github.com/IDzyre/Tutorial.git  # This is a fork of the Submitty tutorial repository with an added folder for the config files, I will ask on Monday if I could/should put it in the actual tutorial repository.
 
