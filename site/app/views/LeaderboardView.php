@@ -4,10 +4,25 @@ namespace app\views;
 
 use app\models\User;
 use app\models\gradeable\Gradeable;
+use app\views\ErrorView;
 
 class LeaderboardView extends AbstractView {
     public function showLeaderboardPage(Gradeable $gradeable, array $leaderboards, bool $user_is_anonymous, string $leaderboard_tag, string $gradeable_id): string {
         $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildCourseUrl(["gradeable", $gradeable_id]));
+
+        if (
+            !$this->core->getUser()->accessGrading()
+            && (
+                !$gradeable->isSubmissionOpen()
+                || !$gradeable->isStudentView()
+                || $gradeable->isStudentViewAfterGrades()
+                && !$gradeable->isTaGradeReleased()
+            )
+        ) {
+            return new WebResponse(ErrorView::class, "noGradeable", $gradeable_id);
+        }
+
+
         $this->core->getOutput()->addBreadcrumb("Leaderboard");
         $this->core->getOutput()->addInternalCss('leaderboard.css');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/leaderboard/Leaderboard.twig', [
