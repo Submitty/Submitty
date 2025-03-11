@@ -22,7 +22,7 @@
 
 - name: Checkout specific version of the submitty git repo
   ansible.builtin.git:
-    repo: https://github.com/Submitty/Submitty.git
+    repo: "{{ submitty_install_github_url }}"
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
     version: "{{ submitty_install_submitty_version }}"
     force: true
