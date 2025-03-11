@@ -26,15 +26,16 @@
         submitty_add_user_email: email
         submitty_add_user_password: instructor
 
+    # This user is the github actions runner, delete if using on production.
     - name: Add instructor
       ansible.builtin.include_role:
         name: submitty_add_user
       vars:
         submitty_add_user_username: runner
-        submitty_add_user_firstname: instructor
-        submitty_add_user_lastname: Quinn
-        submitty_add_user_email: email
-        submitty_add_user_password: instructor
+        submitty_add_user_firstname: runner
+        submitty_add_user_lastname: runner
+        submitty_add_user_email: runner
+        submitty_add_user_password: runner
 
     - name: Course Creation
       ansible.builtin.include_role:
