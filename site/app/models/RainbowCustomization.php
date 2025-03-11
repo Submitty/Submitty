@@ -141,6 +141,15 @@ class RainbowCustomization extends AbstractModel {
 
                 $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
+
+            // If there are no assigned buckets, automatically assign buckets that contain gradeables
+            if (count($this->used_buckets) === 0) {
+                foreach (self::syllabus_buckets as $potential_bucket) {
+                    if ($this->bucket_counts[$potential_bucket] > 0) {
+                        $this->used_buckets[] = $potential_bucket;
+                    }
+                }
+            }
         }
 
         // Reorder buckets
@@ -341,6 +350,16 @@ class RainbowCustomization extends AbstractModel {
 
             // Save the sum of used percentages to special key in array
             $retArray['used_percentage'] = $sum;
+
+            // Assign percentage values for buckets added automatically (i.e. when no other buckets are used)
+            $json_bucket_types = [];
+            foreach ($json_buckets as $json_bucket) {
+                $json_bucket_types[] = $json_bucket->type;
+            }
+            $automatic_buckets = array_diff($this->used_buckets, $json_bucket_types);
+            foreach ($automatic_buckets as $automatic_bucket) {
+                $retArray[$automatic_bucket] = 0;
+            }
         }
 
         return $retArray;
