@@ -2450,7 +2450,7 @@ async function reloadPeerRubric(gradeable_id, anon_id) {
         alert(`Could not fetch gradeable rubric: ${err.message}`);
     }
     try {
-        await ajaxGetGradedGradeable(gradeable_id, anon_id, true);
+        graded_gradeable = await ajaxGetGradedGradeable(gradeable_id, anon_id, true);
     }
     catch (err) {
         alert(`Could not fetch graded gradeable: ${err.message}`);
@@ -2855,10 +2855,9 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
  * @return {void}
  */
 async function closeComponentGrading(component_id, saveChanges) {
-    GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
-    COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
-
     if (saveChanges) {
+        GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
+        COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
         await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden

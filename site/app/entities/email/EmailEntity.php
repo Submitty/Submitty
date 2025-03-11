@@ -92,11 +92,11 @@ class EmailEntity {
     }
 
     public function getTerm(): ?string {
-        return $this->term;
+        return $this->term ?? null;
     }
 
     public function getCourse(): ?string {
-        return $this->course;
+        return $this->course ?? null;
     }
 
     /**
