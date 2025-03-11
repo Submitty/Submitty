@@ -334,4 +334,4 @@ export const bad_rubric = [
             },
         ],
     },
-]
+];
