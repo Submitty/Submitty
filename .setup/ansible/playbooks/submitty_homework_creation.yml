@@ -15,12 +15,12 @@
         vcs: https://github.com/IDzyre/Tutorial.git  # This is a fork of the Submitty tutorial repository with an added folder for the config files, I will ask on Monday if I could/should put it in the actual tutorial repository.
 
   vars_prompt:
-    - name: api_url
+    - name: submitty_homework_creation_api_url
       prompt: Enter the full API url (http://{domain.com}/api/{semester}/{course}/upload)
       private: no
-    - name: passed_api_key
+    - name: submitty_homework_creation_passed_api_key
       prompt: Enter your API key
       private: yes
-    - name: vcs
+    - name: submitty_homework_creation_vcs
       prompt: Enter clone URL for Git repository if you are using one
       private: no

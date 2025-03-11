@@ -1,12 +1,12 @@
 - name: Create gradeables with API
   ansible.builtin.uri:
-    url: "{{ api_url }}"
+    url: "{{ submitty_homework_creation_api_url }}"
     method: POST
     body_format: json
     body: "{{ lookup('file', var_json_file) }}"
     return_content: yes
     headers:
-      Authorization: "{{ api_key }}"
+      Authorization: "{{ submitty_homework_creation_api_key }}"
   register: api_response
 
 - name: Fail when status is error
