@@ -24,7 +24,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * @var string[]
      */
-     private array $omit_section_from_stats = [];
+    private array $omit_section_from_stats = [];
     /**
      * @var string[]
      */
@@ -344,10 +344,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param object $omit_section
      */
-     public function addOmittedSection(object $omit_section): void {
+    public function addOmittedSection(object $omit_section): void {
          /** add validation, check if it is a section */
          $this->omit_section_from_stats[] = $omit_section;
-     }
+    }
 
     /**
      * Add a gradeable object to the gradeables array
