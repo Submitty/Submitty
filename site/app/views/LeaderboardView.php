@@ -5,6 +5,7 @@ namespace app\views;
 use app\models\User;
 use app\models\gradeable\Gradeable;
 use app\views\ErrorView;
+use app\libraries\response\WebResponse;
 
 class LeaderboardView extends AbstractView {
     public function showLeaderboardPage(Gradeable $gradeable, array $leaderboards, bool $user_is_anonymous, string $leaderboard_tag, string $gradeable_id): string | WebResponse {
