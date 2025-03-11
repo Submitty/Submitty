@@ -866,6 +866,7 @@ jobs:
         run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
 
   ansible-ci:
+    name: Ansible CI
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
