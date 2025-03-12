@@ -14,6 +14,7 @@ import datetime
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
+from . import generate_pdf_images 
 from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
@@ -341,6 +342,17 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
+
+
+class GeneratePdfImages(AbstractJob):
+    def run_job(self):
+        pdf_file_path = self.job_details['pdf_file_path']
+        # optionally get redactions
+        redactions = self.job_details.get('redactions', [])
+        generate_pdf_images.main(pdf_file_path, [generate_pdf_images.Redaction(**r) for r in redactions])
+
+    def cleanup_job(self):
+        pass
 
 
 # pylint: disable=abstract-method
