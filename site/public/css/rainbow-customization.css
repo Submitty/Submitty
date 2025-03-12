@@ -74,11 +74,14 @@
 
 /* stylelint-disable-next-line selector-id-pattern */
 @media (max-width: 700px) {
+/* stylelint-disable-next-line selector-id-pattern */    
     #status_head {
         flex-wrap: wrap;
         justify-content: start;
         flex-direction: column;
     }
+
+/* stylelint-disable-next-line selector-id-pattern */    
     #status_head > div {
         width: 100%;
         margin: 3px 0;
