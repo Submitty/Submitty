@@ -162,10 +162,6 @@ class Gradeable extends AbstractModel {
     protected $redactions = [];
 
     /** @prop
-     * @var Redaction[] An array of all redactions loaded from the database */
-    private $db_redactions = [];
-
-    /** @prop
      * @var bool If any submitters have active grade inquiries */
     protected $active_grade_inquiries_count = 0;
 
@@ -1455,9 +1451,8 @@ class Gradeable extends AbstractModel {
      * @param Redaction[] $redactions
      * @internal
      */
-    public function setRedactionsFromDatabase(array $redactions) {
+    public function setRedactionsFromDatabase(array $redactions): void {
         $this->redactions = $redactions;
-        $this->db_redactions = $redactions;
     }
 
     /**
