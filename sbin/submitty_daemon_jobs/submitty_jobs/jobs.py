@@ -14,7 +14,7 @@ import datetime
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
-from . import generate_pdf_images 
+from . import generate_pdf_images
 from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
