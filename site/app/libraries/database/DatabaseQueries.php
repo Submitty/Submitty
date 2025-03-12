@@ -1258,10 +1258,8 @@ WHERE term=? AND course=? AND user_id=?",
      * When $len is zero, this function will return '(NULL)' so that it won't break SQL syntax.
      *
      * @param integer $len the number of placeholder parameters.
-     *
-     * @return string
      */
-    protected function createParameterList($len) {
+    protected function createParameterList(int $len): string {
         if ($len < 1) {
             return '(NULL)';
         }
