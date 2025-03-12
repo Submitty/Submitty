@@ -28,7 +28,7 @@ def main(pdf_file_path: str, redactions: List[Redaction]):
             imagePages[page_number].save(image_filename,
                                          "JPEG", quality=20, optimize=True)
             for redaction in redactions:
-                if redaction.page_number != page_number:
+                if redaction.page_number != page_number + 1:
                     continue
                 img = Image.open(image_filename)
                 draw = ImageDraw.Draw(img)

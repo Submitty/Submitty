@@ -73,6 +73,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setLateSubmissionAllowed($allow_late_submission)
  * @method float getPrecision()
  * @method Component[] getComponents()
+ * @method Redaction[] getRedactions()
  * @method void setAllowedMinutes($minutes)
  * @method string getDependsOn()
  * @method void setDependsOn($depends_on)
@@ -155,6 +156,14 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
+
+    /** @prop
+     * @var Redaction[] An array of all redactions for this gradeable */
+    protected $redactions = [];
+
+    /** @prop
+     * @var Redaction[] An array of all redactions loaded from the database */
+    private $db_redactions = [];
 
     /** @prop
      * @var bool If any submitters have active grade inquiries */
@@ -1439,6 +1448,16 @@ class Gradeable extends AbstractModel {
     public function setComponentsFromDatabase(array $components) {
         $this->setComponents($components);
         $this->db_components = $this->components;
+    }
+
+    /**
+     * Sets the array of redactions, only called from the database
+     * @param Redaction[] $redactions
+     * @internal
+     */
+    public function setRedactionsFromDatabase(array $redactions) {
+        $this->redactions = $redactions;
+        $this->db_redactions = $redactions;
     }
 
     /**
