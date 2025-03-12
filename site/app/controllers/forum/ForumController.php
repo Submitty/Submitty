@@ -1462,9 +1462,8 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
-        $order = $_COOKIE['forum_display_option'] ?? 'tree';
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
-        $thread = $repo->getThreadDetail($_POST['thread_id'], $order);
+        $thread = $repo->getThreadDetail($_POST['thread_id']);
 
         $this->sendSocketMessage([
             'type' => 'edit_likes',
