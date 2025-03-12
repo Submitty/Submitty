@@ -237,9 +237,13 @@ $(document).ready(() => {
                 const original = new Date($(val).attr('data-original'));
 
                 if (original !== updating && updating >= new Date()) {
-                    data['notifications_sent'] = confirm(
-                        `Notifications for this gradeable have already been sent to students. If you change the release date, would you like to resend notifications to students when the new release date is reached?`,
-                    ) ? 0 : notifications_sent;
+                    const resend = confirm(
+                        'Notifications for this gradeable have already been sent to students. '
+                        + 'If you change the release date, would you like to resend notifications to '
+                        + 'students when the new release date is reached?',
+                    );
+
+                    data['notifications_sent'] = resend ? 0 : notifications_sent;
                 }
             }
             data[val.name] = $(val).val();
