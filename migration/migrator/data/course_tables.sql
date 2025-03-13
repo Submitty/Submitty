@@ -1282,6 +1282,41 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 
 
 --
+-- Name: gradeable_redaction; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_redaction (
+    redaction_id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    page integer NOT NULL,
+    x1 integer NOT NULL,
+    x2 integer NOT NULL,
+    y1 integer NOT NULL,
+    y2 integer NOT NULL
+);
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gradeable_redaction_redaction_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gradeable_redaction_redaction_id_seq OWNED BY public.gradeable_redaction.redaction_id;
+
+
+--
 -- Name: gradeable_teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2036,6 +2071,13 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET D
 
 
 --
+-- Name: gradeable_redaction redaction_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction ALTER COLUMN redaction_id SET DEFAULT nextval('public.gradeable_redaction_redaction_id_seq'::regclass);
+
+
+--
 -- Name: lichen id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2326,6 +2368,14 @@ ALTER TABLE ONLY public.gradeable_data
 
 ALTER TABLE ONLY public.gradeable
     ADD CONSTRAINT gradeable_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_pkey PRIMARY KEY (redaction_id);
 
 
 --
