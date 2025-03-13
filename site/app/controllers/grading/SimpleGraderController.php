@@ -35,10 +35,10 @@ class SimpleGraderController extends AbstractController {
             $sort_by = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_by = "coalesce(NULLIF(u.user_preferred_givenname, ''), u.user_givenname)";
+            $sort_by = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
         else {
-            $sort_by = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
+            $sort_by = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
 
         //Figure out what section we are supposed to print
@@ -126,10 +126,10 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_key = "coalesce(NULLIF(u.user_preferred_givenname, ''), u.user_givenname)";
+            $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
         elseif ($sort === "last") {
-            $sort_key = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
+            $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
         else {
             $sort_key = "u.registration_subsection";

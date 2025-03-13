@@ -33,14 +33,14 @@ class UserEntity {
     #[ORM\Column(type: Types::STRING)]
     protected string $user_givenname;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $user_preferred_givenname;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected string|null $user_preferred_givenname;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $user_familyname;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $user_preferred_familyname;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected string|null $user_preferred_familyname;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $user_email;
@@ -133,8 +133,8 @@ class UserEntity {
      */
     public function getDisplayInfo(): array {
         $out = [];
-        $out["given_name"] = (strlen($this->user_preferred_givenname ?? "") > 0) ? $this->user_preferred_givenname : $this->user_givenname;
-        $out["family_name"] = (strlen($this->user_preferred_familyname ?? "") > 0) ? $this->user_preferred_familyname : $this->user_familyname;
+        $out["given_name"] = $this->user_preferred_givenname ?? $this->user_givenname;
+        $out["family_name"] = $this->user_preferred_familyname ?? $this->user_familyname;
         $out["user_email"] = $this->user_email;
         $out["pronouns"] = $this->user_pronouns;
         $out["display_pronouns"] = $this->display_pronouns;
