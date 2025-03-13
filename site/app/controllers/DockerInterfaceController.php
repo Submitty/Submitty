@@ -3,10 +3,12 @@
 namespace app\controllers;
 
 use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\DockerUI;
 
 /**
  * Class DockerInterfaceController
@@ -15,6 +17,9 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
+    /**
+     * Entry point to render the Docker UI, handles both API and webresponse calls
+     */
     #[Route("/admin/docker", methods: ["GET"])]
     #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
@@ -27,7 +32,6 @@ class DockerInterfaceController extends AbstractController {
         }
 
         $json = [];
-
         $json['autograding_containers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
@@ -36,15 +40,14 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
-        $images = [];
-        if ($json['autograding_containers'] !== false) {
-            foreach ($json['autograding_containers'] as $capability => $image_list) {
-                foreach ($image_list as $image) {
-                    $images[] = $image;
-                }
-            }
+        if ($json['autograding_containers'] === false) {
+            $error_message = "Failed to read autograding_containers.json";
+            Logger::error($error_message);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error_message),
+                new WebResponse("Error", "errorPage", $error_message)
+            );
         }
-        $json['image_owners'] = $this->core->getQueries()->getAllDockerImageOwners();
 
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
@@ -54,12 +57,22 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
+        if ($json['autograding_workers'] === false) {
+            $error_message = "Failed to read autograding_workers.json";
+            Logger::error($error_message);
+            return new MultiResponse(
+                JsonResponse::getFailResponse($error_message),
+                new WebResponse("Error", "errorPage", $error_message)
+            );
+        }
+
+        $json['image_owners'] = $this->core->getQueries()->getAllDockerImageOwners();
         return new MultiResponse(
             JsonResponse::getSuccessResponse($json),
             new WebResponse(
                 ['admin', 'Docker'],
                 'displayDockerPage',
-                $json
+                new DockerUI($this->core, $json),
             )
         );
     }
@@ -231,6 +244,11 @@ class DockerInterfaceController extends AbstractController {
             $jsonFilePath,
             $json,
         );
+
+        if (!$this->updateDocker()) {
+            return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
+        }
+
         return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
     }
 }

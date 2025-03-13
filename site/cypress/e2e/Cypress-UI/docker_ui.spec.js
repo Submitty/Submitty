@@ -54,7 +54,7 @@ describe('Docker UI Test', () => {
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('[data-testid="docker_version"]')
+            return cy.get('[data-testid="docker-version"]')
                 .invoke('text')
                 .then((text) => {
                     return text !== 'Error';
@@ -62,13 +62,13 @@ describe('Docker UI Test', () => {
         }, 10000);
 
         // Updated time should not be "Unknown"
-        cy.get('[data-testid="systemwide_info"]')
+        cy.get('[data-testid="systemwide-info"]')
             .should('not.contain.text', 'Unknown');
         // Updated OS info should not be empty
-        cy.get('[data-testid="system_info"]')
+        cy.get('[data-testid="system-info"]')
             .should('not.be.empty');
         // Updated docker version should not be "Error"
-        cy.get('[data-testid="docker_version"]')
+        cy.get('[data-testid="docker-version"]')
             .should('not.contain.text', 'Error');
     });
 
@@ -166,22 +166,40 @@ describe('Docker UI Test', () => {
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
-            .type('submitty/python:2.7');
+            .type('submitty/pdflatex:2021');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
         cy.get('.alert-success')
-            .should('have.text', 'submitty/python:2.7 found on DockerHub'
+            .should('have.text', 'submitty/pdflatex:2021 found on DockerHub'
             + ' and queued to be added!');
 
+        const time_to_update = 25000;
         cy.reload();
+        // Allow the system to update the info and reload
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-image-id="submitty/pdflatex:2021"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Remove');
+                });
+        }, time_to_update);
+
         // Remove the image
-        cy.get('[data-image-id="submitty/python:2.7"]')
+        cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('be.visible', { timeout: 10000 })
             .click();
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
-        cy.get('[data-image-id="submitty/python:2.7"]')
+        // now wait until the image is removed
+
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return Cypress.$('[data-image-id="submitty/pdflatex:2021"]').length === 0;
+        }, time_to_update);
+
+        cy.get('[data-image-id="submitty/pdflatex:2021"]')
             .should('not.exist');
     });
 });
