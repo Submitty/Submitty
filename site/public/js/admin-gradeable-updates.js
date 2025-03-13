@@ -155,6 +155,7 @@ $(document).ready(() => {
     };
 
     ajaxCheckBuildStatus();
+    checkWarningBanners();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
@@ -261,6 +262,7 @@ $(document).ready(() => {
                     }
                 }
                 updateErrorMessage();
+                checkWarningBanners();
             }, updateGradeableErrorCallback);
     });
 
@@ -312,6 +314,23 @@ $(document).ready(() => {
             }
         });
 });
+
+function checkWarningBanners() {
+    $('#gradeable-dates-warnings').hide();
+    if ($('#yes_grade_inquiry_allowed').is(':checked')) {
+        const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
+        const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
+
+        // hide/show the element when the start date is before/after the due date respectfully
+        if (grade_inquiry_start_date > grade_inquiry_due_date) {
+            $('#grade-inquiry-warning').show();
+            $('#gradeable-dates-warnings').show();
+        }
+        else {
+            $('#grade-inquiry-warning').hide();
+        }
+    }
+}
 
 function ajaxRebuildGradeableButton() {
     const gradeable_id = $('#g_id').val();
