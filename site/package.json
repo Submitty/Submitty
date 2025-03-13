@@ -84,7 +84,7 @@
     "@vue/tsconfig": "^0.7.0",
     "eslint-plugin-vue": "^9.32.0",
     "vite": "^6.0.11",
-    "vue-tsc": "^2.2.0"
+    "vue-tsc": "^2.2.8"
   },
   "scripts": {
     "css-stylelint": "stylelint \"**/*.css\"",
