@@ -536,7 +536,7 @@ class User extends AbstractModel {
 
     /**
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
-     * @param string $name
+     * @param ?string $name
      */
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
