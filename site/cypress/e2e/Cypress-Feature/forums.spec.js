@@ -33,17 +33,13 @@ const replyToThread = (title, reply) => {
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
     cy.get('[data-testid="thread-list-item"]').contains(fromThread).click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
+    cy.get('[data-testid="thread-dropdown"]');
     cy.get('[title="Merge Thread Into Another Thread"]').click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
+    cy.get('.chosen-single > span');
     cy.get('.chosen-single > span').click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
+    cy.get('.active-result');
     cy.get('.active-result').contains(toThread).click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
+    cy.get('[value="Merge Thread"]');
     cy.get('[value="Merge Thread"]').click();
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
