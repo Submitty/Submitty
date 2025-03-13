@@ -15,7 +15,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
     formData.append('release_date', releaseDate);
     formData.append('close_date', closeDate);
     $.ajax({
-        url: buildUrl(['banner', 'delete']),
+        url: buildUrl(['community_events', 'delete']),
         data: formData,
         processData: false,
         contentType: false,
@@ -25,7 +25,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -37,7 +37,7 @@ function deleteBannerImage(csrf_token, id, imageName, imagePath, description, re
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
