@@ -167,7 +167,7 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
@@ -178,6 +178,56 @@ function getSection() {
 
     return sections;
 }
+
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    if (hasDuplicates) {
+        warningIcon.show();
+    }
+    else {
+        warningIcon.hide();
+    }
+}
+
+$(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
+
+    // Run at input events
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
+    });
+});
 
 function getDisplayBenchmark() {
     // Collect display benchmarks
