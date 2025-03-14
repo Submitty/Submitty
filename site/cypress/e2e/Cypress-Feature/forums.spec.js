@@ -91,7 +91,8 @@ const setLockDateToPast = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
     cy.get('[data-testid="thread-dropdown"]').first().click();
     cy.get('[data-testid="edit-post-button"]').first().click();
-    cy.get('#lock_thread_date').clear().type('2023-01-01 00:00:00');
+    cy.get('#lock_thread_date').clear();
+    cy.get('#lock_thread_date').type('2023-01-01 00:00:00');
     cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
 
