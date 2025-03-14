@@ -780,6 +780,7 @@
     flex: 3;
 }
 
+/* stylelint-disable custom-property-empty-line-before, declaration-empty-line-before */
 .thread-icons-cont {
     flex: 1;
     display: flex;
@@ -803,6 +804,7 @@
     --custom-spacing: 16px;
     column-gap: var(--custom-spacing);
 }
+/* stylelint-enable custom-property-empty-line-before, declaration-empty-line-before */
 
 .sub-info-container {
     display: flex;
@@ -825,6 +827,7 @@
     margin-left: auto;
 }
 
+/* stylelint-disable custom-property-empty-line-before, declaration-empty-line-before */
 .thread-date {
     display: flex;
     flex-direction: column;
@@ -834,6 +837,7 @@
     --custom-spacing: 0px;
     margin-top: var(--custom-spacing);
 }
+/* stylelint-enable custom-property-empty-line-before, declaration-empty-line-before */
 
 /* stylelint-disable-next-line selector-class-pattern */
 .viewed_post {

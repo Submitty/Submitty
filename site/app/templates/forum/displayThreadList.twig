@@ -59,25 +59,25 @@
                             id="Thread_likeCounter_{{thread.thread_id}}"
                             class="thread-like-counter"
                             style="margin-right: {{ is_full_page is defined and is_full_page ? '22' : '16' }}px;">
-                            {{ thread.sum_ducks }}
+                            {{- thread.sum_ducks -}}
                         </span>
                         <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
                         <span data-testid="thread-post-count"
                             id="Thread_postCounter_{{thread.thread_id}}"
                             class="thread-post-counter">
-                            {{ thread.num_posts }}
+                            {{- thread.num_posts -}}
                         </span>
                     </span>
 
-                    <span class="thread-action-container">
+                    <span class="thread-action-container" data-testid="thread-action-container">
                         {% if is_full_page is defined and is_full_page %}
                             {% if thread.date.not_null %}
                                 <span class="thread-date" style="--custom-spacing: 5px">{{ thread.date.formatted }}</span>
                             {% endif %}
                             <span>
-                                <strong class="post_user_id">{{thread.author_info.name}}</strong>
+                                <strong class="post-author-name">{{ thread.author_info.name }}</strong>
                                 {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                                    <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
+                                    <strong class="post-author-pronouns">({{ thread.author_info.pronouns }})</strong>
                                 {% endif %}
                             </span>
                         {% elseif thread.date.not_null %}
