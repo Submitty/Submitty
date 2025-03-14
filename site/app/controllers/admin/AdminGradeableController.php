@@ -76,7 +76,7 @@ class AdminGradeableController extends AbstractController {
             'external_repo' => '',
             'using_subdirectory' => 'false',
             'vcs_subdirectory' => '',
-            'syllabus_bucket' => 'Homework',
+            'syllabus_bucket' => 'homework',
             'autograding_config_path' => ''
         ];
 
@@ -150,7 +150,7 @@ class AdminGradeableController extends AbstractController {
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
-        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page
@@ -1119,6 +1119,10 @@ class AdminGradeableController extends AbstractController {
         ];
         foreach ($front_page_property_names as $prop) {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
+        }
+
+        if (!array_key_exists($details['syllabus_bucket'], self::syllabus_buckets)) {
+            throw new \InvalidArgumentException('Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets));
         }
 
         $repo_name = '';

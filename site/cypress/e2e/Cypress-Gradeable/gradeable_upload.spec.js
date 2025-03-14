@@ -48,7 +48,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                 },
                 headers: {
                     Authorization: key,
@@ -80,7 +80,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                 },
                 headers: {
                     Authorization: key,
@@ -110,7 +110,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                 },
                 headers: {
                     Authorization: key,
