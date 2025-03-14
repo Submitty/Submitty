@@ -60,11 +60,9 @@ const removeThread = (title) => {
     cy.reload();
     threadExists(title).then((exists) => {
         if (exists) {
-            cy.get('[data-testid="thread-list-item"]').contains(title).click().then(() => {
-                cy.get('[data-testid="thread-dropdown"]').first().click().then(() => {
-                    cy.get('[data-testid="delete-post-button"]').first().click();
-                });
-            });
+            cy.get('[data-testid="thread-list-item"]').contains(title).click();
+            cy.get('[data-testid="thread-dropdown"]').first().click();
+            cy.get('[data-testid="delete-post-button"]').first().click();
             // eslint-disable-next-line cypress/no-unnecessary-waiting
             cy.wait(1000);
             if (threadExists(title)) {
