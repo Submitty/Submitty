@@ -1650,9 +1650,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 // eslint-disable-next-line no-undef
                 removeMessagePopup('theid');
             }, 1000);
-            if (category_color !== null) {
-                $(`#categorylistitem-${category_id}`).css('color', category_color);
-            }
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
