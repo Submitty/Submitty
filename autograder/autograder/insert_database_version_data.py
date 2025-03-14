@@ -1,4 +1,3 @@
-
 """
 This module is used for inserting/updating autograding information into the DB.
 Generally, the site should be inserting an empty row into the DB for the autograding
@@ -301,6 +300,5 @@ def get_result_details(data_dir, semester, course, g_id, who_id, version):
             result_json = json.load(result_file)
             # a = datetime.strptime(result_json[-1]['submission_time'], "%a %b  %d %H:%M:%S %Z %Y")
             a = dateutils.read_submitty_date(result_json[-1]['submission_time'])
-            result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
-                .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
+            result_details['submission_time'] = a.strftime('%Y-%m-%d %H:%M:%S%z')
     return result_details
