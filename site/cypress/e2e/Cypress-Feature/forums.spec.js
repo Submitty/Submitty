@@ -65,6 +65,7 @@ const removeThread = (title) => {
                     cy.get('[data-testid="delete-post-button"]').first().click();
                 });
             });
+            // eslint-disable-next-line cypress/no-unnecessary-waiting
             cy.wait(1000);
             if (threadExists(title)) {
                 removeThread(title);
