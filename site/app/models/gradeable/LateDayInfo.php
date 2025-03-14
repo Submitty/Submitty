@@ -216,7 +216,7 @@ class LateDayInfo extends AbstractModel {
      * @return bool
      */
     public function isOnTimeSubmission() {
-        // if there is no submission or if this isnt a gradeable event, ignore
+        // if there is no submission or if this isn't a gradeable event, ignore
         if (!$this->has_submission || $this->isLateDayUpdate()) {
             return true;
         }

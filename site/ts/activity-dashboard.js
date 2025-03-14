@@ -5,7 +5,7 @@
  */
 export function sortTable(n, dir) {
     const table = document.getElementById('data-table');
-    const merge = function(arr1, arr2) {
+    const merge = function (arr1, arr2) {
         const res = [];
         let i = 0, j = 0;
         while (i < arr1.length && j < arr2.length) {
@@ -34,7 +34,7 @@ export function sortTable(n, dir) {
             return arr;
         }
 
-        const mid = Math.floor(arr.length/2);
+        const mid = Math.floor(arr.length / 2);
         const left = mergeSort(arr.slice(0, mid));
         const right = mergeSort(arr.slice(mid));
         const res = merge(left, right);
@@ -43,13 +43,13 @@ export function sortTable(n, dir) {
     const rows = table.rows;
     const sorted = mergeSort(Array.prototype.slice.call(rows).slice(1));
     // inserting rows back into table to update the order
-    for (let i = 0; i < table.rows.length-1; i++) {
-        rows[i+1].parentNode.insertBefore(sorted[i], rows[i+1]);
+    for (let i = 0; i < table.rows.length - 1; i++) {
+        rows[i + 1].parentNode.insertBefore(sorted[i], rows[i + 1]);
     }
 }
 
 // Comparator used to compare 2 data entries for sorting
-export function comparator (row1, row2, n, dir) {
+export function comparator(row1, row2, n, dir) {
     // Check if they're equal
     if (!helper(row1[n].innerHTML, row2[n].innerHTML) && !helper(row2[n].innerHTML, row1[n].innerHTML)) {
         // eslint-disable-next-line eqeqeq
@@ -71,7 +71,7 @@ export function comparator (row1, row2, n, dir) {
 
 // if n == 0 or n == 8
 // returns true if x < y, empty strings < digits < strings
-export function helper (x, y, i) {
+export function helper(x, y, i) {
     // eslint-disable-next-line eqeqeq
     if (x != '' && y == '') {
         return false;
@@ -169,14 +169,13 @@ export function applySettings() {
             flag = true;
         }
         else {
-            rows[i+1].getElementsByTagName('TD')[11].innerText = 'False';
-            document.getElementById(data[i].user_id).style.backgroundColor= 'green';
+            rows[i + 1].getElementsByTagName('TD')[11].innerText = 'False';
+            document.getElementById(data[i].user_id).style.backgroundColor = 'green';
         }
         if (flag) {
             document.getElementById(data[i].user_id).style.backgroundColor = 'red';
-            rows[i+1].getElementsByTagName('TD')[11].innerText = 'True';
+            rows[i + 1].getElementsByTagName('TD')[11].innerText = 'True';
         }
-
     }
 }
 
@@ -193,8 +192,8 @@ export function clearFields() {
     const data = JSON.parse(document.getElementById('data').getAttribute('data-original'));
     const rows = table.rows;
     for (let i = 0; i < data.length; i++) {
-        rows[i+1].getElementsByTagName('TD')[11].innerText = '';
-        document.getElementById(data[i].user_id).style.backgroundColor= '';
+        rows[i + 1].getElementsByTagName('TD')[11].innerText = '';
+        document.getElementById(data[i].user_id).style.backgroundColor = '';
     }
 }
 

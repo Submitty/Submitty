@@ -7,11 +7,13 @@ namespace app\controllers\calendar;
 use app\controllers\AbstractController;
 use app\controllers\GlobalController;
 use app\entities\calendar\CalendarItem;
+use app\entities\calendar\GlobalItem;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\ResponseInterface;
 use app\models\CalendarInfo;
+use app\models\GlobalCalendarInfo;
 use app\models\gradeable\GradeableUtils;
 use app\views\calendar\CalendarView;
 use Symfony\Component\Routing\Annotation\Route;
@@ -22,22 +24,22 @@ class CalendarController extends AbstractController {
      * on a calendar. The calendar is accessible through the side bar button in a
      * global scope.
      *
-     * @Route("/calendar")
      *
      * @return WebResponse
      * @throws \Exception if a Gradeable failed to load from the database
      * @see GlobalController::prep_user_sidebar
      * @see CalendarView::showCalendar
      */
+    #[Route("/calendar")]
     public function viewCalendar(): WebResponse {
         $user = $this->core->getUser();
 
         $calendar_messages = [];
-
+        $global_calendar_messages = [];
         $courses = $this->core->getQueries()->getCourseForUserId($user->getId());
         $filtered_courses = [];
 
-        //If there arent any courses, don't filter
+        //If there aren't any courses, don't filter
         if (count($courses) != 0) {
             //Check if should see all courses
             $show_all_courses = '1';
@@ -84,13 +86,14 @@ class CalendarController extends AbstractController {
             CalendarView::class,
             'showCalendar',
             CalendarInfo::loadGradeableCalendarInfo($this->core, $gradeables_of_user, $filtered_courses, $calendar_messages),
+            GlobalCalendarInfo::loadGlobalCalendarInfo($this->core),
             $courses
         );
     }
 
     /**
-     * @Route("/calendar/items/new", methods={"POST"})
      */
+    #[Route("/calendar/items/new", methods: ["POST"])]
     public function createMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -165,9 +168,7 @@ class CalendarController extends AbstractController {
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    /**
-     * @Route("/calendar/items/edit", methods={"POST"})
-     */
+    #[Route("/calendar/items/edit", methods: ["POST"])]
     public function editMessage(): RedirectResponse {
         // Checks if the values exist that are set and returns an error message if not
         if (isset($_POST['type'])) {
@@ -211,7 +212,7 @@ class CalendarController extends AbstractController {
         }
 
         if (isset($_POST['course'])) {
-            $InputCourse = $_POST['course'];
+            $input_course = $_POST['course'];
         }
         else {
             $this->core->addErrorMessage("Invalid course");
@@ -221,12 +222,13 @@ class CalendarController extends AbstractController {
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
 
         foreach ($instructor_courses as $course) {
-            if (($semester === $course['term']) && ($InputCourse === $course['course'])) {
+            if (($semester === $course['term']) && ($input_course === $course['course'])) {
                 $this->core->loadCourseConfig($course['term'], $course['course']);
                 $this->core->loadCourseDatabase();
                 $calendar_item = $this->core->getCourseEntityManager()->getRepository(CalendarItem::class)
                     ->findOneBy(['id' => $id]);
                 if ($calendar_item === null) {
+                    $this->core->addErrorMessage("Calendar item does not exist");
                     return new RedirectResponse($this->core->buildUrl(['calendar']));
                 }
                 try {
@@ -243,12 +245,11 @@ class CalendarController extends AbstractController {
             }
         }
 
+        $this->core->addSuccessMessage("Successfully edited calendar item");
         return new RedirectResponse($this->core->buildUrl(['calendar']));
     }
 
-    /**
-     * @Route("/calendar/items/delete", methods={"POST"})
-     */
+    #[Route("/calendar/items/delete", methods: ["POST"])]
     public function deleteMessage(): ResponseInterface {
         if (isset($_POST['id'])) {
             $id = $_POST['id'];
@@ -274,8 +275,8 @@ class CalendarController extends AbstractController {
 
         $instructor_courses = $this->core->getQueries()->getInstructorLevelUnarchivedCourses($this->core->getUser()->getId());
         $exists = false;
-        foreach ($instructor_courses as $currCourse) {
-            if ($currCourse['term'] === $semester && $currCourse['course'] === $course) {
+        foreach ($instructor_courses as $current_course) {
+            if ($current_course['term'] === $semester && $current_course['course'] === $course) {
                 $exists = true;
                 break;
             }
@@ -297,5 +298,147 @@ class CalendarController extends AbstractController {
             return JsonResponse::getSuccessResponse();
         }
         return JsonResponse::getErrorResponse("Failed to delete message");
+    }
+
+    #[Route(path: "/calendar/global_items/new", methods: ["POST"])]
+    public function createGlobalEvent(): RedirectResponse {
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $global_event = new GlobalItem();
+        try {
+            $global_event->setStringType($type);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+        $global_event->setDate(new \DateTime($date));
+        try {
+            $global_event->setText($text);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->getSubmittyEntityManager()->persist($global_event);
+        $this->core->getSubmittyEntityManager()->flush();
+
+        $this->core->addSuccessMessage("Global event successfully created");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+    }
+
+
+    #[Route(path: "/calendar/global_items/edit", methods: ["POST"])]
+    public function editGlobalEvent(): RedirectResponse {
+        // Checks if the values exist that are set and returns an error message if not
+        if (isset($_POST['type'])) {
+            $type = $_POST['type'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect type given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['date'])) {
+            $date = $_POST['date'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect date given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['text'])) {
+            $text = $_POST['text'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect text given");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        else {
+            $this->core->addErrorMessage("Invalid or incorrect id");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+
+        $global_event = $this->core->getSubmittyEntityManager()
+            ->getRepository(GlobalItem::class)
+            ->findOneBy(['id' => $id]);
+
+        if ($global_event === null) {
+            $this->core->addErrorMessage("Global event not found");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        // Edit the global event
+        try {
+            $global_event->setText($text);
+            $global_event->setDate(new \DateTime($date));
+            $global_event->setStringType($type);
+        }
+        catch (\InvalidArgumentException $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        // Persist the changes and flush to save them
+        $this->core->getSubmittyEntityManager()->flush();
+
+        $this->core->addSuccessMessage("Global event successfully updated");
+        return new RedirectResponse($this->core->buildUrl(['calendar']));
+    }
+
+    #[Route(path: "/calendar/global_items/delete", methods: ["POST"])]
+    public function deleteGlobalEvent(): ResponseInterface {
+        if (isset($_POST['id'])) {
+            $id = $_POST['id'];
+        }
+        else {
+            $this->core->addErrorMessage("Error: No id specified");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        // Find the announcement in the master database
+        $global_event = $this->core->getSubmittyEntityManager()
+            ->getRepository(GlobalItem::class)
+            ->findOneBy(['id' => $id]);
+
+        if ($global_event === null) {
+            $this->core->addErrorMessage("Global event not found");
+            return new RedirectResponse($this->core->buildUrl(['calendar']));
+        }
+
+        $this->core->getSubmittyEntityManager()->remove($global_event);
+        $this->core->getSubmittyEntityManager()->flush();
+        $this->core->addSuccessMessage($global_event->getText() . " was successfully deleted.");
+
+        return JsonResponse::getSuccessResponse();
     }
 }

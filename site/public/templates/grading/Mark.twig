@@ -8,36 +8,27 @@ Required Input:
     mark_disabled: True if the mark should appear uneditable in 'edit' mode
     show_publish: True to show the 'publish' option
 #}
-<div id="mark-{{ mark.id }}"
-     class="mark-container key_to_click row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}" tabindex="0"
-     data-component_id="{{ component.id }}"
-     data-mark_id="{{ mark.id }}"
-     data-publish="{{ mark.publish }}"
-     onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}"
->
+<div id="mark-{{ mark.id }}" class="mark-container key_to_click row {{ mark.publish ? 'mark-publish' : '' }} {{ first_mark ? 'mark-first' : '' }} {{ not edit_marks_enabled and mark_disabled ? 'mark-disabled' : '' }} {{ mark.deleted ? 'mark-deleted' : '' }}" tabindex="0" data-component_id="{{ component.id }}" data-mark_id="{{ mark.id }}" data-publish="{{ mark.publish }}" onclick="{{ edit_marks_enabled or mark_disabled ? '' : 'onToggleMark(this)' }}">
     {% if edit_marks_enabled %}
-        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks">
+        <span class="reorder-mark-container col-no-gutters {{ first_mark ? 'hidden' : '' }}" title="Click and drag to reorder marks" data-testid="mark-reorder">
             <i class="fas fa-ellipsis-v"></i>
         </span>
     {% endif %}
     <span class="mark-selector-container">
-        {# Keep the mark checkbox so we can keep graded data when in edit mode to automatically update the component points #}
-        <span class="{{ is_checked ? 'mark-selected' : '' }} {{ edit_marks_enabled ? 'hidden' : '' }} mark-selector col-no-gutters"
-              data-mark_id="{{ mark.id }}">
+        <span class="{{ is_checked ? 'mark-selected' : '' }} mark-selector col-no-gutters" data-mark_id="{{ mark.id }}">
             {{ mark.order }}
         </span>
     </span>
-    <span class="col-no-gutters mark-points"
-          data-points="{{ mark.points }}">
+    {% if mark.publish %}
+    <span class="question-mark-container">
+        <a href="https://submitty.org/grader/rubric_grading/rubric_components_and_marks#common-mark-editing" target="_blank" class="explanation-link rubric-question-mark" title="NOTE: This mark will be visible to ALL students, but they will only receive the points (or point deduction) if it is checked.">
+            <i class="fas fa-question-circle rubric-question-mark"></i>
+        </a>
+    </span>
+    {% endif %}
+    <span class="col-no-gutters mark-points" data-points="{{ mark.points }}">
         {% if edit_marks_enabled %}
-            <input id="mark-editor-{{ mark.id }}"
-                   type="number"
-                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
-                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
-                   step="{{ precision }}"
-                   aria-label="mark value"
-                   value="{{ mark.points|round(decimal_precision) }}"
-                    {{ first_mark ? 'disabled' : '' }}/>
+            <input id="mark-editor-{{ mark.id }}" type="number" onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))" onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))" step="{{ precision }}" aria-label="mark value" value="{{ mark.points|round(decimal_precision) }}" {{ first_mark ? 'disabled' : '' }}/>
             <script>
                 {% if first_mark %}
                     var overall_title = "{{ mark.title  }}";
@@ -62,11 +53,9 @@ Required Input:
             {{ mark.points }}
         {% endif %}
     </span>
-    <span class="col-sm mark-title"
-          data-title="{{ mark.title|escape }}">
+    <span class="col-sm mark-title" data-testid="mark-title" data-title="{{ mark.title|escape }}">
         {% if edit_marks_enabled %}
-            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title"
-                    {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
+            <textarea onkeyup="auto_grow(this)" class="noscroll" aria-label="mark title" data-testid="mark-title-input" {{ first_mark ? 'disabled' : '' }}>{{ mark.title|escape }}</textarea>
         {% else %}
             {{ mark.title|nl2br }}
         {% endif %}

@@ -12,9 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class GradeOverrideController extends AbstractController {
-    /**
-     * @Route("/courses/{_semester}/{_course}/grade_override")
-     */
+    #[Route("/courses/{_semester}/{_course}/grade_override")]
     public function viewOverriddenGrades() {
         $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
         $students = $this->core->getQueries()->getAllUsers();
@@ -27,9 +25,7 @@ class GradeOverrideController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}")
-     */
+    #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}")]
     public function getOverriddenGrades($gradeable_id) {
         $users = $this->core->getQueries()->getUsersWithOverriddenGrades($gradeable_id);
         $user_table = [];
@@ -42,17 +38,13 @@ class GradeOverrideController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods: ["POST"])]
     public function deleteOverriddenGrades($gradeable_id) {
         $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
         return $this->getOverriddenGrades($gradeable_id);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
         $isUserNotInCourse = empty($this->core->getQueries()->getUsersById([$_POST['user_id']]));

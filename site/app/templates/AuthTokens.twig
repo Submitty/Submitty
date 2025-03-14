@@ -1,5 +1,5 @@
 {% if new_vcs_token is defined and new_vcs_token_val is defined %}
-    <div class="content" id="new-token-banner">
+    <div class="content" id="new-token-banner" data-testid="new-token-banner">
         <p>
             Your new VCS Authentication Token was created successfully and its value is displayed below.<br>
             <em>NOTE: Do not share this token with others. Treat it like a password.</em><br>
@@ -16,7 +16,7 @@
         {% else %}
             <p><b>Expiration</b>: {{ new_vcs_token.getExpiration()|date('m/d/Y @ h:i A T') }}</p>
         {% endif %}
-        <p>
+        <p data-testid="new-vcs-token">
             <b>Value</b>: {{ new_vcs_token_val }}
             <i class="fas fa-copy" id="token-copy-button" title="Copy to clipboard" data-val="{{ new_vcs_token_val }}"></i>
         </p>
@@ -44,7 +44,6 @@
 
 <div class="content">
     <h1>Authentication Tokens</h1>
-    {% if is_faculty %}
         <h2>API Token</h2>
         <p>
             To get your API token, press the Get API Token button below.
@@ -67,14 +66,13 @@
         </form>
 
         <br><br>
-    {% endif %}
     <h2>Version Control System (GIT) Authentication Tokens</h2>
     <p>
         For more information about managing and using these tokens, please see:<br>
         <a href="https://submitty.org/student/account/authentication_tokens">Submitty Authentication Tokens</a>
         <br><br>
     </p>
-    <button class="btn btn-primary" id="new-auth-token-button">Create New VCS Authentication Token</button>
+    <button class="btn btn-primary" id="new-auth-token-button" data-testid="new-auth-token-button">Create New VCS Authentication Token</button>
     <br><br>
     {% if vcs_tokens|length != 0 %}
     <table class="table mobile-table">
@@ -85,28 +83,28 @@
         </tr>
         {% for token in vcs_tokens %}
             <tr>
-                <td>{{ token.getName() }}</td>
+                <td data-testid="auth-token-name">{{ token.getName() }}</td>
                 {% if token.getExpiration() is null %}
-                    <td>Never expires</td>
+                    <td data-testid="auth-token-expire">Never expires</td>
                 {% else %}
                     {% if token.isExpired(current_time) %}
-                        <td>EXPIRED on {{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
+                        <td data-testid="auth-token-expire">EXPIRED on {{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
                     {% else %}
-                        <td>{{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
+                        <td data-testid="auth-token-expire">{{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
                     {% endif %}
                 {% endif %}
                 <td>
                     <form action="/authentication_tokens/vcs/revoke" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="id" value="{{ token.getId() }}">
-                        <input type="submit" class="btn btn-danger" value="Revoke">
+                        <input data-testid="auth-token-revoke" type="submit" class="btn btn-danger" value="Revoke">
                     </form>
                 </td>
             </tr>
         {% endfor %}
     </table>
     {% else %}
-    <p>You don't have any Authentication Tokens.</p>
+    <p data-testid="no-auth-token">You don't have any Authentication Tokens.</p>
     {% endif %}
 </div>
 

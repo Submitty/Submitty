@@ -86,7 +86,7 @@
             <form method="post" action="{{base_url}}/{{entry['queue_code'] | url_encode }}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-              <button type="submit" class="btn btn-default remove_from_queue_btn">Remove</button>
+              <button type="submit" class="btn btn-default remove_from_queue_btn" data-testid="remove-from-queue-btn">Remove</button>
             </form>
           </td>
         </tr>

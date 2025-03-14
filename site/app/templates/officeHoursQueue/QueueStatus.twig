@@ -9,7 +9,7 @@
     <div class="form-group">
       <label for="queue_code">Queue Name:
       </label>
-      <select id="queue_code" class="form-control" name="code" required="required">
+      <select id="queue_code" class="form-control" name="code" required="required" data-testid="queue-code">
         <option value="">Queue Name</option>
         {% for queue in viewer.getAllOpenQueues() %}
           <option value="{{queue['code']}}">{{queue['code']}}</option>
@@ -24,7 +24,7 @@
       <input type="text" name="contact_info" id="contact_info" style="margin:.5rem" placeholder="Contact Information (follow instructor directions)" value="{{viewer.getContactInfo()}}" autocomplete="on">
       <br>
     </div>
-    <button id="join_queue_btn" type="submit" class="btn btn-primary">Join</button>
+    <button id="join_queue_btn" type="submit" class="btn btn-primary" data-testid="join-queue-btn">Join</button>
   </form>
     <script>
         $('#queue_code').change(function(){
@@ -60,7 +60,6 @@
             </p>
         </div>
     {% endif %}
-<br>
   <div id="queue_status">
   <h2>My Queue Status</h2>
     <p>
@@ -108,7 +107,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-      <button id="leave_queue" type="submit" class="btn btn-danger">Leave Queue</button>
+      <button id="leave_queue" type="submit" class="btn btn-danger" data-testid="leave-queue">Leave Queue</button>
     </form>
 
       {# Display the switch queue form if there is more than 1 open queue or the queue code we got does not match the 1 open queue 
@@ -211,7 +210,7 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
       <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
       <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
-      <button id="self_finish_help" type="submit" class="btn btn-danger">Finish Being Helped</button>
+      <button id="self_finish_help" type="submit" class="btn btn-danger" data-testid="self-finish-help">Finish Being Helped</button>
     </form>
   </div>
 {% endif %}

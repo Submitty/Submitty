@@ -11,8 +11,8 @@ Required Parameters:
         <span class="btn btn-default save-tools-cancel key_to_click" tabindex="0" onclick="{{ cancel_on_click }} ;event.stopPropagation()">
             Discard
         </span>
-        <span class="btn btn-primary save-tools-save">
-            Save
+        <span class="btn btn-primary save-tools-save" data-testid="save-tools-save">
+            Save {% if component_version_conflict %} and resolve version conflict {% endif %}
         </span>
     {% endif %}
     <span class="save-tools-in-progress" hidden>

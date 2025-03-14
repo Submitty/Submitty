@@ -10,10 +10,8 @@ use app\libraries\response\ResponseInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class LeaderboardController extends AbstractController {
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard/{leaderboard_tag}")]
     public function getLeaderboard(string $gradeable_id, string $leaderboard_tag = null): ResponseInterface {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -57,8 +55,8 @@ class LeaderboardController extends AbstractController {
      * This route is for generating leaderboards for a specific gradable
      * users will not go to this route directly, instead this route should be dynamically requested
      * and its content be inserted inside another html page
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/leaderboard_data/{leaderboard_tag}")]
     public function getLeaderboardData(string $gradeable_id, string $leaderboard_tag): ResponseInterface {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -107,9 +105,7 @@ class LeaderboardController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/set_self_anonymity", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/set_self_anonymity", methods: ["POST"])]
     public function toggleSelfLeaderboardAnonymity(string $gradeable_id): JsonResponse {
         if (empty($_POST['anonymity_state'])) {
             $this->core->addErrorMessage("Missing anonymity state");

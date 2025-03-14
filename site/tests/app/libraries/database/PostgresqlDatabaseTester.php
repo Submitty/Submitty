@@ -7,22 +7,46 @@ use app\libraries\database\PostgresqlDatabase;
 class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
     public function testPostgresqlHost() {
         $database = new PostgresqlDatabase(['host' => 'localhost']);
-        $this->assertEquals("pgsql:host=localhost", $database->getDSN());
+        $this->assertEquals(
+            [
+                'driver' => 'pdo_pgsql',
+                'host' => 'localhost'
+            ],
+            $database->getConnectionDetails()
+        );
     }
 
     public function testPostgresqlPort() {
         $database = new PostgresqlDatabase(['port' => '15432']);
-        $this->assertEquals('pgsql:port=15432', $database->getDSN());
+        $this->assertEquals(
+            [
+                'driver' => 'pdo_pgsql',
+                'port' => '15432'
+            ],
+            $database->getConnectionDetails()
+        );
     }
 
     public function testPostgresqlDbname() {
         $database = new PostgresqlDatabase(['dbname' => 'submitty']);
-        $this->assertEquals('pgsql:dbname=submitty', $database->getDSN());
+        $this->assertEquals(
+            [
+                'driver' => 'pdo_pgsql',
+                'dbname' => 'submitty'
+            ],
+            $database->getConnectionDetails()
+        );
     }
 
     public function testPostgresqlUnixSocket() {
         $database = new PostgresqlDatabase(['host' => '/var/run/postgresql', 'port' => 5432]);
-        $this->assertEquals('pgsql:host=/var/run/postgresql', $database->getDSN());
+        $this->assertEquals(
+            [
+                'driver' => 'pdo_pgsql',
+                'host' => '/var/run/postgresql'
+            ],
+            $database->getConnectionDetails()
+        );
     }
 
     public function arrayData() {

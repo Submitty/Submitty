@@ -5,7 +5,7 @@
 {% endif %}
 
 {# Submitted files #}
-{% if student_download or core.getUser().accessGrading() %}
+{% if student_download or is_vcs or core.getUser().accessGrading() %}
     <h4>Submitted Files</h4>
     <div class="row">
         <div class="box col-md-6" id="submitted-files">
@@ -16,11 +16,18 @@
                         <span>
                             {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
                         </span>
-                    {# download icon if student can download files #}
-                    {% if student_download %}
-                        <button class = 'btn btn-primary key_to_click' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
-                            <i class="fas fa-download" title="Download the file"></i></button>
-                    {% endif %}
+                        {# view and download icons if student is permitted to access files #}
+                        {% if student_download %}
+                            <div>
+                                {% set extension = file.relative_name|split('.')|last|lower %}
+                                {% if extension in ['pdf', 'jpg', 'jpeg', 'c', 'cpp', 's', 'twig', 'py', 'java', 'png', 'txt', 'h', 'html', 'php', 'js', 'sql', 'sh', 'md', 'csv', 'salsa', 'erl', 'oz', 'pl', 'hs', 'gif', 'ipynb'] %}
+                                    <button class = 'btn btn-default' onclick='popOutSubmittedFile("{{ file.name|url_encode }}", "{{ file.path|url_encode }}")' aria-label="Pop up the file in a new window"> View
+                                        <i class="fas fa-window-restore" title="Pop up the file in a new window"></i></button>
+                                {% endif %}
+                                <button class = 'btn btn-primary' onclick='downloadFile("{{ file.path|url_encode }}", "submissions")' aria-label="Download {{file.relative_name}}"> Download
+                                    <i class="fas fa-download" title="Download the file"></i></button>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
@@ -28,9 +35,8 @@
                 <br />
                 <div class="flex-row">
                     <span>Download all files:</span>
-                     <button class = 'btn btn-primary key_to_click' 
-                        onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")' 
-                        class="key_to_click"
+                     <button class = 'btn btn-primary' 
+                        onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ submitter_id }}", "{{ display_version }}", "submission")'
                         tabindex="0"
                         aria-label="Download"
                         > Download all files

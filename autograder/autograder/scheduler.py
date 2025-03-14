@@ -54,6 +54,11 @@ class Job:
                 self.config.logger.log_stack_trace(
                     traceback.format_exc(),
                 )
+                # We apparently have a race condition where the queue
+                # file is incomplete and we fail to load the object
+                # file.  See also note in _assign_jobs.  Failure to
+                # load the file means that the job cannot be sorted or
+                # assigned to a worker.
                 return False
         # The queue object was either already loaded or was successfully loaded, so return True.
         return True
@@ -190,10 +195,38 @@ class FCFSScheduler(BaseScheduler):
     def __init__(self, config: Config, workers: List[Worker]):
         super().__init__(config, workers)
 
-    def _assign_jobs(self, jobs: List[Job]):
+    def _assign_jobs(self, jobs_with_None: List[Job]):
         idle_workers = [worker for worker in self.workers if worker.is_idle()]
 
-        jobs.sort(key=lambda j: os.stat(j.path).st_ctime_ns)
+        # _try_load_queue_object returns a None queue_obj when there is a
+        # json parsing error.  Remove those jobs before sorting.
+        jobs = [item for item in jobs_with_None if item.queue_obj is not None]
+
+        # sort jobs by priority
+        # 1. VCS gradeable that has not yet been checked out
+        # 2. Interative / non-regrade job
+        # 3. Time entering queue
+        # 4. Ppath name
+        jobs.sort(key=lambda j:
+                  (
+                    not ("vcs_checkout" in j.queue_obj and
+                         j.queue_obj["vcs_checkout"] and
+                         not ("checkout_total_size" in j.queue_obj)),
+                    "regrade" in j.queue_obj and j.queue_obj["regrade"],
+                    j.queue_obj['queue_time'],
+                    j.path
+                  ),
+                  reverse=False
+                  )
+
+        # for testing / debugging
+        print("JOBS QUEUE count=" + str(len(jobs)))
+        position = 0
+        for j in jobs:
+            position += 1
+            regrade = "regrade" in j.queue_obj and j.queue_obj["regrade"]
+            qt = j.queue_obj['queue_time']
+            print("JOB " + str(position) + " " + str(regrade) + " " + str(qt) + " " + j.path)
 
         for job in jobs:
             if len(idle_workers) == 0:

@@ -1,3 +1,6 @@
+/* exported openMarkConflictPopup */
+/* global ajaxSaveMark ajaxAddNewMark ajaxDeleteMark renderConflictMarks getComponentJQuery getGradeableId isMarkDeleted */
+
 /**
  * Note: The in-use callbacks use buttons to select a row, but this code supports
  *  individually selecting the point value / title of the resolutions
@@ -9,7 +12,7 @@
  * @returns {jQuery}
  */
 function getConflictMarkJQuery(mark_id) {
-    return $('#mark-conflict-' + mark_id);
+    return $(`#mark-conflict-${mark_id}`);
 }
 
 /**
@@ -70,8 +73,8 @@ function showNextConflict() {
  * @param {Object} conflictMarks
  */
 function prepConflictMarks(conflictMarks) {
-    for (let id in conflictMarks) {
-        if (conflictMarks.hasOwnProperty(id)) {
+    for (const id in conflictMarks) {
+        if (Object.prototype.hasOwnProperty.call(conflictMarks, id)) {
             conflictMarks[id].local_deleted = isMarkDeleted(parseInt(id));
         }
     }
@@ -85,8 +88,8 @@ function prepConflictMarks(conflictMarks) {
  *                              The mark will be null if it should be deleted
  */
 function openMarkConflictPopup(component_id, conflictMarks) {
-    let gradeable_id = getGradeableId();
-    let popup = $('#mark-conflict-popup');
+    const gradeable_id = getGradeableId();
+    const popup = $('#mark-conflict-popup');
 
     // Set the component title
     popup.find('.component-title').html(getComponentJQuery(component_id).attr('data-title'));
@@ -96,7 +99,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
 
     // Generate the list of marks
     return renderConflictMarks(conflictMarks)
-        .then(function (elements) {
+        .then((elements) => {
             // Insert the rendered elements
             popup.find('.conflict-marks-container').html(elements);
 
@@ -104,11 +107,11 @@ function openMarkConflictPopup(component_id, conflictMarks) {
             popup.show();
 
             // Setup the promise so that resolving the last mark will resolve the promise
-            return new Promise(function (resolve, reject) {
+            return new Promise((resolve) => {
                 // Function to tag a mark as resolved and move to the next mark
-                let resolveMark = function(mark_id) {
+                const resolveMark = function (mark_id) {
                     tagMarkConflictResolved(mark_id);
-                    if(!anyUnresolvedConflicts()) {
+                    if (!anyUnresolvedConflicts()) {
                         popup.hide();
                         resolve();
                     }
@@ -119,17 +122,17 @@ function openMarkConflictPopup(component_id, conflictMarks) {
 
                 // In order for the event handlers to have the power to resolve the promise,
                 //  they need to be established within the promise
-                popup.find('.mark-resolve-dom .btn').click(function() {
-                    let id = getConflictMarkIdFromDOMElement(this);
-                    let mark = conflictMarks[id].domMark;
+                popup.find('.mark-resolve-dom .btn').click(function () {
+                    const id = getConflictMarkIdFromDOMElement(this);
+                    const mark = conflictMarks[id].domMark;
 
                     Promise.resolve()
-                        .then(function() {
+                        .then(() => {
                             if (conflictMarks[id].local_deleted) {
-                                return ajaxDeleteMark(gradeable_id, component_id ,id)
-                                    .catch(function (err) {
+                                return ajaxDeleteMark(gradeable_id, component_id, id)
+                                    .catch((err) => {
                                         // Don't let this error hold up the whole operation
-                                        alert('Could not delete mark: ' + err.message);
+                                        alert(`Could not delete mark: ${err.message}`);
                                     });
                             }
                             else {
@@ -137,7 +140,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                                 //  we need to re-add the mark
                                 if (isMarkServerDeleted(id)) {
                                     return ajaxAddNewMark(gradeable_id, component_id, mark.title, mark.points, mark.publish)
-                                        .then(function (data) {
+                                        .then((data) => {
                                             mark.id = data.mark_id;
                                         });
                                 }
@@ -146,30 +149,30 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                                 }
                             }
                         })
-                        .then(function() {
+                        .then(() => {
                             resolveMark(id);
                         })
-                        .catch(function(err) {
+                        .catch((err) => {
                             console.error(err);
-                            alert('Failed to resolve conflict! ' + err.message);
+                            alert(`Failed to resolve conflict! ${err.message}`);
                         });
                 });
-                popup.find('.mark-resolve-old-server .btn').click(function() {
-                    let id = getConflictMarkIdFromDOMElement(this);
-                    let mark = conflictMarks[id].oldServerMark;
+                popup.find('.mark-resolve-old-server .btn').click(function () {
+                    const id = getConflictMarkIdFromDOMElement(this);
+                    const mark = conflictMarks[id].oldServerMark;
                     ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish)
-                        .then(function() {
+                        .then(() => {
                             resolveMark(id);
                         })
-                        .catch(function(err) {
+                        .catch((err) => {
                             console.error(err);
-                            alert('Failed to resolve conflict! ' + err.message);
+                            alert(`Failed to resolve conflict! ${err.message}`);
                         });
                 });
-                popup.find('.mark-resolve-server .btn').click(function() {
+                popup.find('.mark-resolve-server .btn').click(function () {
                     // If we choose the server mark, we don't do anything
                     resolveMark(getConflictMarkIdFromDOMElement(this));
                 });
-            })
+            });
         });
 }

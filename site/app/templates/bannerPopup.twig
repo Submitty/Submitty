@@ -1,0 +1,14 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}showing-banner{% endblock %}
+{% block title %}New Event Happening!{% endblock %}
+{% block body %}
+    <input type="hidden" name="csrf_token" value="ok" />
+
+    <a  id = "click-banner-to-link" href = "#" alt="This is the link that the user will go to when they click on the banner">
+    <img id= "click-for-bigger-banner" src = "#" alt="This is a bigger image with more information on the event" style = "width: 100%; height: 100%;"/>
+    </a>
+
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+{% endblock %}

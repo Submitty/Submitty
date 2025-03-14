@@ -45,14 +45,6 @@ extern const std::string GLOBAL_allowed_autograding_commands_custom_string;  // 
 // =====================================================================================
 // =====================================================================================
 
-bool command_available_in_env(const nlohmann::json &program_object, const bool &running_in_docker) {
-  bool onlyDocker = program_object.value("onlyDocker", false);
-  if (!running_in_docker && onlyDocker) {
-    return false;
-  }
-  return true;
-}
-
 bool system_program(const std::string &program, std::string &full_path_executable, const bool running_in_docker)
 {
   // parse GLOBAL_allowed_autograding_commands_default_string into allowed_autograding_commands
@@ -70,22 +62,24 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     for (auto& entry : allowed_autograding_commands.items()) {
       nlohmann::json program_obj = entry.value();
       if (program_obj["path"] == program) {
-        if (command_available_in_env(program_obj, running_in_docker)) {
-          full_path_executable = program;
-          return true;
-        }
-        return false;
+        full_path_executable = program;
+        return true;
       }
     }
   }
   else {
     if (allowed_autograding_commands.contains(program)) {
       nlohmann::json program_obj = allowed_autograding_commands[program];
-      if (command_available_in_env(program_obj, running_in_docker)) {
-        full_path_executable = program_obj["path"];
-        return true;
-      }
+      full_path_executable = program_obj["path"];
+      return true;
     }
+  }
+  // if we are docker, allow any program
+  if (running_in_docker) {
+    if (full_path_executable.empty()) {
+      full_path_executable = program;
+    }
+    return true;
   }
   return false;
 }

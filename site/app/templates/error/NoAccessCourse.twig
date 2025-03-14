@@ -1,18 +1,35 @@
-<div class="content">
-    You don't have access to this course. <br />
-    This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
-    If you think this is a mistake,
-    {% if ability_to_readd %}
-        you may select below to temporarily readd yourself to the course. <br/>
-        Your instructor will be notified and can then choose to keep you in the course.
-        </br>
-        </br>
-        <form method="POST" action="{{ readd_url }}">
-            <input type="hidden" name="csrf_token" value={{ csrf_token }}>
-            <button type="submit" class="btn btn-primary">Rejoin Course</button>
-        </form>
+<div class="content" data-testid="no-access-message">
+    {% if self_registration_type != constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
+        You don't have access to this course. <br />
+        This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
+        If you think this is a mistake,
+        {% if ability_to_readd %}
+            you may select below to temporarily re-add yourself to the course. <br/>
+            Your instructor will be notified and can then choose to keep you in the course.
+            </br>
+            </br>
+            <form method="POST" action="{{ readd_url }}">
+                <input type="hidden" name="csrf_token" value={{ csrf_token }}>
+                <button type="submit" class="btn btn-primary">Rejoin Course</button>
+            </form>
+        {% else %}
+            please contact your instructor to gain access. <br/>
+            Click <a href="{{main_url}}"> here </a> to back to homepage and see your courses list.
+        {% endif %}
     {% else %}
-        please contact your instructor to gain access. <br/>
-        Click <a href = "{{main_url}}"> here </a> to back to homepage and see your courses list.
+        The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration <br />
+        You may select below to add yourself to the course. <br/>
+        Your instructor will be notified and can then choose to keep you in the course.
+        {% if course_home_url != '' %}
+            </br>   
+            Click <a href="{{ course_home_url }}"> here </a> to visit the course home page.
+        {% endif %}
+        </br>
+        </br>
+        <form method="POST" action="{{ register_url }}">
+            <input type="hidden" name="csrf_token" value={{ csrf_token }}>
+            <button type="submit" class="btn btn-primary" data-testid="register-button">Register</button>
+        </form>
     {% endif %}
+
 </div>

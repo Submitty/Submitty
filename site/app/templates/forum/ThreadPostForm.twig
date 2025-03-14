@@ -9,7 +9,7 @@
 
     {% if show_title is defined and show_title %}
     <span class="edit_thread">
-        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" aria-label="Edit thread title" required/>
+        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" data-testid="title" aria-label="Edit thread title" required/>
     </span>
     {% endif %}
 
@@ -19,7 +19,7 @@
     <div style="margin-bottom:10px;" class="form-group row position-relative">
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown is defined and render_markdown ? 1 : 0 }}" />
     {% if show_merge_thread_button is defined and show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" data-testid="merge-thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -70,13 +70,15 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
-        <div role="button" id="markdown_toggle_{{ post_box_id }}"
+        <div class="button-row">
+            <div role="button" id="markdown_toggle_{{ post_box_id }}"
              class="markdown-toggle {{ render_markdown is defined and render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
              title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
-        >
-            <i class="fab fa-markdown fa-2x"></i>
+            >
+                <i class="fab fa-markdown fa-2x"></i>
+            </div>
+            <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
         </div>
-        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
         {% if first_post_id is defined %}
             <a class="skip-btn skip-first-post" href="#{{ first_post_id }}">Skip to first post</a>
         {% endif %}
@@ -91,7 +93,7 @@
             "render_header" : render_markdown is defined and render_markdown ? render_markdown : false,
             "markdown_header_id" : "markdown_header_" ~ post_box_id,
             "min_height" : min_height,
-            "required" :  true,
+            "required" :  false,
             "textarea_maxlength" : post_content_limit is defined ? post_content_limit : null,
             "textarea_onkeydown" : "submitNearestForm(event,$(this))",
             "textarea_onpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
@@ -116,15 +118,15 @@
         {% endif %}
         <fieldset>
           <legend id="cat_label">Categories:</legend>
-          <div id=id='categories-pick-list'>
+          <div id='categories-pick-list' data-testid='categories-pick-list'>
             {% for category in categories %}
                 {# if diff > 0 then visible_Date is true
-                 diff is used for comparsion betweeen  the given date of category and the current date of user 
+                 diff is used for comparison between the given date of category and the current date of user 
                  when date is above then current date then output is less than zero.
                  and when date is below then current date the optput is greater then zero #}
                 {% if category.visible_date is null or category.diff > 0 %}
                 <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" data-testid="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
                 </div>
                 {% endif %}
             {% endfor %}
@@ -138,16 +140,18 @@
     </div>
 {% endif %}
 <div class="form-group row thread-attachment-container">
+    <div id="img-table-loc"></div>
+    <br style="margin-bottom:1rem;">
     {% if post_box_id %}
         <div class="inline-block">
             {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer key_to_click" id="upload{{ post_box_id }}">
                 <div id="file_input_label_{{post_box_id}}" class="btn btn-default" tabindex="0">
-                  <label for="input-file{{ post_box_id }}">Upload Attachment</label>
+                  <label for="input-file{{ post_box_id }}" data-testid="input-file{{ post_box_id }}">Attach Image</label>
                 </div>
                 <input type="file" accept="image/*" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
-                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
+                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}" data-testid="file-upload-table-{{ post_box_id }}"><th style="display:none">Files:</th></table>
             </div>
         </div>
         <br style="margin-right:1rem;">
@@ -162,20 +166,20 @@
                     var part = "{{ post_box_id }}";
                     initializeDragAndDrop();
                     createArray(part);
-                    $(".upload_attachment_box").each(function() {
-                        this.addEventListener("click", clicked_on_box, false);
+                    
+                    $(".parent-container").on("click", ".upload_attachment_box", function() {
+                        clicked_on_box.apply(this, arguments);
                     });
+
                 });
             </script>
         {% endif %}
     {% endif %}
-    <div id="img-table-loc"></div>
-    <br style="margin-bottom:1rem;">
     <fieldset class="inline-block right-zero">
       <legend style="display:none">Settings:</legend>
         <div class="new-thread-settings-wrapper">
         {% if show_anon %}
-            <input type="checkbox" class="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <input type="checkbox" class="thread-anon-checkbox" data-testid="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
             <label>Anonymous (to class)? </label>
         {% endif %}
         {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
@@ -203,9 +207,9 @@
         <br style="margin-bottom:1rem;">
         {% if show_cancel_edit_form is defined and show_cancel_edit_form %}
         <a onclick="cancelEditPostForum()"
-                     class="btn btn-default close-button key_to_click" tabindex="0">Cancel</a>
+                     class="btn btn-default close-button key_to_click" tabindex="0" data-testid="cancel-forum-btn">Cancel</a>
         {% endif %}
-        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
+        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" data-testid="{{ data_testid }}"/>
 
         {% if thread_resolve_state is defined and thread_resolve_state == 1 and show_unresolve %}
             <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
@@ -251,7 +255,12 @@
         //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
         //from an input with 'post-content-reply' class
         $('.post_content_reply').focus(function(){
+            this.dataset.active = 'true';
             $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $('.post_content_reply').blur(function(){
+            delete this.dataset.active;
         });
 
         $(':not(.post_content_reply, .skip-first-post)').focus(function(){

@@ -21,6 +21,17 @@
             })
         }
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const browserTime = Date.now();
+            const serverTime = {{ server_time|e('js') }} * 1000;
+            const timeDifference = serverTime - browserTime;
+            // Warn if time difference is greater than 2 minutes (120000 milliseconds)
+            if (Math.abs(timeDifference) > 120000) {
+                document.querySelector('#server-time-not-aligned').removeAttribute('hidden');
+            }
+        });
+    </script>
 
     {% for css_ref in css %}
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
@@ -30,6 +41,10 @@
     {% if use_mobile_viewport %}
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %}
+
+    {% for audio_ref in audio %}
+    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
+    {% endfor %}
 
     {% for js_ref in js %}
     <script src='{{ js_ref }}'></script>
@@ -113,18 +128,6 @@
 </head>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
-    {% if not content_only %}
-        {% if wrapper_urls['top_bar.html'] is defined %}
-            {# uploaded homepage redirect can go here? #}
-            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
-        {% endif %}
-        {% if wrapper_urls['left_sidebar.html'] is defined %}
-            {# uploaded sidebar can go here? #}
-            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
-        {% endif %}
-        {# separates our content from user custom bars #}
-    {% endif %}
-
     <div id="submitty-body" class="flex-col">
         {% if not content_only %}
             <div id="mobile-menu">
@@ -240,6 +243,10 @@
                 {{ system_message }}
             </div>
         {% endif %}
+        <div class="system-message warning" id="server-time-not-aligned" hidden>
+            Warning: The server time is not aligned with the browser time. 
+            Please check your system time settings.
+        </div>
         <div class="system-message warning" id="socket-server-system-message" hidden>
             Warning: Failed to connect to websocket server. This page will not dynamically update.
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the

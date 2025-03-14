@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\routers\AccessControl;
+use app\libraries\response\DownloadResponse;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -37,30 +38,26 @@ class ReportController extends AbstractController {
 
     private $all_overrides = [];
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports")
-     */
+    #[Route("/courses/{_semester}/{_course}/reports")]
     public function showReportPage() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
-        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $this->core->getOutput()->enableMobileViewport();
         $json = null;
-        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "customization.json");
+        $customization_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades", "manual_customization.json");
         if (file_exists($customization_path)) {
             $json = file_get_contents($customization_path);
         }
-        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $grade_summaries_last_run, $json);
+        $this->core->getOutput()->renderOutput(['admin', 'Report'], 'showReportUpdates', $json);
     }
 
     /**
      * Generates grade summary files for every user
-     *
-     * @Route("/courses/{_semester}/{_course}/reports/summaries")
-     * @Route("/api/courses/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/reports/summaries")]
+    #[Route("/api/courses/{_semester}/{_course}/reports/summaries", methods: ["POST"])]
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
@@ -80,6 +77,27 @@ class ReportController extends AbstractController {
         if ($this->core->getConfig()->isPollsEnabled() && !is_writable($poll_base_path)) {
             $this->core->addErrorMessage('Unable to write to the poll summary directory');
             $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
+        $url_base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'base_url.json');
+        $base_url = $this->core->getConfig()->getBaseUrl();
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+
+        // Encode $base_url as a json string
+        $data = [
+            'base_url' => $base_url,
+            'term' => $term,
+            'course' => $course
+        ];
+
+        // Encode the data as a JSON string
+        $json_data = json_encode($data, JSON_PRETTY_PRINT);
+
+        // Write the JSON string to the file
+        if (!file_put_contents($url_base_path, $json_data)) {
+            $this->core->addErrorMessage('Unable to write to base_url.json');
+            $this->core->redirect($this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']));
         }
 
         $g_sort_keys = [
@@ -102,7 +120,7 @@ class ReportController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        $this->core->redirect($this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']));
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
@@ -138,14 +156,12 @@ class ReportController extends AbstractController {
 
     /**
      * Generates and offers download of CSV grade report
-     *
-     * @Route("/courses/{_semester}/{_course}/reports/csv")
      */
+    #[Route("/courses/{_semester}/{_course}/reports/csv")]
     public function generateCSVReport() {
         if (!$this->core->getUser()->accessAdmin()) {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
-
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -243,8 +259,10 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
-            $ggs[] = $graded_gradeable;
+            if ($graded_gradeable !== null) {
+                $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
+                $ggs[] = $graded_gradeable;
+            }
         }
         return $ggs;
     }
@@ -593,9 +611,32 @@ class ReportController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")
-     */
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
+    public function writetocustomization(): JsonResponse {
+        // Build a new model, pull in defaults for the course
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+
+        if (isset($_POST["json_string"])) {
+            try {
+                $customization->processForm();
+                return JsonResponse::getSuccessResponse();
+            }
+            catch (\Exception $e) {
+                $msg = 'Error processing form';
+            }
+        }
+        else {
+            $msg = 'No JSON string provided';
+        }
+
+        $this->core->addErrorMessage($msg);
+        return JsonResponse::getErrorResponse($msg);
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -607,7 +648,7 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
             }
             catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
@@ -621,27 +662,40 @@ class ReportController extends AbstractController {
         else {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+            $this->core->getOutput()->addInternalCss('grade-report.css');
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+            $this->core->getOutput()->addSelect2WidgetCSSAndJs();
             $students = $this->core->getQueries()->getAllUsers();
             $student_full = Utils::getAutoFillData($students);
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
+                'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
+                'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
+                'manual_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_download']),
+                'gui_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'gui_download']),
+                'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
+                "manual_customization_exists" => $customization->doesManualCustomizationExist(),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 'bucket_counts' => $customization->getBucketCounts(),
+                'bucket_remove_lowest' => $customization->getBucketRemoveLowest(),
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
                 'benchmark_percents' => (array) $customization->getBenchmarkPercent(),
                 'benchmarks_with_input_fields' => ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
+                'final_cutoff_input_fields' => ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D"],
+                'allowed_grades' => ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'],
+                'final_cutoff' => (array) $customization->getFinalCutoff(),
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
+                'manual_grade' => $customization->getManualGrades(),
+                'warning' => $customization->getPerformanceWarnings(),
                 "gradeables" => $gradeables,
                 "student_full" => $student_full,
                 'per_gradeable_curves' => $customization->getPerGradeableCurves(),
@@ -655,58 +709,167 @@ class ReportController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods={"POST"})
-     */
+
+    #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+    public function executeBuildForm(): JsonResponse {
+        // Configure json to go into jobs queue
+        $job_json = [
+            'job' => 'RunAutoRainbowGrades',
+            'semester' => $this->core->getConfig()->getTerm(),
+            'course' => $this->core->getConfig()->getCourse(),
+        ];
+
+        // Encode
+        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
+
+        // Create path to new jobs queue json
+
+        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getTerm() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Place in queue
+        file_put_contents($path, $job_json);
+        return JsonResponse::getSuccessResponse();
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
     public function uploadRainbowConfig() {
-        $redirect_url =  $this->core->buildCourseUrl((['reports']));
+        $redirect_url = $this->core->buildCourseUrl(['reports']);
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
             $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return JsonResponse::getErrorResponse($msg);
         }
 
         $upload = $_FILES['config_upload'];
-        if (empty($upload['tmp_name'])) {
+        if (!isset($upload['tmp_name']) || trim($upload['tmp_name']) === '') {
             $msg = 'Upload failed: Empty tmp name for file';
             $this->core->addErrorMessage($msg);
-            return new MultiResponse(
-                JsonResponse::getErrorResponse($msg),
-                null,
-                new RedirectResponse($redirect_url)
-            );
+            return JsonResponse::getErrorResponse($msg);
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $destination_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
-        if (!move_uploaded_file($upload['tmp_name'], FileUtils::joinPaths($rainbow_grades_dir, 'customization.json'))) {
+        // this is changed from move_uploaded_file to copy because of permission issue (bits not carried over)
+        // copy is expensive, but we are OK because it is small file.
+        // setgid (sticky-bit) gets ignored and doesn't inherit the parent (rainbowgrades dir) permissions
+        // known issue: look https://www.php.net/manual/en/function.move-uploaded-file.php for more details
+        if (!copy($upload['tmp_name'], $destination_path)) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
+            return JsonResponse::getErrorResponse($msg);
+        }
+
+        $manual_customization_exists =  file_exists($destination_path);
+
+        $this->core->addSuccessMessage('Rainbow Grades Customization uploaded');
+
+        return JsonResponse::getSuccessResponse([
+            'customization_path' => $rainbow_grades_dir,
+            'manual_customization_exists' => $manual_customization_exists
+        ]);
+    }
+
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/gui_download", methods: ["GET"])]
+    public function downloadGUIRainbowConfig(): MultiResponse|DownloadResponse {
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+
+        if (file_exists($file_path)) {
+            return DownloadResponse::getDownloadResponse(
+                file_get_contents($file_path),
+                'gui_customization.json',
+                "application/json"
+            );
+        }
+        else {
+            $msg = 'Download failed: File not found';
+            $this->core->addErrorMessage($msg);
+            $redirect_url = $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']);
             return new MultiResponse(
                 JsonResponse::getErrorResponse($msg),
                 null,
                 new RedirectResponse($redirect_url)
             );
         }
-
-        $msg = 'Rainbow Grades Customization uploaded';
-        $this->core->addSuccessMessage($msg);
-        return new MultiResponse(
-            JsonResponse::getSuccessResponse([
-                'customization_path' => $rainbow_grades_dir
-            ]),
-            null,
-            new RedirectResponse($redirect_url)
-        );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/reports/rainbow_grades_status")
-     */
+
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_download", methods: ["GET"])]
+    public function downloadRainbowConfig(): MultiResponse|DownloadResponse {
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $file_path = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
+
+        if (file_exists($file_path)) {
+            return DownloadResponse::getDownloadResponse(
+                file_get_contents($file_path),
+                'manual_customization.json',
+                "application/json"
+            );
+        }
+        else {
+            $msg = 'Download failed: File not found';
+            $this->core->addErrorMessage($msg);
+            $redirect_url = $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization']);
+            return new MultiResponse(
+                JsonResponse::getErrorResponse($msg),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
+    }
+
+
+    #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
+    public function setRainbowGradeCustomization(): JsonResponse {
+
+        // Extract the value from $_POST
+        $selectedValue = $_POST['selected_value'] ?? null;
+
+        if ($selectedValue === null || trim($selectedValue) === '') {
+            $msg = 'Invalid request: No selected value provided.';
+            return JsonResponse::getErrorResponse($msg);
+        }
+
+        $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+        $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
+
+        // Determine the source file based on the selected value
+        switch ($selectedValue) {
+            case 'manual':
+                $customization_src = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
+                break;
+            case 'gui':
+                $customization_src = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+                break;
+            default:
+                $msg = 'Invalid request: Unknown selected value.';
+                return JsonResponse::getErrorResponse($msg);
+        }
+
+        // Copy the source file to the destination
+        if (!copy($customization_src, $customization_dest)) {
+            $msg = 'File copy failed: Could not copy file.';
+            return JsonResponse::getErrorResponse($msg);
+        }
+
+        $msg = 'Rainbow Grades Customization set successfully';
+
+        return JsonResponse::getSuccessResponse([
+            'selected_value' => $selectedValue,
+            'message' => $msg,
+        ]);
+    }
+
+
+
+    #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
@@ -714,7 +877,6 @@ class ReportController extends AbstractController {
             '_' .
             $this->core->getConfig()->getCourse() .
             '.json';
-
         // Create path to 'processing' file in jobs queue
         $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
             $this->core->getConfig()->getTerm() .
@@ -756,26 +918,25 @@ class ReportController extends AbstractController {
         }
 
         $debug_contents = file_get_contents($debug_output_path);
+        $debug_contents = trim($debug_contents);
+        $was_successful = str_ends_with($debug_contents, 'Done');
 
-        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
-        // implying that it finished
-        if ($max_wait_time && $failure_detected == false) {
-            $this->core->getOutput()->renderJsonSuccess($debug_contents);
+        if ($max_wait_time && $failure_detected === false && $was_successful) {
+            return JsonResponse::getSuccessResponse($debug_contents);
         }
         else {
-            // Else we timed out or something else went wrong
-            $this->core->getOutput()->renderJsonFail($debug_contents);
+            return JsonResponse::getFailResponse($debug_contents);
         }
     }
 
     /**
      * Generate full rainbow grades view for instructors
-     * @Route("/courses/{_semester}/{_course}/gradebook")
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
-
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
         $grade_file = null;
         if (file_exists($grade_path)) {
             $grade_file = file_get_contents($grade_path);
@@ -785,8 +946,49 @@ class ReportController extends AbstractController {
             new WebResponse(
                 ['admin', 'Report'],
                 'showFullGradebook',
-                $grade_file
+                $grade_file,
+                $grade_summaries_last_run
             )
         );
+    }
+
+    /**
+     * Generate a custom filename for the downloaded CSV file
+     */
+    private function generateCustomFilename(): string {
+        $course = $this->core->getConfig()->getCourse();
+        $timestamp = DateUtils::getFileNameTimeStamp();
+        return "{$course}_rainbow_grades_{$timestamp}.csv";
+    }
+
+
+    /**
+     * Download CSV file for Rainbow Grades
+     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_csv")]
+    public function downloadRainbowGradesCSVFile(): ?DownloadResponse {
+        // Path to the CSV file for Rainbow Grades
+        $csvFilePath = FileUtils::joinPaths(
+            '/var/local/submitty/courses',
+            $this->core->getConfig()->getTerm(),
+            $this->core->getConfig()->getCourse(),
+            'rainbow_grades',
+            'output.csv'
+        );
+
+
+        // Check if the file exists
+        if (file_exists($csvFilePath)) {
+            return DownloadResponse::getDownloadResponse(
+                file_get_contents($csvFilePath),
+                $this->generateCustomFilename(),
+                "application/csv"
+            );
+        }
+        else {
+            // Handle the case where the file does not exist
+            $this->core->getOutput()->showError($csvFilePath . " was not found or was not readable.\nMaybe you have not <a\thref='./rainbow_grades_customization'>generated the rainbow grades</a> yet?");
+            return null;
+        }
     }
 }

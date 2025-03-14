@@ -10,11 +10,11 @@ let previous_gradeable = '';
 let gradeable = '';
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
-        $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+        $('#save_status').text('Some Changes Failed!').css('color', 'red');
     }
     else {
         if (updateInProgressCount === 0) {
-            $('#save_status').html('All Changes Saved');
+            $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
         }
     }
 }
@@ -54,7 +54,7 @@ function clearError(name, update) {
 }
 
 function setGradeableUpdateInProgress() {
-    $('#save_status').html('Saving...');
+    $('#save_status').text('Saving...').css('color', 'var(--text-black)');
     updateInProgressCount++;
 }
 
@@ -89,8 +89,8 @@ function onItemPoolOptionChange(componentId) {
 
 function onPrecisionChange() {
     ajaxUpdateGradeableProperty(getGradeableId(), {
-        'precision': $('#point_precision_id').val(),
-        'csrf_token': csrfToken,
+        precision: $('#point_precision_id').val(),
+        csrf_token: csrfToken,
     }, () => {
         // Clear errors by just removing red background
         clearError('precision');
@@ -108,8 +108,7 @@ function onPrecisionChange() {
 
 function updateGradeableErrorCallback(message, response_data) {
     for (const key in response_data) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (response_data.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
             setError(key, response_data[key]);
         }
     }
@@ -213,13 +212,17 @@ $(document).ready(() => {
             return;
         }
 
-        const data = {'csrf_token': csrfToken};
+        const data = { csrf_token: csrfToken };
         if (this.name === 'hidden_files') {
             data[this.name] = $(this).val().replace(/\s*,\s*/, ',');
         }
         else {
             data[this.name] = $(this).val();
         }
+        // Retrieve status for each of the panels
+        $('input[name="peer_panel"]').each(function () {
+            data[$(this).attr('id')] = $(this).is(':checked');
+        });
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -241,19 +244,19 @@ $(document).ready(() => {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
+        // Redundant to send this data
+        delete data.peer_panel;
         ajaxUpdateGradeableProperty($('#g_id').val(), data,
             (response_data) => {
                 // Clear errors by setting new values
                 for (const key in response_data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (response_data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                         clearError(key, response_data[key]);
                     }
                 }
                 // Clear errors by just removing red background
                 for (const key in data) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (data.hasOwnProperty(key)) {
+                    if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
                 }
@@ -265,20 +268,18 @@ $(document).ready(() => {
         function () {
             if ($('input[name="all_grade"]:checked').val() === 'All Grade All') {
                 if (confirm('Each student grades every other student! Continue?')) {
-                    const data = {'csrf_token': csrfToken};
+                    const data = { csrf_token: csrfToken };
                     data[this.name] = $(this).val();
                     setRandomGraders($('#g_id').val(), data, (response_data) => {
                         // Clear errors by setting new values
                         for (const key in response_data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (response_data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                                 clearError(key, response_data[key]);
                             }
                         }
                         // Clear errors by just removing red background
                         for (const key in data) {
-                            // eslint-disable-next-line no-prototype-builtins
-                            if (data.hasOwnProperty(key)) {
+                            if (Object.prototype.hasOwnProperty.call(data, key)) {
                                 clearError(key);
                             }
                         }
@@ -287,21 +288,19 @@ $(document).ready(() => {
                     return;
                 }
             }
-            if ( confirm('This will update peer matrix. Are you sure?')) {
-                const data = {'csrf_token': csrfToken};
+            if (confirm('This will update peer matrix. Are you sure?')) {
+                const data = { csrf_token: csrfToken };
                 data[this.name] = $(this).val();
                 setRandomGraders($('#g_id').val(), data, (response_data) => {
                 // Clear errors by setting new values
                     for (const key in response_data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (response_data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(response_data, key)) {
                             clearError(key, response_data[key]);
                         }
                     }
                     // Clear errors by setting custom validity to ''
                     for (const key in data) {
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (data.hasOwnProperty(key)) {
+                        if (Object.prototype.hasOwnProperty.call(data, key)) {
                             clearError(key);
                         }
                     }
@@ -409,15 +408,15 @@ function ajaxCheckBuildStatus() {
     });
 }
 function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback, all_grade_all) {
-    let number_to_grade=1;
-    if (all_grade_all===true) {
-        number_to_grade=10000;
+    let number_to_grade = 1;
+    if (all_grade_all === true) {
+        number_to_grade = 10000;
     }
     else {
-        number_to_grade=$('#number_to_peer_grade').val();
+        number_to_grade = $('#number_to_peer_grade').val();
     }
 
-    if (number_to_grade<=0) {
+    if (number_to_grade <= 0) {
         number_to_grade = 0;
         if (!confirm('This will clear Peer Matrix. Continue?')) {
             $('#peer_loader').addClass('hide');
@@ -426,32 +425,32 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
     }
 
     gradeable_id = $('#g_id').val();
-    let restrict_to_registration='unchecked';
-    let submit_before_grading='unchecked';
+    let restrict_to_registration = 'unchecked';
+    let submit_before_grading = 'unchecked';
     $('#peer_loader').removeClass('hide');
     if ($('#restrict-to-registration').is(':checked')) {
-        restrict_to_registration='checked';
+        restrict_to_registration = 'checked';
     }
     if ($('#submit-before-grading').is(':checked')) {
-        submit_before_grading='checked';
+        submit_before_grading = 'checked';
     }
 
     $.ajax({
         type: 'POST',
         url: buildCourseUrl(['gradeable', gradeable_id, 'RandomizePeers']),
         data: {
-            csrf_token:p_values['csrf_token'],
-            number_to_grade:number_to_grade,
-            restrict_to_registration:restrict_to_registration,
-            submit_before_grading:submit_before_grading,
+            csrf_token: p_values['csrf_token'],
+            number_to_grade: number_to_grade,
+            restrict_to_registration: restrict_to_registration,
+            submit_before_grading: submit_before_grading,
         },
-        success: function(response) {
-            const res=JSON.parse(response);
+        success: function (response) {
+            const res = JSON.parse(response);
             if (res.data === 'Invalid Number of Students Entered') {
                 confirm('Do you Want to go with ALL grade ALL?');
             }
-            if (res.data=== 'Clear Peer Matrix') {
-                $('#save_status').html('Peer Matrix Cleared');
+            if (res.data === 'Clear Peer Matrix') {
+                $('#save_status').text('Peer Matrix Cleared').css('color', 'var(--text-black)');
             }
             setGradeableUpdateComplete();
             $('#peer_loader').addClass('hide');
@@ -488,19 +487,19 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
 }
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     if ('peer_graders_list' in p_values && $('#peer_graders_list').length) {
-        $('#save_status').html('Saving Changes');
+        $('#save_status').text('Saving Changes').css('color', 'var(--text-black)');
         const csvFile = $('#peer_graders_list').prop('files')[0];
         const reader = new FileReader();
         reader.readAsText(csvFile);
         const jsonFile = [];
-        reader.onload = function() {
+        reader.onload = function () {
             try {
-                const lines=reader.result.split('\n');
+                const lines = reader.result.split('\n');
                 const headers = lines[0].split(',');
                 let students_lines_index = -1;
                 let graders_lines_index = -1;
 
-                for (let k=0;k<headers.length;k++) {
+                for (let k = 0; k < headers.length; k++) {
                     if (headers[k].toLowerCase().trim() === 'student') {
                         students_lines_index = k;
                     }
@@ -519,19 +518,18 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     return;
                 }
 
-                for (let i=1;i<lines.length;i++) {
-
+                for (let i = 1; i < lines.length; i++) {
                     const built_line = {};
-                    const cells=lines[i].split(',');
+                    const cells = lines[i].split(',');
 
-                    for (let j=0; j < cells.length; j++) {
+                    for (let j = 0; j < cells.length; j++) {
                         if (cells[j].trim() !== '') {
-                            built_line[headers[j].trim()]= cells[j].trim();
+                            built_line[headers[j].trim()] = cells[j].trim();
                         }
                     }
-                    //built_line[headers[0].trim()]= cells[students_lines_index].trim();
-                    //built_line[headers[1].trim()]= cells[graders_lines_index].trim();
-                    jsonFile[i-1] = built_line;
+                    // built_line[headers[0].trim()]= cells[students_lines_index].trim();
+                    // built_line[headers[1].trim()]= cells[graders_lines_index].trim();
+                    jsonFile[i - 1] = built_line;
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
@@ -556,29 +554,29 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                         }
                         setGradeableUpdateComplete();
                         if (response.status === 'success') {
-                            $('#save_status').html('All Changes Saved');
+                            $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
                             successCallback(response.data);
                         }
                         else if (response.status === 'fail') {
-                            $('#save_status').html('Error Saving Changes');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             errorCallback(response.message, response.data);
                         }
                         else {
                             alert('Internal server error');
-                            $('#save_status').html('Error Saving Changes');
+                            $('#save_status').text('Error Saving Changes').css('color', 'red');
                             console.error(response.message);
                         }
                         location.reload();
                     },
                     error: function (response) {
-                        $('#save_status').html('Error Saving Changes');
+                        $('#save_status').text('Error Saving Changes').css('color', 'red');
                         setGradeableUpdateComplete();
                         console.error(`Failed to parse response from server: ${response}`);
                     },
                 });
             }
             catch (e) {
-                $('#save_status').html('Error Saving Changes');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         };
     }
@@ -625,15 +623,14 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
 }
 
 function serializeRubric() {
-    return function () {
-
+    return (function () {
         const o = {};
         const a = this.serializeArray();
         const ignore = ['numeric_label_0', 'max_score_0', 'numeric_extra_0', 'numeric_extra_0',
             'text_label_0', 'checkpoint_label_0', 'num_numeric_items', 'num_text_items'];
 
         // Ignore all properties not on rubric
-        $.each(a, function() {
+        $.each(a, function () {
             if ($('#gradeable_rubric').find(`[name="${this.name}"]`).length === 0) {
                 ignore.push(this.name);
             }
@@ -644,7 +641,7 @@ function serializeRubric() {
             ignore.push($(this).attr('name'));
         });
 
-        //parse checkpoints
+        // parse checkpoints
 
         $('.checkpoints-table').find('.multi-field').each(function () {
             let label = '';
@@ -671,9 +668,8 @@ function serializeRubric() {
             if (o['checkpoints'] === undefined) {
                 o['checkpoints'] = [];
             }
-            o['checkpoints'].push({'label': label, 'extra_credit': extra_credit});
+            o['checkpoints'].push({ label: label, extra_credit: extra_credit });
         });
-
 
         // parse text items
 
@@ -696,7 +692,7 @@ function serializeRubric() {
             if (o['text'] === undefined) {
                 o['text'] = [];
             }
-            o['text'].push({'label': label});
+            o['text'].push({ label: label });
         });
 
         // parse numeric items
@@ -732,10 +728,8 @@ function serializeRubric() {
             if (o['numeric'] === undefined) {
                 o['numeric'] = [];
             }
-            o['numeric'].push({'label': label, 'max_score': max_score, 'extra_credit': extra_credit});
-
+            o['numeric'].push({ label: label, max_score: max_score, extra_credit: extra_credit });
         });
-
 
         $.each(a, function () {
             if ($.inArray(this.name, ignore) !== -1) {
@@ -744,13 +738,13 @@ function serializeRubric() {
             o[this.name] = this.value || '';
         });
         return o;
-    }.call($('form'));
+    }.call($('form')));
 }
 
 function saveRubric(redirect = true) {
     const values = serializeRubric();
 
-    $('#save_status').html('Saving Rubric...');
+    $('#save_status').text('Saving Rubric...').css('color', 'var(--text-black)');
     $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
@@ -787,14 +781,14 @@ function serializeGraders() {
     $('#grader_assignment').find('input').each(function () {
         const parts = this.name.split('_');
         // Ignore if we aren't at the right access level
-        const level = parts[0] === 'grader'? parts[1].substr(1) : parts[0].substr(1);
+        const level = parts[0] === 'grader' ? parts[1].substr(1) : parts[0].substr(1);
         if (level > minLevel) {
             if ($('#all_access').is(':checked')) {
                 $(this).prop('checked', false);
             }
             return;
         }
-        //check all boxes with right access level for all access
+        // check all boxes with right access level for all access
         if ($('#all_access').is(':checked')) {
             $(this).prop('checked', true);
         }
@@ -818,7 +812,7 @@ function serializeGraders() {
 function saveGraders() {
     const values = serializeGraders();
 
-    $('#save_status').html('Saving Graders...');
+    $('#save_status').text('Saving Graders...').css('color', 'var(--text-black)');
     $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'graders']),

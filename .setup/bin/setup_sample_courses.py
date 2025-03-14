@@ -43,6 +43,7 @@ from sample_courses import (
     DB_HOST, DB_PORT,
     DB_USER, DB_PASS,
     NOW, NO_GRADING,
+    TEST_ONLY_GRADING,
     SUBMITTY_DATA_DIR
 )
 
@@ -88,6 +89,19 @@ def main() -> None:
         course_json = load_data_yaml(course_file)
 
         if len(use_courses) == 0 or course_json['code'] in use_courses:
+            course = Course(course_json)
+            courses[course.code] = course
+
+    git_checkout_dir = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT")
+    for course_json in [
+        load_data_yaml(course_yml)
+        for course_yml in [
+            os.path.join(git_checkout_dir, repo, "course_config.yml")
+            for repo in sorted(os.listdir(git_checkout_dir))
+        ]
+        if os.path.isfile(course_yml)
+    ]:
+        if len(use_courses) == 0 or course_json["code"] in use_courses:
             course = Course(course_json)
             courses[course.code] = course
 
@@ -229,10 +243,12 @@ def main() -> None:
     os.system("systemctl restart submitty_autograding_worker")
     os.system("systemctl restart submitty_daemon_jobs_handler")
     os.system("systemctl restart submitty_websocket_server")
-
-    if not NO_GRADING:
+    regrade_extras = ""
+    if TEST_ONLY_GRADING:
+        regrade_extras = "*/testing/"
+    if (not NO_GRADING) or TEST_ONLY_GRADING:
         # queue up all of the newly created submissions to grade!
-        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
+        os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/{regrade_extras}")
 
 
 if __name__ == "__main__":

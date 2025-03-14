@@ -10,7 +10,7 @@ function addConfetti() {
     let times_ran = 0;
     let frame = 0;
 
-    //destroy the canvas animation on click or on enter
+    // destroy the canvas animation on click or on enter
     canvas.addEventListener('click', () => {
         if (canvas.style.display !== 'none') {
             canvas.style.display = 'none';
@@ -32,7 +32,7 @@ function addConfetti() {
         }
     });
 
-    canvas.width  = window.innerWidth;
+    canvas.width = window.innerWidth;
     canvas.height = document.body.clientHeight;
 
     canvas.style.display = 'block';
@@ -57,62 +57,61 @@ function addConfetti() {
     const d = DateTime.local();
     let month = d.month;
 
-    //if we parsed the submission due date, use that instead
+    // if we parsed the submission due date, use that instead
     if (submission_date.length >= 1) {
         month = parseInt(submission_date[0], 10) - 1;
     }
 
-    function randomColor () {
+    function randomColor() {
         let colors = [];
 
-        //JS month : 0-11
+        // JS month : 0-11
         switch (month) {
-            case 0: //jan
+            case 0: // jan
                 colors = ['#406bc9', '#ffffff', '#809bce', '#9ac8de', '#b6c7be'];
                 break;
-            case 1: //feb
+            case 1: // feb
                 colors = ['#df3b57', '#ee4b6a', '#7d2335', '#86cec5', '#b2e6f1'];
                 break;
-            case 2: //mar
+            case 2: // mar
                 colors = ['#8db62f', '#7b9233', '#034121', '#022607', '#ffcc00'];
                 break;
-            case 3: //apr
+            case 3: // apr
                 colors = ['#eed149', '#3bca8b', '#9ee0e7', '#ebb8aa', '#ffffff'];
                 break;
-            case 4: //may
+            case 4: // may
                 colors = ['#f9eae5', '#f16878', '#c1dbb3', '#7ebc89', '#ff8154'];
                 break;
-            case 5: //jun
+            case 5: // jun
                 colors = ['#ec4067', '#f4d35e', '#f78764', '#00889f', '#083d77'];
                 break;
-            case 6: //jul
+            case 6: // jul
                 colors = ['#ffffff', '#de1a1a', '#090c9b'];
                 break;
-            case 7: //aug
+            case 7: // aug
                 colors = ['#f0a202', '#ff4040', '#f2c940', '#ab2321'];
                 break;
-            case 8: //sept
-                //sky blue,  submitty blue, shail green,  yellow,     red,  open-books purple
+            case 8: // sept
+                // sky blue,  submitty blue, shail green,  yellow,     red,  open-books purple
                 colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
                 break;
-            case 9: //oct
+            case 9: // oct
                 colors = ['#000000', '#ff6700', '#291528'];
                 break;
-            case 10://nov
+            case 10:// nov
                 colors = ['#5a351e', '#522b47', '#912f09', '#f0a202', '#fbf5f3'];
                 break;
-            case 11://dec
+            case 11:// dec
                 colors = ['#d7cdcc', '#f7b11d', '#1f5e00', '#de1a1a', '#ffffff'];
                 break;
-            //make sure we have a default if parsing goes wrong
+            // make sure we have a default if parsing goes wrong
             default:
                 colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
-
         }
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    function update () {
+    function update() {
         const now = DateTime.local().toMillis();
         const dt = now - lastUpdateTime;
 
@@ -135,7 +134,7 @@ function addConfetti() {
 
         lastUpdateTime = now;
 
-        times_ran ++;
+        times_ran++;
 
         if (pieces.length <= 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -143,11 +142,9 @@ function addConfetti() {
             canvas.width = 0;
             canvas.height = 0;
         }
-
     }
 
-    function draw () {
-
+    function draw() {
         if (canvas.style.display === 'none') {
             cancelAnimationFrame(frame);
             is_drawing = false;
@@ -181,7 +178,7 @@ function addConfetti() {
         frame = requestAnimationFrame(draw);
     }
 
-    function Piece (x, y) {
+    function Piece(x, y) {
         this.x = x;
         this.y = y;
         this.x_vel = (Math.random() - 0.5) * x_const;

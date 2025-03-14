@@ -13,7 +13,7 @@
 {# Note: the ternery operator cannot consistently be used to insert the result of a macro into the output,
     so we need to use the long-form {% if <condition> %}{{ call_macro() }}{% endif %} #}
 <span class="col-no-gutters badge-container">
-    <strong id="grading_total"
+    <strong id="grading_total" data-testid="grading-total"
             class="badge {% if graded_component is defined %} {{ functions.getBadgeStyle(graded_component.total_score, component.max_value) }} {% endif %}">
         {{ graded_component.total_score is defined ? graded_component.total_score|round(decimal_precision) : '&minus;' }} / {{ component.max_value|round(decimal_precision) }}
     </strong>
@@ -31,16 +31,17 @@
 
 <span class="divider col"> </span>
 
-<span class="col-no-gutters">
-    {# Saving status #}
-    {% include "SavingTools.twig" with {
-        'show_save_tools': show_mark_list,
-        'cancel_on_click': 'onCancelComponent(this)'
-    } only %}
-</span>
 {% if component_version_conflict is same as(true) and not grading_disabled %}
-    <span class="version-warning col-5">
-        Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
+    <span class="version-warning col-5" data-testid="version-warning">
+        Version Conflict: Please edit or ensure that comments from version {{ graded_component.graded_version }} still apply.
+        <a 
+            style="font-style:normal;" 
+            class="fa-question-circle" 
+            href="https://submitty.org/grader/resolving_version_conflict" 
+            target="_blank"
+            onclick="event.stopPropagation()"
+        >
+        </a> 
     </span>
 {% else %}
     {% if show_verify_grader %}
@@ -49,6 +50,15 @@
         </span>
     {% endif %}
 {% endif %}
+
+<span class="col-no-gutters">
+    {# Saving status #}
+    {% include "SavingTools.twig" with {
+        'show_save_tools': show_mark_list,
+        'cancel_on_click': 'onCancelComponent(this)',
+        'component_version_conflict': component_version_conflict
+    } only %}
+</span>
 
 <span class="graded-by col-no-gutters">
     {% if graded_component.grader_id is defined %}

@@ -15,7 +15,7 @@
 
 import './commands';
 
-require('@cypress/skip-test/support');
+import('@cypress/skip-test/support');
 
 beforeEach(() => {
     cy.wrap(false).as('checkLogout');

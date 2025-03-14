@@ -39,6 +39,8 @@ class Output {
     private $page_name = "";
     private $loaded_views = [];
 
+    /** @var Set<array{string,string}> */
+    private $audio;
     /** @var Set */
     private $css;
     /** @var Set */
@@ -75,6 +77,7 @@ class Output {
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
 
+        $this->audio = new Set();
         $this->css = new Set();
         $this->js = new Set();
         $this->module_js = new Set();
@@ -132,7 +135,7 @@ class Output {
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
-<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
+<img alt="{$title}" src="data:{$mime_type};base64,{$base64_data}" />
 HTML;
         }, ['is_safe' => ['html']]));
 
@@ -198,6 +201,7 @@ HTML;
         $this->addInternalJs('server.js');
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
+        $this->addInternalJs('markdown.js');
     }
 
     /**
@@ -525,6 +529,14 @@ HTML;
         return $this->getOutput();
     }
 
+    public function addAudio(string $filename, string $url): void {
+        $this->audio->add([$filename, $url]);
+    }
+
+    public function addInternalAudio(string $file, string $folder = 'audio'): void {
+        $this->addAudio($file, $this->timestampResource($file, $folder));
+    }
+
     public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
@@ -547,6 +559,17 @@ HTML;
 
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
+    }
+
+    /**
+     * @param array<mixed>$args
+     */
+    public function renderVue(string $page, array $args = []): string {
+        $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
+        $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
+        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
+
+        return $this->renderTwigTemplate('Vue.twig', ["page" => $page, "args" => $args]);
     }
 
     public function addVendorJs($file) {
@@ -625,6 +648,13 @@ HTML;
         return end($this->breadcrumbs)->getTitle();
     }
 
+    /**
+     * @return Set<array{string,string}>
+     */
+    public function getAudio(): Set {
+        return $this->audio;
+    }
+
     public function getCss(): Set {
         return $this->css;
     }
@@ -698,5 +728,6 @@ HTML;
         ));
         $this->addInternalCss("select-widgets.css");
         $this->addInternalJs("select-widgets.js");
+        $this->addInternalCss("select2-override.css");
     }
 }

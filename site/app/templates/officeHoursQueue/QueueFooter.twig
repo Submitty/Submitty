@@ -145,27 +145,50 @@
 
 
   {% if viewer.isGrader() %}
-
-      $('#old_queue_code').change(function(){
-          document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
-      });
-
-      var notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
-      if ("Notification" in window && Notification.permission === "granted" && notifications_enabled) {
-          setNotificationState(true);
-      }else{
-          setNotificationState(false);
+    function initializeAudibleNotifications() {
+      var notificationSoundState = Cookies.get('notification_sound');
+      if (notificationSoundState === undefined) {
+        notificationSoundState = 'false';
+        Cookies.set('notification_sound', notificationSoundState, { path: '/', expires: 365 });
       }
+      window.audible_notifications_enabled = notificationSoundState === 'true';
+      $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
+    }
+
+    initializeAudibleNotifications();
+
+    var pushNotificationState = Cookies.get('push_notification');
+    var push_notifications_enabled = pushNotificationState === 'true' || localStorage.getItem('office_hour_queue_notifications') === "true";
+
+    $('#push-notification-switch').prop('checked', push_notifications_enabled);
+
+    $('#old_queue_code').change(function(){
+      document.getElementById('change_queue_token').action = '{{base_url}}/'+encodeURIComponent(this.value)+'/change_token';
+    });
+
+    push_notifications_enabled = localStorage.getItem('office_hour_queue_notifications') === "true";
+    if ("Notification" in window && Notification.permission === "granted" && push_notifications_enabled) {
+      setNotificationState(true);
+    } else {
+      setNotificationState(false);
+    }
+
+    try {
+      window.notificationSound = new NotificationSound();
+    } catch (e) {
+      console.error(e);
+    }
   {% endif %}
 
   function setNotificationState(turnOn){
-    notifications_enabled = turnOn;
-    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true":"false");
-    $('#notification_btn').html(turnOn ? "Disable Notifications":"Enable Notifications");
+    Cookies.set('push_notification', turnOn, { path: '/', expires: 365 });
+    push_notifications_enabled = turnOn;
+    localStorage.setItem('office_hour_queue_notifications', turnOn ? "true" : "false");
+    $('#push-notification-switch').prop('checked', turnOn);
   }
 
   function enableNotifications() {
-    if(notifications_enabled){
+    if(push_notifications_enabled){
       setNotificationState(false);
       return;
     }
@@ -174,13 +197,13 @@
       alert("This browser does not support desktop notification");
     }
     else if (Notification.permission === "granted") {
-      new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
+      new Notification("Notifications have been enabled. You will be notified when a student joins a queue.");
       setNotificationState(true);
     }
     else if (Notification.permission !== "denied") {
       Notification.requestPermission().then(function (permission) {
         if (permission === "granted") {
-          new Notification("Notifications have been enabled. You will be notified when a student joins a previously inactive queue.");
+          new Notification("Notifications have been enabled. You will be notified when a student joins a queue.");
           setNotificationState(true);
         }else{
           setNotificationState(false);
@@ -234,49 +257,43 @@
   }
 
   {% if viewer.isGrader() %}
-    window.isAudibleAlertEnabled = false;
 
     try {
         window.notificationSound = new NotificationSound();
-        document.querySelector('.disable-audible').style.display = 'none';
-        document.querySelector('.enable-audible').style.display = 'inline-block';
     } catch (e) {
         console.error(e);
     }
   {% endif %}
 
   function toggleAudibleAlert() {
-      if (window.isAudibleAlertEnabled) {
-          document.querySelector('.disable-audible').style.display = 'none';
-          document.querySelector('.enable-audible').style.display = 'inline-block';
-          window.isAudibleAlertEnabled = false;
-      }
-      else {
-          document.querySelector('.disable-audible').style.display = 'inline-block';
-          document.querySelector('.enable-audible').style.display = 'none';
-          window.isAudibleAlertEnabled = true;
-      }
+    window.audible_notifications_enabled = !window.audible_notifications_enabled;
+    Cookies.set('notification_sound', window.audible_notifications_enabled, { path: '/', expires: 365 });
+    $('#sound-notification-switch').prop('checked', window.audible_notifications_enabled);
   }
+
+
+  let previousQueueLength = $('.help_btn:visible[data-ready="true"]').length;
 
   function updateCurrentQueue() {
-      var queue_empty_before = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
+    const helping_student = $('.finish_helping_btn.btn-success:visible').length > 0;
 
-      $.get("{{base_url}}/current_queue", function(newQueue) {
-          $("#current_queue").replaceWith(newQueue);
-          filterQueues();
+    $.get("{{base_url}}/current_queue", function(newQueue) {
+        $("#current_queue").replaceWith(newQueue);
+        filterQueues();
 
-          var queue_empty_after = $( '.help_btn:visible[data-ready="true"]' ).length === 0;
-          var helping_student = $( '.finish_helping_btn.btn-success:visible').length > 0;
+        const currentQueueLength = $('.help_btn:visible[data-ready="true"]').length;
 
-          if(notifications_enabled && queue_empty_before && !queue_empty_after && !helping_student) {
-              new Notification("A student is now waiting for help.");
-          }
-      });
-
-      if (window.isAudibleAlertEnabled) {
-          window.notificationSound.play();
-      }
-  }
+        if (currentQueueLength > previousQueueLength && !helping_student) {
+            if (push_notifications_enabled) {
+                new Notification("A student has joined the queue.");
+            }
+            if (window.audible_notifications_enabled) {
+                window.notificationSound.play();
+            }
+        }
+        previousQueueLength = currentQueueLength;
+    });
+}
 
   function updateQueueStatus() {
       $.get("{{base_url}}/new_status", function(newStatus) {
@@ -352,6 +369,5 @@
   }
 
 
-  
 </script>
 </div>

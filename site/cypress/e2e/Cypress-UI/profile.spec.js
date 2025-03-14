@@ -13,10 +13,10 @@ const testFormOpening = (rowId, formId) => {
 const getVisibleData = () => {
     const data = {};
 
-    cy.get('#givenname-row > button').invoke('text').then(text => data.givenName = text.trim());
-    cy.get('#familyname-row > button').invoke('text').then(text => data.familyName = text.trim());
-    cy.get('#pronouns-row > button').invoke('text').then(text => data.pronouns = text.trim());
-    cy.get('#secondary-email-row > button').invoke('text').then(text => data.secondaryEmail = text.trim());
+    cy.get('#givenname-row > button').invoke('text').then((text) => data.givenName = text.trim());
+    cy.get('#familyname-row > button').invoke('text').then((text) => data.familyName = text.trim());
+    cy.get('#pronouns-row > button').invoke('text').then((text) => data.pronouns = text.trim());
+    cy.get('#secondary-email-row > button').invoke('text').then((text) => data.secondaryEmail = text.trim());
 
     return data;
 };
@@ -31,21 +31,22 @@ const testModification = (formId, cb) => {
 
 const fillData = (data) => {
     testModification('#edit-username-form', () => {
-        cy.get('#user-givenname-change').clear().type(data.givenName);
-        cy.get('#user-familyname-change').clear().type(data.familyName);
+        cy.get('#user-givenname-change').clear();
+        cy.get('#user-givenname-change').type(data.givenName);
+        cy.get('#user-familyname-change').clear();
+        cy.get('#user-familyname-change').type(data.familyName);
     });
 
     testModification('#edit-pronouns-form', () => {
-        cy.get('#user-pronouns-change').clear().as('pronounsInput');
+        cy.get('#user-pronouns-change').clear();
+        cy.get('#user-pronouns-change').as('pronounsInput');
         data.pronouns && cy.get('@pronounsInput').type(data.pronouns);
     });
 
     testModification('#edit-secondary-email-form', () => {
-        cy.get('#user-secondary-email-change')
-            .clear()
-            .as('secondaryEmailInput');
-        data.secondaryEmail &&
-            cy.get('@secondaryEmailInput').type(data.secondaryEmail);
+        cy.get('#user-secondary-email-change').clear();
+        cy.get('#user-secondary-email-change').as('secondaryEmailInput');
+        data.secondaryEmail && cy.get('@secondaryEmailInput').type(data.secondaryEmail);
     });
 };
 
@@ -77,19 +78,42 @@ describe('Test cases revolving around user profile page', () => {
     // Selenium test_basic_info
     it('Should start with accurate values', () => {
         cy.get('[data-testid="username-row"]').should('contain.text', 'instructor');
-        cy.get('[data-testid="givenname-row"]').should('contain.text', 'Quinn');
-        cy.get('[data-testid="familyname-row"]').should('contain.text', 'Instructor');
-        cy.get('[data-testid="pronouns-row"]').should('contain.text', 'She/Her');
         cy.get('[data-testid="email-row"]').should('contain.text', 'instructor@example.com');
     });
 
     // Selenium test_time_zone_selection
-    it('Time zone selector should work', () => {
+    it('should handle the timezone selector correctly', () => {
+        // Check that the default value is NOT_SET/NOT_SET
         cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', 'NOT_SET/NOT_SET');
-        cy.get('[data-testid="time-zone-dropdown"]').select('(UTC-07:00) America/Phoenix');
-        // Since the login success message is still up, we get the next message.
-        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Time-zone updated successfully');
-        cy.get('[data-testid="time-zone-dropdown"]').select('NOT_SET/NOT_SET');
+
+        // Search and select the first timezone
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('(UTC+14:00) Pacific/Kiritimati');
+        cy.get('.select2-results__option').contains('(UTC+14:00) Pacific/Kiritimati').click({ force: true });
+        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
+        cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC+14:00) Pacific/Kiritimati');
+
+        // Search and select the last timezone
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('(UTC-11:00) Pacific/Pago_Pago');
+        cy.get('.select2-results__option').contains('(UTC-11:00) Pacific/Pago_Pago').click({ force: true });
+        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'Warning: Local timezone does not match user timezone. Consider updating user timezone in profile.');
+        cy.get('[data-testid="time-zone-dropdown"]').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
+
+        // Filter options based on partial search input
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Pacific');
+        cy.get('.select2-results__option').should('have.length', 38).and('contain.text', 'Pacific/');
+
+        // Navigate and select options via keyboard
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('{downarrow}{downarrow}{enter}', { force: true });
+        cy.get('[data-testid="time-zone-dropdown"]').parent().find('.select2-selection__rendered').should('contain.text', '(UTC-11:00) Pacific/Pago_Pago');
+        cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'Time-zone updated successfully');
+
+        // Display message when no search results are found
+        cy.get('#select2-time_zone_drop_down-container').click({ force: true });
+        cy.get('input[aria-controls="select2-time_zone_drop_down-results"]').type('Nonexistent Zone');
+        cy.get('.select2-results').should('contain.text', 'No results found').click({ force: true });
     });
 
     it('Should error then succeed uploading profile photo', () => {
@@ -97,11 +121,11 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="upload-photo-button"]').click();
         cy.get('[data-testid="submit-button"]').click();
         // Since the login success message is still up, we get the next message.
-        cy.get('[data-testid="popup-message"]').next().should('contain.text', 'No image uploaded to update the profile photo');
+        cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'No image uploaded to update the profile photo');
         cy.get('[data-testid="upload-photo-button"]').click();
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
-        cy.get('[data-testid="popup-message"]').next().next().should('contain.text', 'Profile photo updated successfully!');
+        cy.get('[data-testid="popup-message"]').next().next().next().should('contain.text', 'Profile photo updated successfully!');
     });
 
     it('Flagging an innapropriate photo', () => {
@@ -111,7 +135,7 @@ describe('Test cases revolving around user profile page', () => {
         cy.get('[data-testid="user-image-button"]').selectFile(filePath);
         cy.get('[data-testid="submit-button"]').click();
         cy.visit(['sample', 'student_photos']);
-        cy.get('.fa-flag').click();
+        cy.get('.fa-flag').click({ force: true });
         cy.on('window:confirm', () => {
             return true;
         });

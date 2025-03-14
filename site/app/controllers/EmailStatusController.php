@@ -16,10 +16,10 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/email_status", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/email_status", methods: ["GET"])]
     public function getEmailStatusPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
@@ -37,10 +37,10 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/email_status_page", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/email_status_page", methods: ["GET"])]
     public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
@@ -60,10 +60,10 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/email_status", methods={"GET"})
      * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
+    #[Route("/superuser/email_status", methods: ["GET"])]
     public function getSuperuserEmailStatusPage(): WebResponse {
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
@@ -79,10 +79,10 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @Route("/superuser/email_status_page", methods={"GET"})
      * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
+    #[Route("/superuser/email_status_page", methods: ["GET"])]
     public function getSuperuserEmailStatusesByPage(): WebResponse {
         $page = $_GET['page'] ?? 1;
         /** @var EmailRepository $repository */

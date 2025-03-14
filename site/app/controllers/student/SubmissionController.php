@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
@@ -22,6 +23,7 @@ use app\models\GradingOrder;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
+use app\models\gradeable\AutoGradedTestcase;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -90,8 +92,9 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return ['error' => true, 'message' => 'No gradeable with that id.'];
         }
-        elseif ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage('Must be on a team to access submission');
+        elseif ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
+            // Irrespective of the access level, user should be redirected out of page if not present in a team
+            $this->core->addErrorMessage('Must be on a team to access submission.');
             $this->core->redirect($this->core->buildCourseUrl());
             return ['error' => true, 'message' => 'Must be on a team to access submission.'];
         }
@@ -99,10 +102,10 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}")]
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements: ["gradeable_version" => "\d+"])]
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
@@ -207,8 +210,8 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for showing a message to a user before the gradeable is loaded.
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/load_gradeable_message")]
     public function loadGradeableMessage($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
@@ -241,9 +244,8 @@ class SubmissionController extends AbstractController {
      * This should be called via AJAX, saving the result to the json_buffer of the Output object.
      * If failure, also returns message explaining what happened.
      * If success, also returns highest version of the student gradeable.
-     *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods: ["POST"])]
     public function ajaxValidGradeable($gradeable_id) {
 
         if (!isset($_POST['user_id'])) {
@@ -340,8 +342,8 @@ class SubmissionController extends AbstractController {
      * Its error checking has overlap with ajaxUploadSubmission.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods: ["POST"])]
     public function ajaxBulkUpload($gradeable_id) {
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
@@ -358,7 +360,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        $num_pages = $_POST['num_pages'];
+        $num_pages = rawurlencode($_POST['num_pages']);
 
         // making sure files have been uploaded
         if (!isset($_FILES["files1"])) {
@@ -484,7 +486,30 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
+                $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?" . http_build_query(
+                    [
+                        'pdf_path' => $pdf_full_path,
+                        'num_page' => $num_pages,
+                        'file_name' => $job_data['filename']
+                    ]
+                ));
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                $output = curl_exec($ch);
+                curl_close($ch);
+                $response = json_decode($output);
+
+                if (!$response->success) {
+                    if (!isset($response->error_message)) {
+                        return $this->core->getOutput()->renderJsonFail("Unknown error occurred.");
+                    }
+                    return $this->core->getOutput()->renderJsonFail($response->error_message);
+                }
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT))) {
@@ -504,9 +529,9 @@ class SubmissionController extends AbstractController {
      * Has overlap with ajaxUploadSubmission
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
      * @return boolean
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods: ["POST"])]
     public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
         // check for whether the item should be merged with previous submission
         // and whether or not file clobbering should be done
@@ -811,9 +836,9 @@ class SubmissionController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
      * @AccessControl(role="FULL_ACCESS_GRADER")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
      * @return boolean
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods: ["POST"])]
     public function ajaxDeleteSplitItem($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
@@ -867,9 +892,9 @@ class SubmissionController extends AbstractController {
     /**
      * function for counting the number of submissions to be regraded
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods={"POST"})
      * @return JsonResponse
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods: ["POST"])]
     public function ajaxCountRegrade(): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
@@ -897,9 +922,9 @@ class SubmissionController extends AbstractController {
     /**
      * Function for regrading submissions
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods={"POST"})
      * @return array
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods: ["POST"])]
     public function ajaxRegrade($gradeable_id): array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
@@ -1020,12 +1045,112 @@ class SubmissionController extends AbstractController {
     }
 
     /**
+     * @return JsonResponse
+     * @param string $gradeable_id
+     */
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/values', methods: ['GET'])]
+    public function ajaxGetGradeableValues(string $gradeable_id): JsonResponse {
+        $user_id = $_GET['user_id'] ?? '';
+        // Instructors can get values for other users, otherwise require the $_GET user id to be the same as the
+        // API authenticated user.
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($user_id !== $this->core->getUser()->getId())) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+        }
+        catch (\InvalidArgumentException $e) {
+            return JsonResponse::getFailResponse('Gradeable does not exist');
+        }
+
+        $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
+            $gradeable,
+            $user_id,
+            $gradeable->isTeamAssignment()
+        );
+
+        if ($graded_gradeable === null) {
+            return JsonResponse::getFailResponse('Graded gradeable for user with id ' . $user_id . ' does not exist');
+        }
+
+        $graded_gradeable = $graded_gradeable->getAutoGradedGradeable();
+
+        $testcase_array = [];
+        if ($graded_gradeable->hasActiveVersion()) {
+            $gradeable_version = $graded_gradeable->getAutoGradedVersions()[$graded_gradeable->getActiveVersion()] ?? null;
+            if ($gradeable_version !== null) {
+                // Gets arrays, and cleans empty arrays
+                $testcase_array = array_filter(array_map(function (AutoGradedTestcase $testcase) {
+                    $testcase_config = $testcase->getTestcase();
+                    if ($testcase->canView()) {
+                        return [
+                            'name' => $testcase_config->getName(),
+                            'details' => $testcase_config->getDetails(),
+                            'is_extra_credit' => $testcase_config->isExtraCredit(),
+                            'points_available' => $testcase_config->getPoints(),
+                            'has_extra_results' => $testcase->hasAutochecks(),
+                            'points_received' => $testcase->getPoints(),
+                            'testcase_message' => $testcase_config->canViewTestcaseMessage() ? $testcase->getMessage() : ''
+                        ];
+                    }
+                    else {
+                        return [];
+                    }
+                }, $gradeable_version->getTestcases()));
+            }
+        }
+
+        return JsonResponse::getSuccessResponse([
+            'is_queued' => $graded_gradeable->isQueued(),
+            'queue_position' => $graded_gradeable->getQueuePosition(),
+            'is_grading' => $graded_gradeable->isGrading(),
+            'has_submission' => $graded_gradeable->hasSubmission(),
+            'autograding_complete' => $graded_gradeable->isAutoGradingComplete(),
+            'has_active_version' => $graded_gradeable->hasActiveVersion(),
+            'highest_version' => $graded_gradeable->getHighestVersion(),
+            'total_points' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPoints() : null),
+            'total_percent' => ($graded_gradeable->hasActiveVersion() ? $graded_gradeable->getTotalPercent() : null),
+            'test_cases' => $testcase_array
+        ]);
+    }
+
+    /**
+     * @return JsonResponse|array{
+     *     status: string,
+     *     data: mixed
+     * }
+     */
+    #[Route('/api/{_semester}/{_course}/gradeable/{gradeable_id}/grade', methods: ['POST'])]
+    public function ajaxRequestGrade(string $gradeable_id): JsonResponse|array {
+        // Instructors can get request grading for other users, otherwise require the $_POST user id to be the same as the
+        // API authenticated user.
+        if ($this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR && ($_POST['user_id'] ?? '') !== $this->core->getUser()->getId()) {
+            return JsonResponse::getFailResponse('API key and specified user_id are not for the same user.');
+        }
+        $vcs_checkout = array_key_exists('vcs_checkout', $_POST) && $_POST['vcs_checkout'] === 'true';
+        if (!$vcs_checkout) {
+            return JsonResponse::getFailResponse('API only supports requesting for VCS gradeables to be graded.');
+        }
+
+        if (!array_key_exists('git_repo_id', $_POST)) {
+            return JsonResponse::getFailResponse('API requires git_repo_id variable to be set.');
+        }
+
+        if (!array_key_exists('user_id', $_POST)) {
+            return JsonResponse::getFailResponse('API requires user_id variable to be set.');
+        }
+
+        return $this->ajaxUploadSubmission($gradeable_id);
+    }
+
+    /**
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods: ["POST"])]
     public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
 
         // check for whether the item should be merged with previous submission,
@@ -1074,7 +1199,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -1727,9 +1852,7 @@ class SubmissionController extends AbstractController {
         return $this->core->getOutput()->renderResultMessage($message, $success);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods: ["POST"])]
     public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null): MultiResponse {
         $ta = $ta === "true" ?? false;
         if ($ta !== false) {
@@ -1882,9 +2005,8 @@ class SubmissionController extends AbstractController {
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
-     *
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -1941,9 +2063,9 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
      * @AccessControl(role="FULL_ACCESS_GRADER")
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")]
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
         $base_path = $course_path . "/submissions/" . $gradeable_id . "/";
@@ -1979,9 +2101,9 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")
      * @return JsonResponse
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/time_remaining_data")]
     public function getTimeRemainingData($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable !== null) {
@@ -2008,5 +2130,47 @@ class SubmissionController extends AbstractController {
             }
         }
         return JsonResponse::getErrorResponse("Cannot find gradeable with given id!");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/generate_repo", methods: ["POST"])]
+    public function generateRepo(string $gradeable_id): RedirectResponse {
+        $g = $this->tryGetElectronicGradeable($gradeable_id);
+
+        if ($g === null) {
+            $this->core->addErrorMessage("Gradeable not found.");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+            );
+        }
+
+        if (!$g->isVcs()) {
+            $this->core->addErrorMessage("Gradeable is not VCS.");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+            );
+        }
+
+        $vcs_partial_path = $g->getVcsPartialPath();
+        $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$gradeable_id}', $g->getId(), $vcs_partial_path);
+        $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($g->isTeamAssignment()) {
+            $gg = $this->tryGetGradedGradeable($g, $this->core->getUser()->getId());
+            $vcs_partial_path = str_replace('{$team_id}', $gg->getSubmitter()->getId(), $vcs_partial_path);
+        }
+        $path_parts = explode('/', $vcs_partial_path);
+        array_pop($path_parts);
+
+        AdminGradeableController::enqueueGenerateRepos(
+            $this->core->getConfig()->getTerm(),
+            $this->core->getConfig()->getCourse(),
+            implode('/', $path_parts),
+            $g->getVcsSubdirectory()
+        );
+
+        $this->core->addSuccessMessage("Repository creation requested.");
+        return new RedirectResponse(
+            $this->core->buildCourseUrl(['gradeable', $gradeable_id])
+        );
     }
 }

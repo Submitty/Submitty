@@ -3,6 +3,18 @@
         {{ poll.getName() }}
     </h1>
 
+    <hr>
+
+    {% if timer_enabled %}
+    <!-- Invisible until JS renders -->
+        <h2 id="timer" class="timer" style="display:none" data-testid="timer">
+            <label for="timerDisplay">
+                Time until Poll Ends:
+            </label>
+            <span id="timerDisplay"></span>
+        </h2>
+    {% endif %}
+
     {% if user_admin or poll.isHistogramAvailable() %}
         <button class="btn btn-primary" id='toggle-info-button' onclick="toggle_section('poll-info')">Toggle Poll Info</button>
         <button class="btn btn-primary" id='toggle-histogram-button' onclick="toggle_section('poll-histogram')">Toggle Histogram</button>
@@ -51,7 +63,7 @@
 
                     {% set user_selections = poll.getSelectedOptionIds() %}
                     {% for option in poll.getOptions() %}
-                        <tr class="radio option-row">
+                        <tr class="radio option-row" id = "option-row-{{ option.getId() }}">
                             <td class="option-btn">
                             <input class="response-radio"
                                    type={{ button_type }}
@@ -59,32 +71,74 @@
                                    value="{{ option.getId() }}"
                                    name="answers[]"
                                    id="answer-{{index}}"
+                                   data-testid="answer-{{index}}"
                                    {{ not user_admin and option.getId() in user_selections ? "checked" : "" }}
                                    {{ (not user_admin and poll.isOpen()) ? "" : "disabled" }}
                                    onchange="disableNoResponse();"
                             />
                             </td>
-                            <td class="option-text">
+                            <td class="option-text" id = "markdown-{{index}}">
                             {% include "misc/Markdown.twig" with {
                                 "content" : option.getResponse(),
                                 "style": "display: inline"
                             } only %}
+                            {% if ((poll.getAllowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
+                                <button
+                                    type="button"
+                                    data-testid="custom-response-delete"
+                                    class="move-btn delete-btn"
+                                    aria-label="Delete Custom Response"
+                                    style="border:0; padding:0;"
+                                    onclick="removeCustomResponse({{ poll.getId() }}, {{ option.getId() }}, '{{ base_url }}');">
+                                    <i class="fas fa-trash black-btn"></i>
+                                </button>
+                            {% endif %}
                             {% if option.isCorrect() and poll.isReleaseAnswer()%}
                                 <span class="fa-stack fa-2xs correct-tag">
                                     <i class="fa fa-circle fa-stack-2x correct-tag-background"></i>
                                     <i class="fa fa-check fa-stack-1x fa-xl correct-tag-checkmark"></i>
                                 </span>
-                            {% endif %}                                
-                            </td>                       
+                            {% endif %}
+                            </td>
                         </tr>
                         {% set index = index + 1 %}
                     {% endfor %}
                     </table>
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
-                    <button type="submit" class="btn btn-primary student-submit">Submit</button>
+                    <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
                 {% endif %}
             </form>
+            {% if not user_admin and poll.isOpen() and poll.getAllowsCustomResponses() %}
+                <div class = 'info-wrapper custom-response-wrapper'>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                    <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
+                    <br />
+                    <div class="response-container">
+                        <textarea
+                            aria-label="Response text"
+                            data-testid="custom-response-text"
+                            class="poll-response custom-poll-response"
+                            name="custom-response"
+                            placeholder="Enter response here..."
+                            rows="10" cols="30"></textarea>
+                    </div>
+                    <i>
+                        This response will be visible to every student.<br />
+                    </i>
+                    <button
+                        type="button"
+                        data-testid="custom-response-submit"
+                        class="btn btn-primary student-submit custom-response-submit"
+                        onclick = "addCustomResponse({{poll.getId()}},'{{base_url}}');">
+                        Add Response</button>
+                    <script>
+                        $(document).ready(() => {
+                            validateCustomResponse();
+                        });
+                    </script>
+                </div>
+            {% endif %}
         </div>
         {% if user_admin or poll.isHistogramAvailable() %}
             <div class="poll-view-wrapper histogram-wrapper" id="poll-histogram" style="display: none;">
@@ -95,76 +149,53 @@
 </div>
 
 <script>
-    function toggle_section(section_id) {
-        $(`#${section_id}`).toggle('fast');
-    }
 
-    function get_new_chart_width() {
-        const MIN_CHART_WIDTH = 400;
-        const DESIRED_CHART_FACTOR = 0.75;
-        const table_size = $("#info-histogram-table").width();
-        const desired_size = table_size * DESIRED_CHART_FACTOR;
-        // if the width of the viewport is small enough
-        if (desired_size < MIN_CHART_WIDTH) {
-            // set the width of poll-info to 100%
-            $("#poll-info").css("max-width", "100%");
-            return Math.max(MIN_CHART_WIDTH, table_size);
-        }
-        // reset width of poll-info
-        $("#poll-info").css("max-width", '');
-        return desired_size;
-    }
-
-    function disableNoResponse() {
-        $(".no-response-radio").prop("checked", false);
-    }
-
-    function clearResponses() {
-        if ($(".no-response-radio").is(':checked')) {
-            $(".response-radio").prop("checked", false);
-        }
-    }
+    {% if timer_enabled %}
+        const endTime = new Date('{{ end_time }}')
+        updateTimer(endTime);
+    {% endif %}
 
     {% if user_admin or poll.isHistogramAvailable() %}
-    window.onload = function () {
-        const data = [{
-            type: "bar",
-            x: [],
-            y: [],
-            marker: {
-                color: [],
-            },
-        }];
-        const [correctColor, defaultColor] =
-        [window.getComputedStyle(document.body).getPropertyValue('--standard-deep-dark-green'),
-            window.getComputedStyle(document.body).getPropertyValue('--standard-vibrant-dark-blue')];
-        {% for option in poll.getOptions() %}
-        data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "}) }}");
-        data[0].y.push({{ response_counts[option.getId()] }});
-        data[0].marker.color.push(
-            {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
-        );
-        {% endfor %}
-        const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
-        const width = get_new_chart_width();
-        const layout = {
-            title: title_text.documentElement.textContent,
-            paper_bgcolor: $("body").css("--default-white"),
-            plot_bgcolor: $("body").css("--default-white"),
-            font: {
-                color: $("body").css("--text-black")
-            },
-            width: width
-        }
-        Plotly.newPlot("chartContainer", data, layout);
-        window.addEventListener('resize', function() {
+        window.onload = function () {
+            const data = [{
+                type: "bar",
+                x: [],
+                y: [],
+                marker: {
+                    color: [],
+                },
+            }];
+            const [correctColor, defaultColor] =
+            [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
+                window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
+            {% for option in poll.getOptions() %}
+                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
+                data[0].y.push({{ response_counts[option.getId()] }});
+                data[0].marker.color.push(
+                    {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
+                );
+            {% endfor %}
+            const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
-            const container = document.getElementById('chartContainer');
-            const update = {
-                width: width
+            const layout = {
+                title: title_text.documentElement.textContent,
+                paper_bgcolor: $("body").css("--default-white"),
+                plot_bgcolor: $("body").css("--default-white"),
+                font: {
+                    color: $("body").css("--text-black")
+                },
+                width: width,
+                xaxis: {type: 'category'}
             }
-            Plotly.relayout(container, update);
-        });
-    }
+            Plotly.newPlot("chartContainer", data, layout);
+            window.addEventListener('resize', function() {
+                const width = get_new_chart_width();
+                const container = document.getElementById('chartContainer');
+                const update = {
+                    width: width
+                }
+                Plotly.relayout(container, update);
+            });
+        }
     {% endif %}
 </script>

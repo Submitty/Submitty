@@ -52,3 +52,11 @@ a.popout-item > .fas:hover {
 .view-row {
     padding: 0.8px;
 }
+
+#config-drop-down {
+    margin-top: 10px;
+}
+
+#new-file-name {
+    width: 100%;
+}

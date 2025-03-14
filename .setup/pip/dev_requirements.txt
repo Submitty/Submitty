@@ -1,9 +1,9 @@
-# Devlopment Requirements
+# Development Requirements
 
 # Linters
-pylint==3.0.2
-flake8-bugbear==23.12.2
-flake8==6.1.0
+pylint==3.3.4
+flake8-bugbear==24.12.12
+flake8==7.1.2
 
 # Code Formatter
-black==23.11.0
+black==25.1.0

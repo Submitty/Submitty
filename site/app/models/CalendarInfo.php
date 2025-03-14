@@ -94,6 +94,8 @@ class CalendarInfo extends AbstractModel {
             GradeableList::GRADING => $gradeable_list->getGradingGradeables(),
             GradeableList::CLOSED => $gradeable_list->getClosedGradeables(),
             GradeableList::GRADED => $gradeable_list->getGradedGradeables(),
+            GradeableList::FUTURE => $gradeable_list->getFutureGradeables(),
+            GradeableList::BETA => $gradeable_list->getBetaGradeables()
         ];
 
         foreach ($gradeable_list_sections as $section => $gradeables) {
@@ -123,6 +125,8 @@ class CalendarInfo extends AbstractModel {
                     'submission' => ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) ? $gradeable->getSubmissionDueDate()->format($date_format) : '',
                     'status' => (string) $section,
                     'status_note' => ($submit_btn === null) ? "N/A" : $submit_btn->getTitle(),
+                    'submission_open' => $gradeable->isSubmissionOpen(),
+                    'is_student' => $info->core->getUser()->getAccessLevel() === User::LEVEL_USER,
                     'grading_open' => $gradeable->getGradeStartDate() !== null ? $gradeable->getGradeStartDate()->format($date_format) : '',
                     'grading_due' => $gradeable->getGradeDueDate() !== null ? $gradeable->getGradeDueDate()->format($date_format) : '',
                     'class' => 'btn-nav',

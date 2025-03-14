@@ -96,6 +96,16 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerAutograding($peer_autograding)
+ * @method bool getPeerAutograding()
+ * @method void setPeerRubric($peer_rubric)
+ * @method bool getPeerRubric()
+ * @method void setPeerFiles($peer_files)
+ * @method bool getPeerFiles()
+ * @method void setPeerSolutions($peer_solutions)
+ * @method bool getPeerSolutions()
+ * @method void setPeerDiscussion($peer_discussion)
+ * @method bool getPeerDiscussion()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
@@ -320,6 +330,21 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var bool will peer graders access the autograding panel*/
+    protected $peer_autograding = true;
+    /** @prop
+     * @var bool will peer graders access the rubric panel*/
+    protected $peer_rubric = true;
+    /** @prop
+     * @var bool will peer graders access the files panel*/
+    protected $peer_files = true;
+    /** @prop
+     * @var bool will peer graders access the solution/notes panel*/
+    protected $peer_solutions = true;
+    /** @prop
+     * @var bool will peer graders access the discussion panel*/
+    protected $peer_discussion = true;
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
@@ -341,13 +366,30 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
-        $this->setAnyManualGrades($details['any_manual_grades']);
+        if (array_key_exists('any_manual_grades', $details)) {
+            $this->setAnyManualGrades($details['any_manual_grades']);
+        }
+
         if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        $mapping = [
+            'autograding' => 'setPeerAutograding',
+            'rubric' => 'setPeerRubric',
+            'files' => 'setPeerFiles',
+            'solution_notes' => 'setPeerSolutions',
+            'discussion' => 'setPeerDiscussion'
+        ];
+
+        foreach ($mapping as $key => $method) {
+            if (array_key_exists($key, $details) && method_exists($this, $method)) {
+                call_user_func([$this, $method], $details[$key] ?? true);
+            }
         }
 
         if (array_key_exists('limited_access_blind', $details)) {
@@ -781,23 +823,15 @@ class Gradeable extends AbstractModel {
      */
     private function getDateValidationSet(bool $grade_inquiry_modified = false) {
         if ($this->type === GradeableType::ELECTRONIC_FILE) {
-            if (!$this->isStudentSubmit()) {
-                if ($this->isTaGrading()) {
-                    $result = self::date_properties_elec_exam;
-                }
-                else {
-                    $result = self::date_properties_bare;
-                }
-            }
-            elseif ($this->isTaGrading()) {
+            // submission open date has to be included for validation
+            if ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
             }
             else {
                 $result = self::date_properties_elec_no_ta;
             }
-
-            // Only add in submission due date if student submission is enabled
-            if ($this->isStudentSubmit() && $this->hasDueDate()) {
+            // Add in submission due date
+            if ($this->hasDueDate()) {
                 // Make sure we insert the due date into the correct location (after the open date)
                 array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
@@ -1507,13 +1541,24 @@ class Gradeable extends AbstractModel {
         while ($checked_paths <= 1000 && count($cur_paths) !== 0) {
             foreach ($cur_paths as $cur_path) {
                 $is_dir = is_dir($cur_path);
-                if (!$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
-                    return "Invalid permissions on a file or directory within specified path.";
+
+                // We don't need to check the permissions for autograding configurations
+                // in this courses config_upload directory.
+                // Instructor users can upload configs to this directory through the web UI
+                // and they can select and use these configs to autograding their assignments.
+                $config_upload_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+                $is_in_config_upload_dir = str_starts_with($cur_path, $config_upload_dir);
+
+                if (
+                    !$is_in_config_upload_dir
+                    && !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)
+                ) {
+                    return "Invalid permissions on a file or directory within specified path:" . $cur_path;
                 }
                 if ($is_dir) {
                     $next_paths_tmp = @scandir($cur_path);
                     if (!is_array($next_paths_tmp)) {
-                        return "Invalid permissions on a file or directory within specified path.";
+                        return "Invalid directory array: " . $next_paths_tmp;
                     }
                     foreach ($next_paths_tmp as $next_path) {
                         if ($next_path === "." || $next_path === "..") {
@@ -1757,7 +1802,8 @@ class Gradeable extends AbstractModel {
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
+//        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
+        return false;
     }
 
     /**
@@ -1855,15 +1901,13 @@ class Gradeable extends AbstractModel {
      * @param bool $include_bad_submissions
      * @return float The percentage (0 to 1) of grading completed or NAN if none required
      */
-    public function getGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
+    public function getTaGradingProgress(User $grader, bool $include_bad_submissions, bool $include_null_section) {
         //This code is taken from the ElectronicGraderController, it used to calculate the TA percentage.
         $total_users = [];
         $graded_components = [];
         if ($this->isGradeByRegistration()) {
-            if (!$grader->accessFullGrading()) {
-                $sections = $grader->getGradingRegistrationSections();
-            }
-            else {
+            $sections = $grader->getGradingRegistrationSections();
+            if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && $sections === []) {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
@@ -1889,56 +1933,56 @@ class Gradeable extends AbstractModel {
         if (count($sections) > 0) {
             if ($this->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $late_submitted = $this->core->getQueries()->getBadTeamSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
-                $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
+                $graded_ta_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
                 $late_submitted = $this->core->getQueries()->getBadUserSubmissionsByGradingSection($this->getId(), $sections, $section_key);
                 $late_graded = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
             }
         }
 
-        $num_components = $this->core->getQueries()->getTotalComponentCount($this->getId());
+        $num_ta_components = $this->core->getQueries()->getTaComponentCount($this->getId());
         $sections = [];
         if (count($total_users) > 0) {
             foreach ($num_submitted as $key => $value) {
                 $sections[$key] = [
-                    'total_components' => $value * $num_components,
-                    'graded_components' => 0,
-                    'non_late_total_components' => ($value - ($late_submitted[$key] ?? 0)) * $num_components,
-                    'non_late_graded_components' => 0
+                    'total_ta_components' => $value * $num_ta_components,
+                    'graded_ta_components' => 0,
+                    'non_late_total_ta_components' => ($value - ($late_submitted[$key] ?? 0)) * $num_ta_components,
+                    'non_late_graded_ta_components' => 0
                 ];
-                if (isset($graded_components[$key])) {
+                if (isset($graded_ta_components[$key])) {
                     // Clamp to total components if unsubmitted assignment is graded for whatever reason
-                    $sections[$key]['graded_components'] = min(intval($graded_components[$key]), $sections[$key]['total_components']);
-                    $sections[$key]['non_late_graded_components'] = $graded_components[$key] - $late_graded[$key];
+                    $sections[$key]['graded_ta_components'] = min(intval($graded_ta_components[$key]), $sections[$key]['total_ta_components']);
+                    $sections[$key]['non_late_graded_ta_components'] = $graded_ta_components[$key] - $late_graded[$key];
                 }
             }
         }
-        $components_graded = 0;
-        $components_total = 0;
+        $ta_components_graded = 0;
+        $ta_components_total = 0;
         foreach ($sections as $key => $section) {
             if ($key === "NULL" && !$include_null_section) {
                 continue;
             }
             if ($include_bad_submissions) {
-                $components_graded += $section['graded_components'];
-                $components_total += $section['total_components'];
+                $ta_components_graded += $section['graded_ta_components'];
+                $ta_components_total += $section['total_ta_components'];
             }
             else {
-                $components_graded += $section['non_late_graded_components'];
-                $components_total += $section['non_late_total_components'];
+                $ta_components_graded += $section['non_late_graded_ta_components'];
+                $ta_components_total += $section['non_late_total_ta_components'];
             }
         }
-        if ($components_total === 0) {
+        if ($ta_components_total === 0) {
             return NAN;
         }
-        return $components_graded / $components_total;
+        return $ta_components_graded / $ta_components_total;
     }
 
     /**
@@ -2305,7 +2349,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getTerm(), $config->getCourse(), $gradeable_id, $this->getVcsSubdirectory());
         }
     }
 
@@ -2528,7 +2572,8 @@ class Gradeable extends AbstractModel {
     public function getPrerequisite(): string {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
-            return $dependent_gradeable->getTitle();
+            $dependent_gradeable_points = strval($this->depends_on_points);
+            return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
         }
         else {
             return '';

@@ -4,7 +4,7 @@
         Limited grader does not have "View All" option
         If nothing to grade, Instructor will see all sections
     #}
-    <div class="row details-header-row">
+    <div class="details-header-row">
     <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
             <ul id="details-legend">
@@ -40,34 +40,29 @@
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </button>
                 {% endif %}
-                <a class="btn btn-default"
-                   href="" onclick="changeSortOrder()">
+                <button class="btn btn-default" data-testid="random-default-order"
+                   onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
-                </a>
+                </button>
                 {% if toggle_anon_button %}
-                <button class="btn btn-default" id="toggle-anon-button"
+                <button class="btn btn-default" id="toggle-anon-button" data-testid="toggle-anon-button"
                     onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
                 </button>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                <button class="btn btn-default" id="inquiryButton" data-testid="toggle-grade-inquiry" onclick="change_inquiry()">
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
             </div>
         </div>
     </div>
-    {% if grade_inquiry_only_button %}
-        <script>
-            inquiry_update();
-        </script>
-    {% endif %}
     {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
     {% endif %}
     {% if not is_instructor %}
-        <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
+        <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
     {% endif %}
     {% if can_regrade %}
         <div class="btn-group">
@@ -80,8 +75,8 @@
             </div>
         </div>
     {% endif %}
-    <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -90,12 +85,12 @@
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
-            <a class="btn btn-primary"
+            <a class="btn btn-primary" data-testid="export-team-members"
                href="{{ export_teams_url }}"
             >Export Teams Members</a>
         {% endif %}
         {% if show_export_teams_button %}
-            <button class="btn btn-primary key_to_click"
+            <button class="btn btn-primary"
                     tabindex="0"
                     onclick="importTeamForm();"
             >
@@ -107,8 +102,9 @@
         {# Randomize team button #}
         {% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
             {% if past_grade_start_date %}
-                <button class="btn btn-default key_to_click"
+                <button class="btn btn-default"
                         tabindex="0"
+                        data-testid="randomly-reassign-teams"
                         onclick="randomizeRotatingGroupsButton()"
                 >
                     Randomly Re-Assign Teams to Rotating Sections
@@ -185,7 +181,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -202,19 +198,18 @@
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
             <tbody class="details-info-header{% if 'empty-teams' not in collapsed_sections %} panel-head-active{% endif %}" id="details-content-section-empty-teams" data-section-id="empty-teams">
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
                     {% if core.getUser().accessGrading() %}
-                        <td colspan="{{ columns|length }}" style="text-align: center">
-                            <i class="collapse-icon fas fa-caret-right"></i>
-                            <i class="expand-icon fas fa-caret-down"></i>
-                        </td>
+                    <td colspan="{{ columns|length }}" style="text-align: center">
+                        <i class="collapse-icon fas fa-caret-right"></i>
+                        <i class="expand-icon fas fa-caret-down"></i>
+                    </td>
                     {% endif %}
                 </tr>
                 <tr class="info">
-                    <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
+                    <td colspan="{{ columns|length }}" style="text-align: center">Empty teams</td>
                 </tr>
             </tbody>
-            <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
+            <tbody class="details-content panel-content-active">
                 {% for team in empty_teams %}
                     {% set reg_section = team.getRegistrationSection() ?? "NULL" %}
                     {% set rot_section = team.getRotatingSection() ?? "NULL" %}
@@ -241,7 +236,7 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
@@ -277,7 +272,7 @@
             {% elseif column.function == "team_id_anon" %}
                 {{ _self.render_column_team_id_anon(context, section, graded_gradeable, index, info, column, anon_ids) }}
             {% elseif column.function == "team_name" %}
-                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) }}
             {% elseif column.function == "team_members" %}
                 {{ _self.render_column_team_members(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "total" %}
@@ -426,17 +421,17 @@
                     {% else %}
                         {# If submission has been made but not graded, non peer information should not be visible to peer grader #}
                         {%  if info.graded_groups[index] == "peer-no-submission" %}
-                            {# Indicates Submitted but Ungraded Peer Component #}
+                            {# Indicates Not Submitted Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                         {% elseif info.graded_groups[index] =="peer-null"   %}
-                            {# Indicates Non-Peer Component (Hidden) #}
+                            {# Indicates Submitted but Ungraded Peer Component #}
                             <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
-                        {% elseif info.graded_groups[index] < 4   %}
-                            {# Indicates Non-Peer Component (Hidden) #}
-                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
-                        {% else %}
+                        {% elseif info.graded_groups[index] == 4 %}
                             {# Indicates Submitted and Graded Peer Component #}
                              <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+                        {% else %}
+                            {# Indicates Non-Peer Component (Hidden)#}
+                            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle hide-highlights"></i>
                         {% endif %}
                     {% endif %}
                 {% endif %}
@@ -470,19 +465,19 @@
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
-        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
@@ -517,22 +512,25 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+    {% elseif info.on_time_submission == false %}
+        {% set contents = "Too Many Days Late" %}
+        {% set btn_class = "btn-danger" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
-        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
@@ -595,9 +593,14 @@
 {% endmacro %}
 
 {# Team Name #}
-{% macro render_column_team_name(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_team_name(context, section, graded_gradeable, index, info, column, max_team_name_length) %}
     <td>
-        {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {# existing teams names over max length get truncated down on display #}
+        {% if graded_gradeable.getSubmitter().getTeam().getTeamName()|length > max_team_name_length %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName()|slice(0, max_team_name_length) ~ '...' }}
+        {% else %}
+          {{ graded_gradeable.getSubmitter().getTeam().getTeamName() }}
+        {% endif %}
     </td>
 {% endmacro %}
 
@@ -734,6 +737,10 @@
 
 {# /Column functions #}
 <script>
+    {% if grade_inquiry_only_button %}
+        inquiry_update();
+    {% endif %}
+    
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
@@ -759,25 +766,8 @@
     }
 
     function change_inquiry() {
-        var button = document.getElementById('inquiryButton');
-        var status = Cookies.get('inquiry_status');
-        if(status === 'on') {
-            status = 'off'
-        }
-        else{
-            status = 'on';
-        }
-        if(status === 'on') {
-            Cookies.set('inquiry_status', 'on');
-            var inquiry = Cookies.get('inquiry_status');
-            grade_inquiry_only();
-            button.textContent = "Grade Inquiry Only: On";
-        } else {
-            Cookies.set('inquiry_status', 'off');
-            var inquiry = Cookies.get('inquiry_status');
-            reverse_inquiry_only();
-            button.textContent = "Grade Inquiry Only: Off";
-        }
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
     }
 
     

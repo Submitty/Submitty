@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
+use app\controllers\SelfRejoinController;
 
 /**
  * Class UsersController
@@ -25,10 +26,10 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/users", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/users", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/users", methods: ["GET"])]
     public function getStudents() {
         $students = $this->core->getQueries()->getAllUsers();
         //Assemble students into sections
@@ -83,6 +84,24 @@ class UsersController extends AbstractController {
             }
         }
 
+        $can_rejoin = [];
+        $self_rejoin_tester = new SelfRejoinController($this->core);
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
+        foreach ($sorted_students['NULL'] as $student) {
+            $user_id = $student->getId();
+            if (
+                $user_id !== null
+                && $student->getGroup() === User::GROUP_STUDENT
+                && $self_rejoin_tester->canRejoinCourseHelper($student, $course, $term)
+            ) {
+                $can_rejoin[$user_id] = true;
+            }
+            else {
+                $can_rejoin[$user_id] = false;
+            }
+        }
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse($download_info),
             new WebResponse(
@@ -91,6 +110,7 @@ class UsersController extends AbstractController {
                 $sorted_students,
                 $this->core->getQueries()->getRegistrationSections(),
                 $this->core->getQueries()->getRotatingSections(),
+                $can_rejoin,
                 $download_info,
                 $formatted_tzs,
                 $this->core->getAuthentication() instanceof DatabaseAuthentication,
@@ -100,10 +120,10 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/graders", methods={"GET"})
-     * @Route("/api/courses/{_semester}/{_course}/graders", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/graders", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/graders", methods: ["GET"])]
     public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
         $graders_sorted = [
@@ -178,10 +198,7 @@ class UsersController extends AbstractController {
             )
         );
     }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/graders/assign_registration_sections", methods: ["POST"])]
     public function reassignRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['graders']);
         $new_registration_information = [];
@@ -210,9 +227,7 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/users/details", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/users/details", methods: ["GET"])]
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess([
@@ -239,9 +254,7 @@ class UsersController extends AbstractController {
         ]);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/user_information", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/user_information", methods: ["GET"])]
     public function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
         $user_ids = array_keys($submitty_users);
@@ -276,9 +289,7 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/users", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/users", methods: ["POST"])]
     public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $authentication = $this->core->getAuthentication();
@@ -343,12 +354,12 @@ class UsersController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalGivenName(trim($_POST['user_givenname']));
-        if (isset($_POST['user_preferred_givenname'])) {
+        if (isset($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
             $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
         $user->setLegalFamilyName(trim($_POST['user_familyname']));
-        if (isset($_POST['user_preferred_familyname'])) {
+        if (isset($_POST['user_preferred_familyname']) && trim($_POST['user_preferred_familyname']) !== "") {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
 
@@ -424,7 +435,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id, $gradeable->getVcsSubdirectory());
                 }
             }
         }
@@ -432,9 +443,9 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/delete_user", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/delete_user", methods: ["POST"])]
     public function deleteUser(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
@@ -460,9 +471,9 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/demote_grader", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/demote_grader", methods: ["POST"])]
     public function demoteGrader(): RedirectResponse {
         if (isset($_POST['user_id']) && isset($_POST['displayed_fullname'])) {
             $user_id = trim($_POST['user_id']);
@@ -487,9 +498,7 @@ class UsersController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['graders']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections", methods: ["GET"])]
     public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -508,9 +517,13 @@ class UsersController extends AbstractController {
                 ]);
             }
         }
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $is_self_register = $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
+        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],
             'sectionsForm',
@@ -518,15 +531,20 @@ class UsersController extends AbstractController {
             $reg_sections,
             $non_null_counts,
             $null_counts,
-            $max_section
+            $max_section,
+            $default_section,
+            $is_self_register
         );
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections/registration", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        if (isset($_POST['default_section'])) {
+            $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
+        }
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
@@ -563,12 +581,20 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
-                if ($num_del_sections === 0) {
-                    $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
+                $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
+                if ($default_section === $_POST['delete_reg_section'] && $is_self_register) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
                 }
                 else {
-                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+
+                    if ($num_del_sections === 0) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                    }
+                    else {
+                        $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    }
                 }
             }
             else {
@@ -580,9 +606,7 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/sections/rotating", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/sections/rotating", methods: ["POST"])]
     public function updateRotatingSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
 
@@ -858,8 +882,8 @@ class UsersController extends AbstractController {
      * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
-     * @Route("/courses/{_semester}/{_course}/users/upload", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/users/upload", methods: ["POST"])]
     public function uploadUserList($list_type = "classlist") {
 
         /**
@@ -1274,8 +1298,8 @@ class UsersController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
-     * @Route("/courses/{_semester}/{_course}/users/view_grades", methods={"POST"})
      **/
+    #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {
             $this->core->addErrorMessage("No student ID provided");

@@ -217,6 +217,20 @@ input[type="checkbox"]:checked::before {
     display: inline-block;
 }
 
+.rubric-question-mark {
+    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+    font-family: "Font Awesome 5 Free";
+    content: "\f059";
+    color: var(--external-link-blue);
+    font-weight: 300;
+    display: inline-block;
+    position: absolute;
+    margin-bottom: 16px;
+    font-size: 16px;
+    margin-left: 3px;
+}
+
+
 .fa-question-circle.disabled,
 .fa-question-circle[disabled],
 .disabled > .fa-question-circle,
@@ -240,6 +254,40 @@ button,
 [type="reset"],
 [type="submit"] {
     appearance: button;
+}
+
+/* Hotkeys&Settings */
+
+.ta-grading-setting-list {
+    width: 100%;
+}
+
+.ta-grading-setting-list tr {
+    border: 1px solid var(--standard-light-gray);
+    border-left: none;
+    border-right: none;
+}
+
+.ta-grading-setting-list td{
+    padding: 4px;
+}
+
+.ta-grading-setting-list td.button-cell {
+    display: flex;
+    justify-content: center;
+}
+
+.hotkeys-title-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.hotkeys-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 /****************************
@@ -650,6 +698,14 @@ td > a.active-sort {
     background-color: var(--standard-light-gray);
 }
 
+.results-box .box-block .red-message {
+    margin-left: 5px;
+}
+
+.results-box .box-block .diff-element .red-message {
+    margin-left: 0;
+}
+
 .box-title > h4 {
     margin-left: 90px;
 }
@@ -761,6 +817,21 @@ td > a.active-sort {
 
 .blue-background {
     background-color: var(--standard-medium-blue);
+}
+
+.dark-green-background{
+    background-color: var(--good-green);
+    color: --btn-text-black;
+}
+
+.dark-yellow-background{
+    background-color: var(--standard-light-yellow);
+    color: --btn-text-black;
+}
+
+.dark-red-background{
+    background-color: var(--error-alert-dark-red);
+    color: --btn-text-black;
 }
 
 .badge-container {
@@ -1137,6 +1208,10 @@ div.full-height {
     background-color: var(--black-moderately-transparent);
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
 .popup-box {
     width: 100%;
     height: 100%;
@@ -1499,59 +1574,6 @@ end of styles used in the admin gradeable page
 }
 
 /* Site Wrapper View */
-
-.wrapper-example {
-    width: 400px;
-    height: 240px;
-    display: flex;
-    flex-direction: column;
-    color: var(--btn-text-black);
-}
-
-.wrapper-example .wrapper-center {
-    display: flex;
-    flex-grow: 2;
-    flex-direction: row;
-}
-
-.wrapper-example .wrapper-top,
-.wrapper-example .wrapper-left,
-.wrapper-example .wrapper-body,
-.wrapper-example .wrapper-right,
-.wrapper-example .wrapper-bottom {
-    flex-grow: 1;
-    border: 1px solid var(--text-black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.wrapper-example .wrapper-body {
-    flex-grow: 5;
-}
-
-.wrapper-top {
-    background-color: var(--standard-light-pink);
-}
-
-.wrapper-left {
-    background-color: var(--standard-light-yellow);
-}
-
-.wrapper-body {
-    background-color: var(--default-white);
-    color: var(--text-black);
-}
-
-.wrapper-right {
-    background-color: var(--standard-light-green);
-    color: var(--text-black);
-}
-
-.wrapper-bottom {
-    background-color: var(--standard-light-blue);
-}
 
 .wrapper-css {
     background-color: var(--default-white);
@@ -1988,6 +2010,85 @@ header > * {
     background: var(--default-white);
 }
 
+/*
+Start of slider switch
+ */
+
+.super-switch-container {
+    display: flex;
+}
+
+.switch-container {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+}
+
+.switch-label {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    margin-right: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 3em;
+    height: 1.7em;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--standard-light-medium-gray);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider::before {
+    position: absolute;
+    content: "";
+    height: 1.3em;
+    width: 1.3em;
+    left: 0.2em;
+    bottom: 0.2em;
+    background-color: var(--always-default-white);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.slider::after {
+    position: absolute;
+    color: var(--always-default-white);
+    top: 50%;
+    left: 0.5em;
+    transform: translateY(-50%);
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--good-green);
+}
+
+input:checked + .slider::before {
+    transform: translateX(1.3em);
+}
+
+input:checked + .slider::after {
+    left: 1.75em;
+}
+
+/*
+End of slider switch
+ */
+
 .badge-1 {
     background-color: var(--category-color-1);
     color: var(--text-black);
@@ -2328,3 +2429,15 @@ header > * {
     float: none;
 }
 /* stylelint-enable no-descending-specificity */
+
+.notebook-output-cell-content {
+    background-color: var(--standard-light-gray);
+    padding: 1em;
+    margin-bottom: 1em;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.notebook-cell {
+    padding: 0 0.5em;
+}

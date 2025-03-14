@@ -26,6 +26,7 @@ class DockerInterfaceControllerTester extends BaseUnitTest {
         $api = $response->json_response->json;
         $mock_data['autograding_containers'] = false;
         $mock_data['autograding_workers'] = false;
+        $mock_data['image_owners'] = [];
 
         $this->assertTrue($api['status'] === "success");
         $this->assertEquals($mock_data, $api['data']);

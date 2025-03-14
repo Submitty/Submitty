@@ -21,7 +21,6 @@ const tests = [
     },
 ];
 
-
 describe('Test Uploading Files', () => {
     beforeEach(() => {
         const gradeableId = 'open_homework';

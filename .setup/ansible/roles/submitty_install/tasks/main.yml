@@ -1,0 +1,148 @@
+---
+- name: Run the equivalent of "apt get update" as a seperate stop
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 300
+
+- name: Install PHP
+  ansible.builtin.apt:
+    name: php
+    state: present
+  register: apt_action
+  retries: 100
+  until: apt_action is success or
+    ('Failed to lock apt for exclusive operation' not in apt_action.msg and
+    '/var/lib/dpkg/lock' not in apt_action.msg)
+
+- name: Create submitty git directory if none exists
+  ansible.builtin.file:
+    path: /usr/local/submitty/GIT_CHECKOUT
+    state: directory
+    mode: "0755"
+
+- name: Checkout specific version of the submitty git repo
+  ansible.builtin.git:
+    repo: https://github.com/Submitty/Submitty.git
+    dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
+    version: "{{ submitty_install_submitty_version }}"
+    force: true
+    update: true
+
+- name: Run install_system.sh script
+  ansible.builtin.shell:
+    executable: "/bin/bash"
+    cmd: |
+      set -o pipefail
+      echo  "{{ submitty_install_db_host }}
+        {{ submitty_install_db_port }}
+        {{ submitty_install_submitty_dbuser }}
+        {{ submitty_install_submitty_dbuser_password }}
+        {{ submitty_install_submitty_course_dbuser }}
+        {{ submitty_install_submitty_course_dbuser_password }}
+        {{ submitty_install_timezone }}
+        {{ submitty_install_language }}
+        {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
+        {{ submitty_install_vcs_url }}
+        {{ submitty_install_institution_name }}
+        {{ submitty_install_sysadmin_email }}
+        {{ submitty_install_submitty_email }}
+        {{ submitty_install_institution_url }}
+        {{ submitty_install_authentication_method }}
+        {{ submitty_install_admin_email }}
+        {{ submitty_install_email_enabled }}
+        {{ submitty_install_admin_email }}
+        {{ submitty_install_admin_password }}
+        {{ submitty_install_submitty_ip }}
+        {{ submitty_install_submitty_email }}
+        {{ submitty_install_noreply_email }}
+        {{ submitty_install_smtp_server }}
+        {{ submitty_install_smtp_port }}
+        {{ submitty_install_institution_url }}
+        " | bash -p ./.setup/install_system.sh > /usr/local/submitty/install.log 2>&1
+
+  args:
+    chdir: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  become: true
+  become_user: root
+  register: submitty_install_output
+  changed_when: submitty_install_output.rc != 0
+
+- name: Check to see if installation succeeded
+  ansible.builtin.command: grep "INSTALLATION SUCCESS!" /usr/local/submitty/install.log
+  changed_when: false
+
+- name: Update the PHP disabled functions
+  ansible.builtin.lineinfile:
+    path: /etc/php/8.1/fpm/php.ini
+    regexp: "^disable_functions = "
+    line: |
+      disable_functions = popen,pclose,proc_open,php_real_logo_guid,php_egg_logo_guid,
+      php_ini_scanned_files,php_ini_loaded_file,readlink,symlink,link,set_file_buffer,
+      proc_close,proc_terminate,proc_get_status,proc_nice,getmyuid,getmygid,getmyinode,
+      putenv,get_current_user,magic_quotes_runtime,set_magic_quotes_runtime,
+      import_request_variables,ini_alter,stream_socket_server,stream_socket_accept,
+      stream_socket_pair,stream_get_transports,stream_wrapper_restore,mb_send_mail,
+      openlog,syslog,closelog,pfsockopen,posix_kill,apache_child_terminate,
+      apache_get_modules,apache_get_version,apache_lookup_uri,apache_reset_timeout,
+      apache_response_headers,virtual,system,phpinfo,exec,shell_exec,passthru,
+    # https://submitty.org/sysadmin/installation/index is a link to the updated list for PHP disabled functions
+
+- name: Set up Apache Submitty configuration
+  ansible.builtin.copy:
+    src: /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/apache/submitty.conf
+    dest: /etc/apache2/sites-available/submitty.conf
+    remote_src: true
+    mode: "0644"
+
+- name: Change CGI access to all for PAM authentication
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "Require host __your_domain__"
+    replace: "Require all granted"
+  when: submitty_install_authentication_method == 1
+
+- name: Set up SSL in Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: '<VirtualHost \*:80>'
+    replace: "{{ lookup('file', 'append_to_submitty.conf') }}"
+  when: submitty_install_ssl_enabled | bool
+
+- name: Add ip to the Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "Require host __your_domain__"
+    replace: "Require ip {{ submitty_install_submitty_ip }}"
+
+- name: Add domain to the Apache Submitty configuration
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "__your_domain__"
+    replace: "{{ submitty_install_submitty_url }}"
+
+- name: Add email
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "ADMIN@DOMAIN.HERE"
+    replace: "{{ submitty_install_submitty_email }}"
+
+- name: Uncomment ServerName
+  ansible.builtin.replace:
+    path: /etc/apache2/sites-available/submitty.conf
+    regexp: "# ServerName"
+    replace: "ServerName"
+
+- name: Run a2ensite submitty
+  ansible.builtin.command: a2ensite submitty
+  register: submitty_install_output
+  changed_when: submitty_install_output.rc != 0
+
+- name: Restart service apache2
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+
+- name: Ensure submitty_autograding_shipper is running
+  ansible.builtin.service:
+    name: submitty_autograding_shipper
+    state: started

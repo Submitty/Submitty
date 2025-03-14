@@ -148,6 +148,7 @@ class RunGenerateRepos(CourseGradeableJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
+        subdirectory = self.job_details['subdirectory']
 
         gen_script = os.path.join(INSTALL_DIR, 'bin', 'generate_repos.py')
 
@@ -166,7 +167,9 @@ class RunGenerateRepos(CourseGradeableJob):
                     "--non-interactive",
                     semester,
                     course,
-                    gradeable
+                    gradeable,
+                    "--subdirectory",
+                    subdirectory
                 ], stdout=output_file, stderr=output_file)
         except PermissionError:
             print("error, could not open " + output_file + " for writing")

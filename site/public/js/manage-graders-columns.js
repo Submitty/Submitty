@@ -1,20 +1,20 @@
 /* exported toggleColumnsForm, updateManageGradersColumns, fillAllCheckboxes
 */
+/* global showPopup */
 
-//Data structure for active columns
+// Data structure for active columns
 const checkboxes = document.getElementsByClassName('toggle-columns-box');
 
-//opens modal with initial settings for new student
+// opens modal with initial settings for new student
 function toggleColumnsForm() {
-    const form = $('#toggle-columns-form');
-    form.css('display', 'block');
+    showPopup('#toggle-columns-form');
     checkProperTicks();
 }
 
-//checks proper tick marks in modal
+// checks proper tick marks in modal
 function checkProperTicks() {
     const selectedColumns = loadColumns();
-    for (let i = 0; i<checkboxes.length; i++) {
+    for (let i = 0; i < checkboxes.length; i++) {
         if (selectedColumns[i] === 1) {
             checkboxes[i].checked = true;
         }
@@ -29,10 +29,10 @@ function updateManageGradersColumns() {
     location.reload();
 }
 
-//Gets the values of all the checkboxes
+// Gets the values of all the checkboxes
 function getCheckboxValues() {
     const selectedColumns = new Array(7);
-    for (let i = 0; i<checkboxes.length; i++) {
+    for (let i = 0; i < checkboxes.length; i++) {
         if (checkboxes[i].checked === true) {
             selectedColumns[i] = 1;
         }
@@ -44,19 +44,19 @@ function getCheckboxValues() {
 }
 
 function fillAllCheckboxes(val) {
-    for (let i = 0; i<checkboxes.length; i++) {
+    for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = val;
     }
 }
 
-//Cookies (loading and storing)
+// Cookies (loading and storing)
 function saveColumns(selectedColumns) {
     Cookies.set('active_grader_columns', selectedColumns.join('-'), { expires: 365, path: '' });
 }
 
 function loadColumns() {
     const cookie = Cookies.get('active_grader_columns').split('-');
-    for (let i = 0; i< cookie.length; i++) {
+    for (let i = 0; i < cookie.length; i++) {
         if (cookie[i] === '1') {
             cookie[i] = 1;
         }

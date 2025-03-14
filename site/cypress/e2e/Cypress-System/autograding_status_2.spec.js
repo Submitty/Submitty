@@ -1,4 +1,4 @@
-import {skipOn} from '@cypress/skip-test';
+import { skipOn } from '@cypress/skip-test';
 
 const autograding_status_path = 'autograding_status';
 
@@ -7,7 +7,6 @@ skipOn(Cypress.env('run_area') === 'CI', () => {
     describe('Pre autograding test', () => {
         before(() => {
             cy.login();
-            cy.wait(500);
             cy.visit(autograding_status_path);
         });
 

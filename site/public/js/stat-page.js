@@ -1,6 +1,6 @@
 /* global sortTable, escapeSpecialChars, buildCourseUrl */
 $(document).ready(() => {
-    $('th').click(function() {
+    $('th').click(function () {
         let table_id = 0;
         switch ($(this).attr('id')) {
             case 'user_sort':
@@ -25,7 +25,7 @@ $(document).ready(() => {
             sortTable(table_id, false);
         }
     });
-    $('button').click(function() {
+    $('button').click(function () {
         const action = $(this).data('action');
         const posts = $(this).data('posts');
         const ids = $(this).data('id');
@@ -42,7 +42,7 @@ $(document).ready(() => {
             }
             $(this).html('Collapse');
             $(this).data('action', 'collapse');
-            $('td').click(function() {
+            $('td').click(function () {
                 if ($(this).data('type') === 'post' || $(this).data('type') === 'thread') {
                     const id = $(this).data('thread_id');
                     const url = buildCourseUrl(['forum', 'threads', id]);

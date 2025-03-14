@@ -1,10 +1,10 @@
 {{ add_twig_module_js('grading/electronic/StudentInformationPanel.js') }}
-<div id="student_info" class="rubric_panel">
+<div id="student_info" class="rubric_panel" data-testid="student-info">
     <div>
         <span class="grading_label">Student Information</span>
         <div class="inner-container">
             <h5 class='label' style="float:right; padding-right:15px;">Browse Student Submissions:</h5>
-            <div class="rubric-title">
+            <div class="rubric-title" data-testid="rubric-title">
                 <div style="float:right;">
                     {% include 'grading/VersionChoice.twig' with({formatting: "font-size: 13px;"}) %}
 
@@ -45,7 +45,7 @@
                 </br>
                 {% if team_assignment %}
                     <form id="late-days-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
-                        <div class="tab-bar-wrapper">
+                        <div class="tab-bar-wrapper" data-testid="tab-bar-wrapper">
                             {% for team_member in submitter.getTeam().getMemberUsers() %}
                                 <a class="nav-bar key_to_click" id="page_{{loop.index}}_nav" onclick="onChangeNavTab({{loop.index}});"> 
                                     {{ team_member.getDisplayedGivenName() }} {{ team_member.getDisplayedFamilyName() }} ({{ team_member.getId() }})

@@ -176,6 +176,8 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
 
   // SAFELIST : FILE_MANAGEMENT
   ALLOW_SYSCALL(access);
+  ALLOW_SYSCALL(faccessat);
+  ALLOW_SYSCALL(faccessat2);
   ALLOW_SYSCALL(_llseek);
   ALLOW_SYSCALL(close);
   ALLOW_SYSCALL(creat);
@@ -473,8 +475,6 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(afs_syscall);
     ALLOW_SYSCALL(bdflush);
     ALLOW_SYSCALL(break);
-    ALLOW_SYSCALL(faccessat);
-    ALLOW_SYSCALL(faccessat2);
     ALLOW_SYSCALL(fallocate);
     ALLOW_SYSCALL(fanotify_init);
     ALLOW_SYSCALL(fanotify_mark);

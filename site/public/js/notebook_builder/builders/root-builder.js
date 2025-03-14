@@ -10,7 +10,7 @@ class RootBuilder extends AbstractBuilder {
         super(attachment_div);
 
         const all_options = this.selector_options.concat(['Item']);
-        this.main_selector = new SelectorWidget(all_options,  'Add New Notebook Cell');
+        this.main_selector = new SelectorWidget(all_options, 'Add New Notebook Cell');
 
         this.itempool_selector = new SelectorWidget(['Itempool Item'], 'Add New Itempool Item');
         this.itempool_selector_elem = this.itempool_selector.render();

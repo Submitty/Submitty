@@ -91,7 +91,7 @@ class LateDays extends AbstractModel {
             $prev_late_days_available = $info->getLateDaysRemaining();
 
             $this->late_day_info[$id] = $info;
-            // If the cache wasnt used, the value has been updated
+            // If the cache wasn't used, the value has been updated
             if (!$useCache && ($reCache)) {
                 $this->core->getQueries()->addLateDayCacheForUser($user, $info);
             }
@@ -305,7 +305,7 @@ class LateDays extends AbstractModel {
     /**
      * Gets the number of late days remaining from the previous number
      * of late days remaining.
-     * @param int $prev_late_days_available The number of late days availabe at the prev time stamp
+     * @param int $prev_late_days_available The number of late days available at the prev time stamp
      * @param array<string, mixed> $event
      * @return LateDayInfo
      */

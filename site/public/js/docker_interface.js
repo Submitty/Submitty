@@ -1,4 +1,4 @@
-/* exported collapseSection, addImage, updateImage */
+/* exported collapseSection, confirmationDialog, removeImage, addImage, updateImage */
 /**
 * toggles visibility of a content sections on the Docker UI
 * @param {string} id of the section to toggle
@@ -27,7 +27,7 @@ function filterOnClick() {
 
     $(this).removeClass('fully-transparent');
 
-    $('.image-row').each(function() {
+    $('.image-row').each(function () {
         const this_row = $(this);
         let hide = true;
         $(this).find('.badge').each(function () {
@@ -64,6 +64,40 @@ function addFieldOnChange() {
     }
 }
 
+function confirmationDialog(url, id) {
+    if (confirm(`Are you sure you want to remove ${id} image?`)) {
+        removeImage(url, id);
+    }
+}
+
+function removeImage(url, id) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+            image: id,
+            // eslint-disable-next-line no-undef
+            csrf_token: csrfToken,
+        },
+        success: (data) => {
+            const json = JSON.parse(data);
+            if (json.status === 'success') {
+                location.reload();
+                // eslint-disable-next-line no-undef
+                displaySuccessMessage(json.data);
+            }
+            else {
+                // eslint-disable-next-line no-undef
+                displayErrorMessage(json.message);
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+    });
+}
+
 function addImage(url) {
     const capability = $('#capability-form').val();
     const image = $('#add-field').val();
@@ -71,12 +105,12 @@ function addImage(url) {
         url: url,
         type: 'POST',
         data: {
-            'capability': capability,
-            'image': image,
+            capability: capability,
+            image: image,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
@@ -88,7 +122,7 @@ function addImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },
@@ -103,7 +137,7 @@ function updateImage(url) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(data) {
+        success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 // eslint-disable-next-line no-undef
@@ -114,7 +148,7 @@ function updateImage(url) {
                 displayErrorMessage(json.message);
             }
         },
-        error: function(err) {
+        error: (err) => {
             console.error(err);
             window.alert('Something went wrong. Please try again.');
         },

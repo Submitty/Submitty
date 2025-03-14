@@ -20,33 +20,53 @@ use app\libraries\FileUtils;
 class RainbowCustomizationJSON extends AbstractModel {
     protected $core;
 
-    private $section;                   // Init in constructor
-    private $display_benchmark = [];
-    private $messages = [];
-    private $display = [];
-    private $benchmark_percent;         // Init in constructor
-    private $gradeables = [];
+    private object $section;                   // Init in constructor
+    /**
+     * @var string[]
+     */
+    private array $display_benchmark = [];
+    /**
+     * @var string[]
+     */
+    private array $messages = [];
+    /**
+     * @var string[]
+     */
+    private array $display = [];
+    private object $benchmark_percent;         // Init in constructor
+    private object $final_cutoff;       // Init in constructor
+    /**
+     * @var object[]
+     */
+    private array $gradeables = [];
     /**
      * @var object[]
      */
     private array $plagiarism = [];
+    /**
+     * @var object[]
+     */
+    private array $manual_grade = [];
+    /**
+     * @var object[]
+     */
+    private array $warning = [];
 
     // The order of allowed_display and allowed_display_description has to match
-    const allowed_display = ['grade_summary', 'grade_details', 'benchmark_percent',
-        'exam_seating', 'section', 'messages', 'warning', 'final_grade', 'manual_grade', 'final_cutoff', 'instructor_notes'];
+    const allowed_display = ['grade_summary', 'grade_details', 'exam_seating', 'section',
+        'messages', 'warning', 'final_grade', 'final_cutoff', 'instructor_notes', 'display_rank_to_individual'];
 
     const allowed_display_description = [
         "Display a column(row) for each gradeable bucket on the syllabus.", //grade_summary
         "Display a column(row) for each gradeable within each gradeable bucket on the syllabus.", //grade_details
-        "not used", //benchmark_percent
         "Used for assigned seating for exams, see also:  <a href='https://submitty.org/instructor/course_settings/rainbow_grades/exam_seating'>Exam Seating</a> ", //exam_seating
         "Display the students registration section.", //section
         "Display the optional text message at the top of the page.", //messages
-        "not used", //warning
-        "Display the student's final term letter grade.", //final_grade
-        "not used", //manual_grade
+        "Generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.", //warning
+        "Configure cutoffs and display the student's final term letter grade.", //final_grade
         "Display the histogram of average overall grade and count of students with each final term letter grade.", //final_cutoff
-        "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students." //instructor_notes
+        "Optional message for specific students that are only visible on the instructor gradebook, these messages are never displayed to students.", //instructor_notes
+        "Display each student's rank in the course to themselves." //display_rank_to_individual
     ];
 
 
@@ -61,12 +81,13 @@ class RainbowCustomizationJSON extends AbstractModel {
         // This is done so json_encode will properly encode the item when converting to json
         $this->section = (object) [];
         $this->benchmark_percent = (object) [];
+        $this->final_cutoff = (object) [];
     }
 
     /**
      * Get gradeable buckets array
      *
-     * @return array
+     * @return object[]
      */
     public function getGradeables() {
         return $this->gradeables;
@@ -75,17 +96,34 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of plagiarism
      *
-     * @return array<object>
+     * @return object[]
      */
     public function getPlagiarism(): array {
         return $this->plagiarism;
     }
 
+    /**
+     * Get array of manual grades
+     *
+     * @return object[]
+     */
+    public function getManualGrades(): array {
+        return $this->manual_grade;
+    }
+
+    /**
+     * Get array of performance warnings
+     *
+     * @return array<object>
+     */
+    public function getPerformanceWarnings(): array {
+        return $this->warning;
+    }
 
     /**
      * Gets an array of display benchmarks
      *
-     * @return array The display benchmarks
+     * @return string[] The display benchmarks
      */
     public function getDisplayBenchmarks() {
         return $this->display_benchmark;
@@ -100,10 +138,18 @@ class RainbowCustomizationJSON extends AbstractModel {
         return $this->benchmark_percent;
     }
 
+    /**
+     * Gets the final cutoffs object
+     *
+     * @return object The final cutoffs object
+     */
+    public function getFinalCutoff() {
+        return $this->final_cutoff;
+    }
 
     /**
      * Gets an array of display
-     * @return array<string> The display
+     * @return string[] The display
      */
     public function getDisplay(): array {
         return $this->display;
@@ -118,25 +164,25 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param string $benchmark The benchmark to add
      * @throws BadArgumentException The passed in argument is not allowed
      */
-    public function addDisplayBenchmarks(string $benchmark) {
-        if (!in_array($benchmark, self::allowed_display_benchmarks)) {
+    public function addDisplayBenchmarks(string $benchmark): void {
+        if (!in_array($benchmark, self::allowed_display_benchmarks, true)) {
             throw new BadArgumentException('Passed in benchmark not found in the list of allowed benchmarks');
         }
 
-        if (!in_array($benchmark, $this->display_benchmark)) {
+        if (!in_array($benchmark, $this->display_benchmark, true)) {
             array_push($this->display_benchmark, $benchmark);
         }
     }
 
     /**
-     * Determine the existence of a custom_customization.json inside the course rainbow_grades directory
+     * Determine the existence of a manual_customization.json inside the course rainbow_grades directory
      *
-     * @return bool Indicates if a custom_customization.json exists
+     * @return bool Indicates if a manual_customization.json exists
      */
-    public function doesCustomCustomizationExist() {
-        // Get path to custom_customization.json
+    public function doesManualCustomizationExist() {
+        // Get path to manual_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
-        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'manual_customization.json');
 
         return file_exists($file_path);
     }
@@ -147,10 +193,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @throws FileReadException Failure to read the contents of the file
      * @throws MalformedDataException Failure to decode the contents of the JSON string
      */
-    public function loadFromJsonFile() {
+    public function loadFromJsonFile(): void {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         if (!file_exists($course_path)) {
             throw new FileReadException('Unable to locate the file to read');
@@ -190,12 +236,24 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->benchmark_percent = $json->benchmark_percent;
         }
 
+        if (isset($json->final_cutoff)) {
+            $this->final_cutoff = $json->final_cutoff;
+        }
+
         if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
 
         if (isset($json->plagiarism)) {
             $this->plagiarism = $json->plagiarism;
+        }
+
+        if (isset($json->manual_grade)) {
+            $this->manual_grade = $json->manual_grade;
+        }
+
+        if (isset($json->warning)) {
+            $this->warning = $json->warning;
         }
     }
 
@@ -205,12 +263,12 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param string $display The item to add
      * @throws BadArgumentException The passed in argument is not allowed.
      */
-    public function addDisplay($display) {
-        if (!in_array($display, self::allowed_display)) {
+    public function addDisplay(string $display): void {
+        if (!in_array($display, self::allowed_display, true)) {
             throw new BadArgumentException('Passed in display not found in the list of allowed display items');
         }
 
-        if (!in_array($display, $this->display)) {
+        if (!in_array($display, $this->display, true)) {
             $this->display[] = $display;
         }
     }
@@ -220,14 +278,10 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $sectionID The sectionID
      * @param string $label The label you would like to assign to the sectionID
-     * @throws BadArgumentException The passed in section label is empty
      */
-    public function addSection($sectionID, $label) {
-        if (empty($label)) {
-            throw new BadArgumentException('The section label may not be empty.');
-        }
-
-        $this->section->$sectionID = $label;
+    public function addSection(string $sectionID, string $label): void {
+        // If label is not set, use sectionID as default
+        $this->section->$sectionID = $label === '' ? $sectionID : $label;
     }
 
     /**
@@ -237,12 +291,26 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param float $percent The percent - this is the value for this json field
      * @throws BadArgumentException The passed in percent was empty
      */
-    public function addBenchmarkPercent($benchmark, $percent) {
-        if (empty($percent)) {
+    public function addBenchmarkPercent(string $benchmark, ?float $percent): void {
+        if (is_null($percent)) {
             throw new BadArgumentException('The benchmark percent may not be empty.');
         }
 
-        $this->benchmark_percent->$benchmark = (float) $percent;
+        $this->benchmark_percent->$benchmark = $percent;
+    }
+
+    /**
+     * Add a final cutoff
+     *
+     * @param string $cutoff The cutoff - this is the key for this json field
+     * @param float $percent The percent - this is the value for this json field
+     */
+    public function addFinalCutoff(string $cutoff, ?float $percent): void {
+        if (is_null($percent)) {
+            throw new BadArgumentException('The final cutoff may not be empty.');
+        }
+
+        $this->final_cutoff->$cutoff = $percent;
     }
 
     /**
@@ -259,11 +327,11 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param object $gradeable
      */
-    public function addGradeable(object $gradeable) {
+    public function addGradeable(object $gradeable): void {
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
         $emptyObject = (object) [];
-        if ($gradeable == $emptyObject) {
+        if ($gradeable === $emptyObject) {
             throw new BadArgumentException('Gradeable may not be empty.');
         }
 
@@ -273,7 +341,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get messages
      *
-     * @return array
+     * @return string[]
      */
     public function getMessages() {
         return $this->messages;
@@ -285,8 +353,8 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $message
      */
-    public function addMessage(string $message) {
-        if (empty($message)) {
+    public function addMessage(string $message): void {
+        if ($message === '') {
             throw new BadArgumentException('You may not add an empty message.');
         }
 
@@ -320,17 +388,68 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
 
+    /**
+     * Add a manual grade entry to existing array
+     *
+     * @param object{
+     *     "user": string,
+     *     "grade": string,
+     *     "note": string
+     * } $manualGradeEntry
+     */
+    public function addManualGradeEntry(object $manualGradeEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $manualGradeArray = (array) $manualGradeEntry;
+
+        if ($manualGradeArray === $emptyArray) {
+            throw new BadArgumentException('Manual grading entry may not be empty.');
+        }
+
+        $this->manual_grade[] = $manualGradeEntry;
+    }
+
+
+    /**
+     * Add a performance warning entry to existing array
+     *
+     * @param object{
+     *     "msg": string,
+     *     "ids": string,
+     *     "value": float
+     * } $performanceWarningEntry
+     */
+    public function addPerformanceWarningEntry(object $performanceWarningEntry): void {
+        $emptyArray = [
+            "user" => "",
+            "grade" => "",
+            "note" => ""
+        ];
+
+        $performanceWarningArray = (array) $performanceWarningEntry;
+
+        if ($performanceWarningArray === $emptyArray) {
+            throw new BadArgumentException('Performance Warning entry may not be empty.');
+        }
+
+        $this->warning[] = $performanceWarningEntry;
+    }
+
 
     /**
      * Save the contents in this objects properties to the customization.json for the current course
      */
-    public function saveToJsonFile() {
+    public function saveToJsonFile(): void {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'gui_customization.json');
 
         // If display was empty then just add defaults
-        if (empty($this->display)) {
+        if (count($this->display) === 0) {
             $this->addDisplay('grade_summary');
             $this->addDisplay('grade_details');
         }
@@ -342,7 +461,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         // @phpstan-ignore-next-line phpstan devs do not like object iteration
         foreach ($this as $key => $value) {
             // Dont include $core or $modified
-            if ($key != 'core' && $key != 'modified') {
+            if ($key !== 'core' && $key !== 'modified') {
                 $json->$key = $value;
             }
         }

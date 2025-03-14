@@ -1,4 +1,3 @@
-
 /**
 * get information about Submitty's releases from the GitHub API
 *
@@ -11,14 +10,14 @@ async function getReleases(current_tag) {
 
         if (response.status !== 200) {
             // eslint-disable-next-line no-undef
-            displayMessage(' Failed to get latest version info.' +
-                ` (Status Code : ${response.status.toString()})<br>` +
-                `Message : ${response.statusText}`, 'error',
+            displayMessage(' Failed to get latest version info.'
+                + ` (Status Code : ${response.status.toString()})<br>`
+                + `Message : ${response.statusText}`, 'error',
             );
             console.error('Got bad response:', response);
         }
         else {
-            response.json().then(data => {
+            response.json().then((data) => {
                 updateReleaseNotes(data, current_tag);
             });
         }
@@ -30,7 +29,6 @@ async function getReleases(current_tag) {
     }
 }
 
-
 /**
 * Update the page with latest available release and its release notes
 *
@@ -38,8 +36,8 @@ async function getReleases(current_tag) {
 * @param {String} current_tag - tag Submitty is currently running on
 */
 function updateReleaseNotes(data, current_tag) {
-    //collect all of the release notes submitty is behind into one large string
-    //release notes are separated with \n-END-\n to help with parsing later
+    // collect all of the release notes submitty is behind into one large string
+    // release notes are separated with \n-END-\n to help with parsing later
     let updates = '';
     let releases_behind = 0;
     while (releases_behind < data.length && data[releases_behind].tag_name !== current_tag) {
@@ -58,45 +56,45 @@ function updateReleaseNotes(data, current_tag) {
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
-        success: function(markdown_data) {
-            //Now that we have the basic markdown, we have to do some extra work to add functionality into the HTML
-            //since normally the markdown is just plain HTML. We can't make an extension off of the markdown engine
-            //because these are highly specific changes needed for just this page (plus JQuery is very helpful).
+        success: function (markdown_data) {
+            // Now that we have the basic markdown, we have to do some extra work to add functionality into the HTML
+            // since normally the markdown is just plain HTML. We can't make an extension off of the markdown engine
+            // because these are highly specific changes needed for just this page (plus JQuery is very helpful).
 
-            //split markdown payload by the custom marker we inserted to separate out releases from each other
+            // split markdown payload by the custom marker we inserted to separate out releases from each other
             const release_notes = markdown_data.split('-END-');
 
-            //due to the splitting of the single markdown payload, there will always be an extra empty release at the
-            //end, so don't include it in the loop
-            for (let i = 0; i < release_notes.length-1; i++) {
-                //have to wrap the output in <div class="markdown"></div> since we are using 1 ajax call to process multiple payloads
-                //that way they all come back at the same time & faster
+            // due to the splitting of the single markdown payload, there will always be an extra empty release at the
+            // end, so don't include it in the loop
+            for (let i = 0; i < release_notes.length - 1; i++) {
+                // have to wrap the output in <div class="markdown"></div> since we are using 1 ajax call to process multiple payloads
+                // that way they all come back at the same time & faster
                 $('.content').append(`<div class="box release"><div class="markdown">${injectStyling(release_notes[i])}</div></div>`);
             }
 
-            //mark release sections that have no items with a special class
-            $('.section').each( (index, section) => {
+            // mark release sections that have no items with a special class
+            $('.section').each((index, section) => {
                 if (!$(section).find('li').length && $(section).text().includes('None')) {
                     $(section).addClass('no-content');
                 }
             });
 
-            //add collapse buttons to each release
+            // add collapse buttons to each release
             $('.version-header').append('<button class="btn btn-default btn-toggle-release" onclick="toggleRelease(this, event)">Collapse</button>');
-            //collapse all releases
+            // collapse all releases
             $('#toggle-releases').addClass('collapsed');
             $('#toggle-releases').trigger('click');
 
-            //initially expand the latest release if there is only 1
+            // initially expand the latest release if there is only 1
             if ($('.btn-toggle-release').length === 1) {
                 $('.btn-toggle-release').eq(0).trigger('click');
             }
 
-            //mark security & sysadmin releases with badges
-            $('.release').each( (i, release) => {
+            // mark security & sysadmin releases with badges
+            $('.release').each((i, release) => {
                 const security_notes = $(release).find('.update-security');
                 const sysadmin_notes = $(release).find('.update-sysadmin');
-                //highlight the collapsed release if it contains sysadmin or security notes
+                // highlight the collapsed release if it contains sysadmin or security notes
                 if (security_notes.length && !security_notes.hasClass('no-content')) {
                     $('<span class="badge red-background">SECURITY</span>').insertAfter($(release).find('.version-header').find('h1'));
                 }
@@ -106,7 +104,7 @@ function updateReleaseNotes(data, current_tag) {
                 }
             });
 
-            //set info about state of submitty
+            // set info about state of submitty
             $('#tag').html(`Most Recent Version Available: <a href="${latest['html_url']}" target="_blank">${latest['tag_name']}</a>`);
             if (current_tag === latest['tag_name']) {
                 $('#text').html('<i>Submitty is up to date!</i>');
@@ -118,11 +116,10 @@ function updateReleaseNotes(data, current_tag) {
                                 ${important_message}`);
             }
 
-
-            //hide loading text
+            // hide loading text
             $('#loading-text').hide();
         },
-        error: function() {
+        error: function () {
             // eslint-disable-next-line no-undef
             displayErrorMessage('Something went wrong while trying to render markdown. Please try again.');
         },
@@ -136,16 +133,16 @@ function updateReleaseNotes(data, current_tag) {
  */
 // eslint-disable-next-line no-unused-vars
 function toggleAllReleases(toggleAllButton) {
-    //in this case, collapsed class controls what action the button should take
+    // in this case, collapsed class controls what action the button should take
     //  if toggleAllButton has collapsed - will collapse all
     //  if toggleAllButton doesn't have collapsed - will expand all
-    $('.btn-toggle-release').each( (index, button) => {
+    $('.btn-toggle-release').each((index, button) => {
         if ($(toggleAllButton).hasClass('collapsed') !== $(button).hasClass('collapsed')) {
             $(button).trigger('click');
         }
     });
 
-    //toggle collapsed class and switch button text accordingly
+    // toggle collapsed class and switch button text accordingly
     $(toggleAllButton).toggleClass('collapsed');
     if ($(toggleAllButton).hasClass('collapsed')) {
         $(toggleAllButton).html('Collapse All');
@@ -165,13 +162,13 @@ function toggleRelease(button, event) {
     const release = $(button).closest('.box');
     $(button).toggleClass('collapsed');
 
-    //COLLAPSE
+    // COLLAPSE
     if ($(button).hasClass('collapsed')) {
-        //hide everything that is not in the header
+        // hide everything that is not in the header
         release.find(':not(div.markdown, div.version-header, div.version-header *)').hide();
         const security_notes = release.find('.update-security');
         const sysadmin_notes = release.find('.update-sysadmin');
-        //highlight the collapsed release if it contains sysadmin or security notes
+        // highlight the collapsed release if it contains sysadmin or security notes
         if ((security_notes.length && !security_notes.hasClass('no-content')) || (sysadmin_notes.length && !sysadmin_notes.hasClass('no-content'))) {
             release.addClass('update-important');
             $(button).addClass('btn-primary');
@@ -179,17 +176,17 @@ function toggleRelease(button, event) {
         }
         $(button).html('Expand');
     }
-    //EXPAND
+    // EXPAND
     else {
-        //show everything that was hidden (not in the header)
+        // show everything that was hidden (not in the header)
         release.find(':not(div.markdown, div.version-header, div.version-header *)').show();
-        //important class is only helpful when release is collapsed
+        // important class is only helpful when release is collapsed
         release.removeClass('update-important');
         $(button).removeClass('btn-primary');
         $(button).addClass('btn-default');
         $(button).html('Collapse');
     }
-    //stop bubbling of event
+    // stop bubbling of event
     event.stopPropagation();
 }
 
@@ -209,13 +206,13 @@ function addPRLinks(raw_str) {
  * @returns {string} HTML string with helpful wrappers/classes applied
  */
 function injectStyling(markdown_data) {
-    //add <hr> after each <ul> or <p><em> tag
+    // add <hr> after each <ul> or <p><em> tag
     markdown_data = markdown_data.replace(/<\/ul>|<\/em><\/p>|<\/a><\/p>/g, '$&<hr>');
-    //replace normal <li> contents with spans with classes
+    // replace normal <li> contents with spans with classes
     markdown_data = markdown_data.replace(/<li>(\[\w+:(\w+)\].+)(?=<\/li>)|<li>(\[([^\]]+)\].+)(?=<\/li>)/g, (match, p1, p2, p3, p4) => `<li class="release-item"><span class="update-${`${p2 ? p2 : p4}`.toLowerCase()}">${p1 ? p1 : p3}</span>`);
-    //add class and wrapper to version headers
+    // add class and wrapper to version headers
     markdown_data = markdown_data.replace(/<h1>.+?<\/h1>/g, '<div class="version-header" onclick="$(this).find(\'.btn-toggle-release\').trigger(\'click\')">$&</div>');
-    //wrap release sections in a <div>
+    // wrap release sections in a <div>
     markdown_data = markdown_data.replace(/<p>([^<\n\s]+)[^<\n]*?[\s\S]+?(?:<hr>)/g, (match, p1) => `<div class="section update-${p1.toLowerCase()}">${match}</div>`);
 
     return markdown_data;
@@ -235,13 +232,13 @@ function clearFilter() {
     $('.section').show();
     $('.release-item').show();
 
-    //remove leftover highlighting from release items
-    $('.release-item').each( (i, list_item) => {
+    // remove leftover highlighting from release items
+    $('.release-item').each((i, list_item) => {
         const no_filter = removeFilterFromHTML($(list_item).html());
         $(list_item).html(no_filter);
     });
 
-    //collapse all
+    // collapse all
     $('#toggle-releases').addClass('collapsed');
     $('#toggle-releases').trigger('click');
 }
@@ -254,7 +251,7 @@ function clearFilter() {
  */
 // eslint-disable-next-line no-unused-vars
 function filterReleaseNotes(filter) {
-    //handle special case of empty filter to save time
+    // handle special case of empty filter to save time
     if (filter === '') {
         clearFilter();
         return;
@@ -264,46 +261,45 @@ function filterReleaseNotes(filter) {
 
     let releases_shown = 0;
     const releases = $('.release');
-    releases.each( (i, release) => {
-        //get all sections on this release
+    releases.each((i, release) => {
+        // get all sections on this release
         const sections = $(release).find('.section');
         let found_at_least_one = false;
-        sections.each( (j, section) => {
-            //initially hide the section
+        sections.each((j, section) => {
+            // initially hide the section
             $(section).hide();
-            //skip to next section early if there is no content in this one
+            // skip to next section early if there is no content in this one
             if ($(section).hasClass('no-content')) {
                 return;
             }
-            //if the filter exists in the section's text somewhere
+            // if the filter exists in the section's text somewhere
             if ($(section).text().toLowerCase().includes(filter.toLowerCase())) {
-                //show the section and make sure the release that the section is in is shown
+                // show the section and make sure the release that the section is in is shown
                 $(section).show();
                 $(release).show();
 
-
-                //loop through all release items in section
-                $(section).find('.release-item').each( (k, release_item) => {
-                    //remove old filter highlighting
+                // loop through all release items in section
+                $(section).find('.release-item').each((k, release_item) => {
+                    // remove old filter highlighting
                     const no_filter = removeFilterFromHTML($(release_item).html());
                     $(release_item).html(no_filter);
 
-                    //initially hide release item
+                    // initially hide release item
                     $(release_item).hide();
 
-                    //if the filter text can be found in this release item
+                    // if the filter text can be found in this release item
                     if ($(release_item).text().toLowerCase().includes(filter.toLowerCase())) {
                         found_at_least_one = true;
                         releases_shown++;
-                        //show the release item
+                        // show the release item
                         $(release_item).show();
-                        //expand the release this release item belongs to if it isn't already expanded
+                        // expand the release this release item belongs to if it isn't already expanded
                         const button = $(release).find('.btn-toggle-release');
                         if (button.hasClass('collapsed')) {
                             button.trigger('click');
                         }
-                        //replace all instances of the filter text that is not inside an html tag's attributes
-                        //with a span wrapper for styling
+                        // replace all instances of the filter text that is not inside an html tag's attributes
+                        // with a span wrapper for styling
                         const matches = $(release_item).html().replace(new RegExp(`${filter}(?=[^<>]+<)`, 'gi'), '<span class="release-filtered">$&</span>');
                         $(release_item).html(matches);
                     }
@@ -311,7 +307,7 @@ function filterReleaseNotes(filter) {
             }
         });
 
-        //if no release items matched with the filter in this release, hide it
+        // if no release items matched with the filter in this release, hide it
         if (!found_at_least_one) {
             $(release).hide();
         }

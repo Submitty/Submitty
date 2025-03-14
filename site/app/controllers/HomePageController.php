@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\controllers\SelfRejoinController;
 
 /**
  * Class HomePageController
@@ -28,13 +29,12 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses", methods={"GET"})
-     * @Route("/home/courses", methods={"GET"})
-     *
      * @param string|null $user_id
      * @param bool|string $as_instructor
      * @return MultiResponse
      */
+    #[Route("/api/courses", methods: ["GET"])]
+    #[Route("/home/courses", methods: ["GET"])]
     public function getCourses($user_id = null, $as_instructor = false) {
         if ($as_instructor === 'true') {
             $as_instructor = true;
@@ -47,7 +47,8 @@ class HomePageController extends AbstractController {
 
         $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
         $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
-
+        $dropped_courses = $this->core->getQueries()->getCourseForUserId($user_id, false, true);
+        $self_registration_courses = $this->core->getQueries()->getSelfRegistrationCourses($user_id);
         if ($as_instructor) {
             foreach (['archived_courses', 'unarchived_courses'] as $var) {
                 $$var = array_filter($$var, function (Course $course) use ($user_id) {
@@ -56,6 +57,14 @@ class HomePageController extends AbstractController {
             }
         }
 
+        $self_rejoin_tester = new SelfRejoinController($this->core);
+        $dropped_courses = array_filter(
+            $dropped_courses,
+            function (Course $course) use ($self_rejoin_tester, $user_id) {
+                return $self_rejoin_tester->canRejoinCourse($user_id, $course->getTitle(), $course->getTerm());
+            }
+        );
+
         $callback = function (Course $course) {
             return $course->getCourseInfo();
         };
@@ -63,17 +72,18 @@ class HomePageController extends AbstractController {
         return MultiResponse::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map($callback, $unarchived_courses),
-                "archived_courses" => array_map($callback, $archived_courses)
+                "archived_courses" => array_map($callback, $archived_courses),
+                "dropped_courses" => array_map($callback, $dropped_courses),
+                "self_registration_courses" => array_map($callback, $self_registration_courses)
             ])
         );
     }
 
     /**
-     * @Route("/home/groups")
-     *
      * @param null $user_id
      * @return MultiResponse
      */
+    #[Route("/home/groups")]
     public function getGroups($user_id = null): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -97,9 +107,9 @@ class HomePageController extends AbstractController {
     /**
      * Display the HomePageView to the student.
      *
-     * @Route("/home")
      * @return MultiResponse
      */
+    #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
 
@@ -110,15 +120,15 @@ class HomePageController extends AbstractController {
                 'showHomePage',
                 $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
-                $courses["data"]["archived_courses"]
+                $courses["data"]["dropped_courses"],
+                $courses["data"]["archived_courses"],
+                $courses["data"]["self_registration_courses"]
             )
         );
     }
 
-    /**
-     * @Route("/home/courses/new", methods={"POST"})
-     * @Route("/api/courses", methods={"POST"})
-     */
+    #[Route("/home/courses/new", methods: ["POST"])]
+    #[Route("/api/courses", methods: ["POST"])]
     public function createCourse() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -249,9 +259,7 @@ class HomePageController extends AbstractController {
         );
     }
 
-    /**
-     * @Route("/home/courses/new", methods={"GET"})
-     */
+    #[Route("/home/courses/new", methods: ["GET"])]
     public function createCoursePage() {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -281,10 +289,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/group/users")
-     *
      * @return MultiResponse
      */
+    #[Route("/home/group/users")]
     public function getGroupUsers($group_name = null): MultiResponse {
         if (!$this->core->getUser()->accessFaculty()) {
             return new MultiResponse(
@@ -314,9 +321,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/term/new", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/term/new", methods: ["POST"])]
     public function addNewTerm() {
         if (!$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
@@ -349,9 +356,9 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/update", methods={"GET"})
      * @return MultiResponse|WebResponse
      */
+    #[Route("/update", methods: ["GET"])]
     public function systemUpdatePage() {
         $user = $this->core->getUser();
         if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {

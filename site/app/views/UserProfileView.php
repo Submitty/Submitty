@@ -23,10 +23,10 @@ class UserProfileView extends AbstractView {
         string $csrf_token
     ) {
         $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
-        if ($user->getPreferredGivenName() != "") {
+        if (!is_null($user->getPreferredGivenName())) {
             $autofill_preferred_name[0] = $user->getPreferredGivenName();
         }
-        if ($user->getPreferredFamilyName() != "") {
+        if (!is_null($user->getPreferredFamilyName())) {
             $autofill_preferred_name[1] = $user->getPreferredFamilyName();
         }
 
@@ -34,6 +34,7 @@ class UserProfileView extends AbstractView {
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Profile');
+        $this->output->addSelect2WidgetCSSAndJs(); /* Adding select2 CSS and JS widgets*/
 
         $user_utc_offset = DateUtils::getUTCOffset($user->getTimeZone());
         $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'

@@ -44,7 +44,7 @@
                 <tbody id="section-{{ grading_group }}">
                     {% if graders[grading_group]|length > 0 %}
                         <tr class="info">
-                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</td>
+                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</th>
                         </tr>
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">

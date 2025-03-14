@@ -3,6 +3,9 @@
 {% import _self as self %}
 
 <script>
+{% if not active_same_as_graded %}
+    $('.peer-results-box').css('background-color', 'var(--standard-light-red)')
+{% endif %}
 {# When the user clicks on a peer tab in peer feedback mode, hide all other peer feedback panels, set all other tabs to unselected, set the clicked peer tab to selected and show the corresponding peer feedback panel #}
 
 function open_peer_feedback_tab(user, ordered_graders) {
@@ -53,14 +56,11 @@ function switch_feedback_modes() {
 </script>
 
 {% if not been_ta_graded %}
-    <br>
-    <h3>This assignment has not been graded yet</h3>
+    <h3>This assignment has not been graded yet.</h3>
 {% elseif not active_same_as_graded %}
-    <br>
-    <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+    <h3>The version you have selected to be graded above does not match the version graded by your peers.</h3>
 {% elseif not grading_complete %}
-    <br>
-    <h3>Grading not complete, please contact an instructor/grader</h3>
+    <h3>Grading not complete, please contact an instructor/grader.</h3>
 {% else %}
     <div class="sub">
 
@@ -78,7 +78,7 @@ function switch_feedback_modes() {
                     {% if peer_score >= peer_max %}
                         onclick="addConfetti();" style="cursor:pointer;"
                     {% endif %}>
-                    {{ Badge.render(peer_score, peer_max, false) }}
+                    {{ Badge.render(peer_score, peer_max, false, active_same_as_graded) }}
                     <h4>Peer Grading Total</h4>
                 </div>
             </div>
@@ -87,9 +87,9 @@ function switch_feedback_modes() {
             <div id="normal_peer_wrapper">
                 {% for component in peer_components %}
                     {% if component.peer_ids | length <= 5 %}
-                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders)  }}
+                        {{ self.renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded)  }}
                     {% else %}
-                        {{ self.renderManyPeerResults(component) }}
+                        {{ self.renderManyPeerResults(component, num_decimals, active_same_as_graded) }}
                     {% endif %}
                 {% endfor %}
             </div>
@@ -117,10 +117,10 @@ function switch_feedback_modes() {
 {% endif %}
 
 
-{%- macro renderManyPeerResults(component, num_decimals) -%}
+{%- macro renderManyPeerResults(component, num_decimals, active_same_as_graded) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
         </div>
         <div class="no-border-box-info" style="width:100%">
             <h4>
@@ -148,7 +148,7 @@ function switch_feedback_modes() {
                                     {{ mark.num_earned }}
                                 </td>
                                 <td class="peer-table-data">
-                                    {{ mark.points|number_format(num_decimals) }}
+                                    {{ mark.points|round(num_decimals) }}
                                 </td>
                                 <td class="peer-table-title-data">
                                     {{ mark.title|nl2br }}
@@ -164,10 +164,10 @@ function switch_feedback_modes() {
 {%- endmacro -%}
 
 
-{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals) -%}
+{%- macro renderFewPeerResults(component, peer_aliases, ordered_graders, num_decimals, active_same_as_graded) -%}
     <div class="box grade-results">
         <div class="no-border-box-badge">
-            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
+            {{ Badge.render(component.total_score, component.points_possible, component.extra_credit, active_same_as_graded) }}
         </div>
         <div class="no-border-box-info" style="width:100%">
             <h4>
@@ -207,7 +207,7 @@ function switch_feedback_modes() {
                                     </td>
                                 {% endfor %}
                                 <td class="peer-table-data">
-                                    {{ mark.points|number_format(num_decimals) }}
+                                    {{ mark.points|round(num_decimals) }}
                                 </td>
                                 <td class="peer-table-title-data">
                                     {{ mark.title|nl2br }}
@@ -245,7 +245,7 @@ function switch_feedback_modes() {
                                             {% else %}
                                                 <i class="far fa-square fa-1g"></i>
                                             {% endif %}
-                                            {{ mark.points|number_format(num_decimals) }}
+                                            {{ mark.points|round(num_decimals) }}
                                             {{ mark.title|nl2br }}
                                             </br>
                                         {% endfor %}

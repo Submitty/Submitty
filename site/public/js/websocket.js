@@ -50,7 +50,7 @@ class WebSocketClient {
             const term_course_arr = document.body.dataset.courseUrl.split('/');
             const course = term_course_arr.pop();
             const term = term_course_arr.pop();
-            this.client.send(JSON.stringify({'type': 'new_connection', 'page': `${term}-${course}-${page}`}));
+            this.client.send(JSON.stringify({ type: 'new_connection', page: `${term}-${course}-${page}` }));
         };
 
         this.client.onmessage = (event) => {
@@ -83,7 +83,7 @@ class WebSocketClient {
                     this.reconnect(page);
                     break;
             }
-            //this.onclose(event);
+            // this.onclose(event);
         };
 
         this.client.onerror = (error) => {
@@ -94,8 +94,8 @@ class WebSocketClient {
                     sys_message.show();
                     break;
                 default:
-                    //console.log(`WebSocket: Error - ${error.code}`);
-                    //this.onerror(error);
+                    // console.log(`WebSocket: Error - ${error.code}`);
+                    // this.onerror(error);
                     break;
             }
             sys_message.show();

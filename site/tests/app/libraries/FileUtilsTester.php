@@ -83,6 +83,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirFileFail() {
         FileUtils::createDir($this->path);
@@ -97,6 +98,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveRmDirRecurseFail() {
         FileUtils::createDir($this->path);
@@ -446,6 +448,7 @@ STRING;
 
     /**
      * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testRecursiveChmodFail() {
         $this->getFunctionMock("app\\libraries", "chmod")
@@ -569,7 +572,7 @@ STRING;
         $this->assertEquals(
             $stat[0],
             ['name' => 'bad.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'The file was only partially uploaded',
              'size' => 100,
              'is_zip' => false,
@@ -584,7 +587,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'bad2.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'No file was uploaded.',
              'size' => 100,
              'is_zip' => false,
@@ -603,7 +606,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'bad2.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'No file was uploaded.',
              'size' => 100,
              'is_zip' => false,
@@ -614,7 +617,7 @@ STRING;
         $this->assertEquals(
             $stat[2],
             ['name' => 'bad3.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'Unknown error code.',
              'size' => 100,
              'is_zip' => false,

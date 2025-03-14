@@ -16,5 +16,6 @@ site/phpstan-baseline.neon
 site/phpstan.neon
 site/phpunit.xml
 site/public/mjs
+site/public/vue
 
 .DS_Store

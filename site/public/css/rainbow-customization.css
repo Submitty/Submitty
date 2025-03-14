@@ -20,11 +20,6 @@
     font-size: 1.1em;
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
-.collapsible_area {
-    margin-bottom: 10px;
-}
-
 /* stylelint-disable-next-line selector-id-pattern */
 #cust_messages_textarea {
     width: 80%;
@@ -61,7 +56,8 @@
 
 /* stylelint-disable-next-line selector-id-pattern */
 #save_status_container {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
@@ -81,7 +77,8 @@
 #save_status_buttons {
     display: flex;
     flex-direction: row;
-    margin-top: 10px;
+    margin-right: 10px;
+    border: none;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -130,7 +127,7 @@
     flex-direction: column;
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle {
+.rainbow-grades-warning-triangle {
     margin-right: 5px;
     padding-bottom: 2px;
     display: none;
@@ -139,12 +136,12 @@
     border-bottom: 1px dotted var(--standard-vibrant-yellow);
 }
 
-[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle {
+[data-theme="dark"] .rainbow-grades-warning-triangle {
     color: var(--standard-light-yellow);
     border-bottom: 1px dotted var(--standard-light-yellow);
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     margin-left: -110px;
     margin-top: 25px;
     font-family: "Source Sans Pro", sans-serif;
@@ -153,11 +150,11 @@
     padding: 5px;
 }
 
-[data-theme="dark"] .gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom {
+[data-theme="dark"] .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     color: var(--text-black);
 }
 
-.gradeable-li-right-of-input i.fa-exclamation-triangle > .tooltiptext.tooltipbottom::after {
+.rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
     content: "";
     position: absolute;
     top: -14%;
@@ -209,6 +206,53 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-.override + div.gradeable-li-right-of-input i.fa-exclamation-triangle {
+div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-triangle {
     display: inline-block;
+}
+
+.input-field {
+    display: flex;
+    align-items: center;
+}
+
+.input-boxes {
+    display: inline-grid;
+    grid-template-columns: auto auto; /* two columns */
+    grid-gap: 0 0.2em;
+}
+
+.input-label {
+    padding: 4px 6px;
+}
+
+#manual-grading-note {
+    width: 32.5em;
+}
+
+#manual-grading-table,
+#performance-warnings-table {
+    text-align: left;
+}
+
+.select2 {
+    display: inline-block !important;
+    width: 38% !important;
+}
+
+#gradeables .gradeable-custom-item-input {
+    width: 3em;
+}
+
+[id^="gradeable-pts-div-"],
+[id^="gradeable-percents-div-"] {
+    margin-right: 2em;
+}
+
+[id^="gradeable-percents-div-"] {
+    display: none;
+}
+
+#btn-build-customization {
+    border: none;
+    margin-right: 10px;
 }

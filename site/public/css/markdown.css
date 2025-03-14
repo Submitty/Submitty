@@ -81,6 +81,18 @@
     font-size: 13px;
 }
 
+.markdown blockquote {
+    border-left: 4px solid var(--standard-dark-gray);
+    padding-left: 0.75em;
+    margin-left: 0;
+    color: var(--standard-dark-gray);
+}
+
+[data-theme="dark"] .markdown blockquote {
+    border-left: 4px solid var(--standard-light-medium-gray);
+    color: var(--standard-light-medium-gray);
+}
+
 .markdown code:not(.inline-code) {
     display: block;
     white-space: pre;
@@ -107,6 +119,7 @@
     background-color: var(--standard-pale-gray);
     padding: 0 10px;
     border-radius: 6px 6px 0 0;
+    overflow-x: hidden;
 }
 
 [data-theme="dark"] .markdown-area-header {
@@ -117,11 +130,14 @@
     display: flex;
     margin-left: auto;
     align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1px;
 }
 
 .markdown-mode-buttons {
     display: flex;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .markdown-mode-tab {
