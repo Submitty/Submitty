@@ -60,14 +60,15 @@ const removeThread = (title) => {
     cy.reload();
     threadExists(title).then((exists) => {
         if (exists) {
-            cy.get('[data-testid="thread-list-item"]').contains(title).click();
-            cy.get('[data-testid="thread-dropdown"]').first().click();
-            cy.get('[data-testid="delete-post-button"]').first().click();
-            cy.get('[data-testid="thread-list-item"]').contains(title).then(($thread) => {
-                if ($thread.length) {
-                    removeThread(title);
-                }
+            cy.get('[data-testid="thread-list-item"]').contains(title).click().then(() => {
+                cy.get('[data-testid="thread-dropdown"]').first().click().then(() => {
+                    cy.get('[data-testid="delete-post-button"]').first().click();
+                });
             });
+            cy.wait(1000);
+            if (threadExists(title)) {
+                removeThread(title);
+            }
         }
     });
 };
@@ -144,6 +145,9 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
+        cy.get('[data-testid="thread-list-item"]').contains(title2).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title3).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('exist');
         removeThread(title1);
     });
 });
