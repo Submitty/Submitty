@@ -50,16 +50,18 @@
 }
 
 /* stylelint-disable selector-class-pattern */
-/* stylelint-disable declaration-no-important */
 
 /* Not sure why the linter can't use disable-next-line here... */
 .line_number,
 .line_code {
     vertical-align: top;
+    /* stylelint-disable-next-line declaration-no-important */
     max-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     height: 20px !important;
     font-family: "Courier New", Courier, monospace;
     font-size: 16px;
+    /* stylelint-disable-next-line declaration-no-important */
     line-height: 20px !important;
     padding: 0 5px;
 }
@@ -67,10 +69,15 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .line_code_inner {
+    /* stylelint-disable-next-line declaration-no-important */
     max-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     line-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     padding: 0 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     overflow-x: scroll !important;
 }
 

@@ -100,12 +100,15 @@ img {
     margin-top: 10px;
 }
 
-/* stylelint-disable declaration-no-important */
 /* stylelint-disable-next-line selector-class-pattern */
 .CodeMirror {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-input-background) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border: 1px solid var(--standard-light-gray) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     vertical-align: middle !important;
 }
 /* stylelint-enable declaration-no-important */

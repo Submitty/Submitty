@@ -45,12 +45,12 @@ th {
     width: 620px;
 }
 
-/* stylelint-disable declaration-no-important */
 .fully-transparent {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--default-black) !important;
 }
-/* stylelint-enable declaration-no-important */
 
 .filter-buttons {
     color: var(--btn-text-black);

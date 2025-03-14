@@ -236,12 +236,12 @@ div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-tri
     text-align: left;
 }
 
-/* stylelint-disable declaration-no-important */
 .select2 {
+    /* stylelint-disable-next-line declaration-no-important */
     display: inline-block !important;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 38% !important;
 }
-/* stylelint-enable declaration-no-important */
 
 #gradeables .gradeable-custom-item-input {
     width: 3em;

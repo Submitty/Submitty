@@ -1719,10 +1719,11 @@ end of styles used in the admin gradeable page
     color: var(--alert-danger-red);
 }
 
-/* stylelint-disable declaration-no-important */
 .black-btn,
 .black-btn > i {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--text-black) !important;
     text-decoration: none;
 }
@@ -1730,17 +1731,20 @@ end of styles used in the admin gradeable page
 .black-btn:hover,
 .black-btn:hover > i,
 .black-btn > i:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #405e90 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #405e90 !important;
 }
 
 .black-btn:active,
 .black-btn:active > i,
 .black-btn > i:active {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--external-link-active) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--external-link-active) !important;
 }
-/* stylelint-enable declaration-no-important */
 
 .flex-row {
     display: flex;
