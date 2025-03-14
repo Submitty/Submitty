@@ -1,4 +1,5 @@
 .cm-spell-error {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
     text-decoration: var(--standard-vibrant-red) dotted underline;
     text-underline-position: under;
