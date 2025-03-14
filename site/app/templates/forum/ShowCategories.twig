@@ -61,13 +61,23 @@
                     No categories exist, please create one.
                 </span>
         {% endif %}
+    
+        <style>
+          {% for category in categories %}
+            .category-item-box {
+              color: var(--default-black);
+            }
+            [data-theme ="dark"] .category-item-box {
+              background: var(--btn-default-white);
+            }
+		  {% endfor %}
+        </style>
 
         <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
                 <li id="categorylistitem-{{ category.category_id }}" 
                     class="category-sortable category-item-box" 
-                    style="color: {{ category.color }};"
                     data-category_desc="{{ category.category_desc }}"
                     data-visible_date="{{ category.visible_date }}"
                     data-category_id="{{ category.category_id }}"
