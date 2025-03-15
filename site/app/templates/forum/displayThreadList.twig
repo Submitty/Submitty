@@ -17,7 +17,7 @@
                                 <span data-testid="thread-post-count"
                                     id="Thread_postCounter_{{thread.thread_id}}"
                                     class="thread-post-counter">
-                                    {{ thread.num_posts }}
+                                    {{- thread.num_posts -}}
                                 </span>
                             </span>
                         {% endif %}
@@ -72,7 +72,7 @@
                         id="Thread_likeCounter_{{thread.thread_id}}"
                         class="thread-like-counter"
                         style="margin-right: 25px;">
-                        {{ thread.sum_ducks }}
+                        {{- thread.sum_ducks -}}
                     </span>
                     <i class="fas fa-comments" style="position: relative; top: -2px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
                     <span data-testid="thread-post-count"
