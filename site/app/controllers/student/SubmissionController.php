@@ -492,7 +492,13 @@ class SubmissionController extends AbstractController {
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
                 $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?" . http_build_query(
+                    [
+                        'pdf_path' => $pdf_full_path,
+                        'num_page' => $num_pages,
+                        'file_name' => $job_data['filename']
+                    ]
+                ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
                 curl_close($ch);
@@ -1193,7 +1199,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);

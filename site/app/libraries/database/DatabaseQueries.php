@@ -2,12 +2,12 @@
 
 namespace app\libraries\database;
 
+use app\controllers\admin\ConfigurationController;
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
 use app\models\gradeable\Gradeable;
@@ -206,7 +206,7 @@ class DatabaseQueries {
         FROM posts
         ORDER BY author_user_id, timestamp desc),
         F AS
-        (SELECT student_id, count (student_id)
+        (SELECT student_id, count (DISTINCT poll_id)
         FROM poll_responses
         GROUP BY student_id),
         G AS
@@ -543,176 +543,6 @@ SQL;
         );
     }
 
-    /**
-     * Helper function for generating sql query according to the given requirements
-     */
-    public function buildLoadThreadQuery(
-        $categories_ids,
-        $thread_status,
-        $unread_threads,
-        $show_deleted,
-        $show_merged_thread,
-        $current_user,
-        &$query_select,
-        &$query_join,
-        &$query_where,
-        &$query_order,
-        &$query_parameters,
-        $want_categories,
-        $want_order
-    ) {
-        $query_raw_select = [];
-        $query_raw_join   = [];
-        $query_raw_where  = ["true"];
-        $query_raw_order  = [];
-        $query_parameters = [];
-
-        // Query Generation
-        if (count($categories_ids) == 0) {
-            $query_multiple_qmarks = "NULL";
-        }
-        else {
-            $query_multiple_qmarks = "?" . str_repeat(",?", count($categories_ids) - 1);
-        }
-        if (count($thread_status) == 0) {
-            $query_status = "true";
-        }
-        else {
-            $query_status = "status in (?" . str_repeat(",?", count($thread_status) - 1) . ")";
-        }
-        $query_favorite = "case when sf.user_id is NULL then false else true end";
-
-        if ($want_order) {
-            $query_raw_select[]     = "row_number() over(ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
-        }
-        $query_raw_select[]     = "t.*";
-        $query_raw_select[]     = "({$query_favorite}) as favorite";
-        $query_raw_select[]     = "CASE
-                                    WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true
-                                    ELSE false
-                                    END as current_user_posted";
-
-        $query_parameters[]     = $current_user;
-        $query_parameters[]     = $current_user;
-        $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
-        $query_parameters[]     = $current_user;
-
-        if (!$show_deleted) {
-            $query_raw_where[]  = "deleted = false";
-        }
-        if (!$show_merged_thread) {
-            $query_raw_where[]  = "merged_thread_id = -1";
-        }
-
-        $query_raw_where[]  = "? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks}))";
-        $query_parameters[] = count($categories_ids);
-        $query_parameters   = array_merge($query_parameters, $categories_ids);
-        $query_raw_where[]  = "{$query_status}";
-        $query_parameters   = array_merge($query_parameters, $thread_status);
-
-        if ($want_order) {
-            $query_raw_order[]  = "row_number";
-        }
-        else {
-            $query_raw_order[]  = "true";
-        }
-
-        // Categories
-        if ($want_categories) {
-            $query_select_categories = "SELECT thread_id, array_to_string(array_agg(cl.category_id order by cl.rank nulls last, cl.category_id),'|')  as categories_ids, array_to_string(array_agg(cl.category_desc order by cl.rank nulls last, cl.category_id),'|') as categories_desc, array_to_string(array_agg(cl.color order by cl.rank nulls last, cl.category_id),'|') as categories_color FROM categories_list cl JOIN thread_categories e ON e.category_id = cl.category_id GROUP BY thread_id";
-
-            $query_raw_select[] = "categories_ids";
-            $query_raw_select[] = "categories_desc";
-            $query_raw_select[] = "categories_color";
-
-            $query_raw_join[] = "JOIN ({$query_select_categories}) AS QSC ON QSC.thread_id = t.id";
-        }
-        // Unread Threads
-        if ($unread_threads) {
-            $query_raw_where[] =
-
-            "EXISTS(
-                SELECT thread_id
-                FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp
-                WHERE(
-                    jp.thread_id = t.id
-                    AND NOT EXISTS(
-                        SELECT thread_id
-                        FROM viewed_responses v
-                        WHERE v.thread_id = jp.thread_id
-                            AND v.user_id = ?
-                            AND (v.timestamp >= jp.timestamp
-                            AND (jp.edit_timestamp IS NULL OR (jp.edit_timestamp IS NOT NULL AND v.timestamp >= jp.edit_timestamp))))))";
-            $query_parameters[] = $current_user;
-        }
-
-        $query_select   = implode(", ", $query_raw_select);
-        $query_join     = implode(" ", $query_raw_join);
-        $query_where    = implode(" and ", $query_raw_where);
-        $query_order    = implode(", ", $query_raw_order);
-    }
-
-    /**
-     * Order: Favourite and Announcements => Announcements only => Favourite only => Others
-     *
-     * @param  int[]    $categories_ids     Filter threads having at least provided categories
-     * @param  int[]    $thread_status      Filter threads having thread status among $thread_status
-     * @param  bool     $unread_threads     Filter threads to show only unread threads
-     * @param  bool     $show_deleted       Consider deleted threads
-     * @param  bool     $show_merged_thread Consider merged threads
-     * @param  string   $current_user       user_id of current user
-     * @param  int      $blockNumber        Index of window of thread list(-1 for last)
-     * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
-     * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
-     */
-    public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id) {
-        $blockSize = 30;
-        $loadLastPage = false;
-
-        $query_raw_select = null;
-        $query_raw_join   = null;
-        $query_raw_where  = null;
-        $query_raw_order  = null;
-        $query_parameters = null;
-        // $blockNumber is 1 based index
-        if ($blockNumber <= -1) {
-            // Find the last block
-            $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
-            $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where})";
-            $this->course_db->query($query, $query_parameters);
-            $results = $this->course_db->rows();
-            $row_count = $results[0]['count'];
-            $blockNumber = 1 + floor(($row_count - 1) / $blockSize);
-        }
-        elseif ($blockNumber == 0) {
-            // Load first block as default
-            $blockNumber = 1;
-            if ($thread_id >= 1) {
-                // Find $blockNumber
-                $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, true);
-                $query = "SELECT SUBQUERY.row_number as row_number FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order}) AS SUBQUERY WHERE SUBQUERY.id = ?";
-                $query_parameters[] = $thread_id;
-                $this->course_db->query($query, $query_parameters);
-                $results = $this->course_db->rows();
-                if (count($results) > 0) {
-                    $row_number = $results[0]['row_number'];
-                    $blockNumber = 1 + floor(($row_number - 1) / $blockSize);
-                }
-            }
-        }
-        $query_offset = ($blockNumber - 1) * $blockSize;
-        $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
-        $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
-        $query_parameters[] = $blockSize;
-        $query_parameters[] = $query_offset;
-        // Execute
-        $this->course_db->query($query, $query_parameters);
-        $results = [];
-        $results['block_number'] = $blockNumber;
-        $results['threads'] = $this->course_db->rows();
-        return $results;
-    }
-
     public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
         $categories_list = [];
@@ -766,96 +596,6 @@ SQL;
             }
             return ['status' => "false", 'likesCount' => 0, 'likesFromStaff' => 0];
         }
-    }
-
-    /**
-     * get what posts should be loaded in with "staff upduck" upduck
-     * returns array of posts that the staff upducked
-     *
-     * @param int[] $post_ids
-     * @return int[]
-     */
-    public function getInstructorUpduck(array $post_ids): array {
-        if (count($post_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($post_ids));
-
-        // SQL to join the forum_upducks and users tables, filter by user_group, and check against provided post_ids
-        $sql = "SELECT f.post_id
-                FROM forum_upducks f
-                JOIN users u ON f.user_id = u.user_id
-                WHERE f.post_id IN {$placeholders}
-                AND u.user_group <= 3
-                GROUP BY f.post_id";
-
-        // Execute the query with the post_ids as parameters
-        $this->course_db->query($sql, $post_ids);
-        $result = [];
-
-        // Fetch the rows and store the post_id in the result array
-        foreach ($this->course_db->rows() as $row) {
-            $result[] = $row['post_id'];
-        }
-        return $result;
-    }
-
-    /**
-     * Gets total number of upducks for each post
-     * returns an array that links each post_id with their total upducks
-     *
-     * @param int[] $post_ids
-     * @return int[]
-     */
-    public function getUpduckInfoForPosts(array $post_ids): array {
-        if (count($post_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($post_ids));
-        $sql = "SELECT post_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders} GROUP BY post_id";
-
-        $this->course_db->query($sql, $post_ids);
-        $result = [];
-
-        foreach ($post_ids as $post) {
-            $result[$post] = 0;
-        }
-        foreach ($this->course_db->rows() as $row) {
-            $result[$row['post_id']] = intval($row['cnt']);
-        }
-        return $result;
-    }
-
-    /**
-     * Gets what posts the user has upducked
-     * returns an array of what posts the user liked and what should be shown as upducked on the frontend
-     *
-     * @param int[] $post_ids
-     * @param string $current_user
-     * @return int[]
-     */
-    public function getUserLikesForPosts(array $post_ids, string $current_user): array {
-        if (count($post_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($post_ids));
-        $user_id = $current_user;
-
-        $sql = "SELECT post_id, user_id, COUNT(*) AS cnt FROM forum_upducks WHERE post_id IN {$placeholders}
-                AND user_id = ? GROUP BY (post_id, user_id)";
-        $bindParams = array_merge($post_ids, [$user_id]);
-        $this->course_db->query($sql, $bindParams);
-        $result = [];
-        $final = [];
-        foreach ($this->course_db->rows() as $row) {
-            $result[$row['post_id']] = intval($row['cnt']);
-        }
-        foreach ($result as $key => $value) {
-            if ($value >= 1) {
-                array_push($final, $key);
-            }
-        }
-        return $final;
     }
 
     public function splitPost($post_id, $title, $categories_ids) {
@@ -961,12 +701,6 @@ SQL;
         return $this->course_db->row();
     }
 
-    public function existsAnnouncementsId($thread_id) {
-        $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
-        $row = $this->course_db->row();
-        return count($row) > 0 && $row['announced'] != null;
-    }
-
     public function updateResolveState($thread_id, $state) {
         if (in_array($state, [-1, 0, 1])) {
             $this->course_db->query("UPDATE threads set status = ? where id = ?", [$state, $thread_id]);
@@ -1022,18 +756,18 @@ SQL;
     public function getUpDucks(): array {
         $this->course_db->query("
             SELECT 
-                p.author_user_id, 
-                COUNT(f.*) AS upducks 
+                f.user_id,
+                COUNT(*) AS upducks 
             FROM 
-                posts p 
+                forum_upducks f
             JOIN 
-                forum_upducks f 
+                posts p
             ON 
-                p.id = f.post_id 
+                f.post_id = p.id
             WHERE 
                 p.deleted = FALSE 
             GROUP BY 
-                p.author_user_id 
+                f.user_id
             ORDER BY 
                 upducks DESC
         ");
@@ -1049,9 +783,23 @@ SQL;
         return $this->course_db->rows();
     }
 
-    public function getPostHistory($post_id) {
-        $this->course_db->query("SELECT * FROM forum_posts_history where post_id = ? ORDER BY edit_timestamp DESC", [$post_id]);
-        return $this->course_db->rows();
+        /**
+         * Gets the list of users who liked a given post.
+         *
+         * @param int $post_id
+         * @return string[] Array of user ids who liked this post.
+         */
+    public function getUsersWhoLikedPost(int $post_id): array {
+        $this->course_db->query("
+            SELECT u.user_id 
+            FROM forum_upducks f
+            JOIN users u ON f.user_id = u.user_id
+            WHERE f.post_id = ?
+        ", [$post_id]);
+
+        $rows = $this->course_db->rows();
+        // return user_id/formatted name
+        return array_map(fn($row) => $row['user_id'], $rows);
     }
 
     public function getPostOldThread($post_id) {
@@ -1067,50 +815,9 @@ SQL;
         }
     }
 
-    /**
-     * @param int[] $post_ids
-     * @return int[] threads that have been merged
-     */
-    public function getMergedThreadIds(array $post_ids): array {
-        if (count($post_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($post_ids));
-        $this->course_db->query("SELECT id FROM threads WHERE merged_thread_id <> -1 AND merged_post_id IN {$placeholders}", $post_ids);
-        return array_column($this->course_db->rows(), "id");
-    }
-
     public function getDeletedPostsByUser($user) {
         $this->course_db->query("SELECT * FROM posts where deleted = true AND author_user_id = ?", [$user]);
         return $this->course_db->rows();
-    }
-
-    public function getFirstPostForThread($thread_id) {
-        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id = ?", [$thread_id]);
-        $rows = $this->course_db->rows();
-        if (count($rows) > 0) {
-            return $rows[0];
-        }
-        else {
-            return null;
-        }
-    }
-
-    /**
-     * @param int[] $thread_ids
-     * @return null|array<int, mixed[]> array of posts, indexed by thread id.
-     */
-    public function getFirstPostForThreads(array $thread_ids): null|array {
-        if (count($thread_ids) === 0) {
-            return null;
-        }
-        $placeholders = $this->createParameterList(count($thread_ids));
-        $this->course_db->query("SELECT * FROM posts WHERE parent_id = -1 AND thread_id IN {$placeholders}", $thread_ids);
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['thread_id']] = $row;
-        }
-        return $return;
     }
 
     public function getPost($post_id) {
@@ -1137,39 +844,6 @@ SQL;
         $placeholders = $this->createParameterList(count($author_ids));
         $this->course_db->query("SELECT user_id, user_group FROM users WHERE user_id IN {$placeholders}", $author_ids);
         return $this->course_db->rows();
-    }
-
-    /**
-     * @param int[] $post_ids
-     * @return int[] ids of posts with history
-     */
-    public function getPostsWithHistory(array $post_ids): array {
-        if (count($post_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($post_ids));
-        $this->course_db->query("SELECT DISTINCT post_id FROM forum_posts_history WHERE post_id IN {$placeholders}", $post_ids);
-        return array_column($this->course_db->rows(), "post_id");
-    }
-
-    public function getUnviewedPosts($thread_id, $user_id) {
-        if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
-            $rows = $this->course_db->rows();
-            if (!empty($rows)) {
-                $thread_id = $rows[0]["max"];
-            }
-            else {
-                // No thread found, hence no posts found
-                return [];
-            }
-        }
-        $this->course_db->query("SELECT DISTINCT id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS pfph WHERE pfph.thread_id = ? AND NOT EXISTS(SELECT * FROM viewed_responses v WHERE v.thread_id = ? AND v.user_id = ? AND (v.timestamp >= pfph.timestamp AND (pfph.edit_timestamp IS NULL OR (pfph.edit_timestamp IS NOT NULL AND v.timestamp >= pfph.edit_timestamp))))", [$thread_id, $thread_id, $user_id]);
-        $rows = $this->course_db->rows();
-        if (empty($rows)) {
-            $rows = [];
-        }
-        return $rows;
     }
 
     /**
@@ -1211,12 +885,6 @@ SQL;
         $this->course_db->query("UPDATE threads SET announced = ? WHERE id = ?", [$now, $thread_id]);
     }
 
-    public function getThreadsBefore($timestamp, $page) {
-        // TODO: Handle request page wise
-        $this->course_db->query("SELECT t.id as id, title from threads t JOIN posts p on p.thread_id = t.id and parent_id = -1 WHERE timestamp < ? and t.deleted = false", [$timestamp]);
-        return $this->course_db->rows();
-    }
-
     public function getThread(int $thread_id) {
         $this->course_db->query("SELECT * from threads where id = ?", [$thread_id]);
         return $this->course_db->row();
@@ -1234,21 +902,11 @@ SQL;
 
     public function addBookmarkedThread(string $user_id, int $thread_id, bool $added) {
         if ($added) {
-            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", [$user_id, $thread_id]);
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?) ON CONFLICT DO NOTHING", [$user_id, $thread_id]);
         }
         else {
             $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", [$user_id, $thread_id]);
         }
-    }
-
-    public function loadBookmarkedThreads(string $user_id) {
-        $this->course_db->query("SELECT * FROM student_favorites WHERE user_id = ?", [$user_id]);
-        $rows = $this->course_db->rows();
-        $favorite_threads = [];
-        foreach ($rows as $row) {
-            $favorite_threads[] = $row['thread_id'];
-        }
-        return $favorite_threads;
     }
 
     private function findChildren($post_id, $thread_id, &$children, $get_deleted = false) {
@@ -1316,42 +974,6 @@ SQL;
         $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
         return null;
     }
-    /**
-     * Set delete status for given post and all descendant
-     *
-     * If delete status of the first post in a thread is changed, it will also update thread delete status
-     *
-     * @param  integer      $post_id
-     * @param  integer      $thread_id
-     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
-     * @return boolean|null Is first post of thread
-     */
-    public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
-        $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
-        $parent_id = $this->course_db->row()["parent_id"];
-        $children = [$post_id];
-        $get_deleted = $newStatus == 0;
-        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
-
-        if (!$newStatus) {
-            // On undelete, parent post must have deleted = false
-            if ($parent_id != -1) {
-                if ($this->getPost($parent_id)['deleted']) {
-                    return null;
-                }
-            }
-        }
-        if ($parent_id == -1) {
-            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
-            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
-            return true;
-        }
-        else {
-            foreach ($children as $post_id) {
-                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $post_id]);
-            }
-        } return false;
-    }
 
     public function getParentPostId($child_id) {
         $this->course_db->query("SELECT parent_id from posts where id = ?", [$child_id]);
@@ -1405,79 +1027,6 @@ SQL;
             }
         }
         return $return;
-    }
-
-    /**
-     * @param string[] $attachments_deleted
-     * @param string[] $attachments_added
-     */
-    public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown, array $attachments_deleted, array $attachments_added) {
-        try {
-            $markdown = $markdown ? 1 : 0;
-            // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
-            // forum_posts_history will store all history state of the post(if edited at any point of time)
-            $this->course_db->beginTransaction();
-            // Insert first version of post during first edit
-            $this->course_db->query(
-                "INSERT INTO forum_posts_history (post_id, edit_author, content, edit_timestamp, has_attachment, version_id)
-                    SELECT id, author_user_id, content, timestamp, has_attachment, version_id
-                        FROM posts
-                        WHERE id = ?
-                        AND NOT EXISTS (SELECT 1 FROM forum_posts_history WHERE post_id = ?);",
-                [$post_id, $post_id]
-            );
-            // Get latest version number
-            $this->course_db->query("SELECT version_id FROM posts WHERE id = ?", [$post_id]);
-            $version_id = $this->course_db->row()["version_id"] + 1;
-            // Update attachments
-            if (count($attachments_deleted) > 0) {
-                $placeholders = $this->createParameterList(count($attachments_deleted));
-                $this->course_db->query("UPDATE forum_attachments SET version_deleted = ? WHERE post_id = ? AND file_name IN {$placeholders}", array_merge([$version_id, $post_id], $attachments_deleted));
-            }
-            if (count($attachments_added) > 0) {
-                $rows = [];
-                $params = [];
-                // Format placeholders and parameters for single query
-                foreach ($attachments_added as $img) {
-                    $params[] = $this->createParameterList(4);
-                    $rows = array_merge($rows, [$post_id, $img, $version_id, 0]);
-                }
-                $placeholders = implode(", ", $params);
-                $this->course_db->query("INSERT INTO forum_attachments (post_id, file_name, version_added, version_deleted) VALUES {$placeholders}", $rows);
-            }
-            $hasAttachment = !empty($this->getForumAttachments([$post_id])[$post_id][0]);
-            // Update current post
-            $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ?, has_attachment = ?, version_id = ? where id = ?", [$content, $anon, $markdown, $hasAttachment, $version_id, $post_id]);
-            // Insert latest version of post into forum_posts_history
-            $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp, version_id) SELECT id, ?, content, current_timestamp, version_id FROM posts WHERE id = ?", [$user, $post_id]);
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", [ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id]);
-            $this->course_db->commit();
-        }
-        catch (DatabaseException $dbException) {
-            $this->course_db->rollback();
-            return false;
-        } return true;
-    }
-
-    public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date, $expiration) {
-        try {
-            $this->course_db->beginTransaction();
-            if ($expiration == null) {
-                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $thread_id]);
-            }
-            else {
-                $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ?, pinned_expiration = ? WHERE id = ?", [$thread_title, $status,$lock_thread_date, $expiration, $thread_id]);
-            }
-            $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", [$thread_id]);
-            foreach ($categories_ids as $category_id) {
-                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", [$thread_id, $category_id]);
-            }
-            $this->course_db->commit();
-        }
-        catch (DatabaseException $dbException) {
-            $this->course_db->rollback();
-            return false;
-        } return true;
     }
 
     /**
@@ -1598,7 +1147,7 @@ WHERE term=? AND course=? AND user_id=?",
      * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty, ?string $term = null, ?string $course = null): array {
         $args = ['-1'];
         $extra_join = '';
         $extra_where = '';
@@ -1619,13 +1168,20 @@ WHERE term=? AND course=? AND user_id=?",
             $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
             $extra_where = ' OR users.user_access_level <= 2';
         }
+        $on_phrase = ' ON courses_users.term = courses.term AND courses_users.course = courses.course ';
+        $parameters = $args;
+        if ($term !== null && $course !== null) {
+            $parameters = [$term, $course];
+            $parameters = array_merge($parameters, $args);
+            $on_phrase = ' ON courses_users.term = ? AND courses_users.course = ? ';
+        }
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.term = courses.term AND courses_users.course = courses.course
-                " . $extra_join . "
-                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+                " . $on_phrase . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN " . $this->createParameterList(count($args)) . $extra_where,
+            $parameters
         );
         return array_map(
             function ($row) {
@@ -1911,7 +1467,8 @@ WHERE term=? AND course=? AND user_id=?",
                             public.calculate_remaining_cache_for_user(user_id::text, ?) as cache_row
                         FROM users
                         ) calculated_cache
-                    )";
+                    )
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -1932,7 +1489,8 @@ WHERE term=? AND course=? AND user_id=?",
         $query = "INSERT INTO late_day_cache
                     (" . $user_or_team . ", g_id, late_day_date, late_days_allowed, submission_days_late, 
                     late_day_exceptions, late_days_remaining, late_day_status, late_days_change, reason_for_exception) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -1944,7 +1502,8 @@ WHERE term=? AND course=? AND user_id=?",
 
         $query = "INSERT INTO late_day_cache
                     (user_id, late_day_date, late_days_remaining, late_days_change) 
-                    VALUES (?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT DO NOTHING";
         $this->course_db->query($query, $params);
     }
 
@@ -2109,7 +1668,8 @@ WHERE term=? AND course=? AND user_id=?",
         $params = [$user_id, $default_late_days];
 
         $query = "INSERT INTO late_day_cache
-                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)";
+                    SELECT * FROM calculate_remaining_cache_for_user(?::text, ?)
+                    ON CONFLICT DO NOTHING";
 
         $this->course_db->query($query, $params);
     }
@@ -3329,6 +2889,21 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getRegistrationSections() {
         $this->course_db->query("SELECT * FROM sections_registration ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'), COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::NUMERIC, -1), SUBSTRING(sections_registration_id, '[^0-9]*$') ");
         return $this->course_db->rows();
+    }
+
+    /**
+     * Gets the default registration section for a given course and term from the courses table
+     */
+    public function getDefaultRegistrationSection(string $term, string $course): string|null {
+        $this->submitty_db->query("SELECT default_section_id FROM courses where term=? and course=?", [$term, $course]);
+        return $this->submitty_db->row()['default_section_id'] ?? null;
+    }
+
+    /**
+     * Updates the default registration section for self register courses.
+     */
+    public function setDefaultRegistrationSection(string $term, string $course, string $section_id): void {
+        $this->submitty_db->query("UPDATE courses set default_section_id=? where term=? and course=?", [$section_id, $term, $course]);
     }
 
     /**
@@ -5148,7 +4723,7 @@ SELECT t.name AS term_name, u.term, u.course, u.user_group, u.registration_secti
 FROM courses_users u
 INNER JOIN courses c ON u.course=c.course AND u.term=c.term
 INNER JOIN terms t ON u.term=t.term_id
-WHERE u.user_id=? ${include_archived} AND ${force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
+WHERE u.user_id=? {$include_archived} AND {$force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
         $this->submitty_db->query($query, [$user_id]);
@@ -5169,6 +4744,35 @@ SQL;
     public function getInstructorLevelAccessCourse(string $user_id): array {
         $this->submitty_db->query("SELECT term, course FROM courses_users WHERE user_id=? AND user_group=1", [$user_id]);
         return $this->submitty_db->rows();
+    }
+
+    /**
+     * @return array<Course>
+     */
+    public function getSelfRegistrationCourses(string $user_id): array {
+        $query = <<<SQL
+SELECT c.*, t.name AS term_name FROM courses c, terms t
+WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
+    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
+) AND c.term = t.term_id ORDER BY t.term_id ASC
+SQL;
+        $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
+        $return = [];
+        foreach ($this->submitty_db->rows() as $row) {
+            $course = new Course($this->core, $row);
+            $course->loadDisplayName();
+            $return[] = $course;
+        }
+        return $return;
+    }
+
+    public function getSelfRegistrationType(string $term, string $course): int {
+        $this->submitty_db->query("SELECT self_registration_type FROM courses WHERE course=? AND term=?", [$course, $term]);
+        return $this->submitty_db->row()['self_registration_type'];
+    }
+
+    public function setSelfRegistrationType(string $term, string $course, int $self_registration_type): void {
+        $this->submitty_db->query("UPDATE courses set self_registration_type=? WHERE course=? AND term=?", [$self_registration_type, $course, $term]);
     }
 
     /**
@@ -5331,47 +4935,6 @@ AND gc_id IN (
         return count($result) > 0;
     }
 
-    public function existsAnnouncements($show_deleted = false) {
-        $query_delete = $show_deleted ? "true" : "deleted = false";
-        $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned_expiration >= current_timestamp");
-        $result = $this->course_db->rows();
-        return empty($result[0]["max"]) ? -1 : $result[0]["max"];
-    }
-
-    /**
-     * @param int[] $thread_ids
-     * @return int[] thread ids that have been viewed by user
-     */
-    public function getViewedThreads(string $user, array $thread_ids): array {
-        if (count($thread_ids) === 0) {
-            return [];
-        }
-        $placeholders = $this->createParameterList(count($thread_ids));
-        $this->course_db->query(
-            "
-            SELECT * FROM viewed_responses v
-            WHERE thread_id IN {$placeholders}
-            AND user_id = ?
-            AND NOT EXISTS(
-                SELECT thread_id 
-                FROM (
-                    posts LEFT JOIN forum_posts_history 
-                    ON posts.id = forum_posts_history.post_id) 
-                    AS jp 
-                    WHERE jp.thread_id = v.thread_id 
-                    AND (
-                        jp.timestamp > v.timestamp 
-                        OR (
-                            jp.edit_timestamp IS NOT NULL 
-                            AND jp.edit_timestamp > v.timestamp
-                        )
-                    )
-                )",
-            array_merge($thread_ids, [$user])
-        );
-        return array_column($this->course_db->rows(), 'thread_id');
-    }
-
     public function getDisplayUserInfoFromUserId($user_id) {
         $this->course_db->query("SELECT user_givenname, user_preferred_givenname, user_familyname, user_preferred_familyname, user_email, user_pronouns, display_pronouns FROM users WHERE user_id = ?", [$user_id]);
         $name_rows = $this->course_db->rows()[0];
@@ -5383,31 +4946,6 @@ AND gc_id IN (
         $ar["display_pronouns"] = $name_rows["display_pronouns"];
 
         return $ar;
-    }
-
-    /**
-     * @param string[] $user_ids
-     * @return array<string, mixed[]> user info, indexed by user id.
-     */
-    public function getDisplayUserInfoFromUserIds(array $user_ids): array {
-        if (count($user_ids) === 0) {
-            return [];
-        }
-        $unique_users = array_values(array_unique($user_ids));
-        $placeholders = $this->createParameterList(count($unique_users));
-        $this->course_db->query("SELECT * FROM users WHERE user_id IN {$placeholders};", $unique_users);
-        $return = [];
-        foreach ($this->course_db->rows() as $row) {
-            $return[$row['user_id']] = [
-                "given_name" => (isset($row["user_preferred_givenname"]) && strlen($row["user_preferred_givenname"]) > 0) ? $row["user_preferred_givenname"] : $row["user_givenname"],
-                "family_name" => " " . ((isset($row["user_preferred_familyname"]) && strlen($row["user_preferred_familyname"]) > 0) ? $row["user_preferred_familyname"] : $row["user_familyname"]),
-                "user_email" => $row["user_email"],
-                "pronouns" => $row["user_pronouns"],
-                "display_pronouns" => $row["display_pronouns"],
-                "is_staff" => intval($row["user_group"]) <= User::GROUP_LIMITED_ACCESS_GRADER,
-            ];
-        }
-        return $return;
     }
 
     public function filterCategoryDesc($category_desc) {
@@ -5462,47 +5000,6 @@ AND gc_id IN (
 
     public function getCategories() {
         $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
-        return $this->course_db->rows();
-    }
-
-    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = null) {
-        $query_delete = $show_deleted ? "true" : "deleted = false";
-        $query_filter_on_user = '';
-        $param_list = [];
-        if (!empty($filterOnUser)) {
-            $query_filter_on_user = ' and author_user_id = ? ';
-            $param_list[] = $filterOnUser;
-        }
-        if ($thread_id == -1) {
-            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) ORDER BY (CASE WHEN pinned_expiration >= current_timestamp THEN 1 ELSE 0 END) DESC");
-            $rows = $this->course_db->rows();
-            if (!empty($rows)) {
-                $thread_id = $rows[0]["max"];
-            }
-            else {
-                // No thread found, hence no posts found
-                return [];
-            }
-        }
-        $param_list[] = $thread_id;
-        $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
-        if ($option == 'alpha') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_familyname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_familyname, posts.timestamp, posts.id;", [$thread_id]);
-        }
-        elseif ($option == 'alpha_by_registration') {
-            $order = self::generateOrderByClause(["registration_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
-        }
-        elseif ($option == 'alpha_by_rotating') {
-            $order = self::generateOrderByClause(["rotating_section", "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)"], self::graded_gradeable_key_map_user);
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, u.user_familyname FROM posts INNER JOIN users u ON posts.author_user_id=u.user_id {$history_query} WHERE thread_id=? AND {$query_delete} {$order};", [$thread_id]);
-        }
-        elseif ($option == 'reverse-time') {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC, id ASC", array_reverse($param_list));
-        }
-        else {
-            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp, id ASC", array_reverse($param_list));
-        }
         return $this->course_db->rows();
     }
 
@@ -6303,10 +5800,11 @@ AND gc_id IN (
 
 
     public function deleteGradeable($g_id) {
+        $this->course_db->beginTransaction();
         $this->course_db->query("UPDATE electronic_gradeable SET eg_depends_on = null,
                                 eg_depends_on_points = null WHERE eg_depends_on=?", [$g_id]);
-        $this->course_db->query("DELETE FROM gradeable_anon WHERE g_id=?", [$g_id]);
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", [$g_id]);
+        $this->course_db->commit();
     }
 
     /**
@@ -7845,10 +7343,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
         if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
@@ -8029,7 +7531,7 @@ AND gc_id IN (
      * @return array<string, mixed[]> user info, indexed by user id.
      */
     public function studentQueueSearch(string $user_id): array {
-        $this->course_db->query("SELECT * FROM queue WHERE user_id = ?", [$user_id]);
+        $this->course_db->query("SELECT * FROM queue WHERE user_id = ? ORDER BY time_in", [$user_id]);
         return $this->course_db->rows();
     }
 
@@ -9788,5 +9290,60 @@ ORDER BY
                 (SELECT user_id FROM saml_mapped_users);
         ");
         return $this->rowsToArray($this->submitty_db->rows());
+    }
+
+    /**
+     * @param string $image the full name of the image to get
+     * @return string|false the user id of the image's owner or false if the image is not in the db
+     */
+    public function getDockerImageOwner(string $image): string|false {
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
+        if ($this->submitty_db->row() === []) {
+            return false;
+        }
+        return $this->submitty_db->row()['user_id'] ?? '';
+    }
+
+    /**
+     * @return array<string, string> the owners of all docker images, indexed by image name
+     */
+    public function getAllDockerImageOwners(): array {
+        $result = [];
+        $this->submitty_db->query("SELECT image_name, user_id FROM docker_images");
+        foreach ($this->submitty_db->rows() as $row) {
+            $result[$row['image_name']] = $row['user_id'] ?? '';
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $image the full name of the image to set ownership
+     * @param string $user_id the user id of its owner.
+     */
+    public function setDockerImageOwner(string $image, string $user_id): void {
+        $current_owner = $this->getDockerImageOwner($image);
+        if ($current_owner === false) {
+            $this->submitty_db->query("INSERT INTO docker_images (image_name, user_id) values (?, ?)", [$image,$user_id]);
+        // If an instructor wants to add an image they didn't upload to a capability, the image will have no owner.
+        // Only sysadmin will be able to remove it.
+        }
+        elseif ($current_owner !== $user_id) {
+            $this->submitty_db->query("UPDATE docker_images SET user_id = NULL WHERE image_name = ?", [$image]);
+        }
+    }
+
+    /**
+     * @param string $image the full name of the image to remove
+     * @param User $user the user who is removing the image
+     * @return bool true if image was deleted, false otherwise
+     */
+    public function removeDockerImageOwner(string $image, User $user): bool {
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=?", [$image]);
+        }
+        else {
+            $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
+        }
+        return $this->submitty_db->getRowCount() > 0;
     }
 }
