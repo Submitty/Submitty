@@ -1121,7 +1121,7 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
-        if (!array_key_exists($details['syllabus_bucket'], self::syllabus_buckets)) {
+        if (!in_array($details['syllabus_bucket'], self::syllabus_buckets)) {
             throw new \InvalidArgumentException('Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets));
         }
 
@@ -1484,6 +1484,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets)) {
+                $errors['syllabus_bucket'] = 'Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets);
             }
 
             // Try to set the property
