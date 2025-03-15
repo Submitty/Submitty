@@ -1147,7 +1147,7 @@ WHERE term=? AND course=? AND user_id=?",
      * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty, ?string $term = null, ?string $course = null): array {
         $args = ['-1'];
         $extra_join = '';
         $extra_where = '';
@@ -1168,13 +1168,20 @@ WHERE term=? AND course=? AND user_id=?",
             $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
             $extra_where = ' OR users.user_access_level <= 2';
         }
+        $on_phrase = ' ON courses_users.term = courses.term AND courses_users.course = courses.course ';
+        $parameters = $args;
+        if ($term !== null && $course !== null) {
+            $parameters = [$term, $course];
+            $parameters = array_merge($parameters, $args);
+            $on_phrase = ' ON courses_users.term = ? AND courses_users.course = ? ';
+        }
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.term = courses.term AND courses_users.course = courses.course
-                " . $extra_join . "
-                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+                " . $on_phrase . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN " . $this->createParameterList(count($args)) . $extra_where,
+            $parameters
         );
         return array_map(
             function ($row) {
@@ -7336,10 +7343,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
         if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
