@@ -40,4 +40,8 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
+    # database.execute("""
+    #     ALTER TABLE electronic_gradeable
+    #     DROP CONSTRAINT late_days_positive
+    # """)
     pass
