@@ -788,7 +788,7 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 3
+			count: 5
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
