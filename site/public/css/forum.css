@@ -891,13 +891,12 @@
     font-size: 14px;
 }
 
-.post-cont {
+.post-container {
     display: inline-flex;
     margin-left: 15px;
 }
 
-.upduck-post-cont {
+.upduck-post-container {
     display: inline-flex;
     align-items: center;
-    width: 150px;
 }

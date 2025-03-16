@@ -8,15 +8,14 @@
 
                     <span class="thread-info-bar">
                         {% for category in thread.categories %}
+                            {# category[1] is the label color, category[0] is the label name #}
                             <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
                         {% endfor %}
 
                         {% if is_full_page is not defined or not is_full_page %}
-                            <span class="post-cont">
-                                <i class="fas fa-comments" style="position: relative; top: 2px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
-                                <span data-testid="thread-post-count"
-                                    id="Thread_postCounter_{{thread.thread_id}}"
-                                    class="thread-post-counter">
+                            <span class="post-container">
+                                <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                                <span class="thread-post-counter">
                                     {{- thread.num_posts -}}
                                 </span>
                             </span>
@@ -54,14 +53,13 @@
                 </span>
             </div>
             {% if is_full_page is defined and is_full_page %}
-                <span class="upduck-post-cont">
+                <span class="upduck-post-container">
                     <i  
                         data-testid="thread-upduck-button" 
                         class="upduck-button text-decoration-none" 
                         style="margin-right: 5px;" 
                         title="Total upduck">
                         <img 
-                            id="ThreadsumDucksIcon_{{thread.thread_id}}" 
                             src="{{'/img/on-duck-button.svg'}}" 
                             alt="sum_like"
                             width="30" 
@@ -74,11 +72,9 @@
                         style="margin-right: 25px;">
                         {{- thread.sum_ducks -}}
                     </span>
-                    <i class="fas fa-comments" style="position: relative; top: -2px; margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
-                    <span data-testid="thread-post-count"
-                        id="Thread_postCounter_{{thread.thread_id}}"
-                        class="thread-post-counter">
-                        {{ thread.num_posts }}
+                    <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                    <span class="thread-post-counter">
+                        {{- thread.num_posts -}}
                     </span>
                 </span>
                 <div class="post-action-container" data-testid="post-action-container">
