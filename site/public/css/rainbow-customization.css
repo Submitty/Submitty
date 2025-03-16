@@ -72,7 +72,6 @@
     flex-wrap: nowrap;
 }
 
-/* stylelint-disable-next-line selector-id-pattern */
 @media (max-width: 700px) {
     /* stylelint-disable-next-line selector-id-pattern */    
     #status_head {
