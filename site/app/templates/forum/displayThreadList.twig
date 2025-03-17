@@ -3,17 +3,24 @@
         <div class="{{ thread.class }}">
             <div class="flex-row"  data-testid="flex-row">
                 <span class="thread-left-cont">
-                    <span class="thread-list-item" data-testid="thread-list-item">
-                        {% if thread.current_user_posted %}
-                            <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
-                        {% endif %}
-                        {{ thread.title }}
-                    </span>
+                    <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
                     <span class="thread-content">{{ thread.content }}</span>
 
-                    {% for category in thread.categories %}
-                        <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
-                    {% endfor %}
+                    <span class="thread-info-bar">
+                        {% for category in thread.categories %}
+                            {# category[1] is the label color, category[0] is the label name #}
+                            <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
+                        {% endfor %}
+
+                        {% if is_full_page is not defined or not is_full_page %}
+                            <span class="post-container">
+                                <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                                <span class="thread-post-counter">
+                                    {{- thread.num_posts -}}
+                                </span>
+                            </span>
+                        {% endif %}
+                    </span>
                 </span>
                 <span class="thread-right-cont">
                     <span>
@@ -46,22 +53,29 @@
                 </span>
             </div>
             {% if is_full_page is defined and is_full_page %}
-                <span>
+                <span class="upduck-post-container">
                     <i  
                         data-testid="thread-upduck-button" 
                         class="upduck-button text-decoration-none" 
+                        style="margin-right: 5px;" 
                         title="Total upduck">
                         <img 
-                            id="ThreadsumDucksIcon_{{thread.thread_id}}" 
                             src="{{'/img/on-duck-button.svg'}}" 
                             alt="sum_like"
                             width="30" 
                             height="30"
                         >
                     </i>
-                    <span data-testid="thread-like-count" 
-                        id="Thread_likeCounter_{{thread.thread_id}}" 
-                        class="thread-like-counter">{{ thread.sum_ducks }}</span>
+                    <span data-testid="thread-like-count"
+                        id="Thread_likeCounter_{{thread.thread_id}}"
+                        class="thread-like-counter"
+                        style="margin-right: 25px;">
+                        {{- thread.sum_ducks -}}
+                    </span>
+                    <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                    <span class="thread-post-counter">
+                        {{- thread.num_posts -}}
+                    </span>
                 </span>
                 <div class="post-action-container" data-testid="post-action-container">
 
