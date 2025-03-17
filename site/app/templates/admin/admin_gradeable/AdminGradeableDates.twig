@@ -1,5 +1,6 @@
 <div class="warning-banner content" id="gradeable-dates-warnings-banner" data-testid="gradeable-dates-warnings-banner" hidden>
     <p class="dates-warning" id="grade-inquiry-dates-warning" data-testid="grade-inquiry-dates-warning" hidden>Warning: Grade Inquiry ends before it starts. Students will not be able to make Grade Inquires.</p>
+    <p class="dates-warning" id="no-grade-inquiry-warning" data-testid="no-grade-inquiry-warning" hidden>Warning: Grade Inquiry ends before the assignment is released. Students will not be able to make Grade Inquires.</p>
 </div>
 <div id="gradeable-dates">
     <input data-testid="ta-view-start-date" name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
