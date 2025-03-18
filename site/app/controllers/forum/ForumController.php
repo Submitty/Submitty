@@ -1409,7 +1409,7 @@ class ForumController extends AbstractController {
         $output['expiration'] = $result["pinned_expiration"];
     }
 
-    // TODO: getPosts and getUpducks() are single use queries that should be used together to achieve the same effect
+    // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
