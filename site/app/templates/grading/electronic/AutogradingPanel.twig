@@ -1,4 +1,5 @@
 {{ add_twig_module_js('grading/electronic/AutogradingPanel.js') }}
+
 <div id="autograding_results" class="rubric_panel" data-highest-version="{{ highest_version }}" data-gradeable-id="{{ gradeable_id }}" data-user-id="{{ user_id }}" data-testid="autograding-results">
     <div>
         <span class="grading_label">Autograding Testcases</span>
@@ -19,11 +20,16 @@
             </div>
         {% endif %}
         <div class="inner-container">
-            {% if version_instance is null %}
+            {% if not has_autograding_results %}
+                <h4>No Autograding Results Available</h4>
+                {% if not grading_started %}
+                    <p>Autograding has not started yet.</p>
+                {% else %}
+                    <p>Autograding is in progress. Results will be displayed here once available.</p>
+                {% endif %}
+            {% elseif version_instance is null %}
                 <h4>No Submission</h4>
             {% else %}
-                {# Render AutoGradingView (the student autograding results page) here to share code. #}
-                {# There should not be any changes or styling only made to the TA Autograding panel. #}
                 {{ render_template('AutoGrading', 'showResults', version_instance, show_hidden_cases, true, ta_grading) }}
             {% endif %}
         </div>
