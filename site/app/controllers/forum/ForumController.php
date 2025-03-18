@@ -1017,7 +1017,7 @@ class ForumController extends AbstractController {
 
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
-            if ($lock_thread_date_input !== false) {
+            if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
