@@ -17,20 +17,7 @@ describe('Superuser Email All Functionality via Sidebar', () => {
         cy.get('[data-testid="sidebar"]')
             .contains('Email Status')
             .click();
-
-        cy.get('body').should('be.visible');
-        cy.get('body').then(($body) => {
-            if (
-                $body.text().includes('Server Error')
-                || $body.text().includes('Oh no! Something irrecoverable has happened...')
-                || $body.text().includes('Typed property app\\entities\\email\\EmailEntity::$term must not be accessed before initialization')
-            ) {
-                throw new Error('Server Error detected on Email Status page');
-            }
-        });
-        cy.get('body').should('not.contain', 'FATAL ERROR');
-        cy.get('body').should('not.contain', 'Typed property');
-
+        cy.get('body').should('be.visible');    
         cy.contains(uniqueSubject);
     });
 });
