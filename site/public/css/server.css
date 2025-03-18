@@ -2187,8 +2187,6 @@ End of slider switch
     background-color: transparent;
     border-width: 1px;
     border-style: solid;
-    min-width: 10px;
-    float: none;
 }
 
 [data-theme="dark"] .badge-1 {
