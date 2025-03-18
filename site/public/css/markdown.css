@@ -201,8 +201,7 @@
     background-color: var(--default-white);
     border-radius: 4px;
     padding: 4px 6px;
-    /* stylelint-disable-next-line declaration-no-important */
-    height: auto !important;
+    height: auto;
     overflow: auto;
     resize: none;
     min-height: 100px;
