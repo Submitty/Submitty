@@ -17,7 +17,7 @@ describe('Superuser Email All Functionality via Sidebar', () => {
         cy.get('[data-testid="sidebar"]')
             .contains('Email Status')
             .click();
-        cy.get('body').should('be.visible');    
-        cy.contains(uniqueSubject);
+        cy.get('body')
+        cy.should('contain', uniqueSubject);
     });
 });
