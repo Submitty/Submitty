@@ -52,6 +52,14 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" id="toggle-details-col-submit" data-testid="toggle-details-col-submit" onclick="updateGradingDetailsColumns()"/>
+    <input
+        name="submit"
+        class="btn btn-primary key_to_click"
+        type="submit"
+        value="Submit"
+        id="toggle-details-col-submit"
+        data-testid="toggle-details-col-submit"
+        onclick="updateGradingDetailsColumns()"
+    />
 
 {% endblock %}
