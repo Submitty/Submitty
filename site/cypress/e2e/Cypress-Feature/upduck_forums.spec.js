@@ -3,6 +3,8 @@ import { buildUrl } from '../../support/utils';
 const title1 = 'Attachment contains secret';
 const title2 = 'Different Levels& display order';
 const title3 = 'Simple C++ threading example';
+const title4 = 'Cypress Title 4 Cypress';
+const content1 = 'Cypress Content 1 Cypress';
 
 const upduckPost = (thread_title, thread_number = 0, num_ducks = 0) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
@@ -186,17 +188,17 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
     });
 
     it('Should display the list of users who liked a post & hide modal for students', () => {
-        createThread(title1, content1, 'Comment');
+        createThread(title4, content1, 'Comment');
 
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
-        upduckPost(title1, 0, 0);
+        upduckPost(title4, 0, 0);
 
         // Logout and login as a student to add another upduck
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'forum']);
-        upduckPost(title1, 0, 1);
+        upduckPost(title4, 0, 1);
 
         // Verify button is not visible for students
         cy.get('[data-testid="show-upduck-list"]').should('not.exist');
@@ -204,7 +206,7 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
         cy.get('[data-testid="show-upduck-list"]').click();
         cy.get('#popup-post-likes').should('be.visible');
 
@@ -215,7 +217,6 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.get('#popup-post-likes .close-button').click();
         cy.get('#popup-post-likes').should('not.be.visible');
 
-        removeThread(title1);
+        removeThread(title4);
     });
-
 });
