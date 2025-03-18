@@ -623,6 +623,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " new_thread";
             }
             if ($thread->isDeleted()) {
+                $class = str_replace(" new_thread", "", $class);
                 if ($isNewThread) {
                     $class .= " deleted-unviewed";
                 }
@@ -691,8 +692,10 @@ class ForumThreadView extends AbstractView {
                 "fa_class" => $fa_class,
                 "tooltip" => $tooltip,
                 "is_locked" => $thread->isLocked(),
+                "num_posts" => count($thread->getPosts()),
                 "date" => $date_content,
                 "current_user_posted" => $thread->getAuthor()->getId() === $current_user,
+                "sum_ducks" => $thread->getSumUpducks(),
             ];
 
             if ($is_full_page) {
@@ -725,7 +728,6 @@ class ForumThreadView extends AbstractView {
                     "render_markdown" => $first_post->isRenderMarkdown(),
                     "author_info" => $author_info,
                     "deleted" => $first_post->isDeleted(),
-                    "sum_ducks" => $thread->getSumUpducks()
                 ]);
             }
             $thread_content[] = $thread_info;
