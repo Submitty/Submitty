@@ -798,12 +798,12 @@
 /* TODO: MAKE THIS CASCADE */
 .deleted {
     background-color: var(--deleted-discussion-post-grey);
-    color: var(--deleted-color);
+    color: var(--text-black);
 }
 
 .deleted-unviewed {
-    background-color: var(--deleted-and-unviewed-thread);
-    color: var(--deleted-color);
+    background-color: var(--deleted-and-unviewed-thread) !important;
+    color: var(--text-black) !important;
 }
 
 .deleted.active {
@@ -889,4 +889,14 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+.post-container {
+    display: inline-flex;
+    margin-left: 15px;
+}
+
+.upduck-post-container {
+    display: inline-flex;
+    align-items: center;
 }
