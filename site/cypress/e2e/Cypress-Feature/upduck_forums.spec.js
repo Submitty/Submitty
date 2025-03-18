@@ -193,9 +193,15 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.get('#nav-sidebar-collapse-sidebar').click();
 
         createThread(title4, content1, 'Comment');
-        upduckPost(title4, 0, 0);
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="create-post-head"]').should('contain', title4);
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
+
         cy.visit(['sample', 'forum']);
-        upduckPost(title4, 0, 1);
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
 
         // Verify that the "show upduck list" button is not visible for students
         cy.get('[data-testid="show-upduck-list"]').should('not.exist');
