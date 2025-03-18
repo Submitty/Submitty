@@ -22,7 +22,7 @@ python-dateutil==2.9.0.post0
 watchdog==4.0.1
 xlsx2csv==0.8.4
 pause==0.3
-paramiko==3.5.0
+paramiko==3.5.1
 tzlocal==5.3
 PyPDF2==3.0.1
 distro==1.9.0
