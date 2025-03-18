@@ -1409,6 +1409,7 @@ class ForumController extends AbstractController {
         $output['expiration'] = $result["pinned_expiration"];
     }
 
+    // TODO: getPosts and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
@@ -1443,6 +1444,15 @@ class ForumController extends AbstractController {
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
+
+            // user has only upducks and no posts
+            if(!isset($users[$user]["given_name"])) {
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $u = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $users[$user]["total_threads"] = 0;
+            }
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
