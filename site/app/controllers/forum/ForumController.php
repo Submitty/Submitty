@@ -1446,7 +1446,7 @@ class ForumController extends AbstractController {
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
 
             // user has only upducks and no posts
-            if(!isset($users[$user]["given_name"])) {
+            if (!isset($users[$user]["given_name"])) {
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
