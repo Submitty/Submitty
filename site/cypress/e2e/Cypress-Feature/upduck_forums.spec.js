@@ -187,36 +187,51 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkStatsUpducks('Student, Joe', 0);
     });
 
-    it('Should display the list of users who liked a post & hide modal for students', () => {
-        createThread(title4, content1, 'Comment');
-
-        cy.login('instructor');
-        cy.visit(['sample', 'forum']);
-        upduckPost(title4, 0, 0);
-
-        // Logout and login as a student to add another upduck
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'forum']);
-        upduckPost(title4, 0, 1);
-
-        // Verify button is not visible for students
-        cy.get('[data-testid="show-upduck-list"]').should('not.exist');
-
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
-        cy.get('[data-testid="show-upduck-list"]').click();
-        cy.get('#popup-post-likes').should('be.visible');
-
-        // Check the list of users in the modal
-        cy.get('.form-body').should('contain', 'instructor');
-        cy.get('.form-body').should('contain', 'student');
-
-        cy.get('#popup-post-likes .close-button').click();
-        cy.get('#popup-post-likes').should('not.be.visible');
-
-        removeThread(title4);
+    describe.only('User-specific upduck tests', () => {
+        beforeEach(() => {
+            cy.login('instructor');
+            cy.visit(['sample', 'forum']);
+            cy.get('#nav-sidebar-collapse-sidebar').click();
+            cy.intercept('POST', buildUrl(['sample', 'posts', 'likes'])).as('upduck');
+        });
+    
+        it('Should display the list of users who liked a post & hide modal for students', () => {
+            // Create a thread as an instructor
+            createThread(title4, content1, 'Comment');
+    
+            // Upduck the post as an instructor
+            upduckPost(title4, 0, 0);
+    
+            // Logout and login as a student to add another upduck
+            cy.logout();
+            cy.login('student');
+            cy.visit(['sample', 'forum']);
+            upduckPost(title4, 0, 1);
+    
+            // Verify that the "show upduck list" button is not visible for students
+            cy.get('[data-testid="show-upduck-list"]').should('not.exist');
+    
+            // Logout and login as instructor to check the upduck list modal
+            cy.logout();
+            cy.login('instructor');
+            cy.visit(['sample', 'forum']);
+            cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+            cy.get('[data-testid="show-upduck-list"]').click();
+    
+            // Verify that the modal is visible
+            cy.get('#popup-post-likes').should('be.visible');
+    
+            // Check the list of users in the modal
+            cy.get('.form-body').should('contain', 'instructor');
+            cy.get('.form-body').should('contain', 'student');
+    
+            // Close the modal and ensure it is hidden
+            cy.get('#popup-post-likes .close-button').click();
+            cy.get('#popup-post-likes').should('not.be.visible');
+    
+            // Cleanup: Remove the thread
+            removeThread(title4);
+        });
     });
+    
 });
