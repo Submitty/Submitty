@@ -164,47 +164,4 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         // Remove threads
         removeThread(title1);
     });
-
-    describe('Should test the users who liked this post feature in the forum', () => {
-        it('Should display the list of users who liked a post', () => {
-            // Create a thread to test
-            createThread(title1, content1, 'Comment');
-
-            // Upduck the post as an instructor
-            cy.get('[data-testid="thread-list-item"]').contains(title1).click();
-            cy.get('[data-testid="create-post-head"]').should('contain', title1);
-            cy.get('[data-testid="upduck-button"]').first().click();
-
-            // Logout and login as a student to add another upduck
-            cy.logout();
-            cy.login('student');
-            cy.visit(['sample', 'forum']);
-            cy.get('[data-testid="thread-list-item"]').contains(title1).click();
-            cy.get('[data-testid="upduck-button"]').first().click();
-
-            // Login back as instructor to view the upduck list
-            cy.logout();
-            cy.login('instructor');
-            cy.visit(['sample', 'forum']);
-            cy.get('[data-testid="thread-list-item"]').contains(title1).click();
-
-            // Open the upduck list modal
-            cy.get('[data-testid="show-upduck-list"]').click();
-
-            // Verify the modal is visible
-            cy.get('#popup-post-likes').should('be.visible');
-
-            // Check the list of users in the modal
-            cy.get('.form-body').should('contain', 'instructor');
-            cy.get('.form-body').should('contain', 'student');
-
-            // Close the modal and ensure the forum is still visible
-            cy.get('#popup-post-likes .close-button').click();
-            cy.get('#popup-post-likes').should('not.be.visible');
-            cy.get('[data-testid="create-post-head"]').should('contain', title1);
-
-            // Cleanup: Remove the thread
-            removeThread(title1);
-        });
-    });
 });

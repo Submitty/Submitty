@@ -94,6 +94,23 @@ const studentUpduckPost = (thread_title) => {
     }
 };
 
+const removeThread = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+};
+
+const createThread = (title, content, category) => {
+    // Add more to tests for uploading attachments
+    cy.get('[title="Create Thread"]').click();
+    cy.get('#title').type(title);
+    cy.get('.thread_post_content').type(content);
+    cy.get('.cat-buttons').contains(category).click();
+    cy.get('[name="post"]').click();
+    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+};
+
 describe('Should test upducks relating to students, TAs, and instructors', () => {
     beforeEach(() => {
         cy.intercept('POST', buildUrl(['sample', 'posts', 'likes'])).as('upduck');
@@ -167,4 +184,38 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkStatsUpducks('TA, Jill', 0);
         checkStatsUpducks('Student, Joe', 0);
     });
+
+    it('Should display the list of users who liked a post & hide modal for students', () => {
+        createThread(title1, content1, 'Comment');
+
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        upduckPost(title1, 0, 0);
+
+        // Logout and login as a student to add another upduck
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        upduckPost(title1, 0, 1);
+
+        // Verify button is not visible for students
+        cy.get('[data-testid="show-upduck-list"]').should('not.exist');
+
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="show-upduck-list"]').click();
+        cy.get('#popup-post-likes').should('be.visible');
+
+        // Check the list of users in the modal
+        cy.get('.form-body').should('contain', 'instructor');
+        cy.get('.form-body').should('contain', 'student');
+
+        cy.get('#popup-post-likes .close-button').click();
+        cy.get('#popup-post-likes').should('not.be.visible');
+
+        removeThread(title1);
+    });
+
 });
