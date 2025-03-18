@@ -2113,6 +2113,7 @@ function loadThreadHandler() {
 
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
+                showAttachOnload();
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status !== 0) {
@@ -2123,6 +2124,24 @@ function loadThreadHandler() {
             },
         });
     });
+}
+
+function showAttachOnload() {
+    if (!window.location.pathname.includes('/forum/threads')) {
+        return;
+    }
+    const showAttach = Cookies.get('show_attachments');
+    if (showAttach === undefined) {
+        Cookies.set('show_attachments', 'false', { expires: 365, path: '/' });
+    }
+    else if (showAttach === 'true') {
+        $('.attachment-btn').each(function (i) {
+            // click first to call loadInlineImages, which loads the data
+            $(this).click();
+            // then show the images
+            $('.attachment-well').eq(i).show();
+        });
+    }
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2136,6 +2155,7 @@ function loadAllInlineImages(open_override = false) {
     // we should hide them all
     if (allShown && toggleButton.hasClass('show-all')) {
         toggleButton.removeClass('show-all');
+        Cookies.set('show_attachments', 'false');
     }
 
     const allHidden = $('.attachment-well').filter(function () {
@@ -2145,6 +2165,7 @@ function loadAllInlineImages(open_override = false) {
     // we should show them all
     if (allHidden && !(toggleButton.hasClass('show-all'))) {
         toggleButton.addClass('show-all');
+        Cookies.set('show_attachments', 'true');
     }
 
     $('.attachment-btn').each(function (i) {
@@ -2608,6 +2629,7 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
+    showAttachOnload();
     if (typeof cleanupAutosaveHistory === 'function') {
         // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
