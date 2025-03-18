@@ -102,6 +102,50 @@ const replyDisabled = (title, attachment) => {
     cy.contains('p', attachment).should('be.visible');
 };
 
+const setLockDateToPast = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('#lock_thread_date').type('2023-01-01 00:00:00');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+const clearLockDate = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+describe('Forum Thread Lock Date Functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
+        createThread(title1, content1, 'Comment');
+        setLockDateToPast(title1);
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
+
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        clearLockDate(title1);
+
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        replyToThread(title1, reply1);
+
+        removeThread(title1);
+    });
+});
+
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.logout();

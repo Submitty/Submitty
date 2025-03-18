@@ -93,6 +93,7 @@ function onReplyTextAreaKeyUp(textarea) {
         $('.gi-show-not-empty').show();
         $('.gi-show-empty').hide();
     }
+    resizeTextarea(textarea);
 }
 
 function onGradeInquirySubmitClicked(button) {
@@ -130,7 +131,6 @@ function onGradeInquirySubmitClicked(button) {
 
     // prevent double submission
     form.data('submitted', true);
-    const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
@@ -138,28 +138,10 @@ function onGradeInquirySubmitClicked(button) {
         success: function (response) {
             try {
                 const json = JSON.parse(response);
-                if (json['status'] === 'success') {
-                    const data = json['data'];
 
-                    // inform other open websocket clients
-                    const submitter_id = form.children('#submitter_id').val();
-                    if (data.type === 'new_post') {
-                        newPostRender(gc_id, data.post_id, data.new_post);
+                if (json['status'] === 'success') {
+                    if (json['data']['type'] === 'new_post') {
                         text_area.val('');
-                        window.socketClient.send({
-                            type: data.type,
-                            post_id: data.post_id,
-                            submitter_id: submitter_id,
-                            gc_id: gc_id,
-                        });
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({ type: data.type, submitter_id: submitter_id });
                     }
                 }
                 else {
@@ -183,6 +165,9 @@ function initGradingInquirySocketClient() {
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
+                break;
+            case 'open_grade_inquiry':
+                window.location.reload();
                 break;
             case 'toggle_status':
                 gradeInquiryDiscussionHandler(msg.submitter_id);
@@ -262,7 +247,26 @@ function newDiscussionRender(discussion) {
     }
 }
 
+function resizeTextarea(textarea) {
+    if (!(textarea instanceof Element)) {
+        return;
+    }
+    textarea.style.height = '100px';
+    const currentScrollHeight = textarea.scrollHeight;
+    const clientHeight = textarea.clientHeight;
+    const scrollTop = textarea.scrollTop;
+    if (scrollTop > 0 || currentScrollHeight > clientHeight) {
+        textarea.style.height = `${currentScrollHeight}px`;
+    }
+    const parentBody = textarea.closest('.markdown-area-body');
+    if (parentBody) {
+        parentBody.style.height = `${textarea.scrollHeight + 32}px`;
+    }
+}
 $(document).ready(() => {
+    document.querySelectorAll('.markdown-area textarea').forEach((textarea) => {
+        resizeTextarea(textarea);
+    });
     loadDraft();
     onReady();
 });
