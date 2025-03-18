@@ -1556,7 +1556,7 @@ input[type="radio"][disabled=""]:checked::before {
     width: 7px;
     height: 7px;
     border-radius: 100%;
-    background: var(--standard-medium-dark-gray);
+    background: var(--standard-dark-gray);
 }
 
 /* Media queries */

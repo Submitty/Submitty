@@ -613,7 +613,7 @@ input[type="button"].btn-block {
     color: var(--btn-text-white);
     text-align: center;
 
-    /* white-space: nowrap; */
+    white-space: nowrap;
     word-wrap: break-word;
     vertical-align: baseline;
     border-radius: 0.25em;

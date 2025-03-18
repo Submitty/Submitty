@@ -22,13 +22,7 @@ class UserProfileView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
-        if ($user->getPreferredGivenName() != "") {
-            $autofill_preferred_name[0] = $user->getPreferredGivenName();
-        }
-        if ($user->getPreferredFamilyName() != "") {
-            $autofill_preferred_name[1] = $user->getPreferredFamilyName();
-        }
+        $autofill_preferred_name = [$user->getDisplayedGivenName(), $user->getDisplayedFamilyName()];
 
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
