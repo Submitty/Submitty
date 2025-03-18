@@ -1422,9 +1422,9 @@ class ForumController extends AbstractController {
             $content = $posts[$i]["content"];
             if (!isset($users[$user])) {
                 $users[$user] = [];
-                $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];
@@ -1445,11 +1445,10 @@ class ForumController extends AbstractController {
             $user = $upducks[$i]["user_id"];
             // user has only upducks and no posts, need to set some information
             if (!isset($users[$user])) {
-                $u = $this->core->getQueries()->getSubmittyUser($user);
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
-                $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
                 $users[$user]["total_threads"] = 0;
             }
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
