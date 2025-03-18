@@ -9401,23 +9401,18 @@ ORDER BY
 
     /**
      * Adds a component grader to the active_graders table
-     * @param Component $component
-     * @param bool $isTeam
-     * @param string $grader_id
-     * @param string $graded_id
-     * @return void
      */
-    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id) {
-            $this->course_db->query("
+    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id): void {
+        $this->course_db->query("
             INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
             VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
-            ", [
+        ", [
             $component->getId(),
             $grader_id,
             $isTeam ? null : $graded_id,
             $isTeam ? $graded_id : null,
             $this->core->getDateTimeNow(),
-            ]);
+        ]);
     }
 
     /**
