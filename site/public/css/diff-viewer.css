@@ -81,7 +81,6 @@
     overflow-x: scroll !important;
 }
 
-/* stylelint-enable declaration-no-important */
 /* stylelint-disable-next-line selector-class-pattern */
 .line_code {
     white-space: pre;

@@ -111,7 +111,6 @@ img {
     /* stylelint-disable-next-line declaration-no-important */
     vertical-align: middle !important;
 }
-/* stylelint-enable declaration-no-important */
 
 /* stylelint-disable-next-line selector-class-pattern */
 .small-mirror .CodeMirror {
