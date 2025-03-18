@@ -130,6 +130,14 @@
     margin-bottom: 60px;
 }
 
+.category-item-box {
+    color: var(--default-black);
+  }
+  
+  [data-theme ="dark"] .category-item-box {
+    background: var(--btn-default-white);
+  }
+
 /* stylelint-disable-next-line selector-id-pattern */
 #new_category_text {
     resize: none;

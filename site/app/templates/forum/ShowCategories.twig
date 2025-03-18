@@ -61,17 +61,6 @@
                     No categories exist, please create one.
                 </span>
         {% endif %}
-    
-        <style>
-          {% for category in categories %}
-            .category-item-box {
-              color: var(--default-black);
-            }
-            [data-theme ="dark"] .category-item-box {
-              background: var(--btn-default-white);
-            }
-		  {% endfor %}
-        </style>
 
         <ul id="ui-category-list" style="padding-left: 0em;">
             {# TODO: scrollbar #}
