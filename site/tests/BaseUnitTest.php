@@ -49,6 +49,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getTerm')->willReturn($config_values['semester']);
         }
 
+        if (isset($config_values['accepted_emails'])) {
+            $config->method('getAcceptedEmails')->willReturn($config_values['accepted_emails']);
+        }
+
         if (isset($config_values['course'])) {
             $config->method('getCourse')->willReturn($config_values['course']);
         }
