@@ -356,8 +356,10 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
-function adjustHeight(el){
-    el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "30px";
+function adjustHeight(el) {
+    el.style.height = el.scrollHeight > el.clientHeight
+        ? `${el.scrollHeight}px`
+        : '30px';
 }
 
 function minimizeHeight(el) {
