@@ -186,7 +186,7 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) as user_givenname, COALESCE(NULLIF(user_preferred_familyname,''), user_familyname) as user_familyname
+        (SELECT registration_section, user_id, COALESCE(user_preferred_givenname, user_givenname) as user_givenname, COALESCE(user_preferred_familyname, user_familyname) as user_familyname
         FROM users
         ORDER BY registration_section, user_familyname, user_givenname, user_id),
         B AS
@@ -3042,8 +3042,8 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getGradersByUserType() {
         $this->course_db->query(
             "SELECT
-                COALESCE(NULLIF(user_preferred_givenname, ''), user_givenname) AS user_givenname,
-                COALESCE(NULLIF(user_preferred_familyname, ''), user_familyname) AS user_familyname,
+                COALESCE(user_preferred_givenname, user_givenname) AS user_givenname,
+                COALESCE(user_preferred_familyname, user_familyname) AS user_familyname,
                 user_id,
                 user_group
             FROM
@@ -7343,10 +7343,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
         if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
@@ -9135,9 +9139,9 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-              COALESCE (NULLIF(user_preferred_givenname, ''), user_givenname),
+              COALESCE (user_preferred_givenname, user_givenname),
               ' ',
-              COALESCE (NULLIF(user_preferred_familyname, ''), user_familyname)
+              COALESCE (user_preferred_familyname, user_familyname)
           ) as name
 FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
