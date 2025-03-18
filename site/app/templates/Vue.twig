@@ -1,8 +1,7 @@
-<script> 
-    $('document').ready(() => {
-        window.submitty.render('[data-vuemount]', "{{ page }}",  {{ args | json_encode() | raw() }});
-    })
-</script>
-<div class="content" data-vuemount>
+<div>
     <noscript>You need Javascript enabled to see this page.</noscript>
 </div>
+<script> 
+    const script = document.currentScript;
+    window.submitty.render(script.previousElementSibling, "{{ component }}",  {{ args | json_encode() | raw() }});
+</script>
