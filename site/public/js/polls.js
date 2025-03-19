@@ -119,8 +119,8 @@ function validateCustomResponse() {
     const custom_response_submit = $('.custom-response-submit');
 
     const validate = () => {
-        custom_response_submit.prop(
-            'disabled', custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === 'true',
+        custom_response_submit.prop('disabled',
+            custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === 'true',
         );
     };
 
@@ -280,7 +280,7 @@ function clearResponses() {
 function updateHistogram(updates) {
     // Fetch the global histogram variables and corresponding element
     const { data, layout, responseIndices } = window.histogram;
-    const container = document.getElementById('chartContainer');
+    const container = $('#chartContainer')[0];
 
     for (const option of Object.keys(updates)) {
         // Update the current y value for the option based on the updates (-1, 0, 1)
@@ -309,16 +309,16 @@ function initializeInstructorSocketClient(url) {
 function initializeStudentSocketClient(url) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        const submit_button = document.querySelector('.student-submit');
-        const custom_response_submit = document.querySelector('.custom-response-submit');
+        const submit_button = $('.student-submit');
+        const custom_response_submit = $('.custom-response-submit');
 
         switch (msg.type) {
             case 'poll_opened':
             case 'poll_updated':
-                submit_button.disabled = false;
+                submit_button.prop('disabled', false);
 
-                if (custom_response_submit) {
-                    custom_response_submit.dataset.disabled = 'false';
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.attr('data-disabled', 'false');
                     validateCustomResponse();
                 }
 
@@ -326,11 +326,11 @@ function initializeStudentSocketClient(url) {
                 break;
             case 'poll_closed':
             case 'poll_ended':
-                submit_button.disabled = true;
+                submit_button.prop('disabled', true);
 
-                if (custom_response_submit) {
-                    custom_response_submit.dataset.disabled = 'true';
-                    custom_response_submit.disabled = true;
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.prop('disabled', true);
+                    custom_response_submit.attr('data-disabled', 'true');
                 }
 
                 displayErrorMessage(msg.message);
