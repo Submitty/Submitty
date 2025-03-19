@@ -164,7 +164,7 @@ class UserProfileController extends AbstractController {
                     || $newGivenName === $user->getDisplayedGivenName())
                     && (($newFamilyName === ""
                     && $user->getPreferredFamilyName() === null)
-                    || $newFamilyName === $user->getDisplayedGivenName())
+                    || $newFamilyName === $user->getDisplayedFamilyName())
                 ) {
                     return JsonResponse::getErrorResponse("No changes detected to update preferred names!");
                 }
