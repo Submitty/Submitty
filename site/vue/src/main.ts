@@ -13,7 +13,10 @@ const exports = {
             }
         })();
 
-        const app = createApp(root_component, { component, ...args });
+        const app = createApp(root_component);
+        for (const [key, value] of Object.entries(args)) {
+            app.provide(key, value);
+        }
 
         app.mount(target);
     },
