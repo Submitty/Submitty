@@ -108,46 +108,7 @@
                 {% if not user_admin and poll.isOpen() %}
                     <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
                     <script>
-                        function initializeStudentSocketClient() {
-                            window.socketClient = new WebSocketClient();
-
-                            window.socketClient.onmessage = (msg) => {
-                                const submit_button = document.querySelector('.student-submit');
-                                const custom_response_submit = document.querySelector('.custom-response-submit');
-
-                                switch (msg.type) {
-                                    case "poll_opened":
-                                    case "poll_updated":
-                                        submit_button.disabled = false;
-
-                                        if (custom_response_submit) {
-                                            custom_response_submit.dataset.disabled = "false";
-                                            validateCustomResponse();
-                                        }
-                                        
-                                        displaySuccessMessage(msg.message);
-                                        break;
-                                    case "poll_closed":
-                                    case "poll_ended":
-                                        submit_button.disabled = true;
-
-                                        if (custom_response_submit) {
-                                            custom_response_submit.dataset.disabled = "true";
-                                            custom_response_submit.disabled = true;
-                                        }
-
-                                        displayErrorMessage(msg.message);
-                                        break;
-                                    default:
-                                        console.error("Unknown web socket message received:", msg);
-                                        break;
-                                }
-                            };
-
-                            window.socketClient.open('polls-{{ poll.getId() }}-student');
-                        }
-
-                        initializeStudentSocketClient();
+                        initializeStudentSocketClient('polls-{{ poll.getId() }}-student');
                     </script>
                 {% endif %}
             </form>
@@ -209,15 +170,17 @@
             }];
 
             // Store the position of each response for incoming websocket updates (-1, 0, 1)
-            const responseIndexMap = {};
+            const responseIndices = {};
+            let response = "";
             let position = 0;
             const [correctColor, defaultColor] =
             [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
                 window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
             {% for option in poll.getOptions() %}
-                responseIndexMap["{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}"] = position++;
-                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
-                data[0].y.push({{ response_counts[option.getId()] }});
+                response = String("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
+                responseIndices[response] = position++;
+                data[0].x.push(response);
+                data[0].y.push(Number("{{ response_counts[option.getId()] }}"));
                 data[0].marker.color.push(
                     {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
                 );
@@ -245,36 +208,13 @@
             });
 
             {% if user_admin and poll.isOpen() %}
-            let graph_data = data;
-
-            function updateHistogram(updates) {
-                const histogram = document.getElementById('chartContainer');
-
-                for (option of Object.keys(updates)) {
-                    graph_data[0].y[responseIndexMap[option]] += updates[option];
-                }
-                
-                Plotly.restyle(histogram, { y: [graph_data[0].y] });
+            window.histogram = {
+                data: data,
+                layout: layout,
+                responseIndices: responseIndices
             }
-
-            function initializeInstructorSocketClient() {
-                window.socketClient = new WebSocketClient();
-                 
-                window.socketClient.onmessage = (msg) => {
-                    switch (msg.type) {
-                        case "update_histogram":
-                            updateHistogram(msg.message);
-                            break;
-                        default:
-                            console.error("Unknown web socket message received:", msg);
-                            break;
-                    }
-                };
-
-                window.socketClient.open('polls-{{ poll.getId() }}-instructor');
-            }
-
-            initializeInstructorSocketClient();
+           
+            initializeInstructorSocketClient('polls-{{ poll.getId() }}-instructor');
             {% endif %}
         }
     {% endif %}
