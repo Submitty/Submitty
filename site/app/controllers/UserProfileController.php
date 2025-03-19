@@ -158,6 +158,16 @@ class UserProfileController extends AbstractController {
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
+                if (
+                    (($newGivenName === ""
+                    && $user->getPreferredGivenName() === null)
+                    || $newGivenName === $user->getDisplayedGivenName())
+                    && (($newFamilyName === ""
+                    && $user->getPreferredFamilyName() === null)
+                    || $newFamilyName === $user->getDisplayedGivenName())
+                ) {
+                    return JsonResponse::getErrorResponse("No changes detected to update preferred names!");
+                }
                 if ($newGivenName === "" || $newGivenName === $user->getLegalGivenName()) {
                     $user->setPreferredGivenName(null);
                 }
