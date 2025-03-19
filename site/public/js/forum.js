@@ -2113,7 +2113,7 @@ function loadThreadHandler() {
 
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
-                showAttachOnload();
+                showAttachmentsOnload();
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status !== 0) {
@@ -2126,7 +2126,7 @@ function loadThreadHandler() {
     });
 }
 
-function showAttachOnload() {
+function showAttachmentsOnload() {
     if (!window.location.pathname.includes('/forum/threads')) {
         return;
     }
@@ -2135,52 +2135,38 @@ function showAttachOnload() {
         Cookies.set('show_attachments', 'false', { expires: 365, path: '/' });
     }
     else if (showAttach === 'true') {
-        $('.attachment-btn').each(function (i) {
-            // click first to call loadInlineImages, which loads the data
-            $(this).click();
-            // then show the images
-            $('.attachment-well').eq(i).show();
-        });
+        $('#toggle-attachments-button').find('.status').text('Hide attachments');
+        loadAllInlineImages(true);
+    }
+    else {
+        $('#toggle-attachments-button').find('.status').text('Show attachments');
     }
 }
 
 // eslint-disable-next-line no-unused-vars
 function loadAllInlineImages(open_override = false) {
-    const toggleButton = $('#toggle-attachments-button');
-
-    const allShown = $('.attachment-well').filter(function () {
-        return $(this).is(':visible');
-    }).length === $('.attachment-well').length;
-    // if the button were to show them all but they have all been individually shown,
-    // we should hide them all
-    if (allShown && toggleButton.hasClass('show-all')) {
-        toggleButton.removeClass('show-all');
-        Cookies.set('show_attachments', 'false');
+    if (open_override) {
+        $('.attachment-btn').each(function (i) {
+            $(this).click();
+            $('.attachment-well').eq(i).show();
+        });
+        return;
     }
 
-    const allHidden = $('.attachment-well').filter(function () {
-        return !($(this).is(':visible'));
-    }).length === $('.attachment-well').length;
-    // if the button were to hide them all but they have all been individually hidden,
-    // we should show them all
-    if (allHidden && !(toggleButton.hasClass('show-all'))) {
-        toggleButton.addClass('show-all');
-        Cookies.set('show_attachments', 'true');
-    }
+    const showAttach = Cookies.get('show_attachments') === 'true' ? 'false' : 'true';
+    Cookies.set('show_attachments', showAttach, { expires: 365, path: '/' });
+
+    const buttonText = `${showAttach === 'true' ? 'Hide' : 'Show'} attachments`;
+    $('#toggle-attachments-button').find('.status').text(buttonText);
 
     $('.attachment-btn').each(function (i) {
-        $(this).click();
-
-        // overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all') || open_override) {
-            $('.attachment-well').eq(i).show();
+        if (showAttach === 'true' && $('.attachment-well').eq(i).is(':hidden')) {
+            $(this).click();
         }
-        else {
-            $('.attachment-well').eq(i).hide();
+        else if (showAttach === 'false' && $('.attachment-well').eq(i).is(':visible')) {
+            $(this).click();
         }
     });
-
-    toggleButton.toggleClass('show-all');
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2629,7 +2615,7 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
-    showAttachOnload();
+    showAttachmentsOnload();
     if (typeof cleanupAutosaveHistory === 'function') {
         // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
