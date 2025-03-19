@@ -62,7 +62,7 @@ const removeThread = (title) => {
         if (exists) {
             cy.get('[data-testid="thread-list-item"]').contains(title).click();
             cy.get('[data-testid="thread-dropdown"]').first().click();
-            cy.get('[data-testid="delete-post-button"]').first().click({ force : true });
+            cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
             if (threadExists(title)) {
                 removeThread(title);
             }
