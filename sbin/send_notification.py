@@ -176,7 +176,7 @@ def send_notifications(course, course_db, master_db, lists):
             )
 
         # Update all successfully sent notifications for current course
-        if len(gradeables) > 0:
+        if gradeables:
             values = ", ".join(gradeables)
             course_db.execute(
                 f"""
@@ -187,13 +187,13 @@ def send_notifications(course, course_db, master_db, lists):
                 """
             )
 
-        # Commit the changes to the individual databases
-        course_db.commit()
-        master_db.commit()
+            m = (f"[{timestamp}] ({course}): Sent {len(general)} site, "
+                 f"{len(email)} email notifications\n")
+            LOG_FILE.write(m)
 
-        m = (f"[{timestamp}] ({course}): Released {len(general)} general, "
-             f"{len(email)} email\n")
-        LOG_FILE.write(m)
+            # Commit the changes to the individual databases
+            course_db.commit()
+            master_db.commit()
     except Exception as notification_error:  # pylint: disable=broad-except
         # Rollback the changes if an error occurs
         course_db.rollback()
@@ -302,7 +302,8 @@ def main():
         notified = send_pending_notifications()
         m = (f"[{datetime.datetime.now()}] Successfully updated notification "
              f"status for {notified} submission{'s' if notified != 1 else ''}")
-        LOG_FILE.write(f"{m}\n")
+        LOG_FILE.write(f"{m}\n\n")
+        LOG_FILE.close()
     except Exception as notification_error:  # pylint: disable=broad-except
         m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
              f"{str(notification_error)}")
