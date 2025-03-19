@@ -7,9 +7,9 @@ function fetchMessages(chatroomId, my_id, when = new Date(0)) {
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
         type: 'GET',
         dataType: 'json',
-        success: function(responseData) {
+        success: function (responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
-                responseData.data.forEach(msg => {
+                responseData.data.forEach((msg) => {
                     let display_name = msg.display_name;
                     if (msg.user_id === my_id) {
                         display_name = 'me';
@@ -20,7 +20,7 @@ function fetchMessages(chatroomId, my_id, when = new Date(0)) {
                 messages_area.scrollTop = messages_area.scrollHeight;
             }
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong with fetching messages');
         },
     });
@@ -33,11 +33,11 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
         url: buildCourseUrl(['chat', chatroomId, 'send']),
         type: 'POST',
         data: {
-            'csrf_token': csrfToken,
-            'user_id': userId,
-            'display_name': displayName,
-            'role': role,
-            'content': content,
+            csrf_token: csrfToken,
+            user_id: userId,
+            display_name: displayName,
+            role: role,
+            content: content,
         },
         success: function (response) {
             try {
@@ -49,9 +49,9 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            window.socketClient.send({'type': 'chat_message', 'content': content, 'user_id': userId, 'display_name': displayName, 'role': role, 'timestamp': new Date(Date.now()).toLocaleString()});
+            window.socketClient.send({ type: 'chat_message', content: content, user_id: userId, display_name: displayName, role: role, timestamp: new Date(Date.now()).toLocaleString() });
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong with storing message');
         },
     });
@@ -61,10 +61,10 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
 function appendMessage(displayName, role, ts, content) {
     let timestamp = ts;
     if (!timestamp) {
-        timestamp = new Date(Date.now()).toLocaleString('en-us',  { year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'numeric'});
+        timestamp = new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
     }
     else {
-        timestamp = new Date(ts).toLocaleString('en-us', { year:'numeric', month:'short', day:'numeric', hour:'numeric', minute:'numeric'});
+        timestamp = new Date(ts).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
     }
 
     let display_name = displayName;
@@ -104,7 +104,7 @@ function appendMessage(displayName, role, ts, content) {
 
     // automatically scroll to bottom for new messages, if close to bottom
     const distanceFromBottom = messages_area.scrollHeight - messages_area.scrollTop - messages_area.clientHeight;
-    if ( distanceFromBottom < 110) {
+    if (distanceFromBottom < 110) {
         messages_area.scrollTop = messages_area.scrollHeight;
     }
 }
@@ -155,7 +155,7 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
             processData: false,
             cache: false,
             contentType: false,
-            success: function(data) {
+            success: function (data) {
                 try {
                     const msg = JSON.parse(data);
                     if (msg.status !== 'success') {
@@ -171,7 +171,7 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
                     window.alert('Something went wrong. Please try again.');
                 }
             },
-            error: function(err) {
+            error: function (err) {
                 console.error(err);
                 window.alert('Something went wrong. Please try again.');
             },
