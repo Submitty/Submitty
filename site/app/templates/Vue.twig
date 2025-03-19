@@ -2,6 +2,5 @@
     <noscript>You need Javascript enabled to see this page.</noscript>
 </div>
 <script> 
-    const script = document.currentScript;
-    window.submitty.render(script.previousElementSibling, "{{ component }}",  {{ args | json_encode() | raw() }});
+    window.submitty.render(document.currentScript.previousElementSibling, "{{ component }}",  {{ args | json_encode() | raw() }});
 </script>
