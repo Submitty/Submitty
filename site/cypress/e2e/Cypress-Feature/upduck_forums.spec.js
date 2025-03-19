@@ -3,6 +3,8 @@ import { buildUrl } from '../../support/utils';
 const title1 = 'Attachment contains secret';
 const title2 = 'Different Levels& display order';
 const title3 = 'Simple C++ threading example';
+const title4 = 'Cypress Title 4 Cypress';
+const content1 = 'Cypress Content 1 Cypress';
 
 const upduckPost = (thread_title, thread_number = 0, num_ducks = 0) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
@@ -94,6 +96,23 @@ const studentUpduckPost = (thread_title) => {
     }
 };
 
+const removeThread = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+};
+
+const createThread = (title, content, category) => {
+    // Add more to tests for uploading attachments
+    cy.get('[title="Create Thread"]').click();
+    cy.get('#title').type(title);
+    cy.get('.thread_post_content').type(content);
+    cy.get('.cat-buttons').contains(category).click();
+    cy.get('[name="post"]').click();
+    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+};
+
 describe('Should test upducks relating to students, TAs, and instructors', () => {
     beforeEach(() => {
         cy.intercept('POST', buildUrl(['sample', 'posts', 'likes'])).as('upduck');
@@ -166,5 +185,46 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkStatsUpducks('Instructor, Quinn', 0);
         checkStatsUpducks('TA, Jill', 0);
         checkStatsUpducks('Student, Joe', 0);
+    });
+
+    it('Should display the list of users who liked a post & hide modal for students', () => {
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+
+        createThread(title4, content1, 'Comment');
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="create-post-head"]').should('contain', title4);
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
+
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
+
+        // Verify that the "show upduck list" button is not visible for students
+        cy.get('[data-testid="show-upduck-list"]').should('not.exist');
+
+        // Logout and login as instructor to check the upduck list modal
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="show-upduck-list"]').click();
+
+        // Verify that the modal is visible
+        cy.get('#popup-post-likes').should('be.visible');
+
+        // Check the list of users in the modal
+        cy.get('.form-body').should('contain', 'instructor');
+        cy.get('.form-body').should('contain', 'student');
+
+        // Close the modal and ensure it is hidden
+        cy.get('#popup-post-likes .close-button').click();
+        cy.get('#popup-post-likes').should('not.be.visible');
+
+        // Cleanup: Remove the thread
+        removeThread(title4);
     });
 });
