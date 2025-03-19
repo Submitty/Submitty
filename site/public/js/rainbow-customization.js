@@ -219,16 +219,6 @@ function DetectSameSectionName() {
     }
 }
 
-$(document).ready(() => {
-    // Run when page loads
-    DetectSameSectionName();
-
-    // Run at input events
-    $('.sections_and_labels').on('input', () => {
-        DetectSameSectionName();
-    });
-});
-
 function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
@@ -826,6 +816,8 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
     $("input[name*='display']").change(() => {
         saveChanges();
     });
@@ -838,6 +830,9 @@ $(document).ready(() => {
     });
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
+    });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
     });
     $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
