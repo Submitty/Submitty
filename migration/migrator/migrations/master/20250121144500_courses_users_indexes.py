@@ -10,8 +10,7 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("CREATE INDEX IF NOT EXISTS courses_users_user_id_idx ON courses_users (user_id);")
-    database.execute("CREATE INDEX IF NOT EXISTS courses_users_user_group ON courses_users (user_id, user_group);")
+    database.execute("CREATE INDEX IF NOT EXISTS courses_users_user_id_user_group_idx ON courses_users (user_id, user_group);")
 
 def down(config, database):
     """
@@ -22,5 +21,4 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("DROP INDEX IF EXISTS courses_users_user_id_idx;")
-    database.execute("DROP INDEX IF EXISTS courses_users_user_group;")
+    database.execute("DROP INDEX IF EXISTS courses_users_user_id_user_group_idx;")
