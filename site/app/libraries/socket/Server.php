@@ -120,8 +120,12 @@ class Server implements MessageComponentInterface {
      * Push a given message to all-but-sender connections on the same course and page
      */
     private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
-        if (!array_key_exists($page_name, $this->clients)) return; // Ignore broadcast requests for non-existent pages
-        if (!$this->isWebSocketClient($from)) return; // Ignore client-side broadcast requests
+        if (!array_key_exists($page_name, $this->clients)) {
+            return; // Ignore broadcast requests for non-existing pages
+        }
+        elseif (!$this->isWebSocketClient($from)) {
+            return; // Ignore client-side broadcast requests
+        }
 
         foreach ($this->clients[$page_name] as $client) {
             if ($client !== $from) {
