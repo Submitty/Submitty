@@ -110,7 +110,8 @@
   ansible.builtin.command:
     cmd: ./adduser_course.py "{{ submitty_course_creation_username }}"
       "{{ submitty_course_creation_term }}" "{{ submitty_course_creation_course }}"
-      "{{ submitty_course_creation_user_group }}"
+      "{{ submitty_course_creation_registration_section }}"
+      --user_group "{{ submitty_course_creation_user_group }}"
     chdir: /usr/local/submitty/sbin/
   become: true
   become_user: root
