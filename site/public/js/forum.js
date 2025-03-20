@@ -2127,6 +2127,7 @@ function loadThreadHandler() {
 }
 
 function showAttachmentsOnload() {
+    // on initial thread load, determine if attachments should be shown
     if (!window.location.pathname.includes('/forum/threads')) {
         return;
     }
@@ -2141,6 +2142,7 @@ function showAttachmentsOnload() {
     else {
         $('#toggle-attachments-button').find('.status').text('Show attachments');
     }
+    $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
 }
 
 // eslint-disable-next-line no-unused-vars
