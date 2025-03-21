@@ -8,13 +8,26 @@ const notifiedMessage = 'Your instructor will be notified and can then choose to
 const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
-    before(() => {
-        // Testing course is on by default, but want to test unchecking and re-checking.
+    beforeEach(() => {
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').uncheck();
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
-        cy.get('[data-testid="default-section-id"]').select('1');
+        cy.logout();
+    });
+
+    it('Should check for visibility of self registration notification option', () => {
+        cy.login('instructor2');
+        cy.visit(['testing', 'notifications', 'settings']);
+        cy.get('[data-testid="self-registration"]').should('not.exist');
+
+        // enable self registration
+        cy.visit(['testing', 'config']);
+        cy.get('[data-testid="all-self-registration"]').check();
+        cy.get('[data-testid="all-self-registration"]').should('be.checked');
+
+        cy.visit(['testing', 'notifications', 'settings']);
+        cy.get('[data-testid="self-registration"]').should('exist');
         cy.logout();
     });
 
