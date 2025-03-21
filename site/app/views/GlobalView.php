@@ -102,7 +102,8 @@ class GlobalView extends AbstractView {
             "imageDataArray" => $images_data_array,
             "errorImageData" => $error_image_data,
             "html_lang" => $html_lang,
-            "server_time" => time()
+            "server_time" => time(),
+            "unregister_course_url" => $this->core->buildCourseUrl(['unregister'])
         ]);
     }
 

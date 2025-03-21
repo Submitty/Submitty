@@ -1122,6 +1122,26 @@ WHERE term=? AND course=? AND user_id=?",
     }
 
     /**
+     * @param User   $user
+     * @param string $semester
+     * @param string $course
+     */
+    public function unregisterCourseUser(User $user, $semester, $course): void {
+        $this->submitty_db->query(
+            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+            [$user->getId(), $semester, $course]
+        );
+
+        $this->course_db->query(
+            "UPDATE users SET 
+                rotating_section = NULL,
+                registration_type = NULL
+            WHERE user_id = ?",
+            [$user->getId()]
+        );
+    }
+
+    /**
      * Gets the group that the user is in for a given class (used on homepage)
      *
      * Classes are distinct for each semester *and* course
