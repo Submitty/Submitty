@@ -242,16 +242,15 @@
                 <div class="config-row checkbox-row">
                     <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
-                        <span class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</span>
-                        <br>
-                        <span class="option-alt">
-                            With a valid customization.json Rainbow Grades configuration,<br>
-                            a Submitty cron job will update Rainbow Grades every night at approximately 2am.<br>
+                        <span class="option-title block">Automatic Nightly Processing for Rainbow Grades Generation</span>
+                        <span class="option-alt block">
+                            With a valid customization.json Rainbow Grades configuration,
+                            a Submitty cron job will update Rainbow Grades every night at approximately 2am.
                             The job will not run if this course is archived.
                         </span>
-                        <span class="red-message" id="customization-exists-warning" data-value="{{ not rainbowCustomizationExists }}" style="display: {{ fields['auto_rainbow_grades'] and not rainbowCustomizationExists ? 'block' : 'none' }};">
-                            <br> WARNING: Automatic rainbow grades generation will not occur until you have supplied a <br>
-                            customization.json file.  To have one generated for you, you may use the Grades Configuration tab. <br>
+                        <span class="red-message block" id="customization-exists-warning" data-value="{{ not rainbowCustomizationExists }}" style="display: {{ fields['auto_rainbow_grades'] and not rainbowCustomizationExists ? 'block' : 'none' }};">
+                            WARNING: Automatic rainbow grades generation will not occur until you have supplied a
+                            customization.json file.  To have one generated for you, you may use the Grades Configuration tab.
                             You may also manually create the file and upload it to your course's rainbow_grades directory.
                         </span>
                     </label>
@@ -264,11 +263,11 @@
             </div>
             {% endif %}
         {% else %}
-        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
-        <div class="option-alt">
-          NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
-          Please ask your system administrator to configure this option on your server.<br><br>
-        </div>
+            <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+            <div class="option-alt">
+              NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
+              Please ask your system administrator to configure this option on your server.<br><br>
+            </div>
         {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
             <span class="option-title">Display Room Seating Guide</span>
