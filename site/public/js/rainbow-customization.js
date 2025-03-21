@@ -211,12 +211,7 @@ function DetectSameSectionName() {
 
     // Show/hide warning triangle
     const warningIcon = $('#section-duplicate-warning');
-    if (hasDuplicates) {
-        warningIcon.show();
-    }
-    else {
-        warningIcon.hide();
-    }
+    warningIcon.toggle(hasDuplicates);
 }
 
 function getDisplayBenchmark() {
