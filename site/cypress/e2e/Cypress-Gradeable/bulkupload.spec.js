@@ -30,7 +30,7 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
             cy.get('#radio-bulk').click();
             cy.get('#use-qr').check();
-            cy.get('#bulk-upload-file').selectFile('cypress/fixtures/bulk_upload_qr.pdf', { force: true });
+            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf');
             cy.get('#bulk-upload-submit').click();
             cy.get('.alert-success').should('contain', 'Bulk upload successful');
             cy.get('.alert-info').should('contain', 'Daemon job started');
@@ -41,7 +41,7 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
             cy.get('#radio-bulk').click();
             cy.get('#num_pages').type('2');
-            cy.get('#bulk-upload-file').selectFile('cypress/fixtures/bulk_upload_page_count.pdf', { force: true });
+            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_page_count.pdf');
             cy.get('#bulk-upload-submit').click();
             cy.get('.alert-success').should('contain', 'Bulk upload successful');
             cy.get('.alert-info').should('contain', 'Daemon job started');
@@ -51,12 +51,12 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
             cy.get('#radio-bulk').click();
-            cy.get('#bulk-upload-file').selectFile('cypress/fixtures/bulk_upload_qr.pdf', { force: true });
+            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf');
             cy.get('#bulk-upload-submit').click();
             cy.get('.alert-success').should('contain', 'Bulk upload successful');
             cy.get('#bulk-upload-delete').click();
             cy.get('.alert-success').should('contain', 'Bulk upload deleted');
-            cy.get('#bulk-upload-file').should('not.exist');
+            cy.get('#input-file1').should('not.exist');
         });
 
         it(`${user} should be able to submit uploads and link to student in grading interface`, () => {
@@ -64,7 +64,7 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
             cy.get('#radio-bulk').click();
             cy.get('#use-qr').check();
-            cy.get('#bulk-upload-file').selectFile('cypress/fixtures/bulk_upload_qr.pdf', { force: true });
+            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf');
             cy.get('#bulk-upload-submit').click();
             cy.get('.alert-success').should('contain', 'Bulk upload successful');
             cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
