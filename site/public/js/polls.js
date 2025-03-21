@@ -1,5 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses */
-/* global csrfToken displaySuccessMessage displayErrorMessage */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeStudentSocketClient */
+/* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function () {
@@ -119,7 +119,9 @@ function validateCustomResponse() {
     const custom_response_submit = $('.custom-response-submit');
 
     const validate = () => {
-        custom_response_submit.prop('disabled', custom_response.val().trim() === '');
+        custom_response_submit.prop('disabled',
+            custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === 'true',
+        );
     };
 
     custom_response.on('input', () => {
@@ -273,4 +275,70 @@ function clearResponses() {
     if ($('.no-response-radio').is(':checked')) {
         $('.response-radio').prop('checked', false);
     }
+}
+
+function updateHistogram(updates) {
+    // Fetch the global histogram variables and corresponding element
+    const { data, layout, responseIndices } = window.histogram;
+    const container = $('#chartContainer')[0];
+
+    for (const option of Object.keys(updates)) {
+        // Update the current y value for the option based on the updates (-1, 0, 1)
+        data[0].y[responseIndices[option]] += Number(updates[option]);
+    }
+
+    // Re-render the histogram based on the current layout
+    Plotly.newPlot(container, data, layout);
+}
+
+function initializeInstructorSocketClient(url) {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        switch (msg.type) {
+            case 'update_histogram':
+                updateHistogram(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open(url);
+}
+
+function initializeStudentSocketClient(url) {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        const submit_button = $('.student-submit');
+        const custom_response_submit = $('.custom-response-submit');
+
+        switch (msg.type) {
+            case 'poll_opened':
+            case 'poll_updated':
+                submit_button.prop('disabled', false);
+
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.attr('data-disabled', 'false');
+                    validateCustomResponse();
+                }
+
+                displaySuccessMessage(msg.message);
+                break;
+            case 'poll_closed':
+            case 'poll_ended':
+                submit_button.prop('disabled', true);
+
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.prop('disabled', true);
+                    custom_response_submit.attr('data-disabled', 'true');
+                }
+
+                displayErrorMessage(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open(url);
 }
