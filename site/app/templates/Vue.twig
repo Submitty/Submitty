@@ -1,6 +1,6 @@
 <div>
+    <script> 
+        window.submitty.render(document.currentScript.parentElement, "{{ component }}",  {{ args | json_encode() | raw() }});
+    </script>
     <noscript>You need Javascript enabled to see this page.</noscript>
 </div>
-<script> 
-    window.submitty.render(document.currentScript.previousElementSibling, "{{ component }}",  {{ args | json_encode() | raw() }});
-</script>
