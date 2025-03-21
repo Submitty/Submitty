@@ -189,12 +189,14 @@
     position: relative;
 }
 
+/* stylelint-disable declaration-no-important */
 .markdown-area textarea {
     resize: none;
     overflow-y: hidden;
     min-height: 100px;
     tab-size: 4;
 }
+/* stylelint-enable declaration-no-important */
 
 .markdown-preview {
     border: none;
