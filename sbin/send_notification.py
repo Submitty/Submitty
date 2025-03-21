@@ -95,19 +95,19 @@ def connect_db(db_name):
 
 def construct_notifications(term, course, pending):
     """Construct pending gradeable notifications for the current course."""
-    gradeables, general, email = [], [], []
+    gradeables, site, email = [], [], []
     course_name = get_full_course_name(term, course)
 
     for notification in pending:
-        timestamp = str(datetime.datetime.now())
+        timestamp = datetime.datetime.now()
         gradeable = {
             "id": notification[0],
             "title": notification[1],
             "team_id": notification[2],
             "user_id": notification[3],
             "user_email": notification[4],
-            "general": notification[5],
-            "email": notification[6]
+            "site_enabled": notification[5],
+            "email_enabled": notification[6]
         }
 
         # Metadata-related content
@@ -132,62 +132,75 @@ def construct_notifications(term, course, pending):
         if len(notification_content) > 40:
             notification_content = notification_content[:36] + "..."
 
-        if gradeable["general"] is True:
-            general.append(
-                f"('grading','{metadata}','{notification_content}',"
-                f"'{timestamp}','submitty-admin','{gradeable['user_id']}')"
-            )
+        if gradeable["site_enabled"] is True:
+            site.append({
+                "component": "grading",
+                "metadata": metadata,
+                "content": notification_content,
+                "created_at": timestamp,
+                "from_user_id": "submitty-admin",
+                "to_user_id": gradeable['user_id']
+            })
 
-        if gradeable["email"] is True:
-            email.append(
-                f"('{email_subject}', '{email_body}', '{timestamp}', "
-                f"'{gradeable['user_id']}', '{gradeable['user_email']}',"
-                f"'{term}', '{course}')"
-            )
+        if gradeable["email_enabled"] is True:
+            email.append({
+                "subject": email_subject,
+                "body": email_body,
+                "created": timestamp,
+                "user_id": gradeable['user_id'],
+                "email_address": gradeable['user_email'],
+                "term": term,
+                "course": course
+            })
 
-        gradeables.append(
-            f"('{gradeable['id']}', "
-            f"'{gradeable['team_id'] or gradeable['user_id']}')"
-        )
+        gradeables.append({
+            "g_id": gradeable['id'],
+            "user_id": gradeable['user_id'],
+            "team_id": gradeable['team_id']
+        })
 
-    return gradeables, general, email
+    return gradeables, site, email
 
 
 def send_notifications(course, course_db, master_db, lists):
     """Send pending gradeable notifications for the current course."""
-    gradeables, general, email = lists
-    timestamp = str(datetime.datetime.now())
+    gradeables, site, email = lists
+    timestamp = datetime.datetime.now()
 
     try:
-        if general:
+        if site:
             course_db.execute(
-                f"""INSERT INTO notifications
-                (component, metadata, content, created_at, from_user_id,
-                to_user_id)
-                VALUES {", ".join(general)};"""
+                """
+                INSERT INTO notifications
+                (component, metadata, content, created_at,
+                 from_user_id, to_user_id)
+                VALUES (:component, :metadata, :content,
+                        :created_at, :from_user_id, :to_user_id)
+                """, site
             )
 
         if email:
             master_db.execute(
-                f"""INSERT INTO emails
-                (subject, body, created, user_id, email_address, term,
-                course)
-                VALUES {", ".join(email)};"""
+                """
+                INSERT INTO emails
+                (subject, body, created, user_id, email_address,
+                 term, course)
+                 VALUES (:subject, :body, :created, :user_id,
+                         :email_address, :term, :course)
+                """, email
             )
 
-        # Update all successfully sent notifications for current course
         if gradeables:
-            values = ", ".join(gradeables)
             course_db.execute(
-                f"""
+                """
                 UPDATE electronic_gradeable_version
                 SET g_notification_sent = TRUE
-                WHERE (g_id, user_id) IN ({values})
-                OR (g_id, team_id) IN ({values});
-                """
+                WHERE (g_id = :g_id AND user_id = :user_id)
+                OR (g_id = :g_id AND team_id = :team_id);
+                """, gradeables
             )
 
-            m = (f"[{timestamp}] ({course}): Sent {len(general)} site, "
+            m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
             LOG_FILE.write(m)
 
@@ -266,8 +279,8 @@ def send_pending_notifications():
                 team_id,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
-                ns.all_released_grades AS general_enabled,
-                ns.all_released_grades_email AS email_enabled
+                COALESCE(ns.all_released_grades, TRUE) AS site_enabled,
+                COALESCE(ns.all_released_grades_email, TRUE) AS email_enabled
             FROM gradeables AS g
             INNER JOIN users AS u
                 ON g.user_id = u.user_id
