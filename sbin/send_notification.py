@@ -175,7 +175,7 @@ def send_notifications(course, course_db, master_db, lists):
                 (component, metadata, content, created_at,
                  from_user_id, to_user_id)
                 VALUES (:component, :metadata, :content,
-                        :created_at, :from_user_id, :to_user_id)
+                        :created_at, :from_user_id, :to_user_id);
                 """, site
             )
 
@@ -186,7 +186,7 @@ def send_notifications(course, course_db, master_db, lists):
                 (subject, body, created, user_id, email_address,
                  term, course)
                  VALUES (:subject, :body, :created, :user_id,
-                         :email_address, :term, :course)
+                         :email_address, :term, :course);
                 """, email
             )
 
