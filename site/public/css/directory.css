@@ -1,5 +1,6 @@
 .access-grading td,
 .access-grading i {
+    /* stylelint-disable-next-line declaration-no-important */
     background: var(--standard-focus-cornflower-blue) !important;
 }
 
@@ -66,6 +67,7 @@
     #grader-table td:nth-of-type(1) { display: table-cell; }
 
     tr.access-grading {
+        /* stylelint-disable-next-line declaration-no-important */
         background: var(--standard-focus-cornflower-blue) !important;
     }
 }

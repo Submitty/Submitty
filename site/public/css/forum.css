@@ -807,7 +807,9 @@
 }
 
 .deleted-unviewed {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--deleted-and-unviewed-thread) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
 }
 

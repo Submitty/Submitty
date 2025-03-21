@@ -284,10 +284,12 @@ hr {
 }
 
 .override {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--active-warning-brown) !important;
 }
 
 [data-theme="dark"] .override {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--standard-vibrant-orange) !important;
 }
 
@@ -329,7 +331,9 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
 }
 
 .select2 {
+    /* stylelint-disable-next-line declaration-no-important */
     display: inline-block !important;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 38% !important;
 }
 
