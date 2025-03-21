@@ -135,7 +135,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
                 'seek_message_instructions'      => '',
-                'polls_enabled'                  => false
+                'polls_enabled'                  => false,
+                'chat_enabled'                   => false
             ],
             'feature_flags' => [
 
@@ -348,6 +349,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'date_time_format' => ['modified' => false],
             "default_locale" => "default",
             "locale" => ['modified' => false],
+            'chat_enabled' => false
         ];
         $actual = $config->toArray();
 
