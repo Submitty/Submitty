@@ -29,6 +29,10 @@ class Server implements MessageComponentInterface {
     /** @var array  */
     private $users = [];
 
+    // Holds the set of PHPWebSocket clients that are currently connected
+    /** @var array<int, bool> */
+    private $php_websocket_clients = [];
+
     /** @var Core */
     private $core;
 
@@ -90,6 +94,7 @@ class Server implements MessageComponentInterface {
         $request = $conn->httpRequest;
 
         if ($this->isWebSocketClient($conn)) {
+            $this->php_websocket_clients[$conn->resourceId] = true;
             $this->log("New connection {$conn->resourceId} --> websocket-client-php");
             return true;
         }
@@ -121,9 +126,9 @@ class Server implements MessageComponentInterface {
      */
     private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
         if (!array_key_exists($page_name, $this->clients)) {
-            return; // Ignore broadcast requests for non-existing pages
+            return; // Ignore broadcast requests for pages without active connections
         }
-        elseif (!$this->isWebSocketClient($from)) {
+        elseif (!isset($this->php_websocket_clients[$from->resourceId])) {
             return; // Ignore client-side broadcast requests
         }
 
@@ -244,6 +249,7 @@ class Server implements MessageComponentInterface {
     public function onClose(ConnectionInterface $conn): void {
         $this->log("Closing connection {$conn->resourceId}");
         $user_current_page = $this->getSocketClientPage($conn);
+        unset($this->php_websocket_clients[$conn->resourceId]);
         if ($user_current_page) {
             $this->clients[$user_current_page]->detach($conn);
             unset($this->pages[$conn->resourceId]);
