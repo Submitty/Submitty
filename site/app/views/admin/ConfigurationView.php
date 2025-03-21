@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\controllers\admin\ConfigurationController;
 
 class ConfigurationView extends AbstractView {
     public function viewConfig(
@@ -28,7 +29,8 @@ class ConfigurationView extends AbstractView {
             "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
             "csrf_token" => $csrf_token,
             "sections_url" => $this->core->buildCourseUrl(['sections']),
-            "rainbowCustomizationExists" => $rainbowCustomizationExists
+            "rainbowCustomizationExists" => $rainbowCustomizationExists,
+            "all_self_register" => ConfigurationController::ALL_SELF_REGISTER
         ]);
     }
 }
