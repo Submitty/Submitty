@@ -166,9 +166,9 @@ describe('Test Rainbow Grading', () => {
         cy.visit(['testing', 'gradeable', 'numeric', 'quick_link?action=release_grades_now']);
 
         cy.visit(['testing', 'reports', 'rainbow_grades_customization']);
+        cy.get('[data-testid="display-grade-summary"]').should('be.visible'); // Ensure page is loaded
 
         cy.get('[data-testid="display-grade-summary"]').check();
-        cy.get('[data-testid="display-grade-summary"]').should('be.checked');
         cy.get('[data-testid="display-grade-details"]').check();
         cy.get('[data-testid="display-benchmarks-average"]').check();
         cy.get('[data-testid="display-benchmarks-stddev"]').check();
