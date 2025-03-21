@@ -13,6 +13,8 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * Class SimpleGraderController
@@ -35,10 +37,10 @@ class SimpleGraderController extends AbstractController {
             $sort_by = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_by = "coalesce(NULLIF(u.user_preferred_givenname, ''), u.user_givenname)";
+            $sort_by = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
         else {
-            $sort_by = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
+            $sort_by = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
 
         //Figure out what section we are supposed to print
@@ -126,10 +128,10 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_key = "coalesce(NULLIF(u.user_preferred_givenname, ''), u.user_givenname)";
+            $sort_key = "coalesce(u.user_preferred_givenname, u.user_givenname)";
         }
         elseif ($sort === "last") {
-            $sort_key = "coalesce(NULLIF(u.user_preferred_familyname, ''), u.user_familyname)";
+            $sort_key = "coalesce(u.user_preferred_familyname, u.user_familyname)";
         }
         else {
             $sort_key = "u.registration_subsection";
@@ -211,6 +213,7 @@ class SimpleGraderController extends AbstractController {
             return JsonResponse::getFailResponse('Did not pass in user_id');
         }
         $user_id = $_POST['user_id'];
+        $anon_id = $_POST['anon_id'] ?? $user_id;
 
         $grader = $this->core->getUser();
         try {
@@ -242,8 +245,11 @@ class SimpleGraderController extends AbstractController {
 
         // Return ids and scores of updated components in success response so frontend can validate
         $return_data = [];
+        $elem = isset($_POST['elem']) ? (int) $_POST['elem'] : null;
+        $total = 0;
+        $value = null;
 
-        foreach ($gradeable->getComponents() as $component) {
+        foreach ($gradeable->getComponents() as $index => $component) {
             if (!array_key_exists($component->getId(), $_POST['scores'])) {
                 continue;
             }
@@ -252,9 +258,27 @@ class SimpleGraderController extends AbstractController {
                 return JsonResponse::getFailResponse("Save error: old score data missing");
             }
             $original_data = $_POST['old_scores'][$component->getId()];
+            $removing = $data === '' || (!$component->isText() && $data === '0');
+            $time = $this->core->getDateTimeNow();
 
+            if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+                // Send websocket message for each checkpoint update
+                $this->sendSocketMessage([
+                    'type' => 'update_checkpoint',
+                    'g_id' => $gradeable_id,
+                    'user' => $anon_id,
+                    'grader' => $removing ? "" : $grader->getId(),
+                    'elem' => (string) $index,
+                    'score' => (float) $data,
+                    'date' => $removing ? "" : $time->format('Y-m-d H:i:s')
+                ]);
+            }
+            elseif ($index === $elem) {
+                // Store the value of the updating component for the websocket message
+                $value = $data;
+            }
 
-            if ($data === '' || (!$component->isText() && $data === '0')) {
+            if ($removing) {
                 $ta_graded_gradeable->deleteGradedComponent($component);
                 continue;
             }
@@ -278,14 +302,27 @@ class SimpleGraderController extends AbstractController {
                     return JsonResponse::getFailResponse("Save error: displayed stale data (" . $original_data . ") does not match database (" . $db_data . ")");
                 }
                 $component_grade->setScore($data);
+                $total += $data;
             }
-            $component_grade->setGradeTime($this->core->getDateTimeNow());
+
+            $component_grade->setGradeTime($time);
             $return_data[$component->getId()] = $data;
         }
 
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
-        $return_data['date'] = $this->core->getDateTimeNow()->format('c');
+        $return_data['date'] = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+
+        if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $this->sendSocketMessage([
+                'type' => 'update_numeric',
+                'g_id' => $gradeable_id,
+                'user' => $anon_id,
+                'elem' => $_POST['elem'] ?? '',
+                'value' => $value,
+                'total' => (float) $total,
+            ]);
+        }
 
         return JsonResponse::getSuccessResponse($return_data);
     }
@@ -398,5 +435,22 @@ class SimpleGraderController extends AbstractController {
         }
 
         return JsonResponse::getSuccessResponse($return_data);
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array<mixed> $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

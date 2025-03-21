@@ -36,6 +36,9 @@
                                 },
                                 {
                                     label: "End of time"
+                                },
+                                {
+                                    label: "Clear"
                                 }
                             ],
                             label: "or",
@@ -44,12 +47,16 @@
                                 switch (index) {
                                     case 0:
                                         date = new Date();
+                                        fp.setDate(date, true);
                                         break;
                                     case 1:
                                         date = new Date("9998-01-01T00:00:00");
+                                        fp.setDate(date, true);
+                                        break;
+                                    case 2:
+                                        fp.clear();
                                         break;
                                 }
-                                fp.setDate(date, true);
                             }
                         })
                     ],
