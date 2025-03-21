@@ -35,7 +35,7 @@ class Message {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     private DateTime $timestamp;
 
-    public function __construct($userId, $displayName, $role, $text, $chatroom) {
+    public function __construct(string $userId, string $displayName, string $role, string $text, Chatroom $chatroom) {
         $this->setUserId($userId);
         $this->setDisplayName($displayName);
         $this->setRole($role);
@@ -52,7 +52,7 @@ class Message {
         return $this->user_id;
     }
 
-    public function setUserId($userId): void {
+    public function setUserId(string $userId): void {
         $this->user_id = $userId;
     }
 
@@ -60,7 +60,7 @@ class Message {
         return $this->display_name;
     }
 
-    public function setDisplayName($displayName): void {
+    public function setDisplayName(string $displayName): void {
         $this->display_name = $displayName;
     }
 
@@ -68,8 +68,8 @@ class Message {
         return $this->role;
     }
 
-    public function setRole($role): string {
-        return $this->role = $role;
+    public function setRole(string $role): void {
+        $this->role = $role;
     }
 
     public function getContent(): string {

@@ -42,7 +42,7 @@ class Chatroom {
     #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class)]
     private Collection $messages;
 
-    public function __construct($hostId, $hostName, $title, $description) {
+    public function __construct(string $hostId, string $hostName, string $title, string $description) {
         $this->setHostId($hostId);
         $this->setHostName($hostName);
         $this->setTitle($title);
@@ -56,7 +56,7 @@ class Chatroom {
         return $this->id;
     }
 
-    public function setHostId($hostId): void {
+    public function setHostId(string $hostId): void {
         $this->host_id = $hostId;
     }
 
@@ -64,7 +64,7 @@ class Chatroom {
         return $this->host_id;
     }
 
-    public function setHostName($hostName): void {
+    public function setHostName(string $hostName): void {
         $this->host_name = $hostName;
     }
 
@@ -84,7 +84,7 @@ class Chatroom {
         return $this->description;
     }
 
-    public function setDescription($description): void {
+    public function setDescription(string $description): void {
         $this->description = $description;
     }
 
@@ -100,7 +100,7 @@ class Chatroom {
         return $this->allow_anon;
     }
 
-    public function setAllowAnon($allow_anon): void {
+    public function setAllowAnon(bool $allow_anon): void {
         $this->allow_anon = $allow_anon;
     }
 

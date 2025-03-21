@@ -14,7 +14,10 @@ class ChatroomView extends AbstractView {
         $this->core->getOutput()->addInternalJs('websocket.js');
     }
 
-    public function showChatPageInstructor(array $chatrooms) {
+    /**
+     * @param Chatroom[] $chatrooms Array of Chatroom objets
+     */
+    public function showChatPageInstructor(array $chatrooms): string {
         return $this->core->getOutput()->renderTwigTemplate("chat/ChatPageIns.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
@@ -24,7 +27,10 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatPageStudent(array $chatrooms) {
+    /**
+     * @param Chatroom[] $chatrooms Array of Chatroom objets
+     */
+    public function showChatPageStudent(array $chatrooms): string {
         return $this->core->getOutput()->renderTwigTemplate("chat/ChatPageStu.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
@@ -34,7 +40,10 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showAllChatrooms(array $chatrooms) {
+    /**
+     * @param Chatroom[] $chatrooms Array of Chatroom objets
+     */
+    public function showAllChatrooms(array $chatrooms): string {
         return $this->core->getOutput()->renderTwigTemplate("chat/AllChatroomsPage.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/chat',
@@ -44,7 +53,7 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatroom($chatroom, $anonymous = false) {
+    public function showChatroom(Chatroom $chatroom, bool $anonymous = false): string {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
