@@ -56,8 +56,12 @@ def process_course(semester, course):
         data = json.load(f)
         auto_rainbow_grades = data['course_details']['auto_rainbow_grades']
 
-    # If true then schedule a RunAutoRainbowGrades job
-    if auto_rainbow_grades:
+    # Check whether Rainbow Grades customization file exists
+    rainbow_customization_path = os.path.join(courses_path, semester, course, 'rainbow_grades', 'customization.json')
+    rainbow_customization_exists = os.path.isfile(rainbow_customization_path)
+
+    # If both true, then schedule a RunAutoRainbowGrades job
+    if auto_rainbow_grades and rainbow_customization_exists:
 
         # Setup jobs daemon json
         jobs_json = {
