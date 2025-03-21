@@ -10,6 +10,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
@@ -5869,9 +5870,22 @@ AND gc_id IN (
               gamo.*,
               gc.*,
               pgp.*,
+              r.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
             FROM gradeable g
+              LEFT JOIN (
+                SELECT
+                  g_id,
+                  json_agg(redaction_id) as redaction_id,
+                  json_agg(page) AS redaction_page,
+                  json_agg(x1) AS redaction_x1,
+                  json_agg(y1) AS redaction_y1,
+                  json_agg(x2) AS redaction_x2,
+                  json_agg(y2) AS redaction_y2
+                FROM gradeable_redaction
+                GROUP BY g_id
+              ) AS r ON g.g_id=r.g_id
               LEFT JOIN (
                 SELECT
                   g_id AS eg_g_id,
@@ -6078,6 +6092,39 @@ AND gc_id IN (
 
             // Set the components
             $gradeable->setComponentsFromDatabase($components);
+
+            if (isset($row["redaction_id"])) {
+                // Create the redaction data
+                $redaction_properties = [
+                'id',
+                'page',
+                'x1',
+                'y1',
+                'x2',
+                'y2'
+                ];
+                $unpacked_redaction_data = [];
+                foreach ($redaction_properties as $property) {
+                    $unpacked_redaction_data[$property] = json_decode($row['redaction_' . $property]) ?? [];
+                }
+
+                // Create the redactions
+                $redactions = [];
+                for ($i = 0; $i < count($unpacked_redaction_data['id']); ++$i) {
+                    // Transpose a single redaction at a time
+                    $redaction_data = [];
+                    foreach ($redaction_properties as $property) {
+                        $redaction_data[$property] = $unpacked_redaction_data[$property][$i];
+                    }
+
+                    // Create the redaction instance
+                    $redactions[] = new Redaction($this->core, $redaction_data);
+                }
+
+                // Set the redactions
+                $gradeable->setRedactionsFromDatabase($redactions);
+            }
+
 
             return $gradeable;
         };

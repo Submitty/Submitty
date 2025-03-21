@@ -14,6 +14,7 @@ import datetime
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
+from . import generate_pdf_images
 from . import INSTALL_DIR, DATA_DIR
 from . import write_to_log as logger
 from . import VERIFIED_ADMIN_USER
@@ -250,6 +251,7 @@ class BulkUpload(CourseJob):
         gradeable_id = self.job_details['g_id']
         filename = self.job_details['filename']
         is_qr = self.job_details['is_qr']
+        redactions = [generate_pdf_images.Redaction(**r) for r in self.job_details.get('redactions', [])]
 
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
@@ -323,9 +325,9 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr, redactions])
             else:
-                bulk_upload_split.main([filename, split_path, num, log_file_path])
+                bulk_upload_split.main([filename, split_path, num, log_file_path, redactions])
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
             print(msg)
@@ -341,6 +343,17 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
+
+
+class GeneratePdfImages(AbstractJob):
+    def run_job(self):
+        pdf_file_path = self.job_details['pdf_file_path']
+        # optionally get redactions
+        redactions = self.job_details.get('redactions', [])
+        generate_pdf_images.main(pdf_file_path, [generate_pdf_images.Redaction(**r) for r in redactions])
+
+    def cleanup_job(self):
+        pass
 
 
 # pylint: disable=abstract-method
