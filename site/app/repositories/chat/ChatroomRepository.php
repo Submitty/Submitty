@@ -7,6 +7,9 @@ namespace app\repositories\chat;
 use Doctrine\ORM\EntityRepository;
 
 class ChatroomRepository extends EntityRepository {
+    /**
+     * @return array<Chatroom>
+     */
     public function findAllChatroomsByHostId(string $hostId): array {
         return $this->createQueryBuilder('c')
                     ->where('c.host_id = :hostId')
@@ -15,6 +18,9 @@ class ChatroomRepository extends EntityRepository {
                     ->getResult();
     }
 
+    /**
+     * @return array<Chatroom>
+     */
     public function findAllActiveChatrooms(): array {
         return $this->createQueryBuilder('c')
                     ->where('c.isActive = :isActive')
@@ -23,6 +29,9 @@ class ChatroomRepository extends EntityRepository {
                     ->getResult();
     }
 
+    /**
+     * @return array<Chatroom>
+     */
     public function findAllInactiveChatrooms(): array {
         return $this->createQueryBuilder('c')
                     ->where('c.isActive = :isActive')

@@ -108,7 +108,7 @@ class Chatroom {
         return $this->messages;
     }
 
-    public function addMessage(Message $message): void {
+    public function addMessage(Message|null $message): void {
         $this->messages->add($message);
     }
 }

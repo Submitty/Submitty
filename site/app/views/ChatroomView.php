@@ -4,6 +4,7 @@ namespace app\views;
 
 use app\libraries\Core;
 use app\libraries\Output;
+use app\entities\chat\Chatroom;
 
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
