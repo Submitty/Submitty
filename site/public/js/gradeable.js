@@ -118,13 +118,14 @@ function prepGradedComponent(component, graded_component) {
  * @param {string} grader_id
  * @param {Object} gradeable
  * @param {Object} graded_gradeable
+ * @param {Object} graders
  * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
  * @param {int} displayVersion
  * @returns {Promise<string>} the html for the graded gradeable
  */
 
-function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_disabled, canVerifyGraders, displayVersion) {
+function renderGradingGradeable(grader_id, gradeable, graded_gradeable, graders, grading_disabled, canVerifyGraders, displayVersion) {
     if (graded_gradeable.graded_components === undefined || graded_gradeable.graded_components === null) {
         graded_gradeable.graded_components = {};
     }
@@ -141,6 +142,7 @@ function renderGradingGradeable(grader_id, gradeable, graded_gradeable, grading_
     return Twig.twig({ ref: 'GradingGradeable' }).render({
         gradeable: gradeable,
         graded_gradeable: graded_gradeable,
+        all_graders: graders,
         edit_marks_enabled: false,
         grading_disabled: grading_disabled,
         decimal_precision: DECIMAL_PRECISION,
@@ -201,6 +203,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {string} grader_id
  * @param {Object} component
  * @param {Object} graded_component
+ * @param {Array} graders
  * @param {boolean} grading_disabled
  * @param {boolean} canVerifyGraders
  * @param {number} precision
@@ -210,7 +213,7 @@ function renderPeerGradeable(grader_id, gradeable, graded_gradeable, grading_dis
  * @param {boolean} is_student False if the grader is a TA, True if peer grader
  * @returns {Promise<string>} the html for the graded component
  */
-function renderGradingComponent(grader_id, component, graded_component, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer, allowCustomMarks) {
+function renderGradingComponent(grader_id, component, graded_component, graders, grading_disabled, canVerifyGraders, precision, editable, showMarkList, componentVersionConflict, is_student, taGradingPeer, allowCustomMarks) {
     return new Promise((resolve) => {
         // Make sure we prep the graded component before rendering
         graded_component = prepGradedComponent(component, graded_component);
@@ -221,6 +224,7 @@ function renderGradingComponent(grader_id, component, graded_component, grading_
         resolve(Twig.twig({ ref: 'GradingComponent' }).render({
             component: component,
             graded_component: graded_component,
+            graders: graders,
             precision: precision,
             edit_marks_enabled: editable,
             show_mark_list: showMarkList,
