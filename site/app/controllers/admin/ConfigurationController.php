@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
@@ -231,7 +232,8 @@ class ConfigurationController extends AbstractController {
             try {
                 $customization_json->loadFromJsonFile(); // Check if any customization.json exists
             }
-            catch (\Exception $e) {
+            // loadFromJsonFile() throws FileReadException if file is missing or empty
+            catch (FileReadException $e) {
                 return false;
             }
         }
