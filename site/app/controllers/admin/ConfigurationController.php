@@ -232,8 +232,7 @@ class ConfigurationController extends AbstractController {
             try {
                 $customization_json->loadFromJsonFile(); // Check if any customization.json exists
             }
-            // loadFromJsonFile() throws FileReadException if file is missing or empty
-            catch (FileReadException $e) {
+            catch (FileReadException $e) { // loadFromJsonFile() throws FileReadException if file is missing or empty
                 return false;
             }
         }
