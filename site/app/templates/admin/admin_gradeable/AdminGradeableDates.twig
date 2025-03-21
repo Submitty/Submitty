@@ -62,8 +62,9 @@
         
             <br />
 
-            <p style="max-width:600px;" id="checkpoint-numeric-gradeables-message">
+            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
+                {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
         </div>
     </div>
