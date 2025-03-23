@@ -19,14 +19,14 @@ use app\models\User;
  */
 class GradedGradeable extends AbstractModel {
     /** @var Gradeable Reference to gradeable */
-    private $gradeable = null;
+    private $gradeable;
     /** @prop
      * @var string Id of the gradeable this grade is attached to */
-    protected $gradeable_id = "";
+    protected $gradeable_id;
 
     /** @prop
      * @var Submitter The submitter who received this graded gradeable */
-    protected $submitter = null;
+    protected $submitter;
     /** @prop
      * @var TaGradedGradeable|null The TA Grading info or null if it doesn't exist  */
     protected $ta_graded_gradeable = null;
@@ -39,15 +39,27 @@ class GradedGradeable extends AbstractModel {
 
     /** @prop
      * @var array The late day exceptions indexed by user id */
-    protected $late_day_exceptions = [];
+    protected $late_day_exceptions;
 
     /** @prop
      * @var array<string> The reasons for exceptions indexed by user id */
-    protected $reasons_for_exceptions = [];
+    protected $reasons_for_exceptions;
 
     /** @prop
      * @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
+
+    /** @prop
+     * @var array<array<int, string>> The active graders for this graded gradeable */
+    protected $active_graders_names;
+
+    /** @prop
+     * @var array<array<int, string>> The active graders for this graded gradeable */
+    protected $active_graders;
+
+    /** @prop
+     * @var array<array<int, string>> The timestamps for the active graders this graded gradeable */
+    protected $active_graders_timestamps;
 
     /**
      * GradedGradeable constructor.
@@ -55,9 +67,12 @@ class GradedGradeable extends AbstractModel {
      * @param Gradeable $gradeable The gradeable associated with this grade
      * @param Submitter $submitter The user or team who submitted for this graded gradeable
      * @param array $details Other construction details (indexed by property name)
+     * @param array<array<int, string>> $active_graders The active graders for this graded gradeable
+     * @param array<array<int, string>> $active_graders_timestamps The timestamps for the active graders this graded gradeable
+     * @param array<array<int, string>> $active_graders_names The names for the active graders this graded gradeable
      * @throws \InvalidArgumentException If the provided gradeable or submitter are null
      */
-    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details) {
+    public function __construct(Core $core, Gradeable $gradeable, Submitter $submitter, array $details, array $active_graders = [], array $active_graders_timestamps = [], array $active_graders_names = []) {
         parent::__construct($core);
 
         // Check the gradeable instance
@@ -76,6 +91,34 @@ class GradedGradeable extends AbstractModel {
         $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
 
         $this->reasons_for_exceptions = $details['reasons_for_exceptions'] ?? [];
+
+        $this->active_graders = $active_graders;
+        $this->active_graders_timestamps = $active_graders_timestamps;
+        $this->active_graders_names = $active_graders_names;
+    }
+
+    /**
+     * Gets the active graders for this graded gradeable
+     * @return array<array<int, string>>
+     */
+    public function getActiveGraders(): array {
+        return $this->active_graders;
+    }
+
+    /**
+     * Gets the active graders timestamps for this graded gradeable
+     * @return array<array<int, string>>
+     */
+    public function getActiveGradersTimestamps(): array {
+        return $this->active_graders_timestamps;
+    }
+
+    /**
+     * Gets the active graders names for this graded gradeable
+     * @return array<array<int, string>>
+     */
+    public function getActiveGradersNames(): array {
+        return $this->active_graders_names;
     }
 
     /**
