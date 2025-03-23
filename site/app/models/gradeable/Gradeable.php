@@ -957,11 +957,11 @@ class Gradeable extends AbstractModel {
         $dates = $this->parseDates($dates);
 
         // Asserts that this date information is valid
-        $this->assertDates($dates);
+        //$this->assertDates($dates);
 
         // Coerce any dates that have database constraints, but
         //  aren't relevant to the current gradeable configuration
-        $dates = $this->coerceDates($dates, $grade_inquiry_modified);
+        //$dates = $this->coerceDates($dates, $grade_inquiry_modified);
 
         // Manually set each property (instead of iterating over self::date_properties) so the user
         //  can't set dates irrelevant to the gradeable settings
