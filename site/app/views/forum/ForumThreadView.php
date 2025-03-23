@@ -1130,14 +1130,14 @@ class ForumThreadView extends AbstractView {
         foreach ($users as $user => $details) {
             $given_name = $details["given_name"];
             $family_name = $details["family_name"];
-            $post_count = count($details["posts"]);
-            $posts = json_encode($details["posts"]);
-            $ids = json_encode($details["id"]);
-            $timestamps = json_encode($details["timestamps"]);
-            $thread_ids = json_encode($details["thread_id"]);
-            $thread_titles = json_encode($details["thread_title"]);
-            $num_deleted = ($details["num_deleted_posts"]);
-            $total_upducks = ($details["total_upducks"]);
+            $post_count = isset($details["posts"]) ? count($details["posts"]) : 0;
+            $posts = isset($details["posts"]) ? json_encode($details["posts"]) : null;
+            $ids = isset($details["id"]) ? json_encode($details["id"]) : null;
+            $timestamps = isset($details["timestamp"]) ? json_encode($details["timestamps"]) : null;
+            $thread_ids = isset($details["thread_id"]) ? json_encode($details["thread_id"]) : null;
+            $thread_titles = isset($details["thread_title"]) ? json_encode($details["thread_title"]) : null;
+            $num_deleted = $details["num_deleted_posts"];
+            $total_upducks = $details["total_upducks"];
 
             $userData[] = [
                 "family_name" => $family_name,
