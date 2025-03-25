@@ -60,11 +60,11 @@ runs:
     - name: Install Test-specific python dependencies
       run: |
         # Install for local
-        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install --upgrade pip setuptools wheel packaging
         pip3 -V
         pip3 install selenium websocket_client
         # Install globally
-        sudo python3 -m pip install --upgrade pip setuptools wheel
+        sudo python3 -m pip install --upgrade pip setuptools wheel packaging
         sudo pip3 -V
       shell: bash
     - name: Install python dependencies

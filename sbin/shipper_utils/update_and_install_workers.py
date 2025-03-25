@@ -170,6 +170,7 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
             return False
         try:
             success = True
+            print(f"============Detailed Command Output for {machine} ============")
             for command in commands:
                 thread_object.add_message(f'{get_machine_by_ip(host)}: performing {command}')
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
