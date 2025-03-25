@@ -92,7 +92,7 @@ class Message {
         return $this->chatroom;
     }
 
-    public function setChatroom(Chatroom $chatroom): void {
+    public function setChatroom(Chatroom|null $chatroom): void {
         $this->chatroom = $chatroom;
     }
 }

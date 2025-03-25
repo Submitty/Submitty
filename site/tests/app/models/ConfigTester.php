@@ -312,7 +312,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'queue_announcement_message' => '',
                     'seek_message_enabled'           => false,
                     'seek_message_instructions'      => '',
-                    'polls_enabled'                  => false
+                    'polls_enabled'                  => false,
+                    'chat_enabled'                   => false
                 ],
                 'feature_flags' => []
             ],

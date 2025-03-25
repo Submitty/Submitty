@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\repositories\chat;
 
 use Doctrine\ORM\EntityRepository;
+use app\entities\chat\Chatroom;
 
 class ChatroomRepository extends EntityRepository {
     /**
