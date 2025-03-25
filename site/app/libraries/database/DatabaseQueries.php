@@ -980,7 +980,7 @@ SQL;
         $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
         $parent_id = $this->course_db->row()["parent_id"];
         $children = [$post_id];
-        $get_deleted = $newStatus == 0;
+        $get_deleted = $newStatus === 0;
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if (!$newStatus) {
@@ -991,7 +991,7 @@ SQL;
                 }
             }
         }
-        if ($parent_id == -1) {
+        if ($parent_id === -1) {
             $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
             $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
             return true;
