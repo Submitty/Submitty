@@ -2089,345 +2089,94 @@ input:checked + .slider::after {
 End of slider switch
  */
 
-.badge-1 {
-    background-color: var(--category-color-1);
+.badge-1, .badge-2, .badge-3, .badge-4, .badge-5, .badge-6, .badge-7,
+.badge-8, .badge-9, .badge-10, .badge-11, .badge-12, .badge-13, .badge-14,
+.badge-15, .badge-16, .badge-17, .badge-18, .badge-19, .badge-20 {
     color: var(--text-black);
     min-width: 10px;
     float: none;
+}
+
+.badge-1 {
+    background-color: var(--category-color-1);
 }
 
 .badge-2 {
     background-color: var(--category-color-2);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-3 {
     background-color: var(--category-color-3);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-4 {
     background-color: var(--category-color-4);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-5 {
     background-color: var(--category-color-5);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-6 {
     background-color: var(--category-color-6);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-7 {
     background-color: var(--category-color-7);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-8 {
     background-color: var(--category-color-8);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-9 {
     background-color: var(--category-color-9);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-10 {
     background-color: var(--category-color-10);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-11 {
     background-color: var(--category-color-11);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-12 {
     background-color: var(--category-color-12);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-13 {
     background-color: var(--category-color-13);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-14 {
     background-color: var(--category-color-14);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-15 {
     background-color: var(--category-color-15);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-16 {
     background-color: var(--category-color-16);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-17 {
     background-color: var(--category-color-17);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-18 {
     background-color: var(--category-color-18);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-19 {
     background-color: var(--category-color-19);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
 .badge-20 {
     background-color: var(--category-color-20);
-    color: var(--text-black);
-    min-width: 10px;
-    float: none;
 }
 
-[data-theme="dark"] .badge-1 {
-    color: var(--category-color-1);
-    border-color: var(--category-color-1);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-2 {
-    color: var(--category-color-2);
-    border-color: var(--category-color-2);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-3 {
-    color: var(--category-color-3);
-    border-color: var(--category-color-3);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-4 {
-    color: var(--category-color-4);
-    border-color: var(--category-color-4);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-5 {
-    color: var(--category-color-5);
-    border-color: var(--category-color-5);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-6 {
-    color: var(--category-color-6);
-    border-color: var(--category-color-6);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-7 {
-    color: var(--category-color-7);
-    border-color: var(--category-color-7);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-8 {
-    color: var(--category-color-8);
-    border-color: var(--category-color-8);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-9 {
-    color: var(--category-color-9);
-    border-color: var(--category-color-9);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-10 {
-    color: var(--category-color-10);
-    border-color: var(--category-color-10);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-11 {
-    color: var(--category-color-11);
-    border-color: var(--category-color-11);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-12 {
-    color: var(--category-color-12);
-    border-color: var(--category-color-12);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-13 {
-    color: var(--category-color-13);
-    border-color: var(--category-color-13);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-14 {
-    color: var(--category-color-14);
-    border-color: var(--category-color-14);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-15 {
-    color: var(--category-color-15);
-    border-color: var(--category-color-15);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-16 {
-    color: var(--category-color-16);
-    border-color: var(--category-color-16);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-17 {
-    color: var(--category-color-17);
-    border-color: var(--category-color-17);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-18 {
-    color: var(--category-color-18);
-    border-color: var(--category-color-18);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-19 {
-    color: var(--category-color-19);
-    border-color: var(--category-color-19);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
-
-[data-theme="dark"] .badge-20 {
-    color: var(--category-color-20);
-    border-color: var(--category-color-20);
-    background-color: transparent;
-    border-width: 1px;
-    border-style: solid;
-    min-width: 10px;
-    float: none;
-}
 /* stylelint-enable no-descending-specificity */
 
 .notebook-output-cell-content {

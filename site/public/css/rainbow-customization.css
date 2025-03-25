@@ -61,6 +61,29 @@
     width: 100%;
     background-color: var(--standard-hover-light-gray);
     border: none;
+    flex-wrap: wrap;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#status_head {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 700px) {
+    /* stylelint-disable-next-line selector-id-pattern */    
+    #status_head {
+        flex-flow: column wrap;
+        justify-content: start;
+    }
+
+    /* stylelint-disable-next-line selector-id-pattern */    
+    #status_head > div {
+        width: 100%;
+        margin: 3px 0;
+    }
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -96,6 +119,33 @@
     display: none;
     margin-top: 10px;
     margin-bottom: 10px;
+    overflow: auto;
+    width: 100%;  
+}
+
+/* status-log-scrollbar */
+/* stylelint-disable-next-line selector-id-pattern */
+#save_status_log::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+    border-radius: 2px;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#save_status_log::-webkit-scrollbar-track {
+    background: var(--standard-light-gray);
+    border-radius: 2px;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#save_status_log::-webkit-scrollbar-thumb {
+    background: var(--standard-medium-gray);
+    border-radius: 2px;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
+#save_status_log::-webkit-scrollbar-thumb:hover {
+    background: var(--subtle-grey-background);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -150,11 +200,46 @@
     padding: 5px;
 }
 
+.same-section-name-warning-triangle {
+    margin-top: 7px;
+    margin-bottom: 4px;
+    display: none;
+    color: var(--standard-vibrant-orange);
+    border-bottom: 1px dotted var(--standard-vibrant-orange);
+}
+
+[data-theme="dark"] .same-section-name-warning-triangle {
+    color: var(--standard-light-yellow);
+    border-bottom: 1px dotted var(--standard-light-yellow);
+}
+
+.same-section-name-warning-triangle > .tooltiptext.tooltipbottom {
+    margin-left: -110px;
+    margin-top: 25px;
+    font-family: "Source Sans Pro", sans-serif;
+    color: var(--text-white);
+    font-size: 16px;
+    padding: 5px;
+}
+
 [data-theme="dark"] .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom {
     color: var(--text-black);
 }
 
 .rainbow-grades-warning-triangle > .tooltiptext.tooltipbottom::after {
+    content: "";
+    position: absolute;
+    top: -14%;
+    right: 50%;
+    border: 9px solid transparent;
+    border-bottom-color: var(--standard-dark-gray);
+}
+
+[data-theme="dark"] .same-section-name-warning-triangle > .tooltiptext.tooltipbottom {
+    color: var(--text-black);
+}
+
+.same-section-name-warning-triangle > .tooltiptext.tooltipbottom::after {
     content: "";
     position: absolute;
     top: -14%;
@@ -210,6 +295,10 @@ div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-tri
     display: inline-block;
 }
 
+div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-triangle {
+    display: inline-block;
+}
+
 .input-field {
     display: flex;
     align-items: center;
@@ -223,6 +312,11 @@ div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-tri
 
 .input-label {
     padding: 4px 6px;
+}
+
+.section-header {
+    display: flex;
+    gap: 7px;
 }
 
 #manual-grading-note {
