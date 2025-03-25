@@ -1528,6 +1528,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
