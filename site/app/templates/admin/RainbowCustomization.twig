@@ -44,27 +44,31 @@
         </div>
 
         <div id="save_status_container" class="customization_item">
-            <div id="build_buttons">
-                <button
+            <div id="status_head">
+                <div id="build_buttons">
+                    <button
                     id="btn-build-customization"
                     data-testid="btn-build-customization"
                     class="btn btn-primary"
                     tabindex="0"
                     type="button"
                     onclick="runBuild()"
-                >
+                    >
                     <i class="fas fa-magic-wand-sparkles" title="Build customization"></i>
                     Build
-                </button>
-            </div>
-            <span id="status_label" style="padding-right: 4px;">Status: </span>
-            <div id="save_status" data-testid="save-status">
-                No changes to save
-            </div>
-            <div id="save_status_buttons">
-                <button style="margin-left: 60px; padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div id="status_label" style="padding-right: 4px;">Status: </div>
+                    <div id="save_status" data-testid="save-status" style="margin-right: 60px;">
+                    No changes to save
+                    </div>
+                </div>
+                <div id="save_status_buttons">
+                    <button style="padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
                     Log
-                </button>
+                    </button>
+                </div>
             </div>
             <div id="save_status_log"></div>
         </div>
@@ -190,7 +194,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;overflow:auto;width:1000px;padding:5px;">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
@@ -227,7 +231,7 @@
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}
-                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle fa-rb tooltip">
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                         <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
                                     </i>
                                     <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
@@ -279,7 +283,7 @@
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                        <i class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                                             <span class="tooltiptext tooltipbottom">
                                                                 WARNING: Max Score has been overridden in Rainbow Grades
                                                                 <br><br>
@@ -359,7 +363,14 @@ To remove a curve simply blank all boxes."></i>
                 </div>
             </div>
             <div id="section_labels" data-testid="section-labels" class="customization_item">
-                <h2>Section Labels</h2>
+                <div class="section-header">
+                    <h2>Section Labels</h2>
+                    <i id="section-duplicate-warning" class="fas fa-exclamation-triangle same-section-name-warning-triangle fa-rb tooltip">
+                        <span class="tooltiptext tooltipbottom">
+                            WARNING: Multiple sections have the same name. This may result in unexpected behavior.
+                        </span>
+                    </i>
+                </div>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
                 <div class="input-boxes">

@@ -19,7 +19,7 @@
     <div style="margin-bottom:10px;" class="form-group row position-relative">
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown is defined and render_markdown ? 1 : 0 }}" />
     {% if show_merge_thread_button is defined and show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" data-testid="merge-thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -36,6 +36,9 @@
                                 },
                                 {
                                     label: "End of time"
+                                },
+                                {
+                                    label: "Clear"
                                 }
                             ],
                             label: "or",
@@ -44,12 +47,16 @@
                                 switch (index) {
                                     case 0:
                                         date = new Date();
+                                        fp.setDate(date, true);
                                         break;
                                     case 1:
                                         date = new Date("9998-01-01T00:00:00");
+                                        fp.setDate(date, true);
+                                        break;
+                                    case 2:
+                                        fp.clear();
                                         break;
                                 }
-                                fp.setDate(date, true);
                             }
                         })
                     ],
