@@ -156,10 +156,15 @@
 
 .category-item-box {
     background-color: var(--standard-pale-gray);
+    color: var(--default-black);
+}
+
+[data-theme ="dark"] .category-item-box {
+    background: var(--btn-default-white);
 }
 
 .category-button {
-    color: var(--standard-gray-black);
+    color: var(--default-black);
 }
 
 .edit-catergoty-name {
@@ -889,4 +894,14 @@
     color: var(--standard-gray-black);
     display: block;
     font-size: 14px;
+}
+
+.post-container {
+    display: inline-flex;
+    margin-left: 15px;
+}
+
+.upduck-post-container {
+    display: inline-flex;
+    align-items: center;
 }
