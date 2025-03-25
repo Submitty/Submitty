@@ -118,6 +118,7 @@ Cypress.Commands.add('checkLogoutInAfterEach', () => {
  * @param {int} wait
  */
 Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(wait);
     cy.reload();
     cy.then(() => {
@@ -125,6 +126,7 @@ Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
             if (result || timeout <= 0) {
                 return result;
             }
+            // eslint-disable-next-line no-restricted-syntax
             return cy.waitAndReloadUntil(condition, timeout - wait, wait);
         });
     });

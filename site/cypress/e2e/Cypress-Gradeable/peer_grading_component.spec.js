@@ -35,8 +35,10 @@ describe('Peer Grading Component testing', () => {
             cy.get('[data-testid="download-peer-csv"]').should('exist');
             if (option === 'grading_homework') {
                 cy.get('[data-testid="add-peer-grader"]').click();
-                cy.get('[data-testid="new-peer-grader"]').click().type('student');
-                cy.get('[data-testid="add-user-id-0"]').click().type('aphacker');
+                cy.get('[data-testid="new-peer-grader"]').click();
+                cy.get('[data-testid="new-peer-grader"]').type('student');
+                cy.get('[data-testid="add-user-id-0"]').click();
+                cy.get('[data-testid="add-user-id-0"]').type('aphacker');
                 cy.get('[data-testid="add-more-users"]').should('contain', 'Add More Users');
                 cy.get('[data-testid="new-peer-grader"]').click();
                 cy.get('[data-testid="admin-gradeable-add-peers-submit"]').click();

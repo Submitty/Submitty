@@ -1,0 +1,31 @@
+{
+	"required_capabilities": "python",
+    "grading_parameters": {
+        "TOTAL_POINTS": 5,
+        "AUTO_POINTS": 5
+    },
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/qiskit:qiskit"
+    },
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 3
+    },
+
+    "testcases" : [
+        {
+            "title" : "Circuit Comparison",
+            "details" : "python3 *.py",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "output_circuit.txt"
+                }
+            ]
+        }
+    ]
+}

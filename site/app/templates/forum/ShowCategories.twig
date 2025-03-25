@@ -6,7 +6,8 @@
         "show_threads" : forumBarData is defined ? forumBarData.show_threads : false,
         "thread_exists" : false,
         "show_filter": false,
-        "show_more": false
+        "show_more": false,
+        "activeThread": null
     } %}
 
 
@@ -50,7 +51,7 @@
             
                 </script>
 
-                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm key_to_click" tabindex="0">
+                <button type="button" title="Add new category" onclick="addNewCategory('{{ csrf_token }}');" style="margin-left:10px;" class="btn btn-primary btn-sm" tabindex="0">
                     <i class="fas fa-plus-circle fa-1x"></i> Add category
                 </button>
             </span>
@@ -66,10 +67,10 @@
             {% for category in categories %}
                 <li id="categorylistitem-{{ category.category_id }}" 
                     class="category-sortable category-item-box" 
-                    style="color: {{ category.color }};"
                     data-category_desc="{{ category.category_desc }}"
                     data-visible_date="{{ category.visible_date }}"
                     data-category_id="{{ category.category_id }}"
+                    data-diff="{{ category.diff }}"
                 >
                     <i class="fas fa-bars handle" aria-label="Drag to reorder" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">

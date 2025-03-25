@@ -1,0 +1,51 @@
+{
+	"required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/qiskit:qiskit"
+    },
+    "autograding" : {
+        "work_to_details" : ["**/*.png","**.*"]
+    },
+    "resource_limits" : {
+        "RLIMIT_NPROC" : 10
+    },
+    "testcases" : [
+        {
+            "title" : "Double H Gate Probabilities - Histogram Diff",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "partial_credit": false,
+            "validation" : [
+                {
+                    "actual_file": "histogram.png",
+                    "expected_file": "expected.png",
+                    "method": "ImageDiff",
+                    "acceptable_threshold": ".1",
+                    "show_difference_image" : "always",
+                    "show_actual": "always",
+                    "show_expected": "always"
+                },
+                {
+                    "method": "fileExists",
+                    "actual_file": "STDOUT.txt",
+                    "show_actual" : "never",
+                    "show_message" : "never"
+                }
+            ]
+        },
+        {
+            "title" : "Double H Gate Probabilities - Float Diff (Tolerance = .025)",
+            "command" : "python3 *.py",
+            "points" : 5,
+            "validation": [
+                {
+                    "method": "diff",
+                    "tolerance": 0.025,
+                    "actual_file": "STDOUT.txt",
+                    "expected_file": "expected.txt"
+                }
+            ]
+        }
+    ]
+}

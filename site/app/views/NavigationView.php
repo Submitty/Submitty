@@ -437,6 +437,8 @@ class NavigationView extends AbstractView {
             ]);
         }
 
+        $prerequisite = '';
+
         if ($graded_gradeable !== null) {
             /** @var TaGradedGradeable $ta_graded_gradeable */
             $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -468,8 +470,11 @@ class NavigationView extends AbstractView {
             }
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
+            // and there are no version conflicts
             $grade_ready_for_view = $gradeable->isTaGrading()
                 && $graded_gradeable->isTaGradingComplete()
+                && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== 0
+                && !$ta_graded_gradeable->hasVersionConflict()
                 && $list_section === GradeableList::GRADED;
 
             if ($gradeable->isTeamAssignment()) {
@@ -583,11 +588,22 @@ class NavigationView extends AbstractView {
                 //when there is no TA grade and due date passed
                 $title = "TA GRADE NOT AVAILABLE";
             }
+            elseif (
+                $gradeable->isTaGrading()
+                    && ($gradeable->isTaGradeReleased() || !$gradeable->hasReleaseDate())
+                    && $graded_gradeable->isTaGradingComplete()
+                    && $ta_graded_gradeable->hasVersionConflict()
+                    && $list_section == GradeableList::GRADED
+            ) {
+                $title = "VERSION CONFLICT";
+                $class = "btn-danger";
+            }
         }
         else {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 $title = "MUST BE ON A TEAM TO SUBMIT";
+                $prerequisite = null;
                 $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
@@ -595,13 +611,11 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
             $title = "LOCKED";
             $prerequisite = $gradeable->getPrerequisite();
         }
-
         return new Button($core, [
             "title" => $title,
             "subtitle" => $date_text,

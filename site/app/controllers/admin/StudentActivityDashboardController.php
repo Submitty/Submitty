@@ -57,7 +57,7 @@ class StudentActivityDashboardController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/activity/download", methods: ["GET"])]
+    #[Route("/courses/{_semester}/{_course}/activity/download_activity", methods: ["GET"])]
     public function downloadData() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
         $file_url = FileUtils::joinPaths(

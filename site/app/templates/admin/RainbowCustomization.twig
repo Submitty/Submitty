@@ -3,7 +3,7 @@
         <p>Loading...</p>
     </div>
     <div id="rg_web_ui">
-        <h1>Rainbow Grades Customization</h1>
+        <h1>Rainbow Grades Configuration</h1>
 
         {% if limited_functionality_mode %}
             <div id="limited_func_messages">
@@ -15,18 +15,134 @@
             </div>
         {% endif %}
 
-        <div id="save_status_container" class="customization_item">
-            <span id="status_label">Status: </span>
-            <div id="save_status" data-testid="save-status">
-                No changes to save
+        <div class="report-title-cont">
+            Web interface for creation and customization of Rainbow Grades for this course.
+            <a target=_blank
+               href="https://submitty.org/instructor/course_settings/rainbow_grades/"
+            >
+                Rainbow Grades Documentation
+                <i style="font-style:normal;" class="fa-question-circle"></i>
+            </a>
+        </div>
+
+        <div id="grade-report-summary" class="report-card">
+            <div class="report-title-cont">
+                Pushing this button will update the grade summary data used to generate the rainbow grades reports.
             </div>
-            <div id="save_status_buttons">
-                <input id="save_status_button" class="key_to_click" tabindex="0" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" data-testid="save-status-button"/>
-                <input id="show_log_button" type="button" value="Log" />
+            <div class="report-card-btn-cont">
+                <button id="grade-summaries-button"
+                        onclick="location.href='{{ summaries_url }}'"
+                        class="btn btn-primary"
+                        tabindex="0"
+                >
+                    Generate Grade Summaries
+                </button>
+                <div class="card-btn-info">
+                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="save_status_container" class="customization_item">
+            <div id="status_head">
+                <div id="build_buttons">
+                    <button
+                    id="btn-build-customization"
+                    data-testid="btn-build-customization"
+                    class="btn btn-primary"
+                    tabindex="0"
+                    type="button"
+                    onclick="runBuild()"
+                    >
+                    <i class="fas fa-magic-wand-sparkles" title="Build customization"></i>
+                    Build
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div id="status_label" style="padding-right: 4px;">Status: </div>
+                    <div id="save_status" data-testid="save-status" style="margin-right: 60px;">
+                    No changes to save
+                    </div>
+                </div>
+                <div id="save_status_buttons">
+                    <button style="padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
+                    Log
+                    </button>
+                </div>
             </div>
             <div id="save_status_log"></div>
         </div>
         <div id="list_wrapper">
+            <div id="upload_and_download" class="customization_item">
+                <div id="grade-report-customization-upload" class="card">
+                    <div class="title-cont">
+                    </div>
+                    <div class="card-btn-cont">
+                        <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{csrfToken}}">
+                            <input type="file" id="config-upload" data-testid="config-upload" name="config_upload" style="display:none">
+
+                            <button
+                                id="btn-download-gui-customization"
+                                data-testid="btn-download-gui-customization"
+                                class="btn btn-default key_to_click"
+                                tabindex="0"
+                                type="button"
+                                title="Download the GUI customization"
+                                onclick="window.location.href='{{ gui_customization_download_url }}'"
+                                style="margin-right: 50px"
+                            >
+                                <i class="fas fa-download" title="Download the file"></i>
+                                Download GUI Customization
+                            </button>
+                            <button
+                                id="btn-upload-customization"
+                                data-testid="btn-upload-customization"
+                                class="btn btn-default key_to_click"
+                                tabindex="0"
+                                type="button"
+                                title="Upload a Rainbow Grades customization.json directly to Submitty"
+                            >
+                                <i class="fas fa-upload" title="Download the file"></i>
+                                Upload Manual Customization
+                            </button>
+                            <button
+                                id="btn-download-customization"
+                                data-testid="btn-download-manual-customization"
+                                class="btn btn-default key_to_click"
+                                tabindex="0"
+                                type="button"
+                                title="Download the manual customization"
+                                onclick="window.location.href='{{ manual_customization_download_url }}'"
+                            >
+                                <i class="fas fa-download" title="Download the file"></i>
+                                Download Manual Customization
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ask_which_customization" data-testid="ask-which-customization" class="customization_item" style="display: {{ manual_customization_exists ? 'block' : 'none' }};">
+                <fieldset>
+                    <legend><h2>Customization</h2></legend>
+                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                    <form id="customizationForm">
+                        <div id="customization-options">
+                            <p> A manual customization file is available. Please choose the file for rendering Rainbow Grades:</p>
+                            <div>
+                                <input type="radio" id="manual_customization" data-testid="manual-customization-option" name="customization" value="manual" {{ manual_customization_exists ? 'checked' : '' }}>
+                                <label for="manual_customization">Manual Customization</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="gui_customization" data-testid="gui-customization-option" name="customization" value="gui" {{ manual_customization_exists ? '' : 'checked' }}>
+                                <label for="gui_customization">GUI Customization</label>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
+            </div>
+                
             <div id="display" class="customization_item">
                 <fieldset>
                     <legend><h2>Display</h2></legend>
@@ -37,24 +153,24 @@
                             <input type="checkbox" id="display_{{ display_option.id }}" name="display" value="{{ display_option.id }}" data-testid="display-{{ display_option.id|replace({'_': '-'}) }}"
                                    {% if display_option.isUsed == true %}checked{% endif %}
                             >
-                            <label style="display: table-cell; width: 150px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
+                            <label style="display: table-cell; width: 200px;" for="display_{{ display_option.id }}">{{ display_option.id }}</label>
                             <span style=" display: table-cell;"><em>{{ description | raw }}</em></span>
                         </div>
                         {% set counter = counter + 1 %}
                     {% endfor %}
                 </fieldset>
             </div>
-            <div id="cust_messages" class="customization_item">
+            <div id="cust_messages" data-testid="cust-messages" class="customization_item">
                 <h2>Messages</h2>
                 <label for="cust_messages_textarea" class="rg_info_message">You may enter a message that will appear above the student's rainbow grades.</label>
-                <textarea id="cust_messages_textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
+                <textarea id="cust_messages_textarea" data-testid="cust-messages-textarea">{% if 0 in messages|keys %}{{ messages[0] }}{% endif %}</textarea>
             </div>
-            <div id="gradeables" class="customization_item">
+            <div id="gradeables" data-testid="gradeables" class="customization_item">
                 <h2>Gradeables</h2>
                 <div style="width:45%;float:left;" id="buckets_used">
                     <h3>Assigned Buckets</h3>
-                    <ol id="buckets_used_list" style="min-height:50px;background-color:var(--standard-beige);">
-                        {%  for bucket in used_buckets %}
+                    <ol id="buckets_used_list" data-testid="buckets-used-list" style="min-height:50px;background-color:var(--standard-beige);">
+                        {% for bucket in used_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: inline;">
                                     <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
@@ -67,8 +183,8 @@
                 </div>
                 <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
                     <h3>Available Buckets</h3>
-                    <ol id="buckets_available_list" style="min-height:50px;background-color:var(--standard-light-green);">
-                        {%  for bucket in available_buckets %}
+                    <ol id="buckets_available_list" data-testid="buckets-available-list" style="min-height:50px;background-color:var(--standard-light-green);">
+                        {% for bucket in available_buckets %}
                             <li>
                                 <div class="bucket-percent" style="display: none;">
                                     <input aria-label="{{ bucket|capitalize }} percent" type="text" class="gradeable-custom-item-input" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
@@ -78,21 +194,21 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;overflow:auto;width:1000px;padding:5px;">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
                     <div id="checkboxControls" style="display: none;">
-                        <label>Extra credit:
-                            <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
-                        </label><br>
+                        <input id="extra_credit_checkbox" type="checkbox" name="extra_credit">
+                        <label for="extra_credit_checkbox">Extra credit</label><br>
 
-                        <label>Remove lowest:
-                            <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
-                        </label>
+                        <input id="drop_lowest_checkbox" type="checkbox" name="drop_lowest">
+                        <label for="drop_lowest_checkbox">Remove lowest</label><br>
+
+                        <input id="enable-per-gradeable-percents" type="checkbox" name="enable-per-gradeable-percents">
+                        <label for="enable-per-gradeable-percents">Enable/Edit Per Gradeable Percents:</label>
+                        <i>For each bucket, you may grade by percent instead of by points.</i><br>
                     </div>
-
-
                     <div id="config-wrapper">
                         {% for bucket, gradeables in customization_data %}
                             <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
@@ -104,9 +220,26 @@
                                         aria-label="{{ bucket|capitalize }} config count"
                                         value="{{ bucket_counts[bucket] }}"
                                         id="config-count-{{ bucket }}"
+                                        onblur="ClampGradeablesInBucket(this, {{ gradeables|length }});"
                                     >
                                     items
                                     <span style="margin-left: 100px;"></span>
+
+                                    {% set per_gradeable_percents_checked = false %}
+                                    {% for gradeable in gradeables %}
+                                        {% if gradeable["override_percent"] %}
+                                            {% set per_gradeable_percents_checked = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
+                                        <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
+                                    </i>
+                                    <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
+                                    <label id="per-gradeable-percents-label-{{ bucket }}" for="per-gradeable-percents-checkbox-{{ bucket }}">Per Gradeable Percents</label>
+                                    <span style="margin-left: 10px;"></span>
+                                    <button class="btn" id="per-gradeable-percents-reset-{{ bucket }}" type="button" onclick="ResetPerGradeablePercents('{{ bucket }}');">Even Split</button>
+                                    <span style="margin-left: 100px;"></span>
+
                                     <div id="dropLowestDiv-{{ bucket }}" style="display: none;">
                                         <label>
                                             Remove lowest:
@@ -125,20 +258,32 @@
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <input type="text"
-                                                       class="gradeable-custom-item-input"
-                                                       aria-label="{{gradeable["title"]}} max score"
-                                                       class="{{ gradeable["override"] ? "override" : "" }}"
-                                                       placeholder="{{ gradeable["max_score"] }}"
-                                                       value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                       id="maxscore-{{ gradeable["id"] }}"
-                                                       data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                       style="margin-right: 10px;"
-                                                       onblur="ClampPoints(this);"
-                                                       onkeyup="DetectMaxOverride(this);">
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
+                                                           aria-label="{{gradeable["title"]}} max score"
+                                                           placeholder="{{ gradeable["max_score"] }}"
+                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
+                                                           id="maxscore-{{ gradeable["id"] }}"
+                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
+                                                           onblur="ClampPoints(this);"
+                                                           onkeyup="DetectMaxOverride(this);">
+                                                    <span>pts</span>
+                                                </div>
+                                                <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
+                                                    <input type="text"
+                                                           {% set default_percent = ((1 / gradeables|length) * 100)|round(1, 'floor') %}
+                                                           class="gradeable-custom-item-input"
+                                                           aria-label="{{gradeable["title"]}} percent"
+                                                           placeholder="{{ default_percent }}"
+                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
+                                                           id="percents-{{ gradeable["id"] }}"
+                                                           onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
+                                                    <span>%</span>
+                                                </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle fa-rb tooltip">
+                                                        <i class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                                             <span class="tooltiptext tooltipbottom">
                                                                 WARNING: Max Score has been overridden in Rainbow Grades
                                                                 <br><br>
@@ -201,7 +346,7 @@ To remove a curve simply blank all boxes."></i>
                     {% endfor %}
                 </fieldset>
             </div>
-            <div id="benchmark_percents" class="customization_item">
+            <div id="benchmark_percents" data-testid="benchmark-percents" class="customization_item">
                 <h2>Benchmark Percents</h2>
                 <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
                 <div class="input-boxes">
@@ -213,22 +358,29 @@ To remove a curve simply blank all boxes."></i>
                         {% endif %}
 
                         <label for="benchmark_{{ benchmark }}" class="{{ benchmark }} input-label">{{ benchmark }}</label>
-                        <input type="text" id="benchmark_{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
+                        <input type="text" id="benchmark_{{ benchmark }}" data-testid="benchmark-{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
             </div>
-            <div id="section_labels" class="customization_item">
-                <h2>Section Labels</h2>
+            <div id="section_labels" data-testid="section-labels" class="customization_item">
+                <div class="section-header">
+                    <h2>Section Labels</h2>
+                    <i id="section-duplicate-warning" class="fas fa-exclamation-triangle same-section-name-warning-triangle fa-rb tooltip">
+                        <span class="tooltiptext tooltipbottom">
+                            WARNING: Multiple sections have the same name. This may result in unexpected behavior.
+                        </span>
+                    </i>
+                </div>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
                 <div class="input-boxes">
                     {% for section, label in sections_and_labels %}
                         <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
-                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
                     {% endfor %}
                 </div>
             </div>
-            <div id="final_grade_cutoffs" class="customization_item">
+            <div id="final_grade_cutoffs" data-testid="final-grade-cutoffs" class="customization_item">
                 <h2>Final Grade Cutoffs</h2>
                 <p class="rg_info_message">You may adjust the minimum percent required to receive certain final letter grades.  Enter this percentage as a decimal number out of 100.<br />As an example 90% would be entered as 90.0</p>
                 <div class="input-boxes">
@@ -240,11 +392,11 @@ To remove a curve simply blank all boxes."></i>
                         {% endif %}
 
                         <label for="cutoff_{{ cutoff_input }}" class="{{ cutoff_input }} input-label">{{ cutoff_input }}</label>
-                        <input type="text" id="cutoff_{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
+                        <input type="text" id="cutoff_{{ cutoff_input }}" data-testid="cutoff-{{ cutoff_input }}" class="final_cutoff_input {{ cutoff_input }}" name="final_grade_cutoffs" data-benchmark="{{ cutoff_input }}" value="{{ percent }}">
                     {% endfor %}
                 </div>
             </div>
-            <div id="manual-grading" class="customization_item">
+            <div id="manual-grading" data-testid="manual-grading" class="customization_item">
                 <h2>Manual Grading</h2>
                 <p class="rg_info_message">You may manually assign final grades to specific students. The note is only visible to the instructor, and it will only appear if instructor_notes is enabled under Display.</p>
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
@@ -252,11 +404,11 @@ To remove a curve simply blank all boxes."></i>
                 <div class="option">
                     <label for="manual-grading-user-id">
                         <span>USER ID:</span>
-                        <input class="option-input" type="text" name="manual-grading-user-id" id="manual-grading-user-id">
+                        <input class="option-input" type="text" name="manual-grading-user-id" id="manual-grading-user-id" data-testid="manual-grading-user-id">
                     </label>
                     <label for="manual-grading-grade">
                         <span>Final Grade:</span>
-                        <select name="manual-grading-grade" id="manual-grading-grade">
+                        <select name="manual-grading-grade" id="manual-grading-grade" data-testid="manual-grading-grade">
                             <option disabled selected value> -- select an option -- </option>
                             {% for grade in allowed_grades %}
                                 <option value="{{ grade }}">{{ grade }}</option>
@@ -265,9 +417,9 @@ To remove a curve simply blank all boxes."></i>
                     </label>
                     <label for="manual-grading-note">
                         <span>Note:</span>
-                        <input class="option-input" type="text" name="manual-grading-note" id="manual-grading-note">
+                        <input class="option-input" type="text" name="manual-grading-note" id="manual-grading-note" data-testid="manual-grading-note">
                     </label>
-                    <button type="submit" class="btn btn-primary" onclick="addToTable('manualGrade')" aria-label="submit">
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('manualGrade')" aria-label="submit" data-testid="manual-grading-submit">
                         <i class="fas fa-plus"></i>
                     </button>
                     {# This is a data table #}
@@ -280,7 +432,7 @@ To remove a curve simply blank all boxes."></i>
                                 <th>Delete</th>
                             </tr>
                         </thead>
-                        <tbody id="manual-grading-table-body">
+                        <tbody id="manual-grading-table-body" data-testid="manual-grading-table-body">
                             {% for entry in manual_grade %}
                                 <tr>
                                     <td>{{ entry.user }}</td>
@@ -293,7 +445,56 @@ To remove a curve simply blank all boxes."></i>
                     </table>
                 </div>
             </div>
-            <div id="plagiarism" class="customization_item">
+            <div id="performance-warnings" class="customization_item">
+                <h2>Academic Performance Warnings</h2>
+                <p class="rg_info_message">Automatically generate Academic Performance Warnings for each student that fails to obtain a target score on a given list of gradeables.</p>
+                <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
+                <input type="hidden" name="option" value="-1" />
+                <div class="option">
+                    <label for="performance-warnings-message">
+                        <span>Message:</span>
+                        <input class="option-input" type="text" name="performance-warnings-message" id="performance-warnings-message">
+                    </label>
+                    <label for="performance-warnings-gradeables">
+                        <span>Gradeables:</span>
+                        <select name="performance-warnings-gradeables[]" id="performance-warnings-gradeables">
+                            <option> -- select an option -- </option>{# Browser automatically selects first option. This option will be removed after page loads #}
+                            {% for index, value in gradeables %}
+                                <option value="{{ value['g_id'] }}">{{ value['g_title'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label for="performance-warnings-score">
+                        <span>Target Score:</span>
+                        <input class="option-input" type="number" name="performance-warnings-score" id="performance-warnings-score">
+                    </label>
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('performanceWarnings'); manageWarningsGradeables('submit');" aria-label="submit">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {# This is a data table #}
+                    <table id="performance-warnings-table" class="table table-striped table-bordered persist-area mobile-table">
+                        <thead>
+                        <tr>
+                            <th>Message</th>
+                            <th>Gradeables</th>
+                            <th>Target Score</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody id="performance-warnings-table-body">
+                        {% for entry in warning %}
+                            <tr>
+                                <td>{{ entry.msg }}</td>
+                                <td>{{ entry.ids|join(', ') }}</td>
+                                <td>{{ entry.value }}</td>
+                                <td><a onclick="deleteRow(this); manageWarningsGradeables('delete');"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="plagiarism" data-testid="plagiarism" class="customization_item">
                 <h2>Penalties for Academic Dishonesty and Plagiarism</h2>
                 <p class="rg_info_message">All students will receive a zero for the specified gradeable.  Additionally if a non-zero penalty value is indicated they will receive an additional reduction on the semester grade.  Penalty = 1 is a full letter grade.  Penalty = 0.5 is a half letter grade.  Penalty = 0.33 is a one third letter grade.</p>
                 <input type="hidden" name="csrf_token" value="{{ csrfToken }}" />
@@ -301,10 +502,10 @@ To remove a curve simply blank all boxes."></i>
                 <div class="option">
                     <label for="plagiarism-user-id">
                         <span>USER ID:</span>
-                        <input class="option-input" type="text" name="plagiarism-user-id" id="plagiarism-user-id">
+                        <input class="option-input" type="text" name="plagiarism-user-id" id="plagiarism-user-id" data-testid="plagiarism-user-id">
                     </label>
                     <label for="g_id" class="option">Gradeable:</label>
-                    <select name="g_id" id="g_id">
+                    <select name="g_id" id="g_id" data-testid="plagiarism-gradeable-id">
                         <option disabled selected value> -- select an option -- </option>
                         {% for index, value in gradeables %}
                             <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
@@ -312,9 +513,9 @@ To remove a curve simply blank all boxes."></i>
                     </select>
                     <label for="marks">
                         <span>Penalty:</span>
-                        <input class="option-input" type="text" name="marks" id="marks">
+                        <input class="option-input" type="text" name="marks" id="marks" data-testid="plagiarism-marks">
                     </label>
-                    <button type="submit" class="btn btn-primary" onclick="addToTable('plagiarism')" aria-label="submit">
+                    <button type="submit" class="btn btn-primary" onclick="addToTable('plagiarism')" aria-label="submit" data-testid="plagiarism-submit">
                         <i class="fas fa-plus"></i>
                     </button>
                     {# This is a data table #}
@@ -328,7 +529,7 @@ To remove a curve simply blank all boxes."></i>
                             <th>Delete</th>
                         </tr>
                         </thead>
-                        <tbody id="plagiarism-table-body" style="text-align:left">
+                        <tbody id="plagiarism-table-body" data-testid="plagiarism-table-body" style="text-align:left">
                         {% for entry in plagiarism %}
                             <tr>
                                 <td>{{ entry.user }}</td>
@@ -347,6 +548,8 @@ To remove a curve simply blank all boxes."></i>
 
 
     <script>
+        window.manualCustomizationExists = {{ manual_customization_exists ? 'true' : 'false' }};
+
         $('.gradeable-li-info .tooltip').on('mouseenter', function(){
             const gradeable = $(this).closest('.gradeable-li');
             const override = gradeable.find('.override');
