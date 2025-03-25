@@ -16,11 +16,12 @@ def up(config, database, semester, course):
     :type course: str
     """
 
+    # First create the tables without foreign key constraints
     database.execute(
     """
         CREATE TABLE IF NOT EXISTS chatrooms (
             id SERIAL PRIMARY KEY,
-            host_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+            host_id character varying NOT NULL,
             host_name character varying,
             title text NOT NULL,
             description text,
@@ -30,13 +31,30 @@ def up(config, database, semester, course):
 
         CREATE TABLE IF NOT EXISTS chatroom_messages (
             id SERIAL PRIMARY KEY,
-            chatroom_id integer NOT NULL REFERENCES chatrooms(id) ON DELETE CASCADE,
-            user_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+            chatroom_id integer NOT NULL,
+            user_id character varying NOT NULL,
             display_name character varying,
             role character varying,
             content text NOT NULL,
             timestamp timestamp(0) with time zone NOT NULL
         );
+    """
+    )
+    
+    # Then add the foreign key constraints separately
+    database.execute(
+    """
+        ALTER TABLE chatrooms 
+        ADD CONSTRAINT chatrooms_host_id_fkey 
+        FOREIGN KEY (host_id) REFERENCES users(user_id) ON DELETE CASCADE;
+        
+        ALTER TABLE chatroom_messages 
+        ADD CONSTRAINT chatroom_messages_chatroom_id_fkey 
+        FOREIGN KEY (chatroom_id) REFERENCES chatrooms(id) ON DELETE CASCADE;
+        
+        ALTER TABLE chatroom_messages 
+        ADD CONSTRAINT chatroom_messages_user_id_fkey 
+        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE;
     """
     )
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
