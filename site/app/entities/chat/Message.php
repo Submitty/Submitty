@@ -18,7 +18,7 @@ class Message {
 
     #[ORM\ManyToOne(targetEntity: Chatroom::class)]
     #[ORM\JoinColumn(name: "chatroom_id", referencedColumnName: "id")]
-    private Chatroom $chatroom;
+    private Chatroom|null $chatroom;
 
     #[ORM\Column(type: Types::STRING)]
     private string $user_id;
@@ -92,7 +92,7 @@ class Message {
         return $this->chatroom;
     }
 
-    public function setChatroom(Chatroom|null $chatroom): void {
+    public function setChatroom(Chatroom $chatroom): void {
         $this->chatroom = $chatroom;
     }
 }
