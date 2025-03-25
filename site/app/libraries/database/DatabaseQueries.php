@@ -701,7 +701,7 @@ SQL;
         return $this->course_db->row();
     }
 
-    public function existsAnnouncementsId($thread_id) {
+    public function existsAnnouncementsId(int $thread_id): bool {
         $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
         $row = $this->course_db->row();
         return count($row) > 0 && $row['announced'] !== null;
@@ -972,11 +972,12 @@ SQL;
     }
 
     /**
-     * @param string $current_user
+     * @param int $post_id
      * @param int $thread_id
-     * @return null
+     * @param bool $newStatus
+     * @return bool|null
      */
-    public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
+    public function setDeletePostStatus(int $post_id, int $thread_id, bool $newStatus): bool|null {
         $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
         $parent_id = $this->course_db->row()["parent_id"];
         $children = [$post_id];
@@ -997,15 +998,18 @@ SQL;
             return true;
         }
         else {
-            foreach ($children as $post_id) {
-                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $post_id]);
+            foreach ($children as $child_post_id) {
+                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $child_post_id]);
             }
-        } return false;
+        }
+        return false;
     }
 
-    public function unreadThread(string $current_user, int $thread_id) {
-        $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
-        return null;
+    public function unreadThread(string $current_user, int $thread_id): void {
+        $this->course_db->query(
+            "DELETE FROM viewed_responses where thread_id = ? and user_id = ?",
+            [$thread_id, $current_user]
+        );
     }
 
     public function getParentPostId($child_id) {
