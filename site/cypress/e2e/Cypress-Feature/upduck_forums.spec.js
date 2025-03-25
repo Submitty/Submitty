@@ -187,7 +187,7 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkStatsUpducks('Student, Joe', 0);
     });
 
-    it('Should display the list of users who liked a post & hide modal for students', () => {
+    it('Should display the list of users who liked this post & hide modal for students', () => {
         cy.login('student');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
