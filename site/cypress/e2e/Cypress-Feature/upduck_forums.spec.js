@@ -198,19 +198,16 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.get('[data-testid="upduck-button"]').first().click();
         cy.wait('@upduck', { responseTimeout: 15000 });
 
-        cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
-        cy.get('[data-testid="upduck-button"]').first().click();
-        cy.wait('@upduck', { responseTimeout: 15000 });
-
         // Verify that the "show upduck list" button is not visible for students
         cy.get('[data-testid="show-upduck-list"]').should('not.exist');
 
-        // Logout and login as instructor to check the upduck list modal
+        // Logout and login as instructor to like and check the upduck list modal
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
         cy.get('[data-testid="show-upduck-list"]').click();
 
         // Verify that the modal is visible
