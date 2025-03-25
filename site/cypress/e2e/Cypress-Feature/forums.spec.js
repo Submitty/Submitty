@@ -148,11 +148,9 @@ describe('Forum Thread Lock Date Functionality', () => {
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
-        cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
-        cy.log('Removing threads');
         removeThread(title1);
         removeThread(title2);
         removeThread(title3);
