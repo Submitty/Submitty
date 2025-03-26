@@ -1471,7 +1471,7 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
-        $source = hash('sha3-224', $_POST['current_user']); 
+        $source = hash('sha3-224', $_POST['current_user']);
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
