@@ -61,20 +61,20 @@ class AdminGradeableController extends AbstractController {
             'instructions_url' => '',
             'id' => '',
             'type' => '',
-            'bulk_upload' => 'false',
+            'bulk_upload' => false,
             'vcs' => 'false',
-            'ta_grading' => 'false',
-            'grade_inquiry_allowed' => 'false',
-            'grade_inquiry_per_component_allowed' => 'false',
-            'discussion_based' => 'false',
+            'ta_grading' => false,
+            'grade_inquiry_allowed' => false,
+            'grade_inquiry_per_component_allowed' => false,
+            'discussion_based' => false,
             'discussion_thread_id' => '',
-            'team_assignment' => 'false',
+            'team_assignment' => false,
             'team_size_max' => 3,
             'eg_inherit_teams_from' => '',
-            'gradeable_teams_read' => 'false',
+            'gradeable_teams_read' => false,
             'vcs_radio_buttons' => 'submitty-hosted',
             'external_repo' => '',
-            'using_subdirectory' => 'false',
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'syllabus_bucket' => 'Homework',
             'autograding_config_path' => ''
@@ -103,14 +103,14 @@ class AdminGradeableController extends AbstractController {
                     $values['external_repo'] = $_POST['vcs']['vcs_path'];
                 }
                 if (isset($_POST['vcs']['vcs_subdirectory'])) {
-                    $values['using_subdirectory'] = 'true';
+                    $values['using_subdirectory'] = true;
                     $values['vcs_subdirectory'] = $_POST['vcs']['vcs_subdirectory'];
                 }
-                $values['vcs'] = 'true';
+                $values['vcs'] = true;
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
             }
-            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
+            $values['bulk_upload'] = $_POST['bulk_upload'] ?? false;
         }
 
         if (array_key_exists('team_gradeable', $_POST)) {
@@ -128,8 +128,8 @@ class AdminGradeableController extends AbstractController {
         if (array_key_exists('ta_grading', $_POST)) {
             $values['ta_grading'] = $_POST['ta_grading'];
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
-                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? false;
+                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? false;
             }
         }
 
@@ -145,9 +145,9 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
-            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
-            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
-            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['has_due_date'] = $dates['has_due_date'] ?? true;
+            $values['has_release_date'] = $dates['has_released_date'] ?? true;
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
@@ -1124,20 +1124,20 @@ class AdminGradeableController extends AbstractController {
         $repo_name = '';
         $subdir = '';
         $using_subdirectory = false;
-        if ($details['using_subdirectory'] === 'true') {
+        if (Utils::getBooleanValue($details['using_subdirectory'])) {
             $subdir = $details['vcs_subdirectory'];
             $using_subdirectory = true;
         }
         $vcs_partial_path = '';
         // VCS specific values
-        if ($details['vcs'] === 'true') {
+        if (Utils::getBooleanValue($details['vcs'])) {
             $host_button = $details['vcs_radio_buttons'];
             $host_type = -1;
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
                 $repo_name = $details['id'];
-                $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+                $vcs_partial_path = $details['id'] . (Utils::getBooleanValue($details['team_assignment']) ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
@@ -1178,7 +1178,7 @@ class AdminGradeableController extends AbstractController {
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
+            $discussion_clicked = isset($details['discussion_based']) && (Utils::getBooleanValue($details['discussion_based']));
 
             //Validate user input for discussion threads
             if ($discussion_clicked) {
@@ -1191,12 +1191,12 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
-            $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
-            $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
+            $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed']);
+            $grade_inquiry = Utils::getBooleanValue($details['grade_inquiry_per_component_allowed']);
             $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => $details['team_assignment'] === 'true',
-                'ta_grading' => $details['ta_grading'] === 'true',
+                'team_assignment' => Utils::getBooleanValue($details['team_assignment']),
+                'ta_grading' => Utils::getBooleanValue($details['ta_grading']),
                 'team_size_max' => $details['team_size_max'],
                 'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
@@ -1273,7 +1273,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Setup student permissions specially for scanned exams
-        if ($details['bulk_upload'] === 'true') {
+        if (Utils::getBooleanValue($details['bulk_upload'])) {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);

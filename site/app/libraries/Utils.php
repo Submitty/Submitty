@@ -315,4 +315,23 @@ class Utils {
     public static function escapeDoubleQuotes(string $str): ?string {
         return preg_replace('["]', '\"', $str);
     }
+
+    /**
+     * Transforms non-boolean values to boolean values, i.e. 'true' to true
+     * @param mixed $variable The variable that is being passed in. Type of mixed to allow for string, boolean, or null.
+     */
+    public static function getBooleanValue(mixed $variable) {
+        // Handle boolean values peacefully
+        if (is_bool($variable)) {
+            return $variable;
+        }
+        // Handle string values peacefully, 'true' or 'on' (for javascript checkboxes)
+        elseif (is_string($variable)) {
+            return (strtolower($variable) === 'true' || strtolower($variable) === 'on');
+        }
+        // Default to returning false
+        else {
+            return false;
+        }
+    }
 }
