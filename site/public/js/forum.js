@@ -2128,9 +2128,9 @@ function showAttachmentsOnload() {
     if (!window.location.pathname.includes('/forum/threads')) {
         return;
     }
-    const showAttach = Cookies.get('show_attachments');
+    const showAttach = Cookies.get('show_forum_attachments');
     if (showAttach === undefined) {
-        Cookies.set('show_attachments', 'false', { expires: 365, path: '/' });
+        Cookies.set('show_forum_attachments', 'false', { expires: 365, path: '/' });
     }
     else if (showAttach === 'true') {
         $('#toggle-attachments-button').find('.status').text('Hide attachments');
@@ -2152,8 +2152,8 @@ function loadAllInlineImages(open_override = false) {
         return;
     }
 
-    const showAttach = Cookies.get('show_attachments') === 'true' ? 'false' : 'true';
-    Cookies.set('show_attachments', showAttach, { expires: 365, path: '/' });
+    const showAttach = Cookies.get('show_forum_attachments') === 'true' ? 'false' : 'true';
+    Cookies.set('show_forum_attachments', showAttach, { expires: 365, path: '/' });
 
     const buttonText = `${showAttach === 'true' ? 'Hide' : 'Show'} attachments`;
     $('#toggle-attachments-button').find('.status').text(buttonText);
