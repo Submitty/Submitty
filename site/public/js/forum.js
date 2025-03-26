@@ -722,7 +722,8 @@ function initSocketClient() {
                     likesCount: msg.likesCount,
                     likesFromStaff: msg.likesFromStaff,
                     status: msg.status,
-                }, 'ws');
+                    source: msg.source,
+                });
                 break;
             default:
                 console.log('Undefined message received.');
@@ -1281,7 +1282,7 @@ function toggleLike(post_id, current_user) {
                 return;
             }
             else {
-                updateLikesDisplay(post_id, json.data, 'ajax');
+                updateLikesDisplay(post_id, json.data);
             }
         },
         error: function (err) {
@@ -1290,7 +1291,7 @@ function toggleLike(post_id, current_user) {
     });
 }
 
-function updateLikesDisplay(post_id, data, source) {
+function updateLikesDisplay(post_id, data) {
     const likes = data['likesCount'];
     const liked = data['status'] === 'like';
     const staffLiked = data['likesFromStaff'];
@@ -1300,9 +1301,10 @@ function updateLikesDisplay(post_id, data, source) {
 
     // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    const user = document.getElementById('current-thread').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
 
-    if (source === 'ajax') {
+    if (user === data['source']) {
         const from = liked ? 'light-mode-off-duck.svg' : 'on-duck-button.svg';
         const to = liked ? 'on-duck-button.svg' : 'light-mode-off-duck.svg';
         likeIconSrcElement = likeIconSrcElement.replace(from, to);

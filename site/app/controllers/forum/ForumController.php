@@ -1476,11 +1476,13 @@ class ForumController extends AbstractController {
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
-            'likesFromStaff' => $output['likesFromStaff']
+            'likesFromStaff' => $output['likesFromStaff'],
+            'source' => $_POST['current_user']
         ]);
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
+            'source' => $_POST['current_user'], // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
