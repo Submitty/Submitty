@@ -103,11 +103,31 @@ dispatch() {
     info "Job dispatched"
 }
 
+restart_services() {
+    services=(
+        "submitty_autograding_shipper"
+        "submitty_autograding_worker"
+        "submitty_daemon_jobs_handler"
+        "submitty_websocket_server"
+        "nullsmtpd"
+    )
+
+    for service in "${services[@]}"; do
+        sudo systemctl status "${service}" | grep -q 'active (running)'
+
+        if [ $? -ne 0 ]; then
+            echo "Restarting ${service}"
+            sudo systemctl restart "${service}"
+        fi
+    done
+}
 
 # Check the dispatching queue
 [[ ! -d "${SUBMITTY_DAEMON_JOB_Q}" ]] && {
     panic "Queue folder (${SUBMITTY_DAEMON_JOB_Q}) does not exist!"
 }
+
+restart_services
 
 get_job_index "$@"
 shift 1
