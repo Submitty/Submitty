@@ -325,12 +325,12 @@ class Utils {
         if (is_bool($variable)) {
             return $variable;
         }
-        // Handle string values peacefully, 'true' or 'on' (for javascript checkboxes)
         elseif (is_string($variable)) {
+            // Handle string values peacefully, 'true' or 'on' (for javascript checkboxes)
             return (strtolower($variable) === 'true' || strtolower($variable) === 'on');
         }
-        // Default to returning false
         else {
+            // Default to returning false
             return false;
         }
     }
