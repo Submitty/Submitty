@@ -113,18 +113,24 @@ a.btn {
 /* stylelint-disable-next-line no-descending-specificity */
 .black-btn,
 .black-btn > i.fas {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--text-black) !important;
 }
 
 .black-btn:hover,
 .black-btn > i.fas:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #405e90 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #405e90 !important;
 }
 
 .black-btn:active,
 .black-btn > i.fas:active {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #991313 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #991313 !important;
 }

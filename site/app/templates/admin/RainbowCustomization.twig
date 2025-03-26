@@ -363,7 +363,14 @@ To remove a curve simply blank all boxes."></i>
                 </div>
             </div>
             <div id="section_labels" data-testid="section-labels" class="customization_item">
-                <h2>Section Labels</h2>
+                <div class="section-header">
+                    <h2>Section Labels</h2>
+                    <i id="section-duplicate-warning" class="fas fa-exclamation-triangle same-section-name-warning-triangle fa-rb tooltip">
+                        <span class="tooltiptext tooltipbottom">
+                            WARNING: Multiple sections have the same name. This may result in unexpected behavior.
+                        </span>
+                    </i>
+                </div>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
                 <div class="input-boxes">

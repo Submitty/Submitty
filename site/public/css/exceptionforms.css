@@ -19,6 +19,7 @@ fieldset {
 }
 
 #gradeable-select {
+    /* stylelint-disable-next-line declaration-no-important */
     width: 100% !important;
 }
 
