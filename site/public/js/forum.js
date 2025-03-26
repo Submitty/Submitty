@@ -1301,7 +1301,7 @@ function updateLikesDisplay(post_id, data) {
 
     // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
-    const user = document.getElementById('current-thread').dataset.user;
+    const user = document.getElementById('posts_list').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
 
     if (user === data['source']) {

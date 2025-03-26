@@ -1471,18 +1471,19 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
+        $source = hash('sha3-224', $_POST['current_user']); 
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
             'likesFromStaff' => $output['likesFromStaff'],
-            'source' => $_POST['current_user']
+            'source' => $source
         ]);
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
-            'source' => $_POST['current_user'], // user who toggled the like
+            'source' => $source, // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);

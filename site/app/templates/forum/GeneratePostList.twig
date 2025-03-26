@@ -1,5 +1,5 @@
 {% set show_unresolve = false %}
-<data id="current-thread" value="{{ post_data[0].thread_id }}" data-user="{{ post_data[0].current_user }}"></data>
+<data id="current-thread" value="{{ post_data[0].thread_id }}"></data>
 <a class="skip-btn" href="#thread_box_link_{{thread_id != "" ? thread_id : first_post_id}}">Back to thread list</a>
 <a class="skip-btn key_to_click" href="#reply_box_{{post_box_id}}" onclick="$('#reply_box_{{post_box_id}}').focus(); return false;">Skip to reply</a>
 {% for post_d in  post_data %}
