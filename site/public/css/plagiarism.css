@@ -37,6 +37,7 @@ td {
 }
 
 .padded-icon-column {
+    /* stylelint-disable-next-line declaration-no-important */
     padding: 0 0.5em !important;
 }
 
