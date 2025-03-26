@@ -156,10 +156,15 @@
 
 .category-item-box {
     background-color: var(--standard-pale-gray);
+    color: var(--default-black);
+}
+
+[data-theme ="dark"] .category-item-box {
+    background: var(--btn-default-white);
 }
 
 .category-button {
-    color: var(--standard-gray-black);
+    color: var(--default-black);
 }
 
 .edit-catergoty-name {
@@ -851,7 +856,9 @@
 }
 
 .deleted-unviewed {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--deleted-and-unviewed-thread) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
 }
 

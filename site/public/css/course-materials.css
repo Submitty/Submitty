@@ -38,6 +38,7 @@ a.popout-item > .fas:hover {
 }
 
 .partial-checkbox:checked {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-medium-gray) !important;
 }
 
