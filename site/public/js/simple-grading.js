@@ -332,10 +332,50 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
+function adjustHeight(el) {
+    el.style.height = el.scrollHeight > el.clientHeight
+        ? `${el.scrollHeight}px`
+        : '30px';
+}
+
+function minimizeHeight(el) {
+    el.style.height = '30px';
+}
+
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $('td.cell-grade').click(function () {
         updateCheckpointCells(this);
+    });
+    $('.cell-grade').change(function () {
+        let elem = $(this);
+        const split_id = elem.attr('id').split('-');
+        const row_el = $(`tr#row-${split_id[2]}-${split_id[3]}`);
+        const scores = {};
+        const old_scores = {};
+        row_el.find('.cell-grade').each(function () {
+            elem = $(this);
+            if (this.tagName.toLowerCase() === 'textarea') {
+                old_scores[elem.data('id')] = `${elem.data('origval')}`;
+                scores[elem.data('id')] = elem.val();
+                elem.data('origval', elem.val());
+                elem.attr('data-origval', elem.val());
+            }
+        });
+        submitAJAX(
+            buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+            {
+                csrf_token: csrfToken,
+                user_id: row_el.data('user'),
+                old_scores: old_scores,
+                scores: scores,
+            },
+            () => {}, // Empty function for success callback, null causing error.
+            () => {
+                console.error('Failed to save data for gradeable:', row_el.data('gradeable'),
+                    'user:', row_el.data('user'));
+            },
+        );
     });
 
     // Initialize based on cookies
