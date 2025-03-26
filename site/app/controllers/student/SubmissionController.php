@@ -436,6 +436,7 @@ class SubmissionController extends AbstractController {
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
+        $redactions = $gradeable->getRedactions();
 
         if ($is_qr) {
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
@@ -457,7 +458,8 @@ class SubmissionController extends AbstractController {
                     "qr_suffix" => $qr_suffix,
                     "filename"  => $uploaded_file["name"][$i],
                     "is_qr"     => true,
-                    "use_ocr"   => $use_ocr
+                    "use_ocr"   => $use_ocr,
+                    "redactions" => $redactions
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
@@ -483,7 +485,8 @@ class SubmissionController extends AbstractController {
                     "timestamp" => $current_time,
                     "filename"  => $uploaded_file["name"][$i],
                     "num"       => $num_pages,
-                    "is_qr"     => false
+                    "is_qr"     => false,
+                    "redactions" => $redactions
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";

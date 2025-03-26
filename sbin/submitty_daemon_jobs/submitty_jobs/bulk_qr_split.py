@@ -7,6 +7,7 @@ import traceback
 import numpy
 from . import write_to_log as logger
 from . import submitty_ocr as scanner
+from . import generate_pdf_images
 
 # try importing required modules
 try:
@@ -28,6 +29,7 @@ def main(args):
     qr_suffix = args[3]
     log_file_path = args[4]
     use_ocr = args[5]
+    redactions = args[6]
 
     buff = "Process " + str(os.getpid()) + ": "
 
@@ -102,12 +104,14 @@ def main(args):
                     logger.write_to_json(json_file, output)
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
+                    generate_pdf_images.main(prev_file, redactions)
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
                     output[prev_file]['page_count'] = page_count
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
+                    generate_pdf_images.main(prev_file, redactions)
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfWriter()
@@ -126,11 +130,6 @@ def main(args):
                 id_index += 1
                 page_count = 1
                 prev_file = output_filename
-
-                # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
-
             else:
                 # the first pdf page doesn't have a qr code
                 if i == 0:
@@ -156,10 +155,6 @@ def main(args):
                 # add pages to current split_pdf
                 page_count += 1
                 pdf_writer.add_page(pdfPages.pages[i])
-                # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
-                          "JPEG", quality=20, optimize=True)
-
             i += 1
 
         buff += "Finished splitting into {} files\n".format(id_index)
@@ -176,6 +171,7 @@ def main(args):
 
         with open(prev_file, 'wb') as out:
             pdf_writer.write(out)
+        generate_pdf_images.main(prev_file, redactions)
         # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)
     except Exception:
