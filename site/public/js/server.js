@@ -1556,6 +1556,11 @@ function toggleSidebar() {
     sidebar.toggleClass('collapsed', !shown);
 }
 
+function unregisterUserForm() {
+    $('.popup-form').css('display', 'none');
+    showPopup('#unregister-user-form');
+}
+
 $(document).ready(() => {
     // Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({

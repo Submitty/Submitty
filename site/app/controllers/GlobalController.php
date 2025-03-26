@@ -210,6 +210,14 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()) !== 0) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => 'javascript: unregisterUserForm();',
+                "title" => "Unregister",
+                "icon" => "fa-remove",
+            ]);
+        }
+
         // --------------------------------------------------------------------------
 
         $sidebar_buttons[] = new Button($this->core, [
