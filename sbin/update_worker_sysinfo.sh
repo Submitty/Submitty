@@ -113,7 +113,8 @@ restart_services() {
     )
 
     for service in "${services[@]}"; do
-       if ! sudo systemctl status "${service}" | grep -q 'active (running)'; then
+        status=$(sudo systemctl status "${service}")
+        if ! echo "${status}" | grep -q 'active (running)'; then
             echo "Restarting ${service}"
             sudo systemctl restart "${service}"
         fi
