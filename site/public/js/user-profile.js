@@ -235,11 +235,15 @@ function updateUserPreferredNames() {
                     displaySuccessMessage(data.message);
                     // update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
-                    $('#givenname-row .icon').html(`${icon} ${data.given_name}`);
-                    $('#familyname-row .icon').html(`${icon} ${data.family_name}`);
+                    $('#givenname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_given_name));
+                    $('#familyname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_family_name));
                     // update the data attributes
-                    given_name_field.data('current-name', data.given_name);
-                    family_name_field.data('current-name', data.family_name);
+                    given_name_field.data('current-name', data.preferred_given_name);
+                    family_name_field.data('current-name', data.preferred_family_name);
+                    // Update abbreviated name
+                    $('#user-last-initial-format-preview').data('options', data.abbreviation_options);
+                    $('#user-last-initial-format-preview').text(data.current_abbreviation);
+                    $('#last-initial-format-row .icon').html(`${icon} `).append($('<span>').text(data.current_abbreviation));
                 }
                 else {
                     // eslint-disable-next-line no-undef
