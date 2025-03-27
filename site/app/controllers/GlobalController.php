@@ -431,13 +431,12 @@ class GlobalController extends AbstractController {
             ]);
         }
 
-        // --------------------------------------------------------------------------
-        // SUPERUSERS ONLY
         if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['community_events']),
                 "title" => "Community Events",
-                "icon" => "fa-paper-plane"
+                "icon" => "fa-palette",
+                "id" => "nav-sidebar-events"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [

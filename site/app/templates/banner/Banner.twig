@@ -5,9 +5,15 @@
 &nbsp;
 </p>
 
-<button class="upload-banner btn btn-primary" onclick="newUploadBanner()"> Upload a New Community Event </button>
+{% if duckGif and duckGif != "" %}
 
-<br>
+
+  <button class="upload-banner btn btn-primary" onclick="newUploadBanner()" style="margin: 20px 0;"> 
+    Upload a New Community Event 
+  </button>
+
+
+
 
 
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -35,8 +41,36 @@
     <p> Id: {{id}} </p>
     <p>Release Date: {{ releaseDate|date('Y-m-d') }}</p>
     <p>Close Date: {{ closeDate|date('Y-m-d') }}</p>
+
+
 </div>
 {% endfor %}
-</div>
+<br>
+<hr style="border: 1px solid #ccc; margin: 20px 0;">
 
-{{ include('banner/UploadBannerPopup.twig') }}
+
+
+
+
+The moorthy gif to be displayed for new banners: <img src="data:image/gif;base64,{{duckGif}}" alt="GIF image" style="max-width: 100px">
+{% else %}
+
+<p>
+  Upload an gif file here that will be displayed to notify students of a new event happening! <br> <br>
+  PLEASE NOTE! <br>
+  You must name your gif: moorthy_chat_gif.gif <br>
+  A gif file for displaying new events will only be able to be uploaded ONCE <br>
+</p>
+
+
+<button class="upload-svg btn btn-primary" onclick="newUploadSVG()" style="margin: 20px 0;"> 
+  Upload a New Notification Duck
+</button>
+
+{% endif %}
+
+</div>
+  {{ include('banner/UploadBannerPopup.twig') }}
+  <br />
+  {{ include('banner/UploadSvgPopup.twig') }}
+
