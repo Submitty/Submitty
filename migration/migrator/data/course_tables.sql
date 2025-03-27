@@ -2954,6 +2954,7 @@ ALTER TABLE ONLY public.active_graders
 
 
 --
+
 -- Name: chatroom_messages chatroom_messages_chatroom_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2978,6 +2979,7 @@ ALTER TABLE ONLY public.chatrooms
 
 
 --
+
 -- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
