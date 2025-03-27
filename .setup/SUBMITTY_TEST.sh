@@ -30,7 +30,7 @@ if [ -z "$1" ] || [ "$1" == "help" ]; then
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
           php-lint: phpcs & phpstan
-          js-lint: eslint
+          js-lint : eslint
           css-lint: css-stylelint
           "
 elif [ "$1" == "phpstan" ]; then
