@@ -722,6 +722,7 @@ function initSocketClient() {
                     likesCount: msg.likesCount,
                     likesFromStaff: msg.likesFromStaff,
                     status: msg.status,
+                    source: msg.source,
                 });
                 break;
             default:
@@ -1292,7 +1293,7 @@ function toggleLike(post_id, current_user) {
 
 function updateLikesDisplay(post_id, data) {
     const likes = data['likesCount'];
-    const liked = data['status'];
+    const liked = data['status'] === 'like';
     const staffLiked = data['likesFromStaff'];
 
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
@@ -1300,13 +1301,13 @@ function updateLikesDisplay(post_id, data) {
 
     // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    const user = document.getElementById('posts_list').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
 
-    if (liked === 'unlike') {
-        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-    }
-    else if (liked === 'like') {
-        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+    if (user === data['source']) {
+        const from = liked ? 'light-mode-off-duck.svg' : 'on-duck-button.svg';
+        const to = liked ? 'on-duck-button.svg' : 'light-mode-off-duck.svg';
+        likeIconSrcElement = likeIconSrcElement.replace(from, to);
     }
 
     if (staffLiked > 0) {
