@@ -1419,7 +1419,7 @@ bool dispatch::tolerance_diff(
 
       // we got two different numbers here: check if they are within tolerance
       auto diff {static_cast<float>(
-        std::abs(std::stod(expected_line_words[word]) - std::stod(student_line_words[word]))
+        std::abs(std::stod(isolateAlphanumAndNumberPunctuation(expected_line_words[word])) - std::stod(isolateAlphanumAndNumberPunctuation(student_line_words[word])))
       )};
 
       if (diff >= tolerance) {  // numbers are not within tolerance
@@ -1451,7 +1451,7 @@ bool dispatch::tolerance_diff(
     // if line doesn't have a diff other than values within tolerence,
     // ignore white spaces if needed, and increment equal_lines
     if (!line_has_diff
-        && (ignoreWhitespace || whiteSpaceListsEqual(expected_spaces[line], student_spaces[line]))
+        && (ignoreWhitespace || wsle)
     )   equal_lines++;
 
   } // for (std::size_t line = 0; line < expected_lines && line < student_lines; line++)

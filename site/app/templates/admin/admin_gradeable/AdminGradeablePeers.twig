@@ -312,17 +312,17 @@
     * @param {boolean} grader_removed true if existing grader was removed
     * @param {String} button_id the ID of the submit button to be enabled / disabled
     * @param {String} error_div_id the ID of the error message to be displayed if submit is disabled
-    * @param {boolean} self_grading true if the student and grader is different
+    * @param {boolean} self_grading true if the student and grader is same
     */
     function updateSubmitButton(valid_grader, valid_students, new_grader, grader_removed, button_id, error_div_id, self_grading) {
-        if (grader_removed || (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true)))) {
+        if (grader_removed || (valid_grader && !valid_students.includes(false) && (!new_grader || valid_students.includes(true))) && !self_grading) {
             $(error_div_id).hide();
             $(button_id).prop('disabled', false);
         } else {
             $(error_div_id).empty();
             if (!valid_grader) {
                 $(error_div_id).text("Please enter a valid new grader that is in the course and not already in the matrix.");
-            } else if (self_grading) {
+            } else if (self_grading || (valid_students.includes(false) && !self_grading)) {
                 $(error_div_id).text("Please note that student is not able to grade themselves.");
             } else if (valid_students.includes(false)) {
                 $(error_div_id).text("Please enter valid new students that are in the course and not already assigned to the grader.");
@@ -383,6 +383,7 @@
         $('#admin-gradeable-edit-peers-form').on('blur', ":text.add_user_ids", function() {
             const grader_id = $("#admin-gradeable-edit-peers-title").text().substr(18);
             checkNewStudentsValid(grader_id, $(this), valid_students, false);
+            self_grading = grader_id === $(this).val();
             updateSubmitButton(valid_grader, valid_students, false, false, "#admin-gradeable-edit-peers-submit", "#submit-error", self_grading);
         });
         $('#admin-gradeable-edit-peers-form').on('focus blur', '#remove_grader', function() {
@@ -394,12 +395,15 @@
             valid_students = [];
         });
         $('#admin-gradeable-add-peers-form').on('blur', ':text#new_peer_grader', function() {
+            const grader_id = $(":text#new_peer_grader").val();
             valid_grader = checkNewGraderValid($(this));
+            self_grading = grader_id === $(":text.add_user_ids").val();
             updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading);
         });
         $('#admin-gradeable-add-peers-form').on('blur', ':text.add_user_ids', function() {
             const grader_id = $(":text#new_peer_grader").val();
             checkNewStudentsValid(grader_id, $(this), valid_students, true);
+            self_grading = grader_id === $(this).val();
             updateSubmitButton(valid_grader, valid_students, true, false, "#admin-gradeable-add-peers-submit", "#submit-error2", self_grading);
         });
     });

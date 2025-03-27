@@ -15,7 +15,7 @@ describe('Rubric Access Test', () => {
         cy.get('#agree-button').click();
         cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').eq(12).click();
-        cy.get('#grading_rubric_btn').click();
+        cy.get('[data-testid="grading-rubric-btn"]').click();
         const filePath = '../more_autograding_examples/image_diff_mirror/submissions/student1.png';
         cy.get('#attachment-upload').selectFile(filePath);
         cy.get('.key_to_click').find('[title="Delete the file"]').click();

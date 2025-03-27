@@ -50,7 +50,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
-        // Only show the late banner if the submission has a due date
+        // Only show the late banner and daylight savings banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
         if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
@@ -197,14 +197,56 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+        // process daylight savings banner
+        // check if we have excessive amounts of late days or if the due date and due date + late days is in different time zones
+        // and if the user can submit without it being too late
+        $due_date = $gradeable->getSubmissionDueDate();
+        $due_date_with_late_days = clone $due_date;
+        $due_date_with_late_days->modify('+' . $late_days_allowed . ' days');
+        $today = new \DateTime();
 
-        $date = new \DateTime();
-        $future_date = clone $date;
-        $future_date->modify('+7 days');
-        $past_date = clone $date;
-        $past_date->modify('-7 days');
-        // format("I") returns whether the given date is in daylight savings
-        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
+        // if we are past the due date + late days
+        if ($today > $due_date_with_late_days) {
+            $daylight_message_required = false;
+        }
+        elseif ($late_days_allowed <= 365) {
+            $daylight_due_date = intval($due_date->format("I"));
+            $daylight_due_date_with_late_days = intval($due_date_with_late_days->format("I"));
+            // DST is different, DST message always required
+            if ($daylight_due_date !== $daylight_due_date_with_late_days) {
+                $daylight_message_required = true;
+            }
+            else { // check if we walked in and then out of DST
+                // same year, only need to check due date outside DST (0) and late day + due date outside of DST but on the other side (0)
+                if ($due_date->format("y") === $due_date_with_late_days->format("y")) {
+                    if ($daylight_due_date === 1 || $daylight_due_date_with_late_days === 1) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = intval($due_date->format("m")) < 6 && intval($due_date_with_late_days->format("m")) > 6;
+                    }
+
+                // different year, only false if we go from second non-DST to first non-DST
+                }
+                else {
+                    if (
+                        $daylight_due_date === 0
+                        && $daylight_due_date_with_late_days === 0
+                        && intval($due_date->format("m")) > 6
+                        && intval($due_date_with_late_days->format("m")) < 6
+                    ) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = true;
+                    }
+                }
+            }
+        }
+        else {
+            // more than 365 days, always true
+            $daylight_message_required = true;
+        }
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
@@ -232,7 +274,8 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_day_budget
+                    'remaining' => $late_day_budget,
+                    'allowed_remaining' => $late_days_allowed - $active_days_charged
                 ]];
             }
             if ($error) {
@@ -295,10 +338,13 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
             'error' => $error,
-            'daylight' => $daylight_message_required
+            'daylight' => $daylight_message_required,
+            'late_days_url' => $late_days_url
         ]);
     }
 

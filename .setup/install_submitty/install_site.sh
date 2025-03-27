@@ -21,10 +21,10 @@ set_permissions () {
     extension="${filename##*.}"
     # filename="${filename%.*}"
     case "${extension}" in
-        css|otf|jpg|png|ico|txt|twig|map)
+        css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|cgi)
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
             chmod 445 ${fullpath}
             ;;
         html)
@@ -353,6 +353,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # js-cookie
     mkdir ${VENDOR_FOLDER}/js-cookie
     cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
+    #vue
+    mkdir ${VENDOR_FOLDER}/vue
+    cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -375,12 +378,18 @@ chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a+x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod a-x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

@@ -42,6 +42,10 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     {% endif %}
 
+    {% for audio_ref in audio %}
+    <audio preload id='{{ audio_ref[0] }}' src='{{ audio_ref[1] }}'></audio>
+    {% endfor %}
+
     {% for js_ref in js %}
     <script src='{{ js_ref }}'></script>
     {% endfor %}

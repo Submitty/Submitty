@@ -96,6 +96,16 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerAutograding($peer_autograding)
+ * @method bool getPeerAutograding()
+ * @method void setPeerRubric($peer_rubric)
+ * @method bool getPeerRubric()
+ * @method void setPeerFiles($peer_files)
+ * @method bool getPeerFiles()
+ * @method void setPeerSolutions($peer_solutions)
+ * @method bool getPeerSolutions()
+ * @method void setPeerDiscussion($peer_discussion)
+ * @method bool getPeerDiscussion()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
@@ -320,6 +330,21 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var bool will peer graders access the autograding panel*/
+    protected $peer_autograding = true;
+    /** @prop
+     * @var bool will peer graders access the rubric panel*/
+    protected $peer_rubric = true;
+    /** @prop
+     * @var bool will peer graders access the files panel*/
+    protected $peer_files = true;
+    /** @prop
+     * @var bool will peer graders access the solution/notes panel*/
+    protected $peer_solutions = true;
+    /** @prop
+     * @var bool will peer graders access the discussion panel*/
+    protected $peer_discussion = true;
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
@@ -351,6 +376,20 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        $mapping = [
+            'autograding' => 'setPeerAutograding',
+            'rubric' => 'setPeerRubric',
+            'files' => 'setPeerFiles',
+            'solution_notes' => 'setPeerSolutions',
+            'discussion' => 'setPeerDiscussion'
+        ];
+
+        foreach ($mapping as $key => $method) {
+            if (array_key_exists($key, $details) && method_exists($this, $method)) {
+                call_user_func([$this, $method], $details[$key] ?? true);
+            }
         }
 
         if (array_key_exists('limited_access_blind', $details)) {
@@ -1502,13 +1541,24 @@ class Gradeable extends AbstractModel {
         while ($checked_paths <= 1000 && count($cur_paths) !== 0) {
             foreach ($cur_paths as $cur_path) {
                 $is_dir = is_dir($cur_path);
-                if (!$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
-                    return "Invalid permissions on a file or directory within specified path.";
+
+                // We don't need to check the permissions for autograding configurations
+                // in this courses config_upload directory.
+                // Instructor users can upload configs to this directory through the web UI
+                // and they can select and use these configs to autograding their assignments.
+                $config_upload_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+                $is_in_config_upload_dir = str_starts_with($cur_path, $config_upload_dir);
+
+                if (
+                    !$is_in_config_upload_dir
+                    && !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)
+                ) {
+                    return "Invalid permissions on a file or directory within specified path:" . $cur_path;
                 }
                 if ($is_dir) {
                     $next_paths_tmp = @scandir($cur_path);
                     if (!is_array($next_paths_tmp)) {
-                        return "Invalid permissions on a file or directory within specified path.";
+                        return "Invalid directory array: " . $next_paths_tmp;
                     }
                     foreach ($next_paths_tmp as $next_path) {
                         if ($next_path === "." || $next_path === "..") {
@@ -1752,7 +1802,8 @@ class Gradeable extends AbstractModel {
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
+//        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
+        return false;
     }
 
     /**
@@ -2521,7 +2572,8 @@ class Gradeable extends AbstractModel {
     public function getPrerequisite(): string {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
-            return $dependent_gradeable->getTitle();
+            $dependent_gradeable_points = strval($this->depends_on_points);
+            return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
         }
         else {
             return '';

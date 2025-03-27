@@ -115,6 +115,13 @@ std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces s
  */
 bool isNumber(const std::string &str);
 
+/* METHOD: isolateAlphanumAndNumberPunctuation
+ * ARGS: str: string
+ * RETURN: string
+ * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ */
+std::string isolateAlphanumAndNumberPunctuation(const std::string &str);
+
 /* METHOD: whiteSpaceListsEqual
  * ARGS: expectedSpaces: vector of space count
  * ARGS: studentSpaces: vector of space count

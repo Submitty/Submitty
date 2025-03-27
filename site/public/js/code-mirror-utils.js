@@ -8,14 +8,16 @@
  * @param {HTMLElement} attachment_elem The instructional message and codemirror will be appended to this element.
  * @param {Object} codemirror_config A javascript object which defines the configuration the codemirror should be
  *                                   instantiated with.
+ * @param {boolean} show_accessibility_msg Indicates whether to display an accessibility message above the codemirror.
  * @returns {CodeMirror}
  */
-function getLargeCodeMirror(attachment_elem, codemirror_config) {
-    const accessibility_msg = document.createElement('i');
-    accessibility_msg.innerText = 'Press TAB to indent. Press ESC to advance from answer area.';
-    accessibility_msg.style.fontSize = '75%';
-    attachment_elem.appendChild(accessibility_msg);
-
+function getLargeCodeMirror(attachment_elem, codemirror_config, show_accessibility_msg = true) {
+    if (show_accessibility_msg) {
+        const accessibility_msg = document.createElement('i');
+        accessibility_msg.innerText = 'Press TAB to indent. Press ESC to advance from answer area.';
+        accessibility_msg.style.fontSize = '75%';
+        attachment_elem.appendChild(accessibility_msg);
+    }
     // If no mode is set must explicitly set it to null otherwise codemirror will attempt to guess the language and
     // highlight.  This is not desirable when collecting plain text.
     if (!codemirror_config.mode) {

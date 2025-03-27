@@ -96,7 +96,7 @@
     }
 }
 
-@media (max-width: 950px) {
+@media (max-width: 949px) {
     .course-section-heading {
         margin: 10px 0;
         font-weight: 400;
@@ -150,6 +150,7 @@
     }
 
     .course-section {
+        /* stylelint-disable-next-line declaration-no-important */
         display: table-row-group !important;
     }
 
@@ -194,6 +195,7 @@
         min-width: 0;
         min-height: 50px;
         justify-content: center;
+        /* stylelint-disable-next-line declaration-no-important */
         padding: 5px !important;
     }
 

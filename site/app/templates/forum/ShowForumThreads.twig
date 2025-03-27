@@ -54,7 +54,8 @@
                 "thread_exists" : filterFormData.thread_exists,
                 "attachment_all_button" : generate_post_content.attachment_all_button,
                 "total_attachments" : generate_post_content.total_attachments,
-                "show_filter": true
+                "show_filter": true,
+                "activeThread" : null
         } %}
         <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
 
@@ -79,7 +80,8 @@
             "thread_exists" : filterFormData.thread_exists,
             "attachment_all_button" : generate_post_content.attachment_all_button is defined ? generate_post_content.attachment_all_button : false,
             "total_attachments" : generate_post_content.total_attachments,
-            "show_filter": true
+            "show_filter": true,
+            "activeThread" : generate_post_content.activeThread,
         } %}
 
         <div id="thread-container" class="row">
@@ -97,14 +99,14 @@
             </div>
             <script>
                 $(function(){
-                    dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread }}, '', '{{ currentCourse }}');
+                    dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread.id }}, '', '{{ currentCourse }}');
                     var active_thread = $('#thread_list .active');
                     if(active_thread.length > 0) {
                         active_thread[0].scrollIntoView(true);
                     }
                 });
             </script>
-            <div id="posts_list" style="overflow-y: auto; height:100%;" class="col-9">
+            <div id="posts_list" style="overflow-y: auto; height:100%;" class="col-9" data-user="{{ generate_post_content.anon_user_id }}">
 
                 {% include "forum/GeneratePostList.twig" with {
                     "userGroup" : generate_post_content.userGroup,

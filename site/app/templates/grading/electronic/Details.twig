@@ -40,34 +40,29 @@
                     {{ view_all ? "View Your Sections" : "View All" }}
                 </button>
                 {% endif %}
-                <button class="btn btn-default"
+                <button class="btn btn-default" data-testid="random-default-order"
                    onclick="changeSortOrder()">
                     {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
                 </button>
                 {% if toggle_anon_button %}
-                <button class="btn btn-default" id="toggle-anon-button"
+                <button class="btn btn-default" id="toggle-anon-button" data-testid="toggle-anon-button"
                     onclick="changeAnon('{{ gradeable.getId() }}')">
                     {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
                 </button>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button class="btn btn-default" id="inquiryButton" onclick="change_inquiry()">
+                <button class="btn btn-default" id="inquiryButton" data-testid="toggle-grade-inquiry" onclick="change_inquiry()">
                     {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
                 </button>
                 {% endif %}
             </div>
         </div>
     </div>
-    {% if grade_inquiry_only_button %}
-        <script>
-            inquiry_update();
-        </script>
-    {% endif %}
     {% if not is_student %}
-        <a href="{{ stats_url }}" class="btn btn-primary">Grading Stats</a>
+        <a href="{{ stats_url }}" class="btn btn-primary" data-testid="stats-and-charts">Statistics & Charts</a>
     {% endif %}
     {% if not is_instructor %}
-        <button class="btn btn-default" onclick="showGradeableMessage()">Responsibilities as a Grader</button>
+        <button class="btn btn-default" onclick="showGradeableMessage()" data-testid="grader-responsibility">Responsibilities as a Grader</button>
     {% endif %}
     {% if can_regrade %}
         <div class="btn-group">
@@ -80,8 +75,8 @@
             </div>
         </div>
     {% endif %}
-    <button type="button" class="btn btn-primary" onclick="collapseAllSections()">Collapse All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="expandAllSections()">Expand All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
+    <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -90,12 +85,12 @@
     <div class="details-action-box">
         {# Import+Export teams buttons #}
         {% if show_import_teams_button %}
-            <a class="btn btn-primary"
+            <a class="btn btn-primary" data-testid="export-team-members"
                href="{{ export_teams_url }}"
             >Export Teams Members</a>
         {% endif %}
         {% if show_export_teams_button %}
-            <button class="btn btn-primary key_to_click"
+            <button class="btn btn-primary"
                     tabindex="0"
                     onclick="importTeamForm();"
             >
@@ -107,8 +102,9 @@
         {# Randomize team button #}
         {% if (not gradeable.isGradeByRegistration()) and (show_export_teams_button or show_import_teams_button) %}
             {% if past_grade_start_date %}
-                <button class="btn btn-default key_to_click"
+                <button class="btn btn-default"
                         tabindex="0"
+                        data-testid="randomly-reassign-teams"
                         onclick="randomizeRotatingGroupsButton()"
                 >
                     Randomly Re-Assign Teams to Rotating Sections
@@ -469,19 +465,19 @@
             {% set contents = "Grade" %}
             {% set btn_class = "btn-primary" %}
 
-        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
@@ -516,22 +512,25 @@
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}
         {% set contents = "Cancelled Submission" %}
         {% set btn_class = "btn-default" %}
+    {% elseif info.on_time_submission == false %}
+        {% set contents = "Too Many Days Late" %}
+        {% set btn_class = "btn-danger" %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
         {% set btn_class = "btn-primary" %}
-        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades() %}
+        {% if graded_gradeable.getOrCreateTaGradedGradeable().anyGrades(core.getUser()) %}
             {% if graded_gradeable.getTaGradedGradeable().hasVersionConflict() %}
                 {% set contents = "Version Conflict" %}
                 {% set btn_class = "btn-primary" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() or core.getUser().getGroup() == 4 and not graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = "Grading Incomplete" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif not graded_gradeable.isTaGradingComplete() and core.getUser().getGroup() == 4 and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore(core.getUser()) ~ " / " ~ graded_gradeable.getGradeable().getPeerPoints() %}
                 {% set btn_class = "btn-default" %}
-            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete() %}
+            {% elseif graded_gradeable.isTaGradingComplete() and core.getUser().accessGrading() and graded_gradeable.isPeerGradingComplete(core.getUser()) %}
                 {% set contents = graded_gradeable.getTaGradedGradeable.getTotalScore() ~ " / " ~ graded_gradeable.getGradeable().getManualGradingPoints() %}
                 {% set btn_class = "btn-default" %}
             {% endif %}
@@ -738,6 +737,10 @@
 
 {# /Column functions #}
 <script>
+    {% if grade_inquiry_only_button %}
+        inquiry_update();
+    {% endif %}
+    
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
@@ -763,25 +766,8 @@
     }
 
     function change_inquiry() {
-        var button = document.getElementById('inquiryButton');
-        var status = Cookies.get('inquiry_status');
-        if(status === 'on') {
-            status = 'off'
-        }
-        else{
-            status = 'on';
-        }
-        if(status === 'on') {
-            Cookies.set('inquiry_status', 'on');
-            var inquiry = Cookies.get('inquiry_status');
-            grade_inquiry_only();
-            button.textContent = "Grade Inquiry Only: On";
-        } else {
-            Cookies.set('inquiry_status', 'off');
-            var inquiry = Cookies.get('inquiry_status');
-            reverse_inquiry_only();
-            button.textContent = "Grade Inquiry Only: Off";
-        }
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
     }
 
     

@@ -17,11 +17,6 @@ th {
     margin-bottom: 0.5rem;
 }
 
-.enable-audible,
-.disable-audible {
-    display: none;
-}
-
 /* stylelint-disable selector-class-pattern */
 .current_queue_row,
 .current_queue_row a > i.fas {
@@ -51,7 +46,9 @@ th {
 }
 
 .fully-transparent {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--default-black) !important;
 }
 
@@ -79,6 +76,7 @@ th {
 @media only screen and (max-width: 479px) {
     /* Put this on elements you dont need on mobile */
     .mobile-hide {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 
@@ -101,6 +99,7 @@ th {
 /* Put this on elements you dont need on desktop */
 @media only screen and (min-width: 480px) {
     .desktop-hide {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 }

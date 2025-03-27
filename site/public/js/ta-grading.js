@@ -225,8 +225,6 @@ function changeStudentArrowTooltips(data) {
             data = 'default';
         }
     }
-    console.log(inquiry_status);
-    console.log(data);
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -302,7 +300,6 @@ const orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function (component_id, saveChanges) {
     const ret = orig_toggleComponent(component_id, saveChanges);
     return ret.then(() => {
-        console.log(localStorage.getItem('general-setting-arrow-function'));
         changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || 'default');
     });
 };
@@ -647,10 +644,16 @@ function updateCookies() {
 // -----------------------------------------------------------------------------
 // Student navigation
 
-function waitForAllAjaxToComplete() {
-    if ($.active > 0) {
-        setTimeout(waitForAllAjaxToComplete, 100);
-    }
+function waitForAllAjaxToComplete(callback) {
+    const checkAjax = () => {
+        if ($.active > 0) {
+            setTimeout(checkAjax, 100);
+        }
+        else {
+            callback();
+        }
+    };
+    checkAjax();
 }
 
 function gotoMainPage() {
@@ -658,8 +661,9 @@ function gotoMainPage() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, go to main page anyway?')) {
                 window.location = window_location;
@@ -717,8 +721,9 @@ function gotoPrevStudent() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, change student anyway?')) {
                 window.location = window_location;
@@ -776,8 +781,9 @@ function gotoNextStudent() {
 
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(() => {
-            waitForAllAjaxToComplete();
-            window.location = window_location;
+            waitForAllAjaxToComplete(() => {
+                window.location = window_location;
+            });
         }).catch(() => {
             if (confirm('Could not save open component, change student anyway?')) {
                 window.location = window_location;
@@ -1234,34 +1240,34 @@ registerKeyHandler({ name: 'Toggle Rubric Edit Mode', code: 'KeyE' }, () => {
 // -----------------------------------------------------------------------------
 // Selecting marks
 
-registerKeyHandler({ name: 'Select Full/No Credit Mark', code: 'Digit0', locked: true }, () => {
+registerKeyHandler({ name: 'Select Full/No Credit Mark', code: 'Digit0' }, () => {
     checkOpenComponentMark(0);
 });
-registerKeyHandler({ name: 'Select Mark 1', code: 'Digit1', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 1', code: 'Digit1' }, () => {
     checkOpenComponentMark(1);
 });
-registerKeyHandler({ name: 'Select Mark 2', code: 'Digit2', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 2', code: 'Digit2' }, () => {
     checkOpenComponentMark(2);
 });
-registerKeyHandler({ name: 'Select Mark 3', code: 'Digit3', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 3', code: 'Digit3' }, () => {
     checkOpenComponentMark(3);
 });
-registerKeyHandler({ name: 'Select Mark 4', code: 'Digit4', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 4', code: 'Digit4' }, () => {
     checkOpenComponentMark(4);
 });
-registerKeyHandler({ name: 'Select Mark 5', code: 'Digit5', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 5', code: 'Digit5' }, () => {
     checkOpenComponentMark(5);
 });
-registerKeyHandler({ name: 'Select Mark 6', code: 'Digit6', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 6', code: 'Digit6' }, () => {
     checkOpenComponentMark(6);
 });
-registerKeyHandler({ name: 'Select Mark 7', code: 'Digit7', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 7', code: 'Digit7' }, () => {
     checkOpenComponentMark(7);
 });
-registerKeyHandler({ name: 'Select Mark 8', code: 'Digit8', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 8', code: 'Digit8' }, () => {
     checkOpenComponentMark(8);
 });
-registerKeyHandler({ name: 'Select Mark 9', code: 'Digit9', locked: true }, () => {
+registerKeyHandler({ name: 'Select Mark 9', code: 'Digit9' }, () => {
     checkOpenComponentMark(9);
 });
 

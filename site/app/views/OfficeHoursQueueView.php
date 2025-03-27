@@ -8,6 +8,7 @@ use app\libraries\Utils;
 class OfficeHoursQueueView extends AbstractView {
     public function showTheQueue(OfficeHoursQueueModel $viewer, mixed $students): string {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
+        $this->core->getOutput()->addInternalAudio('quack-alert.mp3');
         $this->core->getOutput()->addInternalCss('officeHoursQueue.css');
         $this->core->getOutput()->addInternalJs('office-hours-queue.js');
         $this->core->getOutput()->addInternalJs('websocket.js');

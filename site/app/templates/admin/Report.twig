@@ -1,49 +1,9 @@
 <div id="grade-report-cont" class="content">
-    <script>
-        $(document).ready(function() {
-            // Bind click listener to grade summaries button
-            $('#grade-summaries-button').click(function() {
-                $('#grade-summaries-last-run').html('Running...');
-            });
-        });
-    </script>
-
     <div id="grade-report">
         <h1>Grade Reports</h1>
-        <div id="grade-report-summary" class="card">
-            <div class="title-cont">
-                Pushing this button will update the grade summary data used to generate the rainbow grades reports.
-            </div>
-            <div class="card-btn-cont">
-                <button id="grade-summaries-button"
-                        onclick="location.href='{{ summaries_url }}'"
-                        class="btn btn-primary key_to_click"
-                        tabindex="0"
-                >
-                    Generate Grade Summaries
-                </button>
-                <div class="card-btn-info">
-                    Last ran: <span id="grade-summaries-last-run">{{ grade_summaries_last_run }}</span>
-                </div>
-            </div>
-        </div>
         <hr>
-        <div id="grade-report-csv" class="card">
-            <div class="title-cont">
-                Pushing this button will generate a CSV file (for download) with all student grades for all gradeables.
-            </div>
-            <div class="card-btn-cont">
-                <button onclick="location.href='{{ csv_url }}'"
-                        class="btn btn-primary key_to_click"
-                        tabindex="0"
-                >
-                    Generate CSV Report
-                </button>
-            </div>
-        </div>
-        <hr>
-        <div id="grade-report-rainbow" class="card">
-            <div class="title-cont">
+        <div id="grade-report-rainbow" class="report-card">
+            <div class="report-title-cont">
                 Web interface for creation and customization of Rainbow Grades for this course.
                 <a target=_blank
                    href="https://submitty.org/instructor/course_settings/rainbow_grades/"
@@ -52,45 +12,14 @@
                     <i style="font-style:normal;" class="fa-question-circle"></i>
                 </a>
             </div>
-            <div class="card-btn-cont">
+            <div class="report-card-btn-cont">
                 <button onclick="location.href='{{ rainbow_grades_customization_url }}'"
-                        class="btn btn-primary key_to_click"
+                        class="btn btn-primary"
                         tabindex="0"
                 >
                     Web-Based Rainbow Grades Generation
                 </button>
             </div>
-        </div>
-        <hr>
-        <div>
-            <div id="grade-report-customization-upload" class="card">
-                <div class="title-cont">
-                    Upload a Rainbow Grades customization.json directly to Submitty
-                </div>
-                <div class="card-btn-cont">
-                    <form action="{{ customization_upload_url }}" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="{{csrfToken}}">
-                        <input type="file" id="config-upload" name="config_upload" style="display:none">
-                    
-                            <button
-                                id="btn-upload-customization"
-                                class="btn btn-primary key_to_click"
-                                tabindex="0"
-                                type="button"
-                            >
-                                Upload Customization
-                            </button>
-                    </form>
-                </div>
-            </div>
-            {% if json is not null %}
-                <button id="toggle-json">Show JSON</button>
-                <div id="customization-json" style="display:none;">
-                    {% include 'misc/Markdown.twig' with {
-                        content: '```json\n' ~ json ~ '\n```\n'
-                    } only %}
-                </div>
-            {% endif %}
         </div>
     </div>
 </div>

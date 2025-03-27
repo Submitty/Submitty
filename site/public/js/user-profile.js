@@ -1,12 +1,13 @@
 /* exported updateUserPronouns, showUpdatePrefNameForm, showUpdateLastInitialFormatForm,
-showUpdatePronounsForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
-updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail,
+showUpdatePronounsForm, showDisplayNameOrderForm, showUpdatePasswordForm, showUpdateProfilePhotoForm, showUpdateSecondaryEmailForm,
+updateUserPreferredNames, updateUserLastInitialFormat, updateUserProfilePhoto, updateUserSecondaryEmail, updateDisplayNameOrder,
 changeSecondaryEmail, previewUserLastInitialFormat, clearPronounsBox
  */
 /* global displaySuccessMessage, displayErrorMessage, buildUrl, showPopup */
 
 // This variable is to store changes to the pronouns form that have not been submitted
 let pronounsLastVal = null;
+let displayNameOrderLast = 'GIVEN_F';
 
 function showUpdatePrefNameForm() {
     $('.popup-form').css('display', 'none');
@@ -33,6 +34,16 @@ function showUpdatePronounsForm() {
     form.find('.form-body').scrollTop(0);
     if (pronounsLastVal !== null && document.getElementById('user-pronouns-change').value === '') {
         document.getElementById('user-pronouns-change').value = pronounsLastVal;
+    }
+}
+
+function showDisplayNameOrderForm() {
+    $('.popup-form').css('display', 'none');
+    const form = $('#edit-display-name-order-form');
+    form.css('display', 'block');
+    form.find('.form-body').scrollTop(0);
+    if (displayNameOrderLast !== null && document.getElementById('display-name-order-change').value === '') {
+        document.getElementById('display-name-order-change').value = displayNameOrderLast;
     }
 }
 
@@ -147,6 +158,51 @@ function updateUserPronouns(e) {
             },
         });
     }
+}
+
+// update user name order and display name order option
+function updateDisplayNameOrder(e) {
+    // update user name order
+    e.preventDefault();
+    const displayNameOrder = $('#display-name-order-change');
+    displayNameOrderLast = displayNameOrder.val();
+
+    const data = new FormData();
+    // eslint-disable-next-line no-undef
+    data.append('csrf_token', csrfToken);
+    data.append('display-name-order', displayNameOrder.val());
+    const url = buildUrl(['user_profile', 'change_display_name_order']);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            const response = JSON.parse(res);
+            if (response.status === 'success') {
+                const { data } = response;
+                displaySuccessMessage(data.message);
+                const icon = '<i class="fas fa-pencil-alt"></i>';
+                if (data['display-name-order'] === 'GIVEN_F') {
+                    $('#display_name_order_val').html(`${icon} Given Name First`);
+                }
+                else {
+                    $('#display_name_order_val').html(`${icon} Family Name First`);
+                }
+
+                // update the data attributes
+                displayNameOrder.data('current-display-name-order', data['display-name-order']);
+                $('#edit-display-name-order-form').hide();
+            }
+            else {
+                displayErrorMessage(response.message);
+            }
+        },
+        error: function () {
+            displayErrorMessage('Some went wrong while updating name order!');
+        },
+    });
 }
 
 function updateUserPreferredNames() {

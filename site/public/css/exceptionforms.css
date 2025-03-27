@@ -19,12 +19,13 @@ fieldset {
 }
 
 #gradeable-select {
+    /* stylelint-disable-next-line declaration-no-important */
     width: 100% !important;
 }
 
 #extensions-table td:nth-of-type(1)::before { content: "Student ID"; }
-#extensions-table td:nth-of-type(2)::before { content: "First Name"; }
-#extensions-table td:nth-of-type(3)::before { content: "Last Name"; }
+#extensions-table td:nth-of-type(2)::before { content: "Given Name"; }
+#extensions-table td:nth-of-type(3)::before { content: "Family Name"; }
 #extensions-table td:nth-of-type(4)::before { content: "Number of Days of Extension"; }
 #extensions-table td:nth-of-type(5)::before { content: "Delete"; }
 

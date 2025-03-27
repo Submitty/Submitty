@@ -617,6 +617,41 @@ $$;
 
 
 --
+-- Name: active_graders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_graders (
+    id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    gc_id integer NOT NULL,
+    ag_user_id character varying(255),
+    ag_team_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT ag_user_team_id_check CHECK (((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_graders_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_graders_id_seq OWNED BY public.active_graders.id;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -631,9 +666,11 @@ CREATE TABLE public.autograding_metrics (
     points integer NOT NULL,
     passed boolean NOT NULL,
     hidden boolean NOT NULL,
+    source_lines_of_code integer,
     CONSTRAINT elapsed_time_nonnegative CHECK ((elapsed_time >= (0)::double precision)),
     CONSTRAINT max_rss_size_nonnegative CHECK ((max_rss_size >= 0)),
-    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
+    CONSTRAINT metrics_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL))),
+    CONSTRAINT sloc_non_negative CHECK ((source_lines_of_code >= 0))
 );
 
 
@@ -714,7 +751,12 @@ CREATE TABLE public.course_materials (
     hidden_from_students boolean,
     priority double precision NOT NULL,
     url text,
-    title character varying(255)
+    title character varying(255),
+    uploaded_by character varying(255) DEFAULT NULL::character varying,
+    uploaded_date timestamp with time zone,
+    last_edit_by character varying(255) DEFAULT NULL::character varying,
+    last_edit_date timestamp with time zone,
+    CONSTRAINT check_dates CHECK (((uploaded_date IS NULL) OR (last_edit_date IS NULL) OR (uploaded_date <= last_edit_date)))
 );
 
 
@@ -845,7 +887,8 @@ CREATE TABLE public.electronic_gradeable (
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
-    CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone))
+    CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
+    CONSTRAINT late_days_positive CHECK ((eg_late_days >= 0))
 );
 
 
@@ -890,8 +933,29 @@ CREATE TABLE public.forum_attachments (
     post_id integer NOT NULL,
     file_name character varying NOT NULL,
     version_added integer DEFAULT 1 NOT NULL,
-    version_deleted integer DEFAULT 0 NOT NULL
+    version_deleted integer DEFAULT 0 NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: forum_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.forum_attachments_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: forum_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.forum_attachments_id_seq OWNED BY public.forum_attachments.id;
 
 
 --
@@ -1487,6 +1551,20 @@ CREATE TABLE public.peer_feedback (
 
 
 --
+-- Name: peer_grading_panel; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.peer_grading_panel (
+    g_id character varying(255) NOT NULL,
+    autograding boolean DEFAULT true NOT NULL,
+    rubric boolean DEFAULT true NOT NULL,
+    files boolean DEFAULT true NOT NULL,
+    solution_notes boolean DEFAULT true NOT NULL,
+    discussion boolean DEFAULT true NOT NULL
+);
+
+
+--
 -- Name: poll_options; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1495,7 +1573,8 @@ CREATE TABLE public.poll_options (
     poll_id integer,
     response text NOT NULL,
     correct boolean NOT NULL,
-    option_id integer NOT NULL
+    option_id integer NOT NULL,
+    author_id character varying(255) DEFAULT NULL::character varying
 );
 
 
@@ -1566,7 +1645,8 @@ CREATE TABLE public.polls (
     release_answer character varying(10) DEFAULT 'never'::character varying,
     duration integer DEFAULT 0,
     end_time timestamp with time zone,
-    is_visible boolean DEFAULT false NOT NULL
+    is_visible boolean DEFAULT false NOT NULL,
+    allows_custom boolean DEFAULT false NOT NULL
 );
 
 
@@ -1900,6 +1980,13 @@ CREATE TABLE public.viewed_responses (
 
 
 --
+-- Name: active_graders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('public.active_graders_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1932,6 +2019,13 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 --
 
 ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
+
+
+--
+-- Name: forum_attachments id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_attachments ALTER COLUMN id SET DEFAULT nextval('public.forum_attachments_id_seq'::regclass);
 
 
 --
@@ -2061,6 +2155,30 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 
 
 --
+-- Name: active_graders active_graders_grader_id_gc_id_ag_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_team_id_key UNIQUE (grader_id, gc_id, ag_team_id);
+
+
+--
+-- Name: active_graders active_graders_grader_id_gc_id_ag_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_user_id_key UNIQUE (grader_id, gc_id, ag_user_id);
+
+
+--
+-- Name: active_graders active_graders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2138,6 +2256,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: forum_attachments forum_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_attachments
+    ADD CONSTRAINT forum_attachments_pkey PRIMARY KEY (id);
 
 
 --
@@ -2402,6 +2528,14 @@ ALTER TABLE ONLY public.peer_assign
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_pkey PRIMARY KEY (g_id, grader_id, user_id);
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_pkey PRIMARY KEY (g_id);
 
 
 --
@@ -2688,6 +2822,54 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
+-- Name: active_graders active_graders_ag_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_ag_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_last_edit_by_fkey FOREIGN KEY (last_edit_by) REFERENCES public.users(user_id);
+
+
+--
+-- Name: course_materials course_materials_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.course_materials
+    ADD CONSTRAINT course_materials_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(user_id);
+
+
+--
 -- Name: electronic_gradeable_data electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2956,7 +3138,7 @@ ALTER TABLE ONLY public.gradeable_access
 --
 
 ALTER TABLE ONLY public.gradeable_anon
-    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -3269,6 +3451,22 @@ ALTER TABLE ONLY public.peer_feedback
 
 ALTER TABLE ONLY public.peer_feedback
     ADD CONSTRAINT peer_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: peer_grading_panel peer_grading_panel_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.peer_grading_panel
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: poll_options poll_options_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.poll_options
+    ADD CONSTRAINT poll_options_fkey FOREIGN KEY (author_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
 
 
 --

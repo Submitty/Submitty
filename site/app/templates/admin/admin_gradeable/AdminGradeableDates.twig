@@ -1,5 +1,5 @@
 <div id="gradeable-dates">
-    <input data-testid="ta_view_start_date" name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
+    <input data-testid="ta-view-start-date" name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
     <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
 
     <br />
@@ -13,7 +13,7 @@
             <br />
         </div>
 
-        <input data-testid="submission_open_date" id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format, timezone_string) }}">
+        <input data-testid="submission-open-date" id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format, timezone_string) }}">
         <label for="date_submit">Submission Open Date (submission available to students)</label>
 
         <br />
@@ -28,7 +28,7 @@
             </div>
 
             <div id="due_date_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
-                <input data-testid="submission_due_date" id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
+                <input data-testid="submission-due-date" id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
                 <label for="date_due">Due Date</label>
             </div>
         </div>
@@ -62,8 +62,9 @@
         
             <br />
 
-            <p style="max-width:600px;" id="checkpoint-numeric-gradeables-message">
+            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
+                {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
         </div>
     </div>
@@ -91,7 +92,7 @@
             </fieldset>
             <div class="yes-late-submission">
                 <label for="late_days">How many late days may students use on this assignment?</label>
-                <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+                <input style="width: 50px" id="late_days" name="late_days" data-testid="late-days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
                 <br />
 

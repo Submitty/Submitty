@@ -7,9 +7,10 @@ use app\entities\banner\BannerImage;
 
 class GlobalView extends AbstractView {
     /**
+     * @param array<array<string>> $audio
      * @param array<BannerImage> $eventBannerImages
      */
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -75,6 +76,7 @@ class GlobalView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
+            "audio" => $audio,
             "css" => $css,
             "js" => $js,
             "page_title" => $page_title,

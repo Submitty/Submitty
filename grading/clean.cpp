@@ -292,9 +292,10 @@ std::string recreateStudentFile(vectorOfWords studentFileWords, vectorOfSpaces s
 }
 
 bool isNumber(const std::string &str) {
+  std::string stripped_str = isolateAlphanumAndNumberPunctuation(str);
   bool atLeastOneDigit = false;
   bool dotFound = false;
-  for (char const &c : str) {
+  for (char const &c : stripped_str) {
     if (std::isdigit(c)) {
       atLeastOneDigit = true;
     }
@@ -308,7 +309,32 @@ bool isNumber(const std::string &str) {
       return false;
     }
   }
-  return true == atLeastOneDigit;
+  return atLeastOneDigit;
+}
+
+/* METHOD: isolateAlphanumAndNumberPunctuation
+ * ARGS: str: string
+ * RETURN: string
+ * PURPOSE: remove non-alphanum, non-dot characters from around a string
+ */
+std::string isolateAlphanumAndNumberPunctuation(const std::string &str) {
+  if (str.empty())
+  {
+    return str;
+  }
+  std::string::const_iterator begin = str.begin();
+  while (!isalnum(*begin) && !(*begin == '.')) {
+    begin++;
+    if (begin == str.end())
+    {
+      return "";
+    }
+  }
+  std::string::const_reverse_iterator end = str.rbegin();
+  while (!isalnum(*end) && !(*end == '.')) {
+    end++;
+  }
+  return std::string(begin, end.base());
 }
 
 bool whiteSpaceListsEqual(const std::vector<int> &expectedSpaces, const std::vector<int> &studentSpaces) {

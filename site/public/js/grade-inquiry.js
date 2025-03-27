@@ -1,5 +1,23 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+
+function loadDraft() {
+    const gradeableId = $('#gradeable_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        const componentId = $(this).closest('.reply-text-form').find('#gc_id').val();
+        const uniqueKey = `reply-text-area-${componentId}`;
+
+        if (Object.prototype.hasOwnProperty.call(draftContent, uniqueKey)) {
+            $(this).val(draftContent[uniqueKey]);
+        }
+    });
+}
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
@@ -51,10 +69,21 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
+    const gradeableId = $('#gradeable_id').val();
+    const componentId = reply_text_area.closest('.reply-text-form').find('#gc_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const uniqueKey = `reply-text-area-${componentId}`;
+
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
+
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    draftContent[uniqueKey] = reply_text_area.val();
+    localStorage.setItem(draftContentKeyPrefix, JSON.stringify(draftContent));
 
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -64,6 +93,7 @@ function onReplyTextAreaKeyUp(textarea) {
         $('.gi-show-not-empty').show();
         $('.gi-show-empty').hide();
     }
+    resizeTextarea(textarea);
 }
 
 function onGradeInquirySubmitClicked(button) {
@@ -101,7 +131,6 @@ function onGradeInquirySubmitClicked(button) {
 
     // prevent double submission
     form.data('submitted', true);
-    const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
@@ -109,28 +138,10 @@ function onGradeInquirySubmitClicked(button) {
         success: function (response) {
             try {
                 const json = JSON.parse(response);
-                if (json['status'] === 'success') {
-                    const data = json['data'];
 
-                    // inform other open websocket clients
-                    const submitter_id = form.children('#submitter_id').val();
-                    if (data.type === 'new_post') {
-                        newPostRender(gc_id, data.post_id, data.new_post);
+                if (json['status'] === 'success') {
+                    if (json['data']['type'] === 'new_post') {
                         text_area.val('');
-                        window.socketClient.send({
-                            type: data.type,
-                            post_id: data.post_id,
-                            submitter_id: submitter_id,
-                            gc_id: gc_id,
-                        });
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({ type: data.type, submitter_id: submitter_id });
                     }
                 }
                 else {
@@ -154,6 +165,9 @@ function initGradingInquirySocketClient() {
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
+                break;
+            case 'open_grade_inquiry':
+                window.location.reload();
                 break;
             case 'toggle_status':
                 gradeInquiryDiscussionHandler(msg.submitter_id);
@@ -232,3 +246,27 @@ function newDiscussionRender(discussion) {
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
+
+function resizeTextarea(textarea) {
+    if (!(textarea instanceof Element)) {
+        return;
+    }
+    textarea.style.height = '100px';
+    const currentScrollHeight = textarea.scrollHeight;
+    const clientHeight = textarea.clientHeight;
+    const scrollTop = textarea.scrollTop;
+    if (scrollTop > 0 || currentScrollHeight > clientHeight) {
+        textarea.style.height = `${currentScrollHeight}px`;
+    }
+    const parentBody = textarea.closest('.markdown-area-body');
+    if (parentBody) {
+        parentBody.style.height = `${textarea.scrollHeight + 32}px`;
+    }
+}
+$(document).ready(() => {
+    document.querySelectorAll('.markdown-area textarea').forEach((textarea) => {
+        resizeTextarea(textarea);
+    });
+    loadDraft();
+    onReady();
+});

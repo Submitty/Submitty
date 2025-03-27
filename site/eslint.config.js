@@ -8,11 +8,12 @@ const tseslint = require('typescript-eslint');
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
 // @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
+const vuelint = require('eslint-plugin-vue');
 
 module.exports = tseslint.config(
     {
         name: 'Files to include',
-        files: ['**/*.{js,ts}'],
+        files: ['**/*.{js,ts,mts}'],
     },
     {
         // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
@@ -104,20 +105,65 @@ module.exports = tseslint.config(
         },
     },
     {
+        name: 'Options for Vue files',
+        files: ['vue/**/*.{js,ts,vue}'],
+        // @ts-expect-error vuelint doesnt have ts types yet
+        extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parser: require('vue-eslint-parser'),
+            globals: globals.browser,
+            parserOptions: {
+                parser: '@typescript-eslint/parser',
+                project: 'tsconfig.app.json',
+                extraFileExtensions: ['.vue'],
+                tsconfigRootDir: `${__dirname}/vue`,
+            },
+        },
+        rules: {
+            'vue/multi-word-component-names': ['off'],
+            'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+            'vue/block-order': ['error', { order: ['script:not([setup])', 'script[setup]', 'template', 'style'] }],
+            'vue/component-api-style': ['error', ['script-setup']],
+            'vue/define-emits-declaration': ['error', 'type-literal'],
+            'vue/define-macros-order': ['error',
+                {
+                    order: ['defineOptions', 'defineModel', 'defineProps', 'defineEmits', 'defineSlots'],
+                    defineExposeLast: true,
+                },
+            ],
+            'vue/define-props-declaration': ['error', 'type-based'],
+            'vue/html-self-closing': ['error', { html: { void: 'any' } }],
+            'vue/no-boolean-default': ['error', 'no-default'],
+            'vue/no-ref-object-reactivity-loss': ['warn'],
+            'vue/no-required-prop-with-default': ['error', { autofix: true }],
+            'vue/no-useless-mustaches': ['error'],
+            'vue/prefer-separate-static-class': ['error'],
+            'vue/require-typed-object-prop': ['error'],
+            'vue/require-typed-ref': ['error'],
+            'vue/valid-define-options': ['error'],
+        },
+    },
+    {
         name: 'Options for cypress files',
         files: ['cypress/**/*.{js,ts}'],
-        extends: [cypress.configs.globals],
-        // todo: enable cypress lint rules at some point
-        // extends: [cypress.configs.recommended],
+        extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
+        },
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: '[type=CallExpression][callee.object.name=cy][callee.property.name=waitAndReloadUntil]',
+                    message: 'Do not wait for arbitrary time periods',
+                },
+            ],
         },
     },
     {
         name: 'Options for jest files',
         files: ['tests/**/*.{js,ts}'],
-        // todo: enable jest lint rules at some point
-        // extends: [jest.configs['flat/recommended']],
+        extends: [jest.configs['flat/recommended']],
         languageOptions: {
             globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
         },

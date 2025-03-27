@@ -1351,7 +1351,7 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');"><i class='fas fa-trash'></i></a>`;
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
             const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
             $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
         });
@@ -1650,7 +1650,7 @@ function enableKeyToClick() {
 }
 
 function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
-    $('#save_status').html('Saving Feedback...');
+    $('#save_status').text('Saving Feedback...').css('color', 'var(--text-black)');
     const url = buildCourseUrl(['gradeable', g_id, 'feedback', 'set']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
@@ -1666,15 +1666,15 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
         contentType: false,
         success: function (data) {
             if (data.status === 'success') {
-                $('#save_status').html('All Changes Saved');
+                $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
             }
             else {
-                $('#save_status').html('Error Saving Changes');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         },
         error: function () {
             window.alert('Something went wrong. Please try again.');
-            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+            $('#save_status').text('Some Changes Failed!').css('color', 'red');
         },
     });
 }

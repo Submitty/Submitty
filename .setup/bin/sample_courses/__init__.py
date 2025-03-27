@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument("--db_only", action='store_true', default=False)
     parser.add_argument("--no_submissions", action='store_true', default=False)
     parser.add_argument("--no_grading", action='store_true', default=False)
+    parser.add_argument("--test_only_grading", action='store_true', default=False)
     parser.add_argument("--users_path", default=os.path.join(SETUP_DATA_PATH, "users"),
                         help="Path to folder that contains .yml files to use for user creation. "
                         "Defaults to ../data/users")
@@ -97,5 +98,5 @@ VCS_FOLDER: str = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 DB_ONLY: bool = args.db_only
 NO_SUBMISSIONS: bool = args.no_submissions
 NO_GRADING: bool = args.no_grading
-
+TEST_ONLY_GRADING: bool = args.test_only_grading
 NOW = dateutils.get_current_time()

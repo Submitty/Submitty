@@ -211,8 +211,7 @@ function generateCalendarItem(item) {
         }
 
         // Put detail in the tooltip
-        tooltip = `Course: ${item['course']}&#10;`
-        + `Title: ${item['title']}&#10;`;
+        tooltip = `Course: ${item['course']}&#10;Title: ${item['title']}&#10;`;
         if (item['status_note'] !== '') {
             tooltip += `Status: ${item['status_note']}&#10;`;
         }

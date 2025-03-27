@@ -29,10 +29,9 @@ class UserProfileController extends AbstractController {
     /**
      * Show User's profile data
      *
-     * @return MultiResponse
      */
     #[Route("/user_profile", methods: ["GET"])]
-    public function showUserProfile() {
+    public function showUserProfile(): MultiResponse {
         $this->core->getOutput()->addBreadcrumb("My Profile");
         return new MultiResponse(
             null,
@@ -51,10 +50,9 @@ class UserProfileController extends AbstractController {
      * Handle ajax request to update the currently logged in user's time zone data.
      *
      * Will return a json success or failure response depending on the result of the operation.
-     * @return JsonResponse
      */
     #[Route("/user_profile/change_time_zone", methods: ["POST"])]
-    public function changeTimeZone() {
+    public function changeTimeZone(): JsonResponse {
         if (isset($_POST['time_zone'])) {
             $updated = $this->core->getUser()->setTimeZone($_POST['time_zone']);
 
@@ -75,11 +73,8 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Error encountered updating user time zone.');
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/set_pref_locale", methods: ["POST"])]
-    public function setPrefLocale() {
+    public function setPrefLocale(): JsonResponse {
         if (isset($_POST['locale'])) {
             $user = $this->core->getUser();
             $user->setPreferredLocale(empty($_POST['locale']) ? null : $_POST['locale']);
@@ -89,11 +84,8 @@ class UserProfileController extends AbstractController {
         return JsonResponse::getFailResponse('Failed to update user locale.');
     }
 
-    /**
-     * @return MultiResponse
-     */
     #[Route("/user_profile/change_password", methods: ["POST"])]
-    public function changePassword() {
+    public function changePassword(): MultiResponse {
         $user = $this->core->getUser();
         if (
             !empty($_POST['new_password'])
@@ -112,12 +104,8 @@ class UserProfileController extends AbstractController {
         );
     }
 
-
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_pronouns", methods: ["POST"])]
-    public function changePronouns() {
+    public function changePronouns(): JsonResponse {
         $user = $this->core->getUser();
         if (isset($_POST['pronouns'])) {
             $newPronouns = trim($_POST['pronouns']);
@@ -143,11 +131,26 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
+    #[Route("/user_profile/change_display_name_order", methods: ["POST"])]
+    public function changeDisplayNameOrder(): JsonResponse {
+        $user = $this->core->getUser();
+        if (isset($_POST['display-name-order'])) {
+            $newDisplayNameOrdering = trim($_POST['display-name-order']);
+            $user->setDisplayNameOrder($newDisplayNameOrdering);
+            $user->setUserUpdated(true);
+            $this->core->getQueries()->updateUser($user);
+            return JsonResponse::getSuccessResponse([
+                'message' => "Name Order updated successfully",
+                'display-name-order' => $newDisplayNameOrdering,
+            ]);
+        }
+        else {
+            return JsonResponse::getErrorResponse("Name Order is incorrect");
+        }
+    }
+
     #[Route("/user_profile/change_preferred_names", methods: ["POST"])]
-    public function changeUserName() {
+    public function changeUserName(): JsonResponse {
         $user = $this->core->getUser();
         if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
@@ -175,11 +178,8 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/update_last_initial_format", methods: ["POST"])]
-    public function updateLastInitialFormat() {
+    public function updateLastInitialFormat(): JsonResponse {
         $user = $this->core->getUser();
         if (isset($_POST['format'])) {
             $newVal = intval($_POST['format']);
@@ -204,11 +204,10 @@ class UserProfileController extends AbstractController {
     }
 
     /**
-     * @return JsonResponse
      * @throws \ImagickException
      */
     #[Route("/user_profile/change_profile_photo", methods: ["POST"])]
-    public function changeProfilePhoto() {
+    public function changeProfilePhoto(): JsonResponse {
         $user = $this->core->getUser();
         // No image uploaded
         if (empty($_FILES['user_image']) || empty($_FILES['user_image']['tmp_name'])) {
@@ -243,9 +242,6 @@ class UserProfileController extends AbstractController {
         }
     }
 
-    /**
-     * @return JsonResponse
-     */
     #[Route("/user_profile/change_secondary_email", methods: ["POST"])]
     public function changeSecondaryEmail(): JsonResponse {
         $user = $this->core->getUser();
