@@ -293,10 +293,6 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-triangle {
-    display: inline-block;
-}
-
 div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-triangle {
     display: inline-block;
 }

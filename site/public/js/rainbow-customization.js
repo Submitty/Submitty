@@ -27,15 +27,6 @@ function ClampGradeablesInBucket(el, num_gradeables) {
     }
 }
 
-// Forces element's value to be non-negative
-function ClampPoints(el) {
-    if (el.value === '') {
-        el.value = el.placeholder;
-        el.classList.remove('override');
-    }
-    el.value = Math.max(0.0, el.value);
-}
-
 // Forces element's value to be non-negative and between 0.0 - 100.0
 // Distinct from ClampPercent(), this is for Per Gradeable Percents
 function ClampPercents(el) {
@@ -43,15 +34,6 @@ function ClampPercents(el) {
         el.value = el.placeholder;
     }
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
-}
-
-function DetectMaxOverride(el) {
-    if (el.value !== el.placeholder) {
-        el.classList.add('override');
-    }
-    else {
-        el.classList.remove('override');
-    }
 }
 
 function ExtractBucketName(s, offset) {

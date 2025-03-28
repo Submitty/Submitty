@@ -266,8 +266,6 @@
                                                            value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           onblur="ClampPoints(this);"
-                                                           onkeyup="DetectMaxOverride(this);">
                                                            readonly>
                                                     <span>pts</span>
                                                 </div>
@@ -284,15 +282,6 @@
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
-                                                            <span class="tooltiptext tooltipbottom">
-                                                                WARNING: Max Score has been overridden in Rainbow Grades
-                                                                <br><br>
-                                                                Actual Max Score: {{ gradeable["max_score"] }}
-                                                                <br>
-                                                                Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
-                                                            </span>
-                                                        </i>
                                                         <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
