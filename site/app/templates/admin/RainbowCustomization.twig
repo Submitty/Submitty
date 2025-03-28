@@ -264,6 +264,7 @@
                                                            aria-label="{{gradeable["title"]}} max score"
                                                            value="{{ gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
+                                                           title="Manual Points: {{ gradeable['manual_grading_points'] }}, Auto-graded Points: {{ gradeable['autograded_grading_points'] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
                                                            readonly>
                                                     <span>pts</span>
