@@ -605,7 +605,7 @@ SQL;
         // Safety measure in case the database is bad for some reason
         $counted_posts = [];
         if (count($post) > 0) {
-            if ($post["parent_id"] != -1) {
+            if ($post["parent_id"] !== -1) {
                 $old_thread_id = $post["thread_id"];
                 $this->course_db->query("SELECT id from threads where merged_post_id = ?", [$post_id]);
                 $thread_id = $this->course_db->rows();
@@ -701,6 +701,12 @@ SQL;
         return $this->course_db->row();
     }
 
+    public function existsAnnouncementsId(int $thread_id): bool {
+        $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
+        $row = $this->course_db->row();
+        return count($row) > 0 && $row['announced'] !== null;
+    }
+
     public function updateResolveState($thread_id, $state) {
         if (in_array($state, [-1, 0, 1])) {
             $this->course_db->query("UPDATE threads set status = ? where id = ?", [$state, $thread_id]);
@@ -715,7 +721,7 @@ SQL;
         $updates = '';
 
         foreach ($results as $key => $value) {
-            if ($value != 'false') {
+            if ($value !== 'false') {
                 $results[$key] = 'true';
             }
             $this->core->getUser()->updateUserNotificationSettings($key, $results[$key] == 'true');
@@ -966,13 +972,44 @@ SQL;
     }
 
     /**
-     * @param string $current_user
+     * @param int $post_id
      * @param int $thread_id
-     * @return null
+     * @param bool $newStatus
+     * @return bool|null
      */
-    public function unreadThread(string $current_user, int $thread_id) {
-        $this->course_db->query("DELETE FROM viewed_responses where thread_id = ? and user_id = ?", [$thread_id, $current_user]);
-        return null;
+    public function setDeletePostStatus(int $post_id, int $thread_id, bool $newStatus): bool|null {
+        $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
+        $parent_id = $this->course_db->row()["parent_id"];
+        $children = [$post_id];
+        $get_deleted = !$newStatus;
+        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
+
+        if (!$newStatus) {
+            // On undelete, parent post must have deleted = false
+            if ($parent_id !== -1) {
+                if ($this->getPost($parent_id)['deleted']) {
+                    return null;
+                }
+            }
+        }
+        if ($parent_id === -1) {
+            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
+            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
+            return true;
+        }
+        else {
+            foreach ($children as $child_post_id) {
+                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $child_post_id]);
+            }
+        }
+        return false;
+    }
+
+    public function unreadThread(string $current_user, int $thread_id): void {
+        $this->course_db->query(
+            "DELETE FROM viewed_responses where thread_id = ? and user_id = ?",
+            [$thread_id, $current_user]
+        );
     }
 
     public function getParentPostId($child_id) {
@@ -1315,7 +1352,7 @@ WHERE term=? AND course=? AND user_id=?",
 
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
-        if ($user_id != null) {
+        if ($user_id !== null) {
             $query = "SELECT * FROM late_days WHERE user_id";
             if (is_array($user_id)) {
                 $query .= ' IN ' . $this->createParameterList(count($user_id));
@@ -3355,7 +3392,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
         // TODO: anon teams?
-        $user_type = ($type == 'user' && $anon != 'unblind') ? 'anon' : $type;
+        $user_type = ($type === 'user' && $anon !== 'unblind') ? 'anon' : $type;
         $row_type = $user_type . "_id";
 
         $params = [$grader->getId(), $mark->getId()];
@@ -3401,9 +3438,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     public function getAllSubmittersWhoGotMark($mark, $anon = 'unblind') {
         // Switch the column based on gradeable team-ness
         $type = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'team' : 'user';
-        $row_type = ($anon != 'unblind' && $type != 'team') ? 'anon_id' : "gd_" . $type . "_id";
+        $row_type = ($anon !== 'unblind' && $type !== 'team') ? 'anon_id' : "gd_" . $type . "_id";
         //TODO: anon teams?
-        if ($anon != 'unblind' && $type != 'team') {
+        if ($anon !== 'unblind' && $type !== 'team') {
             $table = $mark->getComponent()->getGradeable()->isTeamAssignment() ? 'gradeable_teams' : 'gradeable_anon';
             $this->course_db->query(
                 "
@@ -3926,6 +3963,44 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      */
     public function removeFromSeekingTeam($g_id, $user_id) {
         $this->course_db->query("DELETE FROM seeking_team WHERE g_id=? AND user_id=?", [$g_id, $user_id]);
+    }
+
+    /**
+     * Return an array of Team objects(team_id, team_name, team_members) for all teams on given gradeable
+     *
+     * @param Gradeable $gradeable
+     * @return \app\models\Team[]
+     */
+    public function getTeamsByGradeable(Gradeable $gradeable) {
+        $this->course_db->query(
+            "
+            SELECT 
+                gt.team_id AS team_id,
+                gt.team_name AS team_name,
+                STRING_AGG(u.user_id, ',') AS team_members
+            FROM 
+                gradeable_teams gt
+            JOIN 
+                teams t ON gt.team_id = t.team_id
+            JOIN 
+                users u ON t.user_id = u.user_id
+            WHERE 
+                gt.g_id = ?
+            GROUP BY 
+                gt.team_id
+            ORDER BY
+                team_id",
+            [$gradeable->getId()]
+        );
+        $teams = [];
+        $rows = $this->course_db->rows();
+        if (count($rows) > 0) {
+            foreach ($rows as $row) {
+                $row['team_members'] = explode(',', $row['team_members']); // comma-separated string to an array
+                $teams[] = $row;
+            }
+        }
+        return $teams;
     }
 
     /**
@@ -5262,7 +5337,7 @@ AND gc_id IN (
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
                   user_id = author_user_id AND {$column} = 'true');";
-        if ($column != 'reply_in_post_thread' && $column != 'reply_in_post_thread_email') {
+        if ($column !== 'reply_in_post_thread' && $column !== 'reply_in_post_thread_email') {
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
         }
         $this->course_db->query($query, $params);
@@ -5398,7 +5473,7 @@ AND gc_id IN (
     public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1) {
         $parameters = [];
         $parameters[] = $user_id;
-        if ($thread_id != -1) {
+        if ($thread_id !== -1) {
             $id_query = "metadata::json->>'thread_id' = ?";
             $parameters[] = $thread_id;
         }
@@ -7388,7 +7463,7 @@ AND gc_id IN (
 
         $parameters = [];
         // Select which subquery to use
-        if ($component_id != "-1") {
+        if ($component_id !== "-1") {
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
@@ -7751,8 +7826,8 @@ AND gc_id IN (
     public function setQueuePauseState(bool $new_state) {
         $current_queue_state = $this->core->getQueries()->getCurrentQueueState();
         $time_paused_start = $current_queue_state['time_paused_start'];
-        $current_state = $time_paused_start != null;
-        if ($new_state != $current_state) {
+        $current_state = $time_paused_start !== null;
+        if ($new_state !== $current_state) {
             // The pause state is actually changing
             $time_paused = $current_queue_state['time_paused'];
             $time_paused_start = date_create($time_paused_start);
