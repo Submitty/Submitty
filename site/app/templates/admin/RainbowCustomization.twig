@@ -272,11 +272,9 @@
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"
-                                                           {% set default_percent = ((1 / gradeables|length) * 100)|round(1, 'floor') %}
                                                            class="gradeable-custom-item-input"
                                                            aria-label="{{gradeable["title"]}} percent"
-                                                           placeholder="{{ default_percent }}"
-                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
+                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : "" }}"
                                                            id="percents-{{ gradeable["id"] }}"
                                                            onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
                                                     <span>%</span>
