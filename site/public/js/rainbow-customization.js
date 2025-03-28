@@ -1103,21 +1103,24 @@ $(document).ready(() => {
         });
     }
 
-    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket)
-    const bucketItemCounts = $('input[id^="config-count-{bucket}"]');
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket), with one decimal place
+    const bucketItemCounts = $('input[id^="config-count-"]');
     bucketItemCounts.each((index, bucketItemCountDOMElement) => {
-        const bucketItemCount = bucketItemCountDOMElement[0];
-        const bucket = bucketItemCount.id.match(/^config-count-(.+)$/)[1];
-        const gradeablePercentInputs = $(`div[id^="gradeable-percents-div-${bucket}"]`).children().first();
-        gradeablePercentInputs.each((index, gradeablePercentInputDOMElement) => {
-            const gradeablePercentInput = gradeablePercentInputDOMElement[0];
-            gradeablePercentInput.attr('placeholder', ((1 / bucketItemCount.val()) * 100)|round(1, 'floor'));
+        const bucketItemCount = $(bucketItemCountDOMElement);
+        const bucket = bucketItemCount.prop('id').match(/^config-count-(.+)$/)[1];
+        const gradeablePercents = $(`div[id^="gradeable-percents-div-${bucket}-"]`);
+        gradeablePercents.each((index, gradeablePercentDOMElement) => {
+            const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+            gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            if (gradeablePercentInput.val() === '') {
+                gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
+            }
         });
         bucketItemCount.change((event) => {
             event.stopPropagation();
-            gradeablePercentInputs.each((index, gradeablePercentInputDOMElement) => {
-                const gradeablePercentInput = gradeablePercentInputDOMElement[0];
-                gradeablePercentInput.attr('placeholder', ((1 / bucketItemCount.val()) * 100)|round(1, 'floor'));
+            gradeablePercents.each((index, gradeablePercentDOMElement) => {
+                const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+                gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
             });
         });
     });
