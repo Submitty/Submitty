@@ -109,6 +109,7 @@ a.nav-bar.normal-btn:hover {
 a.nav-bar.disabled-btn {
     color: var(--standard-medium-dark-gray);
     cursor: default;
+    /* stylelint-disable-next-line declaration-no-important */
     border: none !important;
     pointer-events: none;
 }
@@ -172,10 +173,12 @@ table#grader-history td {
 
 #checkpoint-numeric-gradeables-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #late-days-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #gradeable-notifications-message {

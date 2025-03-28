@@ -557,6 +557,7 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
+            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'notifications_sent' => $gradeable->getNotificationsSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
