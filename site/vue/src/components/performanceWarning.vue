@@ -22,7 +22,7 @@ const isVisible = ref(props.performanceWarning);
       id="close-performance-warning-system-message"
       class="fa fa-times"
       style="padding: 4px; cursor: pointer;"
-      @click="isVisible= false"
+      @click="isVisible=false"
     />
   </div>
 </template>
