@@ -1103,6 +1103,25 @@ $(document).ready(() => {
         });
     }
 
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket)
+    const bucketItemCounts = $('input[id^="config-count-{bucket}"]');
+    bucketItemCounts.each((index, bucketItemCountDOMElement) => {
+        const bucketItemCount = bucketItemCountDOMElement[0];
+        const bucket = bucketItemCount.id.match(/^config-count-(.+)$/)[1];
+        const gradeablePercentInputs = $(`div[id^="gradeable-percents-div-${bucket}"]`).children().first();
+        gradeablePercentInputs.each((index, gradeablePercentInputDOMElement) => {
+            const gradeablePercentInput = gradeablePercentInputDOMElement[0];
+            gradeablePercentInput.attr('placeholder', ((1 / bucketItemCount.val()) * 100)|round(1, 'floor'));
+        });
+        bucketItemCount.change((event) => {
+            event.stopPropagation();
+            gradeablePercentInputs.each((index, gradeablePercentInputDOMElement) => {
+                const gradeablePercentInput = gradeablePercentInputDOMElement[0];
+                gradeablePercentInput.attr('placeholder', ((1 / bucketItemCount.val()) * 100)|round(1, 'floor'));
+            });
+        });
+    });
+
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
     const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
