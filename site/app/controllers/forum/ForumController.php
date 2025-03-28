@@ -20,6 +20,7 @@ use app\entities\forum\Post;
 use app\entities\forum\Thread;
 use app\entities\forum\Category;
 use WebSocket;
+use Datetime;
 
 /**
  * Class ForumHomeController
@@ -1377,7 +1378,8 @@ class ForumController extends AbstractController {
             if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result->getAuthor()->getId()])) {
                 $output = [];
                 $output['post'] = $result->getContent();
-                $output['post_time'] = $result->getTimestamp()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                //Use standard ISO time as forum.js is responsible for formatting
+                $output['post_time'] = $result->getTimestamp()->format(DateTime::ATOM);
 
                 $output['anon'] = $result->isAnonymous();
                 $output['change_anon'] = $this->modifyAnonymous($result->getAuthor()->getId());

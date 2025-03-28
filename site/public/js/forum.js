@@ -851,12 +851,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const anon = json.anon;
             const change_anon = json.change_anon;
             const user_id = escapeSpecialChars(json.user);
-            const validIsoString = json.post_time.replace(' ', 'T');
-            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
-            if (!time.isValid) {
-                // Timezone suffix ":00" might be missing
-                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
-            }
+            const time = DateTime.fromISO(json.post_time, {zone: 'local'});
             const categories_ids = json.categories_ids;
             const date = time.toLocaleString(DateTime.DATE_SHORT);
             const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
