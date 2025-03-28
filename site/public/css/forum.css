@@ -948,13 +948,3 @@
     display: block;
     font-size: 14px;
 }
-
-.post-container {
-    display: inline-flex;
-    margin-left: 15px;
-}
-
-.upduck-post-container {
-    display: inline-flex;
-    align-items: center;
-}
