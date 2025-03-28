@@ -10,7 +10,7 @@ use app\models\Email;
 use app\models\User;
 
 class EmailTester extends \PHPUnit\Framework\TestCase {
-    private $footer = "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+    private string $footer = "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     /** @var Core */
     private $core;
 
@@ -18,6 +18,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $this->core = new Core();
         $config = new Config($this->core);
         $config->setCourse('csci1100');
+        $config->setBaseUrl('http://localhost');
+        $config->setTerm('f21');
         $user = new User($this->core, [
             'user_id' => 'test',
             'user_givenname' => 'Tester',
@@ -44,9 +46,13 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame('email body' . $this->footer, $email->getBody());
+        self::assertSame('person', $email->getUserId());
+        self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $body = $email->getBody();
+        self::assertStringContainsString('email body', $body);
+        self::assertStringContainsString('NOTE: This is an automated email notification', $body);
+        self::assertStringContainsString('Update your email notification settings for this course here:', $body);
+        self::assertStringContainsString('http://localhost/courses/f21/csci1100/notifications/settings', $body);
     }
 
     public function testRelevantUrl(): void {
@@ -57,10 +63,10 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'relevant_url' => 'http://example.com'
         ]);
 
-        $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nClick here for more info: http://example.com" . $this->footer,
+        self::assertSame('person', $email->getUserId());
+        self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        self::assertSame(
+            "email body\n\nClick here for more info: http://example.com\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
             $email->getBody()
         );
     }
@@ -73,10 +79,10 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nAuthor: Test P." . $this->footer,
+        self::assertSame('person', $email->getUserId());
+        self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        self::assertSame(
+            "email body\n\nAuthor: Test P.\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
             $email->getBody()
         );
     }
@@ -90,10 +96,10 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body" . $this->footer,
+        self::assertSame('person', $email->getUserId());
+        self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        self::assertSame(
+            "email body\n\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
             $email->getBody()
         );
     }
@@ -107,11 +113,28 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'author' => true
         ]);
 
-        $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com" . $this->footer,
+        self::assertSame('person', $email->getUserId());
+        self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        self::assertSame(
+            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
             $email->getBody()
         );
+    }
+
+    public function testNotificationSettingsLink(): void {
+        $email = new Email($this->core, [
+            'to_user_id' => 'person',
+            'subject' => 'test email',
+            'body' => 'test body',
+        ]);
+
+        $base_url = $this->core->getConfig()->getBaseUrl();
+        $course = $this->core->getConfig()->getCourse();
+        $term = $this->core->getConfig()->getTerm();
+        $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
+
+        $body = $email->getBody();
+        self::assertStringContainsString("Update your email notification settings for this course here:", $body);
+        self::assertStringContainsString($notifications_url, $body);
     }
 }
