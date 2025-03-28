@@ -66,7 +66,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         self::assertSame('person', $email->getUserId());
         self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
         self::assertSame(
-            "email body\n\nClick here for more info: http://example.com\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
+            "email body\n\nClick here for more info: http://example.com" . $this->footer . "\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings",
             $email->getBody()
         );
     }
@@ -82,7 +82,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         self::assertSame('person', $email->getUserId());
         self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
         self::assertSame(
-            "email body\n\nAuthor: Test P.\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
+            "email body\n\nAuthor: Test P." . $this->footer . "\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings",
             $email->getBody()
         );
     }
@@ -99,7 +99,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         self::assertSame('person', $email->getUserId());
         self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
         self::assertSame(
-            "email body\n\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
+            "email body" . $this->footer . "\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings",
             $email->getBody()
         );
     }
@@ -116,7 +116,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         self::assertSame('person', $email->getUserId());
         self::assertSame('[Submitty csci1100]: some email', $email->getSubject());
         self::assertSame(
-            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings" . $this->footer,
+            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com" . $this->footer . "\nUpdate your email notification settings for this course here:\nhttp://localhost/courses/f21/csci1100/notifications/settings",
             $email->getBody()
         );
     }
