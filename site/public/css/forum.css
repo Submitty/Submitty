@@ -598,9 +598,10 @@
     height: 30px;
 }
 
-.email-announcement-checkbox {
-    margin-right: 18px;
-    display: inline-block;
+.pin-expiration-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .thread-attachment-container,
