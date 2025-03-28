@@ -127,7 +127,6 @@
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
-    --deleted-color: #000000;
 
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
@@ -243,7 +242,6 @@
 
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
-    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
 
@@ -263,7 +261,6 @@
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
-    --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
@@ -314,6 +311,8 @@
     /* discussion forum */
     --attachment-box-color: #4a4a4a;
     --file-upload-table-hover: #4a4a4a;
+    --deleted-discussion-post-grey: #283E57;
+    --deleted-and-unviewed-thread: #3E5F7A;
 
     /* these differ from the colors on the posts for some reason?
           so I will put them here for reference
