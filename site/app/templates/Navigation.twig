@@ -75,6 +75,11 @@
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
+                            {% if g_info.is_student_view != true and rainbow_grades_summary != true and info.section_id == "graded"  %}
+                                <span style="color: var(--danger-red); font-weight: bold; font-style: italic;">
+                                    NOTE: Scores are not visible to students as Rainbow Grades summaries are not enabled.
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
                     {% for button in g_info.buttons %}
