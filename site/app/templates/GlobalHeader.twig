@@ -253,12 +253,12 @@
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
         {% include 'Vue.twig' with {
-        'component': 'performanceWarning',
-        'args': {
-            "performanceWarning": performance_warning,
-            "submittyQueries": submitty_queries,
-            "courseQueries": course_queries
-        }
+            'component': 'performanceWarning',
+            'args': {
+                "performanceWarning": performance_warning,
+                "submittyQueries": submitty_queries,
+                "courseQueries": course_queries
+            }
         } %}
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
