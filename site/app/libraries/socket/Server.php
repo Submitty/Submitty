@@ -29,6 +29,10 @@ class Server implements MessageComponentInterface {
     /** @var array  */
     private $users = [];
 
+    // Holds the set of PHPWebSocket clients that are currently connected
+    /** @var array<int, bool> */
+    private $php_websocket_clients = [];
+
     /** @var Core */
     private $core;
 
@@ -67,6 +71,19 @@ class Server implements MessageComponentInterface {
     }
 
     /**
+     * This function checks if a given connection is the PHP WebSocket client
+     * @param ConnectionInterface $conn
+     * @return bool
+     */
+    private function isWebSocketClient(ConnectionInterface $conn): bool {
+        $headers = $conn->httpRequest->getHeaders();
+        $user_agent = $headers['User-Agent'][0] ?? '';
+        $session_secret = $headers['Session-Secret'][0] ?? '';
+
+        return $user_agent === 'websocket-client-php' && $session_secret === $this->core->getConfig()->getSecretSession();
+    }
+
+    /**
      * This function checks if a given connection object is authenticated
      * It uses the submitty_session cookie in the header data to work
      * @param ConnectionInterface $conn
@@ -75,11 +92,11 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
-        $user_agent = $request->getHeader('User-Agent')[0] ?? '';
 
-        if ($user_agent === 'websocket-client-php') {
+        if ($this->isWebSocketClient($conn)) {
+            $this->php_websocket_clients[$conn->resourceId] = true;
             $this->log("New connection {$conn->resourceId} --> websocket-client-php");
-            return $request->getHeader('Session-Secret')[0] === $this->core->getConfig()->getSecretSession();
+            return true;
         }
 
         $cookieString = $request->getHeader("cookie")[0] ?? '';
@@ -108,6 +125,13 @@ class Server implements MessageComponentInterface {
      * Push a given message to all-but-sender connections on the same course and page
      */
     private function broadcast(ConnectionInterface $from, string $content, string $page_name): void {
+        if (!array_key_exists($page_name, $this->clients)) {
+            return; // Ignore broadcast requests for pages without active connections
+        }
+        elseif (!isset($this->php_websocket_clients[$from->resourceId])) {
+            return; // Ignore client-side broadcast requests
+        }
+
         foreach ($this->clients[$page_name] as $client) {
             if ($client !== $from) {
                 $client->send($content);
@@ -225,6 +249,7 @@ class Server implements MessageComponentInterface {
     public function onClose(ConnectionInterface $conn): void {
         $this->log("Closing connection {$conn->resourceId}");
         $user_current_page = $this->getSocketClientPage($conn);
+        unset($this->php_websocket_clients[$conn->resourceId]);
         if ($user_current_page) {
             $this->clients[$user_current_page]->detach($conn);
             unset($this->pages[$conn->resourceId]);
