@@ -981,7 +981,7 @@ SQL;
         $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
         $parent_id = $this->course_db->row()["parent_id"];
         $children = [$post_id];
-        $get_deleted = $newStatus === 0;
+        $get_deleted = !$newStatus;
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if (!$newStatus) {
