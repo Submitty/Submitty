@@ -29,7 +29,7 @@ describe('Test cases revolving around bulk uploading', () => {
 
             // Split by page count
             cy.get('#radio-bulk').click();
-            cy.get('#num_pages').type('2');
+            cy.get('#num_pages').type('1');
             cy.get('#assign_box').should('contain', '0 files ready to assign');
             cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf', {force: true});
             cy.get('#submit').click();
