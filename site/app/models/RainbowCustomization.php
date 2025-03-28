@@ -117,8 +117,6 @@ class RainbowCustomization extends AbstractModel {
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override" => false,
-                "override_max" => $max_score,
                 "override_percent" => false
             ];
         }
@@ -156,7 +154,7 @@ class RainbowCustomization extends AbstractModel {
         $this->reorderBuckets();
 
         //Now that the buckets are ordered and the customization has been initialized, we can
-        //loop through to find differences between the max_values from the database vs the customization JSON
+        //loop through to find differences between the percent values from the database vs the customization JSON
         if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables()) > 0) {
             $json_buckets = $this->RCJSON->getGradeables();
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
@@ -173,13 +171,6 @@ class RainbowCustomization extends AbstractModel {
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
                 foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if ($j_index >= count($json_bucket->ids)) {
-                        $c_gradeable['override_max'] = $c_gradeable['max_score'];
-                    }
-                    elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
-                        $c_gradeable['override'] = true;
-                        $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
-                    }
                     if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;

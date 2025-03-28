@@ -260,10 +260,9 @@
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                 <div id="gradeable-pts-div-{{ gradeable["id"] }}">
                                                     <input type="text"
-                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
+                                                           class="gradeable-custom-item-input"
                                                            aria-label="{{gradeable["title"]}} max score"
-                                                           placeholder="{{ gradeable["max_score"] }}"
-                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
+                                                           value="{{ gradeable["max_score"] }}"
                                                            id="maxscore-{{ gradeable["id"] }}"
                                                            data-grade-release-date="{{ gradeable["grade_release_date"] }}"
                                                            readonly>
