@@ -595,6 +595,7 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: 5px;
+    height: 30px;
 }
 
 .email-announcement-checkbox {
