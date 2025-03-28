@@ -16,3 +16,5 @@
 0 2 * * * submitty_daemon python3 /usr/local/submitty/sbin/auto_rainbow_scheduler.py
 # Update OS Info and Service Health every hour
 0 * * * * submitty_daemon   /usr/local/submitty/sbin/update_worker_sysinfo.sh UpdateSystemInfo
+# Run the repair_services.sh script every minute
+* * * * * submitty_daemon   /usr/local/submitty/sbin/repair_services.sh

@@ -1115,7 +1115,9 @@ else
 
     # Dispatch daemon job to update OS info
     chown "root:${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
+    chown "root:${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/sbin/repair_services.sh"
     chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
+    chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/repair_services.sh"
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateSystemInfo
 fi
