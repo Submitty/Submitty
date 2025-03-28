@@ -139,6 +139,7 @@ class CourseMaterialsView extends AbstractView {
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
+        $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
 
         $folder_paths = $this->compileAllFolderPaths($final_structure);
 
@@ -159,7 +160,8 @@ class CourseMaterialsView extends AbstractView {
             "folder_ids" => $folder_ids,
             "links" => $links,
             "folder_paths" => $folder_paths,
-            "beginning_of_time_date" => $beginning_of_time_date
+            "beginning_of_time_date" => $beginning_of_time_date,
+            "file_upload_limit_mb" => $file_upload_limit_mb
         ]);
     }
 
