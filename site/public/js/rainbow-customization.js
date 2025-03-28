@@ -268,7 +268,7 @@ function getGradeableBuckets() {
                 children[1] = children[1].children[0];
 
                 // Get max points
-                gradeable.max = parseFloat(children[0].value);
+                gradeable.max = parseFloat(children[0].dataset.maxScore);
 
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(children[1]).is(':visible')) {

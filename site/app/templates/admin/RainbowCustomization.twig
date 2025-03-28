@@ -259,15 +259,13 @@
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                 <div id="gradeable-pts-div-{{ gradeable["id"] }}">
-                                                    <input type="text"
-                                                           class="gradeable-custom-item-input"
-                                                           aria-label="{{gradeable["title"]}} max score"
-                                                           value="{{ gradeable["max_score"] }}"
-                                                           id="maxscore-{{ gradeable["id"] }}"
-                                                           title="Manual Points: {{ gradeable['manual_grading_points'] }}, Auto-graded Points: {{ gradeable['autograded_grading_points'] }}"
-                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           readonly>
-                                                    <span>pts</span>
+                                                    <span class="gradeable-points"
+                                                          aria-label="{{gradeable["title"]}} max score"
+                                                          id="maxscore-{{ gradeable["id"] }}"
+                                                          data-max-score="{{ gradeable["max_score"] }}"
+                                                          data-grade-release-date="{{ gradeable["grade_release_date"] }}">
+                                                        {{ gradeable['manual_grading_points'] }} manual + {{ gradeable['autograded_grading_points'] }} autograded = {{ gradeable['max_score'] }} total points
+                                                    </span>
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"

@@ -342,8 +342,19 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     margin-right: 2em;
 }
 
+[id^="gradeable-pts-div-"] {
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    width: 25%;
+}
+
 [id^="gradeable-percents-div-"] {
     display: none;
+}
+
+.gradeable-points {
+    font-style: italic;
+    font-size: 0.8em;
 }
 
 #btn-build-customization {
