@@ -173,10 +173,12 @@ table#grader-history td {
 
 #checkpoint-numeric-gradeables-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #late-days-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #timezone-container {
