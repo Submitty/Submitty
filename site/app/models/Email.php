@@ -91,9 +91,10 @@ class Email extends AbstractModel {
         }
 
         // Getting the base url and course information
-        $base_url = $this->core->getConfig()->getBaseUrl();
-        $course = $this->core->getConfig()->getCourse();
-        $term = $this->core->getConfig()->getTerm();
+        $config = $this->core->getConfig();
+        $base_url = $config->getBaseUrl();
+        $course = $config->getCourse();
+        $term = $config->getTerm();
 
         // Adding the footer note first
         $body .= "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
