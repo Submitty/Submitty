@@ -181,6 +181,10 @@ table#grader-history td {
     font-weight: bold;
 }
 
+#gradeable-notifications-message {
+    font-style: italic;
+}
+
 #timezone-container {
     float: right;
 }
