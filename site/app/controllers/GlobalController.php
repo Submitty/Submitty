@@ -63,6 +63,7 @@ class GlobalController extends AbstractController {
         $duck_img = $this->getDuckImage($now);
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
 
         return $this->core->getOutput()->renderTemplate(
             'Global',
@@ -77,7 +78,8 @@ class GlobalController extends AbstractController {
             $duck_img,
             $page_name,
             $content_only,
-            $bannerImages
+            $bannerImages,
+            $performance_warning
         );
     }
 
@@ -797,10 +799,8 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
-        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
-
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
     }
 
     private function routeEquals(string $a, string $b) {
