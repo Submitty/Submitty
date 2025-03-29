@@ -19,7 +19,7 @@ const createThread = (title, content, category) => {
     cy.get('.thread_post_content').type(content);
     cy.get('.cat-buttons').contains(category).click();
     cy.get('[name="post"]').click();
-    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+    cy.get('.flex-row > .thread-title-cont').should('contain', title);
 };
 
 const replyToThread = (title, reply) => {
