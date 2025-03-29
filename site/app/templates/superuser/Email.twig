@@ -1,5 +1,5 @@
 <div id="superuser-email" class="content">
-    <h1> System Wide Email</h1>
+    <h1 data-testid="system-wide-email-title">System Wide Email</h1>
     <p id="email-warning" class="danger email-warning" style="display: none;">
         At least one recipient groups must be selected.
     </p>
@@ -38,10 +38,10 @@
         </div>
         <label for="email-subject"> Subject:</label>
         <br>
-        <textarea type="text" id="email-subject" class="email-subject custom-scrollbar" style="width:100%;"></textarea>
+        <textarea type="text" id="email-subject" class="email-subject custom-scrollbar" style="width:100%;" data-testid="email-subject"></textarea>
         <label for="email-content"> Body:</label>
         <br>
-        <textarea type="text" id="email-content" class="email-content custom-scrollbar" style="width:100%;"></textarea>
+        <textarea type="text" id="email-content" class="email-content custom-scrollbar" style="width:100%;" data-testid="email-content"></textarea>
     </form>
-    <button class="btn btn-primary" id="send-email" onclick="sendEmail({{"\"" ~ sendUrl ~ "\""}})"> Send</button>
+    <button class="btn btn-primary" id="send-email" onclick="sendEmail({{"\"" ~ sendUrl ~ "\""}})" data-testid="send-email"> Send</button>
 </div>
