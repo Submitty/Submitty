@@ -908,7 +908,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_status').val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
                 if (Date.parse(expiration) > new Date()) {
-                    $('.pin-expiration-date').show();
+                    $('#pin-expiration-date').show();
                 }
                 $('#expirationDate').val(json.expiration);
                 // Categories
@@ -926,7 +926,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $('#title').prop('disabled', true);
                 $('.edit_thread').hide();
-                $('.pin-expiration-date').hide();
+                $('#pin-expiration-date').hide();
                 $('#label_lock_thread').hide();
                 $('#thread_form').prop('ignore-cat', true);
                 $('#category-selection-container').hide();
@@ -2591,17 +2591,17 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
-        $('.pin-expiration-date').hide();
+        $('#pin-expiration-date').hide();
         if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
             $('#Announcement').prop('checked', data.isAnnouncement);
-            $('.pin-expiration-date').show();
+            $('#pin-expiration-date').show();
         }
         if (data.pinThread) {
             $('#pinThread').prop('checked', data.pinThread);
-            $('.pin-expiration-date').show();
+            $('#pin-expiration-date').show();
         }
         if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);

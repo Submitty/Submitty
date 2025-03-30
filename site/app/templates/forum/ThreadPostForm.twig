@@ -197,7 +197,7 @@
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
-            <div class = "pin-expiration-date">
+            <div id="pin-expiration-date">
               <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
             </div>
@@ -236,24 +236,24 @@
             if($(".thread-announcement-checkbox").prop("checked")){
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
-                $(".pin-expiration-date").show();
+                $("#pin-expiration-date").show();
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
-                $(".pin-expiration-date").hide();
+                $("#pin-expiration-date").hide();
             }
         });
 
         $(".pinThread-checkbox").click(function (){
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
-                $(".pin-expiration-date").show();
+                $("#pin-expiration-date").show();
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
                 $(".thread-announcement-checkbox").prop("checked", false);
-                $(".pin-expiration-date").hide();
+                $("#pin-expiration-date").hide();
             }
         });
 

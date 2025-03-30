@@ -595,10 +595,10 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: 5px;
-    height: 30px;
+    min-height: 30px;
 }
 
-.pin-expiration-date {
+#pin-expiration-date {
     display: flex;
     align-items: center;
     gap: 6px;
