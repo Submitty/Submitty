@@ -3,8 +3,6 @@ import { buildUrl } from '../../support/utils';
 const title1 = 'Attachment contains secret';
 const title2 = 'Different Levels& display order';
 const title3 = 'Simple C++ threading example';
-const title4 = 'Cypress Title 4 Cypress';
-const content1 = 'Cypress Content 1 Cypress';
 
 const upduckPost = (thread_title, thread_number = 0, num_ducks = 0) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
@@ -192,9 +190,8 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
 
-        createThread(title4, content1, 'Comment');
-        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
-        cy.get('[data-testid="create-post-head"]').should('contain', title4);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="create-post-head"]').should('contain', title1);
         cy.get('[data-testid="upduck-button"]').first().click();
         cy.wait('@upduck', { responseTimeout: 15000 });
 
@@ -205,10 +202,10 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="thread-list-item"]').contains(title4).click();
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
         cy.get('[data-testid="upduck-button"]').first().click();
         cy.wait('@upduck', { responseTimeout: 15000 });
-        cy.get('[data-testid="show-upduck-list"]').click();
+        cy.get('[data-testid="show-upduck-list"]').first().click();
 
         // Verify that the modal is visible
         cy.get('#popup-post-likes').should('be.visible');
@@ -221,7 +218,12 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.get('#popup-post-likes .close-button').click();
         cy.get('#popup-post-likes').should('not.be.visible');
 
-        // Cleanup: Remove the thread
-        removeThread(title4);
+        // Remove upducks
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        removeUpduck(title1);
     });
 });
