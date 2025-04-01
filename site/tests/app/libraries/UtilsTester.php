@@ -430,7 +430,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::getAutoFillData($users));
     }
 
-    public function testConvertBooleans() {
+    public function testConvertBooleans(): void {
         $values = [
             'true' => true,
             'on' => true,
@@ -441,8 +441,9 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             123 => true,
             1 => true,
             0 => false
-        ]
-        foreach($values as $key => $value) {
+        ];
+
+        foreach ($values as $key => $value) {
             // Strict assertion to assert a boolean value is returned, not possibly equal other values, such as an integer or a string.
             $this->assertSame($value, Utils::getBooleanValue($key));
         }

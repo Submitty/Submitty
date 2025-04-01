@@ -331,11 +331,11 @@ class Utils {
             $true_values = [
                 'true',
                 'on'
-            ]
+            ];
             return (in_array(strtolower($variable), $true_values, true));
         }
         elseif (is_numeric($variable)) {
-            // Handle 0 as the only false integer. 
+            // Handle 0 as the only false integer.
             if ($variable === 0) {
                 return false;
             }
