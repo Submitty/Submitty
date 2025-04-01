@@ -320,7 +320,7 @@ class Utils {
      * Transforms non-boolean values to boolean values, i.e. 'true' to true
      * @param mixed $variable The variable that is being passed in. Type of mixed to allow for string, boolean, or null.
      */
-    public static function getBooleanValue(mixed $variable) {
+    public static function getBooleanValue(mixed $variable): bool {
         // Handle boolean values peacefully
         if (is_bool($variable)) {
             return $variable;
