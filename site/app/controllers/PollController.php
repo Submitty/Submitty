@@ -15,6 +15,8 @@ use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
+use app\libraries\socket\Client;
+use WebSocket;
 use DateInterval;
 
 /**
@@ -135,6 +137,10 @@ class PollController extends AbstractController {
             $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
             if ($poll === null) {
                 $this->core->addErrorMessage("Invalid Poll ID");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
+            if (!$poll->isVisible()) {
+                $this->core->addErrorMessage("Poll is not available");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
             if ($poll->isHistogramAvailable()) {
@@ -478,7 +484,13 @@ class PollController extends AbstractController {
         }
 
         $em->flush();
-
+        $web_socket_message = [
+            'type' => 'poll_updated',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll updated',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll successfully edited");
         return new RedirectResponse($returnUrl);
     }
@@ -509,6 +521,15 @@ class PollController extends AbstractController {
             $poll->setEndTime($end_time);
         }
         $em->flush();
+
+        $web_socket_message = [
+            'type' => 'poll_opened',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll opened',
+        ];
+        $this->sendSocketMessage($web_socket_message);
+
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -605,7 +626,13 @@ class PollController extends AbstractController {
         $poll->setOpen();
         $poll->setEndTime($this->core->getDateTimeNow());
         $em->flush();
-
+        $web_socket_message = [
+            'type' => 'poll_ended',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll ended',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -624,6 +651,14 @@ class PollController extends AbstractController {
         }
         $poll->setClosed();
         $em->flush();
+
+        $web_socket_message = [
+            'type' => 'poll_closed',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll closed',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
@@ -662,20 +697,28 @@ class PollController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
+        $web_socket_message = [
+            'type' => 'update_histogram',
+            'poll_id' => $poll_id,
+            'socket' => 'instructor',
+            'message' => [],
+        ];
 
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
+            $web_socket_message['message'][$response->getOption()->getResponse()] = -1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
                 $em->persist($response);
+                $web_socket_message['message'][$response->getOption()->getResponse()] += 1;
             }
         }
 
         $em->flush();
-
+        $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
@@ -825,5 +868,21 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
         }
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
+     * This method opens a WebSocket client and sends a message containing corresponding poll updates
+     */
+    private function sendSocketMessage(mixed $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'] . '-' . $msg_array['socket'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

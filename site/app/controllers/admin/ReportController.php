@@ -259,8 +259,10 @@ class ReportController extends AbstractController {
                 $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
 
-            $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
-            $ggs[] = $graded_gradeable;
+            if ($graded_gradeable !== null) {
+                $graded_gradeable->setOverriddenGrades($this->all_overrides[$user->getId()][$graded_gradeable->getGradeableId()] ?? null);
+                $ggs[] = $graded_gradeable;
+            }
         }
         return $ggs;
     }
@@ -394,7 +396,7 @@ class ReportController extends AbstractController {
         $user_data['rotating_section'] = $user->getRotatingSection();
         $user_data['registration_type'] = $user->getRegistrationType();
         $user_data['default_allowed_late_days'] = $this->core->getConfig()->getDefaultStudentLateDays();
-        $user_data['last_update'] = date("l, F j, Y");
+        $user_data['last_update'] = date("l, F j, Y h:i A T");
 
         foreach ($ggs as $gg) {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
