@@ -1409,6 +1409,7 @@ class ForumController extends AbstractController {
         $output['expiration'] = $result["pinned_expiration"];
     }
 
+    // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
@@ -1421,9 +1422,9 @@ class ForumController extends AbstractController {
             $content = $posts[$i]["content"];
             if (!isset($users[$user])) {
                 $users[$user] = [];
-                $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];
@@ -1442,6 +1443,14 @@ class ForumController extends AbstractController {
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
+            // user has only upducks and no posts, need to set some information
+            if (!isset($users[$user])) {
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
+                $users[$user]["total_threads"] = 0;
+            }
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
@@ -1464,13 +1473,14 @@ class ForumController extends AbstractController {
 
         $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         $thread = $repo->getThreadDetail($_POST['thread_id']);
-
+        $source = hash('sha3-224', $_POST['current_user']);
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
-            'likesFromStaff' => $output['likesFromStaff']
+            'likesFromStaff' => $output['likesFromStaff'],
+            'source' => $source
         ]);
 
         $this->sendSocketMessage([
@@ -1481,6 +1491,7 @@ class ForumController extends AbstractController {
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
+            'source' => $source, // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);

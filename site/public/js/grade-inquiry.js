@@ -131,7 +131,6 @@ function onGradeInquirySubmitClicked(button) {
 
     // prevent double submission
     form.data('submitted', true);
-    const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
@@ -139,28 +138,10 @@ function onGradeInquirySubmitClicked(button) {
         success: function (response) {
             try {
                 const json = JSON.parse(response);
-                if (json['status'] === 'success') {
-                    const data = json['data'];
 
-                    // inform other open websocket clients
-                    const submitter_id = form.children('#submitter_id').val();
-                    if (data.type === 'new_post') {
-                        newPostRender(gc_id, data.post_id, data.new_post);
+                if (json['status'] === 'success') {
+                    if (json['data']['type'] === 'new_post') {
                         text_area.val('');
-                        window.socketClient.send({
-                            type: data.type,
-                            post_id: data.post_id,
-                            submitter_id: submitter_id,
-                            gc_id: gc_id,
-                        });
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({ type: data.type, submitter_id: submitter_id });
                     }
                 }
                 else {
@@ -184,6 +165,9 @@ function initGradingInquirySocketClient() {
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
+                break;
+            case 'open_grade_inquiry':
+                window.location.reload();
                 break;
             case 'toggle_status':
                 gradeInquiryDiscussionHandler(msg.submitter_id);
