@@ -18,15 +18,15 @@ class CourseRegistrationController extends AbstractController {
         $emails = [];
         $instructors_settings = $this->core->getQueries()->getUsersNotificationSettings($instructors);
 
-        foreach ($instructor_settings as $instructor_setting) {
+        foreach ($instructors_settings as $instructor_setting) {
             // If the instructor has notifications enabled for self registrations add to email list
             if ($instructor_setting['self_registration_email']) {
                 $emails[] = new Email(
                     $this->core,
                     [
-                        "subject" => $subject,
-                        "body" => $body,
-                        "to_user_id" => $instructor_setting['user_id'],
+                        'subject' => $subject,
+                        'body' => $body,
+                        'to_user_id' => $instructor_setting['user_id'],
                     ]
                 );
             }
