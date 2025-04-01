@@ -158,6 +158,7 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         createThread(title1, content1, 'Comment');
         createThread(title1, content1, 'Comment');
         removeThread(title1);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('not.exist');
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
