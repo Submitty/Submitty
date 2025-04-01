@@ -19,9 +19,14 @@
 
 .pdfViewer .page {
     /* describe all css properties independently so js can read it easily across all platforms */
+    /* stylelint-disable-next-line declaration-no-important */
     margin-top: 5px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     margin-right: auto !important;
+    /* stylelint-disable-next-line declaration-no-important */
     margin-bottom: 5px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     margin-left: auto !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border: none !important;
 }
