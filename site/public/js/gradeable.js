@@ -360,10 +360,6 @@ function ajaxUploadGradeable() {
                 }
                 else {
                     closePopup('gradeable-json-form');
-                    if (!Object.prototype.hasOwnProperty.call(data, 'message')) {
-                        displayErrorMessage('An error has occurred. Check console log for more details');
-                        console.log(data);
-                    }
                     displayErrorMessage(data['message']);
                     return false;
                 }
