@@ -21,6 +21,9 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 
 class SqlToolboxController extends AbstractController {
+    private const MAX_ROWS = 1000;
+
+
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {
         return new WebResponse(
@@ -49,7 +52,17 @@ class SqlToolboxController extends AbstractController {
         try {
             $this->core->getCourseDB()->beginTransaction();
             $this->core->getCourseDB()->query($query);
-            return JsonResponse::getSuccessResponse($this->core->getCourseDB()->rows());
+            $allRows = $this->core->getCourseDB()->rows();
+
+            $totalRows = count($allRows);
+            $limitedRows = array_slice($allRows, 0, self::MAX_ROWS);
+
+            return JsonResponse::getSuccessResponse([
+                'results' => $limitedRows,
+                'message' => $totalRows > self::MAX_ROWS
+                    ? "Output was truncated. Showing " . count($limitedRows) . " of {$totalRows} total rows."
+                    : "Showing " . count($limitedRows) . " of {$totalRows} total rows."
+            ]);
         }
         catch (DatabaseException $exc) {
             return JsonResponse::getFailResponse("Error running query: " . $exc->getMessage());
