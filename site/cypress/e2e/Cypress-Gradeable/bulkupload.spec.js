@@ -14,6 +14,9 @@ describe('Test cases revolving around bulk uploading', () => {
     ['instructor'].forEach((user) => {
 
         it(`${user} should have grader submission options, be able to upload, split by QR code, split by page count, check link to student in grading interface, and delete all pdfs`, () => {
+            //Default true for window confirm prompts
+            // cy.on('window:confirm', () => true);
+
             cy.login(user);
             cy.visit(['sample', 'gradeable', 'bulk_upload_test']);
 
@@ -27,23 +30,32 @@ describe('Test cases revolving around bulk uploading', () => {
             cy.get('#num_pages').should('be.visible');
             cy.get('#submission-mode-warning > .warning').should('have.text', 'Warning: Submitting files for bulk upload!');
 
+            //Delete any existing pdfs
+            cy.get('#bulk_delete_all').click();
+
             // Split by page count
             cy.get('#radio-bulk').click();
             cy.get('#num_pages').type('1');
-            cy.get('#assign_box').should('contain', '0 files ready to assign');
-            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf', {force: true});
+
+            //cy.get('#assign_box').should('contain', '0 files ready to assign');
+            cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload.pdf', {force: true});
             cy.get('#submit').click();
             cy.reload();
             cy.get('#assign_box').should('contain', '2 files ready to assign');
 
+            //Submit
+            // cy.get('#bulk_user_id_1').type('beahaf');
+            // cy.get('#bulk_user_id_2').type('bitdiddle');
+            // cy.get('#bulk_submit_all').click();
+
             // Split by QR code
-            cy.login(user);
+            // cy.login(user);
             
             cy.get('#radio-bulk').click();
             cy.get('#use-qr').check();
             cy.get('#input-file1').selectFile('cypress/fixtures/bulk_upload_qr.pdf', {force: true});
             cy.get('#submit').click();
-            cy.reload();
+            // cy.reload();
             cy.get('#assign_box').should('contain', '4 files ready to assign');
 
             //Check link to student in grading interface
@@ -54,7 +66,11 @@ describe('Test cases revolving around bulk uploading', () => {
             
             // Delete all pdfs
             cy.visit(['sample', 'gradeable', 'bulk_upload_test', 'grading', 'details']);
-            cy.get('#bulk_delete_all').click();
+            // cy.waitPageChange(() => {
+                cy.get('#bulk_delete_all').click();
+            // });
+            cy.get('#assign_box').should('contain', '0 files ready to assign');
+
             // cy.get('.alert-success').should('contain', 'Bulk upload deleted');
         });
 
