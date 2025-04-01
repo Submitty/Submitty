@@ -8,26 +8,12 @@ const notifiedMessage = 'Your instructor will be notified and can then choose to
 const no_access_message = "You don't have access to this course.";
 
 describe('Tests for self registering for courses', () => {
-    beforeEach(() => {
+    before(() => {
+        // Testing course defaults to having self registration enabled, so we need to disable it for the tests.
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').uncheck();
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
-        cy.logout();
-    });
-
-    it('Should check for visibility of self registration notification option', () => {
-        cy.login('instructor2');
-        cy.visit(['testing', 'notifications', 'settings']);
-        cy.get('[data-testid="self-registration"]').should('not.exist');
-
-        // enable self registration
-        cy.visit(['testing', 'config']);
-        cy.get('[data-testid="all-self-registration"]').check();
-        cy.get('[data-testid="all-self-registration"]').should('be.checked');
-
-        cy.visit(['testing', 'notifications', 'settings']);
-        cy.get('[data-testid="self-registration"]').should('exist');
         cy.logout();
     });
 
@@ -38,13 +24,21 @@ describe('Tests for self registering for courses', () => {
         cy.visit(['testing']);
         cy.get('[data-testid="no-access-message"]').should('contain', no_access_message);
         cy.logout();
-        // Enable self-registration
+
+        // Test notifications
         cy.login('instructor2');
+        cy.visit(['testing', 'notifications', 'settings']);
+        cy.get('[data-testid="self-registration"]').should('not.exist');
+
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').check();
         cy.get('[data-testid="all-self-registration"]').should('be.checked');
         cy.get('[data-testid="default-section-id"]').select('5');
+
+        cy.visit(['testing', 'notifications', 'settings']);
+        cy.get('[data-testid="self-registration"]').should('exist');
         cy.logout();
+
         // Check instructors view
         cy.login();
         cy.get('[data-testid="courses-header"]').eq(0).should('have.text', 'My Courses');
