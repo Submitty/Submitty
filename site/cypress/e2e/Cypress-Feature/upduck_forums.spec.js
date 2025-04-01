@@ -94,23 +94,6 @@ const studentUpduckPost = (thread_title) => {
     }
 };
 
-const removeThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="thread-dropdown"]').first().click();
-    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
-    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
-};
-
-const createThread = (title, content, category) => {
-    // Add more to tests for uploading attachments
-    cy.get('[title="Create Thread"]').click();
-    cy.get('#title').type(title);
-    cy.get('.thread_post_content').type(content);
-    cy.get('.cat-buttons').contains(category).click();
-    cy.get('[name="post"]').click();
-    cy.get('.flex-row > .thread-left-cont').should('contain', title);
-};
-
 describe('Should test upducks relating to students, TAs, and instructors', () => {
     beforeEach(() => {
         cy.intercept('POST', buildUrl(['sample', 'posts', 'likes'])).as('upduck');
