@@ -15,16 +15,22 @@ def up(config, database, semester, course):
     :type course: str
     """
     database.execute("""
-        UPDATE electronic_gradeable
-        SET eg_late_days = 0
-        WHERE eg_late_days < 0;
+        CREATE TABLE IF NOT EXISTS active_graders (
+            id SERIAL PRIMARY KEY,
+            grader_id VARCHAR(255) NOT NULL,
+            gc_id integer NOT NULL,
+            ag_user_id character varying(255),
+            ag_team_id character varying(255),
+            timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+            FOREIGN KEY (grader_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (gc_id) REFERENCES gradeable_component(gc_id) ON DELETE CASCADE,
+            FOREIGN KEY (ag_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+            FOREIGN KEY (ag_team_id) REFERENCES gradeable_teams(team_id) ON DELETE CASCADE,
+            CONSTRAINT ag_user_team_id_check CHECK ((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)),
+            UNIQUE (grader_id, gc_id, ag_user_id),
+            UNIQUE (grader_id, gc_id, ag_team_id)
+        );
     """)
-
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-        ADD CONSTRAINT late_days_positive CHECK (eg_late_days >= 0)
-    """)
-    pass
 
 
 def down(config, database, semester, course):
@@ -40,8 +46,3 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("""
-        ALTER TABLE electronic_gradeable
-        DROP CONSTRAINT late_days_positive
-    """)
-    pass

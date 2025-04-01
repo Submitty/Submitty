@@ -43,6 +43,10 @@ class CourseRegistrationController extends AbstractController {
             $this->core->addErrorMessage('Self registration is not allowed.');
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
+        elseif ($this->core->getQueries()->getDefaultRegistrationSection($term, $course) === null) {
+            $this->core->addErrorMessage('Default section ID is not set, alert your instructor.');
+            return new RedirectResponse($this->core->buildUrl(['home']));
+        }
         else {
             $this->registerCourseUser($term, $course);
             return new RedirectResponse($this->core->buildCourseUrl());
@@ -53,7 +57,7 @@ class CourseRegistrationController extends AbstractController {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getUser()->setRegistrationSection($default_section);
         $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
-        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
     }
 }
