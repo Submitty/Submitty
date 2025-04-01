@@ -7822,11 +7822,6 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$clients type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$pages type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
