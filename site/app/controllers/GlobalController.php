@@ -61,6 +61,7 @@ class GlobalController extends AbstractController {
 
         $now = $this->core->getDateTimeNow();
         $duck_img = $this->getDuckImage($now);
+        $duck_gif = $this->getDuckGif();
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
         $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
@@ -76,6 +77,7 @@ class GlobalController extends AbstractController {
             $css->toArray(),
             $js->toArray(),
             $duck_img,
+            $duck_gif,
             $page_name,
             $content_only,
             $bannerImages,
@@ -754,6 +756,9 @@ class GlobalController extends AbstractController {
         return $duck_img;
     }
 
+    private function getDuckGif(): string {
+        return 'moorthy_duck/moorthy_chat_gif.gif';
+    }
 
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
