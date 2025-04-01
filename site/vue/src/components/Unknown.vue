@@ -1,11 +1,11 @@
 <script setup lang="ts">
 defineProps<{
-    page: string;
+    component: string;
 }>();
 </script>
 
 <template>
-  <h1>Unknown page "{{ page }}"</h1>
+  <h1>Unknown component "{{ component }}"</h1>
 </template>
 
 <style scoped>
