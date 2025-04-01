@@ -150,6 +150,7 @@
     }
 
     .course-section {
+        /* stylelint-disable-next-line declaration-no-important */
         display: table-row-group !important;
     }
 
@@ -194,6 +195,7 @@
         min-width: 0;
         min-height: 50px;
         justify-content: center;
+        /* stylelint-disable-next-line declaration-no-important */
         padding: 5px !important;
     }
 
