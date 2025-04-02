@@ -1,7 +1,10 @@
 <div class="content">
     <p class="red-message">
-        The gradeable "{{ title }}" has not been successfully built and cannot accept submissions at this time.<br>
+        The gradeable "{{ title }}" has not been successfully built and cannot accept {{ action }} at this time.<br>
         Trying reloading the page in a minute or two.  <br><br>
         If it remains un-built, the instructor needs to debug the configuration and re-build this gradeable.
     </p>
 </div>
+<script>
+    checkRefreshPage("{{ check_refresh_unbuilt_url|e('js') }}")
+</script>

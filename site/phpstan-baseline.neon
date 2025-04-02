@@ -11167,11 +11167,6 @@ parameters:
 			path: app/views/ErrorView.php
 
 		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has parameter \\$gradeable_title with no type specified\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/views/GlobalView.php

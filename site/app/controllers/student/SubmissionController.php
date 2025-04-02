@@ -162,7 +162,8 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput(
                 'Error',
                 'unbuiltGradeable',
-                $gradeable->getTitle()
+                $gradeable,
+                "submissions"
             );
             $error = true;
         }
@@ -1999,6 +2000,34 @@ class SubmissionController extends AbstractController {
             null,
             new RedirectResponse($url)
         );
+    }
+
+
+    /**
+     * Check if the unbuilt gradeable has been built yet
+     * @param string $gradeable_id
+     * @return array<string, string|bool>
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
+    public function checkBuildRefresh(string $gradeable_id): array {
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
+            return ['error' => true, 'message' => 'No gradeable with that id.'];
+        }
+
+        if ($gradeable->hasAutogradingConfig()) {
+            $refresh_string = "REFRESH_ME";
+            $refresh_bool = true;
+        }
+        else {
+            $refresh_string = "NO_REFRESH";
+            $refresh_bool = false;
+        }
+        $this->core->getOutput()->renderString($refresh_string);
+        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
     }
 
     /**
