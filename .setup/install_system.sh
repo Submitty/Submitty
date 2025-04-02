@@ -659,7 +659,7 @@ if [ ! -d "${clangsrc}" ]; then
     mkdir -p ${clangsrc}
 
     # clone the clang sources, circa Jan. 2023
-    git clone --depth 1 --recursive --branch llvmorg-15.0.7 https://github.com/llvm/llvm-project.git ${clangsrc}/source
+    git clone --depth 1 --branch llvmorg-13.0.1 https://github.com/llvm/llvm-project.git ${clangsrc}/source
     cp -R ${clangsrc}/source/llvm ${clangsrc}/llvm
     cp -R ${clangsrc}/source/clang ${clangsrc}/llvm/tools
     cp -R ${clangsrc}/source/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/
