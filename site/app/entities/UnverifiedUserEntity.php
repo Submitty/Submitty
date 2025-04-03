@@ -33,7 +33,7 @@ class UnverifiedUserEntity {
     protected string $user_email;
 
     #[ORM\Column(type: Types::STRING)]
-    protected ?string $verification_code;
+    protected string $verification_code;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $verification_expiration;
@@ -77,23 +77,23 @@ class UnverifiedUserEntity {
         return $this->user_password;
     }
 
-    public function setUserId(string $user_id) {
+    public function setUserId(string $user_id): void {
         $this->user_id = $user_id;
     }
 
-    public function setUserPassword(string $user_password) {
+    public function setUserPassword(string $user_password): void {
         $this->user_password = $user_password;
     }
 
-    public function setUserGivenName(string $user_givenname) {
+    public function setUserGivenName(string $user_givenname): void {
         $this->user_givenname = $user_givenname;
     }
 
-    public function setUserEmail(string $user_email) {
+    public function setUserEmail(string $user_email): void {
         $this->user_email = $user_email;
     }
 
-    public function setUserFamilyName(string $user_familyname) {
+    public function setUserFamilyName(string $user_familyname): void {
         $this->user_familyname = $user_familyname;
     }
 }

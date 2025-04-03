@@ -399,8 +399,8 @@ EMAIL;
         }
 
         $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
-        $unverified_user->setVerificationValues($verification_values);
-        $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserId());
+        $unverified_user[0]->setVerificationValues($verification_values);
+        $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user[0]->getUserId());
         $this->core->addSuccessMessage('Verification email resent.');
         return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
     }
