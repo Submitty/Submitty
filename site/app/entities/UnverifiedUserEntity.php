@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace app\entities;
 
-use app\entities\forum\Post;
-use app\entities\forum\Thread;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * ORM representation of app\libraries\User class.
@@ -87,15 +84,15 @@ class UnverifiedUserEntity {
     public function setUserPassword(string $user_password) {
         $this->user_password = $user_password;
     }
-    
+
     public function setUserGivenName(string $user_givenname) {
         $this->user_givenname = $user_givenname;
     }
-    
+
     public function setUserEmail(string $user_email) {
         $this->user_email = $user_email;
     }
-    
+
     public function setUserFamilyName(string $user_familyname) {
         $this->user_familyname = $user_familyname;
     }

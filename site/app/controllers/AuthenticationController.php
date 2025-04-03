@@ -352,8 +352,8 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
         return new WebResponse(
-            'Authentication', 
-            'signupForm', 
+            'Authentication',
+            'signupForm',
             [
                 'accepted_emails' => $this->core->getConfig()->getAcceptedEmails(),
                 'user_id_requirements' => $this->core->getConfig()->getUserIdRequirements()
@@ -421,7 +421,7 @@ EMAIL;
         }
 
         $this->core->addSuccessMessage('You have successfully verified your email.');
-        
+
         $user = new User($this->core, $unverified_user_details[0]->getUserInfo());
         $this->core->getQueries()->insertSubmittyUser($user);
 
