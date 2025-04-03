@@ -204,7 +204,7 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) as user_givenname, COALESCE(NULLIF(user_preferred_familyname,''), user_familyname) as user_familyname
+        (SELECT registration_section, user_id, COALESCE(user_preferred_givenname, user_givenname) as user_givenname, COALESCE(user_preferred_familyname, user_familyname) as user_familyname
         FROM users
         ORDER BY registration_section, user_familyname, user_givenname, user_id),
         B AS
@@ -798,18 +798,18 @@ SQL;
     public function getUpDucks(): array {
         $this->course_db->query("
             SELECT 
-                p.author_user_id, 
-                COUNT(f.*) AS upducks 
+                f.user_id,
+                COUNT(*) AS upducks 
             FROM 
-                posts p 
+                forum_upducks f
             JOIN 
-                forum_upducks f 
+                posts p
             ON 
-                p.id = f.post_id 
+                f.post_id = p.id
             WHERE 
                 p.deleted = FALSE 
             GROUP BY 
-                p.author_user_id 
+                f.user_id
             ORDER BY 
                 upducks DESC
         ");
@@ -1189,7 +1189,7 @@ WHERE term=? AND course=? AND user_id=?",
      * @param bool $faculty to include faculty level users or not
      * @return array - array of userids active in the specified semester
      */
-    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty): array {
+    public function getActiveUserIds(bool $instructor, bool $fullAccess, bool $limitedAccess, bool $student, bool $faculty, ?string $term = null, ?string $course = null): array {
         $args = ['-1'];
         $extra_join = '';
         $extra_where = '';
@@ -1210,13 +1210,20 @@ WHERE term=? AND course=? AND user_id=?",
             $extra_join = ' INNER JOIN users ON courses_users.user_id = users.user_id ';
             $extra_where = ' OR users.user_access_level <= 2';
         }
+        $on_phrase = ' ON courses_users.term = courses.term AND courses_users.course = courses.course ';
+        $parameters = $args;
+        if ($term !== null && $course !== null) {
+            $parameters = [$term, $course];
+            $parameters = array_merge($parameters, $args);
+            $on_phrase = ' ON courses_users.term = ? AND courses_users.course = ? ';
+        }
         $result_rows = [];
         $this->submitty_db->query(
             "SELECT DISTINCT courses_users.user_id as user_id
                 FROM courses_users INNER JOIN courses
-                ON courses_users.term = courses.term AND courses_users.course = courses.course
-                " . $extra_join . "
-                WHERE courses.status = 1 AND user_group IN (" . implode(', ', $args) . ")" . $extra_where
+                " . $on_phrase . $extra_join . "
+                WHERE courses.status = 1 AND user_group IN " . $this->createParameterList(count($args)) . $extra_where,
+            $parameters
         );
         return array_map(
             function ($row) {
@@ -3077,8 +3084,8 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getGradersByUserType() {
         $this->course_db->query(
             "SELECT
-                COALESCE(NULLIF(user_preferred_givenname, ''), user_givenname) AS user_givenname,
-                COALESCE(NULLIF(user_preferred_familyname, ''), user_familyname) AS user_familyname,
+                COALESCE(user_preferred_givenname, user_givenname) AS user_givenname,
+                COALESCE(user_preferred_familyname, user_familyname) AS user_familyname,
                 user_id,
                 user_group
             FROM
@@ -7421,10 +7428,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
         if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
@@ -8398,6 +8409,9 @@ WHERE current_state IN
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
+             gc.ag_graders AS ag_graders,
+             gc.ag_timestamps AS ag_timestamps,
+             gc.ag_graders_names AS ag_graders_names,
 
               {$submitter_data_inject}
 
@@ -8419,6 +8433,27 @@ WHERE current_state IN
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN LATERAL (
+                SELECT
+                  gc.g_id,
+                  json_object_agg(gc.gc_id, graders) as ag_graders,
+                  json_object_agg(gc.gc_id, graders_names) as ag_graders_names,
+                  json_object_agg(gc.gc_id, timestamps) as ag_timestamps
+                FROM gradeable_component gc
+                LEFT JOIN (
+                  SELECT
+                    ag_{$submitter_type},
+                    gc_id,
+                    json_agg(grader_id) AS graders,
+                    json_agg(COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) || ' ' || substr(COALESCE(NULLIF(user_preferred_familyname,''), user_familyname), 1, 1) || '.') AS graders_names,
+                    json_agg(timestamp) AS timestamps
+                  FROM active_graders
+                  LEFT JOIN users ON active_graders.grader_id = users.user_id
+                  GROUP BY ag_{$submitter_type} , gc_id
+                ) as ag on ag.gc_id = gc.gc_id AND ag.ag_{$submitter_type}={$submitter_type_ext}
+                GROUP BY gc.g_id
+              ) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
                 SELECT
@@ -8604,7 +8639,10 @@ WHERE current_state IN
                 [
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
-                ]
+                ],
+                json_decode($row['ag_graders'], true),
+                json_decode($row['ag_timestamps'], true),
+                json_decode($row['ag_graders_names'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
@@ -9213,9 +9251,9 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-              COALESCE (NULLIF(user_preferred_givenname, ''), user_givenname),
+              COALESCE (user_preferred_givenname, user_givenname),
               ' ',
-              COALESCE (NULLIF(user_preferred_familyname, ''), user_familyname)
+              COALESCE (user_preferred_familyname, user_familyname)
           ) as name
 FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
@@ -9366,6 +9404,36 @@ ORDER BY
         return $this->rowsToArray($this->submitty_db->rows());
     }
 
+    /**
+     * Adds a component grader to the active_graders table
+     */
+    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id): void {
+        $this->course_db->query("
+            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+        ", [
+            $component->getId(),
+            $grader_id,
+            $isTeam ? null : $graded_id,
+            $isTeam ? $graded_id : null,
+            $this->core->getDateTimeNow(),
+        ]);
+    }
+
+    /**
+     * Removes a component grader to the active_graders table
+     */
+    public function removeComponentGrader(Component $component, string $grader_id, string $graded_id): void {
+            $this->course_db->query("
+            DELETE FROM active_graders
+            WHERE gc_id = ? AND grader_id = ? AND (ag_user_id = ? OR ag_team_id = ?)
+            ", [
+            $component->getId(),
+            $grader_id,
+            $graded_id,
+            $graded_id,
+            ]);
+    }
     /**
      * @param string $image the full name of the image to get
      * @return string|false the user id of the image's owner or false if the image is not in the db
