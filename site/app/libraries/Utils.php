@@ -173,9 +173,9 @@ class Utils {
      * @return array<mixed>
      * Generates a random verification code for self account creation.
      */
-    public static function generateVerificationCode(bool $isDebug): array {
+    public static function generateVerificationCode(Core $core, bool $isDebug): array {
         $code = $isDebug ? '00000000' : Utils::generateRandomString();
-        $timestamp = time() + 60 * 15; // 15 minutes from now, may eventually set this as a configurable value.
+        $timestamp = $core->getDateTimeNow()->modify('+15 minutes'); // 15 minutes from now, may eventually set this as a configurable value.
         return ['code' => strval($code), 'exp' => $timestamp];
     }
 

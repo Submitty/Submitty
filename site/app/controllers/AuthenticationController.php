@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\authentication\SamlAuthentication;
 use app\entities\VcsAuthToken;
+use app\entities\UnverifiedUserEntity;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -391,13 +392,13 @@ EMAIL;
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
 
-        $unverified_user = $this->core->getCourseEntityManager()->getRepository(UnverifiedUserEntity::class).findBy(['user_email' => $_GET['email']]);
+        $unverified_user = $this->core->getSubmittyEntityManager()->getRepository(UnverifiedUserEntity::class)->findBy(['user_email' => $_GET['email']]);
         if ($unverified_user === null) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
 
-        $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
+        $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
         $unverified_user->setVerificationValues($verification_values);
         $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserId());
         $this->core->addSuccessMessage('Verification email resent.');
@@ -411,19 +412,20 @@ EMAIL;
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        $em = $this->core->getCourseEntityManager();
-        $unverified_user = $em->getRepository(UnverifiedUserEntity::class).findBy(['verification_code' => $_GET['verification_code']]);
+        $em = $this->core->getSubmittyEntityManager();
+        $unverified_user_details = $em->getRepository(UnverifiedUserEntity::class)->findBy(['verification_code' => $_GET['verification_code']]);
 
-        if ($unverified_user === null) {
+        if ($unverified_user_details === null) {
             $this->core->addErrorMessage('The verification code is not correct. Verify you entered the correct code or resend the verification email');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
 
         $this->core->addSuccessMessage('You have successfully verified your email.');
         
-        $this->core->getQueries()->convertUnverifiedUser($unverified_user);
+        $user = new User($this->core, $unverified_user_details[0]->getUserInfo());
+        $this->core->getQueries()->insertSubmittyUser($user);
 
-        $em->remove($unverified_user);
+        $em->remove($unverified_user_details[0]);
         $em->flush();
         return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
     }
@@ -481,23 +483,21 @@ EMAIL;
             $this->core->addErrorMessage('This user id does not meet the requirements.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
-        $verification_values = Utils::generateVerificationCode($this->core->getConfig()->isDebug());
-        $user = new User($this->core, [
-            'user_id' => $user_id,
-            'user_givenname' => $_POST['given_name'],
-            'user_familyname' => $_POST['family_name'],
-            'user_password' => $password,
-            'user_pronouns' => '',
-            'display_pronouns' => false,
-            'user_email' => $email,
-            'user_email_secondary' => '',
-            'user_email_secondary_notify' => false,
-            'user_verification_code' => $verification_values['code'],
-            'user_verification_expiration' => $verification_values['exp']
-        ]);
+        $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
 
         try {
-            $this->core->getQueries()->insertUnverifiedSubmittyUser($user);
+            $em = $this->core->getSubmittyEntityManager();
+            $user = new UnverifiedUserEntity(
+                $user_id,
+                $password,
+                $_POST['given_name'],
+                $_POST['family_name'],
+                $email,
+                $verification_values['code'],
+                $verification_values['exp']
+            );
+            $em->persist($user);
+            $em->flush();
             $this->sendVerificationEmail($email, $verification_values['code'], $user_id);
             $this->core->addSuccessMessage('Verification Email Sent');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));

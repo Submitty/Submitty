@@ -13,12 +13,12 @@ def up(config, database):
 
     database.execute('''
         CREATE TABLE if not exists public.unverified_users (
-            user_id character varying NOT NULL,
+            user_id character varying(50) NOT NULL,
             user_givenname character varying NOT NULL,
             user_password character varying,
             user_familyname character varying NOT NULL,
             user_email character varying NOT NULL,
-            verification_code character varying(50),
+            verification_code character varying(10),
             verification_expiration timestamptz DEFAULT NOW()
         )
     ''')
