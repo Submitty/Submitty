@@ -172,11 +172,7 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.login('student');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
-
-        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
-        cy.get('[data-testid="create-post-head"]').should('contain', title1);
-        cy.get('[data-testid="upduck-button"]').first().click();
-        cy.wait('@upduck', { responseTimeout: 15000 });
+        upduckPost(title1);
 
         // Verify that the "show upduck list" button is not visible for students
         cy.get('[data-testid="show-upduck-list"]').should('not.exist');
@@ -185,9 +181,7 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
-        cy.get('[data-testid="upduck-button"]').first().click();
-        cy.wait('@upduck', { responseTimeout: 15000 });
+        upduckPost(title1, 0, 1);
         cy.get('[data-testid="show-upduck-list"]').first().click();
 
         // Verify that the modal is visible
