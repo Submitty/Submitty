@@ -28,7 +28,14 @@
 {% endif %}
 
 <div id="gradeables-content" class="content">
+{% if is_self_register %}
+        <form method="post" action="{{ unregister_url }}">
+            <input type="hidden" value="{{ csrf_token }}" name="csrf_token"/>
+            <button class="unregister-button btn" onclick="return (prompt('Are you sure you want to unregister from this course? Type "unregister" to confirm') == 'unregister')" type="submit">Unregister from Course</button>
+        </form>
+{% endif %}
     <h1>Gradeables</h1>
+    
     {% if sections|length > 0 %}
         <div id="gradeables">
         {% for list_section, info in sections %}

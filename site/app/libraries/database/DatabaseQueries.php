@@ -1034,6 +1034,26 @@ SQL;
      * @param string $semester
      * @param string $course
      */
+    public function unregisterCourseUser(User $user, $semester, $course): void {
+        $this->submitty_db->query(
+            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+            [$user->getId(), $semester, $course]
+        );
+
+        $this->course_db->query(
+            "UPDATE users SET 
+                rotating_section = NULL,
+                registration_type = NULL
+            WHERE user_id = ?",
+            [$user->getId()]
+        );
+    }
+
+    /**
+     * @param User   $user
+     * @param string $semester
+     * @param string $course
+     */
     public function insertCourseUser(User $user, $semester, $course) {
         $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
@@ -1119,26 +1139,6 @@ WHERE term=? AND course=? AND user_id=?",
                 );
             }
         }
-    }
-
-    /**
-     * @param User   $user
-     * @param string $semester
-     * @param string $course
-     */
-    public function unregisterCourseUser(User $user, $semester, $course): void {
-        $this->submitty_db->query(
-            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
-            [$user->getId(), $semester, $course]
-        );
-
-        $this->course_db->query(
-            "UPDATE users SET 
-                rotating_section = NULL,
-                registration_type = NULL
-            WHERE user_id = ?",
-            [$user->getId()]
-        );
     }
 
     /**

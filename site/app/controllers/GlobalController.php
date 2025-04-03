@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\libraries\FileUtils;
+use app\controllers\admin\ConfigurationController;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
@@ -207,14 +208,6 @@ class GlobalController extends AbstractController {
                 "href" => $this->core->buildCourseUrl(['email_status']),
                 "title" => "Email Status",
                 "icon" => "fa-envelope"
-            ]);
-        }
-
-        if ($this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()) !== 0) {
-            $sidebar_buttons[] = new NavButton($this->core, [
-                "href" => 'javascript: unregisterUserForm();',
-                "title" => "Unregister",
-                "icon" => "fa-remove",
             ]);
         }
 

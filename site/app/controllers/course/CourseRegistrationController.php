@@ -5,6 +5,7 @@ namespace app\controllers\course;
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
+use app\views\course\CourseRegistrationView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
 
@@ -54,8 +55,7 @@ class CourseRegistrationController extends AbstractController {
             $this->core->addErrorMessage('You cannot unregister from this course on your own.');
             return new RedirectResponse($this->core->buildCourseUrl());
         }
-
-        $this->unregisterCourseUser($term, $course);
+        $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
         $this->core->addSuccessMessage('You have successfully unregistered from the course.');
         return new RedirectResponse($this->core->buildUrl(['home']));
     }
@@ -66,9 +66,5 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
-    }
-
-    public function unregisterCourseUser(string $term, string $course): void {
-        $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
     }
 }
