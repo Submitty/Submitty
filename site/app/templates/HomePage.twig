@@ -1,7 +1,7 @@
-<div id="courses" class="content" data-testid="courses-list">
-{% for course_type, ranks in statuses %}
-{% if loop.first or ranks|length > 0 %}
-    {% if not loop.first %}
+<div id="courses" class="content" data-testid="courses-list"
+    {% for course_type, ranks in statuses %}
+        {% if loop.first or ranks|length > 0 %}
+            {% if not loop.first %}
                 <br>
                 <br>
             {% endif %}
