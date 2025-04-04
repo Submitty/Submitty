@@ -890,6 +890,13 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 
 
 --
+-- Name: courses_users_user_id_user_group_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX courses_users_user_id_user_group_idx ON public.courses_users USING btree (user_id, user_group);
+
+
+--
 -- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
 --
 
