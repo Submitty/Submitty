@@ -54,8 +54,7 @@
     background-color: var(--standard-lightskyblue);
 }
 
-/* stylelint-disable-next-line selector-class-pattern */
-.gradeable_configuration {
+.gradeable-configuration {
     width:98%;
     margin-top:50px;
     padding:5px;
