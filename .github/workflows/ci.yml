@@ -710,6 +710,7 @@ jobs:
           spec: cypress/e2e/Cypress-System/login.spec.js
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
+
       - name: Switch to debug mode
         run: |
           sudo sed -ie '/debugging_enabled/c\ \"debugging_enabled\": true",' /usr/local/submitty/config/submitty.json
@@ -773,7 +774,7 @@ jobs:
         if: failure()
         with:
           name: Submitty-JSON
-          path: ${{env.SUBMITTY_INSTALL_DIR}}/config/submitty.json
+          path: /usr/local/submitty/config/submitty.json
 
       - uses: actions/upload-artifact@v4
         if: failure()

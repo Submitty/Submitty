@@ -62,13 +62,14 @@ class UnverifiedUserEntity {
         return $out;
     }
 
-    public function getVerificationValues(): array {
-        return ['verification_code' => $this->verification_code, 'verification_expiration' => $this->verification_expiration];
+    public function getVerificationExpiration(): DateTime {
+        return $this->verification_expiration;
     }
 
     public function setVerificationValues(array $values): void {
-        $this->verification_code = $values['verification_code'] ?? null;
-        $this->verification_expiration = $values['verification_expiration'];
+        var_dump($values);
+        $this->verification_code = $values['code'];
+        $this->verification_expiration = $values['exp'];
     }
 
     public function setUserId(string $user_id): void {
