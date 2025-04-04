@@ -701,12 +701,6 @@ SQL;
         return $this->course_db->row();
     }
 
-    public function existsAnnouncementsId(int $thread_id): bool {
-        $this->course_db->query("SELECT announced from threads where id = ?", [$thread_id]);
-        $row = $this->course_db->row();
-        return count($row) > 0 && $row['announced'] !== null;
-    }
-
     public function updateResolveState($thread_id, $state) {
         if (in_array($state, [-1, 0, 1])) {
             $this->course_db->query("UPDATE threads set status = ? where id = ?", [$state, $thread_id]);
@@ -969,40 +963,6 @@ SQL;
                 DO UPDATE SET timestamp = ?
             ", [$thread_id, $current_user, $last_viewed_post_time, $last_viewed_post_time]);
         }
-    }
-
-    /**
-     * @param int $post_id
-     * @param int $thread_id
-     * @param bool $newStatus
-     * @return bool|null
-     */
-    public function setDeletePostStatus(int $post_id, int $thread_id, bool $newStatus): bool|null {
-        $this->course_db->query("SELECT parent_id from posts where id=?", [$post_id]);
-        $parent_id = $this->course_db->row()["parent_id"];
-        $children = [$post_id];
-        $get_deleted = !$newStatus;
-        $this->findChildren($post_id, $thread_id, $children, $get_deleted);
-
-        if (!$newStatus) {
-            // On undelete, parent post must have deleted = false
-            if ($parent_id !== -1) {
-                if ($this->getPost($parent_id)['deleted']) {
-                    return null;
-                }
-            }
-        }
-        if ($parent_id === -1) {
-            $this->course_db->query("UPDATE threads SET deleted = ? WHERE id = ?", [$newStatus, $thread_id]);
-            $this->course_db->query("UPDATE posts SET deleted = ? WHERE thread_id = ?", [$newStatus, $thread_id]);
-            return true;
-        }
-        else {
-            foreach ($children as $child_post_id) {
-                $this->course_db->query("UPDATE posts SET deleted = ? WHERE id = ?", [$newStatus, $child_post_id]);
-            }
-        }
-        return false;
     }
 
     public function unreadThread(string $current_user, int $thread_id): void {

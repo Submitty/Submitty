@@ -455,7 +455,7 @@ function setRandomGraders(gradeable_id, p_values, successCallback, errorCallback
             else {
                 for (let i = 0; i < res.data.length; i++) {
                     if (res.data[i][1].length !== number_to_grade) {
-                        confirm('Few of the graders haven\'t been assigned to the given number of students, please manually edit them.');
+                        confirm('Some of the graders haven\'t been assigned to the given number of students, please manually edit them.');
                         break;
                     }
                 }
