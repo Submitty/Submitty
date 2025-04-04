@@ -132,6 +132,7 @@ form {
 .poll-timer {
     display: inline-block;
     text-align: center;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 4em !important;
 }
 
@@ -141,6 +142,7 @@ form {
     margin-right: 0.5em;
     margin-bottom: 1em;
     font-size: 0.8em;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 4em !important;
 }
 

@@ -139,6 +139,7 @@
     /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
 
@@ -292,6 +293,7 @@
     }
 
     #details-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 
