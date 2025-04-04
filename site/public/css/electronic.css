@@ -1528,6 +1528,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
@@ -1538,6 +1544,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1550,7 +1557,7 @@ input[type="radio"][disabled=""]:checked::before {
     width: 7px;
     height: 7px;
     border-radius: 100%;
-    background: var(--standard-medium-dark-gray);
+    background: var(--standard-dark-gray);
 }
 
 /* Media queries */

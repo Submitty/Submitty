@@ -722,6 +722,7 @@ function initSocketClient() {
                     likesCount: msg.likesCount,
                     likesFromStaff: msg.likesFromStaff,
                     status: msg.status,
+                    source: msg.source,
                 });
                 break;
             default:
@@ -907,7 +908,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_status').val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
                 if (Date.parse(expiration) > new Date()) {
-                    $('.expiration').show();
+                    $('#pin-expiration-date').show();
                 }
                 $('#expirationDate').val(json.expiration);
                 // Categories
@@ -925,7 +926,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $('#title').prop('disabled', true);
                 $('.edit_thread').hide();
-                $('.expiration').hide();
+                $('#pin-expiration-date').hide();
                 $('#label_lock_thread').hide();
                 $('#thread_form').prop('ignore-cat', true);
                 $('#category-selection-container').hide();
@@ -1292,7 +1293,7 @@ function toggleLike(post_id, current_user) {
 
 function updateLikesDisplay(post_id, data) {
     const likes = data['likesCount'];
-    const liked = data['status'];
+    const liked = data['status'] === 'like';
     const staffLiked = data['likesFromStaff'];
 
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
@@ -1300,13 +1301,13 @@ function updateLikesDisplay(post_id, data) {
 
     // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    const user = document.getElementById('posts_list').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
 
-    if (liked === 'unlike') {
-        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-    }
-    else if (liked === 'like') {
-        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+    if (user === data['source']) {
+        const from = liked ? 'light-mode-off-duck.svg' : 'on-duck-button.svg';
+        const to = liked ? 'on-duck-button.svg' : 'light-mode-off-duck.svg';
+        likeIconSrcElement = likeIconSrcElement.replace(from, to);
     }
 
     if (staffLiked > 0) {
@@ -1650,9 +1651,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 // eslint-disable-next-line no-undef
                 removeMessagePopup('theid');
             }, 1000);
-            if (category_color !== null) {
-                $(`#categorylistitem-${category_id}`).css('color', category_color);
-            }
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
@@ -1809,12 +1807,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     if (!checkAreYouSureForm()) {
         return;
     }
-    const type = (isDeletion ? '0' : '2');
     const message = (isDeletion ? 'delete' : 'restore');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
-        const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
+        const url = buildCourseUrl(['forum', 'posts', 'delete']);
         $.ajax({
             url: url,
             type: 'POST',
@@ -2114,6 +2111,7 @@ function loadThreadHandler() {
 
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
+                showAttachmentsOnload();
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 if (jqXHR.status !== 0) {
@@ -2126,41 +2124,49 @@ function loadThreadHandler() {
     });
 }
 
+function showAttachmentsOnload() {
+    // on initial thread load, determine if attachments should be shown
+    if (!window.location.pathname.includes('/forum/threads')) {
+        return;
+    }
+    const showAttach = Cookies.get('show_forum_attachments');
+    if (showAttach === undefined) {
+        Cookies.set('show_forum_attachments', 'false', { expires: 365, path: '/' });
+    }
+    else if (showAttach === 'true') {
+        $('#toggle-attachments-button').find('.status').text('Hide attachments');
+        loadAllInlineImages(true);
+    }
+    else {
+        $('#toggle-attachments-button').find('.status').text('Show attachments');
+    }
+    $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
+}
+
 // eslint-disable-next-line no-unused-vars
 function loadAllInlineImages(open_override = false) {
-    const toggleButton = $('#toggle-attachments-button');
-
-    const allShown = $('.attachment-well').filter(function () {
-        return $(this).is(':visible');
-    }).length === $('.attachment-well').length;
-    // if the button were to show them all but they have all been individually shown,
-    // we should hide them all
-    if (allShown && toggleButton.hasClass('show-all')) {
-        toggleButton.removeClass('show-all');
+    if (open_override) {
+        $('.attachment-btn').each(function (i) {
+            $(this).click();
+            $('.attachment-well').eq(i).show();
+        });
+        return;
     }
 
-    const allHidden = $('.attachment-well').filter(function () {
-        return !($(this).is(':visible'));
-    }).length === $('.attachment-well').length;
-    // if the button were to hide them all but they have all been individually hidden,
-    // we should show them all
-    if (allHidden && !(toggleButton.hasClass('show-all'))) {
-        toggleButton.addClass('show-all');
-    }
+    const showAttach = Cookies.get('show_forum_attachments') === 'true' ? 'false' : 'true';
+    Cookies.set('show_forum_attachments', showAttach, { expires: 365, path: '/' });
+
+    const buttonText = `${showAttach === 'true' ? 'Hide' : 'Show'} attachments`;
+    $('#toggle-attachments-button').find('.status').text(buttonText);
 
     $('.attachment-btn').each(function (i) {
-        $(this).click();
-
-        // overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all') || open_override) {
-            $('.attachment-well').eq(i).show();
+        if (showAttach === 'true' && $('.attachment-well').eq(i).is(':hidden')) {
+            $(this).click();
         }
-        else {
-            $('.attachment-well').eq(i).hide();
+        else if (showAttach === 'false' && $('.attachment-well').eq(i).is(':visible')) {
+            $(this).click();
         }
     });
-
-    toggleButton.toggleClass('show-all');
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2338,7 +2344,7 @@ function updateThread(e) {
     }
 
     $.ajax({
-        url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
+        url: buildCourseUrl(['forum', 'posts', 'modify']),
         type: 'POST',
         data: formData,
         processData: false,
@@ -2585,17 +2591,17 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
-        $('.expiration').hide();
+        $('#pin-expiration-date').hide();
         if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
             $('#Announcement').prop('checked', data.isAnnouncement);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (data.pinThread) {
             $('#pinThread').prop('checked', data.pinThread);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
@@ -2609,6 +2615,7 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
+    showAttachmentsOnload();
     if (typeof cleanupAutosaveHistory === 'function') {
         // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
@@ -2671,4 +2678,43 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
+}
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { post_id: post_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
+                // eslint-disable-next-line no-undef
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                }
+                else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+    });
 }

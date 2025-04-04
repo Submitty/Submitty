@@ -167,7 +167,7 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
@@ -177,6 +177,41 @@ function getSection() {
     });
 
     return sections;
+}
+
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    warningIcon.toggle(hasDuplicates);
 }
 
 function getDisplayBenchmark() {
@@ -776,6 +811,8 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
     $("input[name*='display']").change(() => {
         saveChanges();
     });
@@ -789,6 +826,9 @@ $(document).ready(() => {
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
     });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
+    });
     $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
     });
@@ -797,19 +837,21 @@ $(document).ready(() => {
         saveChanges();
     });
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
+    // This mutation observer catches changes to bucket assignments (available buckets to assigned buckets, and vice versa)
+    const targetBucketReassignment = document.querySelector('#buckets_used_list');
+    const observerBucketReassignment = new MutationObserver((mutations) => {
         saveChanges();
     });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
+    const configBucketReassignment = { attributes: true, childList: true, characterData: true };
+    observerBucketReassignment.observe(targetBucketReassignment, configBucketReassignment);
+
+    // This mutation observer catches automatic bucket assignments on page load
+    const targetAutomaticBucketAssignment = document.querySelector('.bucket_detail_div');
+    const observerAutomaticBucketAssignment = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    const configAutomaticBucketAssignment = { attributes: true, attributeFilter: ['style'] };
+    observerAutomaticBucketAssignment.observe(targetAutomaticBucketAssignment, configAutomaticBucketAssignment);
 });
 
 function saveChanges() {
@@ -817,7 +859,14 @@ function saveChanges() {
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
-    formData.append('json_string', buildJSON());
+    try {
+        formData.append('json_string', buildJSON());
+    }
+    catch (err) {
+        console.error(err);
+        $('#save_status').text('An error occurred while saving.');
+        return;
+    }
 
     $.ajax({
         url: url,

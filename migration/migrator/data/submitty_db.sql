@@ -686,6 +686,8 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
+    CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
+    CONSTRAINT user_preferred_givenname_not_empty CHECK (((user_preferred_givenname)::text <> ''::text)),
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
@@ -885,6 +887,13 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.vcs_auth_tokens
     ADD CONSTRAINT vcs_auth_tokens_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: courses_users_user_id_user_group_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX courses_users_user_id_user_group_idx ON public.courses_users USING btree (user_id, user_group);
 
 
 --
