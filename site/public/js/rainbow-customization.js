@@ -1116,8 +1116,7 @@ $(document).ready(() => {
                 gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
             }
         });
-        bucketItemCount.change((event) => {
-            event.stopPropagation();
+        bucketItemCount.on('blur', () => {
             gradeablePercents.each((index, gradeablePercentDOMElement) => {
                 const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
                 gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
