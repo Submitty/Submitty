@@ -960,6 +960,16 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable,
+                "grades"
+            );
+            return;
+        }
+
         $anon_mode = $gradeable->getInstructorBlind() - 1;
         $anon_mode_enabled = "anon_mode_" . $gradeable_id;
         $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
