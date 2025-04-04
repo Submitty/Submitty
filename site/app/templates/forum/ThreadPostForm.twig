@@ -78,7 +78,7 @@
     <div class="form-group row">
         {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
         <div class="button-row">
-            <div role="button" id="markdown_toggle_{{ post_box_id }}
+            <div role="button" id="markdown_toggle_{{ post_box_id }}"
              class="markdown-toggle {{ render_markdown is defined and render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
              title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
             >
