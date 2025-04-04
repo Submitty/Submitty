@@ -308,7 +308,7 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
 
 .input-boxes {
     display: inline-grid;
-    grid-template-columns: auto auto; /* two columns */
+    grid-template-columns: auto auto auto auto; /* four columns */
     grid-gap: 0 0.2em;
 }
 
@@ -316,6 +316,10 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     padding: 4px 6px;
 }
 
+.omit-section-label{
+    padding: 3px;
+}
+  
 .section-header {
     display: flex;
     gap: 7px;

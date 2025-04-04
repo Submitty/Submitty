@@ -580,6 +580,21 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+    /**
+     * Get omitted sections from json file if there is any
+     *
+     * @return 
+    */
+    public function getOmittedSections(): array{
+        $usedOmittedSections = $this->RCJSON?->getOmmitedSection() ?? [];
+        $allowedSections = $this->getSectionsAndLabels();
+
+        $omittedSectionData = [];
+        foreach ($allowedSections as $section) {
+            // TO DO: implement using isUsed
+        }
+        return $omittedSectionData;
+    }
 
     /**
      * Get plagiarism from json file if there is any
@@ -638,6 +653,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
+            }
+        }
+
+        if (isset($form_json->omit_section_from_stats)) {
+            foreach ($form_json->omit_section_from_stats as $omit_section) {
+                $this->RCJSON->addOmittedSection($omit_section);
             }
         }
 
