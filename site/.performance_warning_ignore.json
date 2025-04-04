@@ -51,5 +51,7 @@
   "/courses/<term>/<course>/register",
   "/courses/<term>/<course>/gradeable/<gradeable>/components/marks/save_order",
   "/courses/<term>/<course>/reports/summaries",
-  "/courses/<term>/<course>/gradeable/<gradeable>/grading/csv"
+  "/courses/<term>/<course>/gradeable/<gradeable>/grading/csv",
+  "/superuser/email/send",
+  "/superuser/email_status_page"
 ]

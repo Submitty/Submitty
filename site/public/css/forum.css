@@ -595,11 +595,13 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: 5px;
+    min-height: 30px;
 }
 
-.email-announcement-checkbox {
-    margin-right: 18px;
-    display: inline-block;
+#pin-expiration-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .thread-attachment-container,
@@ -807,7 +809,9 @@
 }
 
 .deleted-unviewed {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--deleted-and-unviewed-thread) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
 }
 
