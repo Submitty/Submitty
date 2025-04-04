@@ -90,9 +90,9 @@ class Email extends AbstractModel {
             $body .= "\n\n" . implode("\n", $extra);
         }
 
-        // Getting the base url and course information
+        // Adding notification footer
         $config = $this->core->getConfig();
-        $base_url = $config->getBaseUrl();
+        $base_url = rtrim($config->getBaseUrl(), "/");
         $course = $config->getCourse();
         $term = $config->getTerm();
 
@@ -101,7 +101,7 @@ class Email extends AbstractModel {
 
         // Adding the notifications settings link after the footer
         $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
-        $body .= "\nUpdate your email notification settings for this course here:\n" . $notifications_url;
+        $body .= "\nUpdate your email notification settings for this course here: " . $notifications_url;
 
         return $body;
     }
