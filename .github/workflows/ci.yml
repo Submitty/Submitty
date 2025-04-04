@@ -884,7 +884,7 @@ jobs:
         shell: bash
         run: |
           cd .setup/ansible
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e "ansible_user=runner submitty_install_submitty_version=${{ github.sha }}" -i inventory/submitty playbooks/submitty_install.yml
       - name: Validate image
         run: curl --show-error --fail --include http://localhost/authentication/login
       - uses: actions/upload-artifact@v4
