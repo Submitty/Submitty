@@ -45,6 +45,11 @@ Required Input:
         </div>
     </div>
     {# /Title bar #}
+    {% if graders is not empty %}
+        <b class="grader-names" data-testid="grader-names">
+        Last opened by: {{ graders|join(", ")}}
+        </b>
+    {% endif %}
 
     {# Marks table #}
     <div class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
