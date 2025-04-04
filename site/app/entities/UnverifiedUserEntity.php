@@ -46,7 +46,7 @@ class UnverifiedUserEntity {
         $this->setUserGivenName($user_givenname);
         $this->setUserFamilyName($user_familyname);
         $this->setUserEmail($user_email);
-        $this->setVerificationValues(['verification_code' => $verification_code, 'verification_expiration' => $verification_expiration]);
+        $this->setVerificationValues(['code' => $verification_code, 'exp' => $verification_expiration]);
     }
 
     public function getUserInfo() {
