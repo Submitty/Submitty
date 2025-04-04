@@ -9,9 +9,11 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * ORM representation of app\libraries\User class.
- * Allows linked entities to access user data without needing to go to database.
- * Should (eventually) replace app\libraries\User as we refactor more code to use Doctrine.
+ * Unverified user entities are created when a user tries to use the self account creation feature.
+ * They are a different entity than normal users to allow for periodical purging of the database,
+ * and since they are using a different database table, it would be confusing to have the same entity
+ * being represented by two different database tables. When the user verifies their email,
+ * the user is added to the normal users table, and then the unverified user entity is removed.
  */
 #[ORM\Entity]
 #[ORM\Table(name: "unverified_users")]
@@ -67,14 +69,6 @@ class UnverifiedUserEntity {
     public function setVerificationValues(array $values): void {
         $this->verification_code = $values['verification_code'] ?? null;
         $this->verification_expiration = $values['verification_expiration'];
-    }
-
-    public function getId(): string {
-        return $this->user_id;
-    }
-
-    public function getUserPassword(): string {
-        return $this->user_password;
     }
 
     public function setUserId(string $user_id): void {

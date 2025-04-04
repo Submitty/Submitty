@@ -158,24 +158,6 @@ class DatabaseQueries {
     }
 
     /**
-     * Gets an unverified user from the database given a verification code.
-     *
-     * @return User|null
-     */
-    public function getUnverifiedUser(string $code): ?User {
-        $this->submitty_db->query("SELECT * FROM unverified_users WHERE verification_code=?", [$code]);
-        return new User($this->core, $this->submitty_db->row());
-    }
-
-    /**
-     * Removes an unverified user from the database given a verification code.
-     *
-     */
-    public function removeUnverifiedUser(string $code, string $user_id): void {
-        $this->submitty_db->query("DELETE FROM unverified_users WHERE verification_code=? and user_id=?", [$code, $user_id]);
-    }
-
-    /**
      * Gets a user from the database given a numeric user_id.
      *
      * @param int $numeric_id
@@ -7364,16 +7346,6 @@ AND gc_id IN (
     public function getUserIdEmailExists(string $email, string $user_id): array {
         $parameters = [$email, $user_id];
         $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', $parameters);
-        return $this->submitty_db->rows();
-    }
-
-    /**
-     * Gets a list of emails with user ids for all active particpants in Submitty
-     * @return array<mixed>
-     */
-    public function getUnverifiedUserIdEmailExists(string $email, string $user_id): array {
-        $parameters = [$email, $user_id];
-        $this->submitty_db->query('SELECT user_id, user_email FROM unverified_users where user_email=? or user_id=?', $parameters);
         return $this->submitty_db->rows();
     }
 
