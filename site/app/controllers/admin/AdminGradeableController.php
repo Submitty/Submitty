@@ -63,7 +63,7 @@ class AdminGradeableController extends AbstractController {
             'id' => '',
             'type' => '',
             'bulk_upload' => false,
-            'vcs' => 'false',
+            'vcs' => false,
             'ta_grading' => false,
             'grade_inquiry_allowed' => false,
             'grade_inquiry_per_component_allowed' => false,
@@ -119,11 +119,11 @@ class AdminGradeableController extends AbstractController {
                 return JsonResponse::getErrorResponse('Team gradeables require a team_size_max value. See documentation for information.');
             }
             $values['eg_inherit_teams_from'] = $_POST['team_gradeable']['inherit_from'] ?? '';
-            $values['team_assignment'] = 'true';
+            $values['team_assignment'] = true;
             $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
-            $values['discussion_based'] = $_POST['discussion_based'];
+            $values['discussion_based'] = $_POST['discussion_based'] ?? false;
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
@@ -1213,7 +1213,7 @@ class AdminGradeableController extends AbstractController {
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = isset($details['discussion_based']) && (Utils::getBooleanValue($details['discussion_based']));
+            $discussion_clicked = Utils::getBooleanValue($details['discussion_based'] ?? false);
 
             //Validate user input for discussion threads
             if ($discussion_clicked) {
@@ -1226,7 +1226,7 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
-            $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed']);
+            $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed'] ?? false);
             $grade_inquiry = Utils::getBooleanValue($details['grade_inquiry_per_component_allowed']);
             $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [

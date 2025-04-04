@@ -318,34 +318,29 @@ class Utils {
 
     /**
      * Transforms non-boolean values to boolean values, i.e. 'true' to true
-     * @param mixed $variable The variable that is being passed in. Type of mixed to allow for string, boolean, integer, or null.
+     * @param mixed $variable The variable that is being passed in. Type of mixed to allow for boolean, string, integer, or null.
      */
     public static function getBooleanValue(mixed $variable): bool {
-        // Handle boolean values peacefully
+        // Handle variables that are already boolean
         if (is_bool($variable)) {
             return $variable;
         }
-        elseif (is_string($variable)) {
+
+        if (is_string($variable)) {
             // Handle string values peacefully, 'true' or 'on' (for javascript checkboxes),
-            // leaves possibility for more options added in the future
             $true_values = [
                 'true',
                 'on'
             ];
-            return (in_array(strtolower($variable), $true_values, true));
+            return (in_array(strtolower(trim($variable)), $true_values, true));
         }
-        elseif (is_numeric($variable)) {
+
+        if (is_int($variable)) {
             // Handle 0 as the only false integer.
-            if ($variable === 0) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return $variable !== 0;
         }
-        else {
-            // Default to returning false
-            return false;
-        }
+
+        // Default to returning false
+        return false;
     }
 }
