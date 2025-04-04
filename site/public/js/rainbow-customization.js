@@ -823,6 +823,9 @@ $(document).ready(() => {
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
+    $('.benchmark_percent_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
     });
