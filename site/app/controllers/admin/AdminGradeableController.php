@@ -158,13 +158,45 @@ class AdminGradeableController extends AbstractController {
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
             }
-            return JsonResponse::getSuccessResponse($_POST['id']);
+            $rubric_components = [];
+            if (isset($_POST['rubric'])) {
+                $gradeable = $this->tryGetGradeable($values['id']);
+                // Delete the default blank component
+                $gradeable->deleteComponent($gradeable->getComponents()[0]);
+                foreach ($_POST['rubric'] as $rubric_component) {
+                    $component_values = [
+                        'title',
+                        'ta_comment',
+                        'student_comment',
+                        'text',
+                        'peer_component',
+                        'page',
+                    ];
+                    if (count(array_diff($component_values, array_keys($rubric_component))) !== 0) {
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component does not have all of the parameters');
+                    }
+                    try {
+                        $rubric_components[] = $gradeable->importComponent($rubric_component);
+                    }
+                    catch (\OutOfBoundsException $exception) {
+                        // Delete gradeable as to not leave the gradeable in a 'broken' state, and users can fix the JSON file and create a
+                        // fully functioning gradeable in one go instead of debugging a non-complete gradeable
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component has extra parameters: ' . $exception->getMessage());
+                    }
+                    catch (\Exception $exception) {
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('An error has occurred: ' . $exception->getMessage());
+                    }
+                }
+                // Save to the database
+                $this->core->getQueries()->updateGradeable($gradeable);
+            }
+            return JsonResponse::getSuccessResponse($values['id']);
         }
-        catch (ValidationException $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
+        catch (ValidationException | \Exception $e) {
+            return JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage());
         }
     }
 
@@ -204,7 +236,7 @@ class AdminGradeableController extends AbstractController {
      *     autograding_config_path: string|mixed,
      *     bulk_upload: boolean,
      *     team_gradeable?: array{
-     *         team_max_size: int,
+     *         team_size_max: int,
      *         inherit_from: string|mixed,
      *     },
      *     ta_grading?: boolean,
@@ -247,7 +279,7 @@ class AdminGradeableController extends AbstractController {
             $return_json['bulk_upload'] = $gradeable->isBulkUpload();
             if ($gradeable->isTeamAssignment()) {
                 $team_properties = [
-                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'team_size_max' => $gradeable->getTeamSizeMax(),
                     'inherit_from' => ''
                 ];
                 $return_json['team_gradeable'] = $team_properties;
@@ -311,6 +343,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
             $dates['late_days'] = $gradeable->getLateDays();
             $return_json['dates'] = $dates;
+            $return_json['rubric'] = $gradeable->exportComponents();
         }
         return $return_json;
     }
