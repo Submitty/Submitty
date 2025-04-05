@@ -213,6 +213,7 @@ class NavigationView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalJs("collapsible-panels.js");
+        $this->core->getOutput()->addInternalJs("registration.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [

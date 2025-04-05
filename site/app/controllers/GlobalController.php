@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\libraries\FileUtils;
-use app\controllers\admin\ConfigurationController;
 use app\models\Button;
 use app\models\NavButton;
 use app\models\User;
