@@ -196,7 +196,8 @@ class NavigationView extends AbstractView {
                     "edit_buttons" => $this->getAllEditButtons($gradeable),
                     "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $buttons,
-                    "has_build_error" => $gradeable->anyBuildErrors()
+                    "has_build_error" => $gradeable->anyBuildErrors(),
+                    "is_student_view" => $gradeable->isStudentView()
                 ];
 
                 if (count($buttons) > $max_buttons) {
@@ -231,7 +232,8 @@ class NavigationView extends AbstractView {
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config,
-            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')
+            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            "rainbow_grades_summary" => $this->core->getConfig()->displayRainbowGradesSummary()
         ]);
     }
 
