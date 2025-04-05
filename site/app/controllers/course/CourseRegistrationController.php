@@ -52,18 +52,14 @@ class CourseRegistrationController extends AbstractController {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $user_id = $this->core->getUser()->getId();
 
-        // Check if user already exists in the course
         $existing_user = $this->core->getQueries()->getUserBySubmittyId($user_id);
         if ($existing_user !== null) {
-            // Update the user's section if they exist but were moved to NULL
             $this->core->getQueries()->updateUser($user_id, $term, $course, 4, $default_section, false);
         }
         else {
-            // Insert new user if they don't exist
             $this->core->getQueries()->insertCourseUser($user_id, $term, $course, 4, $default_section, false);
         }
 
-        // Notify instructors about the registration
         $instructors = $this->core->getQueries()->getInstructors($term, $course);
         $this->notifyInstructors($user_id, $term, $course, $instructors);
 
