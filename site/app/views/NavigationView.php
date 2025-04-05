@@ -76,7 +76,7 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles) {
+    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone, $gradeable_ids_and_titles, bool $is_self_register) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -214,11 +214,15 @@ class NavigationView extends AbstractView {
 
         $this->core->getOutput()->addInternalCss("navigation.css");
         $this->core->getOutput()->addInternalJs("collapsible-panels.js");
+        $this->core->getOutput()->addInternalJs("registration.js");
         $this->core->getOutput()->enableMobileViewport();
 
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
             "course_name" => $this->core->getConfig()->getCourseName(),
             "course_id" => $this->core->getConfig()->getCourse(),
+            "is_self_register" => $is_self_register,
+            "unregister_url" => $this->core->buildCourseUrl(['unregister']),
+            "csrf_token" => $this->core->getCsrfToken(),
             "sections" => $render_sections,
             "max_buttons" => $max_buttons,
             "message_file_details" => $message_file_details,

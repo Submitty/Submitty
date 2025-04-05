@@ -5,6 +5,7 @@ namespace app\controllers\course;
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
+use app\views\course\CourseRegistrationView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
 
@@ -30,10 +31,11 @@ class CourseRegistrationController extends AbstractController {
         $this->core->getNotificationFactory()->sendEmails($emails);
     }
 
-    #[Route("/courses/{term}/{course}/register")]
+    #[Route("/courses/{term}/{course}/register", name: "course_register")]
     public function selfRegister(string $term, string $course): RedirectResponse {
         $this->core->loadCourseConfig($term, $course);
         $this->core->loadCourseDatabase();
+
         if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
             $this->core->addErrorMessage('Self registration is not allowed.');
             return new RedirectResponse($this->core->buildUrl(['home']));
@@ -46,6 +48,20 @@ class CourseRegistrationController extends AbstractController {
             $this->registerCourseUser($term, $course);
             return new RedirectResponse($this->core->buildCourseUrl());
         }
+    }
+
+    #[Route("/courses/{term}/{course}/unregister", name: "course_unregister")]
+    public function selfUnregister(string $term, string $course): RedirectResponse {
+        $this->core->loadCourseConfig($term, $course);
+        $this->core->loadCourseDatabase();
+
+        if ($this->core->getQueries()->getSelfRegistrationType($term, $course) === ConfigurationController::NO_SELF_REGISTER) {
+            $this->core->addErrorMessage('You cannot unregister from this course on your own.');
+            return new RedirectResponse($this->core->buildCourseUrl());
+        }
+        $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
+        $this->core->addSuccessMessage('You have successfully unregistered from the course.');
+        return new RedirectResponse($this->core->buildUrl(['home']));
     }
 
     public function registerCourseUser(string $term, string $course): void {
