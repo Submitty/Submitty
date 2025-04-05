@@ -1227,7 +1227,7 @@ class AdminGradeableController extends AbstractController {
             }
 
             $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed'] ?? false);
-            $grade_inquiry = Utils::getBooleanValue($details['grade_inquiry_per_component_allowed']);
+            $grade_inquiry = Utils::getBooleanValue($details['grade_inquiry_per_component_allowed'] ?? false);
             $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => Utils::getBooleanValue($details['team_assignment']),
