@@ -14,7 +14,7 @@
         {% if new_vcs_token.getExpiration() is null %}
             <p><b>Expiration</b>: Never expires</p>
         {% else %}
-            <p><b>Expiration</b>: {{ new_vcs_token.getExpiration()|date('m/d/Y @ h:i A T') }}</p>
+            <p><b>Expiration</b>: {{ new_vcs_token.getExpiration()|date('Y-m-d @ h:i A T') }}</p>
         {% endif %}
         <p data-testid="new-vcs-token">
             <b>Value</b>: {{ new_vcs_token_val }}
@@ -88,9 +88,9 @@
                     <td data-testid="auth-token-expire">Never expires</td>
                 {% else %}
                     {% if token.isExpired(current_time) %}
-                        <td data-testid="auth-token-expire">EXPIRED on {{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
+                        <td data-testid="auth-token-expire">EXPIRED on {{ token.getExpiration()|date('Y-m-d @ h:i A T') }}</td>
                     {% else %}
-                        <td data-testid="auth-token-expire">{{ token.getExpiration()|date('m/d/Y @ h:i A T') }}</td>
+                        <td data-testid="auth-token-expire">{{ token.getExpiration()|date('Y-m-d @ h:i A T') }}</td>
                     {% endif %}
                 {% endif %}
                 <td>
