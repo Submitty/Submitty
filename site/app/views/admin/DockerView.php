@@ -100,7 +100,7 @@ class DockerView extends AbstractView {
             );
 
             $content = rtrim($content);
-            $content_2rpos = strrpos($content, "[Last ran", -35);
+            $content_2rpos = strrpos($content, "[Last ran", min(-35, strlen($content)));
             if ($content_2rpos === false) {
                 $content_2rpos = 0;
             }
