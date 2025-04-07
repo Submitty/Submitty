@@ -124,8 +124,11 @@ def construct_notifications(term, course, pending):
                       f"\n\nAuthor: System\nClick here for more info: "
                       f"{gradeable_url}\n\n--\nNOTE: This is an automated "
                       "email notification, which is unable to receive replies."
-                      "\nPlease refer to the course syllabus for contact"
-                      "information for your teaching staff."
+                      "\nPlease refer to the course syllabus for contact "
+                      "information for your teaching staff.\nUpdate your "
+                      "email notification settings for this course here: "
+                      f"{BASE_URL_PATH}/courses/{term}/{course}/notifications"
+                      "/settings"
                       )
 
         # Truncate the notification content if it exceeds 40 characters

@@ -56,7 +56,7 @@
             </fieldset>
         </div>
 
-        <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
+        <div id="release_date_container" style="margin-bottom: 5px;" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
             {% set release_date = gradeable.getGradeReleasedDate()|date(date_format, timezone_string) %}
             <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ release_date }}" data-original="{{ release_date }}">
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
@@ -74,8 +74,6 @@
             {% endif %}
         </div>
     </div>
-    <br />
-
     <div class="electronic_file electronic_file_dates">
         <div class="grade_inquiry_date" {{ grade_inquiry_allowed != true ? 'hidden' : '' }}>
             <input data-testid="grade_inquiry_start_date" name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
