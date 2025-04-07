@@ -1,9 +1,15 @@
 /* global buildCourseUrl, WebSocketClient */
 /* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
+function getDraftContentKeyPrefix() {
+    const gradeable_id = window.gradeable_id;
+    const course = window.location.pathname.split('/').slice(2, 4).join('-');
+
+    return `${course}-draftContent-${gradeable_id}-`;
+}
+
 function loadDraft() {
-    const gradeableId = $('#gradeable_id').val();
-    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const draftContentKeyPrefix = getDraftContentKeyPrefix();
     const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
     const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
@@ -69,9 +75,7 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
-    const gradeableId = $('#gradeable_id').val();
     const componentId = reply_text_area.closest('.reply-text-form').find('#gc_id').val();
-    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
     const uniqueKey = `reply-text-area-${componentId}`;
 
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
@@ -79,6 +83,7 @@ function onReplyTextAreaKeyUp(textarea) {
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
 
+    const draftContentKeyPrefix = getDraftContentKeyPrefix();
     const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
     const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
@@ -109,6 +114,7 @@ function onGradeInquirySubmitClicked(button) {
 
     // if grader clicks Close Grade Inquiry button with text in text area we want to confirm that they want to close the grade inquiry
     // and ignore their response
+    const draftContentKeyPrefix = getDraftContentKeyPrefix();
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
     if (submit_button_id && submit_button_id === 'grading-close') {
@@ -118,6 +124,7 @@ function onGradeInquirySubmitClicked(button) {
             }
             else {
                 text_area.val('');
+                localStorage.removeItem(draftContentKeyPrefix);
             }
         }
     }
@@ -140,9 +147,8 @@ function onGradeInquirySubmitClicked(button) {
                 const json = JSON.parse(response);
 
                 if (json['status'] === 'success') {
-                    if (json['data']['type'] === 'new_post') {
-                        text_area.val('');
-                    }
+                    text_area.val('');
+                    localStorage.removeItem(draftContentKeyPrefix);
                 }
                 else {
                     alert(json['message']);
