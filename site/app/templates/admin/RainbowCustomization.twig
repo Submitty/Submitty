@@ -194,7 +194,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;overflow:auto;width:1000px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" class="gradeable-configuration">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
@@ -272,11 +272,9 @@
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"
-                                                           {% set default_percent = ((1 / gradeables|length) * 100)|round(1, 'floor') %}
                                                            class="gradeable-custom-item-input"
                                                            aria-label="{{gradeable["title"]}} percent"
-                                                           placeholder="{{ default_percent }}"
-                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
+                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : "" }}"
                                                            id="percents-{{ gradeable["id"] }}"
                                                            onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
                                                     <span>%</span>
