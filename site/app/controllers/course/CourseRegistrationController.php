@@ -5,7 +5,6 @@ namespace app\controllers\course;
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
 use app\libraries\response\RedirectResponse;
-use app\views\course\CourseRegistrationView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
 
