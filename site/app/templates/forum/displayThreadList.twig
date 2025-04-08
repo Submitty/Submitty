@@ -5,7 +5,7 @@
                 <span class="thread-title-cont">
                     <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
                 </span>
-                <span class="thread-icons-cont" style="--custom-spacing: {{ (is_full_page is defined and is_full_page) ? '0' : '2'}}px;">
+                <span class="thread-icons-cont {{ (is_full_page is defined and is_full_page) ? 'no-spacing' : 'has-spacing' }}">
                     {%- if thread.pinned -%}
                         {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
                         {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
@@ -28,8 +28,7 @@
 
             <div class="thread-content">{{ thread.content }}</div>
 
-            {% set threadInfoGap = (is_full_page is defined and is_full_page) ? '16' : '8' %}
-            <div class="thread-info-container" style="--custom-spacing: {{ threadInfoGap }}px;">
+            <div class="thread-info-container {{ is_full_page is defined and is_full_page ? 'full-spacing' : 'half-spacing' }}">
                 <span class="categories-container">
                     {% for category in thread.categories %}
                         {% set tag = category[0] %}
@@ -49,7 +48,7 @@
                             title="Total upduck">
                             <img 
                                 id="ThreadsumDucksIcon_{{thread.thread_id}}" 
-                                src="{{'/img/on-duck-button.svg'}}" 
+                                src="/img/on-duck-button.svg" 
                                 alt="sum_like"
                                 width="30" 
                                 height="30"
@@ -72,7 +71,7 @@
                     <span class="thread-action-container" data-testid="thread-action-container">
                         {% if is_full_page is defined and is_full_page %}
                             {% if thread.date.not_null %}
-                                <span class="thread-date" style="--custom-spacing: 5px">{{ thread.date.formatted }}</span>
+                                <span class="thread-date has-spacing">{{ thread.date.formatted }}</span>
                             {% endif %}
                             <span>
                                 <strong class="post-author-name">{{ thread.author_info.name }}</strong>

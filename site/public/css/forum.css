@@ -793,10 +793,14 @@
     justify-content: flex-start;
     gap: 3px;
     max-width: 40%;
+}
 
-    --custom-spacing: 0px;
+.thread-icons-cont.no-spacing {
+    margin-top: 0px;
+}
 
-    margin-top: var(--custom-spacing);
+.thread-icons-cont.has-spacing {
+    margin-top: 2px;
 }
 
 .thread-icons-cont:empty {
@@ -807,10 +811,14 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+}
 
-    --custom-spacing: 16px;
+.thread-info-container.half-spacing {
+    column-gap: 8px;
+}
 
-    column-gap: var(--custom-spacing);
+.thread-info-container.full-spacing {
+    column-gap: 16px;
 }
 
 .sub-info-container {
@@ -840,10 +848,10 @@
     align-items: flex-end;
     font-size: smaller;
     font-weight: normal;
+}
 
-    --custom-spacing: 0px;
-    
-    margin-top: var(--custom-spacing);
+.thread-date .has-spacing {
+    margin-top: 5px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
