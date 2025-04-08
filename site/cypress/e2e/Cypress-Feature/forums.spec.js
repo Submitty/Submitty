@@ -50,8 +50,9 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
 
 // Checks if a thread with the specified title exists
 const threadExists = (title) => {
-    return cy.get('body').then(($body) => {
-        return $body.find('[data-testid="thread-list-item"]').filter(`:contains(${title})`).length > 0;
+    return cy.get('[data-testid="thread-list-item"]').then(($thread_items) => {
+        return $thread_items.filter(`:contains(${title})`).length > 0;
+    });
     });
 };
 
