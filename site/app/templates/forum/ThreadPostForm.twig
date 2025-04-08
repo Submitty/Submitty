@@ -1,11 +1,11 @@
-<div class="thread-post-form"
-    {# {% if post_box_id %} #}
+<div class="thread-post-form
+    {#% if post_box_id %#}
         data-post_box_id="{{ post_box_id }}"
     {# {% endif %} #}
->
+
 
 <div class="form-group row position-relative">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }" data-ays-ignore="true"/>
 
     {% if show_title is defined and show_title %}
     <span class="edit_thread">
@@ -40,7 +40,7 @@
                                 {
                                     label: "Clear"
                                 }
-                            ],
+                            ,
                             label: "or",
                             onClick: (index, fp) => {
                                 let date;
