@@ -1,0 +1,36 @@
+name: First PR Open
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  firstPrReply:
+    if: ${{ github.event.pull_request.author_association == 'NONE' }}
+    name: First PR Open
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Check for existing bot comments
+        id: check-comments
+        run: |
+          gh repo set-default martig7/TestSubmitty
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          BOT_COMMENT_EXISTS=$(gh pr view "$PR_NUMBER" --json comments --jq '.comments[].body' | grep -q "Hi @$USERNAME," && echo "true" || echo "false")
+          echo "bot_comment_exists=$BOT_COMMENT_EXISTS" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.event.comment.user.login }}
+
+      - name: First PR Open
+        if: env.bot_comment_exists == 'false'
+        run: |
+          gh repo set-default martig7/TestSubmitty
+          gh pr comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
+        env:
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          USERNAME: ${{ github.event.comment.user.login }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
