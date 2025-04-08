@@ -14,7 +14,7 @@ use app\libraries\TokenManager;
 
 class Server implements MessageComponentInterface {
     // Holds the mapping between pages that have open socket clients and those clients
-    /** @var array */
+    /** @var array<string, \SplObjectStorage> */
     private $clients = [];
 
     // Holds the mapping between Connection Objects IDs (key) and user current course&page (value)
@@ -213,7 +213,7 @@ class Server implements MessageComponentInterface {
             $msg = json_decode($msgString, true);
 
             if (isset($msg["type"]) && $msg["type"] === "new_connection") {
-                if (isset($msg['page']) && is_string($msg['page'])) {
+                if (isset($msg['page']) && is_string($msg['page']) && !isset($this->pages[$from->resourceId])) {
                     if (!array_key_exists($msg['page'], $this->clients)) {
                         $this->clients[$msg['page']] = new \SplObjectStorage();
                     }
@@ -252,6 +252,9 @@ class Server implements MessageComponentInterface {
         unset($this->php_websocket_clients[$conn->resourceId]);
         if ($user_current_page) {
             $this->clients[$user_current_page]->detach($conn);
+            if ($this->clients[$user_current_page]->count() === 0) {
+                unset($this->clients[$user_current_page]);
+            }
             unset($this->pages[$conn->resourceId]);
         }
         $user_id = $this->getSocketUserID($conn);

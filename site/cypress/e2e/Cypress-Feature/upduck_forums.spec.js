@@ -167,4 +167,40 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
         checkStatsUpducks('TA, Jill', 0);
         checkStatsUpducks('Student, Joe', 0);
     });
+
+    it('Should display the list of users who liked this post & hide modal for students', () => {
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+        upduckPost(title1);
+
+        // Verify that the "show upduck list" button is not visible for students
+        cy.get('[data-testid="show-upduck-list"]').should('not.exist');
+
+        // Logout and login as instructor to like and check the upduck list modal
+        cy.logout();
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        upduckPost(title1, 0, 1);
+        cy.get('[data-testid="show-upduck-list"]').first().click();
+
+        // Verify that the modal is visible
+        cy.get('#popup-post-likes').should('be.visible');
+
+        // Check the list of users in the modal
+        cy.get('.form-body').should('contain', 'instructor');
+        cy.get('.form-body').should('contain', 'student');
+
+        // Close the modal and ensure it is hidden
+        cy.get('#popup-post-likes .close-button').click();
+        cy.get('#popup-post-likes').should('not.be.visible');
+
+        // Remove upducks
+        cy.get('[data-testid="upduck-button"]').first().click();
+        cy.wait('@upduck', { responseTimeout: 15000 });
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        removeUpduck(title1);
+    });
 });
