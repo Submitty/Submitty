@@ -82,8 +82,8 @@ $(document).ready(() => {
     function updateRainbowCustomizationWarning() {
         const warningMessage = $('#customization-exists-warning');
         const checked = $('#auto-rainbow-grades').is(':checked');
-        const customizationExists = warningMessage.data('value');
-        checked && customizationExists ? warningMessage.show() : warningMessage.hide();
+        const customizationNotExists = warningMessage.data('value');
+        warningMessage.toggle(checked && customizationNotExists);
     }
 
     $(document).on('change', '#auto-rainbow-grades', updateRainbowCustomizationWarning);
