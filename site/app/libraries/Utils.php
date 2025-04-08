@@ -332,7 +332,7 @@ class Utils {
                 'true',
                 'on'
             ];
-            return (in_array(strtolower(trim($variable)), $true_values, true));
+            return in_array(strtolower(trim($variable)), $true_values, true);
         }
 
         if (is_int($variable)) {
