@@ -21,16 +21,12 @@ repair_services() {
             log_file="/var/log/services/${today}.txt"
             last_status=$(sudo systemctl status "${service}")
 
-            if [[ ! -d "/var/log/services" ]]; then
-                sudo mkdir -p "/var/log/services"
-            fi
-
             if [[ ! -f "${log_file}" ]]; then
                 sudo touch "${log_file}"
             fi
 
-            sudo echo -e "Restarting ${service}\n\n${last_status}" >> "${log_file}"
-            sudo echo -e "\n----------------------------------------\n" >> "${log_file}"
+            echo -e "Restarting ${service}\n\n${last_status}" | sudo tee -a "${log_file}"
+            echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}"
 
             sudo systemctl restart "${service}"
         fi
