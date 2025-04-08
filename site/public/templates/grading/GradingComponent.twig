@@ -53,8 +53,8 @@ Required inputs:
     {% endfor %}
 {% endblock %}
 
-{% if ta_grading_peer or not component.peer_component %}
 {% block extra_mark_rows %}
+{% if ta_grading_peer or not component.peer_component %}
     {# Custom mark (only display in non-edit mode and custom marks are enabled #}
     {% set f_mark = component.marks|first %}
     {% if not edit_marks_enabled and allow_custom_marks %}
@@ -133,8 +133,8 @@ Required inputs:
              hidden></div>
     {% endif %}
     {# /Custom mark #}
-{% endblock %}
 {% endif %}
+{% endblock %}
 
 {% block mark_list_footer %}
     {# Component is closed, so show just the received marks #}
@@ -142,7 +142,7 @@ Required inputs:
         <div class="container">
             <div class="row divider"></div>
         </div>
-        <div class="received-marks-list container" tabindex="0" onclick="{% block component_click %}{% endblock %}">
+        <div class="received-marks-list container" tabindex="0" onclick="{{ block(component_click) }}">
             {% if graded_component.mark_ids|length > 0 %}
                 {% for mark in component.marks %}
                     <div class="row">
