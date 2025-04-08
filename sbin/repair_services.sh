@@ -16,9 +16,22 @@ repair_services() {
     )
 
     for service in "${services[@]}"; do
-        status=$(sudo systemctl status "${service}")
-        if ! echo "${status}" | grep -q 'Active: active'; then
-            echo "Restarting ${service}"
+        if ! sudo systemctl is-active --quiet "${service}"; then
+            today=$(date +%Y%m%d)
+            log_file="/var/log/services/${today}.txt"
+            last_status=$(sudo systemctl status "${service}")
+
+            if [[ ! -d "/var/log/services" ]]; then
+                sudo mkdir -p "/var/log/services"
+            fi
+
+            if [[ ! -f "${log_file}" ]]; then
+                sudo touch "${log_file}"
+            fi
+
+            sudo echo -e "Restarting ${service}\n\n${last_status}" >> "${log_file}"
+            sudo echo -e "\n----------------------------------------\n" >> "${log_file}"
+
             sudo systemctl restart "${service}"
         fi
     done
