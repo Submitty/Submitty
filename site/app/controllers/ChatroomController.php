@@ -15,9 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Enabled("chat")
  */
 class ChatroomController extends AbstractController {
-    /**
-     * @Route("/courses/{_semester}/{_course}/chat", methods={"GET"})
-     */
+
+    #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomssPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatrooms = $repo->findBy([], ['id' => 'ASC']);
@@ -30,9 +29,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/new", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/chat/new", methods:["POST"])]
     public function addChatroom(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
@@ -51,10 +50,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}", methods={"GET"})
-     * @param string $chatroom_id
      * @return RedirectResponse|WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
         if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
@@ -77,10 +75,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods={"GET"})
-     * @param string $chatroom_id
      * @return RedirectResponse|WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function getChatroomAnon(string $chatroom_id): WebResponse|RedirectResponse {
         if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid Chatroom ID");
@@ -99,9 +96,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/delete", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/chat/delete", methods: ["POST"])]
     public function deleteChatroom(): JsonResponse {
         $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -121,9 +118,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", methods: ["POST"])]
     public function editChatroom(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
@@ -153,9 +150,9 @@ class ChatroomController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleOnOff", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleOnOff", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function toggleChatroomOnOff(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
@@ -172,9 +169,7 @@ class ChatroomController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/messages", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function fetchMessages(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $messages = $em->getRepository(Message::class)->findBy(['chatroom' => $chatroom_id], ['timestamp' => 'ASC']);
@@ -193,9 +188,7 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($formattedMessages);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function addMessage(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
         $content = $_POST['content'];
