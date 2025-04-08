@@ -5,7 +5,6 @@ on:
 
 jobs:
   firstPrReply:
-    if: ${{ github.event.pull_request.author_association == 'NONE' }}
     name: First PR Open
     runs-on: ubuntu-latest
     permissions: write-all
@@ -14,10 +13,19 @@ jobs:
       - name: Checkout main repository
         uses: actions/checkout@v4
 
+      - name: Check if this is user's first PR
+        id: check-first-pr
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          FIRST_PR=$(gh pr list --author "$USERNAME" --state all --limit 2 | wc -l | xargs -I {} test {} -eq 1 && echo "true" || echo "false")
+          echo "first_pr=$FIRST_PR" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.event.comment.user.login }}
+
       - name: Check for existing bot comments
         id: check-comments
         run: |
-          gh repo set-default martig7/TestSubmitty
           PR_NUMBER=${{ github.event.pull_request.number }}
           BOT_COMMENT_EXISTS=$(gh pr view "$PR_NUMBER" --json comments --jq '.comments[].body' | grep -q "Hi @$USERNAME," && echo "true" || echo "false")
           echo "bot_comment_exists=$BOT_COMMENT_EXISTS" >> $GITHUB_ENV
@@ -26,9 +34,8 @@ jobs:
           USERNAME: ${{ github.event.comment.user.login }}
 
       - name: First PR Open
-        if: env.bot_comment_exists == 'false'
+        if: env.bot_comment_exists == 'false' && env.first_pr == 'true'
         run: |
-          gh repo set-default martig7/TestSubmitty
           gh pr comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
         env:
           PULL_REQUEST: ${{ github.event.pull_request.number }}
