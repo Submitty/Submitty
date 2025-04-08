@@ -88,10 +88,10 @@
     "vue-tsc": "^2.2.8"
   },
   "scripts": {
-    "css-stylelint": "stylelint \"**/*.css\"",
-    "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
     "prettier": "prettier --check \"public/css/**/*.css\"",
     "prettier:fix": "prettier --write \"public/css/**/*.css\"",
+    "css-stylelint": "stylelint \"**/*.css\"",
+    "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
     "test": "jest",
