@@ -1,10 +1,9 @@
-vendor/**
-tests/report/**
+# CSS files to ignore
 public/css/jquery-ui.min.css
 public/css/reset.css
 public/css/flatpickr.min.css
 public/css/chosen.min.css
-public/css/google/*
+public/css/google
 public/css/bootstrap.css
 public/css/pdf/toolbar_fullscreen.css
 public/css/pdf/toolbar_embedded.css
@@ -35,4 +34,3 @@ public/css/select-widgets.css
 public/css/server.css
 public/css/sidebar.css
 public/css/simple-grading.css
-/*
