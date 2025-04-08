@@ -53,7 +53,6 @@ const threadExists = (title) => {
     return cy.get('[data-testid="thread-list-item"]').then(($thread_items) => {
         return $thread_items.filter(`:contains(${title})`).length > 0;
     });
-    });
 };
 
 // Removes all threads matching the specified title
