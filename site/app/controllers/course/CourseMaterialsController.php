@@ -453,6 +453,9 @@ class CourseMaterialsController extends AbstractController {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
+            if (strpos($requested_path, '/') === 0) {
+                return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
+            }
             $new_path = FileUtils::joinPaths($upload_path, $requested_path);
 
             if (isset($_POST['title'])) {
