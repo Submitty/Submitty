@@ -1,27 +1,33 @@
-<div class="thread-post-form
-    {#% if post_box_id %#}
+<div class="thread-post-form"
+    {# {% if post_box_id %} #}
         data-post_box_id="{{ post_box_id }}"
     {# {% endif %} #}
-
+>
 
 <div class="form-group row position-relative">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
+    <input type="hidden" name="csrf_token" value="{{csrf_token}}" data-ays-ignore="true"/>
 
     {% if show_title is defined and show_title %}
     <span class="edit_thread">
-        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" data-testid="title" aria-label="Edit thread title" required/>
+              Title: <input type="text" size="45" placeholder="Title" name="title" id="title" data-testid="title" aria-label="Edit thread title" required/>
     </span>
-    {% endif %}
+    {% endif %} 
+
+
+
+
+
+
 
 </div>
 <br/>
 {% if show_post %}
-    <div style="margin-bottom:10px;" class="form-group row position-relative">
+     <div style="margin-bottom:10px;" class="form-group row position-relative">
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown is defined and render_markdown ? 1 : 0 }}" />
     {% if show_merge_thread_button is defined and show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" data-testid="merge-thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
+     <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" data-testid="merge-thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
-    {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup() <= 2 %}
+    {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup()<=    2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
             <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
         </label>
@@ -40,7 +46,7 @@
                                 {
                                     label: "Clear"
                                 }
-                            ,
+                            ],
                             label: "or",
                             onClick: (index, fp) => {
                                 let date;
@@ -67,13 +73,13 @@
                     dateFormat: "Y-m-d H:i:S",
                     onReady: (a, b, fp) => {
                         fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                        fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                        fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label','Seconds');
                     }
                 });
             });
         </script>
 
-    {% endif %}
+                        {% endif %}
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
