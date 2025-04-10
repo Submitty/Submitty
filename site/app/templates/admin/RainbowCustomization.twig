@@ -256,18 +256,36 @@
                                 </div>
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        {% set manual_points = false %}
+                                        {% set auto_points = false %}
+                                        {% for gradeable in gradeables %}
+                                            {% if gradeable['manual_grading_points'] != 0 %}
+                                                {% set manual_points = true %}
+                                            {% endif %}
+                                            {% if gradeable['autograded_grading_points'] != 0 %}
+                                                {% set auto_points = true %}
+                                            {% endif %}
+                                        {% endfor %}
                                         <li style="margin: 3px">
                                             <div class="gradeable-points-div">
-                                                <span class="gradeable-points">Manual Pts</span>
-                                                <span class="gradeable-points">Auto Pts</span>
+                                                {% if manual_points %}
+                                                    <span class="gradeable-points">Manual Pts</span>
+                                                {% endif %}
+                                                {% if auto_points %}
+                                                    <span class="gradeable-points">Auto Pts</span>
+                                                {% endif %}
                                                 <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
                                             </div>
                                         </li>
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
                                                 <div id="gradeable-pts-div-{{ gradeable["id"] }}" class="gradeable-points-div">
-                                                    <span class="gradeable-points">{{ gradeable['manual_grading_points'] }}</span>
-                                                    <span class="gradeable-points">{{ gradeable['autograded_grading_points'] }}</span>
+                                                    {% if manual_points %}
+                                                        <span class="gradeable-points">{{ gradeable['manual_grading_points'] }}</span>
+                                                    {% endif %}
+                                                    {% if auto_points %}
+                                                        <span class="gradeable-points">{{ gradeable['autograded_grading_points'] }}</span>
+                                                    {% endif %}
                                                     <span class="gradeable-points"
                                                           style="border-right: 1px solid var(--default-white);"
                                                           aria-label="{{gradeable["title"]}} max score"
