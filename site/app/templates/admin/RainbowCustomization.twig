@@ -256,15 +256,25 @@
                                 </div>
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        <li style="margin: 3px">
+                                            <div class="gradeable-points-div">
+                                                <span class="gradeable-points">Manual Pts</span>
+                                                <span class="gradeable-points">Auto Pts</span>
+                                                <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
+                                            </div>
+                                        </li>
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}" class="gradeable-points-div">
+                                                    <span class="gradeable-points">{{ gradeable['manual_grading_points'] }}</span>
+                                                    <span class="gradeable-points">{{ gradeable['autograded_grading_points'] }}</span>
                                                     <span class="gradeable-points"
+                                                          style="border-right: 1px solid var(--default-white);"
                                                           aria-label="{{gradeable["title"]}} max score"
                                                           id="maxscore-{{ gradeable["id"] }}"
                                                           data-max-score="{{ gradeable["max_score"] }}"
                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}">
-                                                        {{ gradeable['manual_grading_points'] }} manual + {{ gradeable['autograded_grading_points'] }} autograded = {{ gradeable['max_score'] }} total points
+                                                          {{ gradeable['max_score'] }}
                                                     </span>
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">

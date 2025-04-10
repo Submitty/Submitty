@@ -342,19 +342,21 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     margin-right: 2em;
 }
 
-[id^="gradeable-pts-div-"] {
-    padding-top: 0.3em;
-    padding-bottom: 0.3em;
-    width: 25%;
-}
-
 [id^="gradeable-percents-div-"] {
     display: none;
 }
 
 .gradeable-points {
-    font-style: italic;
-    font-size: 0.8em;
+    flex: 1;
+    text-align: center;
+    border-left: 1px solid var(--default-white);
+}
+
+.gradeable-points-div {
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    width: 25%;
+    display: flex;
 }
 
 #btn-build-customization {
