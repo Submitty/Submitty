@@ -347,6 +347,14 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
 
 function socketDeletePostHandler(post_id) {
     const main_post = $(`#${post_id}`);
+    const thread_box_link = $(`#thread_box_link_${post_id}`);
+    const current_thread = Number($('#current-thread').val());
+
+    if (post_id === current_thread) {
+        // Navigate back to the forum page for deleted threads
+        $('#nav-sidebar-forum')[0].click();
+    }
+
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function () {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
@@ -359,6 +367,7 @@ function socketDeletePostHandler(post_id) {
         var posts_to_delete = main_post.nextUntil('#post-hr');
     }
 
+    thread_box_link.remove();
     posts_to_delete.filter('.reply-box').remove();
     main_post.add(posts_to_delete).fadeOut(400, () => {
         main_post.add(posts_to_delete).remove();
@@ -692,10 +701,7 @@ function initSocketClient() {
                 }
                 break;
             case 'delete_post':
-                // eslint-disable-next-line eqeqeq
-                if ($('data#current-thread').val() == msg.thread_id) {
-                    socketDeletePostHandler(msg.post_id);
-                }
+                socketDeletePostHandler(msg.post_id || msg.thread_id);
                 break;
             case 'edit_post':
                 // eslint-disable-next-line eqeqeq
