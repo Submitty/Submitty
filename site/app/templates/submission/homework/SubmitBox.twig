@@ -399,7 +399,7 @@
     // set for all but vcs as it has no box submission
     window.num_submission_boxes = {{ is_vcs ? 0 : part_names | length }};
     window.gradeable_id = "{{ gradeable_id }}";
-    window.course_id = "{{ course_path|split('/')|slice(5,6)|join('-') }}";
+    window.course = "{{ course }}";
 
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf

@@ -2,10 +2,10 @@
 /* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
 function getDraftContentKeyPrefix() {
-    const course_id = window.course_id;
+    const course = window.course;
     const gradeable_id = window.gradeable_id;
 
-    return `${course_id}-draftContent-${gradeable_id}-`;
+    return `${course}-draftContent-${gradeable_id}-`;
 }
 
 function loadDraft() {
