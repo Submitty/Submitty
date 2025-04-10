@@ -56,20 +56,24 @@
             </fieldset>
         </div>
 
-        <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
-            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+        <div id="release_date_container" style="margin-bottom: 5px;" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
+            {% set release_date = gradeable.getGradeReleasedDate()|date(date_format, timezone_string) %}
+            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ release_date }}" data-original="{{ release_date }}">
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
 
-            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
+            <p style="max-width:600px; margin-top:5px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
                 {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
+            {% if electronic and release_date <= "now"|date(date_format, timezone_string) %}
+                <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
+                    Note: Gradeable notifications are released at the start of every hour for completed electronic gradeables with student views. <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> have been sent so far.
+                </p>
+            {% endif %}
         </div>
     </div>
-    <br />
-
     <div class="electronic_file electronic_file_dates">
         <div class="grade_inquiry_date" {{ grade_inquiry_allowed != true ? 'hidden' : '' }}>
             <input data-testid="grade_inquiry_start_date" name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
