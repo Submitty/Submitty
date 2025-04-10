@@ -9,14 +9,16 @@ use app\models\Email;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
+use app\libraries\socket\Client;
+use WebSocket;
 use RuntimeException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GradeInquiryController extends AbstractController {
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods: ["POST"])]
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -55,11 +57,9 @@ class GradeInquiryController extends AbstractController {
         try {
             $this->core->getQueries()->insertNewGradeInquiry($graded_gradeable, $user, $content, $gc_id);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
+            $this->sendSocketMessage(['type' => 'open_grade_inquiry', 'submitter_id' => $submitter_id, 'g_id' => $gradeable_id]);
 
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry', 'new_discussion' => $new_discussion])
-            );
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['type' => 'open_grade_inquiry']));
         }
         catch (\InvalidArgumentException $e) {
             return MultiResponse::JsonOnlyResponse(
@@ -75,9 +75,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return MultiResponse|JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods: ["POST"])]
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -126,13 +126,11 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $grade_inquiry_post_id = $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry_id, $user->getId(), $content, $gc_id);
-            $grade_inquiry_post = $this->core->getQueries()->getGradeInquiryPost($grade_inquiry_post_id);
-            $new_post = $this->core->getOutput()->renderTemplate('submission\Homework', 'renderSingleGradeInquiryPost', $grade_inquiry_post, $graded_gradeable);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
-            return MultiResponse::JsonOnlyResponse(
-                JsonResponse::getSuccessResponse(['type' => 'new_post', 'post_id' => $grade_inquiry_post_id, 'new_post' => $new_post])
-            );
+            $this->sendSocketMessage(['type' => 'new_post', 'submitter_id' => $submitter_id,'post_id' => $grade_inquiry_post_id, 'gc_id' => $gc_id, 'g_id' => $gradeable_id]);
+
+            return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse(['type' => 'new_post']));
         }
         catch (\InvalidArgumentException $e) {
             return MultiResponse::JsonOnlyResponse(
@@ -148,8 +146,8 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods={"POST"})
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/single", methods: ["POST"])]
     public function getSingleGradeInquiryPost($gradeable_id) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -210,9 +208,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return JsonResponse|null null is for tryGetGradeable and tryGetGradedGradeable
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods: ["POST"])]
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
@@ -265,15 +263,11 @@ class GradeInquiryController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewGradeInquiryPost($grade_inquiry->getId(), $user->getId(), $content, $gc_id);
             }
-            $new_discussion = $this->core->getOutput()->renderTemplate('submission\Homework', 'showGradeInquiryDiscussion', $graded_gradeable, $can_inquiry);
 
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
-            return JsonResponse::getSuccessResponse(
-                [
-                'type' => 'toggle_status',
-                'new_discussion' => $new_discussion
-                ]
-            );
+            $this->sendSocketMessage(['type' => 'toggle_status', 'submitter_id' => $submitter_id, 'g_id' => $gradeable_id]);
+
+            return JsonResponse::getSuccessResponse(['type' => 'toggle_status']);
         }
         catch (\InvalidArgumentException $e) {
             return JsonResponse::getFailResponse($e->getMessage());
@@ -285,9 +279,9 @@ class GradeInquiryController extends AbstractController {
 
     /**
      * @param string $gradeable_id
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/discussion", methods: ["POST"])]
     public function getGradeInquiryDiscussion($gradeable_id) {
         $submitter_id = $_POST['submitter_id'];
 
@@ -424,6 +418,23 @@ class GradeInquiryController extends AbstractController {
             if ($this->core->getConfig()->isEmailEnabled()) {
                 $this->core->getNotificationFactory()->sendEmails($emails);
             }
+        }
+    }
+
+    /**
+     * this function opens a WebSocket client and sends a message with the corresponding update
+     * @param array<mixed> $msg_array
+     */
+    private function sendSocketMessage(array $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'] . '_' . $msg_array['submitter_id'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
     }
 }

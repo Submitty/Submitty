@@ -1,0 +1,7 @@
+{% set id = random() %}
+<div id="vue-{{ id }}">
+	<noscript>You need Javascript enabled to see this page.</noscript>
+</div>
+<script>
+	window.submitty.render("#vue-{{ id }}", "{{ component }}", {{ args | json_encode() | raw() }});
+</script>

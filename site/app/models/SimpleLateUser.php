@@ -18,7 +18,7 @@ class SimpleLateUser extends AbstractModel {
     protected $legal_given_name;
     /** @prop
      * @var string The preferred given name of the user if exists */
-    protected $preferred_given_name = "";
+    protected $preferred_given_name;
     /** @prop
      * @var  string The name to be displayed by the system (either preferred given name or legal given name) */
     protected $displayed_given_name;
@@ -40,6 +40,9 @@ class SimpleLateUser extends AbstractModel {
     /** @prop
      * @var string The extensions of a user (allowed late days for a specific homework) */
     protected $late_day_exceptions;
+    /** @prop
+     * @var string The reason for an extension given on a homework assignment */
+    protected $reason_for_exception;
 
     /**
      * User constructor.
@@ -54,7 +57,7 @@ class SimpleLateUser extends AbstractModel {
         $this->loaded = true;
         $this->id = $details['user_id'];
         $this->legal_given_name = $details['user_givenname'];
-        if (isset($details['user_preferred_givenname']) && $details['user_preferred_givenname'] !== "") {
+        if (isset($details['user_preferred_givenname'])) {
             $this->preferred_given_name = $details['user_preferred_givenname'];
             $this->displayed_given_name = $details['user_preferred_givenname'];
         }
@@ -63,7 +66,7 @@ class SimpleLateUser extends AbstractModel {
         }
 
         $this->legal_family_name = $details['user_familyname'];
-        if (isset($details['user_preferred_familyname']) && $details['user_preferred_familyname'] !== "") {
+        if (isset($details['user_preferred_familyname'])) {
             $this->preferred_family_name = $details['user_preferred_familyname'];
             $this->displayed_family_name = $details['user_preferred_familyname'];
         }
@@ -77,6 +80,9 @@ class SimpleLateUser extends AbstractModel {
         }
         if (isset($details['late_day_exceptions'])) {
             $this->late_day_exceptions = $details['late_day_exceptions'];
+        }
+        if (isset($details['reason_for_exception'])) {
+            $this->reason_for_exception = $details['reason_for_exception'];
         }
     }
 

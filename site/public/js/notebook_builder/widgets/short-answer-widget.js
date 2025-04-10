@@ -157,7 +157,7 @@ class ShortAnswerWidget extends Widget {
         all_modes = all_modes.concat(Object.keys(builder_data.codemirror_langauges));
 
         let result = '';
-        all_modes.forEach(mode => {
+        all_modes.forEach((mode) => {
             result = result.concat(`<option value="${mode}">${mode}</option>`);
         });
 

@@ -1,0 +1,5 @@
+---
+- name: Reload fpm
+  ansible.builtin.service:
+    name: "php{{ submitty_common_php_version }}-fpm"
+    state: reloaded

@@ -16,18 +16,11 @@
     <div class="column-wrapper" style="margin: 1em 0;">
         <div id="checkpoint-fixed" class="column-wrapper">
             {% include "grading/simple/StudentSearch.twig" %}
-            {% if action == 'lab' %}
-                <div>
-                    <p class="not-sticky">Undo/Redo Changes</p>
-                    <button id="checkpoint-undo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled>Undo <i class="fas fa-undo"></i></button>
-                    <button id="checkpoint-redo" class="btn btn-primary key_to_click" tabindex="0" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled>Redo <i class="fas fa-redo"></i></button>
-                </div>
-            {% endif %}
         </div>
 
         <div>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
-            <button class="btn btn-primary key_to_click" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+            <button class="btn btn-primary" tabindex="0" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary" tabindex="0" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
         </div>
     </div>
 
@@ -100,11 +93,11 @@
             <option value="id" aria-label="sort by ID" {{ sort == "id" ? 'selected' }}>
                 Section then User ID
             </option>
-            <option value="first" aria-label="sort by First Name" {{ sort == "first" ? 'selected' }}>
-                Section then First Name then User ID
+            <option value="first" aria-label="sort by Given Name" {{ sort == "first" ? 'selected' }}>
+                Section then Given Name then User ID
             </option>
-            <option value="last" aria-label="sort by Last Name" {{ sort == "last" ? 'selected' }}>
-                Section then Last Name then User ID
+            <option value="last" aria-label="sort by Family Name" {{ sort == "last" ? 'selected' }}>
+                Section then Family Name then User ID
             </option>
         </select>
     </div>
@@ -136,13 +129,13 @@
                     </a>
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">
-                        <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by Given Name">
+                        <span class="tooltiptext" title="sort by Given Name">Given Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">
-                        <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Family Name">
+                        <span class="tooltiptext" title="sort by Family Name">Family Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
 
@@ -228,7 +221,7 @@
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
     <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
-            style='background: #7bd0f7;'
+            class="highlighted-row"
         {% endif %}
     >
         <td class="">{{ index + 1 }}</td>

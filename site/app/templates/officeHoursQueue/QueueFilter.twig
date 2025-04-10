@@ -1,22 +1,22 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}filter-settings{% endblock %}
-{% block title %}Edit Existing Queue{% endblock %}
+{% block title %}Edit Queue{% endblock %}
 
 {% block body %}
   <span class="option-title">Modify access code</span>
   <form method="post" id="change_queue_token" action="{{base_url}}/no_code_added/change_token" style="height:auto;">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-    <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required">
+    <select id="old_queue_code" class="form-control" name="code" aria-label="Access Code" required="required" data-testid="old-queue-code">
       <option value="">Queue Name</option>
       {% for queue in viewer.getAllQueues() %}
         <option value="{{queue['code']}}">{{queue['code']}}</option>
       {% endfor %}
     </select>
-    <input type="text" id="old_queue_token" name="token" placeholder="New Access Code" aria-label="New Access Code" required="required">
-    <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;">
+    <input type="text" id="old_queue_token" name="token" placeholder="New Access Code" aria-label="New Access Code" data-testid="old-queue-token">
+    <a id="old_queue_rand_token" onclick="genRandCode('old_queue_token')" onkeypress="genRandCode('old_queue_token')" title="Generate random access code" aria-label="Generate random access code" tabindex="0" style="padding:.5rem;" data-testid="old-queue-rand-token">
       <i class="fas fa-dice"></i>
     </a>
-    <button id="change_code_btn" type="submit" class="btn btn-primary">Change Queue Access Code</button>
+    <button id="change_code_btn" type="submit" class="btn btn-primary" data-testid="change-code-btn">Change Queue Access Code</button>
   </form>
     <br>
     <hr>
@@ -63,9 +63,9 @@
     </thead>
     <tbody>
       {% for queue in viewer.getAllQueues() %}
-          <tr>
+          <tr data-testid="queue-item">
           <td style="text-align: left;">
-              <b>Name: </b>{{queue['code']}}<br>
+              <span data-testid="queue-name"><b>Name: </b>{{queue['code']}}</span><br>
               <b>Access Code: </b>{{queue['token']}}<br>
               <b>Contact Information: </b>{{ queue['contact_information'] ? "On" : "Off" }}<br>
               {% if queue['regex_pattern'] is defined and queue['regex_pattern'] != '' and queue['contact_information'] %}
@@ -74,20 +74,20 @@
 
 
           <td>
-              <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} />
+              <input type="checkbox" class="toggle-queue-checkbox" aria-label="Toggle open/close for: {{queue['code']|upper}}" id="toggle-queue-{{loop.index}}" onchange="toggleQueue({{loop.index}}, '{{queue['code']}}')" {% if queue['open'] %} checked {% endif %} data-testid="toggle-queue-checkbox" />
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-              <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn">Empty</button>
+              <button type="submit" class="btn btn-danger filter_settings_btn empty_queue_btn" data-testid="empty-queue-btn" >Empty</button>
             </form>
           </td>
           <td>
             <form method="post" action="{{base_url}}/{{queue['code'] | url_encode}}/deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will remove all students currently in that queue and remove the queue from your list of queues');">
               <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
               <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-              <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn">Delete</button>
+              <button type="submit" class="btn btn-danger filter_settings_btn delete_queue_btn" data-testid="delete-queue-btn">Delete</button>
             </form>
           </td>
         </tr>

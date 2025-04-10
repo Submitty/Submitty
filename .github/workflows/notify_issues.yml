@@ -1,0 +1,17 @@
+name: 'Notify Good First Issues'
+
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  notify_zulip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Zulip
+        if: github.event.label.name == 'good first issue'
+        run: |
+          curl -X POST https://submitty.zulipchat.com/api/v1/messages -u ${{ secrets.ZULIP_AUTHENTICATION }} --data-urlencode 'type=stream' --data-urlencode 'to=Submitty Developer Studio' \
+          --data-urlencode 'topic=Available Good First Issue' --data-urlencode \
+          'content=A good first issue has been posted. View here: [${{ github.event.issue.title }}](https://github.com/Submitty/Submitty/issues/${{ github.event.issue.number }}).
+          View a list of all good first issues here: [Good First Issues](https://github.com/Submitty/Submitty/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)'

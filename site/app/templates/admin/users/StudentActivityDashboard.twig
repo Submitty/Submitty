@@ -5,7 +5,7 @@
         
                             
         <div class="btn-wrapper">
-          <a href="{{download_link}}" class="btn btn-primary">Download as CSV</a>
+          <a href="{{download_link}}" class="btn btn-primary" data-testid="student-activity-download-csv">Download as CSV</a>
         </div>
     </header>
     <p id="in-page-doc">
@@ -39,6 +39,10 @@
             <label for="office_hours_queue_date">Office Hours Queue Date</label>
             <input type="text" class="date_picker" id="office_hours_queue_date">
         </div>
+        <div class="line">
+            <label for="course_materials_access">Course Materials Access Date</label>
+            <input type="text" class="date_picker" id="course_materials_access">
+        </div>
 
         <div id="apply-btn" class="btn btn-primary">Apply</div> 
         <div id="clear-btn" class="btn btn-primary">Clear</div>
@@ -48,15 +52,16 @@
             <tr>
                 <td id="0" style="cursor: pointer">Registration Section <i class="fas fa-angle-up"></i></td>
                 <td id="1" style="cursor: pointer">User ID <i class="fas"></i></td>
-                <td id="2" style="cursor: pointer">First Name <i class="fas"></i></td>
-                <td id="3" style="cursor: pointer">Last Name <i class="fas"></i></td>
+                <td id="2" style="cursor: pointer">Given Name <i class="fas"></i></td>
+                <td id="3" style="cursor: pointer">Family Name <i class="fas"></i></td>
                 <td id="4" style="cursor: pointer">Gradeable Submission Date <i class="fas"></i></td>
                 <td id="5" style="cursor: pointer">Forum View Date <i class="fas"></i></td>
                 <td id="6" style="cursor: pointer">Forum Post Date <i class="fas"></i></td>
                 <td id="7" style="cursor: pointer">Gradeable Access Date <i class="fas"></i></td>
                 <td id="8" style="cursor: pointer">Number of Poll Responses <i class="fas"></i></td>
                 <td id="9" style="cursor: pointer">Office Hours Queue Date <i class="fas"></i></td>
-                <td id="10"  style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
+                <td id="10" style="cursor: pointer">Course Materials Access Date <i class="fas"></i></td>
+                <td id="11"  style="cursor: pointer; display:none">Flagged <i class="fas"></i></td>
             </tr>
         </thead>
     
@@ -73,6 +78,7 @@
                 <td>{{row.gradeable_access}}</td>
                 <td>{{row.num_poll_responses}}</td>
                 <td>{{row.office_hours_queue}}</td>
+                <td>{{row.course_materials_access}}</td>
                 <td style="display: none;">False</td>
             </tr>
         {% endfor %}

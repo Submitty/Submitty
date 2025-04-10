@@ -14,11 +14,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AutogradingStatusController extends AbstractController {
     /**
-     * @Route("/autograding_status", methods={"GET"})
      * @return WebResponse | MultiResponse
      */
+    #[Route("/autograding_status", methods: ["GET"])]
     public function getGradingDonePage(): ResponseInterface {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return new MultiResponse(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
@@ -34,11 +34,11 @@ class AutogradingStatusController extends AbstractController {
 
     /**
      * Used to continuous in the page's continuous updates
-     * @Route("/autograding_status/get_update", methods={"GET"})
      * @return JsonResponse
      */
+    #[Route("/autograding_status/get_update", methods: ["GET"])]
     public function getProgress(): JsonResponse {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $info = $this->getAutogradingInfo();
@@ -47,11 +47,11 @@ class AutogradingStatusController extends AbstractController {
 
     /**
      * Attempts to read the stack trace and find any error message
-     * @Route("/autograding_status/get_stack", methods={"GET"})
      * @return JsonResponse
      */
+    #[Route("/autograding_status/get_stack", methods: ["GET"])]
     public function getErrorStackTrace(): JsonResponse {
-        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId()))) {
+        if (empty($this->core->getQueries()->getInstructorLevelAccessCourse($this->core->getUser()->getId())) && !$this->core->getUser()->isSuperUser()) {
             return JsonResponse::getFailResponse("You do not have access to this endpoint.");
         }
         $stack_trace_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "autograding_stack_traces");
@@ -87,7 +87,7 @@ class AutogradingStatusController extends AbstractController {
         }
         foreach ($info["ongoing_job_info"] as &$i) {
             foreach ($i as &$job) {
-                if (!in_array($job["semester"] . " " . $job["course"], $course)) {
+                if (!in_array($job["term"] . " " . $job["course"], $course)) {
                     $job["user_id"] = "Hidden";
                 }
             }

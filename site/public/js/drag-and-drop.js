@@ -1,8 +1,8 @@
-/* exported initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
+/* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm*/
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
 
 /*
 References:
@@ -16,17 +16,17 @@ http://www.html5rocks.com/en/tutorials/file/dndfiles/
 */
 
 // INITIALIZATION
-//========================================================================================
+// ========================================================================================
 // eslint-disable-next-line no-var
-var file_array = [];        // contains files uploaded for this submission
+var file_array = []; // contains files uploaded for this submission
 // eslint-disable-next-line no-var
-var previous_files = [];    // contains names of files selected from previous submission
+var previous_files = []; // contains names of files selected from previous submission
 // eslint-disable-next-line no-var
 var label_array = [];
 // eslint-disable-next-line no-var
 var use_previous = false;
 // eslint-disable-next-line no-var
-var changed = false;        // if files from previous submission changed
+var changed = false; // if files from previous submission changed
 
 let total_files_added = 0;
 let MAX_NUM_OF_FILES;
@@ -38,8 +38,7 @@ var empty_inputs = true;
 let num_clipboard_files = 0;
 
 // eslint-disable-next-line no-unused-vars, no-var
-var student_ids = [];           // all student ids
-
+var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
     file_array = [];
@@ -49,13 +48,13 @@ function initializeDragAndDrop() {
     changed = false;
     empty_inputs = true;
     student_ids = [];
-    num_clipboard_files=0;
+    num_clipboard_files = 0;
 }
 
 // initializing file_array and previous_files
 function createArray(num_parts) {
     if (file_array.length === 0) {
-        for (let i=0; i<num_parts; i++) {
+        for (let i = 0; i < num_parts; i++) {
             file_array.push([]);
             previous_files.push([]);
             label_array.push([]);
@@ -66,7 +65,7 @@ function createArray(num_parts) {
 // read in name of previously submitted file
 function readPrevious(filename, part) {
     changed = false;
-    previous_files[part-1].push(filename);
+    previous_files[part - 1].push(filename);
 }
 
 function setUsePrevious() {
@@ -74,7 +73,7 @@ function setUsePrevious() {
 }
 
 // DRAG AND DROP EFFECT
-//========================================================================================
+// ========================================================================================
 // open a file browser if clicked on drop zone
 function clicked_on_box(e) {
     document.getElementById(`input-file${get_part_number(e)}`).click();
@@ -85,21 +84,21 @@ function clicked_on_box(e) {
 function draghandle(e) {
     e.preventDefault();
     e.stopPropagation();
-    document.getElementById(`upload${get_part_number(e)}`).style.opacity = (e.type === 'dragenter' || e.type === 'dragover') ? .5 : '';
+    document.getElementById(`upload${get_part_number(e)}`).style.opacity = (e.type === 'dragenter' || e.type === 'dragover') ? 0.5 : '';
 }
 
 // ADD FILES FOR NEW SUBMISSION
-//========================================================================================
+// ========================================================================================
 // check if adding a file is valid (not exceeding the limit)
 function addIsValid(files_to_add, total_added_files) {
-    if (files_to_add+total_added_files > MAX_NUM_OF_FILES) {
+    if (files_to_add + total_added_files > MAX_NUM_OF_FILES) {
         alert('Exceeded the max number of files to submit.\nPlease upload your files as a .zip file if it is necessary for you to submit more than this limit.');
         return false;
     }
     return true;
 }
 
-//initialize maximum no of files with that of the php_ini value
+// initialize maximum no of files with that of the php_ini value
 function initMaxNoFiles(max_no_of_files) {
     MAX_NUM_OF_FILES = max_no_of_files;
 }
@@ -107,10 +106,10 @@ function initMaxNoFiles(max_no_of_files) {
 // add files dragged
 function drop(e) {
     draghandle(e);
-    const filestream= e.dataTransfer.files;
+    const filestream = e.dataTransfer.files;
     if (addIsValid(filestream.length, total_files_added)) {
         const part = get_part_number(e);
-        for (let i=0; i<filestream.length; i++) {
+        for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part); // check for folders
             total_files_added++;
         }
@@ -120,10 +119,10 @@ function drop(e) {
 // add files dragged
 function dropWithMultipleZips(e) {
     draghandle(e);
-    const filestream= e.dataTransfer.files;
+    const filestream = e.dataTransfer.files;
     if (addIsValid(filestream.length, total_files_added)) {
         const part = get_part_number(e);
-        for (let i=0; i<filestream.length; i++) {
+        for (let i = 0; i < filestream.length; i++) {
             addFileWithCheck(filestream[i], part, false); // check for folders
             total_files_added++;
         }
@@ -141,7 +140,7 @@ function progress(e) {
     if (e.lengthComputable) {
         progressBar.max = e.total;
         progressBar.value = e.loaded;
-        const perc = (e.loaded * 100)/e.total;
+        const perc = (e.loaded * 100) / e.total;
         $('#loading-bar-percentage').html(`${perc.toFixed(2)} %`);
     }
 }
@@ -155,15 +154,66 @@ function get_part_number(e) {
 }
 
 // copy files selected from the file browser
-function addFilesFromInput(part, check_duplicate_zip=true) {
+function addFilesFromInput(part, check_duplicate_zip = true) {
     const filestream = document.getElementById(`input-file${part}`).files;
     if (addIsValid(filestream.length, total_files_added)) {
-        for (let i=0; i<filestream.length; i++) {
+        for (let i = 0; i < filestream.length; i++) {
             addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
             total_files_added++;
         }
     }
     $(`#input-file${part}`).val('');
+}
+
+function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
+    const formData = new FormData();
+    formData.append('csrf_token', window.csrfToken);
+    formData.append('close_time', closeTime);
+    formData.append('release_time', releaseTime);
+    formData.append('extra_name', extraName);
+    formData.append('link_name', linkName);
+    for (let i = 0; i < file_array.length; i++) {
+        for (let j = 0; j < file_array[i].length; j++) {
+            if (!/^[a-zA-Z0-9_.-]+$/.test(file_array[i][j].name)) {
+                alert(`ERROR! Filename "${file_array[i][j].name}" contains invalid characters. Please use only alphanumeric characters, underscores, and dashes.`);
+                return;
+            }
+            const k = fileExists(`/${file_array[i][j].name}`, 1);
+            // Check conflict here
+            if (k[0] === 1) {
+                if (!confirm(`Note: ${file_array[i][j].name} already exists. Do you want to replace it?`)) {
+                    continue;
+                }
+            }
+            formData.append(`files${i + 1}[]`, file_array[i][j], file_array[i][j].name);
+        }
+    }
+    $.ajax({
+        url: buildUrl(['banner', 'upload']),
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+            try {
+                const jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = buildUrl(['banner']);
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert('Failed to upload a banner!');
+                console.log(data);
+            }
+        },
+        error: function () {
+            window.location.href = buildUrl(['banner']);
+        },
+    });
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -173,14 +223,14 @@ function addFilesFromInput(part, check_duplicate_zip=true) {
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
 function fileExists(filename, part) {
-    for (let i = 0; i < previous_files[part-1].length; i++) {
-        if (previous_files[part-1][i] === filename) {
+    for (let i = 0; i < previous_files[part - 1].length; i++) {
+        if (previous_files[part - 1][i] === filename) {
             return [1, i];
         }
     }
 
-    for (let j = 0; j < file_array[part-1].length; j++) {
-        if (file_array[part-1][j].name === filename) {
+    for (let j = 0; j < file_array[part - 1].length; j++) {
+        if (file_array[part - 1][j].name === filename) {
             return [0, j];
         }
     }
@@ -188,10 +238,10 @@ function fileExists(filename, part) {
 }
 
 // add file with folder check
-function addFileWithCheck(file, part, check_duplicate_zip=true) {
+function addFileWithCheck(file, part, check_duplicate_zip = true) {
     // try to open file if it looks suspicious:
     // no type, or with size of a typical folder size
-    if (!file.type || file.size%4096 === 0) {
+    if (!file.type || file.size % 4096 === 0) {
         const reader = new FileReader();
         reader.onload = notFolder(file, part);
         reader.onerror = isFolder(file);
@@ -204,48 +254,48 @@ function addFileWithCheck(file, part, check_duplicate_zip=true) {
 
 // add file if is not a folder
 function notFolder(file, part) {
-    return function() {
+    return function () {
         addFile(file, part);
     };
 }
 
 function isFolder(file) {
-    return function() {
+    return function () {
         alert(`Upload failed: ${file.name} might be a folder.`);
     };
 }
 
-function addFile(file, part, check_duplicate_zip=true) {
+function addFile(file, part, check_duplicate_zip = true) {
     const i = fileExists(file.name, part);
     // eslint-disable-next-line eqeqeq
-    if ( i[0] == -1 ) {    // file does not exist
+    if (i[0] == -1) { // file does not exist
         // When uploading a zip, we confirm with the user to empty the bucket and then only add the zip
-        if (check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) === '.zip' && file_array[part-1].length + previous_files[part-1].length > 0 ) {
+        if (check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) === '.zip' && file_array[part - 1].length + previous_files[part - 1].length > 0) {
             if (confirm(`Note: All files currently in the bucket will be deleted if you try to upload a zip: ${file.name}. Do you want to continue?`)) {
                 deleteFiles(part);
-                file_array[part-1].push(file);
-                addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+                file_array[part - 1].push(file);
+                addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
             }
         }
         else {
-            file_array[part-1].push(file);
-            addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+            file_array[part - 1].push(file);
+            addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
         }
     }
     // eslint-disable-next-line eqeqeq
-    else if (i[0] == 0) {    // file already selected
-        if (confirm(`Note: ${file_array[part-1][i[1]].name} is already selected. Do you want to replace it?`)) {
-            file_array[part-1].splice(i[1], 1, file);
+    else if (i[0] == 0) { // file already selected
+        if (confirm(`Note: ${file_array[part - 1][i[1]].name} is already selected. Do you want to replace it?`)) {
+            file_array[part - 1].splice(i[1], 1, file);
             removeLabel(file.name, part);
-            addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+            addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
         }
     }
-    else {    // file in previous submission
-        if (confirm(`Note: ${previous_files[part-1][i[1]]} was in your previous submission. Do you want to replace it?`)) {
-            file_array[part-1].push(file);
-            previous_files[part-1].splice(i[1], 1);
+    else { // file in previous submission
+        if (confirm(`Note: ${previous_files[part - 1][i[1]]} was in your previous submission. Do you want to replace it?`)) {
+            file_array[part - 1].push(file);
+            previous_files[part - 1].splice(i[1], 1);
             removeLabel(file.name, part);
-            addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+            addLabel(file.name, (file.size / 1024).toFixed(2), part, false);
             changed = true;
         }
     }
@@ -254,14 +304,14 @@ function addFile(file, part, check_duplicate_zip=true) {
 }
 
 // REMOVE FILES
-//========================================================================================
+// ========================================================================================
 // delete files selected for a part
 function deleteFiles(part) {
     if (file_array.length !== 0) {
-        file_array[part-1] = [];
+        file_array[part - 1] = [];
     }
     if (previous_files.length !== 0) {
-        previous_files[part-1] = [];
+        previous_files[part - 1] = [];
     }
     const dropzone = document.getElementById(`file-upload-table-${part}`);
     const labels = dropzone.getElementsByClassName('file-label');
@@ -269,7 +319,7 @@ function deleteFiles(part) {
         dropzone.removeChild(labels[0]);
         total_files_added--;
     }
-    label_array[part-1] = [];
+    label_array[part - 1] = [];
     changed = true;
     setButtonStatus();
 }
@@ -277,10 +327,10 @@ function deleteFiles(part) {
 function deleteSingleFile(filename, part, previous) {
     // Remove files from previous submission
     if (previous) {
-        for (let i = 0; i < previous_files[part-1].length; i++) {
-            if (previous_files[part-1][i] === filename) {
-                previous_files[part-1].splice(i, 1);
-                label_array[part-1].splice(i, 1);
+        for (let i = 0; i < previous_files[part - 1].length; i++) {
+            if (previous_files[part - 1][i] === filename) {
+                previous_files[part - 1].splice(i, 1);
+                label_array[part - 1].splice(i, 1);
                 changed = true;
                 break;
             }
@@ -288,10 +338,10 @@ function deleteSingleFile(filename, part, previous) {
     }
     // Remove files uploaded for submission
     else {
-        for (let j = 0; j < file_array[part-1].length; j++) {
-            if (file_array[part-1][j].name === filename) {
-                file_array[part-1].splice(j, 1);
-                label_array[part-1].splice(j, 1);
+        for (let j = 0; j < file_array[part - 1].length; j++) {
+            if (file_array[part - 1][j].name === filename) {
+                file_array[part - 1].splice(j, 1);
+                label_array[part - 1].splice(j, 1);
                 total_files_added--;
                 break;
             }
@@ -301,7 +351,6 @@ function deleteSingleFile(filename, part, previous) {
 }
 
 function setButtonStatus(inactive_version = false) {
-
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     let labels = 0;
     for (let i = 0; i < label_array.length; i++) {
@@ -340,19 +389,18 @@ function setButtonStatus(inactive_version = false) {
     else if (use_previous) {
         $('#getprev').prop('disabled', false);
     }
-
 }
 
 // LABELS FOR SELECTED FILES
-//========================================================================================
+// ========================================================================================
 function removeLabel(filename, part) {
     const dropzone = document.getElementById(`file-upload-table-${part}`);
     const labels = dropzone.getElementsByClassName('file-label');
 
-    for (let i = 0 ; i < labels.length; i++) {
+    for (let i = 0; i < labels.length; i++) {
         if (labels[i].getAttribute('fname') === filename) {
             dropzone.removeChild(labels[i]);
-            label_array[part-1].splice(i, 1);
+            label_array[part - 1].splice(i, 1);
             break;
         }
     }
@@ -368,33 +416,34 @@ function addLabel(filename, filesize, part, previous) {
     const fileTrashElement = document.createElement('td');
     fileTrashElement.setAttribute('class', 'file-trash');
 
-    fileDataElement.innerHTML= filename;
-    fileTrashElement.innerHTML= `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
+    fileDataElement.innerHTML = filename;
+    fileTrashElement.innerHTML = `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
 
     // styling
-    fileTrashElement.onmouseover = function(e) {
+    fileTrashElement.onmouseover = function (e) {
         e.stopPropagation();
         this.style.color = '#FF3933';
     };
-    fileTrashElement.onmouseout = function(e) {
+    fileTrashElement.onmouseout = function (e) {
         e.stopPropagation();
         this.style.color = 'var(--text-black)';
     };
-    // remove file and label-row in table on click event
-    fileTrashElement.onclick = function(e) {
-        e.stopPropagation();
-        this.parentNode.parentNode.removeChild(this.parentNode);
-        deleteSingleFile(filename, part, previous);
-    };
 
-    // FOR VPAT if trash can has focus and key is pressed it will delete item
-    fileTrashElement.onkeypress = function(e) {
+    // onclick : remove file and label-row in table on click event
+    // onkeypress : FOR VPAT if trash can has focus and key is pressed it will delete item
+    fileTrashElement.onclick = fileTrashElement.onkeypress = function (e) {
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
+
+        const textArea = document.querySelector(`#reply_box_${part}`);
+        if (textArea) {
+            // Dispatch input event on existing forum textarea to disable forum reply button on empty input or no remaining files
+            textArea.dispatchEvent(new Event('input', { bubbles: false, cancelable: false }));
+        }
     };
 
     // adding the file in `table` in the parent div
@@ -403,29 +452,29 @@ function addLabel(filename, filesize, part, previous) {
     // var deletebutton = document.getElementById("delete" + part);
     fileTable.appendChild(uploadRowElement);
     // fileTable.insertBefore(tmp, deletebutton);
-    label_array[part-1].push(filename);
+    label_array[part - 1].push(filename);
 }
 
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
     // eslint-disable-next-line no-undef
-    showPopup = true;
+    show_popup = true;
     if (!inactive_version) {
         setButtonStatus();
     }
 }
 
 // BULK UPLOAD
-//========================================================================================
+// ========================================================================================
 function openFile(url_full) {
-    window.open(url_full,'_blank','toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
+    window.open(url_full, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
 // HANDLE SUBMISSION
-//========================================================================================
+// ========================================================================================
 function isValidSubmission() {
     // check if new files added
-    for (let i=0; i < file_array.length; i++) {
+    for (let i = 0; i < file_array.length; i++) {
         if (file_array[i].length !== 0) {
             return true;
         }
@@ -442,8 +491,7 @@ function isValidSubmission() {
     }
 
     // If is_notebook is set then always valid submission
-    // eslint-disable-next-line no-prototype-builtins
-    if (window.hasOwnProperty('is_notebook')) {
+    if (Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
         return true;
     }
 
@@ -461,13 +509,13 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
     const url = buildCourseUrl(['gradeable', gradeable_id, 'verify']);
     return new Promise((resolve, reject) => {
         $.ajax({
-            url : url,
-            data : {
-                'csrf_token' : csrf_token,
-                'user_id' : user_id,
+            url: url,
+            data: {
+                csrf_token: csrf_token,
+                user_id: user_id,
             },
-            type : 'POST',
-            success : function(response) {
+            type: 'POST',
+            success: function (response) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
@@ -476,26 +524,26 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
                     reject(response);
                 }
             },
-            error : function(err) {
+            error: function (err) {
                 console.log(`Error while trying to validate user id${user_id}`);
-                reject({'status' : 'failed', 'message' : err});
+                reject({ status: 'failed', message: err });
             },
         });
     });
 }
 
-//@param json a dictionary {success : true/false, message : string}
-//@param index used for id
-//function to display pop-up notification after bulk submission/delete
+// @param json a dictionary {success : true/false, message : string}
+// @param index used for id
+// function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    //let the id be the date to prevent closing the wrong message
+    // let the id be the date to prevent closing the wrong message
     const d = new Date();
     const t = String(d.getTime());
 
-    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"` ;
+    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"`;
     const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
     const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
-    const response = (json['status'] === 'success' ? json['data'] : json['message'] );
+    const response = (json['status'] === 'success' ? json['data'] : json['message']);
 
     const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
     $('#messages').append(message);
@@ -507,8 +555,8 @@ function displaySubmissionMessage(json) {
     }
 }
 
-//@param callback to function when user selects an option
-//function to display the different options when submiting a split item to a student with previous submissions
+// @param callback to function when user selects an option
+// function to display the different options when submiting a split item to a student with previous submissions
 function displayPreviousSubmissionOptions(callback) {
     const form = $('#previous-submission-form');
     const submit_btn = form.find('.submit-button');
@@ -535,7 +583,7 @@ function displayPreviousSubmissionOptions(callback) {
         callback(option);
     });
 
-    //on close, save the option selected
+    // on close, save the option selected
     closer_btn.on('click', () => {
         if ($('#instructor-submit-option-new').is(':checked')) {
             localStorage.setItem('instructor-submit-option', '0');
@@ -553,7 +601,7 @@ function displayPreviousSubmissionOptions(callback) {
     $('.popup-form').css('display', 'none');
     form.css('display', 'block');
 
-    //check the option from whatever option was saved
+    // check the option from whatever option was saved
     let radio_idx;
     if (localStorage.getItem('instructor-submit-option') === null) {
         radio_idx = 0;
@@ -562,26 +610,26 @@ function displayPreviousSubmissionOptions(callback) {
         radio_idx = parseInt(localStorage.getItem('instructor-submit-option'));
     }
     form.find('input:radio')[radio_idx].checked = true;
-    //since the modal object isn't rendered on the page manually set what the tab button does
+    // since the modal object isn't rendered on the page manually set what the tab button does
     $('#instructor-submit-option-new').attr('tabindex', '0');
     $('#instructor-submit-option-merge-1').attr('tabindex', '0');
     $('#instructor-submit-option-merge-2').attr('tabindex', '0');
     submit_btn.focus();
     let current_btn = 4;
     if (form.css('display') !== 'none') {
-        document.addEventListener('keydown', e => {
+        document.addEventListener('keydown', (e) => {
             if (e.code === 'Tab') {
-                //on tab update the focus, cycle through the radio buttons and then
-                //the close/submit buttons and then back to the radio buttons
-                $('input[name=instructor-submit]').css({'outline': 'none'});
+                // on tab update the focus, cycle through the radio buttons and then
+                // the close/submit buttons and then back to the radio buttons
+                $('input[name=instructor-submit]').css({ outline: 'none' });
                 e.preventDefault();
                 if (current_btn === 0) {
                     $('#instructor-submit-option-merge-1').focus();
-                    $('#instructor-submit-option-merge-1').css({'outline' : '2px solid #C1E0FF'});
+                    $('#instructor-submit-option-merge-1').css({ outline: '2px solid #C1E0FF' });
                 }
                 else if (current_btn === 1) {
                     $('#instructor-submit-option-merge-2').focus();
-                    $('#instructor-submit-option-merge-2').css({'outline' : '2px solid #C1E0FF'});
+                    $('#instructor-submit-option-merge-2').css({ outline: '2px solid #C1E0FF' });
                 }
                 else if (current_btn === 2) {
                     closer_btn.focus();
@@ -591,17 +639,17 @@ function displayPreviousSubmissionOptions(callback) {
                 }
                 else if (current_btn === 4) {
                     $('#instructor-submit-option-new').focus();
-                    $('#instructor-submit-option-new').css({'outline' : '2px solid #C1E0FF'});
+                    $('#instructor-submit-option-new').css({ outline: '2px solid #C1E0FF' });
                 }
                 current_btn = (current_btn === 4) ? 0 : current_btn + 1;
             }
             else if (e.code === 'Escape') {
-                //close the modal box on escape
+                // close the modal box on escape
                 closer_btn.click();
             }
             else if (e.code === 'Enter') {
-                //on enter update whatever the user is focussing on
-                //uncheck everything and then recheck the desired button to make sure it actually updates
+                // on enter update whatever the user is focussing on
+                // uncheck everything and then recheck the desired button to make sure it actually updates
                 if (current_btn === 1) {
                     $('input[name=instructor-submit]').prop('checked', false);
                     $('#instructor-submit-option-merge-1').prop('checked', true);
@@ -615,7 +663,7 @@ function displayPreviousSubmissionOptions(callback) {
                     $('#instructor-submit-option-new').prop('checked', true);
                 }
                 else if (current_btn === 3) {
-                    //close the modal if the close button is selected
+                    // close the modal if the close button is selected
                     closer_btn.click();
                 }
                 else if (current_btn === 4) {
@@ -636,19 +684,19 @@ function displayPreviousSubmissionOptions(callback) {
  * @return promise resolve on success, reject otherwise. Contains fail/success message
  * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
  */
-function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous = false, clobber = false) {
     const url = `${buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload'])}?merge=${merge_previous}&clobber=${clobber}`;
 
     return new Promise((resolve, reject) => {
         $.ajax({
             url: url,
             data: {
-                'csrf_token' : csrf_token,
-                'user_id' : user_id,
-                'path' : path,
+                csrf_token: csrf_token,
+                user_id: user_id,
+                path: path,
             },
             type: 'POST',
-            success: function(response) {
+            success: function (response) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
@@ -657,9 +705,9 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
                     reject(response);
                 }
             },
-            error: function(err) {
+            error: function (err) {
                 console.log('Failed while submiting split item');
-                reject({'status' : 'failed', 'message' : err});
+                reject({ status: 'failed', message: err });
             },
         });
     });
@@ -672,18 +720,17 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
 * @return promise resolve on success, reject otherwise. Contains fail/success message
 */
 function deleteSplitItem(csrf_token, gradeable_id, path) {
-
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
 
     return new Promise((resolve, reject) => {
         $.ajax({
             url: submit_url,
             data: {
-                'csrf_token' : csrf_token,
-                'path' : path,
+                csrf_token: csrf_token,
+                path: path,
             },
             type: 'POST',
-            success: function(response) {
+            success: function (response) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
@@ -692,9 +739,9 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                     reject(response);
                 }
             },
-            error: function(jqXHR, err_msg) {
+            error: function (jqXHR, err_msg) {
                 console.error('Failed while deleting split item');
-                reject({'status' : 'failed', 'message' : err_msg});
+                reject({ status: 'failed', message: err_msg });
             },
         });
     });
@@ -734,7 +781,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     formData.append('num_pages', num_pages);
     formData.append('use_qr_codes', use_qr_codes);
     formData.append('use_ocr', use_ocr && use_qr_codes);
-    //encode qr prefix and suffix in case URLs are used
+    // encode qr prefix and suffix in case URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
     formData.append('csrf_token', csrfToken);
@@ -742,20 +789,20 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1 ||
-                file_array[i][j].name.indexOf('"') !== -1) {
+            if (file_array[i][j].name.indexOf("'") !== -1
+                || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
                 return;
             }
-            else if (file_array[i][j].name.indexOf('\\') !== -1 ||
-                file_array[i][j].name.indexOf('/') !== -1) {
+            else if (file_array[i][j].name.indexOf('\\') !== -1
+                || file_array[i][j].name.indexOf('/') !== -1) {
                 alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
                 return;
             }
-            else if (file_array[i][j].name.indexOf('<') !== -1 ||
-                file_array[i][j].name.indexOf('>') !== -1) {
+            else if (file_array[i][j].name.indexOf('<') !== -1
+                || file_array[i][j].name.indexOf('>') !== -1) {
                 alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
                 return;
@@ -764,15 +811,15 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             total_size += file_array[i][j].size;
 
             if (total_size >= max_file_size) {
-                alert('ERROR! Uploaded file(s) exceed max file size.\n' +
-                      'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                alert('ERROR! Uploaded file(s) exceed max file size.\n'
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
 
             if (total_size >= max_post_size) {
-                alert('ERROR! Uploaded file(s) exceed max PHP POST size.\n' +
-                      'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                alert('ERROR! Uploaded file(s) exceed max PHP POST size.\n'
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
@@ -790,7 +837,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             $('#submit').prop('disabled', false);
             try {
                 data = JSON.parse(data);
@@ -802,17 +849,17 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
                         window.location.href = return_url;
                     }
                     else {
-                        alert(`ERROR! \n\n${data['message']}`);
+                        displayErrorMessage(`ERROR! ${data['message']}`);
                     }
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             $('#submit').prop('disabled', false);
             alert('ERROR! Please contact administrator that you could not upload files.');
         },
@@ -867,7 +914,7 @@ function gatherInputAnswersByType(type) {
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all=false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
@@ -881,12 +928,12 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
         url: submit_url,
         data: formData,
         processData: false,
-        headers : {
+        headers: {
             Accept: 'application/json',
         },
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             try {
                 data = JSON.parse(data);
                 if (data['status'] === 'success') {
@@ -895,15 +942,14 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                 else {
                     alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
                 }
-
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             $('#submit').prop('disabled', false);
             alert('ERROR! Please contact administrator that you could not regrade files.');
         },
@@ -927,7 +973,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false, viewing_inactive_version = false) {
+function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, charged_late_days, days_past_deadline, late_day_exceptions, late_days_allowed, is_team_assignment, min_team_member_late_days, min_team_member_late_days_exception, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous = false, clobber = false, viewing_inactive_version = false) {
     $('#submit').prop('disabled', true);
     const submit_url = `${buildCourseUrl(['gradeable', gradeable_id, 'upload'])}?merge=${merge_previous.toString()}&clobber=${clobber.toString()}`;
     const return_url = buildCourseUrl(['gradeable', gradeable_id]);
@@ -943,34 +989,34 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
 
     let late_warning_seen = false;
 
-    const days_to_be_charged = Math.max(0,days_past_deadline-late_day_exceptions);
+    const days_to_be_charged = Math.max(0, days_past_deadline - late_day_exceptions);
     // gradeable_status == 3 is a bad submission (too many late days used) and therefore no need to show a warning message anymore
 
-    if ( days_past_deadline > 0 && gradeable_status !== 3 ) {
-
+    if (days_past_deadline > 0 && gradeable_status !== 3) {
         /* days_to_be_charged !== charged_late_days will make sure that both messages won't appear multiple times if it already appeared once and the user made a submission */
 
-        if ( days_to_be_charged <= late_days_allowed && remaining_late_days_for_gradeable > 0  && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
+        if (days_to_be_charged <= late_days_allowed && remaining_late_days_for_gradeable > 0 && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
             message = `Your submission will be ${days_past_deadline} day(s) late. Are you sure you want to use ${days_to_be_charged} late day(s)?`;
             if (!confirm(message)) {
                 $('#submit').prop('disabled', false);
                 return;
             }
         }
-        else if ( ( days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0 )  && days_to_be_charged !== charged_late_days  && days_to_be_charged>0  ) {
+        else if ((days_to_be_charged > late_days_allowed || remaining_late_days_for_gradeable === 0) && days_to_be_charged !== charged_late_days && days_to_be_charged > 0) {
             late_warning_seen = true;
-            message = `Your submission will be ${days_past_deadline} days late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
+            message = `Your submission will be ${days_past_deadline} day(s) late. You are not supposed to submit unless you have an excused absence. Are you sure you want to continue?`;
             if (!confirm(message)) {
                 $('#submit').prop('disabled', false);
                 return;
             }
         }
-    }
-    // check team date
-    if (!late_warning_seen && is_team_assignment && min_team_member_late_days - days_to_be_charged + charged_late_days < 0) {
-        message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
-        if (!confirm(message)) {
-            return;
+
+        // check team date
+        if (!late_warning_seen && is_team_assignment && (min_team_member_late_days - days_to_be_charged + charged_late_days < 0 || min_team_member_late_days_exception + days_to_be_charged < days_past_deadline)) {
+            message = 'There is at least 1 member on your team that does not have enough late days for this submission. This will result in them receiving a marked grade of zero. Are you sure you want to continue?';
+            if (!confirm(message)) {
+                return;
+            }
         }
     }
 
@@ -997,18 +1043,18 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1 ||
-                    file_array[i][j].name.indexOf('"') !== -1) {
+                if (file_array[i][j].name.indexOf("'") !== -1
+                    || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
                 }
-                else if (file_array[i][j].name.indexOf('\\') !== -1 ||
-                    file_array[i][j].name.indexOf('/') !== -1) {
+                else if (file_array[i][j].name.indexOf('\\') !== -1
+                    || file_array[i][j].name.indexOf('/') !== -1) {
                     alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
                     return;
                 }
-                else if (file_array[i][j].name.indexOf('<') !== -1 ||
-                    file_array[i][j].name.indexOf('>') !== -1) {
+                else if (file_array[i][j].name.indexOf('<') !== -1
+                    || file_array[i][j].name.indexOf('>') !== -1) {
                     alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
                     return;
                 }
@@ -1021,16 +1067,15 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-
-    //check if filesize greater than 1,25 MB, then turn on the progressbar
+    // check if filesize greater than 1,25 MB, then turn on the progressbar
     if (filesize > 1250000) {
         $('.loading-bar-wrapper').fadeIn(100);
     }
 
     const multiple_choice_object = gatherInputAnswersByType('multiple_choice');
-    const codebox_object         = gatherInputAnswersByType('codebox');
+    const codebox_object = gatherInputAnswersByType('codebox');
     formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
-    formData.append('codebox_answers'        , JSON.stringify(codebox_object));
+    formData.append('codebox_answers', JSON.stringify(codebox_object));
 
     if (student_page) {
         const pages = [];
@@ -1055,19 +1100,19 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         url: submit_url,
         data: formData,
         processData: false,
-        xhr: function() {
+        xhr: function () {
             const myXhr = $.ajaxSettings.xhr();
             if (myXhr.upload) {
-                myXhr.upload.addEventListener('progress',progress, false);
+                myXhr.upload.addEventListener('progress', progress, false);
             }
             return myXhr;
         },
-        headers : {
+        headers: {
             Accept: 'application/json',
         },
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             $('#submit').prop('disabled', false);
             try {
                 data = JSON.parse(data);
@@ -1088,12 +1133,12 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             $('#submit').prop('disabled', false);
             alert('ERROR! Please contact administrator that you could not upload files.');
         },
@@ -1113,18 +1158,18 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1 ||
-                file_array[i][j].name.indexOf('"') !== -1) {
+            if (file_array[i][j].name.indexOf("'") !== -1
+                || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
             }
-            else if (file_array[i][j].name.indexOf('\\') !== -1 ||
-                file_array[i][j].name.indexOf('/') !== -1) {
+            else if (file_array[i][j].name.indexOf('\\') !== -1
+                || file_array[i][j].name.indexOf('/') !== -1) {
                 alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
                 return;
             }
-            else if (file_array[i][j].name.indexOf('<') !== -1 ||
-                file_array[i][j].name.indexOf('>') !== -1) {
+            else if (file_array[i][j].name.indexOf('<') !== -1
+                || file_array[i][j].name.indexOf('>') !== -1) {
                 alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
                 return;
             }
@@ -1138,7 +1183,7 @@ function handleDownloadImages(csrf_token) {
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             try {
                 data = JSON.parse(data);
 
@@ -1150,12 +1195,12 @@ function handleDownloadImages(csrf_token) {
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             window.location.href = buildCourseUrl(['student_photos']);
         },
     });
@@ -1180,8 +1225,8 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     formData.append('expand_zip', expand_zip);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (sections !== null) {
@@ -1197,7 +1242,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         target_path = cmPath + requested_path;
     }
 
-    if (target_path[target_path.length-1] === '/') {
+    if (target_path[target_path.length - 1] === '/') {
         target_path = target_path.slice(0, -1);
     } // remove slash
 
@@ -1207,25 +1252,25 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1 ||
-                  file_array[i][j].name.indexOf('"') !== -1) {
+                if (file_array[i][j].name.indexOf("'") !== -1
+                    || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
                 }
-                else if (file_array[i][j].name.indexOf('\\') !== -1 ||
-                  file_array[i][j].name.indexOf('/') !== -1) {
+                else if (file_array[i][j].name.indexOf('\\') !== -1
+                    || file_array[i][j].name.indexOf('/') !== -1) {
                     alert(`ERROR! You may not use a slash in your filename: ${file_array[i][j].name}`);
                     return;
                 }
-                else if (file_array[i][j].name.indexOf('<') !== -1 ||
-                  file_array[i][j].name.indexOf('>') !== -1) {
+                else if (file_array[i][j].name.indexOf('<') !== -1
+                    || file_array[i][j].name.indexOf('>') !== -1) {
                     alert(`ERROR! You may not use angle brackets in your filename: ${file_array[i][j].name}`);
                     return;
                 }
 
                 const k = fileExists(`${target_path}/${file_array[i][j].name}`, 1);
                 // Check conflict here
-                if ( k[0] === 1 ) {
+                if (k[0] === 1) {
                     let skip_confirmation = false;
                     if (expand_zip === 'on') {
                         const extension = getFileExtension(file_array[i][j].name);
@@ -1269,7 +1314,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             try {
                 const jsondata = JSON.parse(data);
 
@@ -1286,12 +1331,12 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             window.location.href = buildCourseUrl(['course_materials']);
         },
     });
@@ -1327,8 +1372,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
 
     formData.append('csrf_token', csrf_token);
     formData.append('id', id);
-    formData.append('release_time',cmTime);
-    formData.append('sort_priority',priority);
+    formData.append('release_time', cmTime);
+    formData.append('sort_priority', priority);
     formData.append('sections_lock', sections_lock);
 
     if (hide_from_students !== null) {
@@ -1375,7 +1420,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         processData: false,
         contentType: false,
         type: 'POST',
-        success: function(data) {
+        success: function (data) {
             try {
                 const jsondata = JSON.parse(data);
 
@@ -1395,17 +1440,16 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and ' +
-                    'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
+                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
+                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
                 console.log(data);
             }
         },
-        error: function() {
+        error: function () {
             window.location.href = buildCourseUrl(['course_materials']);
         },
     });
 }
-
 
 function initializeDropZone(id) {
     const dropzone = document.getElementById(id);

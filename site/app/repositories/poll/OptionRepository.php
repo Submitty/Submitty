@@ -27,4 +27,21 @@ class OptionRepository extends EntityRepository {
 
         return $return_array;
     }
+
+    /**
+     * Return whether given response is in given poll
+     */
+    public function existsByPollAndResponse(int $poll_id, string $response): bool {
+        $query_results = $this->_em
+            ->createQuery('
+                SELECT o.id
+                FROM app\entities\poll\Option o
+                WHERE o.poll = :poll_id AND o.response = :response')
+            ->setParameter('poll_id', $poll_id)
+            ->setParameter('response', $response)
+            ->setMaxResults(1)
+            ->getResult();
+
+        return count($query_results) > 0;
+    }
 }

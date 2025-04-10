@@ -1,0 +1,20 @@
+name: Label Stale PRs
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # runs every day at midnight
+jobs:
+  autoClosePr:
+    name: auto close pr
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Check-out main repository
+        uses: actions/checkout@v4
+      - name: Label Stale/Abandoned
+        run: python .github/bin/label_abandoned_prs.py
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: sh

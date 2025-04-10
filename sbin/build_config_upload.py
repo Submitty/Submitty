@@ -19,7 +19,7 @@ DATA_DIR = JSON['submitty_data_dir']
 
 # ------------------------------------------------------------------------
 def build_one(data):
-    semester = data["semester"]
+    semester = data["term"]
     course = data["course"]
 
     # construct the paths for this course

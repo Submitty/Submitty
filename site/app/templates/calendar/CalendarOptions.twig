@@ -8,7 +8,7 @@
         <option value="show all">All Courses</option>
         {% endif %}
         {% for course in course_names %}
-        <option value="{{course}}">{{course}}</option>
+        <option value="{{course.course_name}}">{{course.display_name}}</option>
         {% endfor %}
     </select>
     <hr class="line-break">
@@ -16,8 +16,8 @@
     <div class="options-colors">
         {% for course in course_names %}
         <div class="course-color-field cal-option-area">
-            <label for="color-{{course|replace({' ':''})}}" class="course-color-label">{{course}}</label>
-            <select aria-label="Course Color Picker" class='course-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;" id="color-{{course|replace({' ':''})}}">
+            <label for="color-{{course.course_name|replace({' ':''})}}" class="course-color-label">{{course.display_name}}</label>
+            <select aria-label="Course Color Picker" class='course-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;" id="color-{{course.course_name|replace({' ':''})}}">
                 {% for color_name, color_code in color_options %}
                     <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};">{{ color_name }}</option>
                 {% endfor %}

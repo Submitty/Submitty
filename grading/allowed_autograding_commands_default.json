@@ -42,6 +42,9 @@
     "tail":                    { "path": "/usr/bin/tail" },
     "uniq":                    { "path": "/usr/bin/uniq" },
     "echo":                    { "path": "/bin/echo" },
+    "iverilog":                { "path": "/usr/bin/iverilog" },
+    "vvp":                     { "path": "/usr/bin/vvp" },
+    "wget":                    { "path": "/usr/bin/wget" },
 
     // Submitty Analysis Tools
     "submitty_count":          { "path": "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__/SubmittyAnalysisTools/count"},
@@ -128,7 +131,5 @@
     // Matlab
     "matlab":                  { "path": "/usr/local/bin/matlab" },
 
-    // only for docker
-    "bash":                    { "path": "/bin/bash", "onlyDocker": true },
-    "php":                     { "path": "/usr/bin/php", "onlyDocker": true }
+    "jupyter":                 { "path": "/usr/local/bin/jupyter" }
 }

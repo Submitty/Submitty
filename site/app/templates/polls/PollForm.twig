@@ -2,7 +2,7 @@
 {% set question_type = poll is not null ? poll.getQuestionType() : 'single-response-multiple-correct' %}
 
 <div class="content">
-    <h1>{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
+    <h1 id = "new-poll-title">{{ poll is not null ? "Edit Poll" : "Add a New Poll" }}</h1>
 
     <form id="new-poll-form" method="post" action="{{ base_url }}{{ url_path }}" enctype="multipart/form-data">
         {% if poll is not null %}
@@ -13,7 +13,7 @@
         <label for="poll-name" class="option-title">
             Poll Name:
         </label>
-        <input type="text" name="name" id="poll-name" placeholder="Enter name here..." value="{{ poll is not null ? poll.getName() }}" />
+        <input type="text" name="name" id="poll-name" data-testid="poll-name" placeholder="Enter name here..." value="{{ poll is not null ? poll.getName() }}" />
         <br/> <br/>
 
         <p class="option-title">Question:</p>
@@ -36,37 +36,37 @@
         </span>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()" {{ question_type == 'single-response-single-correct'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-single-correct" name="question_type" data-testid="single-response-one-answer" value="single-response-single-correct" onclick="changePollType()" {{ question_type == 'single-response-single-correct'? "checked" : "" }}></input>
             <label for="poll-type-single-response-single-correct">single response - single correct</label>
             <p class="poll-type-description"><i>Students can select only one response, and there is only one full credit answer.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" {{ question_type == 'single-response-multiple-correct'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" data-testid="single-response-multiple-answer" value="single-response-multiple-correct" onclick="changePollType()" {{ question_type == 'single-response-multiple-correct'? "checked" : "" }}></input>
             <label for="poll-type-single-response-multiple-correct">single response - multiple correct</label>
             <p class="poll-type-description"><i>Students can select only one response, and there are one or more full credit answers.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()" {{ question_type == 'single-response-survey'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-survey" name="question_type" data-testid="single-response-survey" value="single-response-survey" onclick="changePollType()" {{ question_type == 'single-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-single-response-survey">single response - survey</label>
             <p class="poll-type-description"><i>Students can select only one response, and any selection is worth full credit.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-exact" name="question_type" data-testid="multiple-response" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-exact">multiple response - exact</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit only if their selection exactly matches the instructor's selection.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" value="multiple-response-flexible" onclick="changePollType()" {{ question_type == 'multiple-response-flexible'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" data-testid="multiple-response-flexible" value="multiple-response-flexible" onclick="changePollType()" {{ question_type == 'multiple-response-flexible'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-flexible">multiple response - flexible</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit if they select at least one of the instructor's selected responses and do not select any of the instructor's unselected responses.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-survey" name="question_type" data-testid="multiple-response-survey" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-survey">multiple response - survey</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
         </div>
@@ -76,7 +76,7 @@
         <label for="image-file" class="option-title">
             Optional Image:
         </label>
-        <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkSize(this)"/>
+        <input type="file" id="image-file" name="image_file" accept="image/jpeg, image/jpg, image/gif, image/png" onchange="checkImageSize(this)"/>
         <br/>
         {% if poll is not null and poll.getImagePath() != null %}
             Current Image: {{ poll.getImagePath() }}
@@ -87,12 +87,12 @@
             <input type="checkbox" id="keep-image" name="keep_image" checked />
         {% endif %}
         <br/>
-
         <label for="poll-date" class="option-title">
             Expected release date:
         </label>
         <input
             id="poll-date"
+            data-testid="poll-date"
             class="poll-date"
             name="release_date"
             autocomplete="off"
@@ -101,7 +101,29 @@
             value="{{ poll is not null ? poll.getReleaseDate() | date("Y-m-d") }}"
         />
         <br/>
-
+        <label for="enable-timer" class="option-title">
+            Enable Timer?
+        </label>
+        <input type="checkbox" id="enable-timer" name="enable-timer" onchange="toggleTimerInputs()" {% if poll is not null and (poll.getDuration().h != 0 or poll.getDuration().i != 0 or poll.getDuration().s != 0) %} checked {% endif %} value="enabled" />
+        <br/>
+        <div id="timer-inputs" {% if poll is null or (poll.getDuration().h == 0 and poll.getDuration().i == 0 and poll.getDuration().s == 0) %} style="display:none" {% endif %}>
+            <label class="option-title">
+                Expected Duration of Poll:
+            </label>
+            <div class="poll-input">
+                <label for="poll-hours" class="option"> Hours </label><br>
+                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" onchange="changeTimerDisplay()"/>
+            </div>
+            <div class="poll-input">
+                <label for="poll-minutes" class="option"> Minutes </label><br>
+                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}" onchange="changeTimerDisplay()"/>
+            </div>
+            <div class="poll-input">
+                <label for="poll-seconds" class="option"> Seconds </label><br>
+                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}" onchange="changeTimerDisplay()"/>
+            </div>
+        </div>
+        <br>
         <label for="student-histogram-release-setting" class="option-title">
             Release response histogram to students:
         </label>
@@ -111,35 +133,49 @@
             <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always' ? "selected" : "" }}>Always</option>
         </select>
         <br><br>
-        <label for="student-answer-release-setting" class="option-title">
-            Show correct response to students:
-        </label>
-        <select id="student-answer-release-setting" name="release_answer">
-            <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never' ? "selected" : "" }}>Never</option>
-            <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
-            <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
-        </select>
-        <br/>
+        <div id="show-answer-release" data-testid="show-answer" {{is_survey ? "style='display:none'" : "style='display:inline-block'"}}>
+            <label for="student-answer-release-setting" class="option-title">
+                Show correct response to students:
+            </label>
+            <select id="student-answer-release-setting" name="release_answer">
+                <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never' ? "selected" : "" }}>Never</option>
+                <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
+                <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
+            </select>
+        </div>
+        <div class="break-above">
+            <label for="poll-custom-options" class="option-title credit-form-item">
+                Allow student-written responses?
+            </label>
+            <input id="poll-custom-options" data-testid="poll-custom-options" class="credit-box credit-form-item" type="checkbox" name="poll-custom-options" {{poll is not null and poll.getAllowsCustomResponses() ? "checked" : ""}}>
+            <i>
+                <br />
+                Are you certain you want to allow student-written responses? Students will be able to submit responses that will be visible to other students.
+                Responses may become cluttered. If the question-type is not a survey, these responses will be labeled incorrect by default.
+            </i>
+        </div>
 
         <hr>
         <h2> Responses: </h2>
+        <div {{is_survey ? "style='display:none'" : "style='display:inline-block'"}}> <!-- Show/Hide 'Toggle All' based on whether the poll is a survey -->
+            <input aria-label="Toggle All" id="toggle-all" type="checkbox" name="toggle-all-options" onchange="togglePollFormOptions()">
+            <label for="toggle-all" id="toggle-all-label">Toggle All</label>
+        </div>
         <div id="responses">
             {% if poll is not null %}
-                {% set is_survey = poll.getQuestionType() == "single-response-survey" or poll.getQuestionType() == "multiple-response-survey" %}
                 {% for option in poll.getOptions() %}
-                    <div class="response-container" id="response_{{option.getId()}}_wrapper">
+                    <div class="response-container" id="response_{{option.getId()}}_wrapper" data-testid="response-{{option.getId()}}-wrapper">
                         <input type="hidden" class="order order-{{option.getOrderId()}}" name="option[{{option.getId()}}][order]" value="{{option.getOrderId()}}"/>
                         <input type="hidden" class="option_id" name="option[{{option.getId()}}][id]" value="{{option.getId()}}"/>
                         <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[{{option.getId()}}][is_correct]" {{ option.isCorrect() or is_survey ? "checked": "" }} {{ is_survey ? "style='display:none'" : "" }}>
-                        <textarea aria-label="Response text" class="poll_response" name="option[{{option.getId()}}][response]" style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
-                                  rows="10" cols="30">{{option.getResponse()}}</textarea>
+                        <textarea aria-label="Response text" data-testid="poll-response" class="poll-response {{option.isCustom() ? 'poll-response-custom' : ''}}" name="option[{{option.getId()}}][response]" rows="10" cols="30">{{option.getResponse()}}</textarea>
                         <div class="move-btn up-btn">
                             <i class="fa fa-lg fa-chevron-up"></i>
                         </div>
                         <div class="move-btn down-btn">
                             <i class="fa fa-lg fa-chevron-down"></i>
                         </div>
-                        <div class="move-btn delete-btn">
+                        <div class="move-btn delete-btn" data-testid="response-delete-button">
                             <i class="fa fa-lg fa-trash delete"></i>
                         </div>
                         <br/>
@@ -158,12 +194,12 @@
         <span id="question-type-error" class="red-message polls-submit-error" hidden>Please make sure to specify the poll question type.<br/></span>
         <span id="empty-date-error" class="red-message polls-submit-error" hidden>Please make sure release date is filled in.<br/></span>
         <span id="response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one response option.<br/></span>
-        <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single reponse - single correct".<br/></span>
+        <span id="single-response-error" class="red-message polls-submit-error" hidden>Please make sure to add exactly one correct response option for poll type "Single response - single correct".<br/></span>
         <span id="correct-response-count-error" class="red-message polls-submit-error" hidden>Please make sure to add at least one correct response.<br/></span>
         <span id="empty-response-error" class="red-message polls-submit-error" hidden>Please make sure all responses are filled in.<br/></span>
         <span id="file-size-error" class="red-message polls-submit-error" hidden>Please make sure to upload a file that does not exceed the maximum size.<br/></span>
         <a href="{{base_url}}" class="btn btn-danger">Cancel</a>
-        <button type="submit" id="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Save' }} Poll</button>
+        <button type="submit" id="poll-form-submit" data-testid="poll-form-submit" class="btn btn-primary" {{ poll is null ? 'disabled' }}>{{ poll is null ? 'Add' : 'Save' }} Poll</button>
     </form>
 </div>
 
@@ -172,29 +208,94 @@
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
     let poll_type = "{{ poll is not null ? poll.getQuestionType() : 'poll-type-single-response-survey' }}";
+    
+    flatpickr("#poll-date", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            },
+                            {
+                                label: "Tomorrow"
+                            }
+                        ],
+                        label: "or",
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                                case 1:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                            }
+                            fp.setDate(date, true);
+                        }
+                    }
+                )],
+            allowInput: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
 
-    flatpickr('.poll-date', {
-        allowInput: true,
-        dateFormat: "Y-m-d",
-        onReady: (a, b, fp) => {
-            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+    function changeTimerDisplay() {
+        const hoursInput = $("#poll-hours");
+        const minutesInput = $("#poll-minutes");
+        const secondsInput = $("#poll-seconds");
+
+        let hours = Number(hoursInput.val()) || 0;
+        let minutes = Number(minutesInput.val()) || 0;
+        let seconds = Number(secondsInput.val()) || 0;
+
+        if (seconds >= 60) {
+            minutes += Math.floor(seconds/60);
+            seconds = seconds % 60;
         }
-    });
+        if (minutes >= 60) {
+            hours += Math.floor(minutes/60);
+            minutes = minutes % 60;
+        }
+        if (hours > 24) {
+            hours = 24;
+            minutes = 0;
+            seconds = 0;
+        }
+        hoursInput.val(hours);
+        minutesInput.val(minutes);
+        secondsInput.val(seconds);
+    }
 
     function changePollType() {
         let count = $(".option_id").length;
+        if ($("#poll-type-single-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
+            $("#show-answer-release").hide();
+
+        } else {
+            $("#show-answer-release").show();
+
+        }
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {
                 $($(".correct-box")[i]).prop('checked', true);
-                $($(".correct-box")[i]).css({"display":"none"});
+                $($(".correct-box")[i]).hide();
+                $("#toggle-all").hide();
+                $("#toggle-all-label").hide();
             } else {
-                $($(".correct-box")[i]).css({"display":"inline-block"});
+                $($(".correct-box")[i]).show();
+                $("#toggle-all").show();
+                $("#toggle-all-label").show();
             }
         }
     }
 
-    function checkSize(uploadedFile) {
+    function checkImageSize(uploadedFile) {
         if (uploadedFile.files[0].size > MAX_SIZE) {
             size_is_valid = false;
         } else {
@@ -217,13 +318,15 @@
             || $("#poll-type-multiple-response-survey").is(":checked")) {
             hidden_style = "style='display:none'";
             is_checked = "checked";
+            $("#toggle-all").hide();
+            $("#toggle-all-label").hide();
         }
         $("#responses").append(`
-            <div class="response-container" id="response_${first_free_id}_wrapper">
+            <div class="response-container" id="response_${first_free_id}_wrapper" data-testid="response-${first_free_id}-wrapper">
                 <input type="hidden" class="order order-${count}" name="option[${first_free_id}][order]" value="${count}"/>
                 <input type="hidden" class="option_id" name="option[${first_free_id}][id]" value=""/>
                 <input aria-label="Is correct" class="correct-box" type="checkbox" name="option[${first_free_id}][is_correct]" ${hidden_style} ${is_checked}>
-                <textarea aria-label="Response text" class="poll_response" name="option[${first_free_id}][response]" placeholder="Enter response here..." style="resize: none; min-height: 50px; max-height: 300px; height: 50px; width: calc(100% - 200px);"
+                <textarea aria-label="Response text" data-testid="poll-response" class="poll-response" name="option[${first_free_id}][response]" placeholder="Enter response here..."
                 rows="10" cols="30"></textarea>
                 <div class="move-btn up-btn">
                     <i class="fa fa-lg fa-chevron-up"></i>
@@ -231,7 +334,7 @@
                 <div class="move-btn down-btn">
                     <i class="fa fa-lg fa-chevron-down"></i>
                 </div>
-                <div class="move-btn delete-btn">
+                <div class="move-btn delete-btn" data-testid="response-delete-button">
                     <i class="fa fa-lg fa-trash"></i>
                 </div>
                 <br/>
@@ -242,8 +345,8 @@
 
     function submitErrorChecks() {
         let empty_responses = false;
-        for (let i = 0; i < $(".poll_response").length; i++) {
-            if ($($(".poll_response")[i]).val() === "") {
+        for (let i = 0; i < $(".poll-response").length; i++) {
+            if ($($(".poll-response")[i]).val() === "") {
                 empty_responses = true;
             }
         }
@@ -314,7 +417,7 @@
         $(".down-btn").off("click");
         $(".down-btn").on("click", function() {
             let curr_pos = parseInt($($(this).siblings(".order")[0]).attr("value"));
-            if (curr_pos == $(".poll_response").length - 1) {
+            if (curr_pos == $(".poll-response").length - 1) {
                 return;
             }
             $(".order-" + (curr_pos + 1)).parent().insertBefore($(this).parent());
@@ -348,7 +451,7 @@
                             "This response cannot be deleted unless they switch their answers to the poll.");
                     } else {
                         // delete the response
-                        let count = $(".poll_response").length;
+                        let count = $(".poll-response").length;
                         let curr_pos = parseInt($(my_this.siblings(".order")[0]).attr("value"));
                         let wrapper_id = parseInt(my_this.parent().attr("id").match("response_(.*)?_wrapper")[1]);
                         for(let i=curr_pos + 1; i < count; i++) {

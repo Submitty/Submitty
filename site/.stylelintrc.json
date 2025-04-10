@@ -5,7 +5,8 @@
     "color-hex-length": "long",
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
-    "media-feature-range-notation": null
+    "media-feature-range-notation": null,
+    "declaration-no-important": true
   },
   "ignoreFiles": [
     "vendor/**",
@@ -19,6 +20,7 @@
     "public/css/pdf/toolbar_fullscreen.css",
     "public/css/pdf/toolbar_embedded.css",
     "public/css/pdf/pdf_embedded.css",
+    "public/css/select2-override.css",
     "public/css/highlightjs/*"
   ]
 }

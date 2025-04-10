@@ -24,18 +24,18 @@
             <legend class="option-title">Single Student Entry</legend>
             <label for="user_id">
                 Student ID:
-                <input class="option-input" type="text" name="user_id" id="user_id">
+                <input class="option-input" type="text" name="user_id" id="user_id" data-testid="user-id">
             </label>
             <label for="datestamp">
                 Date to be Applied:
-                <input class="option-input" type="text" name="datestamp" id="datestamp">
+                <input class="option-input" type="text" name="datestamp" id="datestamp" data-testid="datestamp">
             </label>
             <label for="late_days">
                 Total Late Days:
-                <input class="option-input" type="number" name="late_days" id="late_days">
+                <input class="option-input" type="number" name="late_days" id="late_days" data-testid="late-days">
             </label>
             <div>
-                <input class="btn btn-primary" type="submit" value="Submit">
+                <input class="btn btn-primary" data-testid="submit-btn" type="submit" value="Submit">
             </div>
         </fieldset>
         <fieldset>
@@ -64,8 +64,8 @@
             <thead>
                 <tr>
                     <th>Student ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Given Name</th>
+                    <th>Family Name</th>
                     <th>Total Allowed Late Days</th>
                     <th>Effective Date</th>
                     <th>Delete</th>
@@ -75,12 +75,13 @@
                 {% for user in users %}
                     <tr>
                         <td data-before-content="Student ID" class="align-left">{{ user.getId() }}</td>
-                        <td data-before-content="First Name" class="align-left">{{ user.getDisplayedGivenName() }}</td>
-                        <td data-before-content="Last Name" class="align-left">{{ user.getDisplayedFamilyName() }}</td>
+                        <td data-before-content="Given Name" class="align-left">{{ user.getDisplayedGivenName() }}</td>
+                        <td data-before-content="Family Name" class="align-left">{{ user.getDisplayedFamilyName() }}</td>
                         <td data-before-content="Total Allowed Late Days">{{ user.getAllowedLateDays() }}</td>
                         <td data-before-content="Effective Date">{{ user.getSinceTimestamp() }}</td>
                         <td id="Delete">
                             <a
+                                id="delete-button" 
                                 aria-label='Delete late days for {{ user.getId() }} on {{ user.getSinceTimestamp() }}'
                                 href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
                             >

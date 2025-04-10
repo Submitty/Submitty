@@ -1,0 +1,35 @@
+{
+  "title": "Testing Json",
+  "instructions_url": "",
+  "id": "hw-1",
+  "type": "Electronic File",
+  "vcs": {
+    "repository_type": "submitty-hosted",
+    "vcs_path": "path/to/vcs",
+    "vcs_subdirectory": "subdirectory"
+  },
+  "bulk_upload": false,
+  "team_gradeable": {
+    "team_size_max": 3,
+    "gradeable_teams_read": false
+  },
+  "grading_inquiry": true,
+  "grade_inquiry_per_component_allowed": false,
+  "ta_grading": true,
+  "syllabus_bucket": "Homework",
+  "dates": {
+    "ta_view_start_date": "2024-1-11 23:59:59.00",
+    "submission_open_date": "2024-1-15 23:59:59.00",
+    "submission_due_date": "2024-2-15 23:59:59.00",
+    "grade_start_date": "2024-2-15 23:59:59.00",
+    "grade_due_date": "2024-3-15 23:59:59.00",
+    "team_lock_date": "2024-1-15 23:59:59.00",
+    "grade_released_date": "2024-3-15 23:59:59.00",
+    "grade_inquiry_start_date": "2024-3-20 23:59:59.00",
+    "grade_inquiry_due_date": "2024-3-20 23:59:59.00",
+    "has_due_date": true,
+    "has_release_date": true,
+    "late_days_allowed": true,
+    "late_days": 55
+  }   
+}

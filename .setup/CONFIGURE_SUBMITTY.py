@@ -115,6 +115,11 @@ if not args.worker:
         grp.getgrnam(DAEMONCGI_GROUP)
     except KeyError:
         raise SystemExit("ERROR: Could not find group: " + DAEMONCGI_GROUP)
+    DAEMONPHPCGI_GROUP = 'submitty_daemonphpcgi'
+    try:
+        grp.getgrnam(DAEMONPHPCGI_GROUP)
+    except KeyError:
+        raise SystemExit("ERROR: Could not find group: " + DAEMONPHPCGI_GROUP)
 
 DAEMON_UID, DAEMON_GID = get_ids(DAEMON_USER)
 
@@ -180,7 +185,7 @@ defaults = {
     'authentication_method': 0,
     'institution_name' : '',
     'institution_homepage' : '',
-    'timezone' : tzlocal.get_localzone().zone,
+    'timezone' : str(tzlocal.get_localzone()),
     'submitty_admin_username': '',
     'email_user': '',
     'email_password': '',
@@ -419,6 +424,7 @@ else:
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
     config['daemoncgi_group'] = DAEMONCGI_GROUP
+    config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
     config['php_uid'] = PHP_UID
     config['php_gid'] = PHP_GID
 
@@ -474,6 +480,14 @@ SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
+
+# Rescue submitty config data
+submitty_config = OrderedDict()
+try:
+    with open(SUBMITTY_JSON, 'r') as json_file:
+        submitty_config = json.load(json_file, object_pairs_hook=OrderedDict)
+except FileNotFoundError:
+    pass
 
 #Rescue the autograding_workers and _containers files if they exist.
 rescued = list()
@@ -603,7 +617,7 @@ if not args.worker:
 ##############################################################################
 # Write submitty json
 
-config = OrderedDict()
+config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
@@ -651,6 +665,7 @@ if not args.worker:
     config['cgi_user'] = CGI_USER
     config['daemonphp_group'] = DAEMONPHP_GROUP
     config['daemoncgi_group'] = DAEMONCGI_GROUP
+    config['daemonphpcgi_group'] = DAEMONPHPCGI_GROUP
 else:
     config['supervisor_user'] = SUPERVISOR_USER
 

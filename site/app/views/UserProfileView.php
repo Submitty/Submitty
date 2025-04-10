@@ -22,18 +22,11 @@ class UserProfileView extends AbstractView {
         bool $database_authentication,
         string $csrf_token
     ) {
-        $autofill_preferred_name = [$user->getLegalGivenName(), $user->getLegalFamilyName()];
-        if ($user->getPreferredGivenName() != "") {
-            $autofill_preferred_name[0] = $user->getPreferredGivenName();
-        }
-        if ($user->getPreferredFamilyName() != "") {
-            $autofill_preferred_name[1] = $user->getPreferredFamilyName();
-        }
-
         $this->output->addInternalJs('user-profile.js');
         $this->output->addInternalCss('user-profile.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('My Profile');
+        $this->output->addSelect2WidgetCSSAndJs(); /* Adding select2 CSS and JS widgets*/
 
         $user_utc_offset = DateUtils::getUTCOffset($user->getTimeZone());
         $user_time_zone_with_offset = $user_utc_offset === 'NOT SET'
@@ -50,8 +43,8 @@ class UserProfileView extends AbstractView {
 
         return $this->output->renderTwigTemplate('UserProfile.twig', [
             "user" => $user,
-            "user_given" => $autofill_preferred_name[0],
-            "user_family" => $autofill_preferred_name[1],
+            "user_given" => $user->getPreferredGivenName() ?? "",
+            "user_family" => $user->getPreferredFamilyName() ?? "",
             "user_pronouns" => $user->getPronouns(),
             "display_pronouns" => $user->getDisplayPronouns(),
             "show_change_password" => $database_authentication,

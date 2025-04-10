@@ -1,7 +1,7 @@
 .course-material-badge {
     background-color: var(--standard-dark-green);
     min-width: 10px;
-    color: white;
+    color: var(--default-white);
     float: none;
 }
 
@@ -38,6 +38,7 @@ a.popout-item > .fas:hover {
 }
 
 .partial-checkbox:checked {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-medium-gray) !important;
 }
 
@@ -51,4 +52,12 @@ a.popout-item > .fas:hover {
 
 .view-row {
     padding: 0.8px;
+}
+
+#config-drop-down {
+    margin-top: 10px;
+}
+
+#new-file-name {
+    width: 100%;
 }

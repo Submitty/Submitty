@@ -91,7 +91,7 @@ class LateDayView extends AbstractView {
         $lastest_gradeable = end($gradeables);
         if (end($gradeables) && end($gradeables)->getSubmissionDueDate() !== null) {
             $lastest_gradeable_date = end($gradeables)->getSubmissionDueDate();
-            // if the last gradeable assigned is after the lastest late day update for the user, replace it
+            // if the last gradeable assigned is after the latest late day update for the user, replace it
             foreach ($students as $s) {
                 if (!isset($last_late_day_events[$s->getId()]) || $last_late_day_events[$s->getId()] <= $lastest_gradeable_date) {
                     $last_late_day_events[$s->getId()] = end($gradeables)->getTitle();

@@ -1,5 +1,5 @@
-import {runSqlQuery, init, generateCSV} from '../../ts/sql-toolbox';
 import { test } from '@jest/globals';
+import { generateCSV, init, runSqlQuery } from '../../ts/sql-toolbox';
 import { mockFetch } from './utils';
 
 const originalError = console.error;
@@ -59,9 +59,9 @@ test('csv generation', () => {
             </tbody>
         </table>
     `;
-    expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n' +
-        '"foo","bar",\n' +
-        '"baz","qux",\n');
+    expect(generateCSV('table-foo')).toEqual('"col_1","col_2",\n'
+        + '"foo","bar",\n'
+        + '"baz","qux",\n');
 });
 
 test('success with results', async () => {
@@ -127,10 +127,10 @@ test('thrown exception is caught and logged to console.error', async () => {
     expect(console.error.mock.calls.length).toEqual(1);
     expect(console.error.mock.calls[0][0].toString()).toEqual(exceptionString);
     expect(document.getElementById('query-results').innerHTML).toEqual('');
-    expect(window.alert).toBeCalledWith(exceptionString);
+    expect(window.alert).toHaveBeenCalledWith(exceptionString);
 });
 
-test('init binds submit button', (done) => {
+test('init binds submit button', async () => {
     mockFetch({
         status: 'success',
         data: [],
@@ -142,8 +142,10 @@ test('init binds submit button', (done) => {
     document.getElementById('run-sql-btn').dispatchEvent(event);
 
     // Pause briefly to allow the async runSqlQuery method to fire
-    setTimeout(() => {
-        expect(document.getElementById('query-results').innerHTML).toEqual('<tr><td>No rows returned</td></tr>');
-        done();
-    }, 50);
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            expect(document.getElementById('query-results').innerHTML).toEqual('<tr><td>No rows returned</td></tr>');
+            resolve();
+        }, 50);
+    });
 });

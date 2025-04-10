@@ -21,24 +21,25 @@ use WebSocket;
  */
 class OfficeHoursQueueController extends AbstractController {
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["GET"])]
     public function showQueue($full_history = false) {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
                 'OfficeHoursQueue',
                 'showTheQueue',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue", methods: ["POST"])]
     public function openQueue() {
         if (empty($_POST['code'])) {
             $this->core->addErrorMessage("Missing queue name");
@@ -54,8 +55,9 @@ class OfficeHoursQueueController extends AbstractController {
         $token = trim($_POST['token']) != "" ? trim($_POST['token']) : null;
 
         $re = '/^[\sa-zA-Z0-9_\-]+$/m';
+        $matches_code = [0];
         preg_match_all($re, $queue_code, $matches_code, PREG_SET_ORDER, 0);
-        $matches_token = 1;
+        $matches_token = [0];
         if ($token !== null) {
             preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         }
@@ -81,9 +83,9 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/add", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/add", methods: ["POST"])]
     public function addPerson($queue_code) {
         if (empty($_POST['name'])) {
             $this->core->addErrorMessage("Missing user's name");
@@ -151,9 +153,9 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/remove", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/remove", methods: ["POST"])]
     public function removePerson($queue_code) {
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("Missing user ID");
@@ -191,9 +193,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/switch", methods={"POST"})
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/switch", methods: ["POST"])]
     public function switchQueue($queue_code) {
         $user_id = $this->core->getUser()->getId();
 
@@ -258,9 +260,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/togglePause", methods: ["POST"])]
     public function setQueuePauseState() {
         if (empty($_POST['pause_state'])) {
             $this->core->addErrorMessage("Missing queue position pause state");
@@ -278,10 +280,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/restore", methods: ["POST"])]
     public function restorePerson($queue_code) {
         if (empty($_POST['entry_id'])) {
             $this->core->addErrorMessage("Missing entry ID");
@@ -305,10 +307,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/startHelp", methods: ["POST"])]
     public function startHelpPerson($queue_code) {
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("Missing user ID");
@@ -333,9 +335,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/finishHelp", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/finishHelp", methods: ["POST"])]
     public function finishHelpPerson($queue_code) {
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("Missing entry ID");
@@ -373,10 +375,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/empty", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/empty", methods: ["POST"])]
     public function emptyQueue($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -395,10 +397,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/toggle", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/toggle", methods: ["POST"])]
     public function toggleQueue($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -423,10 +425,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/deleteQueue", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/deleteQueue", methods: ["POST"])]
     public function deleteQueue($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -445,10 +447,10 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_token", methods: ["POST"])]
     public function changeToken($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -460,7 +462,7 @@ class OfficeHoursQueueController extends AbstractController {
 
         //Replace whitespace with "_"
         $token = trim($_POST['token']);
-        $re = '/^[\sa-zA-Z0-9_\-]+$/m';
+        $re = '/^[\sa-zA-Z0-9_\-]*$/m';
         preg_match_all($re, $token, $matches_token, PREG_SET_ORDER, 0);
         if (count($matches_token) !== 1) {
             $this->core->addErrorMessage('Queue secret code must only contain letters, numbers, spaces, "_", and "-"');
@@ -478,10 +480,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_regex", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_regex", methods: ["POST"])]
     public function changeRegex($queue_code) {
         if (empty($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -501,10 +503,10 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_contact_information", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/{queue_code}/change_contact_information", methods: ["POST"])]
     public function changeContactInformation($queue_code) {
         if (!isset($queue_code)) {
             $this->core->addErrorMessage("Missing queue name");
@@ -519,10 +521,10 @@ class OfficeHoursQueueController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/send_queue_message", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return RedirectResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/send_queue_message", methods: ["POST"])]
     public function sendQueueMessage(): RedirectResponse {
         if (empty($_POST['code'])) {
             $this->core->addErrorMessage("Missing queue name");
@@ -550,9 +552,7 @@ class OfficeHoursQueueController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/get_queue_message", methods: ["GET"])]
     public function getQueueMessage() {
         if (!empty($_GET['code'])) {
             $row = $this->core->getQueries()->getQueueMessage(trim($_GET['code']));
@@ -567,9 +567,9 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/current_queue", methods: ["GET"])]
     public function showCurrentQueue() {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -577,16 +577,17 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderCurrentQueue',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/queue_history", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/queue_history", methods: ["GET"])]
     public function showQueueHistory($full_history = false) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -594,15 +595,16 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderQueueHistory',
-                new OfficeHoursQueueModel($this->core, $full_history)
+                new OfficeHoursQueueModel($this->core, $full_history),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_status", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/new_status", methods: ["GET"])]
     public function showNewStatus() {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -610,16 +612,17 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewStatus',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/update_announcement", methods: ["POST"])]
     public function updateAnnouncement() {
         if (!isset($_POST['queue_announcement_message'])) {
             $this->core->addErrorMessage("Missing announcement content");
@@ -642,10 +645,7 @@ class OfficeHoursQueueController extends AbstractController {
         );
     }
 
-
-    /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/stats", methods: ["GET"])]
     public function showQueueStats() {
         $viewer = new OfficeHoursQueueModel($this->core);
         return new WebResponse(
@@ -661,9 +661,7 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/new_announcement", methods: ["GET"])]
     public function showNewAnnouncement() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
             return MultiResponse::RedirectOnlyResponse(
@@ -677,15 +675,16 @@ class OfficeHoursQueueController extends AbstractController {
             new WebResponse(
                 'OfficeHoursQueue',
                 'renderNewAnnouncement',
-                new OfficeHoursQueueModel($this->core)
+                new OfficeHoursQueueModel($this->core),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/office_hours_queue/student_stats", methods: ["GET"])]
     public function showQueueStudentStats() {
         if (!$this->core->getConfig()->isQueueEnabled()) {
             return new RedirectResponse($this->core->buildCourseUrl(['home']));
@@ -695,7 +694,8 @@ class OfficeHoursQueueController extends AbstractController {
         return new WebResponse(
             'OfficeHoursQueue',
             'showQueueStudentStats',
-            $viewer->getQueueDataStudent()
+            $viewer->getQueueDataStudent(),
+            $this->core->getQueries()->getAllUsers()
         );
     }
 
@@ -713,5 +713,26 @@ class OfficeHoursQueueController extends AbstractController {
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
+    }
+
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     */
+    #[Route("/courses/{_semester}/{_course}/queue/student_search", methods: ["POST"])]
+    public function studentSearch(): JsonResponse {
+        $user_id = $_POST['student_id'];
+        $user = $this->core->getQueries()->getUserById($user_id);
+        if ($user === null) {
+            $error = "Invalid Student ID";
+            return JsonResponse::getFailResponse($error);
+        }
+
+        $result = $this->core->getQueries()->studentQueueSearch($user_id);
+        $data = [];
+        foreach ($result as $row) {
+                $data[] = $row;
+        }
+        $responseData = json_encode($data);
+        return JsonResponse::getSuccessResponse($responseData);
     }
 }

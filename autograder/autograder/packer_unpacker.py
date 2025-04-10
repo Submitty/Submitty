@@ -19,7 +19,7 @@ from . import insert_database_version_data, autograding_utils
 def get_queue_time(next_directory, next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory, next_to_grade)))
     t = dateutil.parser.parse(t)
-    t = dateutils.get_timezone().localize(t)
+    t = t.astimezone(dateutils.get_timezone())
     return t
 
 
@@ -171,15 +171,24 @@ def prepare_autograding_and_submission_zip(
     # figure out what we're supposed to grade & error checking
     obj = load_queue_file_obj(config, job_id, next_directory, next_to_grade)
     # The top level course directory for this class
+
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+
+    if "term" in obj:
+        term_or_semester = "term"
+    else:
+        term_or_semester = "semester"
+
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         'courses',
-        obj["semester"],
+        obj[term_or_semester],
         obj["course"]
     )
     if "generate_output" not in obj:
         partial_path = os.path.join(obj["gradeable"], obj["who"], str(obj["version"]))
-        item_name = os.path.join(obj["semester"], obj["course"], "submissions", partial_path)
+        item_name = os.path.join(obj[term_or_semester], obj["course"], "submissions", partial_path)
         submission_path = os.path.join(config.submitty['submitty_data_dir'], "courses", item_name)
         if not os.path.isdir(submission_path):
             config.logger.log_message(
@@ -192,7 +201,7 @@ def prepare_autograding_and_submission_zip(
          using_subdirectory, vcs_subdirectory) = get_vcs_info(
             config,
             config.submitty['submitty_data_dir'],
-            obj["semester"],
+            obj[term_or_semester],
             obj["course"],
             obj["gradeable"],
             obj["who"],
@@ -201,7 +210,7 @@ def prepare_autograding_and_submission_zip(
 
     elif obj["generate_output"]:
         item_name = os.path.join(
-            obj["semester"],
+            obj[term_or_semester],
             obj["course"],
             "generated_output",
             obj["gradeable"]
@@ -347,7 +356,7 @@ def prepare_autograding_and_submission_zip(
         json.dump(obj, outfile, sort_keys=True, indent=4, separators=(',', ': '))
 
     user_assignment_settings_json = os.path.join(
-        config.submitty['submitty_data_dir'], "courses", obj["semester"], obj["course"],
+        config.submitty['submitty_data_dir'], "courses", obj[term_or_semester], obj["course"],
         "submissions", obj["gradeable"], obj["who"], "user_assignment_settings.json")
 
     if os.path.exists(user_assignment_settings_json):
@@ -385,11 +394,19 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
     if queue_obj is None:
         return False
 
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in queue_obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
     job_id = queue_obj["job_id"]
     course_dir = os.path.join(
         config.submitty['submitty_data_dir'],
         "courses",
-        queue_obj["semester"],
+        queue_obj[term_or_semester],
         queue_obj["course"]
     )
     if "generate_output" not in queue_obj:
@@ -399,7 +416,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
             str(queue_obj["version"])
         )
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj[term_or_semester],
             queue_obj["course"],
             "submissions",
             partial_path
@@ -408,7 +425,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
         results_public_path = os.path.join(course_dir, "results_public", partial_path)
     elif queue_obj["generate_output"]:
         item_name = os.path.join(
-            queue_obj["semester"],
+            queue_obj[term_or_semester],
             queue_obj["course"],
             "generated_output",
             queue_obj["gradeable"]
@@ -438,7 +455,7 @@ def unpack_grading_results_zip(config, which_machine, which_untrusted, my_result
         try:
             insert_database_version_data.insert_into_database(
                 config,
-                queue_obj["semester"],
+                queue_obj[term_or_semester],
                 queue_obj["course"],
                 queue_obj["gradeable"],
                 queue_obj["user"],

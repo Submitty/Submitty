@@ -373,7 +373,62 @@ CREATE FUNCTION public.sync_user() RETURNS trigger
         $$;
 
 
+--
+-- Name: update_previous_registration_section(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_previous_registration_section() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	IF (
+		(NEW.registration_section IS NULL AND OLD.registration_section IS NOT NULL)
+		OR NEW.registration_section != OLD.registration_section
+	) THEN
+		NEW.previous_registration_section := OLD.registration_section;
+	END IF;
+	RETURN NEW;
+END;
+$$;
+
+
 SET default_tablespace = '';
+
+
+--
+-- Name: community_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.community_events (
+    id integer NOT NULL,
+    community_path character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    folder_name character varying(255) NOT NULL,
+    extra_info character varying(255),
+    link_name character varying(255),
+    release_date timestamp(6) without time zone,
+    closing_date timestamp(6) without time zone
+);
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.community_events_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: community_events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.community_events_id_seq OWNED BY public.community_events.id;
 
 
 --
@@ -386,6 +441,8 @@ CREATE TABLE public.courses (
     status smallint DEFAULT 1 NOT NULL,
     group_name character varying(255) NOT NULL,
     owner_name character varying(255) NOT NULL,
+    self_registration_type smallint DEFAULT 0,
+    default_section_id character varying(255),
     CONSTRAINT course_validate CHECK (((course)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT group_validate CHECK (((group_name)::text ~ '^[a-zA-Z0-9_-]*$'::text)),
     CONSTRAINT owner_validate CHECK (((owner_name)::text ~ '^[a-zA-Z0-9_-]*$'::text))
@@ -416,8 +473,19 @@ CREATE TABLE public.courses_users (
     registration_section character varying(255),
     registration_type character varying(255) DEFAULT 'graded'::character varying,
     manual_registration boolean DEFAULT false,
+    previous_registration_section character varying(255),
     CONSTRAINT check_registration_type CHECK (((registration_type)::text = ANY (ARRAY[('graded'::character varying)::text, ('audit'::character varying)::text, ('withdrawn'::character varying)::text, ('staff'::character varying)::text]))),
     CONSTRAINT users_user_group_check CHECK (((user_group >= 1) AND (user_group <= 4)))
+);
+
+
+--
+-- Name: docker_images; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.docker_images (
+    image_name character varying NOT NULL,
+    user_id character varying
 );
 
 
@@ -427,7 +495,7 @@ CREATE TABLE public.courses_users (
 
 CREATE TABLE public.emails (
     id bigint NOT NULL,
-    user_id character varying NOT NULL,
+    user_id character varying,
     subject text NOT NULL,
     body text NOT NULL,
     created timestamp without time zone NOT NULL,
@@ -435,7 +503,9 @@ CREATE TABLE public.emails (
     error character varying DEFAULT ''::character varying NOT NULL,
     email_address character varying(255) DEFAULT ''::character varying NOT NULL,
     term character varying,
-    course character varying
+    course character varying,
+    to_name character varying,
+    CONSTRAINT name_or_email CHECK (((user_id IS NOT NULL) <> (to_name IS NOT NULL)))
 );
 
 
@@ -457,6 +527,38 @@ CREATE SEQUENCE public.emails_id_seq
 --
 
 ALTER SEQUENCE public.emails_id_seq OWNED BY public.emails.id;
+
+
+--
+-- Name: global_calendar_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.global_calendar_items (
+    id integer NOT NULL,
+    type integer NOT NULL,
+    text character varying(255) NOT NULL,
+    date date NOT NULL
+);
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.global_calendar_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: global_calendar_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.global_calendar_items_id_seq OWNED BY public.global_calendar_items.id;
 
 
 --
@@ -584,6 +686,8 @@ CREATE TABLE public.users (
     display_name_order character varying(255) DEFAULT 'GIVEN_F'::character varying NOT NULL,
     display_pronouns boolean DEFAULT false,
     user_preferred_locale character varying,
+    CONSTRAINT user_preferred_familyname_not_empty CHECK (((user_preferred_familyname)::text <> ''::text)),
+    CONSTRAINT user_preferred_givenname_not_empty CHECK (((user_preferred_givenname)::text <> ''::text)),
     CONSTRAINT users_user_access_level_check CHECK (((user_access_level >= 1) AND (user_access_level <= 3))),
     CONSTRAINT users_user_last_initial_format_check CHECK (((user_last_initial_format >= 0) AND (user_last_initial_format <= 3)))
 );
@@ -623,10 +727,24 @@ ALTER SEQUENCE public.vcs_auth_tokens_id_seq OWNED BY public.vcs_auth_tokens.id;
 
 
 --
+-- Name: community_events id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events ALTER COLUMN id SET DEFAULT nextval('public.community_events_id_seq'::regclass);
+
+
+--
 -- Name: emails id; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.emails ALTER COLUMN id SET DEFAULT nextval('public.emails_id_seq'::regclass);
+
+
+--
+-- Name: global_calendar_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.global_calendar_items ALTER COLUMN id SET DEFAULT nextval('public.global_calendar_items_id_seq'::regclass);
 
 
 --
@@ -641,6 +759,14 @@ ALTER TABLE ONLY public.saml_mapped_users ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.vcs_auth_tokens ALTER COLUMN id SET DEFAULT nextval('public.vcs_auth_tokens_id_seq'::regclass);
+
+
+--
+-- Name: community_events community_events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.community_events
+    ADD CONSTRAINT community_events_pkey PRIMARY KEY (id);
 
 
 --
@@ -665,6 +791,14 @@ ALTER TABLE ONLY public.courses_registration_sections
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_pkey PRIMARY KEY (term, course, user_id);
+
+
+--
+-- Name: docker_images docker_images_image_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_image_name_key UNIQUE (image_name);
 
 
 --
@@ -756,6 +890,13 @@ ALTER TABLE ONLY public.vcs_auth_tokens
 
 
 --
+-- Name: courses_users_user_id_user_group_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX courses_users_user_id_user_group_idx ON public.courses_users USING btree (user_id, user_group);
+
+
+--
 -- Name: courses_users after_delete_sync_delete_user_cleanup; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -767,6 +908,13 @@ CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON public.cour
 --
 
 CREATE TRIGGER before_delete_sync_delete_user BEFORE DELETE ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.sync_delete_user();
+
+
+--
+-- Name: courses_users before_update_courses_update_previous_registration_section; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER before_update_courses_update_previous_registration_section BEFORE UPDATE OF registration_section ON public.courses_users FOR EACH ROW EXECUTE PROCEDURE public.update_previous_registration_section();
 
 
 --
@@ -841,6 +989,14 @@ ALTER TABLE ONLY public.courses_users
 
 ALTER TABLE ONLY public.courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON UPDATE CASCADE;
+
+
+--
+-- Name: docker_images docker_images_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.docker_images
+    ADD CONSTRAINT docker_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
 
 
 --

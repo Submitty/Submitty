@@ -7,7 +7,7 @@ function openNewProxyUserForm() {
 
 function openProxyMappingForm() {
     const form = document.getElementById('new-proxy-mapping-form');
-    if (form !== null)  {
+    if (form !== null) {
         form.style.display = 'block';
     }
 }

@@ -46,9 +46,9 @@ class AuthenticationController extends AbstractController {
      * session from the database as well as invalidating the session id saved in the cookie. The latter
      * is not strictly necessary, but still good to tidy up.
      *
-     * @Route("/authentication/logout")
      * @return MultiResponse
      */
+    #[Route("/authentication/logout")]
     public function logout() {
         if ($this->core->removeCurrentSession()) {
             Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
@@ -71,11 +71,10 @@ class AuthenticationController extends AbstractController {
     /**
      * Display the login form to the user
      *
-     * @Route("/authentication/login")
-     *
      * @var string $old the url to redirect to after login
      * @return ResponseInterface
      */
+    #[Route("/authentication/login")]
     public function loginForm($old = null) {
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
             $old = null;
@@ -90,11 +89,10 @@ class AuthenticationController extends AbstractController {
      * login form (this being saved in the $_POST['old'] array). However, on failure to login, we want to continue
      * to maintain that old request data passing it back into the login form.
      *
-     * @Route("/authentication/check_login")
-     *
      * @var string $old the url to redirect to after login
      * @return MultiResponse
      */
+    #[Route("/authentication/check_login")]
     public function checkLogin($old = null) {
         $is_saml_auth = $this->core->getAuthentication() instanceof SamlAuthentication;
         if (!is_null($old) && !str_starts_with(urldecode($old), $this->core->getConfig()->getBaseUrl())) {
@@ -157,10 +155,9 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/token", methods={"POST"})
-     *
      * @return MultiResponse
      */
+    #[Route("/api/token", methods: ["POST"])]
     public function getToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
@@ -179,10 +176,10 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/api/token/invalidate", methods={"POST"})
      *
      * @return MultiResponse
      */
+    #[Route("/api/token/invalidate", methods: ["POST"])]
     public function invalidateToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
@@ -208,9 +205,9 @@ class AuthenticationController extends AbstractController {
      * status, as well as potentially information about a particular
      * gradeable in that course.
      *
-     * @Route("{_semester}/{_course}/authentication/vcs_login")
      * @return MultiResponse
      */
+    #[Route("{_semester}/{_course}/authentication/vcs_login")]
     public function vcsLogin() {
         if (
             empty($_POST['user_id'])
@@ -278,11 +275,11 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/authentication/saml_start")
      * @param string|null $old
      *
      * @return RedirectResponse
      */
+    #[Route("/authentication/saml_start")]
     public function samlStart(string $old = null): RedirectResponse {
         if (!$this->core->getAuthentication() instanceof SamlAuthentication) {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
@@ -296,10 +293,10 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @Route("/authentication/user_select")
      *
      * @return ResponseInterface
      */
+    #[Route("/authentication/user_select")]
     public function userSelection() {
         if (!isset($_SESSION['Authenticated_User_Id']) || !$this->core->getAuthentication() instanceof SamlAuthentication) {
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));

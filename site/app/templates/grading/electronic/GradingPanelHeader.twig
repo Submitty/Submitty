@@ -1,16 +1,20 @@
 {% import _self as self %}
 <script>
-    let student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
-    let grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
-    let discussion_browser = {% if isDiscussionPanel %} true {% else %} false {% endif %};
-    let peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
-    let is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
+    const autograding_results = {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %} true {% else %} false {% endif %};
+    const grading_rubric = {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %} true {% else %} false {% endif %};
+    const submission_browser = {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %} true {% else %} false {% endif %};
+    const solution_ta_notes = {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %} true {% else %} false {% endif %};
+    const student_info = {% if isStudentInfoPanel %} true {% else %} false {% endif %};
+    const grade_inquiry_info = {% if isGradeInquiryPanel %} true {% else %} false {% endif %};
+    const discussion_browser = {% if isDiscussionPanel and (not isPeerGrader or (isPeerGrader and isPeerDiscussion)) %} true {% else %} false {% endif %};
+    const peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
+    const is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
 
     updateThePanelsElements({
-        autograding_results: true,
-        grading_rubric: true,
-        submission_browser: true,
-        solution_ta_notes: true,
+        autograding_results,
+        grading_rubric,
+        submission_browser,
+        solution_ta_notes,
         student_info,
         grade_inquiry_info,
         discussion_browser,
@@ -21,39 +25,45 @@
 
 <div id="grading-panel-header">
     <div class="panel-header-box">
-        <span class="grade-panel" id="autograding_results_btn">
-            <button title="Show/Hide Autograding Testcases (Press A)"
-                    class="invisible-btn key_to_click"
-                    tabindex="0"
-                    data-testid="show-autograding"
-            >
-                <i class="fas fa-list"></i><span>Autograding</span>
-            </button>
-            {{ self.renderPanelPositionSelector('autograding_results') }}
-        </span>
-        <span class="grade-panel" id="grading_rubric_btn">
-            <button title="Show/Hide Grading Rubric (Press G)"
-                    class="invisible-btn key_to_click"
-                    tabindex="0"
-            >
-                <i class="fas fa-edit"></i><span>Rubric</span>
-            </button>
-            {{ self.renderPanelPositionSelector('grading_rubric') }}
-        </span>
-        <span class="grade-panel" id="submission_browser_btn">
-            <button title="Show/Hide Submission and Results Browser (Press O)"
-                    class="invisible-btn key_to_click"
-                    tabindex="0"
-                    data-testid="show-submission"
-            >
-                <i class="fas fa-folder-open"></i><span>Files</span>
-            </button>
-            {{ self.renderPanelPositionSelector('submission_browser') }}
-        </span>
+        {% if not isPeerGrader or (isPeerGrader and isPeerAutograding) %}
+            <span class="grade-panel" id="autograding_results_btn">
+                <button title="Show/Hide Autograding Testcases (Press A)"
+                        class="invisible-btn"
+                        tabindex="0"
+                        data-testid="show-autograding"
+                >
+                    <i class="fas fa-list"></i><span>Autograding</span>
+                </button>
+                {{ self.renderPanelPositionSelector('autograding_results') }}
+            </span>
+        {% endif %}
+        {% if not isPeerGrader or (isPeerGrader and isPeerRubric) %}
+            <span class="grade-panel" id="grading_rubric_btn" data-testid="grading-rubric-btn">
+                <button title="Show/Hide Grading Rubric (Press G)"
+                        class="invisible-btn"
+                        tabindex="0"
+                >
+                    <i class="fas fa-edit"></i><span>Rubric</span>
+                </button>
+                {{ self.renderPanelPositionSelector('grading_rubric') }}
+            </span>
+        {% endif %}
+        {% if not isPeerGrader or (isPeerGrader and isPeerFiles) %}
+            <span class="grade-panel" id="submission_browser_btn" data-testid="submission-browser-btn">
+                <button title="Show/Hide Submission and Results Browser (Press O)"
+                        class="invisible-btn"
+                        tabindex="0"
+                        data-testid="show-submission"
+                >
+                    <i class="fas fa-folder-open"></i><span>Files</span>
+                </button>
+                {{ self.renderPanelPositionSelector('submission_browser') }}
+            </span>
+        {% endif %}
         {% if isStudentInfoPanel %}
-            <span class="grade-panel" id="student_info_btn">
+            <span class="grade-panel" id="student_info_btn" data-testid="student-info-btn">
                 <button title="Show/Hide Student Information (Press S)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                     <i class="fas fa-user"></i><span>Student Info</span>
@@ -61,19 +71,21 @@
             {{ self.renderPanelPositionSelector('student_info') }}
             </span>
         {% endif %}
-        <span class="grade-panel" id="solution_ta_notes_btn">
-            <button title="Show Solution and TA notes"
-                    class="invisible-btn key_to_click"
-                    tabindex="0"
-            >
-                <i class="fas fa-check"></i><span>Solutions/Notes</span>
-            </button>
-            {{ self.renderPanelPositionSelector('solution_ta_notes') }}
-        </span>
+        {% if not isPeerGrader or (isPeerGrader and isPeerSolutions) %}
+            <span class="grade-panel" id="solution_ta_notes_btn" data-testid="solution-ta-notes-btn">
+                <button title="Show Solution and TA notes"
+                        class="invisible-btn"
+                        tabindex="0"
+                >
+                    <i class="fas fa-check"></i><span>Solutions/Notes</span>
+                </button>
+                {{ self.renderPanelPositionSelector('solution_ta_notes') }}
+            </span>
+        {% endif %}
         {% if isPeerPanel %}
-            <span class="grade-panel" id="peer_info_btn">
+            <span class="grade-panel" id="peer_info_btn" data-testid="peer-info-btn">
                 <button title="Show/Hide Peer Information (Press P)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                     <i class="fas fa-users"></i><span>Peer</span>
@@ -81,21 +93,23 @@
             {{ self.renderPanelPositionSelector('peer_info') }}
             </span>
         {% endif %}
-        {% if isDiscussionPanel %}
-            <span class="grade-panel" id="discussion_browser_btn">
-                <button title="Show/Hide Discussion Posts"
-                        class="invisible-btn key_to_click"
-                        tabindex="0"
-                >
-                    <i class="fas fa-comment-alt"></i><span>Discussion</span>
-                </button>
-            {{ self.renderPanelPositionSelector('discussion_browser') }}
-            </span>
+        {% if not isPeerGrader or (isPeerGrader and isPeerDiscussion) %}
+            {% if isDiscussionPanel %}
+                <span class="grade-panel" id="discussion_browser_btn" data-testid="discussion-browser-btn">
+                    <button title="Show/Hide Discussion Posts"
+                            class="invisible-btn"
+                            tabindex="0"
+                    >
+                        <i class="fas fa-comment-alt"></i><span>Discussion</span>
+                    </button>
+                {{ self.renderPanelPositionSelector('discussion_browser') }}
+                </span>
+            {% endif %}
         {% endif %}
         {% if isGradeInquiryPanel and not student_grader %}
-            <span class="grade-panel" id="grade_inquiry_info_btn">
+            <span class="grade-panel" id="grade_inquiry_info_btn" data-testid="grade-inquiry-info-btn">
                 <button title="Show/Hide Grade Inquiry Information (Press X)"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                 >
                    <i class="fas {{ grade_inquiry_pending is defined ? 'fa-exclamation' : 'fa-hand-paper' }} grade_inquiry_icon"></i>
@@ -105,7 +119,7 @@
             </span>
         {% endif %}
         {% if is_notebook %}
-            <span class="grade-panel" id="notebook-view-btn">
+            <span class="grade-panel" id="notebook-view-btn" data-testid="notebook-view-btn">
                 <button title="Open student's view of their notebook gradeable"
                         class="invisible-btn"
                         tabindex="0"

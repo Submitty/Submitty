@@ -1,5 +1,23 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+
+function loadDraft() {
+    const gradeableId = $('#gradeable_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        const componentId = $(this).closest('.reply-text-form').find('#gc_id').val();
+        const uniqueKey = `reply-text-area-${componentId}`;
+
+        if (Object.prototype.hasOwnProperty.call(draftContent, uniqueKey)) {
+            $(this).val(draftContent[uniqueKey]);
+        }
+    });
+}
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
@@ -16,8 +34,8 @@ function onReady() {
         $('.component-tab').first().click();
     }
 
-    //prevent spam submission
-    $('#grade-inquiry-actions').on('click', function() {
+    // prevent spam submission
+    $('#grade-inquiry-actions').on('click', function () {
         $(this).find('.gi-submit .gi-submit-empty').prop('disabled', true);
     });
 
@@ -32,7 +50,7 @@ function onComponentTabClicked(tab) {
     const component_id = $(tab).data('component_id');
 
     // show posts that pertain to this component_id
-    $('.grade-inquiry').each(function() {
+    $('.grade-inquiry').each(function () {
         if ($(this).data('component_id') !== component_id) {
             $(this).hide();
         }
@@ -51,10 +69,21 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
+    const gradeableId = $('#gradeable_id').val();
+    const componentId = reply_text_area.closest('.reply-text-form').find('#gc_id').val();
+    const draftContentKeyPrefix = `draftContent-${gradeableId}-`;
+    const uniqueKey = `reply-text-area-${componentId}`;
+
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
+
+    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    draftContent[uniqueKey] = reply_text_area.val();
+    localStorage.setItem(draftContentKeyPrefix, JSON.stringify(draftContent));
 
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -64,6 +93,7 @@ function onReplyTextAreaKeyUp(textarea) {
         $('.gi-show-not-empty').show();
         $('.gi-show-empty').hide();
     }
+    resizeTextarea(textarea);
 }
 
 function onGradeInquirySubmitClicked(button) {
@@ -71,7 +101,7 @@ function onGradeInquirySubmitClicked(button) {
     const button_clicked = $(button);
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab',`.component-${component_id}`);
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
     const form = $(`#reply-text-form-${component_id}`);
     if (form.data('submitted') === true) {
         return;
@@ -92,47 +122,26 @@ function onGradeInquirySubmitClicked(button) {
         }
     }
 
-    //switch off of preview mode after submission
+    // switch off of preview mode after submission
     const markdown_area = text_area.closest('.markdown-area');
     const markdown_header = markdown_area.find('.markdown-area-header');
     if (markdown_header.attr('data-mode') === 'preview') {
         markdown_header.find('.markdown-write-mode').trigger('click');
     }
 
-
     // prevent double submission
-    form.data('submitted',true);
-    const gc_id = form.children('#gc_id').val();
+    form.data('submitted', true);
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
         data: form.serialize(),
-        success: function(response) {
+        success: function (response) {
             try {
                 const json = JSON.parse(response);
+
                 if (json['status'] === 'success') {
-                    const data = json['data'];
-
-                    // inform other open websocket clients
-                    const submitter_id = form.children('#submitter_id').val();
-                    if (data.type === 'new_post') {
-
-                        newPostRender(gc_id, data.post_id, data.new_post);
+                    if (json['data']['type'] === 'new_post') {
                         text_area.val('');
-                        window.socketClient.send({
-                            'type': data.type,
-                            'post_id': data.post_id,
-                            'submitter_id': submitter_id,
-                            'gc_id': gc_id,
-                        });
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({'type' : 'toggle_status', 'submitter_id' : submitter_id});
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({'type': data.type, 'submitter_id': submitter_id});
                     }
                 }
                 else {
@@ -145,7 +154,7 @@ function onGradeInquirySubmitClicked(button) {
         },
     });
     // allow form resubmission
-    form.data('submitted',false);
+    form.data('submitted', false);
     $('.gi-submit').prop('disabled', true);
     $('.gi-submit-empty').prop('disabled', false);
 }
@@ -156,6 +165,9 @@ function initGradingInquirySocketClient() {
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
+                break;
+            case 'open_grade_inquiry':
+                window.location.reload();
                 break;
             case 'toggle_status':
                 gradeInquiryDiscussionHandler(msg.submitter_id);
@@ -176,9 +188,9 @@ function gradeInquiryNewPostHandler(submitter_id, post_id, gc_id) {
             submitter_id: submitter_id,
             post_id: post_id,
             csrf_token: window.csrfToken,
-            gc_id : gc_id,
+            gc_id: gc_id,
         },
-        success: function(new_post) {
+        success: function (new_post) {
             newPostRender(gc_id, post_id, new_post);
         },
     });
@@ -212,8 +224,8 @@ function gradeInquiryDiscussionHandler(submitter_id) {
     $.ajax({
         type: 'POST',
         url: buildCourseUrl(['gradeable', window.location.pathname.split('gradeable/')[1].split('/')[0], 'grade_inquiry', 'discussion']),
-        data: {submitter_id: submitter_id, csrf_token: window.csrfToken},
-        success: function(discussion) {
+        data: { submitter_id: submitter_id, csrf_token: window.csrfToken },
+        success: function (discussion) {
             newDiscussionRender(discussion);
         },
     });
@@ -223,7 +235,7 @@ function newDiscussionRender(discussion) {
     // save the selected component before updating regrade discussion
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab',`.component-${component_id}`);
+    localStorage.setItem('selected_tab', `.component-${component_id}`);
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {
@@ -234,3 +246,27 @@ function newDiscussionRender(discussion) {
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
+
+function resizeTextarea(textarea) {
+    if (!(textarea instanceof Element)) {
+        return;
+    }
+    textarea.style.height = '100px';
+    const currentScrollHeight = textarea.scrollHeight;
+    const clientHeight = textarea.clientHeight;
+    const scrollTop = textarea.scrollTop;
+    if (scrollTop > 0 || currentScrollHeight > clientHeight) {
+        textarea.style.height = `${currentScrollHeight}px`;
+    }
+    const parentBody = textarea.closest('.markdown-area-body');
+    if (parentBody) {
+        parentBody.style.height = `${textarea.scrollHeight + 32}px`;
+    }
+}
+$(document).ready(() => {
+    document.querySelectorAll('.markdown-area textarea').forEach((textarea) => {
+        resizeTextarea(textarea);
+    });
+    loadDraft();
+    onReady();
+});

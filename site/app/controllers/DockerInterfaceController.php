@@ -6,7 +6,6 @@ use app\libraries\FileUtils;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use app\views\ErrorView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -16,11 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  */
 class DockerInterfaceController extends AbstractController {
-    /**
-     * @Route("/admin/docker", methods={"GET"})
-     * @Route("/api/docker", methods={"GET"})
-     * @return MultiResponse
-     */
+    #[Route("/admin/docker", methods: ["GET"])]
+    #[Route("/api/docker", methods: ["GET"])]
     public function showDockerInterface(): MultiResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
@@ -40,6 +36,16 @@ class DockerInterfaceController extends AbstractController {
             )
         );
 
+        $images = [];
+        if ($json['autograding_containers'] !== false) {
+            foreach ($json['autograding_containers'] as $capability => $image_list) {
+                foreach ($image_list as $image) {
+                    $images[] = $image;
+                }
+            }
+        }
+        $json['image_owners'] = $this->core->getQueries()->getAllDockerImageOwners();
+
         $json['autograding_workers'] = FileUtils::readJsonFile(
             FileUtils::joinPaths(
                 $this->core->getConfig()->getSubmittyInstallPath(),
@@ -57,19 +63,15 @@ class DockerInterfaceController extends AbstractController {
             )
         );
     }
-    /**
-     * @Route("/admin/add_image", methods={"POST"})
-     * @Route("/api/admin/add_image", methods={"GET"})
-     * @return JsonResponse | MultiResponse
-     */
-    public function addImage() {
+
+    #[Route("/admin/add_image", methods: ["POST"])]
+    #[Route("/api/admin/add_image", methods: ["GET"])]
+    public function addImage(): JsonResponse {
         $user = $this->core->getUser();
-        if (is_null($user) || !$user->accessFaculty()) {
-            return new MultiResponse(
-                JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                new WebResponse(ErrorView::class, "errorPage", "You don't have access to this page.")
-            );
+        if (!$user->accessFaculty()) {
+            return JsonResponse::getFailResponse("You don't have access to this endpoint.");
         }
+        $user_id = $this->core->getUser()->getId();
 
         if (!isset($_POST['image'])) {
             return JsonResponse::getErrorResponse("Image not set");
@@ -123,13 +125,13 @@ class DockerInterfaceController extends AbstractController {
                 )
             );
 
-
             if (!array_key_exists($_POST['capability'], $json)) {
                 $json[$_POST['capability']] = [];
             }
 
             if (!in_array($_POST['image'], $json[$_POST['capability']])) {
                 $json[$_POST['capability']][] = $_POST['image'];
+                $this->core->getQueries()->setDockerImageOwner($_POST['image'], $user_id);
             }
             else {
                 return JsonResponse::getFailResponse($_POST['image'] . ' already exists in capability ' . $_POST['capability']);
@@ -153,11 +155,8 @@ class DockerInterfaceController extends AbstractController {
         }
     }
 
-    /**
-     * @Route("/admin/update_docker", methods={"GET"})
-     * @return JsonResponse
-     */
-    public function updateDockerCall() {
+    #[Route("/admin/update_docker", methods: ["GET"])]
+    public function updateDockerCall(): JsonResponse {
         $user = $this->core->getUser();
         if (is_null($user) || !$user->accessFaculty()) {
             return JsonResponse::getFailResponse("You don't have access to this endpoint.");
@@ -168,10 +167,7 @@ class DockerInterfaceController extends AbstractController {
         return JsonResponse::getSuccessResponse("Successfully queued the system to update docker, please refresh the page in a bit.");
     }
 
-    /**
-     * @return bool
-     */
-    private function updateDocker() {
+    private function updateDocker(): bool {
         $now = $this->core->getDateTimeNow()->format('Ymd');
         $docker_job_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue/docker" . $now . ".json");
         $docker_data = [
@@ -198,5 +194,43 @@ class DockerInterfaceController extends AbstractController {
             return false;
         }
         return true;
+    }
+
+    #[Route("/admin/remove_image", methods: ["POST"])]
+    public function removeImage(): JsonResponse {
+        $pattern = '/^[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+\/[a-z0-9]+[a-z0-9._(__)-]*[a-z0-9]+:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/';
+        $image = $_POST['image'] ?? '';
+
+        if (!preg_match($pattern, $image)) {
+            return JsonResponse::getFailResponse('Invalid Docker image name.');
+        }
+
+        if ($this->core->getQueries()->getDockerImageOwner($image) === false) {
+            return JsonResponse::getFailResponse('This image is not listed.');
+        }
+
+        $user = $this->core->getUser();
+        if (!$this->core->getQueries()->removeDockerImageOwner($image, $user)) {
+            return JsonResponse::getFailResponse('This image is owned/managed by another instructor/superuser.');
+        }
+
+        $jsonFilePath = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+        $json = json_decode(file_get_contents($jsonFilePath), true);
+
+        foreach ($json as $capability_key => $capability) {
+            if (($key = array_search($image, $capability, true)) !== false) {
+                array_splice($json[$capability_key], $key, 1);
+            }
+        }
+
+        FileUtils::writeJsonFile(
+            $jsonFilePath,
+            $json,
+        );
+        return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
     }
 }

@@ -25,7 +25,7 @@
 
 import 'cypress-file-upload';
 import { buildUrl } from './utils.js';
-//These functions can be called like "cy.login(...)" and will yield a result
+// These functions can be called like "cy.login(...)" and will yield a result
 
 /**
 * Log into Submitty using API, if a user is already logged in, you are redirected to
@@ -34,7 +34,7 @@ import { buildUrl } from './utils.js';
 * @param {String} [username=instructor] - username & password of who to log in as
 */
 Cypress.Commands.add('login', (username = 'instructor') => {
-    cy.url({ decode: true }).then($url => {
+    cy.url({ decode: true }).then(($url) => {
         cy.request({
             method: 'POST',
             url: '/authentication/check_login'.concat('?', $url.split('?')[1]),
@@ -45,7 +45,7 @@ Cypress.Commands.add('login', (username = 'instructor') => {
                 password: username,
                 __csrf: username,
             },
-        }).then(response => {
+        }).then((response) => {
             cy.visit(response.redirectedToUrl);
         });
     });
@@ -70,14 +70,13 @@ Cypress.Commands.add('logout', () => {
  * @param {function} fn - the code to run that should navigate to a new page.
  */
 Cypress.Commands.add('waitPageChange', (fn) => {
-    cy.window().then(win => {
+    cy.window().then((win) => {
         win._cypress_beforeReload = true;
     });
     cy.window().should('have.prop', '_cypress_beforeReload', true);
     fn();
     cy.window().should('not.have.prop', '_cypress_beforeReload');
 });
-
 
 /**
 * Visit a url either by an array of parts or a completed url E.g:
@@ -119,6 +118,7 @@ Cypress.Commands.add('checkLogoutInAfterEach', () => {
  * @param {int} wait
  */
 Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(wait);
     cy.reload();
     cy.then(() => {
@@ -126,6 +126,7 @@ Cypress.Commands.add('waitAndReloadUntil', (condition, timeout, wait = 100) => {
             if (result || timeout <= 0) {
                 return result;
             }
+            // eslint-disable-next-line no-restricted-syntax
             return cy.waitAndReloadUntil(condition, timeout - wait, wait);
         });
     });

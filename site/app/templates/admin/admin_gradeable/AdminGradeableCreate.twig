@@ -31,21 +31,21 @@
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-    <div class="option row">
-        <div class="option-desc col-md-6">
-            <label for="g_title">
-                <span class="option-title">Title</span>
-                <br>
-                <span class="option-alt">What is the title of this gradable?</span>
-                <br>
-                <span class="required_type">(Required)</span>
-            </label>
-        </div>
-
-        <div class="option-input col-md-6">
-            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required>{{action != 'new' ? gradeable.getTitle() : '' }}</textarea>
-        </div>
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="g_title">
+            <span class="option-title">Title</span>
+            <br>
+            <span class="option-alt">What is the title of this gradable?</span>
+            <br>
+            <span class="required_type">(Required)</span>
+        </label>
     </div>
+
+    <div class="option-input col-md-6">
+        <input type='text' name='title' id='g_title' data-testid="create-gradeable-title" class="required auto_save new-gradeable" style="overflow:hidden" placeholder="(Required)" required value="{{ action != 'new' ? gradeable.getTitle() : '' }}" />
+    </div>
+</div>
 
 
 <!-- Instruction URL (read/write in all modes) -->
@@ -58,7 +58,7 @@
         </label>
     </div>
     <div class="option-input col-md-6">
-        <input type='text' name='instructions_url' id='instructions_url' class="auto_save"
+        <input type='text' name='instructions_url' id='instructions_url' class="auto_save new-gradeable"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
     </div>
 </div>
@@ -74,7 +74,7 @@
         </label>
     </div>
     <div class="option-input col-md-6">
-        <input type='text' name='id' id="g_id" class="required"
+        <input type='text' name='id' id="g_id" data-testid="create-gradeable-id" class="required new-gradeable"
         value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
     </div>
@@ -115,7 +115,7 @@
             </div>
 
             <div>
-                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
+                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal" data-testid="radio-student-upload"
                         {{ action != 'new' and not gradeable.isBulkUpload() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
@@ -144,15 +144,15 @@
 
             <fieldset id="grade_inquiry_enable_container">
                 <legend>Should grade inquiries be enabled for this assignment?</legend>
-                <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related"
+                <input type="radio" id="yes_grade_inquiry_allowed" name="grade_inquiry_allowed" value="true" class="bool_val auto_save date-related" data-testid="yes-grade-inquiry-allowed"
                         {{ action != 'new' and gradeable.isGradeInquiryAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_allowed">Yes</label>
-                <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related"
+                <input type="radio" id="no_grade_inquiry_allowed" name="grade_inquiry_allowed" value="false" class="bool_val auto_save date-related" data-testid="no-grade-inquiry-allowed"
                         {{ not (action != 'new' and gradeable.isGradeInquiryAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_allowed">No</label>
             </fieldset>
 
             <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
                 <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
-                <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
+                <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save" data-testid="yes-component"
                         {{ action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
                 <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
                         {{ not (action != 'new' and gradeable is not null and gradeable.isGradeInquiryPerComponentAllowed()) ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
@@ -162,14 +162,14 @@
                 <div>
                     <fieldset id="discussion_grading_enable_container">
                         <legend>Is there a discussion component for this assignment?</legend>
-                        <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
+                        <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related" data-testid="yes-discussion"
                                 {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
                         <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
                                 {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
 
                         <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
-                            <input style="width: 85px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                            <input style="width: 85px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text" data-testid="discussion-thread-id"
                                    value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}" placeholder="(Required)"/>
                         </div>
                     </fieldset>
@@ -199,7 +199,7 @@
             <div class="team_assignment team_yes" id="team_yes">
 
                 <label for="team_size_max">What is the maximum team size?</label>
-                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
+                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save new-gradeable" type="text"
                            value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
 
                 {#Use teams from a previous gradeable:
@@ -243,7 +243,7 @@
                         <div id="vcs_submitty_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
                                 <kbd>{{ vcs_base_url }}</kbd>
-                                <input style='width: 30%' type='text' name="vcs_path" id="vcs_path" class="required auto_save" placeholder="(Required)"
+                                <input style='width: 30%' type='text' name="vcs_path" id="vcs_path" class="required auto_save new-gradeable" placeholder="(Required)"
                                     aria-label="repository name" value="" required />
                                 <kbd>&#47;&#123;&#36;user_id&#125;</kbd>
                             {% else %}
@@ -268,7 +268,7 @@
                         <div id="vcs_self_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}
                                 <label for="external_repo">What is the URL to the repository? </label>
-                            <input style='width: 80%' type='text' name="external_repo" id="external_repo" class="required auto_save"
+                            <input style='width: 80%' type='text' name="external_repo" id="external_repo" class="required auto_save new-gradeable"
                                     aria-label="repository name" value="{{ vcs_partial_path == '' ? vcs_base_url : vcs_partial_path }}" required/><br />
                             {% else %}
                                 <kbd id="vcs_url">{{ vcs_partial_path }}</kbd>
@@ -300,7 +300,7 @@
                     {% else %}
                     Path to students files within the VCS repository:
                     {% endif %}
-                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory_input" class="required auto_save" placeholder="(Required)"
+                    <input style='width: 30%' type='text' name="vcs_subdirectory" id="vcs_subdirectory_input" class="required auto_save new-gradeable" placeholder="(Required)"
                                         aria-label="repository name" value="{{ vcs_subdirectory }}" required/><br />
                     <em>Note: all other files & directories in the repository will be discarded from the checkout before grading begins.</em></label>
                 </div>
@@ -345,7 +345,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" data-testid="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 
@@ -717,3 +717,4 @@
     }
 
 </script>
+{% include('admin/admin_gradeable/AdminGradeableUploadForm.twig') %}

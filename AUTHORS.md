@@ -1,45 +1,91 @@
 ## Admins / Project Managers  
+
 [Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
 [Matthew Peveler](http://mpeveler.com/) 2014-current  
-Evan Maicus 2016-current  
+Christopher Reed, 2021-current  
+William Allen, 2021-current  
+
 
 ## Developers  
 
-Eden Bendheim 2023-current  
-Jason Chen 2023-current  
-Anson Decker 2023-current  
+Tony Fausto, 2024-current  
+Alex Lavallee, 2024-current  
+Itamar Oren-naftalovich, 2024-current  
+Chris McCarthy, 2024-current  
+Dorian Bilelis, 2024-current  
+Michael Papadopoulos, 2024-current  
+William Powe, 2024-current  
+Zachary Niles Peretz, 2024-current  
+Williams Chen, 2024-current  
+Sahil Suman, 2024, Google Summer of Code 2024  
+Rahul Vishwakarma, 2024, Google Summer of Code 2024  
+Sophia Oliinik, 2024, Google Summer of Code 2024  
+Nithish Reddy Banda, 2024, Google Summer of Code 2024  
+Jeffrey Cordero, 2024-current  
+Kush Raval, 2024-current  
+Ryan Varughese, 2024-current  
+Zheyu Deng, 2023-current  
+Chuanyi Pan, 2023-current  
+Tate Whiteberg, 2023-current  
+Cameron Peterson, 2023-current, Google Summer of Code 2023  
+Sátvik Karanam 2023-current  
 Jaeseok Kang 2023-current  
 Hanson Gu 2023-current  
-Sátvik Karanam 2023-current  
 Viane Matsibekker 2023-current  
-Jason Ng 2023-current  
-Mahi Pasarkar 2023-current  
-Hannah Rose 2023-current  
-Zachary Silverstein 2023-current  
-Adam Tuhacek 2023-current  
 Yanli Wang 2023-current  
-Kerui (Ray) Wu 2023-current  
-Bairong Zhang 2023-current  
-Jody Sunray 2022-current  
-Ryon Chan 2022-current  
-Kasja Arnold 2022-current  
-Bowen (Evan) Shi 2022-current  
-Jiarui (Jerry) Lu 2022-current  
-Thomas Kozlowski 2022-current  
-William Allen, 2021-current  
-Shelly Belsky, 2021-current  
-Christopher Reed, 2021-current  
-Jenay Barela, 2020-current  
-Jensen Li, 2020-current  
 Shail Patel 2018-current  
 Jasmine Plum 2017-current  
 Ana Milanova 2016-current  
-Jay McGlothlin, 2019-current  
 Steven Lindsey 2014-current  
 Peter Bailie 2014-current  
 David Goldschmidt 2014-current  
 Konstantin Kuzmin 2018-current  
 Preston Carman 2019-current  
+Johnny Chen, 2024  
+James Fitzgerald, 2024  
+Michael Krar, 2024  
+William Lin, 2024  
+Raymond Reynoso Ramirez, 2024  
+Josiah Riggins, 2024  
+Alex Rougebec, 2024  
+Adam Saich, 2024  
+Joshua Wei, 2024  
+Junyi Wu, 2024  
+Zhehua Zhang, 2024  
+Arnav Pawar, 2023-2024  
+Nia Heermance 2023-2024  
+Jay McGlothlin, 2019-2024  
+Benjamin Lee, 2023  
+Rita Lei, 2023  
+Oscar Li, 2023  
+Hayeon Oh, 2023  
+Thomas Orifici, 2023  
+Dana Siong Sin, 2023  
+Nicole Wu, 2023  
+Tevin Zhuo, 2023  
+Saumya Borwankar, 2023, Google Summer of Code 2023  
+Musaab Imran, 2023, Google Summer of Code 2023  
+Youssef Hassan 2023  
+Eden Bendheim 2023  
+Jason Chen 2023  
+Anson Decker 2023  
+Jason Ng 2023  
+Mahi Pasarkar 2023  
+Hannah Rose 2023  
+Zachary Silverstein 2023  
+Adam Tuhacek 2023  
+Kerui (Ray) Wu 2023  
+Bairong Zhang 2023  
+Evan Maicus 2016-2021  
+Shelly Belsky, 2021-2023  
+Jenay Barela, 2020-2023  
+Jensen Li, 2020-2023  
+Ryon Chan 2022-2023  
+Kasja Arnold 2022-2023  
+Jody Sunray 2022-2023  
+Bowen (Evan) Shi 2022-2023  
+Jiarui (Jerry) Lu 2022-2023  
+Thomas Kozlowski 2022-2023  
 Akshat Batra, 2022, Google Summer of Code 2022  
 Madhur Jain, 2022, Google Summer of Code 2022  
 Poorna Gunathilaka, 2022, Google Summer of Code 2022  

@@ -8,12 +8,10 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\database\DatabaseUtils;
 use app\models\Config;
 use app\models\User;
 use app\entities\Session;
 use app\repositories\SessionRepository;
-use Doctrine\DBAL\Logging\DebugStack;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -44,14 +42,8 @@ class Core {
     /** @var EntityManager */
     private $submitty_entity_manager;
 
-    /** @var DebugStack */
-    private $submitty_debug_stack;
-
     /** @var EntityManager */
     private $course_entity_manager;
-
-    /** @var DebugStack */
-    private $course_debug_stack;
 
     /** @var AbstractAuthentication */
     private $authentication;
@@ -68,8 +60,6 @@ class Core {
     /** @var User */
     private $user = null;
 
-    /** @var string */
-    private $user_id = null;
 
     /** @var Output */
     private $output = null;
@@ -181,25 +171,17 @@ class Core {
         $this->session_manager = $manager;
     }
 
-    private function createEntityManager(AbstractDatabase $database, ?DebugStack $debug_stack): EntityManager {
+    private function createEntityManager(AbstractDatabase $database): EntityManager {
         $cache_path = FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine');
         $cache = new PhpFilesAdapter("", 0, $cache_path);
-        $config = ORMSetup::createAnnotationMetadataConfiguration(
+        $config = ORMSetup::createAttributeMetadataConfiguration(
             [FileUtils::joinPaths(__DIR__, '..', 'entities')],
             $this->config->isDebug(),
             FileUtils::joinPaths(dirname(__DIR__, 2), 'cache', 'doctrine-proxy'),
             $cache
         );
 
-        if ($debug_stack) {
-            $config->setSQLLogger($debug_stack);
-        }
-
-        $conn = [
-            'driver' => 'pdo_pgsql',
-            'pdo' => $database->getConnection(),
-        ];
-        return EntityManager::create($conn, $config);
+        return new EntityManager($database->getConnection(), $config);
     }
 
     /**
@@ -218,11 +200,10 @@ class Core {
         $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
-        $this->submitty_db->connect();
+        $this->submitty_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->submitty_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db, $this->submitty_debug_stack);
+        $this->submitty_entity_manager = $this->createEntityManager($this->submitty_db);
     }
 
     public function setMasterDatabase(AbstractDatabase $database): void {
@@ -237,11 +218,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->submitty_db) {
             return [];
         }
-        $queries = $this->submitty_db->getPrintQueries();
-        foreach ($this->submitty_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->submitty_db->getPrintQueries();
     }
 
     public function loadCourseDatabase(): void {
@@ -249,11 +226,10 @@ class Core {
             return;
         }
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
-        $this->course_db->connect();
+        $this->course_db->connect($this->config->isDebug());
 
         $this->setQueries($this->database_factory->getQueries($this));
-        $this->course_debug_stack = $this->config->isDebug() ? new DebugStack() : null;
-        $this->course_entity_manager = $this->createEntityManager($this->course_db, $this->course_debug_stack);
+        $this->course_entity_manager = $this->createEntityManager($this->course_db);
     }
 
     public function setCourseDatabase(AbstractDatabase $database): void {
@@ -272,11 +248,7 @@ class Core {
         if (!$this->config->isDebug() || !$this->course_db) {
             return [];
         }
-        $queries = $this->course_db->getPrintQueries();
-        foreach ($this->course_debug_stack->queries as $query) {
-            $queries[] = DatabaseUtils::formatQuery($query['sql'], $query['params']);
-        }
-        return $queries;
+        return $this->course_db->getPrintQueries();
     }
 
     public function hasDBPerformanceWarning(): bool {
@@ -288,19 +260,7 @@ class Core {
             return true;
         }
 
-        $queries = [];
-        if ($this->course_debug_stack !== null) {
-            foreach ($this->course_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-        if ($this->submitty_debug_stack !== null) {
-            foreach ($this->submitty_debug_stack->queries as $query) {
-                $queries[] = $query['sql'];
-            }
-        }
-
-        return count($queries) !== count(array_unique($queries));
+        return false;
     }
 
     private function logPerformanceWarning(): void {
@@ -330,7 +290,7 @@ class Core {
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+        Logger::debug("Excessive or duplicate queries observed: {$num_queries} queries executed.\nMethod: {$_SERVER['REQUEST_METHOD']}");
     }
 
     /**
@@ -428,7 +388,6 @@ class Core {
 
     public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
-        $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
         $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
@@ -809,6 +768,13 @@ class Core {
     }
 
     /**
+     * Gets the time for the given string in the config timezone
+     */
+    public function getDateTimeSpecific(string $time_string): \DateTime {
+        return new \DateTime($time_string, $this->getConfig()->getTimezone());
+    }
+
+    /**
      * Given a string URL, sets up a CURL request to that URL, wherein it'll either return the response
      * assuming that we
      *
@@ -889,7 +855,7 @@ class Core {
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
-                    if ($this->session_manager->shouldSessionBeUpdated()) {
+                    if ($this->session_manager->checkAndUpdateSession()) {
                         $new_token = TokenManager::generateSessionToken(
                             $session_id,
                             $token->claims()->get('sub')

@@ -1,5 +1,5 @@
 <div id="gradeable-dates">
-    <input name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
+    <input data-testid="ta-view-start-date" name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
     <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
 
     <br />
@@ -7,13 +7,13 @@
 
     <div class="electronic_file electronic_file_dates">
         <div class="team_yes team_yes_dates">
-            <input name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format, timezone_string) }}">
+            <input data-testid="team_lock_date" name="team_lock_date" id="date_team_lock" class="date_picker" type="text" value="{{ gradeable.getTeamLockDate()|date(date_format, timezone_string) }}">
             <label for="date_team_lock">Team Lock Date (Instructors can still manually manage teams)</label>
 
             <br />
         </div>
 
-        <input id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format, timezone_string) }}">
+        <input data-testid="submission-open-date" id="date_submit" name="submission_open_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionOpenDate()|date(date_format, timezone_string) }}">
         <label for="date_submit">Submission Open Date (submission available to students)</label>
 
         <br />
@@ -28,20 +28,20 @@
             </div>
 
             <div id="due_date_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
-                <input id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
+                <input data-testid="submission-due-date" id="date_due" name="submission_due_date" class="date_picker" type="text" value="{{ gradeable.getSubmissionDueDate()|date(date_format, timezone_string) }}">
                 <label for="date_due">Due Date</label>
             </div>
         </div>
     </div>
     <div id="manual_grading_container" class="due_date_date" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
         <div class="manual_grading manual_grading_dates">
-            <input name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format, timezone_string) }}"
+            <input data-testid="grade_start_date" name="grade_start_date" id="date_grade" class="date_picker" type="text" value="{{ gradeable.getGradeStartDate()|date(date_format, timezone_string) }}"
             {% if not gradeable.getTaGrading() %}disabled{% endif %}>
             <label for="date_grade">TA/Instructor Manual Grading Open Date (grading may begin)</label>
 
             <br />
 
-            <input name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format, timezone_string) }}">
+            <input data-testid="grade_due_date" name="grade_due_date" id="date_grade_due" class="date_picker" type="text" value="{{ gradeable.getGradeDueDate()|date(date_format, timezone_string) }}">
             <label for="date_grade_due">TA/Instructor Manual Grading Due Date</label>
 
             <br />
@@ -57,13 +57,14 @@
         </div>
 
         <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
-            <input name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
 
-            <p style="max-width:600px;" id="checkpoint-numeric-gradeables-message">
+            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
+                {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
         </div>
     </div>
@@ -71,12 +72,12 @@
 
     <div class="electronic_file electronic_file_dates">
         <div class="grade_inquiry_date" {{ grade_inquiry_allowed != true ? 'hidden' : '' }}>
-            <input name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
+            <input data-testid="grade_inquiry_start_date" name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
             <label for="date_grade_inquiry_start">Grade Inquiry Start Date (Grade Inquiries may begin)</label>
 
             <br />
 
-            <input name="grade_inquiry_due_date" id="date_grade_inquiry_due" class="date_picker grade_inquiry_due_date" type="text" value="{{ gradeable.getGradeInquiryDueDate()|date(date_format, timezone_string) }}">
+            <input data-testid="grade-inquiry-due-date" name="grade_inquiry_due_date" id="date_grade_inquiry_due" class="date_picker grade_inquiry_due_date" type="text" value="{{ gradeable.getGradeInquiryDueDate()|date(date_format, timezone_string) }}">
             <label for="date_grade_inquiry_due">Grade Inquiry Due Date (Grade Inquiries must be initiated by this date)</label>
         </div>
 
@@ -91,7 +92,7 @@
             </fieldset>
             <div class="yes-late-submission">
                 <label for="late_days">How many late days may students use on this assignment?</label>
-                <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
+                <input style="width: 50px" id="late_days" name="late_days" data-testid="late-days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
 
                 <br />
 
@@ -162,7 +163,7 @@
                                     date = new Date();
                                     break;
                                 case 1:
-                                    date = new Date("9998-01-01 00:00:00");
+                                    date = new Date("9998-01-01T00:00:00");
                                     break;
                             }
                             fp.setDate(date, true);

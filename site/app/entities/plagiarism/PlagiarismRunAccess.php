@@ -5,41 +5,30 @@ declare(strict_types=1);
 namespace app\entities\plagiarism;
 
 use app\libraries\DateUtils;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use DateTime;
 
 /**
  * Class PlagiarismRunAccess
  * @package app\entities\plagiarism
- * @ORM\Entity
- * @ORM\Table(name="lichen_run_access")
  */
+#[ORM\Entity]
+#[ORM\Table(name: "lichen_run_access")]
 class PlagiarismRunAccess {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @var int
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\GeneratedValue(strategy: "AUTO")]
+    protected int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="app\entities\plagiarism\PlagiarismConfig", inversedBy="access_times")
-     * @var PlagiarismConfig
-     */
-    protected $lichen_run;
+    #[ORM\ManyToOne(targetEntity: PlagiarismConfig::class, inversedBy: "access_times")]
+    protected PlagiarismConfig $lichen_run;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @var string
-     */
-    protected $user_id;
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    protected string $user_id;
 
-    /**
-     * @ORM\Column(type="datetimetz")
-     * @var DateTime
-     */
-    protected $timestamp;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
+    protected DateTime $timestamp;
 
     /**
      * PlagiarismRunAccess constructor.

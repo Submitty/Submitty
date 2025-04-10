@@ -50,7 +50,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
-        // Only show the late banner if the submission has a due date
+        // Only show the late banner and daylight savings banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
         if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
@@ -197,6 +197,57 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+        // process daylight savings banner
+        // check if we have excessive amounts of late days or if the due date and due date + late days is in different time zones
+        // and if the user can submit without it being too late
+        $due_date = $gradeable->getSubmissionDueDate();
+        $due_date_with_late_days = clone $due_date;
+        $due_date_with_late_days->modify('+' . $late_days_allowed . ' days');
+        $today = new \DateTime();
+
+        // if we are past the due date + late days
+        if ($today > $due_date_with_late_days) {
+            $daylight_message_required = false;
+        }
+        elseif ($late_days_allowed <= 365) {
+            $daylight_due_date = intval($due_date->format("I"));
+            $daylight_due_date_with_late_days = intval($due_date_with_late_days->format("I"));
+            // DST is different, DST message always required
+            if ($daylight_due_date !== $daylight_due_date_with_late_days) {
+                $daylight_message_required = true;
+            }
+            else { // check if we walked in and then out of DST
+                // same year, only need to check due date outside DST (0) and late day + due date outside of DST but on the other side (0)
+                if ($due_date->format("y") === $due_date_with_late_days->format("y")) {
+                    if ($daylight_due_date === 1 || $daylight_due_date_with_late_days === 1) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = intval($due_date->format("m")) < 6 && intval($due_date_with_late_days->format("m")) > 6;
+                    }
+
+                // different year, only false if we go from second non-DST to first non-DST
+                }
+                else {
+                    if (
+                        $daylight_due_date === 0
+                        && $daylight_due_date_with_late_days === 0
+                        && intval($due_date->format("m")) > 6
+                        && intval($due_date_with_late_days->format("m")) < 6
+                    ) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = true;
+                    }
+                }
+            }
+        }
+        else {
+            // more than 365 days, always true
+            $daylight_message_required = true;
+        }
+
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
         if ($active_version >= 1 && $active_days_late > 0) {
@@ -223,7 +274,8 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_day_budget
+                    'remaining' => $late_day_budget,
+                    'allowed_remaining' => $late_days_allowed - $active_days_charged
                 ]];
             }
             if ($error) {
@@ -286,9 +338,13 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
-            'error' => $error
+            'error' => $error,
+            'daylight' => $daylight_message_required,
+            'late_days_url' => $late_days_url
         ]);
     }
 
@@ -457,6 +513,15 @@ class HomeworkView extends AbstractView {
             }
         }, $team_ldi)) : 0;
 
+        $min_team_member_late_days_exception = $team_ldi !== null ? min(array_map(function ($ldi) {
+            if ($ldi !== null) {
+                return $ldi->getLateDayException();
+            }
+            else {
+                return 0;
+            }
+        }, $team_ldi)) : 0;
+
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : [];
 
         $this->core->getOutput()->addInternalCss('submitbox.css');
@@ -475,6 +540,22 @@ class HomeworkView extends AbstractView {
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$gradeable_id}', $gradeable->getId(), $vcs_partial_path);
         $vcs_partial_path = str_replace('{$user_id}', $this->core->getUser()->getId(), $vcs_partial_path);
+        if ($gradeable->isTeamAssignment()) {
+            $vcs_partial_path = str_replace('{$team_id}', $graded_gradeable->getSubmitter()->getId(), $vcs_partial_path);
+        }
+
+        $vcs_repo_exists = false;
+        if ($gradeable->isVcs()) {
+            $path = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                'vcs',
+                'git',
+                $this->core->getConfig()->getTerm(),
+                $this->core->getConfig()->getCourse(),
+                $vcs_partial_path
+            );
+            $vcs_repo_exists = file_exists($path);
+        }
 
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
@@ -509,6 +590,7 @@ class HomeworkView extends AbstractView {
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
             'min_team_member_late_days' => $min_team_member_late_days,
+            'min_team_member_late_days_exception' => $min_team_member_late_days_exception,
             'num_inputs' => isset($notebook_inputs) ? count($notebook_inputs) : 0,
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
@@ -548,7 +630,9 @@ class HomeworkView extends AbstractView {
             'is_grader_view' => false,
             'recent_version_url' => $recent_version_url,
             'git_auth_token_url' => $this->core->buildUrl(['authentication_tokens']),
-            'git_auth_token_required' => false
+            'git_auth_token_required' => false,
+            'vcs_repo_exists' => $vcs_repo_exists,
+            'vcs_generate_repo_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'generate_repo'])
         ]);
     }
 
@@ -1064,7 +1148,7 @@ class HomeworkView extends AbstractView {
         $failed_file = '';
         $file_count = 0;
         // See if the grade has succeeded or failed
-        if (in_array('files', $param)) {
+        if (array_key_exists('files', $param)) {
             $file_count = count($param['files']);
             if ($file_count === 1) {
                 foreach ($param['files'] as $file) {
@@ -1102,8 +1186,7 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
-            // TODO: change this to submitter ID when the MiscController uses new model
-            'user_id' => $this->core->getUser()->getId(),
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
             'team_members' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getMemberList() : [],
             'team_name' => $gradeable->isTeamAssignment() ? $graded_gradeable->getSubmitter()->getTeam()->getTeamName() : '',

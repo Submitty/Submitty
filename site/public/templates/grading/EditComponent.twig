@@ -21,7 +21,7 @@
                 <label for="component-title-{{component.id}}">Title</label>
             </div>
             <div class="col component-title-container">
-                <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)"/>
+                <input id="component-title-{{component.id}}" class="component-title" type="text" value="{{ component.title|escape }}" placeholder="Component Title" onkeyup="onComponentTitleChange(this)" data-testid="peer-component-title"/>
             </div>
             {% if component.page > 0 %}
                 <div class="col-no-gutters page-label">
@@ -41,7 +41,7 @@
                 <label for="ta-comment-{{component.id}}">Note to TAs</label>
             </div>
             <div class="col tight-right">
-                <textarea id="ta-comment-{{component.id}}" class="ta-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
+                <textarea id="ta-comment-{{component.id}}" data-testid="ta-comment-box" class="ta-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to TAs">{{ component.ta_comment|escape }}</textarea>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
                 <label for="student-comment-{{component.id}}">Note to Students</label>
             </div>
             <div class="col tight-right">
-                <textarea id="student-comment-{{component.id}}" class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
+                <textarea id="student-comment-{{component.id}}" data-testid="student-comment-box" class="student-comment noscroll" onkeyup="auto_grow(this)" placeholder="Note to Students">{{ component.student_comment|escape }}</textarea>
             </div>
         </div>
         {# Choose if this component should be linked with itempool questions or not #}
@@ -82,6 +82,7 @@
             <label for="max-points-{{component.id}}" class="col-label-fixed">Points</label>
             <div class="col point-input-container">
                 <input id="max-points-{{component.id}}"
+                       data-testid="max-points-box"
                        class="max-points"
                        step="{{ precision }}"
                        type="number" min="0"
@@ -124,14 +125,14 @@
                 <span class="radio-input">
                     <input type="radio" class="count-up-selector count-type-selector key_to_click" tabindex="0"
                            name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
-                           onclick="onClickCountUp(this)" id="grade_by_count_up_{{ component.id }}"> <label for="grade_by_count_up_{{ component.id }}">Grade by Count Up (from zero)</label>
+                           onclick="onClickCountUp(this)" id="grade_by_count_up_{{ component.id }}"> <label for="grade_by_count_up_{{ component.id }}" data-testid="grade-by-count-up-option">Grade by Count Up (from zero)</label>
                 </span>
             </div>
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-down-selector count-type-selector key_to_click" tabindex="0"
                            name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
-                           onclick="onClickCountDown(this)" id="grade_by_count_down_{{ component.id }}"> <label for="grade_by_count_down_{{ component.id }}">Grade by Count Down (from "Points")</label>
+                           onclick="onClickCountDown(this)" id="grade_by_count_down_{{ component.id }}"> <label for="grade_by_count_down_{{ component.id }}" data-testid="grade-by-count-down-option">Grade by Count Down (from Points)</label>
                 </span>
             </div>
         </fieldset>

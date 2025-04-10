@@ -50,9 +50,9 @@ class NotificationController extends AbstractController {
     }
     /**
      * @param string|null $show_all
-     * @Route("/courses/{_semester}/{_course}/notifications")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications")]
     public function showNotifications(?string $show_all = null) {
         $show_all = !empty($show_all);
         $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
@@ -71,9 +71,10 @@ class NotificationController extends AbstractController {
     /**
      * @param string $nid
      * @param string|null $seen
-     * @Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
+     *
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications/{nid}", requirements: ["nid" => "[1-9]\d*"])]
     public function openNotification($nid, $seen) {
         $user_id = $this->core->getUser()->getId();
         $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $nid)['metadata'];
@@ -88,9 +89,10 @@ class NotificationController extends AbstractController {
 
     /**
      * @param string $nid
-     * @Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
+     *
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications/{nid}/seen", requirements: ["nid" => "[1-9]\d*"])]
     public function markNotificationAsSeen($nid) {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), intval($nid));
         return MultiResponse::RedirectOnlyResponse(
@@ -99,9 +101,9 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notifications/seen")
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications/seen")]
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
         return MultiResponse::RedirectOnlyResponse(
@@ -110,9 +112,9 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notifications/settings", methods={"GET"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["GET"])]
     public function viewNotificationSettings() {
         return MultiResponse::webOnlyResponse(
             new WebResponse(
@@ -124,9 +126,9 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/notifications/settings", methods={"POST"})
      * @return MultiResponse
      */
+    #[Route("/courses/{_semester}/{_course}/notifications/settings", methods: ["POST"])]
     public function changeSettings() {
         //Change settings for the current user.
         unset($_POST['csrf_token']);

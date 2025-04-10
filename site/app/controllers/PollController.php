@@ -15,6 +15,9 @@ use app\libraries\routers\Enabled;
 use app\libraries\FileUtils;
 use app\libraries\PollUtils;
 use app\views\PollView;
+use app\libraries\socket\Client;
+use WebSocket;
+use DateInterval;
 
 /**
  * @Enabled("polls")
@@ -24,9 +27,7 @@ class PollController extends AbstractController {
         parent::__construct($core);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls", methods={"GET"})
-     */
+    #[Route("/courses/{_semester}/{_course}/polls", methods: ["GET"])]
     public function showPollsPage(): WebResponse {
         /** @var \app\repositories\poll\PollRepository */
         $repo = $this->core->getCourseEntityManager()->getRepository(Poll::class);
@@ -51,6 +52,7 @@ class PollController extends AbstractController {
 
             $todays_polls = [];
             $old_polls = [];
+            $tomorrow_polls = [];
             $future_polls = [];
             /** @var Poll $poll */
             foreach ($all_polls as $poll) {
@@ -59,6 +61,12 @@ class PollController extends AbstractController {
                 }
                 elseif ($poll->getReleaseDate() < $this->core->getDateTimeNow()) {
                     $old_polls[] = $poll;
+                }
+                elseif (
+                    $poll->getReleaseDate() > $this->core->getDateTimeNow()
+                    && $poll->getReleaseDate()->format('Y-m-d') === $this->core->getDateTimeNow()->modify('+1 day')->format('Y-m-d')
+                ) {
+                    $tomorrow_polls[] = $poll;
                 }
                 elseif ($poll->getReleaseDate() > $this->core->getDateTimeNow()) {
                     $future_polls[] = $poll;
@@ -70,6 +78,7 @@ class PollController extends AbstractController {
                 'showPollsInstructor',
                 $todays_polls,
                 $old_polls,
+                $tomorrow_polls,
                 $future_polls,
                 $num_responses_by_poll,
                 $dropdown_states,
@@ -98,9 +107,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @return RedirectResponse|WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/polls/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*"])]
     public function showPoll(string $poll_id) {
         if (!is_numeric($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -130,6 +139,10 @@ class PollController extends AbstractController {
                 $this->core->addErrorMessage("Invalid Poll ID");
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
+            if (!$poll->isVisible()) {
+                $this->core->addErrorMessage("Poll is not available");
+                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            }
             if ($poll->isHistogramAvailable()) {
                 /** @var \app\repositories\poll\OptionRepository */
                 $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
@@ -146,9 +159,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["GET"])]
     public function showNewPollPage(): WebResponse {
         return new WebResponse(
             PollView::class,
@@ -158,9 +171,9 @@ class PollController extends AbstractController {
 
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/newPoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["POST"])]
     public function addNewPoll(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
@@ -191,7 +204,26 @@ class PollController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
-        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $date, $_POST['release_histogram'], $_POST["release_answer"]);
+        //set to 0 if it is not found in $_POST.
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $duration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($duration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        $poll = new Poll($_POST['name'], $_POST['question'], $_POST['question_type'], $duration, $date, $_POST['release_histogram'], $_POST["release_answer"], null, isset($_POST['poll-custom-options']));
         $em->persist($poll);
 
         // Need to run this after persist so that we can use getId() below
@@ -250,10 +282,10 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*", })
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*", ])]
     public function editPoll($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -275,9 +307,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods: ["POST"])]
     public function submitEdits(): RedirectResponse {
         $returnUrl = $this->core->buildCourseUrl(['polls']);
         $poll_id = (int) $_POST['poll_id'];
@@ -306,9 +338,49 @@ class PollController extends AbstractController {
                 return new RedirectResponse($this->core->buildCourseUrl(['polls']));
             }
         }
-
-
         $date = \DateTime::createFromFormat("Y-m-d", $_POST["release_date"]);
+        $hours = intval($_POST['poll-hours'] ?? 0);
+        $minutes = intval($_POST['poll-minutes'] ?? 0);
+        $seconds = intval($_POST['poll-seconds'] ?? 0);
+        $enableTimer = isset($_POST['enable-timer']);
+        if (!$enableTimer) {
+            $hours = 0;
+            $minutes = 0;
+            $seconds = 0;
+        }
+        $prevHours = $poll->getDuration()->h;
+        $prevMinutes = $poll->getDuration()->i;
+        $prevSeconds = $poll->getDuration()->s;
+        $resetDuration = true;
+        if ($hours === $prevHours && $minutes === $prevMinutes && $seconds === $prevSeconds) {
+            $resetDuration = false;
+        }
+        $newDuration = new DateInterval("PT{$hours}H{$minutes}M{$seconds}S");
+        //comparing with DateTimes because PHP doesn't support DateInterval comparison
+        $UserInputDuration = $this->core->getDateTimeNow();
+        $TwentyFourHourDateTime = clone $UserInputDuration;
+        $UserInputDuration->add($newDuration);
+        $twentyfourHourDuration = new DateInterval("PT24H");
+        $TwentyFourHourDateTime->add($twentyfourHourDuration);
+        if ($UserInputDuration > $TwentyFourHourDateTime) {
+            $this->core->addErrorMessage("Exceeded 24 hour limit");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls/newPoll']));
+        }
+        if ($hours < 0 || $minutes < 0 || $seconds < 0) {
+            $this->core->addErrorMessage('Invalid time given');
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if ($poll->isOpen() && $resetDuration) {
+            if ($newDuration->h > 0 || $newDuration->i > 0 || $newDuration->s > 0 || $newDuration->days > 0 || $newDuration->m > 0 || $newDuration->y > 0) {
+                $endDate = $this->core->getDateTimeNow();
+                $endDate->add($newDuration);
+                $poll->setEndTime($endDate);
+            }
+            else {
+                // Timer Disabled
+                $poll->setEndTime(null);
+            }
+        }
         if ($date === false) {
             $this->core->addErrorMessage("Invalid poll release date");
             return new RedirectResponse($returnUrl);
@@ -317,13 +389,14 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid poll question type");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-
         $poll->setName($_POST['name']);
         $poll->setQuestion($_POST['question']);
         $poll->setQuestionType($_POST['question_type']);
+        $poll->setDuration($newDuration);
         $poll->setReleaseDate($date);
         $poll->setReleaseHistogram($_POST['release_histogram']);
         $poll->setReleaseAnswer($_POST['release_answer']);
+        $poll->setAllowsCustomOptions(isset($_POST['poll-custom-options']));
 
         if (isset($_FILES['image_file']) && $_FILES["image_file"]["name"] !== "") {
             $file = $_FILES["image_file"];
@@ -411,15 +484,21 @@ class PollController extends AbstractController {
         }
 
         $em->flush();
-
+        $web_socket_message = [
+            'type' => 'poll_updated',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll updated',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll successfully edited");
         return new RedirectResponse($returnUrl);
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setOpen", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/setOpen", methods: ["POST"])]
     public function openPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -429,16 +508,112 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setOpen();
+        $poll->setVisible();
+        $duration = $poll->getDuration();
+        if ($duration->h > 0 || $duration->i > 0 || $duration->s > 0 || $duration->days > 0 || $duration->m > 0 || $duration->y > 0) {
+            $end_time = $this->core->getDateTimeNow();
+            $end_time->add($duration);
+            $poll->setEndTime($end_time);
+        }
+        else {
+            //If duration is 0, it means that the user wants to manually close it.
+            $end_time = null;
+            $poll->setEndTime($end_time);
+        }
         $em->flush();
+
+        $web_socket_message = [
+            'type' => 'poll_opened',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll opened',
+        ];
+        $this->sendSocketMessage($web_socket_message);
 
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
+    #[Route("/courses/{_semester}/{_course}/polls/addCustomResponse", methods: ["POST"])]
+    public function addCustomResponse(): JsonResponse {
+        $poll_id = intval($_POST['poll_id'] ?? -1);
+        $poll_response = $_POST['custom-response'] ?? '';
+        $user_id = $this->core->getUser()->getId();
+        $em = $this->core->getCourseEntityManager();
+        $poll_repo = $em->getRepository(Poll::class);
+        $option_repo = $em->getRepository(Option::class);
+        /** @var Poll|null */
+        $poll = $poll_repo->find($poll_id);
+        if ($poll === null) {
+            return JsonResponse::getFailResponse("Invalid Poll ID");
+        }
+        elseif (!$poll->isOpen() && !$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse("Poll is closed");
+        }
+        elseif (trim($poll_response) === '') {
+            return JsonResponse::getFailResponse("No associated text provided for custom response");
+        }
+        elseif ($poll->getAllowsCustomResponses() === false) {
+            return JsonResponse::getFailResponse("Poll is currently not accepting custom responses");
+        }
+        elseif ($option_repo->existsByPollAndResponse($poll_id, $poll_response)) {
+            return JsonResponse::getFailResponse("A similar response already exists");
+        }
+
+        $custom_poll_option = new Option($poll->getOptions()->count(), $poll_response, $poll->isSurvey(), $user_id);
+        $poll->addOption($custom_poll_option);
+        $em->persist($custom_poll_option);
+
+        $response = new Response($user_id);
+        $poll->addResponse($response, $custom_poll_option->getId());
+        $em->persist($response);
+        $em->flush();
+
+        return JsonResponse::getSuccessResponse(["message" => "Successfully added custom response"]);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/polls/removeCustomResponse", methods: ["POST"])]
+    public function removeCustomResponse(): JsonResponse {
+        $poll_id = intval($_POST['poll_id'] ?? -1);
+        $option_id = intval($_POST['option_id'] ?? -1);
+        $user_id = $this->core->getUser()->getId();
+        $em = $this->core->getCourseEntityManager();
+        $poll_repo = $em->getRepository(Poll::class);
+        /** @var Poll|null */
+        $poll = $poll_repo->find($poll_id);
+        if ($poll === null) {
+            return JsonResponse::getErrorResponse("Invalid Poll ID");
+        }
+        elseif (!$poll->isOpen() && !$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getFailResponse("Poll is closed");
+        }
+
+        /** @var Option|null */
+        $custom_option = $this->core->getCourseEntityManager()->find(Option::class, $option_id);
+        if ($custom_option === null) {
+            return JsonResponse::getErrorResponse("Could not find custom response");
+        }
+        elseif ($custom_option->getAuthorId() !== $user_id && !$this->core->getUser()->accessFaculty()) {
+            return JsonResponse::getErrorResponse("You have no access to remove this custom response");
+        }
+        elseif ($custom_option->getUserResponses()->count() > 1 || ($custom_option->getUserResponses()->count() === 1 && $custom_option->getUserResponses()->first()->getStudentId() !== $user_id)) {
+            return JsonResponse::getErrorResponse("Cannot delete response option that has already been submitted as an answer by another individual");
+        }
+
+        foreach ($custom_option->getUserResponses() as $response) {
+            $em->remove($response);
+        }
+        $poll->removeOption($custom_option);
+        $em->remove($custom_option);
+        $em->persist($poll);
+        $em->flush();
+
+        return JsonResponse::getSuccessResponse(["message" => "Successfully removed custom response"]);
+    }
+
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setEnded", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods: ["POST"])]
     public function endPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -448,16 +623,23 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        $poll->setEnded();
+        $poll->setOpen();
+        $poll->setEndTime($this->core->getDateTimeNow());
         $em->flush();
-
+        $web_socket_message = [
+            'type' => 'poll_ended',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll ended',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/setClosed", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/setClosed", methods: ["POST"])]
     public function closePoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -470,12 +652,17 @@ class PollController extends AbstractController {
         $poll->setClosed();
         $em->flush();
 
+        $web_socket_message = [
+            'type' => 'poll_closed',
+            'poll_id' => $poll_id,
+            'socket' => 'student',
+            'message' => 'Poll closed',
+        ];
+        $this->sendSocketMessage($web_socket_message);
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/polls/submitResponse", methods={"POST"})
-     */
+    #[Route("/courses/{_semester}/{_course}/polls/submitResponse", methods: ["POST"])]
     public function submitResponse(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 
@@ -510,28 +697,36 @@ class PollController extends AbstractController {
         }
 
         $user_id = $this->core->getUser()->getId();
+        $web_socket_message = [
+            'type' => 'update_histogram',
+            'poll_id' => $poll_id,
+            'socket' => 'instructor',
+            'message' => [],
+        ];
 
         foreach ($poll->getUserResponses() as $response) {
             $em->remove($response);
+            $web_socket_message['message'][$response->getOption()->getResponse()] = -1;
         }
         if (array_key_exists("answers", $_POST) && $_POST['answers'][0] !== '-1') {
             foreach ($_POST['answers'] as $option_id) {
                 $response = new Response($user_id);
                 $poll->addResponse($response, $option_id);
                 $em->persist($response);
+                $web_socket_message['message'][$response->getOption()->getResponse()] += 1;
             }
         }
 
         $em->flush();
-
+        $this->sendSocketMessage($web_socket_message);
         $this->core->addSuccessMessage("Poll response recorded");
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/deletePoll", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/deletePoll", methods: ["POST"])]
     public function deletePoll(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -564,10 +759,10 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods={"GET"}, requirements={"poll_id": "\d*"})
      * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
+    #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*"])]
     public function viewResults($poll_id) {
         if (!isset($poll_id)) {
             $this->core->addErrorMessage("Invalid Poll ID");
@@ -586,9 +781,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods: ["POST"])]
     public function hasAnswers() {
         $option_id  = (int) $_POST['option_id'];
         if (empty($option_id)) {
@@ -603,9 +798,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/export", methods={"GET"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/export", methods: ["GET"])]
     public function getPollExportData() {
         /** @var Poll[] */
         $polls = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findAll();
@@ -623,9 +818,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/polls/import", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
+    #[Route("/courses/{_semester}/{_course}/polls/import", methods: ["POST"])]
     public function importPollsFromJSON(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $filename = $_FILES["polls_file"]["tmp_name"];
@@ -651,7 +846,8 @@ class PollController extends AbstractController {
                 implemented don't have this data. At the time, there
                 only existed questions of type single response. */
             $question_type = array_key_exists("question_type", $poll) ? $poll['question_type'] : 'single-response-multiple-correct';
-            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer']);
+            $poll_entity = new Poll($poll['name'], $poll['question'], $question_type, new \DateInterval($poll['duration']), \DateTime::createFromFormat("Y-m-d", $poll['release_date']), $poll['release_histogram'], $poll['release_answer'], $poll['image_path'], $poll['allows_custom']);
+
             $em->persist($poll_entity);
             $order = 0;
             foreach ($poll['responses'] as $id => $response) {
@@ -672,5 +868,21 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Successfully imported " . $num_imported . " polls. Errors occurred in " . $num_errors . " polls");
         }
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+    }
+
+    /**
+     * This method opens a WebSocket client and sends a message containing corresponding poll updates
+     */
+    private function sendSocketMessage(mixed $msg_array): void {
+        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-polls-" .  $msg_array['poll_id'] . '-' . $msg_array['socket'];
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_array);
+        }
+        catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
     }
 }

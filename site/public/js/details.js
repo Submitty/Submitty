@@ -1,5 +1,5 @@
 /* global courseUrl */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only*/
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -9,7 +9,7 @@ $(document).ready(() => {
 
     // Attach the collapsible panel on details-table
     const ANIMATION_DURATION = 600;
-    $('#details-table .details-info-header').click(function() {
+    $('#details-table .details-info-header').click(function () {
         $(this).toggleClass('panel-head-active');
         const id = $(this).attr('data-section-id');
         if (collapseItems.has(id)) {
@@ -92,7 +92,7 @@ function updateCollapsedSections() {
 }
 
 function expandAllSections() {
-    $('#details-table .details-info-header').each(function() {
+    $('#details-table .details-info-header').each(function () {
         $(this).addClass('panel-head-active');
         $(this).next().show();
     });
@@ -102,7 +102,7 @@ function expandAllSections() {
 
 function collapseAllSections() {
     collapseItems.clear();
-    $('#details-table .details-info-header').each(function() {
+    $('#details-table .details-info-header').each(function () {
         $(this).removeClass('panel-head-active');
         $(this).next().hide();
         collapseItems.add($(this).attr('data-section-id'));
@@ -110,20 +110,22 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function grade_inquiry_only() {
-    $('[data-testid=grade-button]').each(function() {
-        const hasGradeInquiry = typeof $(this).attr('data-grade-inquiry') !== 'undefined';
-        if (!hasGradeInquiry) {
-            $(this).closest('[data-testid="grade-table"]').hide();  // hide gradeable items without active inquiries
-        }
-        else {
-            $(this).closest('[data-testid="grade-table"]').show();  // show gradeable items with active inquiries
-        }
-    });
-}
+function inquiry_update() {
+    const button = document.getElementById('inquiryButton');
+    const status = Cookies.get('inquiry_status');
 
-function reverse_inquiry_only() {
-    $('[data-testid=grade-button]').each(function() {
-        $(this).closest('[data-testid="grade-table"]').show();  // show all gradeable items
-    });
+    if (status === 'on') {
+        $('.grade-button').each(function () {
+            if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
+                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
+            }
+        });
+        button.textContent = 'Grade Inquiry Only: On';
+    }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').show(); // show all gradeable items
+        });
+        button.textContent = 'Grade Inquiry Only: Off';
+    }
 }

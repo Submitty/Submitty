@@ -8,25 +8,32 @@ class HomePageView extends AbstractView {
     /**
      * @param User $user
      * @param array $unarchived_courses
+     * @param array<array<string, string>> $dropped_courses
      * @param array $archived_courses
+     * @param array<mixed> $self_registration_courses
      */
     public function showHomePage(
         User $user,
         array $unarchived_courses,
-        array $archived_courses
+        array $dropped_courses,
+        array $archived_courses,
+        array $self_registration_courses,
     ) {
         $statuses = [];
-        $course_types = [$unarchived_courses, $archived_courses];
+        $course_types = [
+            "unarchived_courses" => $unarchived_courses,
+            "dropped_courses" => $dropped_courses,
+            "self_registration_courses" => $self_registration_courses,
+            "archived_courses" => $archived_courses
+        ];
         $rank_titles = [
             User::GROUP_INSTRUCTOR              => "Instructor:",
             User::GROUP_FULL_ACCESS_GRADER      => "Full Access Grader:",
             User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
             User::GROUP_STUDENT                 => "Student:"
         ];
-
-        foreach ($course_types as $course_type) {
+        foreach ($course_types as $course_type_name => $course_type) {
             $ranks = [];
-
             //Create rank lists
             for ($i = 1; $i < 5; $i++) {
                 $ranks[$i] = [
@@ -44,7 +51,7 @@ class HomePageView extends AbstractView {
             $ranks = array_filter($ranks, function ($rank) {
                 return count($rank["courses"]) > 0;
             });
-            $statuses[] = $ranks;
+            $statuses[$course_type_name] = $ranks;
         }
 
         $this->output->addInternalCss('homepage.css');

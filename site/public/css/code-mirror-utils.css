@@ -1,6 +1,7 @@
 .cm-spell-error {
+    /* stylelint-disable-next-line declaration-no-important */
     background: transparent !important;
-    text-decoration: red dotted underline;
+    text-decoration: var(--standard-vibrant-red) dotted underline;
     text-underline-position: under;
 }
 
@@ -11,15 +12,15 @@
 .cm-s-monokai .CodeMirror-line::selection,
 .cm-s-monokai .CodeMirror-line > span::selection,
 .cm-s-monokai .CodeMirror-line > span > span::selection {
-    background: #3357a0;
+    background: var(--standard-medium-blue);
 }
 .cm-s-monokai .CodeMirror-line::-moz-selection,
 .cm-s-monokai .CodeMirror-line > span::-moz-selection,
 .cm-s-monokai .CodeMirror-line > span > span::-moz-selection {
-    background: #3357a0;
+    background: var(--standard-medium-blue);
 }
 
 .cm-s-monokai div.CodeMirror-selected {
-    background: #3357a0;
+    background: var(--standard-medium-blue);
 }
 /* stylelint-enable */

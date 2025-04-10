@@ -7,6 +7,10 @@ input[disabled]:not(#admin-gradeable-peers-submit) {
     background: var(--standard-medium-gray);
 }
 
+[data-theme="dark"] input[disabled]:not(#admin-gradeable-peers-submit) {
+    background: var(--standard-dark-gray);
+}
+
 input.readonly.peerstudents {
     border: 1px solid var(--standard-light-gray);
     background-color: var(--standard-pale-gray);
@@ -73,7 +77,7 @@ select {
 }
 
 .tab-bar-wrapper {
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid var(--standard-medium-gray);
     display: flex;
     height: 35px;
 }
@@ -81,6 +85,10 @@ select {
 .peer-button {
     background-color: var(--standard-plum-purple);
     color: white;
+}
+
+.new-gradeable {
+    font-family: monospace;
 }
 
 a.nav-bar {
@@ -94,13 +102,14 @@ a.nav-bar {
 a.nav-bar.normal-btn:hover {
     background-color: var(--standard-pastel-blue);
     color: var(--text-black);
-    border: 1px solid gray;
+    border: 1px solid var(--standard-medium-gray);
     border-bottom: none;
 }
 
 a.nav-bar.disabled-btn {
     color: var(--standard-medium-dark-gray);
     cursor: default;
+    /* stylelint-disable-next-line declaration-no-important */
     border: none !important;
     pointer-events: none;
 }
@@ -109,7 +118,7 @@ a.nav-bar.disabled-btn {
 a.nav-bar.normal-btn {
     background-color: var(--default-white);
     color: var(--text-black);
-    border: 1px solid gray;
+    border: 1px solid var(--standard-medium-gray);
     border-bottom: none;
 }
 
@@ -164,10 +173,12 @@ table#grader-history td {
 
 #checkpoint-numeric-gradeables-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #late-days-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #timezone-container {
@@ -212,7 +223,7 @@ div.btn-container {
 
 #rebuild-status-panel {
     display: inline-block;
-    background-color: lightgrey;
+    background-color: var(--standard-light-gray);
     color: var(--btn-text-black);
     position: relative;
     top: 5px;
@@ -308,29 +319,12 @@ select[name="component-itempool"] {
     width: 64%;
 }
 
-/* stylelint-disable selector-class-pattern -- Select2 internal classes */
-#config-drop-down .select2-selection,
-#config-drop-down .select2-selection__rendered,
-#config-drop-down .select2-selection__arrow,
-.select2-container .select2-dropdown,
-.select2-container .select2-dropdown .select2-search .select2-search__field {
-    color: var(--text-black);
-    background-color: var(--default-white);
-}
-
-/* stylelint-disable selector-descendant-combinator-no-non-space -- line too long */
-.select2-container .select2-dropdown .select2-results__options
-.select2-results__option.select2-results__option--selected {
-    background-color: var(--submitty-logo-blue);
-}
-/* stylelint-enable selector-descendant-combinator-no-non-space, selector-class-pattern */
-
 body::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 3px black;
+    box-shadow: inset 0 0 3px var(--default-black);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
 #custom_marks_warning {
-    color: red;
+    color: var(--standard-vibrant-red);
     font-style: italic;
 }

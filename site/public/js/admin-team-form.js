@@ -1,4 +1,4 @@
-/* exported adminTeamForm importTeamForm randomizeRotatingGroupsButton addTeamMemberInput*/
+/* exported adminTeamForm importTeamForm randomizeRotatingGroupsButton addTeamMemberInput */
 /* global captureTabInModal */
 
 function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members,
@@ -9,7 +9,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     captureTabInModal('admin-team-form');
 
     form.find('.form-body').scrollTop(0);
-    $('#admin-team-form-submit').prop('disabled',false);
+    $('#admin-team-form-submit').prop('disabled', false);
     $('[name="new_team"]', form).val(new_team);
     $(`[name="reg_section"] option[value="${reg_section}"]`, form).prop('selected', true);
     $(`[name="rot_section"] option[value="${rot_section}"]`, form).prop('selected', true);
@@ -17,7 +17,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="num_users"]', form).val(3);
     }
     else if (!new_team) {
-        $('[name="num_users"]', form).val(members.length+pending_members.length+2);
+        $('[name="num_users"]', form).val(members.length + pending_members.length + 2);
     }
 
     const title_div = $('#admin-team-title');
@@ -28,14 +28,14 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     const team_history_tbody = $('#admin_team_history_table > tbody');
     team_history_tbody.empty();
 
-    //add nav button to skip to submit button
+    // add nav button to skip to submit button
     members_div.append('<a id="skip-nav" class="skip-btn" href="#admin-team-form-submit">Skip to Submit Button</a>');
     members_div.append('Team Member IDs:<br />');
 
     const student_full = JSON.parse($('#student_full_id').val());
     let exists_multiple_invite_member = false;
 
-    //if a new team is being created
+    // if a new team is being created
     if (new_team) {
         $('[name="new_team_user_id"]', form).val(who_id);
         $('[name="edit_team_team_id"]', form).val('');
@@ -44,7 +44,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         members_div.append(getTeamFormLabelString('user_id_', 'user_id_', 0));
         members_div.append(getTeamFormReadOnlyInputString('user_id_', 'user_id_', who_id, 0));
 
-        //add 2 more inputs
+        // add 2 more inputs
         for (let i = 1; i < 3; i++) {
             members_div.append(getTeamFormLabelString('user_id_', 'Team Member', i));
             members_div.append(getTeamFormInputString('user_id_', 'user_id_', i));
@@ -57,7 +57,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         members_div.find('[name="reg_section"]').val(reg_section);
         members_div.find('[name="rot_section"]').val(rot_section);
     }
-    //a team is being edited
+    // a team is being edited
     else {
         $('[name="new_team_user_id"]', form).val('');
         $('[name="edit_team_team_id"]', form).val(who_id);
@@ -66,7 +66,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
         $('#admin-team-name-form').val(team_name);
 
-        //append current members in the team to members_div
+        // append current members in the team to members_div
         for (let i = 0; i < members.length; i++) {
             members_div.append(getTeamFormLabelString('user_id_', 'Team Member', i));
             members_div.append(getTeamFormReadOnlyInputString('user_id_', 'user_id_', members[i], i));
@@ -75,10 +75,10 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             members_div.append('<br/>');
         }
 
-        //append pending members to members_div
+        // append pending members to members_div
         for (let i = members.length; i < members.length + pending_members.length; i++) {
-            //if this member has been invited to multiple teams, set flag
-            if (multiple_invite_members[i-members.length]) {
+            // if this member has been invited to multiple teams, set flag
+            if (multiple_invite_members[i - members.length]) {
                 exists_multiple_invite_member = true;
             }
             members_div.append(getTeamFormLabelString('pending_user_id_', 'Pending Team Member', i));
@@ -86,9 +86,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
                 getTeamFormReadOnlyInputString(
                     'pending_user_id_',
                     'pending_user_id_',
-                    `Pending: ${pending_members[i-members.length]}`,
+                    `Pending: ${pending_members[i - members.length]}`,
                     i,
-                    `admin-team-form-pending ${multiple_invite_members[i-members.length] ? 'admin-team-form-pending-conflict' : ''}`,
+                    `admin-team-form-pending ${multiple_invite_members[i - members.length] ? 'admin-team-form-pending-conflict' : ''}`,
                 ),
             );
             members_div.append(getTeamFormLabelString('approve_member_', 'approve_member_', i));
@@ -96,8 +96,8 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             members_div.append('<br/>');
         }
 
-        //add 2 extra inputs at the bottom of the list
-        for (let i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
+        // add 2 extra inputs at the bottom of the list
+        for (let i = members.length + pending_members.length; i < (members.length + pending_members.length + 2); i++) {
             members_div.append(getTeamFormLabelString('user_id_', 'Team Member', i));
             members_div.append(getTeamFormInputString('user_id_', 'user_id_', i));
             members_div.append('<br/>');
@@ -111,9 +111,9 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         if (user_assignment_setting_json != false) {
             const team_history_len = user_assignment_setting_json.team_history.length;
             team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[0].time, 'N/A', 'Team Formed'));
-            team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[team_history_len-1].time, 'N/A', 'Last Edited'));
+            team_history_tbody.append(getTeamHistoryTableRowString('', user_assignment_setting_json.team_history[team_history_len - 1].time, 'N/A', 'Last Edited'));
             let past_lock_date = false;
-            for (let j = 0; j <=team_history_len-1; j++) {
+            for (let j = 0; j <= team_history_len - 1; j++) {
                 const curr_json_entry = user_assignment_setting_json.team_history[j];
                 if (!past_lock_date && curr_json_entry.time > lock_date) {
                     past_lock_date = true;
@@ -157,7 +157,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     }
 
-    $(':text',form).change(function() {
+    $(':text', form).change(function () {
         if ($(this)[0].id === 'admin-team-name-form') {
             return;
         }
@@ -177,7 +177,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     });
 
-    const next_user_num = (new_team ? 3 : members.length+2);
+    const next_user_num = (new_team ? 3 : members.length + 2);
     members_div.append(getTeamFormAddMoreUsersButtonString(next_user_num));
     if (exists_multiple_invite_member) {
         members_div.append(getTeamFormMultipleInvitesWarningString());
@@ -192,11 +192,11 @@ function getTeamHistoryTableRowString(isAfterLockDate, date, user, action) {
     </tr>`;
 }
 
-function getTeamFormLabelString(for_prefix, text, user_num ) {
+function getTeamFormLabelString(for_prefix, text, user_num) {
     return `<label tabIndex="0" for="${for_prefix + user_num}" style="display:none;">${`${text} ${user_num}`}</label>`;
 }
 
-function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string='') {
+function getTeamFormReadOnlyInputString(id_prefix, name_prefix, value, user_num, class_string = '') {
     return `<input 
                 tabIndex="0" 
                 id="${id_prefix + user_num}" 
@@ -250,13 +250,13 @@ function getTeamFormMultipleInvitesWarningString() {
 
 function removeTeamMemberInput(i) {
     const removed_member_element = $(`#user_id_${i}`);
-    //remove the Remove button associated with this member;
+    // remove the Remove button associated with this member;
     $(`#remove_member_${i}`).remove();
 
-    //clear removed_member's input field and change it to writeable
+    // clear removed_member's input field and change it to writeable
     removed_member_element.removeClass('readonly').prop('readonly', false).val('');
 
-    //update autocomplete
+    // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     removed_member_element.autocomplete({
         source: student_full,
@@ -266,21 +266,21 @@ function removeTeamMemberInput(i) {
 function approveTeamMemberInput(i) {
     const new_member_element = $(`#pending_user_id_${i}`);
 
-    //remove accept button associated with pending member
+    // remove accept button associated with pending member
     $(`#approve_member_${i}`).remove();
 
-    //remove pending from the name of the readonly input
+    // remove pending from the name of the readonly input
     new_member_element.attr('name', `user_id_${i}`);
 
-    //remove pending classes from the associated input
+    // remove pending classes from the associated input
     new_member_element.removeClass('admin-team-form-pending');
     new_member_element.removeClass('admin-team-form-pending-conflict');
 
-    //remove "Pending: "" from input value
+    // remove "Pending: "" from input value
     const user_id = (new_member_element.val()).substring(9);
     new_member_element.attr('value', user_id);
 
-    //update autocomplete
+    // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     new_member_element.autocomplete({
         source: student_full,
@@ -288,26 +288,26 @@ function approveTeamMemberInput(i) {
 }
 
 function addTeamMemberInput(old, i) {
-    //insert new input before "Add New Users" button
+    // insert new input before "Add New Users" button
     $(getTeamFormLabelString('user_id_', 'Team Member', i)).insertBefore(old);
     $(getTeamFormInputString('user_id_', 'user_id_', i)).insertBefore(old);
     $('<br/>').insertBefore(old);
 
-    //remove old "Add More Users" button so we can update it
+    // remove old "Add More Users" button so we can update it
     old.remove();
-    //remove the multiple invites warning so we can add it back at the bottom later
+    // remove the multiple invites warning so we can add it back at the bottom later
     $('#multiple-invites-warning').remove();
 
-    //increment num_users
+    // increment num_users
     const form = $('#admin-team-form');
-    $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
+    $('[name="num_users"]', form).val(parseInt($('[name="num_users"]', form).val()) + 1);
 
-    //put button and warning back
+    // put button and warning back
     const members_div = $('#admin-team-members');
-    members_div.append(getTeamFormAddMoreUsersButtonString(i+1));
+    members_div.append(getTeamFormAddMoreUsersButtonString(i + 1));
     members_div.append(getTeamFormMultipleInvitesWarningString());
 
-    //update autocomplete
+    // update autocomplete
     const student_full = JSON.parse($('#student_full_id').val());
     $(`#user_id_${i}`).autocomplete({
         source: student_full,
@@ -322,7 +322,6 @@ function importTeamForm() {
     form.find('.form-body').scrollTop(0);
     $('[name="upload_team"]', form).val(null);
 }
-
 
 function randomizeRotatingGroupsButton() {
     $('.popup-form').css('display', 'none');

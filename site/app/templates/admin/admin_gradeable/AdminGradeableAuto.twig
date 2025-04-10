@@ -95,17 +95,17 @@
                 </select>
             </div>
         </div>
-        <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
+        <a data-testid="config-button" class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
     </div>
 
     <div class="notebook-builder-info">
         <div class="option-title">Notebook Builder:</div>
         <div>
-            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}">Start New</a>
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/new' }}" data-testid="start-new-notebook">Start New</a>
             <span>Start a new configuration with notebook builder.</span>
         </div>
         <div class="notebook-builder-edit-button-div">
-            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}">Edit Existing</a>
+            <a class="btn btn-primary" href="{{ notebook_builder_url ~ '/edit' }}" data-testid="edit-existing-notebook">Edit Existing</a>
             <span>Edit the currently selected configuration with notebook builder.</span>
         </div>
     </div>
@@ -137,6 +137,8 @@
 </div>
 
 <script>
+    registerSelect2Widget("autograding_config_selector");
+    
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
 
     function onPdfChange() {
@@ -222,17 +224,6 @@
             const sub = $('#no_student_submit');
             sub.prop('checked', true);
             sub.change();
-        });
-
-        // Register select2 for #autograding_config_selector
-        // https://stackoverflow.com/a/30021059
-        $('#autograding_config_selector').select2({
-            tags: true,
-            theme: "bootstrap-5",
-            createTag: (params) => ({
-                id: params.term,
-                text: params.term
-            })
         });
     });
 </script>

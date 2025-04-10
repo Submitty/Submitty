@@ -13,22 +13,13 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    /**
-     * @Route("/courses/{_semester}/{_course}/no_access")
-     */
-    public function noAccess() {
-        $this->core->getOutput()->renderOutput('Error', 'noAccessCourse');
-    }
-
-    /**
-     * @Route("/courses/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
-     */
+    #[Route('/courses/{_semester}/{_course}', requirements: ['_semester' => '^(?!api)[^\/]+', '_course' => '[^\/]+'])]
     public function navigationPage() {
         try {
             $gradeables_list = new GradeableList($this->core);
         }
         catch (DatabaseException $e) {
-            ExceptionHandler::handleException($e);
+            ExceptionHandler::handleException($e, $this->core->getUser()?->getId());
 
             $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
             return $this->core->getOutput()->renderOutput('Error', 'genericError', $error_messages);

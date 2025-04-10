@@ -21,10 +21,10 @@
                     <th style="text-align:left;">User ID</th>
                 {% endif %}
                 {% if active_grader_columns[1] %}
-                    <th style="text-align:left;">First Name</th>
+                    <th style="text-align:left;">Given Name</th>
                 {% endif %}
                 {% if active_grader_columns[2] %}
-                    <th style="text-align:left;">Last Name</th>
+                    <th style="text-align:left;">Family Name</th>
                 {% endif %}
                 {% if active_grader_columns[3] %}
                     <th style="text-align:left;">User Group</th>
@@ -44,7 +44,7 @@
                 <tbody id="section-{{ grading_group }}">
                     {% if graders[grading_group]|length > 0 %}
                         <tr class="info">
-                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</td>
+                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</th>
                         </tr>
                         {% for grader in graders[grading_group] %}
                             <tr id="user-{{ grader.getId() }}">

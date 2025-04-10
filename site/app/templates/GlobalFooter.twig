@@ -32,29 +32,7 @@
                 </footer>
             {% endif %}
         </div> {# /#submitty-body #}
-    {% if not content_only %}
-        {% if wrapper_urls['right_sidebar.html'] is defined %}
-            {# uploaded homepage redirect can go here? #}
-            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
-        {% endif %}
-        {% if wrapper_urls['bottom_bar.html'] is defined %}
-            {# uploaded homepage redirect can go here? #}
-            <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
-        {% endif %}
-    {% endif %}
     {% if is_debug %}
-        {% if performance_warning %}
-            <script>
-                $(document).ready(() => {
-                    $('#performance-warning-system-message-text').text('Developer Warning: Excessive or duplicate database queries observed: ' +
-                        '{{ submitty_queries|length + course_queries|length }} queries executed. Click "Show Page Details" at the bottom of the page for more info.');
-                    $('#performance-warning-system-message').css('display', 'flex');
-                });
-                $('#close-performance-warning-system-message').click(() => {
-                    $('#performance-warning-system-message').css('display', 'none');
-                });
-            </script>
-        {% endif %}
         <div id='page-info'>
             Runtime: {{ runtime }}<br /><br />
             <h2>Site Details</h2>

@@ -45,7 +45,7 @@ $core = new Core();
  */
 function exception_handler($throwable) {
     global $core;
-    $message = ExceptionHandler::handleException($throwable);
+    $message = ExceptionHandler::handleException($throwable, $core->getUser()?->getId());
 
     // Any exceptions that always get shown we need to make sure to escape, especially for production
     if (is_a($throwable, '\app\exceptions\BaseException')) {
@@ -110,10 +110,19 @@ header('X-Frame-Options: SAMEORIGIN');
 header('X-Content-Type-Options: nosniff');
 
 // Prevents pages from being embedded in an iframe
-header('Content-Security-Policy: frame-ancestors \'none\'');
+header('Content-Security-Policy: frame-ancestors \'self\'');
 
 // Prevent intermediaries from caching the resource
 header('Cache-Control: private');
+
+// Set the cross-origin embedder policy to prevent the browser from loading the page if it is not CORS safe
+header('Cross-Origin-Embedder-Policy: credentialless');
+
+// Set the cross-origin opener policy to prevent the browser from sharing state with the page if it is not CORS safe
+header('Cross-Origin-Opener-Policy: same-origin');
+
+// Set the referrer policy to strict-origin-when-cross-origin to prevent the browser from sending the full URL
+header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', '1');

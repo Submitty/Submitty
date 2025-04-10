@@ -22,6 +22,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            "testUser",
+            $details['release_date'],
+            null,
             null
         );
         $sections = ['1', '2'];
@@ -56,6 +60,10 @@ class CourseMaterialTester extends BaseUnitTest {
             $details['hidden_from_students'],
             $details['priority'],
             null,
+            null,
+            "testUser",
+            $details['release_date'],
+            null,
             null
         );
         $this->assertEquals($details['type'], $course_material->getType());
@@ -63,5 +71,41 @@ class CourseMaterialTester extends BaseUnitTest {
         $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
         $this->assertEquals($details['hidden_from_students'], $course_material->isHiddenFromStudents());
         $this->assertEquals($details['priority'], $course_material->getPriority());
+    }
+
+    public function testUpdateHistory() {
+        $details = [
+            'type' => CourseMaterial::LINK,
+            'path' => '/tmp/file.txt',
+            'release_date' => new \DateTime('9998-01-01 05:00:00'),
+            'hidden_from_students' => true,
+            'priority' => 2.4,
+            'uploaded_by' => "Dummy Uploader",
+            'uploaded_date' => new \DateTime('9998-01-01 05:00:00'),
+            'last_edit_by' => "Dummy User",
+            'last_edit_date' => new \DateTime('9998-01-01 05:00:00'),
+        ];
+        $course_material = new CourseMaterial(
+            $details['type'],
+            $details['path'],
+            $details['release_date'],
+            $details['hidden_from_students'],
+            $details['priority'],
+            null,
+            null,
+            $details['uploaded_by'],
+            $details['uploaded_date'],
+            $details['last_edit_by'],
+            $details['last_edit_date']
+        );
+        $this->assertEquals($details['type'], $course_material->getType());
+        $this->assertEquals($details['path'], $course_material->getPath());
+        $this->assertEquals($details['release_date'], $course_material->getReleaseDate());
+        $this->assertEquals($details['hidden_from_students'], $course_material->isHiddenFromStudents());
+        $this->assertEquals($details['priority'], $course_material->getPriority());
+        $this->assertEquals($details['uploaded_by'], $course_material->getUploadedBy());
+        $this->assertEquals($details['uploaded_date'], $course_material->getUploadedDate());
+        $this->assertEquals($details['last_edit_by'], $course_material->getLastEditBy());
+        $this->assertEquals($details['last_edit_date'], $course_material->getLastEditDate());
     }
 }

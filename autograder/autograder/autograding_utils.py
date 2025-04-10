@@ -410,11 +410,19 @@ def archive_autograding_results(
     submission_path = os.path.join(tmp_submission, "submission")
     random_output_path = os.path.join(tmp_work, 'random_output')
 
+    # REMOVE THIS After a few patches as this ensures backwards compatibility
+    term_or_semester = None
+    if "term" in queue_obj:
+        term_or_semester = "term"
+    else:
+        config.logger.log_message("Generated config file is using 'semester' instead of 'term'")
+        term_or_semester = "semester"
+
     if "generate_output" not in queue_obj:
         partial_path = os.path.join(queue_obj["gradeable"], queue_obj["who"], str(queue_obj["version"]))
-        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", partial_path)
+        item_name = os.path.join(queue_obj[term_or_semester], queue_obj["course"], "submissions", partial_path)
     elif queue_obj["generate_output"]:
-        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "generated_output", queue_obj["gradeable"])
+        item_name = os.path.join(queue_obj[term_or_semester], queue_obj["course"], "generated_output", queue_obj["gradeable"])
     results_public_dir = os.path.join(tmp_results, "results_public")
     results_details_dir = os.path.join(tmp_results, "details")
     patterns = complete_config_obj['autograding']

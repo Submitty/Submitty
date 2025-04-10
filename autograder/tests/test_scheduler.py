@@ -70,17 +70,13 @@ AUTOGRADING_LOGS = os.path.join(LOG_PATH, 'autograding')
 CONFIG = None
 
 
-def generate_queue_file(name: str, *, required_capabilities: str):
+def generate_queue_file(name: str, *, required_capabilities: str, queue_time: str):
     queue_obj = {
         'required_capabilities': required_capabilities,
+        'queue_time': queue_time
     }
     with open(os.path.join(TO_BE_GRADED, name), 'w') as f:
         json.dump(queue_obj, f)
-
-
-def generate_broken_queue_file(name: str):
-    with open(os.path.join(TO_BE_GRADED, name), 'w') as f:
-        f.write("This isn't a valid JSON file.\n")
 
 
 class TestScheduler(unittest.TestCase):
@@ -183,7 +179,7 @@ class TestScheduler(unittest.TestCase):
         scheduler = FCFSScheduler(CONFIG, [worker])
 
         # Place a dummy queue file in the queue
-        generate_queue_file("test", required_capabilities='default')
+        generate_queue_file("test", required_capabilities='default', queue_time='')
 
         # Invoke the scheduler's update mechanism
         scheduler.update_and_schedule()
@@ -209,7 +205,7 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("test", required_capabilities='default')
+        generate_queue_file("test", required_capabilities='default', queue_time='')
 
         scheduler.update_and_schedule()
 
@@ -234,9 +230,9 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, [worker])
 
-        generate_queue_file("first", required_capabilities='default')
+        generate_queue_file("first", required_capabilities='default', queue_time='')
         time.sleep(0.1)  # Kinda ugly, but helps avoid temporal aliasing by the OS
-        generate_queue_file("second", required_capabilities='default')
+        generate_queue_file("second", required_capabilities='default', queue_time='')
 
         scheduler.update_and_schedule()
 
@@ -277,11 +273,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities='default')
+        generate_queue_file("first", required_capabilities='default', queue_time='')
         time.sleep(0.1)
-        generate_queue_file("second", required_capabilities='default')
+        generate_queue_file("second", required_capabilities='default', queue_time='')
         time.sleep(0.1)
-        generate_queue_file("third", required_capabilities='default')
+        generate_queue_file("third", required_capabilities='default', queue_time='')
 
         scheduler.update_and_schedule()
 
@@ -310,11 +306,11 @@ class TestScheduler(unittest.TestCase):
 
         scheduler = FCFSScheduler(CONFIG, workers)
 
-        generate_queue_file("first", required_capabilities='zero')
-        generate_queue_file("second", required_capabilities='one')
-        generate_queue_file("third", required_capabilities='two')
+        generate_queue_file("first", required_capabilities='zero', queue_time='')
+        generate_queue_file("second", required_capabilities='one', queue_time='')
+        generate_queue_file("third", required_capabilities='two', queue_time='')
         time.sleep(0.1)
-        generate_queue_file("fourth", required_capabilities='zero')
+        generate_queue_file("fourth", required_capabilities='zero', queue_time='')
 
         scheduler.update_and_schedule()
 
@@ -325,22 +321,3 @@ class TestScheduler(unittest.TestCase):
         all_worker_files = sum([os.listdir(worker.folder) for worker in workers], [])
         self.assertNotIn("fourth", all_worker_files)
 
-    @mock.patch('multiprocessing.Process')
-    def test_fcfs_ignore_invalid_queue_file(self, MockProcess: mock.Mock):
-        """Test that the scheduler properly ignores invalid queue files."""
-        worker_proc = MockProcess()
-        worker_proc.is_alive = mock.MagicMock(return_value=True)
-
-        worker = Worker(CONFIG, 'worker_0', WORKER_PROPERTIES['worker_0'], worker_proc)
-
-        scheduler = FCFSScheduler(CONFIG, [worker])
-
-        generate_broken_queue_file("first")
-        time.sleep(0.1)
-        generate_queue_file("second", required_capabilities='default')
-
-        scheduler.update_and_schedule()
-
-        worker_files = os.listdir(worker.folder)
-        self.assertNotIn("first", worker_files)
-        self.assertIn("second", worker_files)

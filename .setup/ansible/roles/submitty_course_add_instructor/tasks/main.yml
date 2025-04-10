@@ -1,0 +1,35 @@
+---
+# Assumes that local user accounts for instructor already exist.
+
+- name: Add instructors to the course groups.
+  ansible.builtin.user:
+    name: "{{ submitty_course_add_instructor_username }}"
+    groups: "{{ submitty_course_add_instructor_groups }}"
+    append: true
+  loop:
+    - "{{ submitty_course_add_instructor_course }}"
+    - "{{ submitty_course_add_instructor_course }}_tas_www"
+    - "{{ submitty_course_add_instructor_course }}_archive"
+  loop_control:
+    loop_var: submitty_course_add_instructor_groups
+
+- name: Give course management permissions to "{{ submitty_course_add_instructor_username }}".
+  ansible.builtin.user:
+    name: "{{ submitty_course_add_instructor_username }}"
+    groups: "submitty_course_builders"
+    append: true
+  notify: Reload fpm
+
+- name: Run add_user role
+  ansible.builtin.include_role:
+    name: submitty_course_add_user
+  vars:
+    submitty_course_add_user_term: "{{ submitty_course_add_instructor_term }}"
+    submitty_course_add_user_username: "{{ submitty_course_add_instructor_username }}"
+    submitty_course_add_user_firstname: "{{ submitty_course_add_instructor_firstname }}"
+    submitty_course_add_user_lastname: "{{ submitty_course_add_instructor_lastname }}"
+    submitty_course_add_user_email: "{{ submitty_course_add_instructor_email }}"
+    submitty_course_add_user_password: "{{ submitty_course_add_instructor_password }}"
+    submitty_course_add_user_semester: "{{ submitty_course_add_instructor_semester }}"
+    submitty_course_add_user_course: "{{ submitty_course_add_instructor_course }}"
+    submitty_course_add_user_user_group: "{{ submitty_course_add_instructor_user_group }}"

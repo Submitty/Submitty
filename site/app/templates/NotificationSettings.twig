@@ -17,15 +17,15 @@
                 {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
                 <div class="button-group">
                     <div class="button-row">
-                        <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
-                        <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional notifications</button>
-                        <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".notification-setting-input" onclick="resetNotification(this)">Reset notification settings</button>
+                        <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
+                        <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".notification-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional notifications</button>
+                        <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".notification-setting-input" onclick="resetNotification(this)">Reset notification settings</button>
                     </div>
                     {% if email_enabled %}
                         <div class="button-row">
-                            <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)">Subscribe to all emails</button>
-                            <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional emails</button>
-                            <button type="button" class="notification-setting-button btn btn-default key_to_click" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)">Reset email settings</button>
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="checkAll(this)">Subscribe to all emails</button>
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional emails</button>
+                            <button type="button" class="notification-setting-button btn btn-default" tabindex="0" data-selector=".email-setting-input" onclick="resetNotification(this)">Reset email settings</button>
                         </div>
                     {% endif %}
                 </div>
@@ -151,7 +151,7 @@
                         <span>
                             <span class="option-title">All Modified Threads & Posts</span>
                             <br>
-                            <span class="option-alt">Alert me when a thread/post has been edited, deleted, or undeleted</span>
+                            <span class="option-alt">Alert me when a thread/post has been edited, deleted, or restored</span>
                         </span>
                     </div>
                     <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All Modified Threads & Posts" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="checked"{% endif %}></div>

@@ -1,17 +1,17 @@
+/* global luxon */
+const DateTime = luxon.DateTime;
+
 function calculateLateDays(inputDate) {
     const select_menu = document.getElementById('g_id');
     if (select_menu.selectedIndex === 0) {
         alert('Please select a gradeable first!');
         return;
     }
+
     const due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute('data-due-date');
-    const new_due_date = new Date(inputDate);
-    const old_due_date = new Date(due_date_value);
-    let delta = (new_due_date.getTime() - old_due_date.getTime()) / (1000*60*60*24);
-    if (delta < 0) {
-        delta = 0;
-    }
-    const diff = Math.floor(delta);
+    const new_due_date = DateTime.fromISO(inputDate);
+    const old_due_date = DateTime.fromISO(due_date_value);
+    const diff = Math.floor(Math.max(0, new_due_date.diff(old_due_date, 'days').days));
     document.getElementById('late_days').value = diff;
 }
 
@@ -34,10 +34,10 @@ $(document).ready(() => {
                     let date;
                     switch (index) {
                         case 0:
-                            date = new Date();
+                            date = DateTime.local();
                             break;
                         case 1:
-                            date = new Date('9998-01-01');
+                            date = DateTime.fromISO('9998-01-01');
                             break;
                     }
                     fp.setDate(date, true);
@@ -50,7 +50,7 @@ $(document).ready(() => {
         time_24hr: true,
         dateFormat: 'Y-m-d',
         // eslint-disable-next-line no-unused-vars
-        onChange: function(selectedDates, dateStr, instance) {
+        onChange: function (selectedDates, dateStr, instance) {
             calculateLateDays(selectedDates[0]);
         },
     });
@@ -68,10 +68,10 @@ function updateLateDays(data) {
         data: fd,
         processData: false,
         contentType: false,
-        success: function() {
+        success: function () {
             window.location.reload();
         },
-        error: function() {
+        error: function () {
             window.alert('Something went wrong. Please try again.');
         },
     });
@@ -81,7 +81,7 @@ function updateLateDays(data) {
 // eslint-disable-next-line no-unused-vars
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
-    //datestamp_mmddyy = datestamp.split(" ")[0];
+    // datestamp_mmddyy = datestamp.split(" ")[0];
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['late_days', 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
@@ -95,10 +95,10 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp,
             },
-            success: function() {
+            success: function () {
                 window.location.reload();
             },
-            error: function() {
+            error: function () {
                 window.alert('Something went wrong. Please try again.');
             },
         });
@@ -113,16 +113,16 @@ function updateCacheBuildStatus(url, confirm_message, status) {
         $('#rebuild-status').html(status);
 
         // disable and grey out table and buttons
-        $('#calculate-btn').prop('disabled',true).css('opacity',0.5);
-        $('#flush-btn').prop('disabled',true).css('opacity',0.5);
-        $('#late-day-table').css('opacity',0.5);
+        $('#calculate-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#flush-btn').prop('disabled', true).css('opacity', 0.5);
+        $('#late-day-table').css('opacity', 0.5);
 
         $.ajax({
             url: url,
-            success: function() {
+            success: function () {
                 window.location.reload();
             },
-            error: function() {
+            error: function () {
                 window.alert('Something went wrong. Please try again.');
             },
         });

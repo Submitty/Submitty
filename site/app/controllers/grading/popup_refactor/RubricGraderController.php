@@ -36,7 +36,6 @@ class RubricGraderController extends AbstractController {
 
     /**
      * Creates the Rubric Grading page.
-     * @Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")
      *
      * @param string $gradeable_id - The id string of the current gradeable.
      * @param string $who_id - The id of the student we should grade.
@@ -51,6 +50,7 @@ class RubricGraderController extends AbstractController {
      * provided to the URL.
      * @return void
      */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading_beta/grade")]
     public function createMainRubricGraderPage(
         string $gradeable_id,
         string $who_id = '',
@@ -91,7 +91,7 @@ class RubricGraderController extends AbstractController {
 
 
     /**
-     * Returns gradeable to the appropiate assignment unless $gradeable_id is invalid,
+     * Returns gradeable to the appropriate assignment unless $gradeable_id is invalid,
      * in which case an error is printed and the code exits.
      *
      * @param string $gradeable_id - The id string of the current gradeable.

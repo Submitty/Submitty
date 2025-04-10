@@ -44,7 +44,15 @@ class GradingSection extends AbstractModel {
      */
     protected $teams;
 
-    public function __construct(Core $core, bool $registration, $name, $graders, $users, $teams) {
+    /**
+     * @param Core $core
+     * @param bool $registration
+     * @param $name
+     * @param array<User> $graders
+     * @param array<User> $users
+     * @param array<Team> $teams
+     */
+    public function __construct(Core $core, bool $registration, $name, array $graders, array $users, array $teams) {
         parent::__construct($core);
         $this->registration = $registration;
         $this->name = $name !== null ? (string) $name : null;
@@ -54,11 +62,6 @@ class GradingSection extends AbstractModel {
     }
 
     public function containsUser(User $user) {
-        if ($this->users === null) {
-            //Team assignment
-            return false;
-        }
-
         foreach ($this->users as $section_user) {
             /* @var User $section_user */
             if ($section_user->getId() === $user->getId()) {
@@ -69,11 +72,6 @@ class GradingSection extends AbstractModel {
     }
 
     public function containsTeam(Team $team) {
-        if ($this->teams === null) {
-            //Non-team assignment
-            return false;
-        }
-
         foreach ($this->teams as $section_team) {
             /* @var Team $section_team */
             if ($section_team->getId() === $team->getId()) {
@@ -88,12 +86,12 @@ class GradingSection extends AbstractModel {
      * @return Submitter[] All Submitters
      */
     public function getSubmitters() {
-        if ($this->users !== null) {
+        if ($this->users !== []) {
             return array_map(function (User $user) {
                 return new Submitter($this->core, $user);
             }, $this->users);
         }
-        elseif ($this->teams !== null) {
+        elseif ($this->teams !== []) {
             return array_map(function (Team $team) {
                 return new Submitter($this->core, $team);
             }, $this->teams);

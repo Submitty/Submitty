@@ -1,0 +1,105 @@
+{
+  "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
+  "testcases": [
+    {
+      "title" : "Require Perfect Character to Character Match",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff",
+          "method": "diff",
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 1,
+          "failure_message":"These files do not exactly match."
+        }
+      ]
+    },
+    {
+      "title" : "Ignore Differences in Whitespace",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff w/ ignoreWhitespace",
+          "method": "diff",
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "comparison" : "byLine",
+          "ignoreWhitespace": true,
+          "deduction": 1,
+          "failure_message":"These files have non-whitespace differences."
+         }
+      ]
+    },
+    {
+      "title" : "Allow Minor Numeric Noise (+/-0.05 Tolerance)",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff w/ tolerance=0.05",
+          "method": "diff",
+          "tolerance": 0.05,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 1,
+          "failure_message":"These files have numeric errors > 0.05 or whitespace or text differences."
+        }
+      ]
+    },
+    {
+      "title" : "Allow Numeric Noise (+/-4.0 Tolerance)",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff w/ tolerance=4.0",
+          "method": "diff",
+          "tolerance": 4.0,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 1,
+          "failure_message":"These files have numeric errors > 4.0 or whitespace or text differences."
+        }
+      ]
+    },
+    {
+      "title" : "Allow Minor Numeric Noise (+/-0.05) AND Ignore Whitespace Differences",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff w/ ignoreWhitespace and tolerance=0.05",
+          "method": "diff",
+          "tolerance": 0.05,
+	  "comparison" : "byLine",
+          "ignoreWhitespace": true,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 1,
+          "failure_message":"These files have numeric errors > 0.05 or other NON-whitespace text differences."
+        }
+      ]
+    },
+    {
+      "title" : "Allow Numeric Noise (+/- 4.0) AND Ignore Whitespace Differences",
+      "command" : [ "python3 *.py test_input.txt" ],
+      "points" : 10,
+      "validation": [
+        {
+          "description": "diff w/ ignoreWhitespace and tolerance=4.0",
+          "method": "diff",
+          "tolerance": 4.0,
+	  "comparison" : "byLine",
+          "ignoreWhitespace": true,
+          "actual_file": "STDOUT.txt",
+          "expected_file": "test_output.txt",
+          "deduction": 1,
+          "failure_message":"These files have numeric errors > 4.0 or other NON-whitespace text differences."
+        }
+      ]
+    }
+  ]
+}

@@ -89,7 +89,7 @@
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
         <br />
-        <button class="btn btn-danger key_to_click" tabindex="0" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
+        <button class="btn btn-danger" tabindex="0" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
     </div>
 {% elseif team == null %}
     <div class="content">
@@ -102,7 +102,7 @@
                 <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-                    &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" class="btn btn-success" />
+                    &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" id="accept_invitation" class="btn btn-success" />
                 </form>
                 <br />
             {% endfor %} {# invite in received #}
@@ -110,13 +110,13 @@
 
         {# Create new team button #}
         <br />
-        <button class="btn btn-primary key_to_click" tabindex="0" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
+        <button class="btn btn-primary" id="create_new_team" tabindex="0" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
 
         {% if lock == false %}
             {% if seeking_partner %}
-                &nbsp;or&nbsp;<button class="btn btn-danger key_to_click" tabindex="0" onclick="location.href='{{ stop_seek_url }}'">Stop Seeking Team/Partner </button>
+                &nbsp;or&nbsp;<button class="btn btn-danger" tabindex="0" onclick="location.href='{{ stop_seek_url }}'">Stop Seeking Team/Partner </button>
             {% else %}
-                &nbsp;or&nbsp;<button class="btn btn-primary key_to_click" tabindex="0" onclick="location.href='{{ seek_url }}'">Seek Team/Partner </button>
+                &nbsp;or&nbsp;<button class="btn btn-primary" tabindex="0" onclick="location.href='{{ seek_url }}'">Seek Team/Partner </button>
                 <br>
             {% endif %}
         {% endif %}
@@ -178,8 +178,8 @@
                 <thead class="persist thead">
                     <tr>
                         <th style="width:4%">Index</th>
-                        <th style="width:9%">First Name</th>
-                        <th style="width:9%">Last Name</th>
+                        <th style="width:9%">Given Name</th>
+                        <th style="width:9%">Family Name</th>
                         <th style="width:8%">User ID</th>
                         <th style="width:30%">Email</th>
                         {% if seeking_enabled %}

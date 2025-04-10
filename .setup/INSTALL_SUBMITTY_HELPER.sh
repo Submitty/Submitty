@@ -37,6 +37,10 @@ if [ -d "${THIS_DIR}/../.utm" ]; then
     UTM=1
 fi
 
+CI=0
+if [ -f "${THIS_DIR}/../.github_actions_ci_flag" ]; then
+    CI=1
+fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
@@ -52,17 +56,6 @@ else
     RESTART_DAEMONS=( )
 fi
 
-########################################################################################################################
-########################################################################################################################
-# FORCE CORRECT TIME SKEW
-# This may happen on a development virtual machine
-# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
-if [ "${UTM}" == 1 ]; then
-    sudo service ntp stop
-    sudo ntpd -gq
-    sudo service ntp start
-    sudo timedatectl set-timezone America/New_York
-fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -91,6 +84,18 @@ if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow"
     exit 1
 fi
 
+########################################################################################################################
+########################################################################################################################
+# FORCE CORRECT TIME SKEW
+# This may happen on a development virtual machine
+# SEE GITHUB ISSUE #7885 - https://github.com/Submitty/Submitty/issues/7885
+
+if [[( "${VAGRANT}" == 1  ||  "${UTM}" == 1 ) &&  "${CI}" == 0 ]]; then
+    sudo service ntp stop
+    sudo ntpd -gq
+    sudo service ntp start
+    sudo timedatectl set-timezone America/New_York
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -206,6 +211,7 @@ else
     DAEMONPHP_GROUP="${DAEMON_GROUP}"
 fi
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
+DAEMONPHPCGI_GROUP=$(jq -r '.daemonphpcgi_group' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 SUPERVISOR_USER=$(jq -r '.supervisor_user' "${SUBMITTY_INSTALL_DIR}/config/submitty_users.json")
 
 ########################################################################################################################
@@ -331,9 +337,9 @@ if [ "${WORKER}" == 0 ]; then
     chmod  751                                        "${SUBMITTY_DATA_DIR}/courses"
     chown  "${PHP_USER}:${PHP_USER}"                  "${SUBMITTY_DATA_DIR}/user_data"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/user_data"
-    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs"
+    chown  "root:${DAEMONPHPCGI_GROUP}"               "${SUBMITTY_DATA_DIR}/vcs"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs"
-    chown  "root:${DAEMONCGI_GROUP}"                  "${SUBMITTY_DATA_DIR}/vcs/git"
+    chown  "${CGI_USER}:${DAEMONPHPCGI_GROUP}"        "${SUBMITTY_DATA_DIR}/vcs/git"
     chmod  770                                        "${SUBMITTY_DATA_DIR}/vcs/git"
 fi
 
@@ -559,6 +565,39 @@ else
 fi
 
 
+#################################################################
+# DRMEMORY SETUP
+#################
+
+# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
+
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is initially installed in install_system.sh
+# It is re-installed here (on every Submitty software update) in case of version updates.
+
+pushd /tmp > /dev/null
+
+echo "Updating DrMemory..."
+
+rm -rf /tmp/DrMemory*
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+rm -rf /tmp/DrMemory*
+
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+
+
+
+echo "...DrMemory ${DRMEMORY_TAG} update complete."
+
+popd > /dev/null
+
+
 ########################################################################################################################
 ########################################################################################################################
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
@@ -619,6 +658,12 @@ chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload"*
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
+
+###############################################
+# submitty_test script
+cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_DIR}/.setup/"
+chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
+chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -884,6 +929,18 @@ done
 
 
 #############################################################################
+# An apparent bug in docker may leave stuck zombie networks after
+# autograding has finished.  This docker_cleanup script will be run by
+# the daemon user as root to detect and forceably remove any stuck
+# docker networks.
+
+if ! grep -q "${DAEMON_USER}" /etc/sudoers; then
+    echo "" >> /etc/sudoers
+    echo "#grant the submitty_daemon user ability to run docker_cleanup script as root" >> /etc/sudoers
+    echo "%${DAEMON_USER} ALL = (root) NOPASSWD: /usr/local/submitty/sbin/docker_cleanup.sh" >> /etc/sudoers
+fi
+
+#############################################################################
 # Cleanup Old Email
 
 # Will scan the emails table in the main Submitty database for email
@@ -917,6 +974,13 @@ if [ -f "$REBUILD_ALL_FILENAME" ]; then
 fi
 
 #############################################################################
+
+# Restart docker if not in CI
+if [[ "$CI" -ne "0" ]] ; then
+    echo -n "restarting docker..."
+    systemctl restart docker
+    echo "done"
+fi
 
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then

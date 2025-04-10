@@ -20,6 +20,10 @@
     margin: 0 0 1em;
 }
 
+textarea.config-row {
+    resize: vertical;
+}
+
 .checkbox-row {
     display: flex;
     align-items: center;
@@ -48,6 +52,7 @@
 }
 
 #seating-only-label input[type="checkbox"] {
+    /* stylelint-disable-next-line declaration-no-important */
     margin: 5px !important;
 }
 

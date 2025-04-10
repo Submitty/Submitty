@@ -4,7 +4,7 @@
 <a class="skip-btn key_to_click" href="#reply_box_{{post_box_id}}" onclick="$('#reply_box_{{post_box_id}}').focus(); return false;">Skip to reply</a>
 {% for post_d in  post_data %}
 
-    {% if (post_d.userGroup <= 3 or post_d.post.author_user_id == post_d.current_user) and post_d.first %}
+    {% if (post_d.userGroup <= 3 or post_d.post.author.id == post_d.current_user) and post_d.first %}
         {% set show_unresolve = true %}
     {% endif %}
 
@@ -45,7 +45,8 @@
         "render_markdown": post_d.render_markdown,
         "has_history": post_d.has_history,
         "thread_previously_merged": post_d.thread_previously_merged,
-        "thread_announced": post_d.thread_announced
+        "thread_announced": post_d.thread_announced,
+        "post_up_duck": post_d.post_up_duck
     } only %}
 
 {% endfor %}
@@ -71,6 +72,7 @@
             "show_anon" : true,
             "submit_label" : "Submit Reply to All",
             "thread_id": thread_id,
+            "data_testid" : "forum-submit-reply-all"
         } %}
 
     </form>
@@ -86,6 +88,7 @@
         "current_thread" : merge_thread_content.current_thread,
         "possibleMerges" : merge_thread_content.possibleMerges
     } %}
+    {% include "forum/LikesForm.twig" %}
 {% endif %}
 
 <script>

@@ -3,7 +3,7 @@
     {% endblock %}
 {# Components #}
     {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
-    <div id="component-list">
+    <div id="component-list" data-testid="component-list">
         {% block components_block %}
             {% for component in gradeable.components %}
                 <div class="component-container">
