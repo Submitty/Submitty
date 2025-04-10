@@ -430,23 +430,27 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, Utils::getAutoFillData($users));
     }
 
-    public function testConvertBooleans(): void {
-        $values = [
-            'true' => true,
-            'on' => true,
-            'false' => false,
-            'random_string' => false,
-            true => true,
-            false => false,
-            123 => true,
-            1 => true,
-            0 => false
+    public function booleanProvider() {
+        return [
+            ['true', true],
+            ['on', true],
+            ['1', true],
+            ['false', false],
+            ['random_string', false],
+            ['0', false],
+            [true, true],
+            [false, false],
+            [123, true],
+            [1, true], 
+            [0, false]
         ];
-
-        foreach ($values as $key => $value) {
-            // Strict assertion to assert a boolean value is returned, not possibly equal other values, such as an integer or a string.
-            $this->assertSame($value, Utils::getBooleanValue($key));
-        }
+    }
+    /**
+      * @dataProvider booleanProvider
+      */
+    public function testConvertBooleans(mixed $variable, bool $boolean): void {
+        // Strict assertion to assert actual boolean value is returned, not possibly equal other values, such as an integer or a string.
+        $this->assertSame($boolean, Utils::getBooleanValue($variable));
     }
 
     public function testGetAutoFillDataVersion() {
@@ -459,8 +463,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             'user_givenname' => "User",
             'user_preferred_givenname' => null,
             'user_familyname' => "Tester",
-            'user_preferred_familyname' => null,
-            'user_pronouns' => '',
+         ser_pronouns' => '',
             'display_pronouns' => false,
             'user_email' => "test@example.com",
             'user_email_secondary' => "test@exampletwo.com",
