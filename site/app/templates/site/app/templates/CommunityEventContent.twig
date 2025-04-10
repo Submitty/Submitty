@@ -1,0 +1,101 @@
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    let bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
+    let removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
+    let imageDataArray = {{ imageDataArray | json_encode | raw }};
+
+    initializeBanner(imageDataArray, "{{ base_url }}", "{{ duck_img }}", "{{ duckGif }}");
+
+    const prevButton = document.getElementById('prevButton');
+    if (prevButton) {
+        prevButton.addEventListener('click', function() {
+            previousBanner(imageDataArray, baseUrl, duckImg, duckGif);
+        });
+    }
+
+    const nextButton = document.getElementById('nextButton');
+    if (nextButton) {
+        nextButton.addEventListener('click', function() {
+            nextBanner(imageDataArray, baseUrl, duckImg, duckGif);
+        });
+    }
+
+    const removeButton = document.getElementById('removeButton');
+    if (removeButton) {
+        removeButton.addEventListener('click', function() {
+            removeBanner(imageDataArray, baseUrl, duckImg, duckGif);
+        });
+    }
+
+    const closeButton = document.getElementById('closeButton');
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            closeBanner(imageDataArray, baseUrl, duckImg, duckGif);
+        });
+    }
+
+    const inquireButton = document.getElementById('inquireButton');
+    if (inquireButton) {
+        inquireButton.addEventListener('click', function() {
+            inquireBanner(imageDataArray, baseUrl, duckImg, duckGif);
+        });
+    }
+
+});
+
+
+</script>
+
+
+
+{% if imageDataArray | length != 0 %}
+    <div id="display-container">
+    <div id="event-holder" style="z-index: 2; position: absolute; top: 52px; right: 50%; transform: translate(50%, -50%); text-align: center; display: none;"> 
+        <div style="display: grid; grid-template-columns: 1fr;">
+            <!-- Placeholder for image -->
+            <img id="current-banner"
+                alt="Banner"
+                class="club-banners"
+                src="#" 
+            />
+        <div id="bannerNavigation" style="display: inline-flex; justify-content: center; margin: 0px">
+            <div style="display: inline-flex; background-color: lightgray; border: 1px solid black; border-radius: 5px;">
+
+                <button id="prevButton" style="border: none; background: none; cursor: pointer;">
+                    Prev
+                </button>
+
+                <button id="nextButton" style="border: none; background: none; cursor: pointer;">
+                     Next
+                </button>
+
+                <button id="closeButton" style="border: none; background: none; cursor: pointer;">
+                     Close
+                </button>
+
+                <button id="removeButton" style="border: none; background: none; cursor: pointer;">
+                     Remove
+                </button>
+
+                <button id="inquireButton" style="border: none; background: none; cursor: pointer;">
+                     See More
+                </button>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+{{ include('banner/BiggerBanner.twig') }}
+
+<style>
+@media (max-width: 600px) {
+    #display-container {
+        display: none !important;
+    }
+}
+
+</style>
+
+{% endif %}
