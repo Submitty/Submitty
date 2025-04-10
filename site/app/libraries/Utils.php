@@ -326,6 +326,11 @@ class Utils {
             return $variable;
         }
 
+        if (is_numeric($variable)) {
+            // Handle 0 as the only false integer.
+            return $variable !== 0 && $variable !== '0';
+        }
+
         if (is_string($variable)) {
             // Handle string values peacefully, 'true' or 'on' (for javascript checkboxes),
             $true_values = [
@@ -334,12 +339,6 @@ class Utils {
             ];
             return in_array(strtolower(trim($variable)), $true_values, true);
         }
-
-        if (is_int($variable)) {
-            // Handle 0 as the only false integer.
-            return $variable !== 0;
-        }
-
         // Default to returning false
         return false;
     }
