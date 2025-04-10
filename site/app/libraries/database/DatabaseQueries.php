@@ -83,6 +83,14 @@ class DatabaseQueries {
     }
 
     /**
+     * Get user from submitty database by user_id
+     */
+    public function getUserBySubmittyId($user_id) {
+        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", [$user_id]);
+        return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
+    }
+
+    /**
      * Gets all users from the submitty database, except nulls out password
      *
      * @return User[]
@@ -1029,24 +1037,83 @@ SQL;
         return $return;
     }
 
-    /**
-     * @param User   $user
-     * @param string $semester
-     * @param string $course
-     */
-    public function insertCourseUser(User $user, $semester, $course) {
-        $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        $this->submitty_db->convertBoolean($user->isManualRegistration())];
+/**
+ * Insert a new user into a course
+ * Can accept either a User object or individual parameters
+ * 
+ * @param User|string $user_or_id Either User object or user_id string
+ * @param string|null $semester Only required if $user_or_id is string
+ * @param string|null $course Only required if $user_or_id is string 
+ * @param int|null $user_group Only required if $user_or_id is string
+ * @param string|null $registration_section Only required if $user_or_id is string
+ * @param bool|null $manual_registration Only required if $user_or_id is string
+ */
+public function insertCourseUser($user_or_id, $semester = null, $course = null, $user_group = null, $registration_section = null, $manual_registration = null) {
+    if ($user_or_id instanceof User) {
+        $user = $user_or_id;
+        $params = [
+            $semester,
+            $course, 
+            $user->getId(),
+            $user->getGroup(),
+            $user->getRegistrationSection(),
+            $this->submitty_db->convertBoolean($user->isManualRegistration())
+        ];
+
         $this->submitty_db->query(
-            "
-INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
-VALUES (?,?,?,?,?,?)",
+            "INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
+            VALUES (?,?,?,?,?,?)",
             $params
         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
-        $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
+        $params = [
+            $user->getRotatingSection(),
+            $user->getRegistrationSubsection(),
+            $user->getRegistrationType(),
+            $user->getId()
+        ];
+        $this->course_db->query(
+            "UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?",
+            $params
+        );
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
+    }
+    else {
+        $params = [$semester, $course, $user_or_id, $user_group, $registration_section, $manual_registration];
+        $this->submitty_db->query(
+            "INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration) 
+            VALUES (?,?,?,?,?,?)",
+            $params
+        );
+    }
+}
+
+    /**
+     * Update an existing user's course registration details
+     */
+    public function updateUser($user_id, $term, $course, $user_group, $registration_section, $manual_registration) {
+        $params = [$user_group, $registration_section, $manual_registration, $term, $course, $user_id];
+        $this->submitty_db->query(
+            "UPDATE courses_users 
+            SET user_group=?, registration_section=?, manual_registration=?
+            WHERE term=? AND course=? AND user_id=?", 
+            $params
+        );
+    }
+
+    /**
+     * Get all instructors for a course
+     * @return array Array of instructor user_ids 
+     */
+    public function getInstructors($term, $course) {
+        $this->submitty_db->query(
+            "SELECT user_id FROM courses_users 
+            WHERE term=? AND course=? AND user_group=1",
+            [$term, $course]
+        );
+        return array_map(function ($row) {
+            return $row['user_id'];
+        }, $this->submitty_db->rows());
     }
 
     /**
