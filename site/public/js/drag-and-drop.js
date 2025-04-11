@@ -189,7 +189,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['banner', 'upload']),
+        url: buildUrl(['community_event', 'upload']),
         data: formData,
         processData: false,
         contentType: false,
@@ -199,7 +199,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -211,7 +211,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
