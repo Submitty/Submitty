@@ -1000,7 +1000,7 @@ class SubmissionController extends AbstractController {
                     $active_version = $i;
                 }
                 else {
-                    $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    $active_version = intval($_POST['version_to_regrade'] ?? $g->getAutoGradedGradeable()->getActiveVersion());
                 }
                 //create file name
                 $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
