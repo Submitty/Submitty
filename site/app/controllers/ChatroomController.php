@@ -15,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Enabled("chat")
  */
 class ChatroomController extends AbstractController {
-
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomssPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
