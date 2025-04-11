@@ -202,8 +202,6 @@ HTML;
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
         $this->addInternalJs('markdown.js');
-        $this->addInternalJs('event-advertisements.js');
-
 
         // Add vue support
         $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
