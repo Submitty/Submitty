@@ -167,7 +167,7 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
@@ -177,6 +177,41 @@ function getSection() {
     });
 
     return sections;
+}
+
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    warningIcon.toggle(hasDuplicates);
 }
 
 function getDisplayBenchmark() {
@@ -776,6 +811,8 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
     $("input[name*='display']").change(() => {
         saveChanges();
     });
@@ -786,8 +823,14 @@ $(document).ready(() => {
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
+    $('.benchmark_percent_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
+    });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
     });
     $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
@@ -1102,6 +1145,27 @@ $(document).ready(() => {
             }
         });
     }
+
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket), with one decimal place
+    const bucketItemCounts = $('input[id^="config-count-"]');
+    bucketItemCounts.each((index, bucketItemCountDOMElement) => {
+        const bucketItemCount = $(bucketItemCountDOMElement);
+        const bucket = bucketItemCount.prop('id').match(/^config-count-(.+)$/)[1];
+        const gradeablePercents = $(`div[id^="gradeable-percents-div-${bucket}-"]`);
+        gradeablePercents.each((index, gradeablePercentDOMElement) => {
+            const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+            gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            if (gradeablePercentInput.val() === '') {
+                gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
+            }
+        });
+        bucketItemCount.on('blur', () => {
+            gradeablePercents.each((index, gradeablePercentDOMElement) => {
+                const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+                gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            });
+        });
+    });
 
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
