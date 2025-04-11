@@ -3,6 +3,7 @@
 namespace app\views;
 
 use app\controllers\admin\ConfigurationController;
+use app\models\gradeable\Gradeable;
 
 class ErrorView extends AbstractView {
     public function exceptionPage($error_message) {
@@ -56,9 +57,12 @@ class ErrorView extends AbstractView {
         ]);
     }
 
-    public function unbuiltGradeable($gradeable_title) {
+    public function unbuiltGradeable(Gradeable $gradeable, string $action) {
+        $check_refresh_unbuilt_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'check_refresh']);
         return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'title' => $gradeable_title
+            'title' => $gradeable->getTitle(),
+            'action' => $action,
+            'check_refresh_unbuilt_url' => $check_refresh_unbuilt_url
         ]);
     }
 
