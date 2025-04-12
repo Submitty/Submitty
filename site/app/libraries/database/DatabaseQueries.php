@@ -7339,6 +7339,39 @@ AND gc_id IN (
     }
 
     /**
+     * Gets a list of emails with user ids for all active particpants in Submitty
+     * array
+     * @return array<mixed>
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): array {
+        $parameters = [$email, $user_id];
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', $parameters);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * Gets verification values given a verification code
+     * @return array<mixed>
+     */
+    public function getUserVerificationValuesByCode(string $code): array {
+        $parameters = [$code];
+        $this->submitty_db->query('SELECT verification_code, verification_expiration FROM unverified_users where verification_code=?', $parameters);
+        $values = $this->submitty_db->row();
+        if ($values === [] || $values['verification_expiration'] < time()) {
+            return [];
+        }
+        return $values;
+    }
+
+    /**
+     * Updates a users verification values given an email
+     */
+    public function updateUserVerificationValues(string $email, string $code, int $timestamp): void {
+        $parameters = [$code, $timestamp, $email];
+        $this->submitty_db->query('UPDATE unverified_users SET verification_code=?, verification_expiration=to_timestamp(?) where user_email=?', $parameters);
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
