@@ -49,7 +49,7 @@ class UnverifiedUserEntity {
         $this->setVerificationValues(['code' => $verification_code, 'exp' => $verification_expiration]);
     }
 
-    public function getUserInfo() {
+    public function getUserInfo(): array {
         $out = [];
         $out["user_givenname"] = $this->user_givenname;
         $out["user_familyname"] =  $this->user_familyname;
@@ -66,8 +66,10 @@ class UnverifiedUserEntity {
         return $this->verification_expiration;
     }
 
+    /**
+     * @param array<string, mixed> $values
+     */
     public function setVerificationValues(array $values): void {
-        var_dump($values);
         $this->verification_code = $values['code'];
         $this->verification_expiration = $values['exp'];
     }
