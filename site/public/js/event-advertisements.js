@@ -1,7 +1,14 @@
+/*
+imgElement  contains -> src, alt
+*/
+
+
+
 /* eslint no-undef: "off" */
 function updateImageData(imageData) {
     const imgElement = document.getElementById('current-banner');
     if (imgElement) {
+        //changing the image for the banner and the alt
         imgElement.src = `data:image/png;base64,${imageData.data}`;
         imgElement.alt = `${imageData.name}_${imageData.id}`;
     }
@@ -10,50 +17,53 @@ function updateImageData(imageData) {
     }
 }
 
+function getOpen() {
+
+    const openBanner = localStorage.getItem('open') !== 'false';
+    return openBanner;
+}
+
+function setupLocalStorage() {
+    if (localStorage.getItem('open') = null) {
+        localStorage.setItem('open', 'false');
+    }
+    if (localStorage.getItem('bannerArray') == null) {
+        localStorage.setItem('bannerArray', JSON.stringify([]));
+    }
+    if (localStorage.getItem('removeArray') == null) {
+        localStorage.setItem('removeArray', JSON.stringify([]));
+    }
+    if (localStorage.getItem('eventIndex') == null) {
+        localStorage.setItem('eventIndex', 0);
+    }
+}
+
+
 function duckTalking(base_url, duck_img, duckGif) {
-    const imageElement = document.querySelector('#moorthy-duck');
-    if (!imageElement) {
-        return;
-    }
+    //this function gets updated once the duck image work is solidified
+    return true;
 
-    const bannerArray = localStorage.getItem('bannerArray');
-
-    if (bannerArray && JSON.parse(bannerArray).length > 0 && localStorage.getItem('open') !== 'true' && localStorage.getItem('duckTalking') === 'true') {
-        imageElement.src = `data:image/gif;base64,${duckGif}`;
-    }
-    else {
-        imageElement.src = `${base_url}/img/${duck_img}`;
-    }
 }
 
 function includesBanner(bannerArray, banner) {
     return bannerArray.some((item) => item.id === banner.id);
 }
 
-function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
-    if (localStorage.getItem('open') !== 'true' && localStorage.getItem('open') !== 'false') {
-        localStorage.setItem('open', 'false');
-    }
+function filterRemovedBanners(localStorageKey, newArray) {
+    let currentArray = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+    currentArray = currentArray.filter((banner) => includesBanner(newArray, banner));
+    return currentArray;
+}
 
-    let bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
-    const openBanner = localStorage.getItem('open') !== 'false';
+function updateLocalStorage(imageDataArray) {
 
-    if (!bannerArray) {
-        localStorage.setItem('bannerArray', JSON.stringify([]));
-        bannerArray = [];
-        localStorage.setItem('removedArray', JSON.stringify([]));
-        localStorage.setItem('currEventIndex', 0);
-        localStorage.setItem('open', 'false');
-    }
+    setupLocalStorage(); //incase any of the localstorage isn't set up yet
 
-    let removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
-
-    bannerArray = bannerArray.filter((item) => imageDataArray.some((img) => img.id === item.id));
-    removedArray = removedArray.filter((item) => imageDataArray.some((img) => img.id === item.id));
-    localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
-    localStorage.setItem('removedArray', JSON.stringify(removedArray));
+    let bannerArray = filterRemovedBanners('bannerArray', imageDataArray);
+    let removedArray = filterRemovedBanners('removedArray', imageDataArray);
 
     let updated = false;
+
     imageDataArray.forEach((item) => {
         if (!includesBanner(bannerArray, item) && !includesBanner(removedArray, item)) {
             bannerArray.unshift(item);
@@ -62,18 +72,28 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
     });
 
     if (updated) {
-        localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
-        localStorage.setItem('currEventIndex', 0);
+        localStorage.setItem('eventIndex', 0);
         localStorage.setItem('duckTalking', 'true');
     }
 
-    bannerArray = JSON.parse(localStorage.getItem('bannerArray'));
-    removedArray = JSON.parse(localStorage.getItem('removedArray'));
-    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
+    localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
+    localStorage.setItem('removedArray', JSON.stringify(bannerArray));
+
+}
+
+
+function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
+
+    openBanner = getOpen();
+    updateLocalStorage(imageDataArray); // remove deleted banners and add in newly created banners
+    const bannerArray = JSON.parse(localStorage.getItem(localStorageKey)) || [];
+
+
+    const eventIndex = parseInt(localStorage.getItem('eventIndex'), 0);
     const eventsHolder = document.getElementById('event-holder');
 
     if (bannerArray.length > 0 && openBanner) {
-        const imageData = bannerArray[currEventIndex];
+        const imageData = bannerArray[eventIndex];
         updateImageData(imageData);
         if (eventsHolder) {
             eventsHolder.style.setProperty('display', 'block', 'important');
@@ -81,7 +101,7 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
         }
     }
     else if (bannerArray.length <= 0 || !openBanner) {
-        localStorage.setItem('currEventIndex', 0);
+        localStorage.setItem('eventIndex', 0);
         if (eventsHolder) {
             eventsHolder.style.setProperty('display', 'none');
         }
@@ -92,8 +112,8 @@ function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
 
 function inquireBanner(imageDataArray, base_url, duck_img, duckGif) {
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
-    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
-    const imageData = bannerArray[currEventIndex];
+    const eventIndex = parseInt(localStorage.getItem('eventIndex'), 0);
+    const imageData = bannerArray[eventIndex];
 
     if (imageData.extra_info === '' && imageData.link_name !== '') {
         window.open(imageData.link_name, '_blank');
@@ -112,11 +132,11 @@ function removeBanner(imageDataArray, base_url, duck_img, duckGif) {
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
     const removedArray = JSON.parse(localStorage.getItem('removedArray')) || [];
 
-    const currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
+    const eventIndex = parseInt(localStorage.getItem('eventIndex'), 0);
 
-    if (currEventIndex >= 0 && currEventIndex < bannerArray.length) {
-        removedArray.push(bannerArray[currEventIndex]);
-        bannerArray.splice(currEventIndex, 1);
+    if (eventIndex >= 0 && eventIndex < bannerArray.length) {
+        removedArray.push(bannerArray[eventIndex]);
+        bannerArray.splice(eventIndex, 1);
 
         localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
         localStorage.setItem('removedArray', JSON.stringify(removedArray));
@@ -129,21 +149,21 @@ function removeBanner(imageDataArray, base_url, duck_img, duckGif) {
 }
 
 function previousBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
+    let eventIndex = parseInt(localStorage.getItem('eventIndex'), 0);
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
 
-    currEventIndex = (currEventIndex - 1 + bannerArray.length) % bannerArray.length;
-    localStorage.setItem('currEventIndex', currEventIndex);
+    eventIndex = (eventIndex - 1 + bannerArray.length) % bannerArray.length;
+    localStorage.setItem('eventIndex', eventIndex);
 
     initializeBanner(imageDataArray, base_url, duck_img, duckGif);
 }
 
 function nextBanner(imageDataArray, base_url, duck_img, duckGif) {
-    let currEventIndex = parseInt(localStorage.getItem('currEventIndex'), 0);
+    let eventIndex = parseInt(localStorage.getItem('eventIndex'), 0);
     const bannerArray = JSON.parse(localStorage.getItem('bannerArray')) || [];
 
-    currEventIndex = (currEventIndex + 1) % bannerArray.length;
-    localStorage.setItem('currEventIndex', currEventIndex);
+    eventIndex = (eventIndex + 1) % bannerArray.length;
+    localStorage.setItem('eventIndex', eventIndex);
 
     initializeBanner(imageDataArray, base_url, duck_img, duckGif);
 }
