@@ -1,4 +1,5 @@
 submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/create_course.sh
+submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/repair_services.sh
 submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/adduser.py
 submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/bin/generate_repos.py
 submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/adduser_course.py
