@@ -40,6 +40,29 @@ class Utils {
         return $json;
     }
 
+/**
+ * Prepares Date to Be Written to Database
+ *
+ * @param string|null $date_string The input date string to convert.
+ * 
+ * @return \DateTime|null The DateTime object or null if invalid.
+ */
+    public static function convertToSQLDateTime(?string $date_string): ?\DateTime {
+        if (empty($date_string) || strtolower($date_string) === 'none') {
+            return null;
+        }
+
+        try {
+            // Fix invalid timezone format
+            $datetime = new \DateTime($date_string);
+            $formated =  $datetime->format("Y-m-d H:i:sO"); // Expected SQL format
+            return new \DateTime($formated);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+
     /**
      * Generates a pseudo-random string that should be cryptographically secure for use
      * as tokens and other things where uniqueness is of absolute importance. The generated
