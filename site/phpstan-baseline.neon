@@ -768,7 +768,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 7
+			count: 5
 			path: app/controllers/UserProfileController.php
 
 		-
@@ -7803,7 +7803,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
+			count: 1
 			path: app/libraries/socket/Server.php
 
 		-
@@ -7822,22 +7822,12 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$clients type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$pages type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
 
 		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$sessions type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$users type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
 
