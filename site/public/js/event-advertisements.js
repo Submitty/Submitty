@@ -11,16 +11,16 @@ function updateImageData(imageData) {
 }
 
 function setupLocalStorage() {
-    if (localStorage.getItem('open') == null) {
+    if (localStorage.getItem('open') === null) {
         localStorage.setItem('open', 'false');
     }
-    if (localStorage.getItem('bannerArray') == null) {
+    if (localStorage.getItem('bannerArray') === null) {
         localStorage.setItem('bannerArray', JSON.stringify([]));
     }
-    if (localStorage.getItem('removeArray') == null) {
+    if (localStorage.getItem('removeArray') === null) {
         localStorage.setItem('removeArray', JSON.stringify([]));
     }
-    if (localStorage.getItem('eventIndex') == null) {
+    if (localStorage.getItem('eventIndex') === null) {
         localStorage.setItem('eventIndex', 0);
     }
 }
@@ -36,9 +36,8 @@ function filterRemovedBanners(localStorageKey, newArray) {
 }
 
 function updateLocalStorage(imageDataArray) {
-
-    let bannerArray = filterRemovedBanners('bannerArray', imageDataArray);
-    let removedArray = filterRemovedBanners('removedArray', imageDataArray);
+    const bannerArray = filterRemovedBanners('bannerArray', imageDataArray);
+    const removedArray = filterRemovedBanners('removedArray', imageDataArray);
 
     let updated = false;
 
@@ -56,10 +55,9 @@ function updateLocalStorage(imageDataArray) {
 
     localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
     localStorage.setItem('removedArray', JSON.stringify(bannerArray));
-
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
     setupLocalStorage();
     updateLocalStorage(imageDataArray);
 });
