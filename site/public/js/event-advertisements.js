@@ -17,12 +17,6 @@ function updateImageData(imageData) {
     }
 }
 
-function getOpen() {
-
-    const openBanner = localStorage.getItem('open') !== 'false';
-    return openBanner;
-}
-
 function setupLocalStorage() {
     if (localStorage.getItem('open') = null) {
         localStorage.setItem('open', 'false');
@@ -84,8 +78,9 @@ function updateLocalStorage(imageDataArray) {
 
 function initializeBanner(imageDataArray, base_url, duck_img, duckGif) {
 
-    openBanner = getOpen();
     updateLocalStorage(imageDataArray); // remove deleted banners and add in newly created banners
+
+    const openBanner = localStorage.getItem('open') !== 'false';
     const bannerArray = JSON.parse(localStorage.getItem(localStorageKey)) || [];
 
 
