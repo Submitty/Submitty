@@ -18,7 +18,7 @@ function updateImageData(imageData) {
 }
 
 function setupLocalStorage() {
-    if (localStorage.getItem('open') = null) {
+    if (localStorage.getItem('open') == null) {
         localStorage.setItem('open', 'false');
     }
     if (localStorage.getItem('bannerArray') == null) {
