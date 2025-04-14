@@ -1,8 +1,8 @@
 <div id="gradeable_rubric">
-    <label for="numeric_num-items">How many numeric items?</label> <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    <label for="numeric_num-items">How many numeric items?</label> <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="number" min="0" step="1" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
     &emsp;&emsp;
 
-    <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="number" min="0" step="1" value="0" class="int_val ignore"/>
     <br /> <br />
 
     <div class="multi-field-wrapper-numeric">
@@ -31,7 +31,7 @@
                         <input style="width: 200px" name="numeric_label_0" type="text" aria-label="label for numeric item 0" class="numeric_label" value="0" />
                     </td>
                     <td>
-                        <input style="width: 60px" type="text" name="max_score_0" aria-label="max score for numeric item 0" class="max_score" value="0" onchange="calculateTotalScore();"/>
+                        <input style="width: 60px" type="number" min="0" step="1" value="0" name="max_score_0" aria-label="max score for numeric item 0" class="max_score" value="0" onchange="calculateTotalScore();"/>
                     </td>
                     <td>
                         <input type="checkbox" name="numeric_extra_0" aria-label="is numeric item 0 counted as extra credit?" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
