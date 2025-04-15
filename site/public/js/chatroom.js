@@ -136,9 +136,7 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) 
     document.getElementById('chatroom-edit-form').action = `${baseUrl}/${chatroom_id}/edit`;
     document.getElementById('chatroom-title-input').value = title;
     document.getElementById('chatroom-description-input').value = description;
-    if (allow_anon) {
-        document.getElementById('chatroom-allow-anon').checked = true;
-    }
+    document.getElementById('chatroom-anon-allow').checked = allow_anon;
 }
 
 // eslint-disable-next-line no-unused-vars
