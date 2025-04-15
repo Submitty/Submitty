@@ -308,7 +308,7 @@ class MiscController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($user_id !== $this->core->getUser()->getId()) {
-            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->addErrorMessage("You do not have permission to download this file!");
                 return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
             }
@@ -316,7 +316,7 @@ class MiscController extends AbstractController {
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
         $file_path = null;
         $testcase = $autograde->getTestcases()[$test_case - 1];
-        if ((!$testcase->getTestcase()->isHidden() || $this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) && $testcase->hasAutochecks()) {
+        if ((!$testcase->getTestcase()->isHidden() || $this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) && $testcase->hasAutochecks()) {
             foreach ($testcase->getAutochecks() as $autocheck) {
                 $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
                 $actual_file_name = array_pop($path);
