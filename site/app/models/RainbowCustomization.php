@@ -581,9 +581,9 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-     * Get omitted sections from json file if there is any
+     * Get omit sections from stats from json file if there is any
      *
-     * @return array<string>
+     * @return array<int, array<string, mixed>>
      */
     public function getOmittedSections(): array {
         $allowedSections = $this->getSectionsAndLabels();
@@ -597,9 +597,9 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-     * Get section data formatted for use in Twig: section ID → { label, isUsed }
+     * Get section data from json file if there is any
      *
-     * @return array<string, array{ id: string, isUsed: bool }>
+     * @return array<array{label: mixed, isUsed: bool}>  array of form section ID → { label, isUsed }
      */
     public function getSectionsAndLabelsAndOmitted(): array {
         $sections = (array) $this->getSectionsAndLabels();
