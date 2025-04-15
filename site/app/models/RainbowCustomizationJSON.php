@@ -342,9 +342,9 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Get array of sections omitted from stats
      *
-     * @return object[]
+     * @return string[]
      */
-    public function getOmmitedSection(): array {
+    public function getOmittedSections(): array {
         return $this->omit_section_from_stats;
     }
 

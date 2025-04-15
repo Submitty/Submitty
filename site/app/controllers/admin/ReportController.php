@@ -690,7 +690,7 @@ class ReportController extends AbstractController {
                 'final_cutoff' => (array) $customization->getFinalCutoff(),
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
-                'sections_and_labels' => (array) $customization->getSectionsAndLabelsAndOmitted(),
+                'sections_and_labels' => $customization->getSectionsAndLabelsAndOmitted(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),

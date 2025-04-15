@@ -583,7 +583,7 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Get omitted sections from json file if there is any
      *
-     * @return
+     * @return array<string>
      */
     public function getOmittedSections(): array {
         $allowedSections = $this->getSectionsAndLabels();
@@ -599,7 +599,7 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Get section data formatted for use in Twig: section ID → { label, isUsed }
      *
-     * @return array
+     * @return array<string, array{ id: string, isUsed: bool }>
      */
     public function getSectionsAndLabelsAndOmitted(): array {
         $sections = (array) $this->getSectionsAndLabels();
