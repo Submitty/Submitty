@@ -275,7 +275,9 @@
                                                 {% if auto_points %}
                                                     <span class="gradeable-points">Auto Pts</span>
                                                 {% endif %}
-                                                <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
+                                                {% if manual_points or auto_points %}
+                                                    <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
+                                                {% endif %}
                                             </div>
                                         </li>
                                         {% for gradeable in gradeables %}
