@@ -78,6 +78,15 @@ $(document).ready(() => {
     updateEmailSeatingOption();
 
     $(document).on('change', '#room-seating-gradeable-id', updateEmailSeatingOption);
+
+    function updateRainbowCustomizationWarning() {
+        const warningMessage = $('#customization-exists-warning');
+        const checked = $('#auto-rainbow-grades').is(':checked');
+        const customizationNotExists = warningMessage.data('value');
+        warningMessage.toggle(checked && customizationNotExists);
+    }
+
+    $(document).on('change', '#auto-rainbow-grades', updateRainbowCustomizationWarning);
 });
 
 function confirmSelfRegistration(element, needs_reg_sections) {
