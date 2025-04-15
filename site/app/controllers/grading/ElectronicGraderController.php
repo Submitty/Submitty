@@ -3681,6 +3681,9 @@ class ElectronicGraderController extends AbstractController {
             // Itempool item passed when the component is not linked with itempool
             $error = 'This Component expects only non-empty itempool-item!' . json_encode($componentItempoolInfo) . $itempool_item;
         }
+        elseif (!$this->core->getAccess()->canI("grading.electronic.view_solution", ["gradeable" => $gradeable])) {
+            $error = 'Insufficient permissions to update solution';
+        }
         else {
             try {
                 $this->core->getQueries()->addSolutionForComponentId($gradeable_id, $component_id, $itempool_item, $solution_text, $author_id);

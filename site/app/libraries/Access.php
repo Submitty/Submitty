@@ -85,6 +85,8 @@ class Access {
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
     /** Ensure on the forum the operation is done by the correct user. */
     const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
+    const CHECK_PEER_AUTOGRADING         = 1 << 30;
+    const CHECK_PEER_SOLUTIONS           = 1 << 31;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
@@ -119,6 +121,8 @@ class Access {
 
         // TODO: these are new actions that should be audited
         $this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_COMPONENT_PEER_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.grade_autograding"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_PEER_AUTOGRADING;
+        $this->permissions["grading.electronic.view_solution"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_PEER_SOLUTIONS;
 
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
@@ -494,6 +498,15 @@ class Access {
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
                 if (!$this->isGradedGradeableInPeerAssignment($gradeable, $graded_gradeable, $user)) {
+                    $grading_checks = false;
+                }
+                if (self::checkBits($checks, self::CHECK_STUDENT_VIEW) && !$gradeable->getPeerFiles()) {
+                    $grading_checks = false;
+                }
+                if (self::checkBits($checks, self::CHECK_PEER_AUTOGRADING) && !$gradeable->getPeerAutograding()) {
+                    $grading_checks = false;
+                }
+                if (self::checkBits($checks, self::CHECK_PEER_SOLUTIONS) && !$gradeable->getPeerSolutions()) {
                     $grading_checks = false;
                 }
             }
