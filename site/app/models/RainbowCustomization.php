@@ -580,6 +580,42 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+    /**
+     * Get omit sections from stats from json file if there is any
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getOmittedSections(): array {
+        $allowedSections = $this->getSectionsAndLabels();
+        $usedOmittedSections = $this->RCJSON?->getOmittedSections() ?? [];
+        $omittedSectionData = [];
+        foreach ($allowedSections as $section_id => $label) {
+            $omittedSectionsUsed = in_array($label, $usedOmittedSections, true);
+            $omittedSectionData[] = ['id' => $label, 'isUsed' => $omittedSectionsUsed];
+        }
+        return $omittedSectionData;
+    }
+
+    /**
+     * Get section data from json file if there is any
+     *
+     * @return array<array{label: mixed, isUsed: bool}>  array of form section ID → { label, isUsed }
+     */
+    public function getSectionsAndLabelsAndOmitted(): array {
+        $sections = (array) $this->getSectionsAndLabels();
+        $omittedSections = $this->getOmittedSections();
+
+        $sections_and_labels = [];
+
+        foreach ($sections as $section_id => $label) {
+            $sections_and_labels[$section_id] = [
+                'label' => $label,
+                'isUsed' => in_array($label, $omittedSections, true)
+            ];
+        }
+
+        return $sections_and_labels;
+    }
 
     /**
      * Get plagiarism from json file if there is any
@@ -638,6 +674,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
+            }
+        }
+
+        if (isset($form_json->omit_section_from_stats)) {
+            foreach ($form_json->omit_section_from_stats as $omit_section) {
+                $this->RCJSON->addOmittedSection($omit_section);
             }
         }
 
