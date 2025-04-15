@@ -264,7 +264,7 @@ function getGradeableBuckets() {
                 // children[0] represents <div id="gradeable-pts-div-*">
                 // children[1] represents <div id="gradeable-percents-div-*">
                 // replace divs with inputs
-                children[0] = children[0].querySelector('[id^="maxscore-"]');
+                children[0] = children[0].querySelector('.max-score'); // can be either 1st, 2nd, or 3rd child
                 children[1] = children[1].children[0];
 
                 // Get max points
