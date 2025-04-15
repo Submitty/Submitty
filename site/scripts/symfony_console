@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__DIR__,1) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+use Symfony\Component\Console\Application;
+use Symfony\Bundle\TwigBundle\Command\LintCommand;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use app\libraries\Core;
+
+$core = new Core();
+$core->getOutput()->loadTwig();
+$twig = $core->getOutput()->getTwig();
+
+$application = new Application();
+
+$application->add(new LintCommand($twig));
+
+$input = new ArgvInput();
+$output = new ConsoleOutput();
+$application->run($input, $output);
