@@ -345,8 +345,8 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     width: 3em;
 }
 
-[id^="gradeable-pts-div-"],
-[id^="gradeable-percents-div-"] {
+.gradeable-points-div,
+.gradeable-percents-div {
     margin-right: 2em;
 }
 
