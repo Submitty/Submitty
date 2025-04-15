@@ -257,23 +257,50 @@
                                 </div>
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        {% set manual_points = false %}
+                                        {% set auto_points = false %}
+                                        {% for gradeable in gradeables %}
+                                            {% if gradeable['manual_grading_points'] != 0 %}
+                                                {% set manual_points = true %}
+                                            {% endif %}
+                                            {% if gradeable['autograded_grading_points'] != 0 %}
+                                                {% set auto_points = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <li style="margin: 3px">
+                                            <div class="gradeable-points-div">
+                                                {% if manual_points %}
+                                                    <span class="gradeable-points">Manual Pts</span>
+                                                {% endif %}
+                                                {% if auto_points %}
+                                                    <span class="gradeable-points">Auto Pts</span>
+                                                {% endif %}
+                                                {% if manual_points or auto_points %}
+                                                    <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
+                                                {% endif %}
+                                            </div>
+                                        </li>
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
-                                                    <input type="text"
-                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
-                                                           aria-label="{{gradeable["title"]}} max score"
-                                                           placeholder="{{ gradeable["max_score"] }}"
-                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                           id="maxscore-{{ gradeable["id"] }}"
-                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           onblur="ClampPoints(this);"
-                                                           onkeyup="DetectMaxOverride(this);">
-                                                    <span>pts</span>
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}" class="gradeable-points-div">
+                                                    {% if manual_points %}
+                                                        <span class="gradeable-points">{{ gradeable['manual_grading_points'] }}</span>
+                                                    {% endif %}
+                                                    {% if auto_points %}
+                                                        <span class="gradeable-points">{{ gradeable['autograded_grading_points'] }}</span>
+                                                    {% endif %}
+                                                    <span class="gradeable-points max-score"
+                                                          style="border-right: 1px solid var(--default-white);"
+                                                          aria-label="{{gradeable["title"]}} max score"
+                                                          id="maxscore-{{ gradeable["id"] }}"
+                                                          data-max-score="{{ gradeable["max_score"] }}"
+                                                          data-grade-release-date="{{ gradeable["grade_release_date"] }}">
+                                                          {{ gradeable['max_score'] }}
+                                                    </span>
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"
-                                                           class="gradeable-custom-item-input"
+                                                           class="gradeable-custom-item-input gradeable-percents-div"
                                                            aria-label="{{gradeable["title"]}} percent"
                                                            value="{{ gradeable["override_percent"] ? gradeable["percent"] : "" }}"
                                                            id="percents-{{ gradeable["id"] }}"
@@ -282,15 +309,6 @@
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
-                                                            <span class="tooltiptext tooltipbottom">
-                                                                WARNING: Max Score has been overridden in Rainbow Grades
-                                                                <br><br>
-                                                                Actual Max Score: {{ gradeable["max_score"] }}
-                                                                <br>
-                                                                Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
-                                                            </span>
-                                                        </i>
                                                         <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
