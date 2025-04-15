@@ -586,14 +586,35 @@ class RainbowCustomization extends AbstractModel {
      * @return
      */
     public function getOmittedSections(): array {
-        $usedOmittedSections = $this->RCJSON?->getOmmitedSection() ?? [];
         $allowedSections = $this->getSectionsAndLabels();
-
+        $usedOmittedSections = $this->RCJSON?->getOmittedSections() ?? [];
         $omittedSectionData = [];
-        foreach ($allowedSections as $section) {
-            // TO DO: implement using isUsed
+        foreach ($allowedSections as $section_id => $label) {
+            $omittedSectionsUsed = in_array($label, $usedOmittedSections, true);
+            $omittedSectionData[] = ['id' => $label, 'isUsed' => $omittedSectionsUsed];
         }
         return $omittedSectionData;
+    }
+
+    /**
+     * Get section data formatted for use in Twig: section ID → { label, isUsed }
+     *
+     * @return array
+     */
+    public function getSectionsAndLabelsAndOmitted(): array {
+        $sections = (array) $this->getSectionsAndLabels();
+        $omittedSections = $this->getOmittedSections();
+
+        $sections_and_labels = [];
+
+        foreach ($sections as $section_id => $label) {
+            $sections_and_labels[$section_id] = [
+                'label' => $label,
+                'isUsed' => in_array($label, $omittedSections, true)
+            ];
+        }
+
+        return $sections_and_labels;
     }
 
     /**

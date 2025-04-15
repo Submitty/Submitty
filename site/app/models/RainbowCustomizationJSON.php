@@ -293,6 +293,15 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
+     * Add an omitted section
+     *
+     * @param string $label The label of the section to omit
+     */
+    public function addOmittedSection(string $label): void {
+        $this->omit_section_from_stats->$label = true;
+    }
+
+    /**
      * Add a benchmark percent
      *
      * @param string $benchmark The benchmark - this is the key for this json field
