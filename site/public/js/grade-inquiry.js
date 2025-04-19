@@ -1,16 +1,14 @@
 /* global buildCourseUrl, WebSocketClient */
 /* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
 
-function getDraftContentKeyPrefix() {
-    const course = window.course;
-    const gradeable_id = window.gradeable_id;
+function getLocalStorageKey(key) {
+    const { course, term, gradeable_id } = window;
 
-    return `${course}-draftContent-${gradeable_id}-`;
+    return `${course}-${term}-${gradeable_id}-${key}`;
 }
 
 function loadDraft() {
-    const draftContentKeyPrefix = getDraftContentKeyPrefix();
-    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContentRaw = localStorage.getItem(getLocalStorageKey('draftContent'));
     const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
     const elements = $('.markdown-textarea.fill-available');
@@ -27,11 +25,12 @@ function loadDraft() {
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
-    const component_selector = localStorage.getItem('selected_tab');
+    const selectedTabKey = getLocalStorageKey('selectedTab');
+    const component_selector = localStorage.getItem(selectedTabKey);
     const first_unresolved_component = $('.component-unresolved').first();
     if (component_selector !== null) {
         $(component_selector).click();
-        localStorage.removeItem('selected_tab');
+        localStorage.removeItem(selectedTabKey);
     }
     else if (first_unresolved_component.length) {
         first_unresolved_component.click();
@@ -83,12 +82,12 @@ function onReplyTextAreaKeyUp(textarea) {
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
 
-    const draftContentKeyPrefix = getDraftContentKeyPrefix();
-    const draftContentRaw = localStorage.getItem(draftContentKeyPrefix);
+    const draftContentKey = getLocalStorageKey('draftContent');
+    const draftContentRaw = localStorage.getItem(draftContentKey);
     const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
 
     draftContent[uniqueKey] = reply_text_area.val();
-    localStorage.setItem(draftContentKeyPrefix, JSON.stringify(draftContent));
+    localStorage.setItem(draftContentKey, JSON.stringify(draftContent));
 
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -106,7 +105,7 @@ function onGradeInquirySubmitClicked(button) {
     const button_clicked = $(button);
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    localStorage.setItem(getLocalStorageKey('selectedTab'), `.component-${component_id}`);
     const form = $(`#reply-text-form-${component_id}`);
     if (form.data('submitted') === true) {
         return;
@@ -114,7 +113,7 @@ function onGradeInquirySubmitClicked(button) {
 
     // if grader clicks Close Grade Inquiry button with text in text area we want to confirm that they want to close the grade inquiry
     // and ignore their response
-    const draftContentKeyPrefix = getDraftContentKeyPrefix();
+    const draftContentKey = getLocalStorageKey('draftContent');
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
     if (submit_button_id && submit_button_id === 'grading-close') {
@@ -124,7 +123,7 @@ function onGradeInquirySubmitClicked(button) {
             }
             else {
                 text_area.val('');
-                localStorage.removeItem(draftContentKeyPrefix);
+                localStorage.removeItem(draftContentKey);
             }
         }
     }
@@ -148,7 +147,7 @@ function onGradeInquirySubmitClicked(button) {
 
                 if (json['status'] === 'success') {
                     text_area.val('');
-                    localStorage.removeItem(draftContentKeyPrefix);
+                    localStorage.removeItem(draftContentKey);
                 }
                 else {
                     alert(json['message']);
@@ -241,7 +240,7 @@ function newDiscussionRender(discussion) {
     // save the selected component before updating regrade discussion
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    localStorage.setItem(getLocalStorageKey('selectedTab'), `.component-${component_id}`);
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {

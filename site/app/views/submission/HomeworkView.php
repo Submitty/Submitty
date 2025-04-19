@@ -560,7 +560,8 @@ class HomeworkView extends AbstractView {
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
-            'course' => $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse(),
+            'course' => $this->core->getConfig()->getCourse(),
+            'term' => $this->core->getConfig()->getTerm(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_partial_path' => $vcs_partial_path ,
@@ -1412,6 +1413,8 @@ class HomeworkView extends AbstractView {
         $components_twig_array[] = ['id' => 0, 'title' => 'All'];
 
         return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Discussion.twig', [
+            'course' => $this->core->getConfig()->getCourse(),
+            'term' => $this->core->getConfig()->getTerm(),
             'grade_inquiries' => $grade_inquiries_twig_array,
             'grade_inquiry_url' => $grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
