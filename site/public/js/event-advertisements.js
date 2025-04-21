@@ -1,9 +1,9 @@
 /* eslint no-undef: "off" */
 function updateImageData(imageData) {
-    const imgElement = document.getElementById('current-banner');
-    if (imgElement) {
-        imgElement.src = `data:image/png;base64,${imageData.data}`;
-        imgElement.alt = `${imageData.name}_${imageData.id}`;
+    const imgElement = $('#current-banner');
+    if (imgElement.length) {
+        imgElement.attr('src', `data:image/png;base64,${imageData.data}`)
+            .attr('alt', `${imageData.name}_${imageData.id}`);
     }
     else {
         console.error('Image element with id \'current-banner\' not found');
