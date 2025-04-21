@@ -57,7 +57,7 @@ function updateLocalStorage(imageDataArray) {
     localStorage.setItem('removedArray', JSON.stringify(bannerArray));
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+$(function() {
     setupLocalStorage();
     updateLocalStorage(imageDataArray);
 });
