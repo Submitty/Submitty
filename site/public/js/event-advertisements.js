@@ -17,8 +17,8 @@ function setupLocalStorage() {
     if (localStorage.getItem('bannerArray') === null) {
         localStorage.setItem('bannerArray', JSON.stringify([]));
     }
-    if (localStorage.getItem('removeArray') === null) {
-        localStorage.setItem('removeArray', JSON.stringify([]));
+    if (localStorage.getItem('removedArray') === null) {
+        localStorage.setItem('removedArray', JSON.stringify([]));
     }
     if (localStorage.getItem('eventIndex') === null) {
         localStorage.setItem('eventIndex', 0);
