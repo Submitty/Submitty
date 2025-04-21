@@ -54,7 +54,7 @@ function updateLocalStorage(imageDataArray) {
     }
 
     localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
-    localStorage.setItem('removedArray', JSON.stringify(bannerArray));
+    localStorage.setItem('removedArray', JSON.stringify(removedArray));
 }
 
 $(function() {
