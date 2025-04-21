@@ -14,15 +14,13 @@
 
 <div class="forum_bar">
 	<div class="toolbar">
-		<div class="toolbar-left">
+		<div class="toolbar_left">
 			{% if thread_exists %}
 			<form id="search_block" method="post" action="{{ search_url }}">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<div class="search-field">
-					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
-				</div>
-				<div class="search-filter">
+				<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<div class="search_filter">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 						Search
 					</button>
@@ -43,13 +41,13 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue); min-width: 120px; "title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
 		</div>
+		<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue); display: none" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
-		<div class="toolbar-right">
+		<div class="toolbar_right">
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">
 				<div class="btn-group">
