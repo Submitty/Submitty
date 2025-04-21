@@ -1,12 +1,12 @@
 /* eslint no-undef: "off" */
 
-const eventLS= {
+const eventLS = {
     open: 'open',
     bArr: 'bannerArray',
     rArr: 'removedArray',
     index: 'eventIndex',
-    duckTalk: 'duckTalking'
-}
+    duckTalk: 'duckTalking',
+};
 
 function updateImageData(imageData) {
     const imgElement = $('#current-banner');
@@ -66,7 +66,8 @@ function updateLocalStorage(imageDataArray) {
     localStorage.setItem(eventLS.rArr, JSON.stringify(removedArray));
 }
 
-$(function() {
+function init() {
     setupLocalStorage();
     updateLocalStorage(imageDataArray);
-});
+}
+$(init);
