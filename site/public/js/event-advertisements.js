@@ -1,4 +1,13 @@
 /* eslint no-undef: "off" */
+
+const eventLS= {
+    open: 'open',
+    bArr: 'bannerArray',
+    rArr: 'removedArray',
+    index: 'eventIndex',
+    duckTalk: 'duckTalking'
+}
+
 function updateImageData(imageData) {
     const imgElement = $('#current-banner');
     if (imgElement.length) {
@@ -11,17 +20,17 @@ function updateImageData(imageData) {
 }
 
 function setupLocalStorage() {
-    if (localStorage.getItem('open') === null) {
-        localStorage.setItem('open', 'false');
+    if (localStorage.getItem(eventLS.open) === null) {
+        localStorage.setItem(eventLS.open, 'false');
     }
-    if (localStorage.getItem('bannerArray') === null) {
-        localStorage.setItem('bannerArray', JSON.stringify([]));
+    if (localStorage.getItem(eventLS.bArr) === null) {
+        localStorage.setItem(eventLS.bArr, JSON.stringify([]));
     }
-    if (localStorage.getItem('removedArray') === null) {
-        localStorage.setItem('removedArray', JSON.stringify([]));
+    if (localStorage.getItem(eventLS.rArr) === null) {
+        localStorage.setItem(eventLS.rArr, JSON.stringify([]));
     }
-    if (localStorage.getItem('eventIndex') === null) {
-        localStorage.setItem('eventIndex', 0);
+    if (localStorage.getItem(eventLS.index) === null) {
+        localStorage.setItem(eventLS.index, 0);
     }
 }
 
@@ -36,8 +45,8 @@ function filterRemovedBanners(localStorageKey, newArray) {
 }
 
 function updateLocalStorage(imageDataArray) {
-    const bannerArray = filterRemovedBanners('bannerArray', imageDataArray);
-    const removedArray = filterRemovedBanners('removedArray', imageDataArray);
+    const bannerArray = filterRemovedBanners(eventLS.bArr, imageDataArray);
+    const removedArray = filterRemovedBanners(eventLS.rArr, imageDataArray);
 
     let updated = false;
 
@@ -49,12 +58,12 @@ function updateLocalStorage(imageDataArray) {
     });
 
     if (updated) {
-        localStorage.setItem('eventIndex', 0);
-        localStorage.setItem('duckTalking', 'true');
+        localStorage.setItem(eventLS.index, 0);
+        localStorage.setItem(eventLS.duckTalk, 'true');
     }
 
-    localStorage.setItem('bannerArray', JSON.stringify(bannerArray));
-    localStorage.setItem('removedArray', JSON.stringify(removedArray));
+    localStorage.setItem(eventLS.bArr, JSON.stringify(bannerArray));
+    localStorage.setItem(eventLS.rArr, JSON.stringify(removedArray));
 }
 
 $(function() {
