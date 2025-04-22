@@ -60,7 +60,7 @@ jobs:
       - name: Run stylelint
         run: npm run css-stylelint
       - name: Run Prettier Check
-        run: npm run prettier
+        run: npm run prettier -c
 
   js-lint:
     name: JavaScript Lint
