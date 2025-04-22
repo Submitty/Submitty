@@ -21,6 +21,7 @@ function updateImageData(imageData) {
 
 function setupLocalStorage() {
     //incase the local storage for these variables are undefined
+
     if (localStorage.getItem(eventLS.open) === null) {
         localStorage.setItem(eventLS.open, 'false');
     }
@@ -41,6 +42,7 @@ function includesBanner(bannerArray, banner) {
 
 function filterRemovedBanners(localStorageKey, newArray) {
     //if the instructor removes arrays we don't want their data saved
+
     let currentArray = JSON.parse(localStorage.getItem(localStorageKey)) || [];
     currentArray = currentArray.filter((banner) => includesBanner(newArray, banner));
     return currentArray;
@@ -51,7 +53,8 @@ function updateLocalStorage(imageDataArray) {
     const removedArray = filterRemovedBanners(eventLS.removedArr, imageDataArray);
 
 
-    //here new banners are added to the front of bannerArray so they are displayed first 
+    //here new banners are added to the front of bannerArray so they are displayed first
+
     let updated = false;
 
     imageDataArray.forEach((item) => {
@@ -62,6 +65,7 @@ function updateLocalStorage(imageDataArray) {
     });
 
     //change index to 0 so that new events are shown first, and we want the ducktalk to be true to display the talking animation
+
     if (updated) {
         localStorage.setItem(eventLS.index, 0);
         localStorage.setItem(eventLS.duckTalk, 'true');
@@ -71,8 +75,8 @@ function updateLocalStorage(imageDataArray) {
     localStorage.setItem(eventLS.removedArr, JSON.stringify(removedArray));
 }
 
-
 //initiation script
+
 function init() {
     setupLocalStorage();
     updateLocalStorage(imageDataArray);
