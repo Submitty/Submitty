@@ -44,14 +44,14 @@
 }
 
 .forum_bar .toolbar_left {
-    flex: 1 1 auto;
-    max-width: 50%;
+    flex: 0 1 28rem;
+    min-width: 12rem;
     display: flex;
     align-items: stretch;
 }
 
 .forum_bar .toolbar_left > form {
-    flex: 1 1 0;
+    width: 100%;
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
@@ -62,15 +62,24 @@
     flex: 1 1 auto;
     height: 100%;
     width: 100%;
-    min-width: 40px;
+    min-width: 30px;
 }
 
-.forum_bar .toolbar_left .search_filter {
+.forum_bar .toolbar_left .search_actions {
     flex: 0 0 auto;
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
     gap: 0.5rem;
+}
+
+#clear_filter_button {
+    flex: 0 1 auto;
+    min-width: 100px;
+    display: none;
+    white-space: nowrap;
+    margin-left: .5rem;
+    color: var(--actionable-blue);
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
@@ -725,7 +734,7 @@
     color: var(--submitty-logo-blue);
 }
 /* stylelint-disable-next-line selector-id-pattern */
-#clear_filter_button,
+
 #unread {
     display: none;
 }
