@@ -20,7 +20,9 @@ public/css/details.css
 public/css/directory.css
 public/css/docker_interface.css
 public/css/electronic.css
-
+public/css/email-status.css
+public/css/exceptionforms.css
+public/css/forum.css
 public/css/gradeable-notebook.css
 public/css/gradeOverride.css
 public/css/latedaystableplugin.css

@@ -90,7 +90,6 @@
   "scripts": {
     "prettier": "prettier --check \"public/css/**/*.css\"",
     "prettier:fix": "prettier --write \"public/css/**/*.css\"",
-    "prettier:debug": "prettier --debug-check \"public/css/**/*.css\"",
     "css-stylelint": "stylelint \"**/*.css\"",
     "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
     "eslint": "eslint .",
