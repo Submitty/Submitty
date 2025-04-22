@@ -1,9 +1,9 @@
 /* eslint no-undef: "off" */
 
 const eventLS = {
-    open: 'open',
-    bArr: 'bannerArray',
-    rArr: 'removedArray',
+    open: 'bannerOpen',
+    bannerArr: 'bannerArray',
+    removedArr: 'removedArray',
     index: 'eventIndex',
     duckTalk: 'duckTalking',
 };
