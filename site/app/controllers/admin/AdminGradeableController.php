@@ -111,7 +111,7 @@ class AdminGradeableController extends AbstractController {
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
             }
-            $values['bulk_upload'] = $_POST['bulk_upload'] ?? false;
+            $values['bulk_upload'] = Utils::getBooleanValue($_POST['bulk_upload'] ?? false);
         }
 
         if (array_key_exists('team_gradeable', $_POST)) {
@@ -123,14 +123,14 @@ class AdminGradeableController extends AbstractController {
             $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
-            $values['discussion_based'] = $_POST['discussion_based'] ?? false;
+            $values['discussion_based'] = Utils::getBooleanValue($_POST['discussion_based'] ?? false);
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
-            $values['ta_grading'] = $_POST['ta_grading'];
+            $values['ta_grading'] = Utils::getBooleanValue($_POST['ta_grading']);
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? false;
-                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? false;
+                $values['grade_inquiry_allowed'] = Utils::getBooleanValue($_POST['grade_inquiries'] ?? false);
+                $values['grade_inquiry_per_component_allowed'] = Utils::getBooleanValue($_POST['grade_inquiries_per_component'] ?? false);
             }
         }
 
