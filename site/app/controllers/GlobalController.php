@@ -439,7 +439,8 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['community_events']),
                 "title" => "Community Events",
-                "icon" => "fa-paper-plane"
+                "icon" => "fa-palette",
+                "id" => "nav-sidebar-events"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
@@ -655,6 +656,10 @@ class GlobalController extends AbstractController {
             case 4:
                 // April
                 $aprilImages = [];
+                if ($day === 1) {
+                    //April Fool's day Duck
+                    $aprilImages[] = 'moorthy_duck/01-april.svg';
+                }
                 // Eid-al-Fitr 2025
                 if ($day <= 2) {
                     $aprilImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
