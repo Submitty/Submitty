@@ -6,7 +6,7 @@
   tasks:
     # This role is defined in the Submitty Repo under .setup/ansible/roles
     - name: Create gradeable
-      ansible.builtin.include_role: 
+      ansible.builtin.include_role:
         name: submitty_homework_creation
 
   vars_prompt:
