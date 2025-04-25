@@ -2006,7 +2006,7 @@ class SubmissionController extends AbstractController {
     /**
      * Check if the unbuilt gradeable has been built yet
      * @param string $gradeable_id
-     * @return array<string, string|bool>
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
     public function checkBuildRefresh(string $gradeable_id): JsonResponse {
