@@ -61,7 +61,7 @@ jobs:
         run: npm run css-stylelint
       - name: Run Prettier Format
         run: npm run prettier:fix
-      - run: diff --exit-code
+      - run: git diff --exit-code
 
   js-lint:
     name: JavaScript Lint
