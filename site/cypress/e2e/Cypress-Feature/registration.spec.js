@@ -23,7 +23,7 @@ describe('Tests for self registering for courses', () => {
         cy.login('instructor2');
         cy.visit(['testing', 'users']);
         cy.get('[data-testid="delete-student-gutmal-button"]').click();
-        cy.get('[data-testid="confirm-delete-button"]').click();   
+        cy.get('[data-testid="confirm-delete-button"]').click();
         cy.logout();
     });
 
@@ -91,6 +91,5 @@ describe('Tests for self registering for courses', () => {
         cy.visit();
         cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
         cy.logout();
-        
     });
 });
