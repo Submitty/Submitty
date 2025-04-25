@@ -1131,13 +1131,6 @@ div.full-height {
     opacity: 0.8;
 }
 
-[data-theme="dark"] {
-    .cat-buttons {
-        color: var(--btn-default-text) !important;
-        background-color: var(--btn-default-white) !important;
-    }
-}
-
 .peer-feedback-negative-unselected {
     margin-top: 5px;
     background-color: var(--default-white);
