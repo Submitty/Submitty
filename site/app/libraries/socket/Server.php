@@ -25,10 +25,6 @@ class Server implements MessageComponentInterface {
     /** @var array */
     private $sessions = [];
 
-    // Holds the mapping between User_ID (key) and Connection objects (value)
-    /** @var array  */
-    private $users = [];
-
     // Holds the set of PHPWebSocket clients that are currently connected
     /** @var array<int, bool> */
     private $php_websocket_clients = [];
@@ -151,10 +147,6 @@ class Server implements MessageComponentInterface {
      */
     private function setSocketClient(string $user_id, ConnectionInterface $conn): void {
         $this->sessions[$conn->resourceId] = $user_id;
-        if (!isset($this->users[$user_id])) {
-            $this->users[$user_id] = [];
-        }
-        $this->users[$user_id][] = $conn;
     }
 
     /**
@@ -260,12 +252,6 @@ class Server implements MessageComponentInterface {
         $user_id = $this->getSocketUserID($conn);
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
-            $this->users[$user_id] = array_filter($this->users[$user_id], function ($client) use ($conn) {
-                return $client !== $conn;
-            });
-            if (empty($this->users[$user_id])) {
-                unset($this->users[$user_id]);
-            }
         }
     }
 
