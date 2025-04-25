@@ -2,7 +2,7 @@
     <header>
         <h1>Manage Students</h1>
         <div class="btn-wrapper">
-            <a id="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
+            <a id="toggle-columns" data-testid="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
             <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
@@ -26,11 +26,11 @@
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[2] %}
-                        <th style="text-align:left;">First Name</th>
+                        <th style="text-align:left;">Given Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[3] %}
-                        <th style="text-align:left;">Last Name</th>
+                        <th style="text-align:left;">Family Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[4] %}
@@ -70,11 +70,11 @@
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[13] %}
-                        <th>Legal First Name</th>
+                        <th>Legal Given Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[14] %}
-                        <th>Legal Last Name</th>
+                        <th>Legal Family Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[15] %}

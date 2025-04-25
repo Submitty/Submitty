@@ -24,6 +24,7 @@
     }
 
     #late-day-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 }

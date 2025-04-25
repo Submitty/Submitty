@@ -7,10 +7,6 @@ on:
       - ready_for_review
 
 env:
-  PROJECT_ID: "PVT_kwDOAKRRkc4AfZil"
-  STATUS_FIELD_ID: "PVTSSF_lADOAKRRkc4AfZilzgUwVMs"
-  WIP_ID: "26e8e6b2"
-  SEEKING_REVIEWER_ID: "67583d20"
   PR_ID: ${{ github.event.pull_request.number }}
 
 jobs:
@@ -33,13 +29,18 @@ jobs:
           PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
           echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
       - name: Move draft to Work in Progress
         if: ${{ (github.event.action == 'converted_to_draft') || ((github.event.action == 'opened') && (github.event.pull_request.draft == true)) }}
         env:
           PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
+          source .github/bin/board_automation_helper.sh
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$WIP_ID"
+        shell: bash
 
       - name: Move ready for review to Seeking Reviewer
         if: ${{ github.event.action == 'ready_for_review' }}
@@ -47,4 +48,6 @@ jobs:
           PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
+          source .github/bin/board_automation_helper.sh
           gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$SEEKING_REVIEWER_ID"
+        shell: bash

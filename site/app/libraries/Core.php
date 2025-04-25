@@ -60,8 +60,6 @@ class Core {
     /** @var User */
     private $user = null;
 
-    /** @var string */
-    private $user_id = null;
 
     /** @var Output */
     private $output = null;
@@ -292,7 +290,7 @@ class Core {
 
         // didn't match any of the ignore rules...print a warning
         $num_queries = count($this->getSubmittyQueries()) + count($this->getCourseQueries());
-        Logger::debug("Excessive or duplicate queries observed: ${num_queries} queries executed.\nMethod: ${_SERVER['REQUEST_METHOD']}");
+        Logger::debug("Excessive or duplicate queries observed: {$num_queries} queries executed.\nMethod: {$_SERVER['REQUEST_METHOD']}");
     }
 
     /**
@@ -390,7 +388,6 @@ class Core {
 
     public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
-        $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
         $this->getOutput()->setTwigTimeZone($this->getUser()->getTimeZone());
     }
