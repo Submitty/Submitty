@@ -19,6 +19,7 @@ parameters:
     doctrine:
         objectManagerLoader: tests/phpstan/DoctrineExtensionTester.php
     checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false
 
 services:
     - class: tests\phpstan\ModelClassExtension

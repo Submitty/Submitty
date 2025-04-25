@@ -11,10 +11,12 @@
 }
 
 .admin-team-history-after-lock {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--alert-invalid-entry-pink) !important;
 }
 
 [data-theme="dark"] .admin-team-history-after-lock {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--alert-danger-red) !important;
 }
 
@@ -35,9 +37,11 @@
 }
 
 .admin-team-form-pending-conflict {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--alert-invalid-entry-pink) !important;
 }
 
 [data-theme="dark"] .admin-team-form-pending-conflict {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--alert-danger-red) !important;
 }
