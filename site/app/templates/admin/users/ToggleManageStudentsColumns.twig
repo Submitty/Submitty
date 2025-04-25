@@ -8,71 +8,71 @@
     </p>
     <div class="toggle-columns-menu">
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-registration-section">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-registration-section" data-testid="toggle-registration-section">
             <label for="toggle-registration-section">Registration Section</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-user-id">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-user-id" data-testid="toggle-user-id">
             <label for="toggle-user-id">User ID</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-first-name">
-            <label for="toggle-first-name">First Name</label>
+            <input type="checkbox" class="toggle-columns-box" id="toggle-first-name" data-testid="toggle-first-name">
+            <label for="toggle-first-name">Given Name</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-last-name">
-            <label for="toggle-last-name">Last Name</label>
+            <input type="checkbox" class="toggle-columns-box" id="toggle-last-name" data-testid="toggle-last-name">
+            <label for="toggle-last-name">Family Name</label>
         </div>
         <div class="toggle-checkbox-area">   
-            <input type="checkbox" class="toggle-columns-box" id="toggle-pronouns">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-pronouns" data-testid="toggle-pronouns">
             <label for="toggle-pronouns">Pronouns</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-rotating-section">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-rotating-section" data-testid="toggle-rotating-section">
             <label for="toggle-rotating-section">Rotating Section</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-time-zone">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-time-zone" data-testid="toggle-time-zone">
             <label for="toggle-time-zone" class="visually-hidden">UTC Offset / Time Zone</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-view-grades">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-view-grades" data-testid="toggle-view-grades">
             <label for="toggle-view-grades">View Grades</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-late-days">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-late-days" data-testid="toggle-late-days">
             <label for="toggle-late-days">Late Days</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-registration-type">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-registration-type" data-testid="toggle-registration-type">
             <label for="toggle-registration-type">Registration Type</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-edit-student">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-edit-student" data-testid="toggle-edit-student">
             <label for="toggle-edit-student">Edit Student</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-delete-student">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-delete-student" data-testid="toggle-delete-student">
             <label for="toggle-delete-student">Delete Student</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-user-numeric-id">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-user-numeric-id" data-testid="toggle-user-numeric-id">
             <label for="toggle-user-numeric-id">User Numeric ID</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-legal-first-name">
-            <label for="toggle-legal-first-name">Legal First Name</label>
+            <input type="checkbox" class="toggle-columns-box" id="toggle-legal-first-name" data-testid="toggle-legal-first-name">
+            <label for="toggle-legal-first-name">Legal Given Name</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-legal-last-name">
-            <label for="toggle-legal-last-name">Legal Last Name</label>
+            <input type="checkbox" class="toggle-columns-box" id="toggle-legal-last-name" data-testid="toggle-legal-last-name">
+            <label for="toggle-legal-last-name">Legal Family Name</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-email">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-email" data-testid="toggle-email">
             <label for="toggle-email">Email</label>
         </div>
         <div class="toggle-checkbox-area">
-            <input type="checkbox" class="toggle-columns-box" id="toggle-secondary-email">
+            <input type="checkbox" class="toggle-columns-box" id="toggle-secondary-email" data-testid="toggle-secondary-email">
             <label for="toggle-secondary-email">Secondary Email</label>
         </div>
     </div>
@@ -84,6 +84,6 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" id="toggle-student-col-submit" onclick="updateManageStudentsColumns()"/>
+    <input name="submit" class="btn btn-primary key_to_click" type="submit" value="Submit" id="toggle-student-col-submit" data-testid="toggle-student-col-submit" onclick="updateManageStudentsColumns()"/>
 
 {% endblock %}

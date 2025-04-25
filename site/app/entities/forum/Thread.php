@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace app\entities\forum;
 
+use DateInterval;
 use DateTime;
 use Doctrine\Common\Collections\Collection;
+use app\entities\UserEntity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use app\repositories\forum\ThreadRepository;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ThreadRepository::class)]
 #[ORM\Table(name: "threads")]
 class Thread {
     #[ORM\Id]
@@ -19,8 +22,9 @@ class Thread {
     #[ORM\Column(type: Types::STRING)]
     protected string $title;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $created_by;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, inversedBy: "threads")]
+    #[ORM\JoinColumn(name: "created_by", referencedColumnName: "user_id", nullable: false)]
+    protected UserEntity $author;
 
     #[ORM\Column(type: Types::BOOLEAN)]
     protected bool $pinned;
@@ -48,14 +52,14 @@ class Thread {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $status;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $lock_thread_date;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $lock_thread_date;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $pinned_expiration;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $announced;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $announced;
 
     /**
      * @var Collection<Post>
@@ -77,4 +81,143 @@ class Thread {
      */
     #[ORM\OneToMany(mappedBy: "thread", targetEntity: ThreadAccess::class)]
     protected Collection $viewers;
+
+    /**
+     * @var Collection<StudentFavorite>
+     */
+    #[ORM\OneToMany(mappedBy: "thread", targetEntity: StudentFavorite::class)]
+    protected Collection $favorers;
+
+    public function getId(): int {
+        return $this->id;
+    }
+
+    public function getTitle(): string {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function getAuthor(): UserEntity {
+        return $this->author;
+    }
+
+    public function isDeleted(): bool {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): void {
+        $this->deleted = $deleted;
+    }
+
+    public function getMergedThread(): ?Thread {
+        return $this->merged_thread;
+    }
+
+    public function isMergedThread(): bool {
+        return ($this->merged_thread?->getId() ?? -1) !== -1;
+    }
+
+    public function getStatus(): int {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): void {
+        $this->status = $status;
+    }
+
+    public function getLockDate(): ?DateTime {
+        return $this->lock_thread_date;
+    }
+
+    public function setLockDate(?DateTime $lock_thread_date): void {
+        $this->lock_thread_date = $lock_thread_date;
+    }
+
+    public function isLocked(): bool {
+        return $this->lock_thread_date !== null && $this->lock_thread_date < new DateTime("now");
+    }
+
+    public function getPinnedExpiration(): DateTime {
+        return $this->pinned_expiration;
+    }
+
+    public function setPinnedExpiration(DateTime $pinned_expiration): void {
+        $this->pinned_expiration = $pinned_expiration;
+    }
+
+    public function isPinned(): bool {
+        return $this->pinned_expiration > new DateTime("now");
+    }
+
+    public function isPinnedExpiring(): bool {
+        return $this->pinned_expiration <= (new DateTime("now"))->add(DateInterval::createFromDateString("7 days"));
+    }
+
+    public function isAnnounced(): bool {
+        return !is_null($this->announced);
+    }
+
+    /**
+     * @return Collection<Post>
+     */
+    public function getPosts(): Collection {
+        return $this->posts;
+    }
+
+    /**
+     * @return Collection<Category>
+     */
+    public function getCategories(): Collection {
+        return $this->categories;
+    }
+
+    /**
+     * @param Collection<Category> $categories
+     * @return void
+     */
+    public function setCategories(Collection $categories): void {
+        $this->categories = $categories;
+    }
+    public function isUnread(string $user_id): bool {
+        return !$this->getNewPosts($user_id)->isEmpty();
+    }
+
+    /**
+     * @return Collection<Post>
+     */
+    public function getNewPosts(string $user_id): Collection {
+        $last_view = $this->viewers->filter(function ($x) use ($user_id) {
+            return $user_id === $x->getUserId();
+        })->first();
+
+        if ($last_view === false) {
+            return $this->posts;
+        }
+        return $this->posts->filter(function ($x) use ($last_view) {
+            return $x->isUnread($last_view);
+        });
+    }
+
+    public function isFavorite(string $user_id): bool {
+        return $this->favorers->map(function ($x) {
+            return $x->getUserId();
+        })->contains($user_id);
+    }
+
+    public function getFirstPost(): Post|false {
+        return $this->posts->filter(function ($x) {
+            return $x->getParent()->getId() === -1;
+        })->first();
+    }
+
+    public function getSumUpducks(): int {
+        $sum_upducks = 0;
+        foreach ($this->getPosts() as $post) {
+            $sum_upducks += count($post->getUpduckers());
+        }
+        return $sum_upducks;
+    }
 }
