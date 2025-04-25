@@ -54,13 +54,7 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatroom(Chatroom|null $chatroom, bool $anonymous = false): string {
-        if ($chatroom === null){
-            return $this->core->getOutput()->renderTwigTemplate("error/CourseErrorPage.twig", [
-                'error_message' => 'Chat no longer exists',
-                'course_url' => $this->core->buildCourseUrl(),
-            ]);
-        }
+    public function showChatroom(Chatroom $chatroom, bool $anonymous = false): string {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();

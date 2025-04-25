@@ -68,6 +68,13 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
+        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Chatroom not enabled");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['chat'])
+            );
+        }
+
         return new WebResponse(
             'Chatroom',
             'showChatroom',
@@ -91,6 +98,13 @@ class ChatroomController extends AbstractController {
         if ($chatroom === null) {
             $this->core->addErrorMessage("chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
+
+        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Chatroom not enabled");
+            return new RedirectResponse(
+                $this->core->buildCourseUrl(['chat'])
+            );
         }
 
         return new WebResponse(
