@@ -13,7 +13,7 @@
                 </p>
             {% endif %}
             <script>
-                checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
+                checkRefreshPage("{{ check_refresh_submission_url }}")
             </script>
         {% elseif results is not defined %}
             <p class="red-message">
