@@ -5,6 +5,7 @@
     "selector-id-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
     "media-feature-range-notation": null,
+    "rule-empty-line-before": null,
     "declaration-empty-line-before": null,
     "declaration-no-important": true
   },
