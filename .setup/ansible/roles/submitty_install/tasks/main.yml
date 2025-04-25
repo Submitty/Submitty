@@ -25,6 +25,7 @@
     repo: https://github.com/Submitty/Submitty.git
     dest: /usr/local/submitty/GIT_CHECKOUT/Submitty
     version: "{{ submitty_install_submitty_version }}"
+    refspec: "{{ submitty_install_submitty_version }}"
     force: true
     update: true
 
