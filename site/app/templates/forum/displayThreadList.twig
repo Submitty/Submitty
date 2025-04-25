@@ -2,93 +2,95 @@
     <a href="{{ thread.link }}" class="thread_box_link" data-thread_id="{{ thread.thread_id }}" data-thread_title="{{ thread.title }}" id="thread_box_link_{{ thread.thread_id }}" data-testid="thread_box">
         <div class="{{ thread.class }}">
             <div class="flex-row"  data-testid="flex-row">
-                <span class="thread-left-cont">
+                <span class="thread-title-cont">
                     <span class="thread-list-item" data-testid="thread-list-item">{{ thread.title }}</span>
-                    <span class="thread-content">{{ thread.content }}</span>
+                </span>
+                <span class="thread-icons-cont {{ (is_full_page is defined and is_full_page) ? 'no-spacing' : 'has-spacing' }}">
+                    {%- if thread.pinned -%}
+                        {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
+                        {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
+                        <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
+                    {%- endif -%}
+                    {%- if thread.favorite -%}
+                        <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
+                    {%- endif -%}
+                    {%- if thread.merged_thread_id != -1 -%}
+                        <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
+                    {%- endif -%}
+                    {%- if thread.status != 0 -%}
+                        <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status" title="{{ thread.tooltip }}" aria-label="{{ thread.tooltip }}"></i>
+                    {%- endif -%}
+                    {%- if thread.is_locked -%}
+                        <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
+                    {%- endif -%}
+                </span>
+            </div>
 
-                    <span class="thread-info-bar">
-                        {% for category in thread.categories %}
-                            {# category[1] is the label color, category[0] is the label name #}
-                            <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
-                        {% endfor %}
+            <div class="thread-content">{{ thread.content }}</div>
 
-                        {% if is_full_page is not defined or not is_full_page %}
-                            <span class="post-container">
-                                <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
-                                <span class="thread-post-counter">
-                                    {{- thread.num_posts -}}
-                                </span>
+            <div class="thread-info-container {{ is_full_page is defined and is_full_page ? 'full-spacing' : 'half-spacing' }}">
+                <span class="categories-container">
+                    {% for category in thread.categories %}
+                        {% set tag = category[0] %}
+                        {% if tag|length > 20 and (is_full_page is not defined or not is_full_page) %}
+                            {% set tag = category[0]|slice(0, 17) ~ "..." %}
+                        {% endif %}
+                        <span class="label_forum" style="background-color: {{ category[1] }}">{{ tag }}</span>
+                    {% endfor %}
+                </span>
+
+                <span class="sub-info-container">
+                    <span class="count-container">
+                        <i  
+                            data-testid="thread-upduck-button" 
+                            class="upduck-button text-decoration-none" 
+                            style="margin-right: 4px;" 
+                            title="Total upduck">
+                            <img 
+                                id="ThreadsumDucksIcon_{{thread.thread_id}}" 
+                                src="/img/on-duck-button.svg" 
+                                alt="sum_like"
+                                width="30" 
+                                height="30"
+                            >
+                        </i>
+                        <span data-testid="thread-like-count"
+                            id="Thread_likeCounter_{{thread.thread_id}}"
+                            class="thread-like-counter"
+                            style="margin-right: {{ is_full_page is defined and is_full_page ? '22' : '16' }}px;">
+                            {{- thread.sum_ducks -}}
+                        </span>
+                        <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
+                        <span data-testid="thread-post-count"
+                            id="Thread_postCounter_{{thread.thread_id}}"
+                            class="thread-post-counter">
+                            {{- thread.num_posts -}}
+                        </span>
+                    </span>
+
+                    <span class="thread-action-container" data-testid="thread-action-container">
+                        {% if is_full_page is defined and is_full_page %}
+                            {% if thread.date.not_null %}
+                                <span class="thread-date has-spacing">{{ thread.date.formatted }}</span>
+                            {% endif %}
+                            <span>
+                                <strong class="post-author-name">{{ thread.author_info.name }}</strong>
+                                {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
+                                    <strong class="post-author-pronouns">({{ thread.author_info.pronouns }})</strong>
+                                {% endif %}
+                            </span>
+                        {% elseif thread.date.not_null %}
+                            {% set dateArray = thread.date.formatted|split(" ") %}
+                            <span class="thread-date">
+                                <span class="date">{{ dateArray[0] }}</span>
+                                <span class="time">{{ dateArray[1] }} {{ dateArray[2] }}</span>
                             </span>
                         {% endif %}
                     </span>
                 </span>
-                <span class="thread-right-cont">
-                    <span>
-                        {% if thread.pinned %}
-                            {% set expiringVisual = (thread.expiring) ? 'thread-announcement-expiring' : 'thread-announcement' %}
-                            {% set hoverText = (thread.expiring) ? 'Pinned thread -- will expire soon' : 'Pinned thread' %}
-                            <i class="fas fa-thumbtack {{expiringVisual}}" title ="{{hoverText}}" aria-label="{{hoverText}}"></i>
-                        {% endif %}
-                        {% if thread.favorite %}
-                            <i class="fas fa-bookmark thread-favorite" title="Bookmarked as my favorite" aria-label="Bookmarked as my favorite"></i>
-                        {% endif %}
-                        {% if thread.merged_thread_id != -1 %}
-                            <i class="fas fa-link thread-merged" title="Thread Merged" aria-label="Thread Merged"></i>
-                        {% endif %}
-
-                        {% if thread.status != 0 %}
-                            <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status"
-                               title="{{ thread.tooltip }}"
-                               aria-label="{{ thread.tooltip }}"
-                            ></i>
-                        {% endif %}
-
-                        {% if thread.is_locked %}
-                            <i class="fas fa-lock thread-locked" title="Locked" aria-label="Locked"></i>
-                        {% endif %}
-                    </span>
-                    {% if thread.date.not_null %}
-                        <span class="thread-date">{{ thread.date.formatted }}</span>
-                    {% endif %}
-                </span>
             </div>
-            {% if is_full_page is defined and is_full_page %}
-                <span class="upduck-post-container">
-                    <i  
-                        data-testid="thread-upduck-button" 
-                        class="upduck-button text-decoration-none" 
-                        style="margin-right: 5px;" 
-                        title="Total upduck">
-                        <img 
-                            src="{{'/img/on-duck-button.svg'}}" 
-                            alt="sum_like"
-                            width="30" 
-                            height="30"
-                        >
-                    </i>
-                    <span data-testid="thread-like-count"
-                        id="Thread_likeCounter_{{thread.thread_id}}"
-                        class="thread-like-counter"
-                        style="margin-right: 25px;">
-                        {{- thread.sum_ducks -}}
-                    </span>
-                    <i class="fas fa-comments" style="margin-right: 9px;" title="Total posts" aria-label="Total posts"></i>
-                    <span class="thread-post-counter">
-                        {{- thread.num_posts -}}
-                    </span>
-                </span>
-                <div class="post-action-container" data-testid="post-action-container">
 
-                    <span>
-                    <strong class="post_user_id">{{thread.author_info.name}}</strong>
-                        {% if thread.author_info.pronouns and thread.author_info.display_pronouns and thread.author_info.name != "Anonymous" %}
-                            <strong class="post_user_pronouns">({{thread.author_info.pronouns}})</strong>
-                        {% endif %}
-                    </span>
-                </div>
-            {% endif %}
         </div>
     </a>
-
 
 {% endfor %}
