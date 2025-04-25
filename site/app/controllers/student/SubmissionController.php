@@ -2009,25 +2009,22 @@ class SubmissionController extends AbstractController {
      * @return array<string, string|bool>
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
-    public function checkBuildRefresh(string $gradeable_id): array {
+    public function checkBuildRefresh(string $gradeable_id): JsonResponse {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
-            return ['error' => true, 'message' => 'No gradeable with that id.'];
+            return JsonResponse::getFailResponse("No gradeable with that id.");
         }
 
         if ($gradeable->hasAutogradingConfig()) {
-            $refresh_string = "REFRESH_ME";
             $refresh_bool = true;
         }
         else {
-            $refresh_string = "NO_REFRESH";
             $refresh_bool = false;
         }
-        $this->core->getOutput()->renderString($refresh_string);
-        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
+        return JsonResponse::getSuccessResponse($refresh_bool);
     }
 
     /**
@@ -2036,7 +2033,7 @@ class SubmissionController extends AbstractController {
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
-    public function checkRefresh($gradeable_id, $gradeable_version) {
+    public function checkRefresh($gradeable_id, $gradeable_version): JsonResponse {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -2079,16 +2076,8 @@ class SubmissionController extends AbstractController {
                 $team_id
             );
 
-        if ($has_results) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-        }
-        else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
-        }
-        $this->core->getOutput()->renderString($refresh_string);
-        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
+        $refresh_bool = $has_results;
+        return JsonResponse::getSuccessResponse($refresh_bool);
     }
 
     /**
