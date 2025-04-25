@@ -923,6 +923,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
+          name: install-log
+          path: /usr/local/submitty/install.log
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
           name: Cypress-Ansible-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
 
