@@ -12,16 +12,15 @@ describe('Tests leaderboard access', () => {
         cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
         cy.visit(['sample', 'gradeable', 'leaderboard']);
         cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
-
         cy.logout();
+
         cy.login('ta');
         cy.visit(['sample', 'gradeable', 'leaderboard']);
         cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
-
         cy.visit(['sample', 'gradeable', 'leaderboard']);
         cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
-
         cy.logout();
+
         cy.login('grader');
         cy.visit(['sample', 'gradeable', 'leaderboard']);
         cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
