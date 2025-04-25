@@ -45,6 +45,7 @@
         {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
         {{ submitty_install_vcs_url }}
         {{ submitty_install_institution_name }}
+        {{ submitty_install_institution_url }}
         {{ submitty_install_self_account_creation }}
         {{ submitty_install_sysadmin_email }}
         {{ submitty_install_submitty_email }}
