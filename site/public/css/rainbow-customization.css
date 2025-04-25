@@ -54,6 +54,14 @@
     background-color: var(--standard-lightskyblue);
 }
 
+.gradeable-configuration {
+    width:98%;
+    margin-top:50px;
+    padding:5px;
+    clear:both;
+    background-color:var(--standard-peachpuff);
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #save_status_container {
     display: flex;
@@ -284,15 +292,13 @@ hr {
 }
 
 .override {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--active-warning-brown) !important;
 }
 
 [data-theme="dark"] .override {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--standard-vibrant-orange) !important;
-}
-
-div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-triangle {
-    display: inline-block;
 }
 
 div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-triangle {
@@ -329,7 +335,9 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
 }
 
 .select2 {
+    /* stylelint-disable-next-line declaration-no-important */
     display: inline-block !important;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 38% !important;
 }
 
@@ -337,13 +345,26 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     width: 3em;
 }
 
-[id^="gradeable-pts-div-"],
-[id^="gradeable-percents-div-"] {
+.gradeable-points-div,
+.gradeable-percents-div {
     margin-right: 2em;
 }
 
 [id^="gradeable-percents-div-"] {
     display: none;
+}
+
+.gradeable-points {
+    flex: 1;
+    text-align: center;
+    border-left: 1px solid var(--default-white);
+}
+
+.gradeable-points-div {
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    width: 25%;
+    display: flex;
 }
 
 #btn-build-customization {
