@@ -59,7 +59,7 @@
     "@types/jquery": "^3.5.32",
     "@types/jquery.are-you-sure": "^0.0.34",
     "@types/jqueryui": "^1.12.23",
-    "@types/node": "^22.10.3",
+    "@types/node": "^22.15.2",
     "@types/twig": "^1.12.16",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-typescript": "^13.0.0",
