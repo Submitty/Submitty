@@ -2010,16 +2010,13 @@ class SubmissionController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
     public function checkBuildRefresh(string $gradeable_id): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return JsonResponse::getFailResponse("No gradeable with that id.");
         }
 
-        $refresh_bool = $gradeable->hasAutogradingConfig();
-        return JsonResponse::getSuccessResponse($refresh_bool);
+        return JsonResponse::getSuccessResponse($gradeable->hasAutogradingConfig());
     }
 
     /**
@@ -2029,8 +2026,6 @@ class SubmissionController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
     public function checkRefresh($gradeable_id, $gradeable_version): JsonResponse {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // Don't load the graded gradeable, since that may not exist yet
@@ -2071,8 +2066,7 @@ class SubmissionController extends AbstractController {
                 $team_id
             );
 
-        $refresh_bool = $has_results;
-        return JsonResponse::getSuccessResponse($refresh_bool);
+        return JsonResponse::getSuccessResponse($has_results);
     }
 
     /**
