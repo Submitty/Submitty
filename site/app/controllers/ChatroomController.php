@@ -88,6 +88,11 @@ class ChatroomController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatroom = $repo->find($chatroom_id);
 
+        if ($chatroom === null) {
+            $this->core->addErrorMessage("chatroom not found");
+            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
+
         return new WebResponse(
             'Chatroom',
             'showChatroom',
