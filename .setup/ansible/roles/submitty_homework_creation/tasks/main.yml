@@ -1,28 +1,6 @@
-- name: Checkout repository containing config files
-  ansible.builtin.git:
-    repo: "{{ vcs }}"
-    dest: /tmp/Submitty
-    force: yes
-    update: yes
-    version: "main"
-  when: vcs != ''
-
-- name: Find files in the directory
-  ansible.builtin.find:
-    paths: "/tmp/Submitty/config_files/"  # Replace with your directory path
-    file_type: file  # Ensure you're finding files (not directories)
-  register: json_files
-  when: vcs != ''
-
-- name: Set a variable with the list of file paths
-  ansible.builtin.set_fact:
-    var_json_list: "{{ json_files.files | map(attribute='path') | list }}"
-  when: vcs != ''
-
 - name: Read JSON content from a file
   ansible.builtin.set_fact:
     var_json_list: "{{ lookup('file', 'json_list.txt') | split('\n')  }}"
-  when: vcs == ''
 
 - name: Use task list to loop through gradeables
   ansible.builtin.include_tasks:
