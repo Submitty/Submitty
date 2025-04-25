@@ -77,6 +77,12 @@ $(document).ready(function() {
     // How many checkpoint items? field change
     $('#numeric_num-items').on('change', function() {
         var requestedCheckpoints = parseInt(this.value) || 0;
+        if (requestedCheckpoints < 1) {
+            displayErrorMessage('There must be at least one checkpoint.');
+            requestedCheckpoints = 1;
+            $(this).val(1);
+        }
+
         if (requestedCheckpoints < 0) {
             requestedCheckpoints = 0;
         }
