@@ -37,7 +37,7 @@ class FormOptionsWidget extends Widget {
     getFormOptionsTemplate() {
         return `
         <div class="buttons">
-            <input type="button" class="save-button btn btn-primary btn-nav btn-nav-submit" value="Save">
+            <input type="button" class="save-button btn btn-primary btn-nav btn-nav-submit" value="Save" data-testid="notebook-save">
         </div>
         <div class="status"></div>`;
     }

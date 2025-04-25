@@ -244,18 +244,18 @@ progress::-webkit-progress-value {
 
 .grade-panel button {
     color: var(--text-black);
-    position: relative;
     cursor: pointer;
-    padding: 2px 6px 5px 24px;
+    padding: 4px 12px;
     white-space: nowrap;
     outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
-    position: absolute;
-    top: 1px;
-    left: 4px;
+    margin-right: 5px;
     font-size: 14px;
 }
 
@@ -1528,6 +1528,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
@@ -1538,6 +1544,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1550,7 +1557,7 @@ input[type="radio"][disabled=""]:checked::before {
     width: 7px;
     height: 7px;
     border-radius: 100%;
-    background: var(--standard-medium-dark-gray);
+    background: var(--standard-dark-gray);
 }
 
 /* Media queries */
