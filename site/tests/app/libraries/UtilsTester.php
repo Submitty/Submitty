@@ -459,6 +459,30 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::getAutoFillData($users));
     }
 
+    public function booleanProvider() {
+        return [
+            ['true', true],
+            ['on', true],
+            ['1', true],
+            ['false', false],
+            ['random_string', false],
+            ['0', false],
+            [true, true],
+            [false, false],
+            [123, true],
+            [1, true],
+            [0, false]
+        ];
+    }
+
+    /**
+     * @dataProvider booleanProvider
+     */
+    public function testConvertBooleans(mixed $variable, bool $boolean): void {
+        // Strict assertion to assert actual boolean value is returned, not possibly equal other values, such as an integer or a string.
+        $this->assertSame($boolean, Utils::getBooleanValue($variable));
+    }
+
     public function testGetAutoFillDataVersion() {
         $details = [];
         $details[] = [
