@@ -2018,12 +2018,7 @@ class SubmissionController extends AbstractController {
             return JsonResponse::getFailResponse("No gradeable with that id.");
         }
 
-        if ($gradeable->hasAutogradingConfig()) {
-            $refresh_bool = true;
-        }
-        else {
-            $refresh_bool = false;
-        }
+        $refresh_bool = $gradeable->hasAutogradingConfig();
         return JsonResponse::getSuccessResponse($refresh_bool);
     }
 
