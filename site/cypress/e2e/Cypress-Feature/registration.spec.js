@@ -30,7 +30,7 @@ describe('Tests for self registering for courses', () => {
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="all-self-registration"]').check();
         cy.get('[data-testid="all-self-registration"]').should('be.checked');
-        cy.get('[data-testid="default-section-id"]').select('5');
+        cy.get('[data-testid="default-section-id"]').select('1');
         cy.logout();
         // Check instructors view
         cy.login();
