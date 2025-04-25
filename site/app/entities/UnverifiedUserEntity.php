@@ -48,7 +48,18 @@ class UnverifiedUserEntity {
         $this->setUserEmail($user_email);
         $this->setVerificationValues(['code' => $verification_code, 'exp' => $verification_expiration]);
     }
-
+    /**
+     * @return array{
+     *     user_givenname: string,
+     *     user_familyname: string,
+     *     user_email: string,
+     *     user_password: string,
+     *     user_id: string,
+     *     user_pronouns: string,
+     *     user_email_secondary: string,
+     *     user_email_secondary_notify: boolean
+     * }
+     */
     public function getUserInfo(): array {
         $out = [];
         $out["user_givenname"] = $this->user_givenname;
