@@ -1,28 +1,40 @@
 describe('Tests leaderboard access', () => {
-    ['instructor', 'student'].forEach((user) => {
-        it(`Leaderboard visibility check for ${user}`, () => {    
-            cy.login(user);        
-            cy.visit(['sample']);
-            if (user === 'instructor') {
-                // Change the date as instructor
+    before(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'leaderboard', 'update']);
+        cy.get('#page_5_nav').click();
+        cy.get('[data-testid="submission-open-date"]').type('2100-01-15 23:59:59');
+    });
 
-                cy.get('#leaderboard')
-                .find('a.fas.fa-pencil-alt.black-btn[title="Edit Gradeable Configuration"]')
-                .click();
+    it('Should check if leaderboard is accessible to users', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
 
-                cy.get('#page_5_nav').click();
-                cy.get('[data-testid="submission-open-date"]').type('2100-01-15 23:59:59');
+        cy.logout();
+        cy.login('ta');
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
 
-                cy.logout();
-            } else if (user === 'student') {
-                cy.visit(['sample', 'gradeable', 'leaderboard', 'leaderboard']);
-                cy.get('.content').should(
-                    'contain.text',
-                    'leaderboard is not a valid electronic submission gradeable. Contact your instructor if you think this is an error.'
-                  );
-                cy.logout();
-                  
-            }
-        });
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
+
+        cy.logout();
+        cy.login('grader');
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
+
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('not.exist');
+
+        cy.logout();
+        cy.login('student');
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('exist');
+
+        cy.visit(['sample', 'gradeable', 'leaderboard']);
+        cy.get('[data-testid="invalid-gradeable"]').should('exist');
     });
 });
