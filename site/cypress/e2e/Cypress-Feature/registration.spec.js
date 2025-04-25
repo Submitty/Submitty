@@ -12,9 +12,18 @@ describe('Tests for self registering for courses', () => {
         // Testing course is on by default, but want to test unchecking and re-checking.
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
+        cy.get('[data-testid="course-name"').clear();
         cy.get('[data-testid="all-self-registration"]').uncheck();
         cy.get('[data-testid="all-self-registration"]').should('not.be.checked');
         cy.get('[data-testid="default-section-id"]').select('1');
+        cy.logout();
+    });
+
+    after(() => {
+        cy.login('instructor2');
+        cy.visit(['testing', 'users']);
+        cy.get('[data-testid="delete-student-gutmal-button"]').click();
+        cy.get('[data-testid="confirm-delete-button"]').click();   
         cy.logout();
     });
 
@@ -65,5 +74,23 @@ describe('Tests for self registering for courses', () => {
         cy.visit();
         cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
         cy.logout();
+        cy.login('instructor2');
+        cy.visit(['testing', 'users']);
+        cy.get('[data-testid="edit-student-gutmal-button"]').click();
+        cy.get('[data-testid="registration-section-dropdown"]').select('Not Registered');
+        cy.get('[data-testid="submit-user-form-button"]').click();
+        cy.login('gutmal');
+        cy.visit();
+        cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
+        cy.get('[data-testid="testing-button"]').click();
+        cy.get('[data-testid="no-access-message"]').should('contain', openMessageFull)
+            .and('contain', selectMessage)
+            .and('contain', notifiedMessage);
+        cy.get('[data-testid="register-button"]').click();
+        cy.get('[data-testid="open_homework"]').should('exist');
+        cy.visit();
+        cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
+        cy.logout();
+        
     });
 });
