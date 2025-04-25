@@ -4401,16 +4401,6 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
-			message: "#^Instantiated class Aptoma\\\\Twig\\\\Extension\\\\MarkdownEngine\\\\PHPLeagueCommonMarkEngine not found\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Instantiated class Aptoma\\\\Twig\\\\Extension\\\\MarkdownExtension not found\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 2
 			path: app/libraries/Output.php
@@ -4697,11 +4687,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\views\\\\ErrorView is not subtype of type string\\.$#"
-			count: 1
-			path: app/libraries/Output.php
-
-		-
-			message: "#^Parameter \\#1 \\$extension of method Twig\\\\Environment\\:\\:addExtension\\(\\) expects Twig\\\\Extension\\\\ExtensionInterface, Aptoma\\\\Twig\\\\Extension\\\\MarkdownExtension given\\.$#"
 			count: 1
 			path: app/libraries/Output.php
 
