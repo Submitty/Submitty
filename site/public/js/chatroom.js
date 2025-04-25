@@ -10,11 +10,7 @@ function fetchMessages(chatroomId, my_id, when = new Date(0)) {
         success: function (responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach((msg) => {
-                    let display_name = msg.display_name;
-                    if (msg.user_id === my_id) {
-                        display_name = 'me';
-                    }
-                    appendMessage(display_name, msg.role, msg.timestamp, msg.content);
+                    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
                 });
                 const messages_area = document.querySelector('.messages-area');
                 messages_area.scrollTop = messages_area.scrollHeight;
@@ -49,13 +45,11 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
-            window.socketClient.send({ type: 'chat_message', content: content, user_id: userId, display_name: displayName, role: role, timestamp: new Date(Date.now()).toLocaleString() });
         },
         error: function () {
             window.alert('Something went wrong with storing message');
         },
     });
-    appendMessage(displayName, role, null, content);
 }
 
 function appendMessage(displayName, role, ts, content) {
@@ -68,7 +62,7 @@ function appendMessage(displayName, role, ts, content) {
     }
 
     let display_name = displayName;
-    if (role && role !== 'student' && display_name !== 'me' && display_name.substring(0, 9) !== 'Anonymous') {
+    if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
         display_name = `${displayName} [${role}]`;
     }
 
@@ -109,14 +103,17 @@ function appendMessage(displayName, role, ts, content) {
     }
 }
 
+function socketChatMessageHandler(msg){
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
+}
+
 function initChatroomSocketClient(chatroomId) {
     // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        if (msg.type === 'chat_message') {
-            const sender_name = msg.display_name;
-            const role = msg.role;
-            appendMessage(sender_name, role, msg.timestamp, msg.content);
+        switch(msg.type) {
+            case 'chat_message':
+                socketChatMessageHandler(msg);
         }
     };
     window.socketClient.open(`chatroom_${chatroomId}`);

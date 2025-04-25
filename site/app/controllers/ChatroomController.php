@@ -10,6 +10,8 @@ use app\entities\chat\Message;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\socket\Client;
+use app\libraries\DateUtils;
 
 /**
  * @Enabled("chat")
@@ -111,6 +113,7 @@ class ChatroomController extends AbstractController {
         foreach ($chatroom->getMessages() as $message) {
             $em->remove($message);
         }
+        unset($_SESSION["anon_name_chatroom_{$chatroom_id}"]);
         $em->remove($chatroom);
         $em->flush();
         return JsonResponse::getSuccessResponse();
@@ -190,13 +193,25 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function addMessage(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
-        $content = $_POST['content'];
-        $userId = $_POST['user_id'];
-        $displayName = $_POST['display_name'] ?? '';
-        $role = $_POST['role'] ?? 'student';
+        $msg_json = [];
+        $msg_json['content'] = $_POST['content'];
+        $msg_json['user_id']= $_POST['user_id'];
+        $msg_json['display_name'] = $_POST['display_name'] ?? '';
+        $msg_json['role'] = $_POST['role'] ?? 'student';
+        $msg_json['type'] = 'chat_message';
+        $msg_json['timestamp'] = date("Y-m-d H:i:s");
+        $msg_json['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-chatroom_$chatroom_id";
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
-        $message = new Message($userId, $displayName, $role, $content, $chatroom);
+        $message = new Message($msg_json['user_id'], $msg_json['display_name'], $msg_json['role'], $msg_json['content'], $chatroom);
+
+        try {
+            $client = new Client($this->core);
+            $client->json_send($msg_json);
+        } catch (WebSocket\ConnectionException $e) {
+            $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+        }
+        
 
         $em->persist($message);
         $em->flush();

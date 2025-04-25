@@ -54,19 +54,32 @@ class ChatroomView extends AbstractView {
         ]);
     }
 
-    public function showChatroom(Chatroom $chatroom, bool $anonymous = false): string {
+    public function showChatroom(Chatroom|null $chatroom, bool $anonymous = false): string {
+        if ($chatroom === null){
+            return $this->core->getOutput()->renderTwigTemplate("error/CourseErrorPage.twig", [
+                'error_message' => 'Chat no longer exists',
+                'course_url' => $this->core->buildCourseUrl(),
+            ]);
+        }
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
-        if (!$anonymous) {
+        if ($anonymous) {
+            $roomId = $chatroom->getId();
+            $sessKey = "anon_name_chatroom_{$roomId}";
+            if (empty($_SESSION[$sessKey])) {
+                $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
+                $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+                $adj  = $adjectives[array_rand($adjectives)];
+                $noun = $nouns[array_rand($nouns)];
+                $_SESSION[$sessKey] = "Anonymous {$adj} {$noun}";
+            }
+            $display_name = $_SESSION[$sessKey];
+        }
+        else {
             if (!$user->accessAdmin()) {
                 $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
             }
-        }
-        else {
-            $adjectives = ["Quick", "Lazy", "Cheerful", "Pensive", "Mysterious", "Bright", "Sly", "Brave", "Calm", "Eager", "Fierce", "Gentle", "Jolly", "Kind", "Lively", "Nice", "Proud", "Quiet", "Rapid", "Swift"];
-            $anon_names = ["Duck", "Goose", "Swan", "Eagle", "Parrot", "Owl", "Sparrow", "Robin", "Pigeon", "Falcon", "Hawk", "Flamingo", "Pelican", "Seagull", "Cardinal", "Canary", "Finch", "Hummingbird"];
-            $display_name = 'Anonymous' . ' ' . $adjectives[array_rand($anon_names)] . ' ' . $anon_names[array_rand($anon_names)];
         }
 
         return $this->core->getOutput()->renderTwigTemplate("chat/Chatroom.twig", [
