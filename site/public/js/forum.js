@@ -347,6 +347,14 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
 
 function socketDeletePostHandler(post_id) {
     const main_post = $(`#${post_id}`);
+    const thread_box_link = $(`#thread_box_link_${post_id}`);
+    const current_thread = Number($('#current-thread').val());
+
+    if (post_id === current_thread) {
+        // Navigate back to the forum page for deleted threads
+        $('#nav-sidebar-forum')[0].click();
+    }
+
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function () {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
@@ -359,6 +367,7 @@ function socketDeletePostHandler(post_id) {
         var posts_to_delete = main_post.nextUntil('#post-hr');
     }
 
+    thread_box_link.remove();
     posts_to_delete.filter('.reply-box').remove();
     main_post.add(posts_to_delete).fadeOut(400, () => {
         main_post.add(posts_to_delete).remove();
@@ -692,10 +701,7 @@ function initSocketClient() {
                 }
                 break;
             case 'delete_post':
-                // eslint-disable-next-line eqeqeq
-                if ($('data#current-thread').val() == msg.thread_id) {
-                    socketDeletePostHandler(msg.post_id);
-                }
+                socketDeletePostHandler(msg.post_id || msg.thread_id);
                 break;
             case 'edit_post':
                 // eslint-disable-next-line eqeqeq
@@ -908,7 +914,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_status').val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
                 if (Date.parse(expiration) > new Date()) {
-                    $('.expiration').show();
+                    $('#pin-expiration-date').show();
                 }
                 $('#expirationDate').val(json.expiration);
                 // Categories
@@ -926,7 +932,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $('#title').prop('disabled', true);
                 $('.edit_thread').hide();
-                $('.expiration').hide();
+                $('#pin-expiration-date').hide();
                 $('#label_lock_thread').hide();
                 $('#thread_form').prop('ignore-cat', true);
                 $('#category-selection-container').hide();
@@ -1749,14 +1755,21 @@ function refreshCategories() {
 
 function changeColorClass() {
     const color = $(this).data('color');
+    const isDarkMode = $('[data-theme="dark"]').length > 0;
     $(this).css('border-color', color);
     if ($(this).hasClass('btn-selected')) {
         $(this).css('background-color', color);
         $(this).css('color', 'white');
     }
     else {
-        $(this).css('background-color', 'white');
-        $(this).css('color', color);
+        if (isDarkMode) {
+            $(this).css('background-color', 'var(--btn-default-white)');
+            $(this).css('color', 'var(--btn-default-text)');
+        }
+        else {
+            $(this).css('background-color', 'white');
+            $(this).css('color', color);
+        }
     }
 }
 
@@ -2591,17 +2604,17 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
-        $('.expiration').hide();
+        $('#pin-expiration-date').hide();
         if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
             $('#Announcement').prop('checked', data.isAnnouncement);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (data.pinThread) {
             $('#pinThread').prop('checked', data.pinThread);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);

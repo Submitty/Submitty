@@ -140,7 +140,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsFirstItem(): void {
@@ -232,7 +232,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsNonFirstItem(): void {
@@ -329,7 +329,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {
