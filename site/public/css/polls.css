@@ -49,7 +49,7 @@
     vertical-align: middle;
 }
 
-.option-btn input[type="radio"]{
+.option-btn input[type="radio"] {
     vertical-align: top;
 }
 
@@ -151,7 +151,7 @@ form {
     min-height: 50px;
     max-height: 300px;
     height: 50px;
-    width: calc(100% - 200px)
+    width: calc(100% - 200px);
 }
 
 .response-container .poll-response-custom {
