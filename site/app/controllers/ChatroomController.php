@@ -74,6 +74,7 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
+        unset($_SESSION["anon_name_chatroom_{$chatroom_id}"]);
 
         return new WebResponse(
             'Chatroom',
@@ -212,16 +213,39 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function addMessage(string $chatroom_id): JsonResponse {
         $em = $this->core->getCourseEntityManager();
+        $user = $this->core->getUser();
+        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
+        if ($chatroom === null){
+            return JsonResponse::getFailResponse("Chatroom not found.");
+        }
+        if (!$chatroom->isActive() && !$user->accessAdmin()){
+            return JsonResponse::getFailResponse("No access");
+        }
+
+        $sessKey = "anon_name_chatroom_{$chatroom_id}"; 
+        $display_name = '';
+        $user_id = $user->getId();
+        if ($chatroom->isAllowAnon() && !empty($_SESSION[$sessKey])) {
+            $display_name = $_SESSION[$sessKey];
+        }
+        else{
+            if ($user->accessAdmin()) {
+                $display_name = $user->getDisplayFullName();
+            }
+            else {
+                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName() ,0, 1) . ".";
+            }
+        }
+
+        $role = $user->accessAdmin() ? 'instructor' : 'student';
         $msg_json = [];
         $msg_json['content'] = $_POST['content'];
-        $msg_json['user_id']= $_POST['user_id'];
-        $msg_json['display_name'] = $_POST['display_name'] ?? '';
-        $msg_json['role'] = $_POST['role'] ?? 'student';
+        $msg_json['user_id']= $user_id;
+        $msg_json['display_name'] = $display_name;
+        $msg_json['role'] = $role;
         $msg_json['type'] = 'chat_message';
         $msg_json['timestamp'] = date("Y-m-d H:i:s");
         $msg_json['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . "-chatroom_$chatroom_id";
-        $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
-
         $message = new Message($msg_json['user_id'], $msg_json['display_name'], $msg_json['role'], $msg_json['content'], $chatroom);
 
         try {
