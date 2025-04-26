@@ -11,6 +11,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
+use WebSocket;
 
 /**
  * @Enabled("chat")
@@ -226,7 +227,7 @@ class ChatroomController extends AbstractController {
         $boolKey = "anon_name_chatroom_{$chatroom_id}_bool";
         $display_name = '';
         $user_id = $user->getId();
-        if ($chatroom->isAllowAnon() && $_SESSION[$boolKey]) {
+        if ($chatroom->isAllowAnon() && $_SESSION[$boolKey] === true) {
             $display_name = $_SESSION[$sessKey];
         }
         else {

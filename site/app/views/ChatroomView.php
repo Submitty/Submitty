@@ -62,7 +62,7 @@ class ChatroomView extends AbstractView {
         $sessKey = "anon_name_chatroom_{$roomId}";
         $boolKey = "anon_name_chatroom_{$roomId}_bool";
         if ($anonymous) {
-            if (empty($_SESSION[$sessKey])) {
+            if (!isset($_SESSION[$sessKey])) {
                 $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
                 $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
                 $adj  = $adjectives[array_rand($adjectives)];
