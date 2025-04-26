@@ -5,7 +5,7 @@
         This submission is currently in the autograding queue at position {{ queue_pos }} of {{ queue_total }}.
     </p>
     <script>
-        checkRefreshPage("{{ check_refresh_submission_url }}")
+        checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
     </script>
 {% endif %}
 
