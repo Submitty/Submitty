@@ -58,9 +58,10 @@ class ChatroomView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Chatroom");
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
+        $roomId = $chatroom->getId();
+        $sessKey = "anon_name_chatroom_{$roomId}";
+        $boolKey = "anon_name_chatroom_{$roomId}_bool";
         if ($anonymous) {
-            $roomId = $chatroom->getId();
-            $sessKey = "anon_name_chatroom_{$roomId}";
             if (empty($_SESSION[$sessKey])) {
                 $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
                 $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];

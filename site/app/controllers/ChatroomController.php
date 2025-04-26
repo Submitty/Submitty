@@ -55,7 +55,7 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
     public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
         if (!is_numeric($chatroom_id)) {
-            $this->core->addErrorMessage("Invalid Chatroom ID");
+            $this->core->addErrorMessage("Invalid chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
@@ -63,7 +63,7 @@ class ChatroomController extends AbstractController {
         $chatroom = $repo->find($chatroom_id);
 
         if ($chatroom === null) {
-            $this->core->addErrorMessage("chatroom not found");
+            $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
@@ -73,7 +73,7 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
-        unset($_SESSION["anon_name_chatroom_{$chatroom_id}"]);
+        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = false;
 
         return new WebResponse(
             'Chatroom',
@@ -96,7 +96,7 @@ class ChatroomController extends AbstractController {
         $chatroom = $repo->find($chatroom_id);
 
         if ($chatroom === null) {
-            $this->core->addErrorMessage("chatroom not found");
+            $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
@@ -106,6 +106,7 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
+        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = true;
 
         return new WebResponse(
             'Chatroom',
@@ -214,32 +215,33 @@ class ChatroomController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $user = $this->core->getUser();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
-        if ($chatroom === null){
-            return JsonResponse::getFailResponse("Chatroom not found.");
+        if ($chatroom === null) {
+            return JsonResponse::getFailResponse("Chatroom not found");
         }
-        if (!$chatroom->isActive() && !$user->accessAdmin()){
+        if (!$chatroom->isActive() && !$user->accessAdmin()) {
             return JsonResponse::getFailResponse("No access");
         }
 
-        $sessKey = "anon_name_chatroom_{$chatroom_id}"; 
+        $sessKey = "anon_name_chatroom_{$chatroom_id}";
+        $boolKey = "anon_name_chatroom_{$chatroom_id}_bool";
         $display_name = '';
         $user_id = $user->getId();
-        if ($chatroom->isAllowAnon() && !empty($_SESSION[$sessKey])) {
+        if ($chatroom->isAllowAnon() && $_SESSION[$boolKey]) {
             $display_name = $_SESSION[$sessKey];
         }
-        else{
+        else {
             if ($user->accessAdmin()) {
                 $display_name = $user->getDisplayFullName();
             }
             else {
-                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName() ,0, 1) . ".";
+                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
             }
         }
 
         $role = $user->accessAdmin() ? 'instructor' : 'student';
         $msg_json = [];
         $msg_json['content'] = $_POST['content'];
-        $msg_json['user_id']= $user_id;
+        $msg_json['user_id'] = $user_id;
         $msg_json['display_name'] = $display_name;
         $msg_json['role'] = $role;
         $msg_json['type'] = 'chat_message';
@@ -250,7 +252,8 @@ class ChatroomController extends AbstractController {
         try {
             $client = new Client($this->core);
             $client->json_send($msg_json);
-        } catch (WebSocket\ConnectionException $e) {
+        }
+        catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
         
