@@ -54,6 +54,14 @@
     background-color: var(--standard-lightskyblue);
 }
 
+.gradeable-configuration {
+    width:98%;
+    margin-top:50px;
+    padding:5px;
+    clear:both;
+    background-color:var(--standard-peachpuff);
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #save_status_container {
     display: flex;
@@ -293,10 +301,6 @@ hr {
     color: var(--standard-vibrant-orange) !important;
 }
 
-div:has(.override) ~ div.gradeable-li-right-of-input .rainbow-grades-warning-triangle {
-    display: inline-block;
-}
-
 div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-triangle {
     display: inline-block;
 }
@@ -341,13 +345,26 @@ div:has(.override) ~ div.gradeable-li-right-of-input .same-section-name-warning-
     width: 3em;
 }
 
-[id^="gradeable-pts-div-"],
-[id^="gradeable-percents-div-"] {
+.gradeable-points-div,
+.gradeable-percents-div {
     margin-right: 2em;
 }
 
 [id^="gradeable-percents-div-"] {
     display: none;
+}
+
+.gradeable-points {
+    flex: 1;
+    text-align: center;
+    border-left: 1px solid var(--default-white);
+}
+
+.gradeable-points-div {
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    width: 25%;
+    display: flex;
 }
 
 #btn-build-customization {

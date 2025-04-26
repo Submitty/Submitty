@@ -63,6 +63,7 @@ class GlobalController extends AbstractController {
         $duck_img = $this->getDuckImage($now);
         $repo = $this->core->getSubmittyEntityManager()->getRepository(BannerImage::class);
         $bannerImages = $repo->getValidBannerImages();
+        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
 
         return $this->core->getOutput()->renderTemplate(
             'Global',
@@ -77,7 +78,8 @@ class GlobalController extends AbstractController {
             $duck_img,
             $page_name,
             $content_only,
-            $bannerImages
+            $bannerImages,
+            $performance_warning
         );
     }
 
@@ -446,7 +448,8 @@ class GlobalController extends AbstractController {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildUrl(['community_events']),
                 "title" => "Community Events",
-                "icon" => "fa-paper-plane"
+                "icon" => "fa-palette",
+                "id" => "nav-sidebar-events"
             ]);
 
             $sidebar_buttons[] = new NavButton($this->core, [
@@ -662,6 +665,10 @@ class GlobalController extends AbstractController {
             case 4:
                 // April
                 $aprilImages = [];
+                if ($day === 1) {
+                    //April Fool's day Duck
+                    $aprilImages[] = 'moorthy_duck/01-april.svg';
+                }
                 // Eid-al-Fitr 2025
                 if ($day <= 2) {
                     $aprilImages[] = 'moorthy_duck/eid_al_fitr_duck.svg';
@@ -806,10 +813,8 @@ class GlobalController extends AbstractController {
             $footer_links[] =  ["title" => "Email Admin", "url" => $this->core->getConfig()->getSysAdminEmail(), "is_email" => true];
         }
 
-        $performance_warning = $this->core->getConfig()->isDebug() && $this->core->hasDBPerformanceWarning();
-
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only, $performance_warning);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links, $content_only);
     }
 
     private function routeEquals(string $a, string $b) {
