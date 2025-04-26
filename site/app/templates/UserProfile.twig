@@ -37,7 +37,7 @@
                     </div>
                     <div class="flex-row" id="givenname-row" data-testid="givenname-row">
                         <span class="label">
-                        {{ localize('My_Profile.First_Name', "First Name" )}}:
+                        {{ localize('My_Profile.Given_Name', "Given Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedGivenName() }}
@@ -45,7 +45,7 @@
                     </div>
                     <div class="flex-row" id="familyname-row" data-testid="familyname-row">
                         <span class="label">
-                        {{ localize('My_Profile.Last_Name', "Last Name" )}}:
+                        {{ localize('My_Profile.Family_Name', "Family Name" )}}:
                         </span>
                         <button class="icon" tabindex="0" onclick="showUpdatePrefNameForm()" aria-label="Edit user preferred name" title="Edit user preferred name">
                             <i class="fas fa-pencil-alt"></i> {{ user.getDisplayedFamilyName() }}

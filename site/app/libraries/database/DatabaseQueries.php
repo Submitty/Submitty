@@ -8324,6 +8324,9 @@ WHERE current_state IN
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
+             gc.ag_graders AS ag_graders,
+             gc.ag_timestamps AS ag_timestamps,
+             gc.ag_graders_names AS ag_graders_names,
 
               {$submitter_data_inject}
 
@@ -8345,6 +8348,27 @@ WHERE current_state IN
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN LATERAL (
+                SELECT
+                  gc.g_id,
+                  json_object_agg(gc.gc_id, graders) as ag_graders,
+                  json_object_agg(gc.gc_id, graders_names) as ag_graders_names,
+                  json_object_agg(gc.gc_id, timestamps) as ag_timestamps
+                FROM gradeable_component gc
+                LEFT JOIN (
+                  SELECT
+                    ag_{$submitter_type},
+                    gc_id,
+                    json_agg(grader_id) AS graders,
+                    json_agg(COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) || ' ' || substr(COALESCE(NULLIF(user_preferred_familyname,''), user_familyname), 1, 1) || '.') AS graders_names,
+                    json_agg(timestamp) AS timestamps
+                  FROM active_graders
+                  LEFT JOIN users ON active_graders.grader_id = users.user_id
+                  GROUP BY ag_{$submitter_type} , gc_id
+                ) as ag on ag.gc_id = gc.gc_id AND ag.ag_{$submitter_type}={$submitter_type_ext}
+                GROUP BY gc.g_id
+              ) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
                 SELECT
@@ -8530,7 +8554,10 @@ WHERE current_state IN
                 [
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
-                ]
+                ],
+                json_decode($row['ag_graders'], true),
+                json_decode($row['ag_timestamps'], true),
+                json_decode($row['ag_graders_names'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
@@ -9292,6 +9319,36 @@ ORDER BY
         return $this->rowsToArray($this->submitty_db->rows());
     }
 
+    /**
+     * Adds a component grader to the active_graders table
+     */
+    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id): void {
+        $this->course_db->query("
+            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+        ", [
+            $component->getId(),
+            $grader_id,
+            $isTeam ? null : $graded_id,
+            $isTeam ? $graded_id : null,
+            $this->core->getDateTimeNow(),
+        ]);
+    }
+
+    /**
+     * Removes a component grader to the active_graders table
+     */
+    public function removeComponentGrader(Component $component, string $grader_id, string $graded_id): void {
+            $this->course_db->query("
+            DELETE FROM active_graders
+            WHERE gc_id = ? AND grader_id = ? AND (ag_user_id = ? OR ag_team_id = ?)
+            ", [
+            $component->getId(),
+            $grader_id,
+            $graded_id,
+            $graded_id,
+            ]);
+    }
     /**
      * @param string $image the full name of the image to get
      * @return string|false the user id of the image's owner or false if the image is not in the db
