@@ -103,7 +103,7 @@ function appendMessage(displayName, role, ts, content) {
     }
 }
 
-function socketChatMessageHandler(msg){
+function socketChatMessageHandler(msg) {
     appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
 }
 
@@ -111,7 +111,7 @@ function initChatroomSocketClient(chatroomId) {
     // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
-        switch(msg.type) {
+        switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
         }
