@@ -79,6 +79,7 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="edit-student-gutmal-button"]').click();
         cy.get('[data-testid="registration-section-dropdown"]').select('Not Registered');
         cy.get('[data-testid="submit-user-form-button"]').click();
+        cy.logout();
         cy.login('gutmal');
         cy.visit();
         cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
