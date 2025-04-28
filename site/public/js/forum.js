@@ -1755,14 +1755,21 @@ function refreshCategories() {
 
 function changeColorClass() {
     const color = $(this).data('color');
+    const isDarkMode = $('[data-theme="dark"]').length > 0;
     $(this).css('border-color', color);
     if ($(this).hasClass('btn-selected')) {
         $(this).css('background-color', color);
         $(this).css('color', 'white');
     }
     else {
-        $(this).css('background-color', 'white');
-        $(this).css('color', color);
+        if (isDarkMode) {
+            $(this).css('background-color', 'var(--btn-default-white)');
+            $(this).css('color', 'var(--btn-default-text)');
+        }
+        else {
+            $(this).css('background-color', 'white');
+            $(this).css('color', color);
+        }
     }
 }
 

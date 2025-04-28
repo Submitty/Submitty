@@ -45,16 +45,16 @@ tr > td:nth-child(5) {
     border-right: 1px solid var(--standard-medium-gray);
 }
 
-.highlighted-row td:nth-child(n+1):nth-child(-n+5){
+.highlighted-row td:nth-child(n + 1):nth-child(-n + 5) {
     /* stylelint-disable-next-line declaration-no-important */
     background: var(--standard-focus-cornflower-blue) !important ;
 }
 
-tr:nth-child(odd) td:nth-child(n+1):nth-child(-n+5) {
+tr:nth-child(odd) td:nth-child(n + 1):nth-child(-n + 5) {
     background: var(--default-white);
 }
 
-tr:nth-child(even) td:nth-child(n+1):nth-child(-n+5) {
+tr:nth-child(even) td:nth-child(n + 1):nth-child(-n + 5) {
     background: var(--standard-light-gray);
 }
 
