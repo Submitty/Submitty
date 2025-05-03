@@ -61,13 +61,15 @@
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
-
-            <p style="max-width:600px;" id="checkpoint-numeric-gradeables-message">
+            
+            {% if not gradeable.isStudentView() %}
+            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
+                {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
+            {% endif %}
         </div>
     </div>
-    <br />
 
     <div class="electronic_file electronic_file_dates">
         <div class="grade_inquiry_date" {{ grade_inquiry_allowed != true ? 'hidden' : '' }}>
