@@ -125,7 +125,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: shivammathur/setup-php@2.33.0
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -161,7 +161,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.32.0
+      - uses: shivammathur/setup-php@2.33.0
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
