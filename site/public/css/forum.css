@@ -27,6 +27,61 @@
     min-height: 30px;
 }
 
+.forum_bar .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.forum_bar .toolbar_right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    margin-left: auto;
+    gap: 0.5rem;
+}
+
+.forum_bar .toolbar_left {
+    flex: 0 1 28rem;
+    min-width: 12rem;
+    display: flex;
+    align-items: stretch;
+}
+
+.forum_bar .toolbar_left > form {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.forum_bar .toolbar_left #search_content {
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+    min-width: 30px;
+}
+
+.forum_bar .toolbar_left .search_actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+#clear_filter_button {
+    flex: 0 1 auto;
+    min-width: 100px;
+    display: none;
+    white-space: nowrap;
+    margin-left: .5rem;
+    color: var(--actionable-blue);
+}
+
 /* stylelint-disable-next-line selector-id-pattern */
 #thread_list {
     padding-right: 0;
@@ -435,43 +490,6 @@
     display: inline-block;
 }
 
-/* stylelint-disable selector-class-pattern, selector-id-pattern */
-.forum_bar div div.col-6,
-#search_block div div,
-.forum_bar div div.col-5 {
-    padding: 0;
-    top: 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: nowrap;
-    width: auto;
-}
-/* stylelint-enable selector-class-pattern, selector-id-pattern */
-
-/* stylelint-disable-next-line selector-id-pattern */
-#search_block div div.col-6 {
-    margin-right: 5px;
-}
-
-/* stylelint-disable-next-line selector-id-pattern */
-#search_block div div.col-6 input {
-    width: 100%;
-    height: 34px;
-}
-
-/* stylelint-disable-next-line selector-id-pattern, no-descending-specificity */
-#search_block div {
-    position: relative;
-    top: 3px;
-}
-
-.more-dropdown {
-    position: absolute;
-    right: 118px;
-    top: 3px;
-}
-
 #post-hr {
     border-top: 1px solid var(--standard-medium-gray);
     margin-bottom: 5px;
@@ -691,7 +709,6 @@
 }
 /* stylelint-disable-next-line selector-id-pattern */
 #forum_filter_bar {
-    margin-left: 15px;
     margin-top: 10px;
     font-size: small;
     display: none;
@@ -723,7 +740,7 @@
     color: var(--submitty-logo-blue);
 }
 /* stylelint-disable-next-line selector-id-pattern */
-#clear_filter_button,
+
 #unread {
     display: none;
 }
