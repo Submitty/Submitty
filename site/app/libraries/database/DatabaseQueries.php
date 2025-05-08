@@ -5199,6 +5199,7 @@ AND gc_id IN (
             'team_invite_email',
             'team_joined_email',
             'team_member_submission_email',
+            'self_registration_email',
             'self_notification_email',
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
@@ -8801,7 +8802,7 @@ WHERE current_state IN
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
                  ns.self_notification,
-                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
