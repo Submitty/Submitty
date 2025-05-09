@@ -114,7 +114,7 @@
                                 </td>
                             {% endif %}
                             {% if active_student_columns[1] %}
-                                <td class="align-left td-student-id">{{ student.getId() }}</td>
+                                <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
                             {% endif %}
                             {% if active_student_columns[2] %}
                                 <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
@@ -153,10 +153,10 @@
                                 <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
                             {% endif %}
                             {% if active_student_columns[10] %}
-                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[11] %}
-                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
+                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}" data-testid="delete-student-{{ student.getId() }}-button"><i class="fas fa-trash"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[12] %}
                                 <td class="td-user-numeric-id">{{ student.getNumericId() }}</td>
