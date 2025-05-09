@@ -15,7 +15,6 @@ use Doctrine\ORM\Mapping as ORM;
  * and since they are using a different database table, it would be confusing to have the same entity
  * being represented by two different database tables. When the user verifies their email,
  * the user is added to the normal users table, and then the unverified user entity is removed.
- * 
  * @package app\entities
  */
 #[ORM\Entity(repositoryClass: UnverifiedUserRepository::class)]

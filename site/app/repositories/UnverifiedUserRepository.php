@@ -4,10 +4,11 @@ namespace app\repositories;
 use Doctrine\ORM\EntityRepository;
 
 class UnverifiedUserRepository extends EntityRepository {
-  /**
-     * @return UnverifiedUser[]|null
+
+    /**
+     * @return UnverifiedUser[]
      */
-    public function getUnverifiedUsers(string $user_id, string $email): ?array {
+    public function getUnverifiedUsers(string $user_id, string $email): array {
         $qb = $this->_em->createQueryBuilder();
         return $qb->select('u')
             ->from('app\entities\UnverifiedUserEntity', 'u')
