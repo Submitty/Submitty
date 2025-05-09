@@ -5,6 +5,8 @@ namespace app\controllers;
 use app\authentication\SamlAuthentication;
 use app\entities\VcsAuthToken;
 use app\entities\UnverifiedUserEntity;
+use app\libraries\UnverifiedUsersManager;
+use app\repositories\UnverifiedUserRepository;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -393,7 +395,7 @@ EMAIL;
         }
 
         $entity_manager = $this->core->getSubmittyEntityManager();
-        $unverified_user = $entity_manager->getRepository(UnverifiedUserEntity::class)->findOneBy(['user_email' => $_GET['email']]);
+        $unverified_user = $entity_manager->getRepository(UnverifiedUserRepository::class)->findOneBy(['user_email' => $_GET['email']]);
 
         if ($unverified_user === null) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
@@ -401,7 +403,7 @@ EMAIL;
         }
 
         $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
-        $unverified_user->setVerificationValues($verification_values);
+        $unverified_user->setVerificationValues($verification_values['code'], $verification_values['expiration']);
 
         $entity_manager->flush();
         $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserInfo()['user_id']);
@@ -466,20 +468,10 @@ EMAIL;
         $given_name = $_POST['given_name'];
         $family_name = $_POST['family_name'];
 
-        $verified_users = $this->core->getQueries()->getUserIdEmailExists($email, $user_id);
-        $entity_manager = $this->core->getSubmittyEntityManager();
-        $query = $entity_manager->getRepository(UnverifiedUserEntity::class)->createQueryBuilder('u');
-        $unverified_users = $query->where('u.user_email = :email')
-            ->orWhere('u.user_id = :user_id')
-            ->setParameter('email', $email)
-            ->setParameter('user_id', $user_id)
-            ->getQuery()
-            ->getResult();
+        $user_exists = $this->core->getQueries()->getUserIdEmailExists($email, $user_id);
+        $unverified_users = UnverifiedUsersManager::getUnverifiedUsers($this->core, $email, $user_id);
 
-        $user_id_exists = in_array($user_id, array_column($verified_users, 'user_id'), true);
-        $email_exists = in_array($email, array_column($verified_users, 'user_email'), true);
-
-        if ($user_id_exists || $email_exists || count($unverified_users) !== 0) {
+        if ($user_exists || count($unverified_users) !== 0) {
             $this->core->addErrorMessage('User ID or email is already attached with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
@@ -514,7 +506,7 @@ EMAIL;
                 $family_name,
                 $email,
                 $verification_values['code'],
-                $verification_values['exp']
+                $verification_values['expiration']
             );
             $entity_manager->persist($user);
             $entity_manager->flush();
@@ -522,9 +514,9 @@ EMAIL;
             $this->core->addSuccessMessage('Verification Email Sent');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
-        catch (\Error $e) {
+        catch (\Exception $e) {
             Logger::error($e);
-            $this->core->addErrorMessage($e->getMessage() . 'Failed to create the account.');
+            $this->core->addErrorMessage($e->getMessage() . ' Failed to create the account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'create_account']));
         }
     }

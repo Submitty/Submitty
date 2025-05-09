@@ -310,14 +310,11 @@ else:
             INSTITUTION_HOMEPAGE = ''
         print()
 
-    while True:
-        user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
-        if user_create_account.lower() in ['yes', 'y']:
-            USER_CREATE_ACCOUNT = True
-            break
-        elif user_create_account.lower() in ['no', 'n']:
-            USER_CREATE_ACCOUNT = False
-            break
+    user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
+    if user_create_account.lower() in ['yes', 'y']:
+        USER_CREATE_ACCOUNT = True
+    else:
+        USER_CREATE_ACCOUNT = False
     print()
     
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])

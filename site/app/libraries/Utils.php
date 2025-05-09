@@ -114,10 +114,10 @@ class Utils {
     /**
      * Check if the user ID meets requirements specified in the Submitty config file
      *
-     * @param array<mixed> $requirements
+     * @param array<mixed> $requirements The user id requirements taken from the config file, like length, name requirements, etc.
      */
     public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
-        if ($requirements['max_length'] < strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
+        if ($requirements['max_length'] <= strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
             return false;
         }
 
@@ -176,7 +176,7 @@ class Utils {
     public static function generateVerificationCode(Core $core, bool $isDebug): array {
         $code = $isDebug ? '00000000' : Utils::generateRandomString();
         $timestamp = $core->getDateTimeNow()->modify('+15 minutes'); // 15 minutes from now, may eventually set this as a configurable value.
-        return ['code' => strval($code), 'exp' => $timestamp];
+        return ['code' => strval($code), 'expiration' => $timestamp];
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\entities;
 
+use app\repositories\UnverifiedUserRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,8 +15,10 @@ use Doctrine\ORM\Mapping as ORM;
  * and since they are using a different database table, it would be confusing to have the same entity
  * being represented by two different database tables. When the user verifies their email,
  * the user is added to the normal users table, and then the unverified user entity is removed.
+ * 
+ * @package app\entities
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UnverifiedUserRepository::class)]
 #[ORM\Table(name: "unverified_users")]
 class UnverifiedUserEntity {
     #[ORM\Id]
@@ -46,7 +49,8 @@ class UnverifiedUserEntity {
         $this->setUserGivenName($user_givenname);
         $this->setUserFamilyName($user_familyname);
         $this->setUserEmail($user_email);
-        $this->setVerificationValues(['code' => $verification_code, 'exp' => $verification_expiration]);
+        $this->setVerificationCode($verification_code);
+        $this->setVerificationExpiration($verification_expiration);
     }
     /**
      * @return array{
@@ -61,28 +65,28 @@ class UnverifiedUserEntity {
      * }
      */
     public function getUserInfo(): array {
-        $out = [];
-        $out["user_givenname"] = $this->user_givenname;
-        $out["user_familyname"] =  $this->user_familyname;
-        $out["user_email"] = $this->user_email;
-        $out["user_password"] = $this->user_password;
-        $out['user_id'] = $this->user_id;
-        $out['user_pronouns'] = '';
-        $out['user_email_secondary'] = '';
-        $out['user_email_secondary_notify'] = false;
-        return $out;
+        return [
+            "user_givenname" => $this->user_givenname,
+            "user_familyname" =>  $this->user_familyname,
+            "user_email" => $this->user_email,
+            "user_password" => $this->user_password,
+            'user_id' => $this->user_id,
+            'user_pronouns' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
+        ];
     }
 
     public function getVerificationExpiration(): DateTime {
         return $this->verification_expiration;
     }
 
-    /**
-     * @param array<string, mixed> $values
-     */
-    public function setVerificationValues(array $values): void {
-        $this->verification_code = $values['code'];
-        $this->verification_expiration = $values['exp'];
+    public function setVerificationCode(string $code): void {
+        $this->verification_code = $code;
+    }
+
+    public function setVerificationExpiration(DateTime $verification_expiration): void {
+        $this->verification_expiration = $verification_expiration;
     }
 
     public function setUserId(string $user_id): void {
