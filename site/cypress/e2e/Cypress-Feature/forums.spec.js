@@ -103,20 +103,17 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 
     it('Form content is not cleared while submitting with empty description', () => {
-        cy.get('[title="Create Thread"]').click();
-        cy.get('#title').type(title1);
-        cy.get('.cat-buttons').contains('Comment').click();
-
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(1000);
+        cy.get('[data-testid="Create Thread"]').click();
+        cy.get('[data-testid="title"]').type(title1);
+        cy.get('[data-testid="categories-pick-list"]').contains('Comment').click();
         cy.get('[name="post"]').click();
 
         // Check if the title is still there
-        cy.get('#title').should('have.value', title1);
+        cy.get('[data-testid="title"]').should('have.value', title1);
 
         // clear form title and de-select category
-        cy.get('#title').clear();
-        cy.get('.cat-buttons').contains('Comment').click();
+        cy.get('[data-testid="title"]').clear();
+        cy.get('[data-testid="categories-pick-list"]').contains('Comment').click();
     });
 
     it('Create, reply to, merge, and delete threads', () => {
