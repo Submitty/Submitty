@@ -21,7 +21,7 @@ const createThread = (title, content, category) => {
     // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(1000);
     cy.get('[name="post"]').click();
-    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+    cy.get('.flex-row > .thread-title-cont').should('contain', title);
 };
 
 const replyToThread = (title, reply) => {
@@ -50,11 +50,24 @@ const mergeThreads = (fromThread, toThread, mergedContent) => {
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
+// Checks if a thread with the specified title exists
+const threadExists = (title) => {
+    return cy.get('[data-testid="thread-list-item"]').then(($thread_items) => {
+        return $thread_items.filter(`:contains(${title})`).length > 0;
+    });
+};
+
+// Removes all threads matching the specified title
 const removeThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="thread-dropdown"]').first().click();
-    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
-    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+    cy.reload();
+    threadExists(title).then((exists) => {
+        if (exists) {
+            cy.get('[data-testid="thread-list-item"]').contains(title).click();
+            cy.get('[data-testid="thread-dropdown"]').first().click();
+            cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+            removeThread(title);
+        }
+    });
 };
 
 const uploadAttachmentAndDelete = (title, attachment) => {
@@ -89,11 +102,65 @@ const replyDisabled = (title, attachment) => {
     cy.contains('p', attachment).should('be.visible');
 };
 
+const setLockDateToPast = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('#lock_thread_date').type('2023-01-01 00:00:00');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+const clearLockDate = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+describe('Forum Thread Lock Date Functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
+        createThread(title1, content1, 'Comment');
+        setLockDateToPast(title1);
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
+
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        clearLockDate(title1);
+
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        replyToThread(title1, reply1);
+
+        removeThread(title1);
+    });
+});
+
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        removeThread(title1);
+        removeThread(title2);
+        removeThread(title3);
+    });
+
+    it('Remove threads removes all threads with the same title', () => {
+        createThread(title1, content1, 'Comment');
+        createThread(title1, content1, 'Comment');
+        removeThread(title1);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('not.exist');
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
@@ -132,8 +199,9 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
-
-        // Remove threads
+        cy.get('[data-testid="thread-list-item"]').contains(title2).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title3).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('exist');
         removeThread(title1);
     });
 });
