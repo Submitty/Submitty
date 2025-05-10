@@ -158,7 +158,7 @@ class Utils {
     /**
      * Checks if the email extension is in the accepted emails part of the Submitty config file
      *
-     * @param array<string> $accepted_emails
+     * @param array<string> $accepted_emails Array of accepted email extensions, like @gmail.com, @rpi.edu, etc.
      */
     public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
         $split_email = explode('@', $email);
