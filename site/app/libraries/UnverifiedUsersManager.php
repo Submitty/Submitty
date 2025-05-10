@@ -3,8 +3,8 @@
 namespace app\libraries;
 
 use app\entities\UnverifiedUserEntity;
-class UnverifiedUsersManager {
 
+class UnverifiedUsersManager {
     /**
      * @return UnverifiedUser[]
      */

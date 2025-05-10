@@ -60,6 +60,7 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
         // Bad passwords don't match
+        cy.get('[data-testid="remove-popup"]').click();
         cy.get('[data-testid="email"]').type('test.email.good@gmail.com');
         cy.get('[data-testid="user-id"]').type('good_id');
         cy.get('[data-testid="given-name"]').type('GivenName');

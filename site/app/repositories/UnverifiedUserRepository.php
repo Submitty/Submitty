@@ -1,10 +1,10 @@
 <?php
+
 namespace app\repositories;
 
 use Doctrine\ORM\EntityRepository;
 
 class UnverifiedUserRepository extends EntityRepository {
-
     /**
      * @return UnverifiedUser[]
      */
