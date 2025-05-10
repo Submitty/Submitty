@@ -7339,6 +7339,14 @@ AND gc_id IN (
     }
 
     /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {

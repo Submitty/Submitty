@@ -479,6 +479,7 @@ jobs:
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
+              echo "y"                            # user create account
               echo ""                             # sysadmin email
               echo ""                             # where to report
               echo "1"                            # PamAuth
@@ -712,6 +713,24 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Submitty-JSONs
+          path: /usr/local/submitty/config/submitty.json
+
+      - name: Switch to debug mode
+        run: |
+          sudo sed -ie '/debugging_enabled/c\ \"debugging_enabled\": true",' /usr/local/submitty/config/submitty.json
+
+      - name: Run self-account-creation tests.
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/self_account_creation.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
       - name: Switch to LDAP auth
         run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
 
@@ -759,12 +778,18 @@ jobs:
           http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
           [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
 
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Submitty-JSON
+          path: /usr/local/submitty/config/submitty.json
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Cypress-System-Screenshots
           path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
