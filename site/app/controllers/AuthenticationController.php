@@ -6,7 +6,6 @@ use app\authentication\SamlAuthentication;
 use app\entities\VcsAuthToken;
 use app\entities\UnverifiedUserEntity;
 use app\libraries\UnverifiedUsersManager;
-use app\repositories\UnverifiedUserRepository;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -393,19 +392,13 @@ EMAIL;
             $this->core->addErrorMessage('You must specify an email to send the verification to.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
-
-        $entity_manager = $this->core->getSubmittyEntityManager();
-        $unverified_user = $entity_manager->getRepository(UnverifiedUserRepository::class)->findOneBy(['user_email' => $_GET['email']]);
-
-        if ($unverified_user === null) {
+        // Attempt to update values, if user is not found, false is returned.
+        $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
+        if (!UnverifiedUsersManager::updateUserVerificationValues($this->core, $_GET['email'], $verification_values['code'], $verification_values['expiration'])) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-
-        $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
-        $unverified_user->setVerificationValues($verification_values['code'], $verification_values['expiration']);
-
-        $entity_manager->flush();
+        $unverified_user = UnverifiedUsersManager::getUnverifiedUser($this->core, $_GET['email']);
         $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserInfo()['user_id']);
         $this->core->addSuccessMessage('Verification email resent.');
         return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
