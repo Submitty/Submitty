@@ -196,6 +196,17 @@ function DetectSameSectionName() {
     warningIcon.toggle(hasDuplicates);
 }
 
+function getOmittedSections() {
+    // Collect sections omitted from stats
+    const omit_section_from_stats = [];
+
+    $.each($("input[name='omit_section']:checked"), function () {
+        omit_section_from_stats.push($(this).val());
+    });
+
+    return omit_section_from_stats;
+}
+
 function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
@@ -667,6 +678,7 @@ function buildJSON() {
         benchmark_percent: getBenchmarkPercent(),
         final_cutoff: getFinalCutoffPercent(),
         section: getSection(),
+        omit_section_from_stats: getOmittedSections(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -800,6 +812,9 @@ $(document).ready(() => {
     });
     // Register change handlers to update the status message when form inputs change
     $("input[name*='display_benchmarks']").change(() => {
+        saveChanges();
+    });
+    $("input[name*='omit_section']").change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
