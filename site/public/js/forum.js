@@ -731,6 +731,11 @@ function initSocketClient() {
                     source: msg.source,
                 });
                 break;
+            case 'edit_thread_likes':
+                updateThreadLikesDisplay(msg.thread_id, {
+                    likesCount: msg.likesCount,
+                });
+                break;
             default:
                 console.log('Undefined message received.');
         }
@@ -1260,7 +1265,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user) {
+function toggleLike(post_id, thread_id, current_user) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
@@ -1268,6 +1273,7 @@ function toggleLike(post_id, current_user) {
         type: 'POST',
         data: {
             post_id: post_id,
+            thread_id: thread_id,
             current_user: current_user,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
@@ -1326,6 +1332,12 @@ function updateLikesDisplay(post_id, data) {
     likeCounter = likes;
     likeIconSrc.src = likeIconSrcElement; // Update the state
     likeCounterElement.innerText = likeCounter;
+}
+
+function updateThreadLikesDisplay(thread_id, data) {
+    const likes = data['likesCount'];
+    const likeCounterElement = document.getElementById(`Thread_likeCounter_${thread_id}`);
+    likeCounterElement.innerText = likes;
 }
 
 function displayHistoryAttachment(edit_id) {
