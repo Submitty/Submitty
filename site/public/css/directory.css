@@ -4,39 +4,91 @@
     background: var(--standard-focus-cornflower-blue) !important;
 }
 
-#student-table td:nth-of-type(1) { display: none; }
-#student-table .td-registration-section::before {content: "Registration Section"; }
-#student-table .td-student-id::before { content: "User ID"; }
-#student-table .td-given-name::before { content: "Given Name"; }
-#student-table .td-family-name::before { content: "Family Name"; }
-#student-table .td-pronouns::before { content: "Pronouns"; }
-#student-table .td-rotating-section::before { content: "Rotating Section"; }
-#student-table .td-manual-registration::before { content: "Manual Registration"; }
-#student-table .td-view-grades::before { content: "View Grades"; }
-#student-table .td-late-days::before { content: "View Late Days"; }
-#student-table .td-registration-type::before { content: "Registration Type"; }
-#student-table .td-edit-student::before { content: "Edit Student"; }
-#student-table .td-delete-student::before { content: "Delete Student"; }
-#student-table .td-user-numeric-id::before { content: "User Numeric ID"; }
-#student-table .td-legal-first-name::before { content: "Legal Given Name"; }
-#student-table .td-legal-last-name::before { content: "Legal Family Name"; }
-#student-table .td-email::before { content: "Email"; }
-#student-table .td-secondary-email::before { content: "Secondary Email"; }
+#student-table td:nth-of-type(1) {
+    display: none;
+}
+#student-table .td-registration-section::before {
+    content: "Registration Section";
+}
+#student-table .td-student-id::before {
+    content: "User ID";
+}
+#student-table .td-given-name::before {
+    content: "Given Name";
+}
+#student-table .td-family-name::before {
+    content: "Family Name";
+}
+#student-table .td-pronouns::before {
+    content: "Pronouns";
+}
+#student-table .td-rotating-section::before {
+    content: "Rotating Section";
+}
+#student-table .td-manual-registration::before {
+    content: "Manual Registration";
+}
+#student-table .td-view-grades::before {
+    content: "View Grades";
+}
+#student-table .td-late-days::before {
+    content: "View Late Days";
+}
+#student-table .td-registration-type::before {
+    content: "Registration Type";
+}
+#student-table .td-edit-student::before {
+    content: "Edit Student";
+}
+#student-table .td-delete-student::before {
+    content: "Delete Student";
+}
+#student-table .td-user-numeric-id::before {
+    content: "User Numeric ID";
+}
+#student-table .td-legal-first-name::before {
+    content: "Legal Given Name";
+}
+#student-table .td-legal-last-name::before {
+    content: "Legal Family Name";
+}
+#student-table .td-email::before {
+    content: "Email";
+}
+#student-table .td-secondary-email::before {
+    content: "Secondary Email";
+}
 
-#grader-table td:nth-of-type(1) { display: none; }
-#grader-table .td-grader-id::before { content: "User ID"; }
-#grader-table .td-given-name::before { content: "Given Name"; }
-#grader-table .td-family-name::before{ content: "Family Name"; }
-#grader-table .td-grader-group::before { content: "User Group"; }
-#grader-table .td-registration-section::before { content: "Registration Sections"; }
-#grader-table .td-edit-grader::before { content: "Edit Grader"; }
-#grader-table .td-demote-grader::before { content: "Demote Grader"; }
+#grader-table td:nth-of-type(1) {
+    display: none;
+}
+#grader-table .td-grader-id::before {
+    content: "User ID";
+}
+#grader-table .td-given-name::before {
+    content: "Given Name";
+}
+#grader-table .td-family-name::before {
+    content: "Family Name";
+}
+#grader-table .td-grader-group::before {
+    content: "User Group";
+}
+#grader-table .td-registration-section::before {
+    content: "Registration Sections";
+}
+#grader-table .td-edit-grader::before {
+    content: "Edit Grader";
+}
+#grader-table .td-demote-grader::before {
+    content: "Demote Grader";
+}
 
-#toggle-columns-form .toggle-columns-menu{
+#toggle-columns-form .toggle-columns-menu {
     display: grid;
 }
 
-#toggle-columns-form .toggle-columns-instructions{
+#toggle-columns-form .toggle-columns-instructions {
     margin-bottom: 1vh;
 }
 
@@ -63,8 +115,12 @@
         padding: 0 1em;
     }
 
-    #student-table td:nth-of-type(1) { display: table-cell; }
-    #grader-table td:nth-of-type(1) { display: table-cell; }
+    #student-table td:nth-of-type(1) {
+        display: table-cell;
+    }
+    #grader-table td:nth-of-type(1) {
+        display: table-cell;
+    }
 
     tr.access-grading {
         /* stylelint-disable-next-line declaration-no-important */
