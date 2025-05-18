@@ -330,7 +330,10 @@ body::-webkit-scrollbar-track {
 }
 
 .warning-banner {
-    display: none; margin: 0 0 1em; background-color: var(--standard-vibrant-yellow); color: var(--default-black);
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
 }
 
 .date-warning {
