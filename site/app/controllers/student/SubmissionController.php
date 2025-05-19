@@ -2012,7 +2012,6 @@ class SubmissionController extends AbstractController {
     public function checkBuildRefresh(string $gradeable_id): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return JsonResponse::getFailResponse("No gradeable with that id.");
         }
 
