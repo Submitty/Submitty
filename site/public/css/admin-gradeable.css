@@ -328,3 +328,14 @@ body::-webkit-scrollbar-track {
     color: var(--standard-vibrant-red);
     font-style: italic;
 }
+
+.warning-banner {
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
+
+.date-warning {
+    display: none;
+}
