@@ -144,6 +144,9 @@ img {
     @page {
         size: auto;
         margin: 0;
+    }
+
+    .some-print-section {
         break-inside: avoid;
     }
 
@@ -152,7 +155,6 @@ img {
     }
 
     .content {
-        margin: 2;
         padding: 0;
     }
 
