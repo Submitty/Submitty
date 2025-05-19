@@ -89,7 +89,7 @@ watch(
           <div class="form-button-container">
             <button
               class="btn btn-default close-button"
-              data-testid="close-button"
+              data-testid="popup-close-button"
               tabindex="0"
               @click="$emit('toggle', $event)"
             >
@@ -97,7 +97,7 @@ watch(
             </button> <button
               v-if="savable"
               class="btn btn-primary"
-              data-testid="save-button"
+              data-testid="popup-save-button"
               tabindex="1"
               @click="$emit('save', $event)"
             >

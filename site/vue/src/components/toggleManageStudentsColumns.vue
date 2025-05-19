@@ -105,6 +105,7 @@ onMounted(loadColumns);
             v-model="selected[idx]"
             type="checkbox"
             class="toggle-columns-box"
+            :data-testid="id"
           />
           <label :for="id">{{ labels[idx] }}</label>
         </div>
