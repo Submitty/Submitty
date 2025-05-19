@@ -104,7 +104,7 @@ aside {
     [data-theme="dark"] aside ul {
         background-color: var(--background-blue);
     }
- 
+
     /* Reduced z-index when popup is active */
     body.popup-active aside {
         z-index: 0;

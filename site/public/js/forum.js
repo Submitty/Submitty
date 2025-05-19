@@ -347,6 +347,14 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
 
 function socketDeletePostHandler(post_id) {
     const main_post = $(`#${post_id}`);
+    const thread_box_link = $(`#thread_box_link_${post_id}`);
+    const current_thread = Number($('#current-thread').val());
+
+    if (post_id === current_thread) {
+        // Navigate back to the forum page for deleted threads
+        $('#nav-sidebar-forum')[0].click();
+    }
+
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function () {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
@@ -359,6 +367,7 @@ function socketDeletePostHandler(post_id) {
         var posts_to_delete = main_post.nextUntil('#post-hr');
     }
 
+    thread_box_link.remove();
     posts_to_delete.filter('.reply-box').remove();
     main_post.add(posts_to_delete).fadeOut(400, () => {
         main_post.add(posts_to_delete).remove();
@@ -692,10 +701,7 @@ function initSocketClient() {
                 }
                 break;
             case 'delete_post':
-                // eslint-disable-next-line eqeqeq
-                if ($('data#current-thread').val() == msg.thread_id) {
-                    socketDeletePostHandler(msg.post_id);
-                }
+                socketDeletePostHandler(msg.post_id || msg.thread_id);
                 break;
             case 'edit_post':
                 // eslint-disable-next-line eqeqeq
@@ -723,6 +729,11 @@ function initSocketClient() {
                     likesFromStaff: msg.likesFromStaff,
                     status: msg.status,
                     source: msg.source,
+                });
+                break;
+            case 'edit_thread_likes':
+                updateThreadLikesDisplay(msg.thread_id, {
+                    likesCount: msg.likesCount,
                 });
                 break;
             default:
@@ -1254,7 +1265,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user) {
+function toggleLike(post_id, thread_id, current_user) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
@@ -1262,6 +1273,7 @@ function toggleLike(post_id, current_user) {
         type: 'POST',
         data: {
             post_id: post_id,
+            thread_id: thread_id,
             current_user: current_user,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
@@ -1320,6 +1332,12 @@ function updateLikesDisplay(post_id, data) {
     likeCounter = likes;
     likeIconSrc.src = likeIconSrcElement; // Update the state
     likeCounterElement.innerText = likeCounter;
+}
+
+function updateThreadLikesDisplay(thread_id, data) {
+    const likes = data['likesCount'];
+    const likeCounterElement = document.getElementById(`Thread_likeCounter_${thread_id}`);
+    likeCounterElement.innerText = likes;
 }
 
 function displayHistoryAttachment(edit_id) {
@@ -1749,14 +1767,21 @@ function refreshCategories() {
 
 function changeColorClass() {
     const color = $(this).data('color');
+    const isDarkMode = $('[data-theme="dark"]').length > 0;
     $(this).css('border-color', color);
     if ($(this).hasClass('btn-selected')) {
         $(this).css('background-color', color);
         $(this).css('color', 'white');
     }
     else {
-        $(this).css('background-color', 'white');
-        $(this).css('color', color);
+        if (isDarkMode) {
+            $(this).css('background-color', 'var(--btn-default-white)');
+            $(this).css('color', 'var(--btn-default-text)');
+        }
+        else {
+            $(this).css('background-color', 'white');
+            $(this).css('color', color);
+        }
     }
 }
 
