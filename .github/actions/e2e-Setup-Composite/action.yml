@@ -25,21 +25,21 @@ runs:
         rm -rf "$AGENT_TOOLSDIRECTORY"
         sudo apt-get clean
       shell: bash
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         path: SUBMITTY_CPY/
     - name: Copy Repo
       run: |
-        # have to copy first, absolute paths not supported by actions/checkout@v3
+        # have to copy first, absolute paths not supported by actions/checkout@v4
           sudo mkdir -p ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
       shell: bash
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.24.0
+    - uses: shivammathur/setup-php@2.33.0
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -50,7 +50,7 @@ runs:
       shell: bash
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
@@ -60,11 +60,11 @@ runs:
     - name: Install Test-specific python dependencies
       run: |
         # Install for local
-        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install --upgrade pip setuptools wheel packaging
         pip3 -V
         pip3 install selenium websocket_client
         # Install globally
-        sudo python3 -m pip install --upgrade pip setuptools wheel
+        sudo python3 -m pip install --upgrade pip setuptools wheel packaging
         sudo pip3 -V
       shell: bash
     - name: Install python dependencies
@@ -81,7 +81,7 @@ runs:
         echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       shell: bash
     - name: Install composer Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.composer-cache.outputs.dir }}
         key: ${{ runner.os }}-php-composer-${{ hashFiles('**/composer.lock') }}
@@ -152,7 +152,7 @@ runs:
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing archived
       shell: bash
 
     - name: Set up test suite

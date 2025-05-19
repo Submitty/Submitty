@@ -12,6 +12,19 @@
 	"RLIMIT_FSIZE" : 99000000
     },
 
+    // needed for /usr/bin/mv
+    "allow_system_calls" : [
+        "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "ALLOW_SYSTEM_CALL_CATEGORY_FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD"
+    ],
+
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/pdflatex:latest"
+    },
+
     "autograding" : {
 	"submission_to_compilation" : [ ],
 	"submission_to_runner" : [ "*.pdf" ],

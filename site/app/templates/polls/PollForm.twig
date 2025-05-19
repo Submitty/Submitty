@@ -36,37 +36,37 @@
         </span>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-single-correct" name="question_type" value="single-response-single-correct" onclick="changePollType()" {{ question_type == 'single-response-single-correct'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-single-correct" name="question_type" data-testid="single-response-one-answer" value="single-response-single-correct" onclick="changePollType()" {{ question_type == 'single-response-single-correct'? "checked" : "" }}></input>
             <label for="poll-type-single-response-single-correct">single response - single correct</label>
             <p class="poll-type-description"><i>Students can select only one response, and there is only one full credit answer.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" value="single-response-multiple-correct" onclick="changePollType()" {{ question_type == 'single-response-multiple-correct'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-multiple-correct" name="question_type" data-testid="single-response-multiple-answer" value="single-response-multiple-correct" onclick="changePollType()" {{ question_type == 'single-response-multiple-correct'? "checked" : "" }}></input>
             <label for="poll-type-single-response-multiple-correct">single response - multiple correct</label>
             <p class="poll-type-description"><i>Students can select only one response, and there are one or more full credit answers.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-single-response-survey" name="question_type" value="single-response-survey" onclick="changePollType()" {{ question_type == 'single-response-survey'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-single-response-survey" name="question_type" data-testid="single-response-survey" value="single-response-survey" onclick="changePollType()" {{ question_type == 'single-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-single-response-survey">single response - survey</label>
             <p class="poll-type-description"><i>Students can select only one response, and any selection is worth full credit.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-exact" name="question_type" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-exact" name="question_type" data-testid="multiple-response" value="multiple-response-exact" onclick="changePollType()" {{ question_type == 'multiple-response-exact'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-exact">multiple response - exact</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit only if their selection exactly matches the instructor's selection.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" value="multiple-response-flexible" onclick="changePollType()" {{ question_type == 'multiple-response-flexible'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-flexible" name="question_type" data-testid="multiple-response-flexible" value="multiple-response-flexible" onclick="changePollType()" {{ question_type == 'multiple-response-flexible'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-flexible">multiple response - flexible</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and they receive full credit if they select at least one of the instructor's selected responses and do not select any of the instructor's unselected responses.</i></p>
         </div>
 
         <div class="poll-type-option">
-            <input type="radio" id="poll-type-multiple-response-survey" name="question_type" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
+            <input type="radio" id="poll-type-multiple-response-survey" name="question_type" data-testid="multiple-response-survey" value="multiple-response-survey" onclick="changePollType()" {{ question_type == 'multiple-response-survey'? "checked" : "" }}></input>
             <label for="poll-type-multiple-response-survey">multiple response - survey</label>
             <p class="poll-type-description"><i>Students can select one or more responses, and any selection is worth full credit.</i></p>
         </div>
@@ -112,15 +112,15 @@
             </label>
             <div class="poll-input">
                 <label for="poll-hours" class="option"> Hours </label><br>
-                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" />
+                <input type="number" name="poll-hours" id="poll-hours" class="poll-timer" placeholder="hrs" max="24" min="0" value="{{ poll is not null ? poll.getDuration().h }}" onchange="changeTimerDisplay()"/>
             </div>
             <div class="poll-input">
                 <label for="poll-minutes" class="option"> Minutes </label><br>
-                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}"/>
+                <input type="number" name="poll-minutes" id="poll-minutes" class="poll-timer" placeholder="min" min="0" value="{{ poll is not null ? poll.getDuration().i }}" onchange="changeTimerDisplay()"/>
             </div>
             <div class="poll-input">
                 <label for="poll-seconds" class="option"> Seconds </label><br>
-                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}"/>
+                <input type="number" name="poll-seconds" id="poll-seconds" class="poll-timer" placeholder="sec" min="0" value="{{ poll is not null ? poll.getDuration().s }}" onchange="changeTimerDisplay()"/>
             </div>
         </div>
         <br>
@@ -133,14 +133,16 @@
             <option value="always" {{ poll is not null and poll.getReleaseHistogram() == 'always' ? "selected" : "" }}>Always</option>
         </select>
         <br><br>
-        <label for="student-answer-release-setting" class="option-title">
-            Show correct response to students:
-        </label>
-        <select id="student-answer-release-setting" name="release_answer">
-            <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never' ? "selected" : "" }}>Never</option>
-            <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
-            <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
-        </select>
+        <div id="show-answer-release" data-testid="show-answer" {{is_survey ? "style='display:none'" : "style='display:inline-block'"}}>
+            <label for="student-answer-release-setting" class="option-title">
+                Show correct response to students:
+            </label>
+            <select id="student-answer-release-setting" name="release_answer">
+                <option value="never" {{ poll is null or poll.getReleaseAnswer() == 'never' ? "selected" : "" }}>Never</option>
+                <option value="when_ended" {{ poll is not null and poll.getReleaseAnswer() == 'when_ended' ? "selected" : "" }}>After Poll Ended</option>
+                <option value="always" {{ poll is not null and poll.getReleaseAnswer() == 'always' ? "selected" : "" }}>Always</option>
+            </select>
+        </div>
         <div class="break-above">
             <label for="poll-custom-options" class="option-title credit-form-item">
                 Allow student-written responses?
@@ -206,17 +208,78 @@
     let MAX_SIZE = {{ max_size }};
     let size_is_valid = true;
     let poll_type = "{{ poll is not null ? poll.getQuestionType() : 'poll-type-single-response-survey' }}";
+    
+    flatpickr("#poll-date", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Today"
+                            },
+                            {
+                                label: "Tomorrow"
+                            }
+                        ],
+                        label: "or",
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0:
+                                    date = new Date();
+                                    break;
+                                case 1:
+                                    date = new Date();
+                                    date.setDate(date.getDate() + 1);
+                                    break;
+                            }
+                            fp.setDate(date, true);
+                        }
+                    }
+                )],
+            allowInput: true,
+            dateFormat: "Y-m-d",
+            onReady: (a, b, fp) => {
+                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            }
+        });
 
-    flatpickr('.poll-date', {
-        allowInput: true,
-        dateFormat: "Y-m-d",
-        onReady: (a, b, fp) => {
-            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+    function changeTimerDisplay() {
+        const hoursInput = $("#poll-hours");
+        const minutesInput = $("#poll-minutes");
+        const secondsInput = $("#poll-seconds");
+
+        let hours = Number(hoursInput.val()) || 0;
+        let minutes = Number(minutesInput.val()) || 0;
+        let seconds = Number(secondsInput.val()) || 0;
+
+        if (seconds >= 60) {
+            minutes += Math.floor(seconds/60);
+            seconds = seconds % 60;
         }
-    });
+        if (minutes >= 60) {
+            hours += Math.floor(minutes/60);
+            minutes = minutes % 60;
+        }
+        if (hours > 24) {
+            hours = 24;
+            minutes = 0;
+            seconds = 0;
+        }
+        hoursInput.val(hours);
+        minutesInput.val(minutes);
+        secondsInput.val(seconds);
+    }
 
     function changePollType() {
         let count = $(".option_id").length;
+        if ($("#poll-type-single-response-survey").is(":checked")
+                || $("#poll-type-multiple-response-survey").is(":checked")) {
+            $("#show-answer-release").hide();
+
+        } else {
+            $("#show-answer-release").show();
+
+        }
         for (let i = 0; i < count; i++) {
             if ($("#poll-type-single-response-survey").is(":checked")
                 || $("#poll-type-multiple-response-survey").is(":checked")) {

@@ -1,0 +1,941 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PGPASSWORD: submitty_dbuser
+  PHP_USER: submitty_php
+  PHP_GROUP: submitty_php
+  CGI_USER: submitty_cgi
+  SUBMITTY_DATA_DIR: /var/local/submitty
+  SUBMITTY_INSTALL_DIR: /usr/local/submitty
+  SUBMITTY_REPOSITORY: /usr/local/submitty/GIT_CHECKOUT/Submitty
+  POSTGRES_HOST: localhost
+  PHP_VER: 8.1
+  NODE_VERSION: 20
+  PYTHON_VERSION: "3.10"
+
+concurrency:
+  # If this is a PR, cancel all previously running jobs on source branch
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
+jobs:
+  ansible-lint:
+    name: Ansible Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          args: .setup/ansible
+
+
+  css-lint:
+    name: CSS Lint
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run stylelint
+        run: npm run css-stylelint
+      - name: Run Prettier Format
+        run: npm run prettier:fix
+      - run: git diff --exit-code
+
+  js-lint:
+    name: JavaScript Lint
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run eslint
+        run: npm run eslint
+      - name: Run npm build (tsc and esbuild)
+        run: npm run build
+
+
+  js-unit:
+    name: JavaScript Unit
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - run: npm run test
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: site/tests/report/jest/clover.xml
+          flags: js
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+
+  php-lint:
+    name: PHP Lint
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@2.33.0
+        with:
+          php-version: ${{ env.PHP_VER }}
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Check syntax
+        run: find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+      - name: Lint PHP code
+        run: |
+            php vendor/bin/phpcs --version
+            php vendor/bin/phpcs
+      - name: Static analysis
+        run: |
+            php vendor/bin/phpstan  --version
+            php vendor/bin/phpstan analyze app public/index.php socket/index.php
+
+
+  php-unit:
+    name: PHP Unit
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@2.33.0
+        with:
+          php-version: ${{ env.PHP_VER }}
+          extensions: imagick
+          coverage: pcov
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-composer-
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Run php unit tests
+        run: php vendor/bin/phpunit
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: site/tests/report/clover.xml
+          flags: php
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+
+  python-lint:
+    name: Python Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ github.job }}-pip-${{ github.sha }}
+          restore-keys: |
+              ${{ runner.os }}-${{ github.job }}-pip-
+      - name: Install python libraries
+        run: python3 -m pip install -r .setup/pip/dev_requirements.txt
+      - name: Run flake8
+        run: python3 -m flake8
+      - name: Run pylint
+        run: python3 -m pylint --recursive=y .
+
+  python-unit:
+    name: Python Unit
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache Pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ github.job }}-pip-${{ hashFiles('**/system_requirements.txt') }}
+          restore-keys: |
+              ${{ runner.os }}-${{ github.job }}-pip-
+      - name: Install python libraries
+        run: |
+          python3 -m pip install -r .setup/pip/system_requirements.txt
+          python3 -m pip install coverage # Testing util.
+
+      # Submitty utils install & unit testing, must be put before auto grader
+      # testing as auto grader depends on submitty utils to function.
+      - name: Run python_submitty_utils python unit tests
+        working-directory: python_submitty_utils
+        run: |
+          pip3 install .
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload submitty python utils Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: python_submitty_utils/coverage.xml
+          flags: python_submitty_utils
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Migrator unit test
+      - name: Run migrator python unit tests
+        working-directory: migration
+        run: |
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload migrator Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: migration/coverage.xml
+          flags: migrator
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      # Auto grader unit test
+      - name: Run autograder python unit tests
+        working-directory: autograder
+        run: |
+          coverage run -m unittest discover
+          coverage xml
+      - name: Upload autograder Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: autograder/coverage.xml
+          flags: autograder
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      #  submitty_daemon_jobs unit tests
+      - name: Install bulk upload dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+          sudo apt-get install -y libzbar0
+
+      - name: Run bulk upload unit tests
+        working-directory: sbin/submitty_daemon_jobs
+        run: |
+          coverage run -m unittest discover tests -t .
+          coverage xml -i
+
+      - name: Upload submitty_daemon_jobs Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: sbin/submitty_daemon_jobs/coverage.xml
+          flags: submitty_daemon_jobs
+          disable_search: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: install yamllint
+        run: sudo apt-get install -y yamllint
+      - name: Run yamllint
+        run: yamllint .
+
+
+  shellcheck:
+    name: Shell Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run ShellCheck
+        run: python3 run_shellcheck.py  # Uses the default Python installed with Ubuntu
+
+
+  colors-css:
+    name: colors.css Check
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: MAIN
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          path: PR
+
+      - name: Compare file size
+        run: |
+          FILEPATH="site/public/css/colors.css"
+          MAIN_FILE="MAIN/$FILEPATH"
+          PR_FILE="PR/$FILEPATH"
+
+          if [ ! -f "$MAIN_FILE" ]; then
+            echo "Main file $MAIN_FILE does not exist."
+            exit 1
+          fi
+
+          if [ ! -f "$PR_FILE" ]; then
+            echo "PR file $PR_FILE does not exist."
+            exit 1
+          fi
+
+          LINES_DIFF=$(( $(wc -l < "$PR_FILE") - $(wc -l < "$MAIN_FILE") ))
+
+          if [ $LINES_DIFF -gt 0 ]; then
+            echo "::error::colors.css has increased in size by $LINES_DIFF lines in this PR."
+            echo "::error::Please use existing colors in colors.css instead of adding new ones, to keep the size of the file manageable."
+            echo "::error::If adding to colors.css really is necessary for your PR, this requirement may be waived on maintainer review."
+            exit 1
+          else
+            echo "No lines added. OK."
+          fi
+
+
+  db-check:
+    name: DB Check
+    runs-on: ubuntu-22.04
+    env:
+      PGPASSWORD: submitty_dbuser
+      MAIN_INSTALL_PATH: ${{ github.WORKSPACE }}/main
+      MAIN_DATA_PATH: ${{ github.WORKSPACE }}/main/var
+      MAIN_REPO_PATH: ${{ github.WORKSPACE }}/main/GIT_CHECKOUT
+      PR_INSTALL_PATH: ${{ github.WORKSPACE }}/branch
+      PR_DATA_PATH: ${{ github.WORKSPACE }}/branch/var
+      PR_REPO_PATH: ${{ github.WORKSPACE }}/branch/GIT_CHECKOUT
+
+    services:
+      postgres-main:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        ports:
+          - 5432
+
+      postgres-branch:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        ports:
+          - 5432
+
+    steps:
+      - name: Setup Dependencies
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+          sudo apt-get update
+          sudo apt-get autoremove -y postgresql-14 postgresql-client-common
+          sudo apt-get install -y postgresql-12
+          sudo rm /etc/postgresql/14 -rf
+
+      - name: Checkout Current Branch
+        uses: actions/checkout@v4
+        with:
+          path: branch/GIT_CHECKOUT/Submitty
+          fetch-depth: 0
+
+      - name: Find Merge Base
+        run: |
+          echo MBASE=$(git --git-dir ${PR_REPO_PATH}/Submitty/.git merge-base               \
+                       -a origin/main ${{ github.sha }}) >> $GITHUB_ENV
+
+      - name: Checkout main Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.MBASE || 'main' }}
+          path: main/GIT_CHECKOUT/Submitty
+
+      - name: Download Required Packages
+        run: |
+          pip install -r <(
+              grep  -e "tzlocal"    -e "sqlalchemy" -e "ruamel"                             \
+                    -e "psycopg2"   -e "docker"                                             \
+                    ${MAIN_REPO_PATH}/Submitty/.setup/pip/system_requirements.txt
+          )
+          pip install ${MAIN_REPO_PATH}/Submitty/python_submitty_utils
+
+
+      - name: Create Users and Groups
+        run: | # Create users and groups
+          sudo -E python3 ${MAIN_REPO_PATH}/Submitty/.setup/bin/create_untrusted_users.py
+
+          sudo addgroup submitty_daemonphp
+          sudo addgroup submitty_daemoncgi
+          sudo addgroup submitty_daemonphpcgi
+          sudo addgroup submitty_course_builders
+          sudo addgroup submitty_phpgrp
+
+          sudo adduser  submitty_php --disabled-password --no-create-home
+          sudo adduser  submitty_cgi --disabled-password --no-create-home
+          sudo adduser  submitty_cgi submitty_phpgrp --no-create-home
+          sudo adduser  submitty_php shadow --no-create-home
+          sudo adduser  submitty_cgi shadow --no-create-home
+          sudo adduser  submitty_daemon --disabled-password --no-create-home
+          sudo adduser  submitty_php submitty_daemonphp --no-create-home
+          sudo adduser  submitty_daemon submitty_daemonphp --no-create-home
+          sudo adduser  submitty_cgi submitty_daemoncgi --no-create-home
+          sudo adduser  submitty_daemon submitty_daemoncgi --no-create-home
+          sudo adduser  submitty_daemon submitty_daemonphpcgi --no-create-home
+          sudo adduser  submitty_php submitty_daemonphpcgi --no-create-home
+          sudo adduser  submitty_cgi submitty_daemonphpcgi --no-create-home
+          sudo adduser  submitty_daemon docker --no-create-home
+
+          sudo useradd -p $(openssl passwd -1 submitty_dbuser) submitty_dbuser
+
+      - name: Configure Submitty
+        run: |
+          configure_submitty() {
+            # $1->MAIN_INSTALL_PATH, $2->MAIN_DATA_PATH, $3->MAIN_REPO_PATH, $4->DB_PORT
+            mkdir -vp "$2"          &&  chmod -vR 777 "$2"
+            mkdir -vp "$1/config"   &&  chmod -vR 777 "$1/config"
+            mkdir -vp "$1/site"     &&  chmod -vR 777 "$1/site"
+            mkdir -vp "$2/courses"  &&  chmod -vR 777 "$2/courses"
+
+            (
+              echo "localhost"                    # database host
+              echo "$4"                           # database port
+              echo ""                             # global db user
+              echo "submitty_dbuser"              # global db pass
+              echo ""                             # course db user
+              echo "submitty_dbuser"              # course db pass
+              echo ""                             # timezone
+              echo ""                             # default locale
+              echo "http://localhost"             # submitty url
+              echo ""                             # vcs url
+              echo ""                             # institution name
+              echo ""                             # sysadmin email
+              echo ""                             # where to report
+              echo "1"                            # PamAuth
+              echo ""                             # sysadmin username
+              echo "n"                            # email notification
+            ) | tee /dev/stderr                                                             \
+              | sudo -E python3 "$3/Submitty/.setup/CONFIGURE_SUBMITTY.py"                  \
+                        --install-dir "$1" --data-dir "$2" --debug
+
+            # Copy necessary files to the installation path
+            cp -vr "$3/Submitty/sbin" "$1"
+            sudo chmod -vR 777 "$1/config"
+            sudo chmod -vR 777 "$1/sbin"
+          }
+
+          configure_submitty "${MAIN_INSTALL_PATH}" "${MAIN_DATA_PATH}"                     \
+            "${MAIN_REPO_PATH}"     "${{  job.services.postgres-main.ports['5432']  }}"
+          configure_submitty "${PR_INSTALL_PATH}"   "${PR_DATA_PATH}"                       \
+            "${PR_REPO_PATH}"       "${{ job.services.postgres-branch.ports['5432'] }}"
+
+
+      - name: Create Databases
+        run: |
+          psql -d postgres -h localhost -U postgres        -p ${{  job.services.postgres-main.ports['5432']  }} \
+            -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
+          psql -d postgres -h localhost -U submitty_dbuser -p ${{  job.services.postgres-main.ports['5432']  }} \
+            -c "CREATE DATABASE submitty"
+
+          psql -d postgres -h localhost -U postgres        -p ${{ job.services.postgres-branch.ports['5432'] }} \
+            -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"\
+            -c "CREATE ROLE submitty_course_dbuser WITH LOGIN PASSWORD 'submitty_dbuser'"
+          psql -d postgres -h localhost -U submitty_dbuser -p ${{ job.services.postgres-branch.ports['5432'] }} \
+            -c "CREATE DATABASE submitty"
+
+      - name: Create Database Dumper
+        run: | # the original dumper requires a `su`, which is not needed when psql as a service
+          (
+              echo 'pg_dump -Osx -d "$1" -f "$2" -h localhost -p "$3" -U postgres '
+              echo 'sed -i -e "'"/SELECT pg_catalog.set_config('search_path'/d"'"\'
+              echo '       -e "/-- Dumped \(from\|by\)/d"                        \'
+              echo '       -e "/SET default_table_access_method = /d"            \'
+              echo '       -e "s/FOR EACH ROW EXECUTE FUNCTION/FOR EACH ROW EXECUTE PROCEDURE/g" "$2"'
+          ) > dbdump.sh
+          chmod +x dbdump.sh
+
+          echo M=$([ "$(date +%-m)" -lt "7" ] && echo 's' || echo 'f') >> $GITHUB_ENV
+          echo Y=$(date +%y) >> $GITHUB_ENV
+
+          mkdir -vp ${GITHUB_WORKSPACE}/dumped/main
+          mkdir -vp ${GITHUB_WORKSPACE}/dumped/branch
+
+      - name: Setup Databases and Courses for main
+        run: | # migrate main according to dumped master database (assume it is correct)
+          python3 ${MAIN_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
+
+          sudo ln -vs /usr/bin/true /usr/bin/ldapadd
+          sudo -E python3 ${MAIN_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py     \
+            blank --no_grading --data_dir ${MAIN_DATA_PATH} --install_dir ${MAIN_INSTALL_PATH}
+
+          sudo chmod -vR 777 ${MAIN_DATA_PATH}/courses
+
+      - name: Apply New Migrations from Current Branch
+        run: |
+          python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py                        \
+            -e master -e course -c ${MAIN_INSTALL_PATH}/config migrate
+
+      - name: Setup Databases and Courses for Current Branch
+        run: |
+          python3 ${PR_REPO_PATH}/Submitty/migration/run_migrator.py -e master migrate --initial
+
+          sudo -E python3 ${PR_REPO_PATH}/Submitty/.setup/bin/setup_sample_courses.py       \
+            blank --no_grading --data_dir ${PR_DATA_PATH} --install_dir ${PR_INSTALL_PATH}
+
+          sudo chmod -vR 777 ${PR_DATA_PATH}/courses
+
+      - name: Dump Migrated Databases
+        run: |
+          ./dbdump.sh "submitty"                "${GITHUB_WORKSPACE}/dumped/main/master.sql"\
+            "${{  job.services.postgres-main.ports['5432']  }}"
+          ./dbdump.sh "submitty_${M}${Y}_blank" "${GITHUB_WORKSPACE}/dumped/main/course.sql"\
+            "${{  job.services.postgres-main.ports['5432']  }}"
+
+          ./dbdump.sh "submitty"                "${GITHUB_WORKSPACE}/dumped/branch/master.sql"\
+            "${{ job.services.postgres-branch.ports['5432'] }}"
+          ./dbdump.sh "submitty_${M}${Y}_blank" "${GITHUB_WORKSPACE}/dumped/branch/course.sql"\
+            "${{ job.services.postgres-branch.ports['5432'] }}"
+
+      - name: Compare Migrated master Databases
+        if: always()
+        run: |
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/master.sql                           \
+                       ${GITHUB_WORKSPACE}/dumped/branch/master.sql || {
+            echo "::error:: Master databases are not identical, please check your migration"
+            exit 1
+          }
+
+      - name: Compare Migrated course Databases
+        if: always()
+        run: |
+          diff --color ${GITHUB_WORKSPACE}/dumped/main/course.sql                           \
+                       ${GITHUB_WORKSPACE}/dumped/branch/course.sql || {
+            echo "::error:: Course databases are not identical, please check your migration"
+            exit 1
+          }
+
+      - name: Compare Migrated master Database with Provided Dump
+        if: always()
+        run: |
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/master.sql                         \
+                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/submitty_db.sql || {
+            echo "::error:: Wrong provided dump, please check your database dumps"
+            exit 1
+          }
+
+      - name: Compare Migrated course Database with Provided Dump
+        if: always()
+        run: |
+          diff --color ${GITHUB_WORKSPACE}/dumped/branch/course.sql                         \
+                       ${PR_REPO_PATH}/Submitty/migration/migrator/data/course_tables.sql || {
+            echo "::error:: Wrong provided dump, please check your database dumps"
+            exit 1
+          }
+
+      - name: Pack Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dumped_database
+          path: ${{ github.WORKSPACE }}/dumped/**/*.sql
+          retention-days: 3
+
+
+  Cypress-System:
+    name: Cypress (System)
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/e2e-Setup-Composite
+      # TODO: Remove this block after upgrading jsPDF
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-dev
+
+      - name: Install node dependencies
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: |
+          npm ci
+
+      - name: Run accessibility test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/accessibility.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Run API tests
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: npm run test:api
+        env:
+          BASE_URL: http://localhost
+
+      - name: Stop autograding services
+        run: |
+          sudo systemctl stop submitty_autograding_worker
+          sudo systemctl stop submitty_autograding_shipper
+
+      - name: Run autograding status test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/autograding_status_1.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+          env: autograding_shipper_off=True
+
+      - name: Restart autograding shipper
+        run: |
+          sudo systemctl restart submitty_autograding_shipper
+
+      - name: Run autograding status test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/autograding_status_2.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+          env: autograding_shipper_off=True
+
+      - name: Restart autograding worker
+        run: |
+          sudo systemctl restart submitty_autograding_worker
+
+      - name: Run cypress e2e login tests with PAM auth
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost,chromeWebSecurity=false
+          spec: cypress/e2e/Cypress-System/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Switch to database auth
+        run: sudo sed -ie "s/Pam/Database/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with database auth
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Switch to LDAP auth
+        run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with LDAP auth
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-System/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Setup SAML
+        run: |
+          cd $SUBMITTY_REPOSITORY
+          sudo -E env "PATH=$PATH" bash .setup/testing/setup_saml.sh
+
+      - name: Switch to SAML auth
+        run: sudo sed -ie "s/Ldap/Saml/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
+      - name: Run cypress e2e login tests with SAML auth
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost,chromeWebSecurity=false
+          spec: cypress/e2e/Cypress-System/login.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - name: Setup HTTP/2
+        run: |
+          cd $SUBMITTY_REPOSITORY
+          if [ -f .setup/dev-upgrade-h2.sh ]; then
+            sudo sed -e "s/:80/:443/g" --in-place /etc/apache2/sites-available/submitty.conf
+            sudo -E env "PATH=$PATH" bash .setup/dev-upgrade-h2.sh up --i-know-what-i-am-doing-please-go-ahead \
+              && echo "Setup OK"  \
+              || {
+                echo "::warning::Setup Failed"
+                sudo sed -e "s/:443/:80/g" --in-place /etc/apache2/sites-available/submitty.conf
+              }
+          else
+            echo "Could not find dev-upgrade-h2.sh, skipping"
+          fi
+
+      - name: Test HTTP/2 Connection
+        run: |
+          http_ver=$(curl -ksI https://localhost -o/dev/null -w "%{http_version}\n")
+          [ "$http_ver" = "2" ] && echo "Pass" || echo "::warning::Failed"
+
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-System-Screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-System-Videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+      - name: Check for site errors
+        working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+        run: sudo bash tests/test_site_error_log.sh
+
+  Cypress:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/e2e-Setup-Composite
+      # TODO: Remove this block after upgrading jsPDF
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-dev-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+              ${{ runner.os }}-cache-node-modules-dev
+
+      - name: Install node dependencies
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: |
+          npm ci
+
+      - name: Run cypress e2e tests with pam auth
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          spec: cypress/e2e/Cypress-${{matrix.containers}}/*
+          browser: chrome
+          env: run_area=CI
+
+      - name: Check for site errors
+        working-directory: ${{ env.SUBMITTY_REPOSITORY }}
+        run: sudo bash tests/test_site_error_log.sh
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-${{matrix.containers}}-Videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos
+
+
+  Integration:
+    name: Integration
+    runs-on: ubuntu-22.04
+    # Postgres should not be needed for the integration tests.
+    # But unfortunately Configure test suite seems to use it at the moment, and
+    # Configure test suite seems to be necessary for the Integration tests
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: submitty_dbuser
+          POSTGRES_USER: postgres
+          TZ: America/New_York
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/e2e-Setup-Composite
+      - name: Run integration tests
+        run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/test_suite/integrationTests/run.py
+
+  ansible-ci:
+    name: Ansible Install
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        shell: bash
+        run: |
+          ssh-keygen -t rsa -b 4096 -C "github_ci" -N '' -f /home/runner/.ssh/id_rsa
+          ssh-keyscan -t rsa localhost >> /home/runner/.ssh/known_hosts
+          cat /home/runner/.ssh/id_rsa.pub >> /home/runner/.ssh/authorized_keys
+          ssh -T localhost
+          sudo systemctl start postgresql
+
+      - name: Run ansible script
+        shell: bash
+        run: |
+          cd .setup/ansible
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
+
+      - name: Set perms
+        shell: bash
+        run: |
+          sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
+          sudo chmod -R a+rwx /tmp/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+
+      - name: Install node dependencies
+        working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+        run: |
+          npm ci
+
+      - name: Validate image
+        run: |
+          curl --show-error --fail --include http://localhost/authentication/login
+
+      - name: Run Ansible cypress test
+        uses: cypress-io/github-action@v6
+        with:
+          config: baseUrl=http://localhost
+          spec: cypress/e2e/Cypress-Ansible/ansible-course.spec.js
+          working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
+          browser: chrome
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: install-log
+          path: /usr/local/submitty/install.log
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-Ansible-Screenshots
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/screenshots
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Cypress-Ansible-Videos
+          path: ${{env.SUBMITTY_REPOSITORY}}/site/cypress/videos

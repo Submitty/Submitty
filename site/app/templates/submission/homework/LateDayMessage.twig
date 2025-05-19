@@ -2,7 +2,7 @@
 
 {% if messages|length > 0 %}
 {# WRAP THE LATE DAY INFORMATION IN A DIV #}
-<div class="content gradeable_message"
+<div class="content"
     {% if error %}
         style="background-color: var(--standard-light-red);"
     {% endif %}
@@ -37,10 +37,10 @@
                 {{ self.line_breaks(loop.index0 > 0 ? 2 : 0) }}
                 Your active version was submitted {{ message.info.late }} {{ self.day_or_days(message.info.late) }} after the deadline,
                 and you have been charged {{ message.info.charged }} late {{ self.day_or_days(message.info.charged) }} for this assignment.
-                {% if message.info.remaining == 0 %}
-                    You have no late days remaining for future assignments.
+                {% if message.info.allowed_remaining == 0 %}
+                    You have no late days remaining for this assignment.
                 {% else %}
-                    You have {{ message.info.remaining }} remaining late {{ self.day_or_days(message.info.remaining) }} for this assignment.
+                    You have {{ message.info.allowed_remaining }} remaining late {{ self.day_or_days(message.info.allowed_remaining) }} for this assignment.
                 {% endif %}
             {% elseif message.type == 'getting_zero' %}
                 {{ self.line_breaks(loop.index0 > 0 ? 1 : 0) }}
@@ -85,6 +85,9 @@
                 {% endif %}
             {% endif %}
         {% endfor %}
+
+        <br>
+        For more information, see your complete <a href="{{ late_days_url }}">"My Late Days/Extensions"</a> page.
     </h4>
 </div>
 {% endif %}

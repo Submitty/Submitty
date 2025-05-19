@@ -108,7 +108,10 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_announcement_message'     => 'announcement message',
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
-            'polls_enabled'                  => false
+            'polls_enabled'                  => false,
+            'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
+            'registration_sections'          => null,
+            'default_section'                => null
         ];
 
         $gradeable_seating_options = [
@@ -136,7 +139,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsFirstItem(): void {
@@ -190,7 +193,10 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_announcement_message'     => 'announcement message',
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
-            'polls_enabled'                  => false
+            'polls_enabled'                  => false,
+            'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
+            'registration_sections'          => null,
+            'default_section'                => null
         ];
 
         $gradeable_seating_options = [
@@ -224,7 +230,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingChartsNonFirstItem(): void {
@@ -279,7 +285,10 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'queue_announcement_message'     => 'announcement message',
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
-            'polls_enabled'                  => false
+            'polls_enabled'                  => false,
+            'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
+            'registration_sections'          => null,
+            'default_section'                => null
         ];
 
         $gradeable_seating_options = [
@@ -317,7 +326,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, false, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {

@@ -12,7 +12,9 @@ function revert_settings(gradeable_id, setting) {
 
 function select_gradeable() {
     // This gets a gradeable that has been graded already, so there are submissions available.
-    cy.get('[data-testid="grade-table"]').contains('/ 12').click({ force: true });
+    const button_labels = ['/ 12', 'Grade', 'Incomplete'];
+    const button_labels_regex = new RegExp(button_labels.join('|'));
+    cy.get('[data-testid="grade-table"]').contains(button_labels_regex).click({ force: true });
     cy.get('[data-testid="show-autograding"]').click();
     cy.get('[data-testid="show-submission"]').click();
     cy.get('[data-testid="folders"]').contains('submissions').click();
