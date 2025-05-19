@@ -24,6 +24,13 @@
     left: 0;
 }
 
+.expand-icon,
+.collapse-icon {
+    font-size: 30px;
+    top: 50%;
+    left: 3%;
+}
+
 .collapse-icon {
     left: 2%;
 }
@@ -101,6 +108,7 @@
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .expand-icon,
 .collapse-icon {
     display: inline;
@@ -236,13 +244,6 @@
 
     #details-table tbody.details-info-header .info td {
         padding: 0 25px;
-    }
-
-    .expand-icon,
-    .collapse-icon {
-        font-size: 30px;
-        top: 50%;
-        left: 3%;
     }
 
     .collapse-icon {
