@@ -13,10 +13,10 @@ use app\libraries\Core;
  *
  * @method int getId()
  * @method int getPageNumber()
- * @method int getX1()
- * @method int getY1()
- * @method int getX2()
- * @method int getY2()
+ * @method float getX1()
+ * @method float getY1()
+ * @method float getX2()
+ * @method float getY2()
  *
  */
 class Redaction extends AbstractModel implements \JsonSerializable {
@@ -27,29 +27,25 @@ class Redaction extends AbstractModel implements \JsonSerializable {
      * @var int The page number of the redaction */
     protected $page_number = -1;
     /** @prop
-     * @var int The x1 coordinate of the redaction */
+     * @var float The x1 coordinate of the redaction */
     protected $x1 = -1;
     /** @prop
-     * @var int The y1 coordinate of the redaction */
+     * @var float The y1 coordinate of the redaction */
     protected $y1 = -1;
     /** @prop
-     * @var int The x2 coordinate of the redaction */
+     * @var float The x2 coordinate of the redaction */
     protected $x2 = -1;
     /** @prop
-     * @var int The y2 coordinate of the redaction */
+     * @var float The y2 coordinate of the redaction */
     protected $y2 = -1;
-    /**
-     * Redaction constructor.
-     * @param array<string,int> $details
-     */
-    public function __construct(Core $core, array $details) {
+
+    public function __construct(Core $core, int $page_number, float $x1, float $y1, float $x2, float $y2) {
         parent::__construct($core);
-        $this->id = $details['id'] ?? $this->id;
-        $this->page_number = $details['page'];
-        $this->x1 = $details['x1'];
-        $this->y1 = $details['y1'];
-        $this->x2 = $details['x2'];
-        $this->y2 = $details['y2'];
+        $this->page_number = $page_number;
+        $this->x1 = $x1;
+        $this->y1 = $y1;
+        $this->x2 = $x2;
+        $this->y2 = $y2;
     }
 
     public function jsonSerialize(): mixed {

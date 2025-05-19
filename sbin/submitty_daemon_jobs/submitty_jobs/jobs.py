@@ -12,6 +12,8 @@ import stat
 import traceback
 import datetime
 from urllib.parse import unquote
+
+from . import regenerate_bulk_images
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import generate_pdf_images
@@ -325,9 +327,21 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr, redactions])
+                bulk_qr_split.main(
+                    [
+                        filename,
+                        split_path,
+                        qr_prefix,
+                        qr_suffix,
+                        log_file_path,
+                        use_ocr,
+                        redactions,
+                    ]
+                )
             else:
-                bulk_upload_split.main([filename, split_path, num, log_file_path, redactions])
+                bulk_upload_split.main(
+                    [filename, split_path, num, log_file_path, redactions]
+                )
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
             print(msg)
@@ -347,10 +361,14 @@ class BulkUpload(CourseJob):
 
 class GeneratePdfImages(AbstractJob):
     def run_job(self):
-        pdf_file_path = self.job_details['pdf_file_path']
+        pdf_file_path = self.job_details["pdf_file_path"]
         # optionally get redactions
-        redactions = self.job_details.get('redactions', [])
-        generate_pdf_images.main(pdf_file_path, [generate_pdf_images.Redaction(**r) for r in redactions])
+        redactions = self.job_details.get("redactions", [])
+        generate_pdf_images.main(
+            pdf_file_path,
+            [generate_pdf_images.Redaction(**r) for r in redactions],
+            True,
+        )
 
     def cleanup_job(self):
         pass
@@ -426,6 +444,19 @@ class UpdateSystemInfo(AbstractJob):
 
         log_msg = f"[Last ran on: {today.isoformat()}]\n"
         logger.write_to_log(log_file, log_msg)
+
+    def cleanup_job(self):
+        pass
+
+
+class RegenerateBulkImages(AbstractJob):
+    def run_job(self):
+        folder = self.job_details["pdf_file_path"]
+        redactions = [
+            generate_pdf_images.Redaction(**r)
+            for r in self.job_details.get("redactions", [])
+        ]
+        regenerate_bulk_images.main(folder, redactions)
 
     def cleanup_job(self):
         pass

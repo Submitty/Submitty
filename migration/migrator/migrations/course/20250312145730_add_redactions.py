@@ -19,10 +19,10 @@ def up(config, database, semester, course):
                      redaction_id SERIAL PRIMARY KEY,
                      g_id character varying(255) NOT NULL,
                      page integer NOT NULL,
-                     x1 integer NOT NULL,
-                     x2 integer NOT NULL,
-                     y1 integer NOT NULL,
-                     y2 integer NOT NULL
+                     x1 float NOT NULL,
+                     x2 float NOT NULL,
+                     y1 float NOT NULL,
+                     y2 float NOT NULL
                      )
     """)
 

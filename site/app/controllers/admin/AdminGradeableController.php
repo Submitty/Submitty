@@ -16,6 +16,7 @@ use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\gradeable\Redaction;
 
 /**
  * Class AdminGradeableController
@@ -1919,5 +1920,60 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["POST"])]
+    public function redactions($gradeable_id)
+    {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            return;
+        }
+
+        if (!isset($_POST['redactions'])) {
+            $this->core->getOutput()->renderJsonFail('No redactions provided');
+            return;
+        }
+
+        $redactions = [];
+
+        for ($i = 0; $i < count($_POST['redactions']); $i++) {
+            $redaction = $_POST['redactions'][$i];
+            if (!isset($redaction['page']) || !isset($redaction['x1']) || !isset($redaction['y1']) || !isset($redaction['x2']) || !isset($redaction['y2'])) {
+                $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
+                return;
+            }
+
+            $redactions[] = new Redaction($this->core, $redaction['page'], $redaction['x1'], $redaction['y1'], $redaction['x2'], $redaction['y2']);
+        }
+
+        $this->core->getQueries()->updateRedactions($gradeable, $redactions);
+
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $job_path = FileUtils::joinPaths($daemon_job_queue_path, "regenerate_bulk_images__{$semester}__{$course}__{$gradeable_id}.json");
+        $job_data = [
+            "job" => "RegenerateBulkImages",
+            "pdf_file_path" => "/var/local/submitty/courses/s25/sample/submissions/bulk_upload_test",
+            "redactions" => array_map(
+                function (Redaction $redaction) {
+                    return [
+                        'page_number' => $redaction->getPageNumber(),
+                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
+                    ];
+                },
+                $redactions
+            )
+        ];
+
+
+        if (!FileUtils::writeJsonFile($job_path, $job_data)) {
+            $this->core->getOutput()->renderJsonFail('Failed to write job file');
+            return;
+        }
+
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 }

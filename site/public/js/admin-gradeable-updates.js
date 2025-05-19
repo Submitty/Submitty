@@ -74,6 +74,34 @@ function updatePdfPageSettings() {
         });
 }
 
+async function updateRedactionSettings() {
+    const files = $('#redactions_json').prop('files');
+    if (files.length === 0) {
+        return;
+    }
+    const file = files[0];
+    const data = JSON.parse(await file.text());
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: data,
+            csrf_token: csrfToken,
+        },
+    });
+}
+
+async function removeRedactions() {
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: [{ page: 1, x1: 0, y1: 0, x2: 0, y2: 0 }],
+            csrf_token: csrfToken,
+        },
+    });
+}
+
 function onItemPoolOptionChange(componentId) {
     const linkItemPool = $(`#yes-link-item-pool-${componentId}`);
     // Provide a select option for item-pool items on the rubric components

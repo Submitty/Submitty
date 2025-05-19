@@ -6129,7 +6129,7 @@ AND gc_id IN (
                     }
 
                     // Create the redaction instance
-                    $redactions[] = new Redaction($this->core, $redaction_data);
+                    $redactions[] = new Redaction($this->core, $redaction_data['page'], $redaction_data['x1'], $redaction_data['y1'], $redaction_data['x2'], $redaction_data['y2']);
                 }
 
                 // Set the redactions
@@ -9460,5 +9460,28 @@ ORDER BY
             $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
         }
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array<Redaction> $redactions
+     */
+    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
+        $this->course_db->beginTransaction();
+        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
+        foreach ($redactions as $redaction) {
+            $this->course_db->query(
+                "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    $gradeable->getId(),
+                    $redaction->getPageNumber(),
+                    $redaction->getX1(),
+                    $redaction->getY1(),
+                    $redaction->getX2(),
+                    $redaction->getY2()
+                ]
+            );
+        }
+        $this->course_db->commit();
     }
 }
