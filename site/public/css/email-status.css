@@ -9,7 +9,6 @@
 .button-container {
     position: relative;
     margin: auto;
-    display: inline-flexbox;
 }
 
 .expand {
