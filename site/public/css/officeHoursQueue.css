@@ -60,7 +60,7 @@ th {
 .filter-buttons:focus {
     opacity: 0.8;
     /* stylelint-disable-next-line function-no-unknown */
-    filter: alpha(opacity=80);
+    opacity: 0.8;
 }
 
 .queue-message {
