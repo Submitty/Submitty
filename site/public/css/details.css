@@ -22,10 +22,7 @@
     font-size: 1rem;
     top: 33%;
     left: 0;
-}
 
-.expand-icon,
-.collapse-icon {
     font-size: 30px;
     top: 50%;
     left: 3%;
@@ -109,14 +106,12 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.panel-head-active .expand-icon,
-.collapse-icon {
+.panel-head-active .expand-icon, .collapse-icon {
     display: inline;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.panel-head-active .collapse-icon,
-.expand-icon {
+.panel-head-active .collapse-icon, .expand-icon {
     display: none;
 }
 
