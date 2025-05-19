@@ -107,11 +107,12 @@
     display: inline;
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
+/* stylelint-disable no-descending-specificity */
 .panel-head-active .collapse-icon,
 .expand-icon {
     display: none;
 }
+/* stylelint-enable no-descending-specificity */
 
 @media (max-width: 950px) {
     table.table,
