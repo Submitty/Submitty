@@ -98,8 +98,8 @@ describe('Tests for self registering for courses', () => {
         cy.intercept(
             {
                 url: `/courses/${getCurrentSemester()}/testing/user_information`,
-                times: 1
-            }
+                times: 1,
+            },
         ).as('userInformation');
         cy.get('[data-testid="popup-message"]').should('contain', "User 'gutmal' updated");
         cy.wait('@userInformation');
