@@ -27,15 +27,6 @@ function ClampGradeablesInBucket(el, num_gradeables) {
     }
 }
 
-// Forces element's value to be non-negative
-function ClampPoints(el) {
-    if (el.value === '') {
-        el.value = el.placeholder;
-        el.classList.remove('override');
-    }
-    el.value = Math.max(0.0, el.value);
-}
-
 // Forces element's value to be non-negative and between 0.0 - 100.0
 // Distinct from ClampPercent(), this is for Per Gradeable Percents
 function ClampPercents(el) {
@@ -43,15 +34,6 @@ function ClampPercents(el) {
         el.value = el.placeholder;
     }
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
-}
-
-function DetectMaxOverride(el) {
-    if (el.value !== el.placeholder) {
-        el.classList.add('override');
-    }
-    else {
-        el.classList.remove('override');
-    }
 }
 
 function ExtractBucketName(s, offset) {
@@ -167,7 +149,7 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
@@ -177,6 +159,41 @@ function getSection() {
     });
 
     return sections;
+}
+
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    warningIcon.toggle(hasDuplicates);
 }
 
 function getDisplayBenchmark() {
@@ -247,11 +264,11 @@ function getGradeableBuckets() {
                 // children[0] represents <div id="gradeable-pts-div-*">
                 // children[1] represents <div id="gradeable-percents-div-*">
                 // replace divs with inputs
-                children[0] = children[0].children[0];
+                children[0] = children[0].querySelector('.max-score'); // can be either 1st, 2nd, or 3rd child
                 children[1] = children[1].children[0];
 
                 // Get max points
-                gradeable.max = parseFloat(children[0].value);
+                gradeable.max = parseFloat(children[0].dataset.maxScore);
 
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(children[1]).is(':visible')) {
@@ -776,6 +793,8 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
     $("input[name*='display']").change(() => {
         saveChanges();
     });
@@ -786,8 +805,14 @@ $(document).ready(() => {
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
+    $('.benchmark_percent_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     $('.sections_and_labels').on('change keyup paste', () => {
         saveChanges();
+    });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
     });
     $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
@@ -1102,6 +1127,27 @@ $(document).ready(() => {
             }
         });
     }
+
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket), with one decimal place
+    const bucketItemCounts = $('input[id^="config-count-"]');
+    bucketItemCounts.each((index, bucketItemCountDOMElement) => {
+        const bucketItemCount = $(bucketItemCountDOMElement);
+        const bucket = bucketItemCount.prop('id').match(/^config-count-(.+)$/)[1];
+        const gradeablePercents = $(`div[id^="gradeable-percents-div-${bucket}-"]`);
+        gradeablePercents.each((index, gradeablePercentDOMElement) => {
+            const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+            gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            if (gradeablePercentInput.val() === '') {
+                gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
+            }
+        });
+        bucketItemCount.on('blur', () => {
+            gradeablePercents.each((index, gradeablePercentDOMElement) => {
+                const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+                gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            });
+        });
+    });
 
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');

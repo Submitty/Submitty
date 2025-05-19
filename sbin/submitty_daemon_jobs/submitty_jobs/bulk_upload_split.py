@@ -7,6 +7,7 @@ import PyPDF2
 import traceback
 from PyPDF2 import PdfWriter
 from . import write_to_log as logger
+from . import generate_pdf_images
 
 try:
     from pdf2image import convert_from_bytes
@@ -61,15 +62,7 @@ def main(args):
                     i += 1
                 with open(output_filename, 'wb') as out:
                     pdf_writer.write(out)
-
-                # save pdfs as images (start indexing at one)
-                # open the file after writing it
-                with open(output_filename, 'rb') as out:
-                    pdf_images = convert_from_bytes(out.read(), dpi=200)
-                    for k in range(len(pdf_images)):
-                        pdf_images[k].save(output_filename[:-4] +
-                                           '_' + str(k + 1).zfill(3) + '.jpg',
-                                           "JPEG", quality=20, optimize=True)
+                generate_pdf_images.main(output_filename, [])
 
                 with open(cover_filename, 'wb') as out:
                     cover_writer.write(out)

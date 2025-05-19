@@ -74,9 +74,9 @@ describe('Tests cases abut changing user pronouns', () => {
 
         // verify pronouns is shown in overall forum page
         cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="post-action-container"]').first().should('contain', 'Joe S.');
-        cy.get('[data-testid="post-action-container"]').first().should('contain', 'They/Them');
-        cy.get('[data-testid="post-action-container"]').first().click();
+        cy.get('[data-testid="thread-action-container"]').first().should('contain', 'Joe S.');
+        cy.get('[data-testid="thread-action-container"]').first().should('contain', 'They/Them');
+        cy.get('[data-testid="thread-action-container"]').first().click();
 
         // comment on the thread, verify pronouns is shown
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test pronouns display');
@@ -98,9 +98,9 @@ describe('Tests cases abut changing user pronouns', () => {
 
         // verify pronouns is not shown in overall forum page
         cy.visit(['sample', 'forum']);
-        cy.get('[data-testid="post-action-container"]').first().should('contain', 'Anonymous');
-        cy.get('[data-testid="post-action-container"]').first().find('[data-testid="post-user-pronouns"]').should('not.exist');
-        cy.get('[data-testid="post-action-container"]').first().click();
+        cy.get('[data-testid="thread-action-container"]').first().should('contain', 'Anonymous');
+        cy.get('[data-testid="thread-action-container"]').first().find('.post-author-pronouns').should('not.exist');
+        cy.get('[data-testid="thread-action-container"]').first().click();
 
         // comment on the thread anonymously, verify pronouns is not shown
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test Anonymous thread, should not show pronouns');
@@ -117,17 +117,17 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.login('instructor');
 
         // verify pronouns exist and remove thread
-        cy.get('[data-testid="post-action-container"]').eq(1).should('contain', 'Joe S.');
-        cy.get('[data-testid="post-action-container"]').eq(1).should('contain', 'They/Them');
-        cy.get('[data-testid="post-action-container"]').eq(1).click();
+        cy.get('[data-testid="thread-action-container"]').eq(1).should('contain', 'Joe S.');
+        cy.get('[data-testid="thread-action-container"]').eq(1).should('contain', 'They/Them');
+        cy.get('[data-testid="thread-action-container"]').eq(1).click();
         cy.get('[data-testid="post-user-pronouns"]').should('contain', 'They/Them');
         cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
         cy.get('[data-testid="flex-row"]').contains('Test pronouns display').should('not.exist');
 
         // verify pronouns do not exist (post thread Anonymously) and remove thread
-        cy.get('[data-testid="post-action-container"]').eq(0).should('contain', 'Anonymous');
-        cy.get('[data-testid="post-action-container"]').eq(0).find('[data-testid="post_user_pornouns"]').should('not.exist');
-        cy.get('[data-testid="post-action-container"]').eq(0).click();
+        cy.get('[data-testid="thread-action-container"]').eq(0).should('contain', 'Anonymous');
+        cy.get('[data-testid="thread-action-container"]').eq(0).find('.post-author-pronouns').should('not.exist');
+        cy.get('[data-testid="thread-action-container"]').eq(0).click();
         cy.get('[data-testid="post-user-id"]').should('contain', 'Anonymous');
         cy.get('[data-testid="post-user-pronouns"]').should('not.exist');
         cy.get('.first_post > .post-action-container > .dropdown-menu ').find(':contains("Delete")').click({ force: true });
