@@ -4,18 +4,20 @@
 
 import os
 import traceback
+
 import numpy
-from . import write_to_log as logger
-from . import submitty_ocr as scanner
+
 from . import generate_pdf_images
+from . import submitty_ocr as scanner
+from . import write_to_log as logger
 
 # try importing required modules
 try:
-    from PyPDF2 import PdfReader, PdfWriter
-    from pdf2image import convert_from_bytes
-    import pyzbar.pyzbar as pyzbar
-    from pyzbar.pyzbar import ZBarSymbol
     import cv2
+    import pyzbar.pyzbar as pyzbar
+    from pdf2image import convert_from_bytes
+    from PyPDF2 import PdfReader, PdfWriter
+    from pyzbar.pyzbar import ZBarSymbol
 except ImportError:
     traceback.print_exc()
     raise ImportError("One or more required python modules not installed correctly")

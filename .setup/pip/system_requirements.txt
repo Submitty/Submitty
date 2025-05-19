@@ -23,13 +23,13 @@ watchdog==4.0.1
 xlsx2csv==0.8.4
 pause==0.3
 paramiko==3.5.1
-tzlocal==5.3
+tzlocal==5.3.1
 PyPDF2==3.0.1
 distro==1.9.0
 jsonschema==4.23.0
 jsonref==1.1.0
 docker==7.1.0
-urllib3==2.3.0
+urllib3==2.4.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.9

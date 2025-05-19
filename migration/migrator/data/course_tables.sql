@@ -1522,7 +1522,8 @@ CREATE TABLE public.notification_settings (
     team_invite_email boolean DEFAULT true NOT NULL,
     team_joined_email boolean DEFAULT true NOT NULL,
     team_member_submission_email boolean DEFAULT true NOT NULL,
-    self_notification_email boolean DEFAULT false NOT NULL
+    self_notification_email boolean DEFAULT false NOT NULL,
+    self_registration_email boolean DEFAULT true NOT NULL
 );
 
 

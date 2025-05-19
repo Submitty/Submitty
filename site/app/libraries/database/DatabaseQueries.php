@@ -1253,7 +1253,17 @@ WHERE term=? AND course=? AND user_id=?",
         return count($this->course_db->rows()) > 0 && $this->course_db->row()['autograding_complete'] === true;
     }
 
-    protected function createParameterList($len) {
+    /**
+     * Create a string that consists placeholder parameters (?) enclosed in parentheses.
+     * These placeholders will then be used for parameter binding when executing the SQL query.
+     * When $len is zero, this function will return '(NULL)' so that it won't break SQL syntax.
+     *
+     * @param integer $len the number of placeholder parameters.
+     */
+    protected function createParameterList(int $len): string {
+        if ($len < 1) {
+            return '(NULL)';
+        }
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
@@ -4753,8 +4763,8 @@ SQL;
     public function getSelfRegistrationCourses(string $user_id): array {
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
-WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
-    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
+WHERE c.self_registration_type > ? AND c.status = ? AND  c.course NOT IN (
+    SELECT course FROM courses_users WHERE user_id = ? AND (registration_section IS NOT NULL OR user_group <> 4) AND term = t.term_id
 ) AND c.term = t.term_id ORDER BY t.term_id ASC
 SQL;
         $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
@@ -5200,6 +5210,7 @@ AND gc_id IN (
             'team_invite_email',
             'team_joined_email',
             'team_member_submission_email',
+            'self_registration_email',
             'self_notification_email',
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
@@ -8848,7 +8859,7 @@ WHERE current_state IN
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
                  ns.self_notification,
-                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,

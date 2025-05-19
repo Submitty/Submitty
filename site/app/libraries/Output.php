@@ -15,8 +15,9 @@ use League\CommonMark\Inline\Element\Code;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
 use app\libraries\CustomCodeInlineRenderer;
-use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
-use Aptoma\Twig\Extension\MarkdownExtension;
+use Twig\Extra\Markdown\MarkdownExtension;
+use Twig\Extra\Markdown\MarkdownRuntime;
+use Twig\Extra\Markdown\LeagueMarkdown;
 use Ds\Set;
 
 /**
@@ -171,8 +172,22 @@ HTML;
         $environment->mergeConfig([]);
 
         $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
-        $engine = new PHPLeagueCommonMarkEngine($converter);
-        $this->twig->addExtension(new MarkdownExtension($engine));
+        $this->twig->addExtension(new MarkdownExtension());
+
+        $this->twig->addRuntimeLoader(new class ($converter) implements \Twig\RuntimeLoader\RuntimeLoaderInterface {
+            private CommonMarkConverter $converter;
+
+            public function __construct(CommonMarkConverter $converter) {
+                $this->converter = $converter;
+            }
+
+            public function load(string $class): ?MarkdownRuntime {
+                if (MarkdownRuntime::class === $class) {
+                    return new MarkdownRuntime(new LeagueMarkdown($this->converter));
+                }
+                return null;
+            }
+        });
     }
 
     public function setInternalResources() {
@@ -202,6 +217,11 @@ HTML;
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
         $this->addInternalJs('markdown.js');
+
+        // Add vue support
+        $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
+        $this->css->add($this->timestampResource('submitty-vue.css', 'mjs/vue'));
+        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
     }
 
     /**
@@ -559,17 +579,6 @@ HTML;
 
     public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
-    }
-
-    /**
-     * @param array<mixed>$args
-     */
-    public function renderVue(string $page, array $args = []): string {
-        $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
-        $this->css->add($this->timestampResource('style.css', 'mjs/vue'));
-        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
-
-        return $this->renderTwigTemplate('Vue.twig', ["page" => $page, "args" => $args]);
     }
 
     public function addVendorJs($file) {
