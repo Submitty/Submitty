@@ -23,16 +23,13 @@ describe('Tests for self registering for courses', () => {
         cy.visit(['testing', 'users']);
         cy.get('[data-testid="delete-student-gutmal-button"]').click();
         cy.get('[data-testid="confirm-delete-button"]').click();
-    });
-
-    after(() => {
-        cy.login('instructor2');
-        cy.visit(['testing', 'users']);
-        cy.intercept(`/courses/${getCurrentSemester()}/testing/user_information`).as('userInfo');
-        cy.get('[data-testid="delete-student-gutmal-button"]').click();
-        cy.get('[data-testid="confirm-delete-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain', 'Leonie Gutmann has been removed from your course.');
-        cy.wait('@userInfo');
+        // This wait is necessary due to the JS $.ajax request, as if the logout request is sent too quickly,
+        // the login page is sent to the $.ajax request instead of the accurate data. For some reason waiting for an intercepted route
+        // does not work here, when it works below.
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
+        cy.wait(500);
+        cy.logout();
     });
 
     it('Should enable self registration, and allow user to register for courses.', () => {
