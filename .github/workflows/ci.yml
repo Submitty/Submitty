@@ -116,6 +116,32 @@ jobs:
           disable_search: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  twig-lint:
+    name: Twig Lint
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@2.33.0
+        with:
+          php-version: ${{ env.PHP_VER }}
+      - name: Cache Composer
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Install Composer
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --dev
+      - name: Lint Twig Templates
+        run: php scripts/symfony_console lint:twig --format=github app/ public/ room_templates/
 
   php-lint:
     name: PHP Lint

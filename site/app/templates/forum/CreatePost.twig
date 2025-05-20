@@ -75,7 +75,7 @@
     {% endif %}
 
 <span class="upduck-container" data-testid="upduck-container">
-    <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" onClick="toggleLike({{ post.id }}, '{{ current_user }}')" title="Like the post">
+    <button data-testid="upduck-button" class="upduck-button text-decoration-none" tabindex="0" onClick="toggleLike({{ post.id }}, {{ post.thread.id }}, '{{ current_user }}')" title="Like the post">
         <img id="likeIcon_{{ post.id }}" src="{{ post_up_duck.upduck_user_liked ? '/img/on-duck-button.svg' : '/img/light-mode-off-duck.svg' }}" alt="Like" width="30" height="30">
     </button>
     <span data-testid="like-count" id="likeCounter_{{ post.id }}" class="like-counter">{{ post_up_duck.upduck_count }}</span>
