@@ -27,6 +27,7 @@
     min-height: 30px;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_bar .toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -34,6 +35,7 @@
     gap: 0.5rem;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_bar .toolbar_right {
     flex: 0 0 auto;
     display: flex;
@@ -43,6 +45,7 @@
     gap: 0.5rem;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .forum_bar .toolbar_left {
     flex: 0 1 28rem;
     min-width: 12rem;
