@@ -1719,11 +1719,11 @@ class AdminGradeableController extends AbstractController {
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
                 $haystack = $logs->json['data'][0];
-                
-                if(str_contains($haystack, 'MAKE ERROR')) {
+
+                if (str_contains($haystack, 'MAKE ERROR')) {
                     $status = false;
                 }
-                elseif(str_contains($haystack, $needle)) {
+                elseif (str_contains($haystack, $needle)) {
                     $status = 'warnings';
                 }
             }
