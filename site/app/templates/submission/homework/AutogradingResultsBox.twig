@@ -12,9 +12,6 @@
                     This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
                 </p>
             {% endif %}
-            <script>
-                checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
-            </script>
         {% elseif results is not defined %}
             <p class="red-message">
                 Something went wrong when grading this submission. Please contact your instructor about this.
