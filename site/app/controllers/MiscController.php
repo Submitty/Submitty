@@ -93,7 +93,7 @@ class MiscController extends AbstractController {
 
         // Check if file exceeds 20MB size limit before encoding
         if ($file_size > $max_size) {
-            return new MultiResponse(JsonResponse::getFailResponse("This PDF is too large to be viewed online. Please download it instead."));
+             return $this->renderJsonFail("File exceeds the maximum allowed size of " . ($max_size / (1024 * 1024)) . "MB.");
         }
 
         $pdf64 = base64_encode(file_get_contents($file_path));
