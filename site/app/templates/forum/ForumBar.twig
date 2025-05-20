@@ -12,15 +12,15 @@
 	</script>
 {% endif %}
 
-<div class="forum_bar">
+<div class="forum-bar">
 	<div class="toolbar">
-		<div class="toolbar_left">
+		<div class="toolbar-left">
 			{% if thread_exists %}
 			<form id="search_block" method="post" action="{{ search_url }}">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 
-				<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
-				<div class="search_actions">
+				<input type="text" placeholder="Search here..." name="search-content" id="search-content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
+				<div class="search-actions">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 						Search
 					</button>
@@ -45,8 +45,8 @@
 			</form>
 			{% endif %}
 		</div>
-		<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
-		<div class="toolbar_right">
+		<a id="clear-filter-button" class="inline-block text-decoration-none key_to_click" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+		<div class="toolbar-right">
 			{% if show_more is defined and show_more %}
 			<div data-testid="more-dropdown" class="dropdown more-dropdown">
 				<div class="btn-group">
@@ -182,7 +182,7 @@
 
 		if(filters_applied.length > 0 || unread_marked ){
 			$('#forum_filter_bar').css('display', 'inline-block');
-			$('#clear_filter_button').css('display', 'inline-block');
+			$('#clear-filter-button').css('display', 'inline-block');
 		}
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}
