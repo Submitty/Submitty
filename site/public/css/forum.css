@@ -57,14 +57,14 @@
     gap: 0.5rem;
 }
 
-.forum-bar .toolbar-left #search_content {
+.forum-bar .toolbar-left #search-content {
     flex: 1 1 auto;
     height: 100%;
     width: 100%;
     min-width: 30px;
 }
 
-.forum-bar .toolbar-left .search_actions {
+.forum-bar .toolbar-left .search-actions {
     flex: 0 0 auto;
     display: flex;
     flex-wrap: nowrap;
@@ -487,6 +487,7 @@
 #unread {
     margin-right: 15px;
     display: inline-block;
+    display: none;
 }
 
 #post-hr {
@@ -739,10 +740,6 @@
     color: var(--submitty-logo-blue);
 }
 /* stylelint-disable-next-line selector-id-pattern */
-
-#unread {
-    display: none;
-}
 
 .filter-active,
 .filter-active:hover {
