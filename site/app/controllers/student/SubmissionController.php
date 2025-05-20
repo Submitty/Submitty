@@ -162,7 +162,8 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput(
                 'Error',
                 'unbuiltGradeable',
-                $gradeable->getTitle()
+                $gradeable,
+                "submissions"
             );
             $error = true;
         }
@@ -492,7 +493,13 @@ class SubmissionController extends AbstractController {
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
                 $pdf_full_path = FileUtils::joinPaths($pdf_path, $job_data["timestamp"], $job_data["filename"]);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?pdf_path={$pdf_full_path}&num_page={$num_pages}&file_name={$job_data['filename']}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "pdf_page_check.cgi?" . http_build_query(
+                    [
+                        'pdf_path' => $pdf_full_path,
+                        'num_page' => $num_pages,
+                        'file_name' => $job_data['filename']
+                    ]
+                ));
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 $output = curl_exec($ch);
                 curl_close($ch);
@@ -1193,7 +1200,7 @@ class SubmissionController extends AbstractController {
         }
 
         // if student submission, make sure that gradeable allows submissions
-        if (!$this->core->getUser()->accessFullGrading() && !$gradeable->canStudentSubmit()) {
+        if (!$this->core->getUser()->accessGrading() && !$gradeable->canStudentSubmit()) {
             $msg = "You do not have access to that page.";
             $this->core->addErrorMessage($msg);
             return $this->uploadResult($msg, false);
@@ -1995,15 +2002,29 @@ class SubmissionController extends AbstractController {
         );
     }
 
+
+    /**
+     * Check if the unbuilt gradeable has been built yet
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
+    public function checkBuildRefresh(string $gradeable_id): JsonResponse {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return JsonResponse::getFailResponse("No gradeable with that id.");
+        }
+
+        return JsonResponse::getSuccessResponse($gradeable->hasAutogradingConfig());
+    }
+
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
-    public function checkRefresh($gradeable_id, $gradeable_version) {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
+    public function checkRefresh($gradeable_id, $gradeable_version): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // Don't load the graded gradeable, since that may not exist yet
@@ -2044,16 +2065,7 @@ class SubmissionController extends AbstractController {
                 $team_id
             );
 
-        if ($has_results) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-        }
-        else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
-        }
-        $this->core->getOutput()->renderString($refresh_string);
-        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
+        return JsonResponse::getSuccessResponse($has_results);
     }
 
     /**

@@ -572,7 +572,7 @@ STRING;
         $this->assertEquals(
             $stat[0],
             ['name' => 'bad.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'The file was only partially uploaded',
              'size' => 100,
              'is_zip' => false,
@@ -587,7 +587,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'bad2.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'No file was uploaded.',
              'size' => 100,
              'is_zip' => false,
@@ -606,7 +606,7 @@ STRING;
         $this->assertEquals(
             $stat[1],
             ['name' => 'bad2.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'No file was uploaded.',
              'size' => 100,
              'is_zip' => false,
@@ -617,7 +617,7 @@ STRING;
         $this->assertEquals(
             $stat[2],
             ['name' => 'bad3.txt',
-             'type' => 'text/plain',
+             'type' => null,
              'error' => 'Unknown error code.',
              'size' => 100,
              'is_zip' => false,

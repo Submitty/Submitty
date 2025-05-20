@@ -196,7 +196,8 @@ class NavigationView extends AbstractView {
                     "edit_buttons" => $this->getAllEditButtons($gradeable),
                     "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $buttons,
-                    "has_build_error" => $gradeable->anyBuildErrors()
+                    "has_build_error" => $gradeable->anyBuildErrors(),
+                    "is_student_view" => $gradeable->isStudentView()
                 ];
 
                 if (count($buttons) > $max_buttons) {
@@ -227,7 +228,8 @@ class NavigationView extends AbstractView {
             "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config,
-            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable')
+            "date_time_format" => $this->core->getConfig()->getDateTimeFormat()->getFormat('gradeable'),
+            "rainbow_grades_summary" => $this->core->getConfig()->displayRainbowGradesSummary()
         ]);
     }
 
@@ -437,6 +439,8 @@ class NavigationView extends AbstractView {
             ]);
         }
 
+        $prerequisite = '';
+
         if ($graded_gradeable !== null) {
             /** @var TaGradedGradeable $ta_graded_gradeable */
             $ta_graded_gradeable = $graded_gradeable->getTaGradedGradeable();
@@ -601,6 +605,7 @@ class NavigationView extends AbstractView {
             // This means either the user isn't on a team
             if ($gradeable->isTeamAssignment()) {
                 $title = "MUST BE ON A TEAM TO SUBMIT";
+                $prerequisite = null;
                 $disabled = true;
                 if ($list_section > GradeableList::OPEN) {
                     $class = "btn-danger";
@@ -608,7 +613,6 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $prerequisite = '';
         if ($gradeable->isLocked($core->getUser()->getId())) {
             $disabled = true;
             $title = "LOCKED";

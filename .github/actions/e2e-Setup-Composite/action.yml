@@ -39,7 +39,7 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.31.1
+    - uses: shivammathur/setup-php@2.33.0
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -60,11 +60,11 @@ runs:
     - name: Install Test-specific python dependencies
       run: |
         # Install for local
-        python3 -m pip install --upgrade pip setuptools wheel
+        python3 -m pip install --upgrade pip setuptools wheel packaging
         pip3 -V
         pip3 install selenium websocket_client
         # Install globally
-        sudo python3 -m pip install --upgrade pip setuptools wheel
+        sudo python3 -m pip install --upgrade pip setuptools wheel packaging
         sudo pip3 -V
       shell: bash
     - name: Install python dependencies
@@ -152,7 +152,7 @@ runs:
       shell: bash
 
     - name: Set up sample course
-      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing
+      run: sudo -E env "PATH=$PATH" python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --test_only_grading sample testing archived
       shell: bash
 
     - name: Set up test suite

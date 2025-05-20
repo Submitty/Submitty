@@ -43,6 +43,7 @@ class Course_create:
     no_registration_sections: int
     no_rotating_students: int
     unregistered_students: int
+    self_registration_type: int
     archived: bool
 
     def __init__(self) -> None:
@@ -73,8 +74,9 @@ class Course_create:
         add_to_group(course_group, "submitty_daemon")
         add_to_group(course_group, "submitty_cgi")
         archive = ' --archive ' if self.archived else ''
+        self_registration_type = ' --all-self-registration ' if self.self_registration_type == 2 else ''
         os.system(
-            f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {archive} {self.semester} {self.code}"
+            f"{SUBMITTY_INSTALL_DIR}/sbin/create_course.sh {self_registration_type} {archive} {self.semester} {self.code}"
             f" {self.instructor.id} {course_group}"
         )
 
@@ -110,7 +112,15 @@ class Course_create:
                 course=self.code,
                 registration_section_id=str(section),
             )
-
+        table = Table("courses", submitty_metadata, autoload=True)
+        print("(tables loaded)...")
+        if self.self_registration_type != 0:
+            print("Setting course default section id to 1")
+            submitty_conn.execute(
+                table.update()
+                .where(table.c.course == self.code)
+                .values(default_section_id=1)
+            )
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload=True)
         print("(tables loaded)...")

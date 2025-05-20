@@ -176,7 +176,7 @@ button > i.fas:hover {
     --default-box-shadow: 1px 1px 2px black;
 }
 
-[data-black_mode="black"][data-theme="dark"]  {
+[data-black_mode="black"][data-theme="dark"] {
     --default-border-color: grey;
     --default-box-shadow: 1px 1px 2px grey;
 }
@@ -1528,6 +1528,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
@@ -1538,6 +1544,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1550,7 +1557,7 @@ input[type="radio"][disabled=""]:checked::before {
     width: 7px;
     height: 7px;
     border-radius: 100%;
-    background: var(--standard-medium-dark-gray);
+    background: var(--standard-dark-gray);
 }
 
 /* Media queries */

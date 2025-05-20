@@ -139,6 +139,7 @@
     /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
 
@@ -158,7 +159,9 @@
         color: var(--default-white);
     }
 
-    #details-table .details-content td:nth-of-type(1) { display: none; }
+    #details-table .details-content td:nth-of-type(1) {
+        display: none;
+    }
 
     /*
         The content for the ':before' will be added through details.js
@@ -269,17 +272,17 @@
     .details-action-box > * {
         margin-top: 0;
     }
-    
+
     .markers-container {
         display: grid;
         grid-template-columns: 60% 40%;
         gap: 10px;
     }
-    
+
     #details-legend {
         width: unset;
     }
-    
+
     .action-btn-cont {
         margin: 0;
         width: unset;
@@ -292,6 +295,7 @@
     }
 
     #details-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 
@@ -299,14 +303,19 @@
         width: 600px;
     }
 
-    #details-table td:nth-of-type(1) { display: table-cell; }
+    #details-table td:nth-of-type(1) {
+        display: table-cell;
+    }
 
     #details-table .details-info-header {
         cursor: pointer;
         position: relative;
     }
 
-    #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
+    #details-table
+        .details-info-header:not(.panel-head-active)
+        tr:last-of-type
+        > td {
         border-bottom: 1px solid var(--standard-hover-light-gray);
     }
 }
