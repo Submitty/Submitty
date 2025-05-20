@@ -2993,11 +2993,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -11143,11 +11138,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has parameter \\$gradeable_title with no type specified\\.$#"
 			count: 1
 			path: app/views/ErrorView.php
 
