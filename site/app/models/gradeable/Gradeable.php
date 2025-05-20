@@ -595,6 +595,7 @@ class Gradeable extends AbstractModel {
                 'build',
                 "build_{$this->id}.json"
             ));
+
             // If the file could not be found, the result will be false, so don't
             //  create the config if the file can't be found
             if ($details !== false) {

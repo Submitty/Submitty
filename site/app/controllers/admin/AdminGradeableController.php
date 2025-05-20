@@ -1718,12 +1718,12 @@ class AdminGradeableController extends AbstractController {
                 $logs = $this->getBuildLogs($gradeable_id);
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
-                $errorNeedle = 'ERROR';
                 $haystack = $logs->json['data'][0];
-                if (strpos($haystack, $errorNeedle) !== false) {
+                // 
+                if(str_contains($haystack, 'ERROR')) {
                     $status = false;
                 }
-                elseif (strpos($haystack, $needle) !== false) {
+                elseif(str_contains($haystack, $needle)) {
                     $status = 'warnings';
                 }
             }
