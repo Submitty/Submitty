@@ -100,10 +100,7 @@ class Output {
         return $this->render;
     }
 
-    /**
-     * @return \Twig\Environment|null
-     */
-    public function getTwig() {
+    public function getTwig(): ?\Twig\Environment {
         return $this->twig;
     }
 
