@@ -214,7 +214,7 @@
     color: var(--default-black);
 }
 
-[data-theme ="dark"] .category-item-box {
+[data-theme="dark"] .category-item-box {
     background: var(--btn-default-white);
 }
 
@@ -291,7 +291,6 @@
     text-shadow: var(--standard-medium-red) 0 0 5px;
 }
 
-
 /* stylelint-disable-next-line selector-class-pattern */
 .reverse_golden_hover {
     color: var(--standard-tangerine-yellow);
@@ -300,7 +299,6 @@
 .text-decoration-none {
     text-decoration: none;
 }
-
 
 .post-action-container {
     margin-top: 8px;
@@ -315,7 +313,7 @@
     display: inline-block;
 }
 
-.upduck-container{
+.upduck-container {
     display: inline-block;
     align-items: center;
     justify-content: center;
@@ -324,18 +322,18 @@
 .upduck-button {
     position: relative;
     display: inline-block;
-    background: none; 
-    border: none; 
-    padding: 0; 
-    cursor: pointer; 
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
     outline: none;
     vertical-align: middle;
 }
 
-.like-counter{
+.like-counter {
     font-size: 15px;
     margin-left: 4px;
-    margin-right: 3px; 
+    margin-right: 3px;
     vertical-align: middle;
 }
 
@@ -380,16 +378,24 @@
     color: var(--submitty-logo-blue);
 }
 
-.active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+.active-thread-remove-expiring-announcement:hover,
+.active-thread-remove-announcement:hover,
+.current-favorite:hover {
     text-shadow: var(--default-black) 0 0 5px;
 }
 
-.red-hover:hover, .not-active-thread-announcement:hover, .active-thread-remove-expiring-announcement:hover, .active-thread-remove-announcement:hover, .current-favorite:hover {
+.red-hover:hover,
+.not-active-thread-announcement:hover,
+.active-thread-remove-expiring-announcement:hover,
+.active-thread-remove-announcement:hover,
+.current-favorite:hover {
     display: inline-block;
     transform: translateY(-2px);
 }
 
-[data-theme="dark"] .active-thread-remove-expiring-announcement:hover, [data-theme="dark"] .active-thread-remove-announcement:hover, [data-theme="dark"] .current-favorite:hover {
+[data-theme="dark"] .active-thread-remove-expiring-announcement:hover,
+[data-theme="dark"] .active-thread-remove-announcement:hover,
+[data-theme="dark"] .current-favorite:hover {
     text-shadow: var(--text-black) 0 0 5px;
 }
 
@@ -909,7 +915,6 @@
     border-color: var(--important-post);
 }
 /* stylelint-enable selector-class-pattern */
-
 
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
