@@ -309,13 +309,6 @@ else:
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
-
-    user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
-    if user_create_account.lower() in ['yes', 'y']:
-        USER_CREATE_ACCOUNT = True
-    else:
-        USER_CREATE_ACCOUNT = False
-    print()
     
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
@@ -343,6 +336,13 @@ else:
         'bind_dn': default_auth_options.get('bind_dn', '')
     }
 
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
+        user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
+        if user_create_account.lower() in ['yes', 'y']:
+            USER_CREATE_ACCOUNT = True
+        else:
+            USER_CREATE_ACCOUNT = False
+        print()
     if AUTHENTICATION_METHOD == 'LdapAuthentication':
         LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
         LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
