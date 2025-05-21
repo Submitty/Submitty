@@ -115,7 +115,7 @@ const COUNT_DIRECTION_DOWN = -1;
 window.PDF_PAGE_NONE = 0;
 // eslint-disable-next-line no-var
 window.PDF_PAGE_STUDENT = -1;
-const PDF_PAGE_INSTRUCTOR = -2;
+window.PDF_PAGE_INSTRUCTOR = -2;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -2348,7 +2348,7 @@ function deleteComponent(component_id: number) {
  * @return {void}
  */
 window.setPdfPageAssignment = async function (page: number) {
-    if (page === PDF_PAGE_INSTRUCTOR) {
+    if (page === window.PDF_PAGE_INSTRUCTOR) {
         page = 1;
     }
 

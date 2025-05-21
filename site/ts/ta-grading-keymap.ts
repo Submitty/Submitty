@@ -13,7 +13,7 @@ var remapping = {
     active: false,
     index: 0,
 };
-type KeymapEntry<Options> = {
+export type KeymapEntry<Options> = {
     name: string;
     code: string;
     fn?: (e: KeyboardEvent, options?: Options) => void;
@@ -141,6 +141,7 @@ export function registerKeyHandler<T>(parameters: KeymapEntry<T>, fn: (e: Keyboa
 
     keymap.push(parameters as KeymapEntry<unknown>);
 }
+window.registerKeyHandler = registerKeyHandler;
 
 function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
