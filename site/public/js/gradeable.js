@@ -232,7 +232,8 @@ function renderGradingComponent(grader_id, component, graded_component, graders,
             decimal_precision: DECIMAL_PRECISION,
             can_verify_graders: canVerifyGraders,
             grader_id: grader_id,
-            peer_component: component.peer,
+            peer_component: component.peer_component,
+            curve_component: component.curve_component,
             allow_custom_marks: allowCustomMarks,
             component_version_conflict: componentVersionConflict,
             itempool_id: Object.prototype.hasOwnProperty.call(itempool_items, component.id) ? itempool_items[component.id] : '',
@@ -305,6 +306,7 @@ function renderEditComponent(component, precision, showMarkList) {
             itempool_options: getItempoolOptions(),
             decimal_precision: DECIMAL_PRECISION,
             peer_component: component.peer_component,
+            curve_component: component.curve_component,
         }));
     });
 }

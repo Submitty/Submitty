@@ -2288,26 +2288,47 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        // Get user id from the anon id
-        $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
-        if ($submitter_id === false) {
-            return;
+        // Initialize an array to hold graded gradeables
+        $graded_gradeables = [];
+
+        // Check if the component is a curve component
+        $is_curve_component = $component->isCurveComponent();
+
+        if ($is_curve_component) {
+            // Get all graded gradeables for the gradeable
+            $graded_gradeables = $this->core->getQueries()->getGradedGradeables([$gradeable]);
+        } else {
+            // Get user id from the anon id
+            $submitter_id = $this->tryGetSubmitterIdFromAnonId($anon_id, $gradeable_id);
+            if ($submitter_id === false) {
+                return;
+            }
+
+            // Get the graded gradeable
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+            if ($graded_gradeable === false) {
+                return;
+            }
+
+            // Add the single graded gradeable to the array
+            $graded_gradeables[] = $graded_gradeable;
         }
 
-        // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
+        // Iterate through the array of graded gradeables
+        foreach ($graded_gradeables as $graded_gradeable) {
+            $submitter_id = $graded_gradeable->getSubmitter()->getId();
+            $this->saveComponent($gradeable, $graded_gradeable, $component, $grader, $custom_points, $custom_message, $marks, $component_version, $silent_edit, $submitter_id);
         }
+    }
 
-
+    public function saveComponent($gradeable, $graded_gradeable, $component, $grader, $custom_points, $custom_message, $marks, $component_version, $silent_edit, $submitter_id) {
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.save_graded_component", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "component" => $component])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
             return;
         }
 
-        //don't allow custom marks if they are disabled
+        // Don't allow custom marks if they are disabled
         if ($custom_message != null || $custom_points != null) {
             if (!$gradeable->getAllowCustomMarks()) {
                 $this->core->getOutput()->renderJsonFail('Custom marks are disabled for this assignment');
@@ -2315,7 +2336,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        //don't allow peer graders to save custom marks no matter how gradeable is configured
+        // Don't allow peer graders to save custom marks no matter how gradeable is configured
         if (($custom_message != null || $custom_points != null) && $gradeable->hasPeerComponent()) {
             if ($this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
                 $this->core->getOutput()->renderJsonFail('Insufficient permissions to save component/marks');
@@ -2864,6 +2885,15 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $peer = $_POST['peer'] === 'true';
+        $curve = $_POST['curve'] === 'true';
+
+        // Check if a curve component already exists
+        if ($curve) {
+            if ($gradeable->hasCurveComponent()) {
+                $this->core->getOutput()->renderJsonFail('A curve component already exists for this gradeable');
+                return;
+            }
+        }   
 
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
@@ -2874,9 +2904,12 @@ class ElectronicGraderController extends AbstractController {
         try {
             $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
 
+            // set the title based on whether it is peer or curve component
+            $title = $curve ? 'Curved Score ' : 'Problem ' . strval(count($gradeable->getComponents()) + 1);
+
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component = $gradeable->addComponent(
-                'Problem ' . strval(count($gradeable->getComponents()) + 1),
+                $title,
                 '',
                 '',
                 0,
@@ -2885,6 +2918,7 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 false,
                 $peer,
+                $curve,
                 $page
             );
             $component->addMark('No Credit', 0.0, false);

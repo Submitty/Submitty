@@ -1327,6 +1327,7 @@ class Gradeable extends AbstractModel {
      * @param float $upper_clamp
      * @param bool $text
      * @param bool $peer
+     * @param bool $curve
      * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
      * @return Component the created component
      */
@@ -1340,6 +1341,7 @@ class Gradeable extends AbstractModel {
         float $upper_clamp,
         bool $text,
         bool $peer,
+        bool $curve,
         int $pdf_page
     ) {
         $component = new Component($this->core, $this, [
@@ -1352,6 +1354,7 @@ class Gradeable extends AbstractModel {
             'upper_clamp' => $upper_clamp,
             'text' => $text,
             'peer_component' => $peer,
+            'curve_component' => $curve,
             'page' => $pdf_page,
             'id' => 0,
             'order' => count($this->components)
@@ -2075,6 +2078,19 @@ class Gradeable extends AbstractModel {
     public function hasPeerComponent() {
         foreach ($this->getComponents() as $component) {
             if ($component->isPeerComponent()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets if a gradeable has curve component
+     * @return bool
+     */
+    public function hasCurveComponent() {
+        foreach ($this->getComponents() as $component) {
+            if ($component->isCurveComponent()) {
                 return true;
             }
         }
