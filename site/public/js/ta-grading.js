@@ -195,7 +195,6 @@ $(() => {
     }
 
     // Remove the select options which are open
-    // eslint-disable-next-line no-unused-vars
     function hidePanelPositionSelect() {
         $('select.panel-position-cont').hide();
         document.removeEventListener('click', hidePanelPositionSelect);
@@ -558,7 +557,6 @@ function adjustGradingPanelHeader() {
     document.querySelector('.panels-container').style.height = `calc(100% - ${height}px)`;
 }
 
-// eslint-disable-next-line no-unused-vars
 function onAjaxInit() { }
 
 function readCookies() {
@@ -574,7 +572,6 @@ function readCookies() {
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
 
-    // eslint-disable-next-line no-func-assign, no-global-assign
     onAjaxInit = function () {
         $(`#title-${opened_mark}`).click();
         if (scroll_pixel > 0) {
