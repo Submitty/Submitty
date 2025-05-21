@@ -75,6 +75,7 @@ declare global {
         closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
         reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
         registerKeyHandler<T>(parameters: KeymapEntry<T>, fn: (e: KeyboardEvent, options?: T) => void): void;
+        updateCookies (): void;
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
@@ -961,7 +962,7 @@ function readCookies() {
     }
 }
 
-function updateCookies() {
+window.updateCookies = function () {
     window.Cookies.set('silent_edit_enabled', String(isSilentEditModeEnabled()), {
         path: '/',
     });
@@ -989,7 +990,7 @@ function updateCookies() {
 
     window.Cookies.set('files', JSON.stringify(files), { path: '/' });
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
-}
+};
 
 // -----------------------------------------------------------------------------
 // Student navigation
@@ -1601,45 +1602,45 @@ window.exchangeTwoPanels = function () {
 // Key handler / shorthand for toggling in between panels
 registerKeyHandler({ name: 'Toggle Autograding Panel', code: 'KeyA' }, () => {
     $('#autograding_results_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler({ name: 'Toggle Rubric Panel', code: 'KeyG' }, () => {
     $('#grading_rubric_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler({ name: 'Toggle Submissions Panel', code: 'KeyO' }, () => {
     $('#submission_browser_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler(
     { name: 'Toggle Student Information Panel', code: 'KeyS' },
     () => {
         $('#student_info_btn button').trigger('click');
-        updateCookies();
+        window.updateCookies();
     },
 );
 registerKeyHandler({ name: 'Toggle Grade Inquiry Panel', code: 'KeyX' }, () => {
     $('#grade_inquiry_info_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler({ name: 'Toggle Discussion Panel', code: 'KeyD' }, () => {
     $('#discussion_browser_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler({ name: 'Toggle Peer Panel', code: 'KeyP' }, () => {
     $('#peer_info_btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 
 registerKeyHandler({ name: 'Toggle Notebook Panel', code: 'KeyN' }, () => {
     $('#notebook-view-btn button').trigger('click');
-    updateCookies();
+    window.updateCookies();
 });
 registerKeyHandler(
     { name: 'Toggle Solution/TA-Notes Panel', code: 'KeyT' },
     () => {
         $('#solution_ta_notes_btn button').trigger('click');
-        updateCookies();
+        window.updateCookies();
     },
 );
 // -----------------------------------------------------------------------------
@@ -1721,7 +1722,7 @@ registerKeyHandler({ name: 'Toggle Rubric Edit Mode', code: 'KeyE' }, () => {
     const editBox = $('#edit-mode-enabled');
     editBox.prop('checked', !editBox.prop('checked'));
     void onToggleEditMode();
-    updateCookies();
+    window.updateCookies();
 });
 
 // -----------------------------------------------------------------------------
