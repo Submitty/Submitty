@@ -1217,8 +1217,20 @@ HTML;
         CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
+
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
+
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
+        $this->core->getOutput()->addInternalJs('gradeable.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalJs('ta-grading.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1620,16 +1632,6 @@ HTML;
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
-        $this->core->getOutput()->addInternalJs('gradeable.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
-
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1708,15 +1710,6 @@ HTML;
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
 
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
-        $this->core->getOutput()->addInternalJs('gradeable.js');
-        $this->core->getOutput()->addInternalCss('table.css');
-
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
                 "gradeable_id" => $gradeable->getId(),
