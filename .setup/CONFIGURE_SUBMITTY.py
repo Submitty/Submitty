@@ -452,8 +452,9 @@ else:
 
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
-    config['user_create_account'] = USER_CREATE_ACCOUNT
     config['debugging_enabled'] = DEBUGGING_ENABLED
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
+        config['user_create_account'] = USER_CREATE_ACCOUNT
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
@@ -667,10 +668,11 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
-    config['user_create_account'] = USER_CREATE_ACCOUNT
-    config['accepted_emails'] = accepted_emails
-    config['user_id_requirements'] = user_id_requirements
-
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
+        config['user_create_account'] = USER_CREATE_ACCOUNT
+        config['accepted_emails'] = accepted_emails
+        config['user_id_requirements'] = user_id_requirements
+    
 config['worker'] = True if args.worker == 1 else False
 
 with open(SUBMITTY_JSON, 'w') as json_file:
