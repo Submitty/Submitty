@@ -3,54 +3,22 @@ import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
 import Popup from './popup.vue';
 
-const columnIds = [
-    'toggle-registration-section',
-    'toggle-user-id',
-    'toggle-first-name',
-    'toggle-last-name',
-    'toggle-pronouns',
-    'toggle-rotating-section',
-    'toggle-time-zone',
-    'toggle-view-grades',
-    'toggle-late-days',
-    'toggle-registration-type',
-    'toggle-edit-student',
-    'toggle-delete-student',
-    'toggle-user-numeric-id',
-    'toggle-legal-first-name',
-    'toggle-legal-last-name',
-    'toggle-email',
-    'toggle-secondary-email',
-];
-const labels = [
-    'Registration Section',
-    'User ID',
-    'Given Name',
-    'Family Name',
-    'Pronouns',
-    'Rotating Section',
-    'UTC Offset / Time Zone',
-    'View Grades',
-    'Late Days',
-    'Registration Type',
-    'Edit Student',
-    'Delete Student',
-    'User Numeric ID',
-    'Legal Given Name',
-    'Legal Family Name',
-    'Email',
-    'Secondary Email',
-];
+const { columns, labels, cookie } = defineProps<{
+    columns: string[];
+    labels: string[];
+    cookie: string;
+}>();
 
 const selected = ref<boolean[]>([]);
+const visible = ref(false);
 
 function loadColumns() {
-    const cookie = Cookies.get('active_student_columns')?.split('-') || [];
-    selected.value = columnIds.map((_, i) => cookie[i] === '1');
+    const cookieData = Cookies.get(cookie)?.split('-') || [];
+    selected.value = columns.map((_, i) => cookieData[i] === '1');
 }
 function saveColumns() {
     Cookies.set(
-        'active_student_columns',
+        cookie,
         selected.value.map((v) => (v ? 1 : 0)).join('-'),
         { expires: 365, path: '' },
     );
@@ -66,8 +34,6 @@ function toggle() {
         loadColumns();
     }
 }
-
-const visible = ref(false);
 
 onMounted(loadColumns);
 </script>
@@ -96,7 +62,7 @@ onMounted(loadColumns);
       </p>
       <div class="toggle-columns-menu">
         <div
-          v-for="(id, idx) in columnIds"
+          v-for="(id, idx) in columns"
           :key="id"
           class="toggle-checkbox-area"
         >

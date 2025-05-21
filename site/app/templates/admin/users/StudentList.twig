@@ -4,8 +4,49 @@
         <div class="btn-wrapper">
             {# Need 'flex: 1' to preserve the space given by parent div #}
             {% include 'Vue.twig' with {
-                'component': 'toggleManageStudentsColumns',
+                'component': 'toggleColumns',
                 'style': 'flex: 1', 
+                'args': {
+                    'columns': [
+                        'toggle-registration-section',
+                        'toggle-user-id',
+                        'toggle-first-name',
+                        'toggle-last-name',
+                        'toggle-pronouns',
+                        'toggle-rotating-section',
+                        'toggle-time-zone',
+                        'toggle-view-grades',
+                        'toggle-late-days',
+                        'toggle-registration-type',
+                        'toggle-edit-student',
+                        'toggle-delete-student',
+                        'toggle-user-numeric-id',
+                        'toggle-legal-first-name',
+                        'toggle-legal-last-name',
+                        'toggle-email',
+                        'toggle-secondary-email',
+                    ],
+                    'labels': [
+                        'Registration Section',
+                        'User ID',
+                        'Given Name',
+                        'Family Name',
+                        'Pronouns',
+                        'Rotating Section',
+                        'UTC Offset / Time Zone',
+                        'View Grades',
+                        'Late Days',
+                        'Registration Type',
+                        'Edit Student',
+                        'Delete Student',
+                        'User Numeric ID',
+                        'Legal Given Name',
+                        'Legal Family Name',
+                        'Email',
+                        'Secondary Email',
+                    ],
+                    'cookie': 'active_student_columns',
+                },
             } %}
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
