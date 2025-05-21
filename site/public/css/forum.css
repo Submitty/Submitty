@@ -82,6 +82,12 @@
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
+#clear_filter_button,
+#unread {
+    display: none;
+}
+
+/* stylelint-disable-next-line selector-id-pattern */
 #thread_list {
     padding-right: 0;
     overflow-y: auto;
