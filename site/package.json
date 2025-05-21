@@ -62,7 +62,7 @@
     "@types/node": "^22.15.2",
     "@types/twig": "^1.12.16",
     "@vitejs/plugin-vue": "^5.2.1",
-    "@vue/eslint-config-typescript": "^13.0.0",
+    "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/tsconfig": "^0.7.0",
     "babel-jest": "^29.7.0",
     "cypress": "^14.2.0",
