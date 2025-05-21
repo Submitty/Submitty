@@ -1,6 +1,6 @@
 import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
-import { KeymapEntry, loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta-grading-keymap';
+import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta-grading-keymap';
 import {
     closeAllComponents,
     closeComponent,
@@ -74,7 +74,8 @@ declare global {
         togglePanelSelectorModal: (show: boolean) => void;
         closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
         reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
-        registerKeyHandler<T>(parameters: KeymapEntry<T>, fn: (e: KeyboardEvent, options?: T) => void): void;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+        registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;

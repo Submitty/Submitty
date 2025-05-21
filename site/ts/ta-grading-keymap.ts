@@ -13,12 +13,12 @@ var remapping = {
     active: false,
     index: 0,
 };
-export type KeymapEntry<Options> = {
+export type KeymapEntry<T> = {
     name: string;
     code: string;
-    fn?: (e: KeyboardEvent, options?: Options) => void;
+    fn?: (e: KeyboardEvent, options?: T) => void;
     originalCode?: string;
-    options?: Options;
+    options?: T;
 };
 
 type SettingsData = {
@@ -141,7 +141,10 @@ export function registerKeyHandler<T>(parameters: KeymapEntry<T>, fn: (e: Keyboa
 
     keymap.push(parameters as KeymapEntry<unknown>);
 }
-window.registerKeyHandler = registerKeyHandler;
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+window.registerKeyHandler = function (parameters: object, fn: Function) {
+    registerKeyHandler(parameters as KeymapEntry<unknown>, fn as (e: KeyboardEvent, options?: unknown) => void);
+};
 
 function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
