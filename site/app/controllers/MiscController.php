@@ -21,6 +21,23 @@ use Symfony\Component\Routing\Annotation\Route;
 class MiscController extends AbstractController {
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
+    private function convertToBytes(string $value): int {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        switch ($unit) {
+            case 'g':
+                return $num * 1024 * 1024 * 1024;
+            case 'm':
+                return $num * 1024 * 1024;
+            case 'k':
+                return $num * 1024;
+            default:
+                return (int) $value;
+        }
+    }
+
     /**
      * Get the current server time
      *
@@ -89,11 +106,12 @@ class MiscController extends AbstractController {
             );
         }
 
-        $max_size = ini_get('memory_limit');
+        $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
 
-        // Check if file exceeds 20MB size limit before encoding
         if (filesize($file_path) > $max_size && $max_size >= 0) {
-            return new MultiResponse(JsonResponse::getFailResponse("This PDF is too large to be viewed online. Please download it instead."));
+            return new MultiResponse(JsonResponse::getFailResponse(
+                "This PDF is too large to be viewed online. Please download it instead."
+            ));
         }
 
 
