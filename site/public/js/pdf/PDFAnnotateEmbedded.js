@@ -49,6 +49,7 @@ function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, 
     download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
 }
 
+// eslint-disable-next-line default-param-last
 function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,

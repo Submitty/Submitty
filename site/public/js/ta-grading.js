@@ -571,7 +571,7 @@ function readCookies() {
     const files = Cookies.get('files') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
-
+    // eslint-disable-next-line no-func-assign
     onAjaxInit = function () {
         $(`#title-${opened_mark}`).click();
         if (scroll_pixel > 0) {
