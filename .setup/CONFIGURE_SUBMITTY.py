@@ -568,8 +568,7 @@ if not args.worker:
                           "submitty/clang:latest",
                           "submitty/autograding-default:latest",
                           "submitty/java:latest",
-                          "submitty/python:latest",
-                          "submittyrpi/csci1200:default"
+                          "submitty/python:latest"
                        ]
         }
 

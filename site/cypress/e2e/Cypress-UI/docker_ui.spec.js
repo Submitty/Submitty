@@ -16,8 +16,7 @@ const docker_ui_path = '/admin/docker';
  *         "submitty/clang:latest",
  *         "submitty/autograding-default:latest",
  *         "submitty/java:latest",
- *         "submitty/python:latest",
- *         "submittyrpi/csci1200:default"
+ *         "submitty/python:latest"
  *     ]
  * }
  * NOTE: sysinfo log is currently broken, so docker version will always show Error. Once this is fixed,
