@@ -967,7 +967,6 @@ function cancelEditPostForum() {
     $('#display-existing-attachments').remove();
 }
 
-// eslint-disable-next-line no-unused-vars
 function changeDisplayOptions(option) {
     // eslint-disable-next-line no-undef
     thread_id = $('#current-thread').val();
@@ -1028,7 +1027,6 @@ function dynamicScrollLoadPage(element, atEnd) {
             }
             dynamicScrollLoadIfScrollVisible($(element));
         };
-        // eslint-disable-next-line no-unused-vars
         load_page_fail_callback = function (content, count) {
             spinner_down.hide();
         };
@@ -1052,7 +1050,6 @@ function dynamicScrollLoadPage(element, atEnd) {
             }
             dynamicScrollLoadIfScrollVisible($(element));
         };
-        // eslint-disable-next-line no-unused-vars
         load_page_fail_callback = function (content, count) {
             spinner_up.hide();
         };
@@ -1061,7 +1058,6 @@ function dynamicScrollLoadPage(element, atEnd) {
     const urlPattern = $(element).data('urlPattern');
     const currentThreadId = $(element).data('currentThreadId');
     const currentCategoriesId = $(element).data('currentCategoriesId');
-    // eslint-disable-next-line no-unused-vars
     const course = $(element).data('course');
 
     const next_url = urlPattern.replace('{{#}}', load_page);
@@ -1112,7 +1108,6 @@ function dynamicScrollLoadIfScrollVisible(jElement) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, currentCategoriesId, course) {
     jElement.data('urlPattern', urlPattern);
     jElement.data('currentThreadId', currentThreadId);
@@ -1137,7 +1132,6 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function resetScrollPosition(id) {
     // eslint-disable-next-line eqeqeq
     if (sessionStorage.getItem(`${id}_scrollTop`) != 0) {
@@ -1171,7 +1165,6 @@ function checkAreYouSureForm() {
     return true;
 }
 
-// eslint-disable-next-line no-unused-vars
 function alterShowDeletedStatus(newStatus) {
     if (!checkAreYouSureForm()) {
         return;
@@ -1180,7 +1173,6 @@ function alterShowDeletedStatus(newStatus) {
     location.reload();
 }
 
-// eslint-disable-next-line no-unused-vars
 function alterShowMergeThreadStatus(newStatus, course) {
     if (!checkAreYouSureForm()) {
         return;
@@ -1189,7 +1181,6 @@ function alterShowMergeThreadStatus(newStatus, course) {
     location.reload();
 }
 
-// eslint-disable-next-line no-unused-vars
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback) {
     let categories_value = readCategoryValues();
     let thread_status_value = readThreadStatusValues();
@@ -1335,7 +1326,6 @@ function displayHistoryAttachment(edit_id) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function replyPost(post_id) {
     if ($(`#${post_id}-reply`).css('display') === 'block') {
         $(`#${post_id}-reply`).css('display', 'none');
@@ -1373,7 +1363,6 @@ function generateCodeMirrorBlocks(container_element) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function showSplit(post_id) {
     //  If a thread was merged in the database earlier, we want to reuse the thread id and information
     //  so we don't have any loose ends
@@ -1438,7 +1427,6 @@ function showSplit(post_id) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function showHistory(post_id) {
     const url = buildCourseUrl(['forum', 'posts', 'history']);
     $.ajax({
@@ -1517,7 +1505,6 @@ function showHistory(post_id) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function addNewCategory(csrf_token) {
     const newCategory = $('#new_category_text').val();
     const visibleDate = $('#category_visible_date').val();
@@ -1582,7 +1569,6 @@ function addNewCategory(csrf_token) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function deleteCategory(category_id, category_desc, csrf_token) {
     const url = buildCourseUrl(['forum', 'categories', 'delete']);
     $.ajax({
@@ -1615,7 +1601,6 @@ function deleteCategory(category_id, category_desc, csrf_token) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function editCategory(category_id, category_desc, category_color, category_date, changed, csrf_token) {
     if (category_desc === null && category_color === null && category_date === null) {
         return;
@@ -1815,7 +1800,6 @@ function hideReplies() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token) {
     if (!checkAreYouSureForm()) {
         return;
@@ -1867,7 +1851,6 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     const confirm = window.confirm(confirmString);
     if (confirm) {
@@ -1879,8 +1862,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
                 thread_id: thread_id,
                 csrf_token: csrf_token,
 
-            },
-            // eslint-disable-next-line no-unused-vars
+            },            
             success: function (data) {
                 window.location.reload();
             },
@@ -1891,7 +1873,6 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function bookmarkThread(thread_id, type) {
     const url = `${buildCourseUrl(['forum', 'threads', 'bookmark'])}?type=${type}`;
     $.ajax({
@@ -1900,8 +1881,7 @@ function bookmarkThread(thread_id, type) {
         data: {
             thread_id: thread_id,
             csrf_token: csrfToken,
-        },
-        // eslint-disable-next-line no-unused-vars
+        },      
         success: function (data) {
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
@@ -1911,7 +1891,6 @@ function bookmarkThread(thread_id, type) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function markThreadUnread(thread_id) {
     const url = `${buildCourseUrl(['forum', 'threads', 'unread'])}`;
     $.ajax({
@@ -1977,7 +1956,7 @@ function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
+
 function toggleMarkdown(post_box_id, triggered) {
     if (post_box_id === undefined) {
         post_box_id = '';
@@ -2006,7 +1985,6 @@ function toggleMarkdown(post_box_id, triggered) {
     Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
 }
 
-// eslint-disable-next-line no-unused-vars
 function checkInputMaxLength(obj) {
     // eslint-disable-next-line eqeqeq
     if ($(obj).val().length == $(obj).attr('maxLength')) {
@@ -2015,7 +1993,6 @@ function checkInputMaxLength(obj) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function sortTable(sort_element_index, reverse = false) {
     const table = document.getElementById('forum_stats_table');
     let switching = true;
@@ -2156,7 +2133,6 @@ function showAttachmentsOnload() {
     $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
 }
 
-// eslint-disable-next-line no-unused-vars
 function loadAllInlineImages(open_override = false) {
     if (open_override) {
         $('.attachment-btn').each(function (i) {
@@ -2182,7 +2158,6 @@ function loadAllInlineImages(open_override = false) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function loadInlineImages(encoded_data) {
     const data = JSON.parse(encoded_data);
     const attachment_well = $(`#${data[data.length - 1]}`);
@@ -2212,13 +2187,12 @@ function loadInlineImages(encoded_data) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function openInWindow(img) {
     const url = $(img).attr('src');
     window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
 }
 
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var filters_applied = [];
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
@@ -2267,9 +2241,7 @@ function clearForumFilter() {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
-function loadFilterHandlers() {
-    // eslint-disable-next-line no-unused-vars
+function loadFilterHandlers() {    
     $('#filter_unread_btn').mousedown(function (e) {
         $(this).toggleClass('filter-inactive filter-active');
     });
@@ -2311,8 +2283,7 @@ function loadFilterHandlers() {
     });
 }
 
-function thread_post_handler() {
-    // eslint-disable-next-line no-unused-vars
+function thread_post_handler() {    
     $('.submit_unresolve').click(function (event) {
         const post_box_id = $(this).data('post_box_id');
         $(`#thread_status_input_${post_box_id}`).val(-1);
@@ -2320,7 +2291,6 @@ function thread_post_handler() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function forumFilterBar() {
     $('#forum_filter_bar').toggle();
 }
@@ -2401,7 +2371,6 @@ function checkUnread() {
 
 // Used to update thread content in the "Merge Thread"
 // modal.
-// eslint-disable-next-line no-unused-vars
 function updateSelectedThreadContent(selected_thread_first_post_id) {
     const url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
@@ -2538,11 +2507,9 @@ function setupForumAutosave() {
     setupDisableReplyThreadForm();
 }
 
-// eslint-disable-next-line no-unused-vars
 const CREATE_THREAD_DEFER_KEY = 'create-thread';
 const CREATE_THREAD_AUTOSAVE_KEY = `${window.location.pathname}-create-autosave`;
 
-// eslint-disable-next-line no-unused-vars
 function saveCreateThreadToLocal() {
     // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
@@ -2578,7 +2545,6 @@ function saveCreateThreadToLocal() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function restoreCreateThreadFromLocal() {
     // eslint-disable-next-line no-undef
     if (autosaveEnabled) {
@@ -2622,7 +2588,6 @@ function restoreCreateThreadFromLocal() {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function clearCreateThreadAutosave() {
     localStorage.removeItem(CREATE_THREAD_AUTOSAVE_KEY);
 }
@@ -2639,13 +2604,11 @@ $(() => {
 
 // When the user uses tab navigation on the thread list, this function
 // helps to make sure the current thread is always visible on the page
-// eslint-disable-next-line no-unused-vars
 function scrollThreadListTo(element) {
     $(element).get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Only used by the posters and only on recent posts (60 minutes since posted)
-// eslint-disable-next-line no-unused-vars
 function sendAnnouncement(id) {
     $('.pin-and-email-message').attr('disabled', 'disabled');
     $.ajax({
@@ -2682,8 +2645,7 @@ function pinAnnouncement(thread_id, type, csrf_token) {
                 thread_id: thread_id,
                 csrf_token: csrf_token,
 
-            },
-            // eslint-disable-next-line no-unused-vars
+            },            
             success: function (data) {
             },
             error: function () {
