@@ -72,6 +72,7 @@ declare global {
         collapseFile (panel: string): void;
         uploadAttachment(): void;
         togglePanelSelectorModal: (show: boolean) => void;
+        closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         taLayoutDet: {

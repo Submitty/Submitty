@@ -2577,6 +2577,7 @@ export async function closeAllComponents(save_changes: boolean | undefined, edit
         }
     }));
 }
+window.closeAllComponents = closeAllComponents;
 
 /**
  * Toggles the open/close state of a component
