@@ -60,9 +60,9 @@ $(() => {
         regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
     });
     $('.autograding-panel-regrade').on('click', function () {
-        const idValue = $(this).attr('data-id');
-        if (idValue) {
-            autogradingRegradeVersion(parseInt(idValue));
+        const version_number = $(this).attr('data-version');
+        if (version_number) {
+            autogradingRegradeVersion(parseInt(version_number));
         }
     });
 });

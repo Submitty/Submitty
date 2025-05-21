@@ -13,7 +13,7 @@
                 <div class="dropdown-menu"  style="max-height: 200px; overflow-y: auto;">
                     <button id="autograding-results-regrade-all" class="dropdown-item">Regrade All Versions</button>
                     {% for version in versions %}
-                    <button type="button"  id="autograding-results-regrade-{{loop.index}}" data-id="{{loop.index}}" class="autograding-panel-regrade dropdown-item">Regrade: Version #{{ loop.index }} Score: {{ version.points }} / {{ total_points }} {%- if loop.index == active_version -%} &nbsp;&nbsp;&nbsp;GRADE THIS VERSION {%- endif -%}</button>
+                    <button type="button"  id="autograding-results-regrade-{{loop.index}}" data-version="{{loop.index}}" class="autograding-panel-regrade dropdown-item">Regrade: Version #{{ loop.index }} Score: {{ version.points }} / {{ total_points }} {%- if loop.index == active_version -%} &nbsp;&nbsp;&nbsp;GRADE THIS VERSION {%- endif -%}</button>
                     {% endfor %}
                 </div>
             </div>
