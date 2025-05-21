@@ -77,7 +77,36 @@
     {% endif %}
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
-    <button type="button" class="btn btn-primary" onclick="toggleColumnsForm()" data-testid="toggle-columns">Toggle Columns</button>
+    {% include 'Vue.twig' with {
+        'component': 'toggleColumns',
+        'args': {
+            'columns': [
+                "toggle-index",
+                "toggle-section",
+                "toggle-user_id",
+                "toggle-user_given",
+                "toggle-user_family",
+                "toggle-autograding",
+                "toggle-graded_questions",
+                "toggle-total",
+                "toggle-grading",
+                "toggle-active_version"
+            ],
+            'labels': [
+                "# / Count / Index",
+                "Section",
+                "User ID",
+                "User Given",
+                "User Family",
+                "Autograding",
+                "Graded Questions",
+                "Total",
+                "Grading",
+                "Active Version"
+            ],
+            'cookie': 'grading_details_columns',
+        },
+    } %}
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -236,8 +265,6 @@
         {# /Empty teams #}
     </table>
 </div>
-
-{% include('grading/electronic/ToggleGradingDetailsColumns.twig') %}
 
 {% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
     <tr class="grade-table" data-testid="grade-table"

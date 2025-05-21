@@ -976,7 +976,7 @@ class ElectronicGraderController extends AbstractController {
         //Get grading_details Columns
         $grading_details_columns = [];
         if (isset($_COOKIE['grading_details_columns'])) {
-            $grading_details_columns = json_decode(urldecode($_COOKIE['grading_details_columns']), true);
+            $grading_details_columns = explode("-", $_COOKIE['grading_details_columns']);
         }
         else {
             //Expires 10 years from today (functionally indefinite)

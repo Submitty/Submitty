@@ -131,37 +131,3 @@ function inquiry_update() {
         button.textContent = 'Grade Inquiry Only: Off';
     }
 }
-
-function checkProperTicks() {
-    fillAllCheckboxes(true);
-    const selectedColumns = JSON.parse(decodeURIComponent(Cookies.get('grading_details_columns')));
-    for (let i = 0; i < selectedColumns.length; i++) {
-        document.getElementById(`toggle-${selectedColumns[i]}`).checked = false;
-    }
-}
-
-function toggleColumnsForm() {
-    showPopup('#toggle-columns-form');
-    checkProperTicks();
-}
-
-function fillAllCheckboxes(val) {
-    for (let i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = val;
-    }
-}
-
-function updateGradingDetailsColumns() {
-    getCheckboxValues();
-    location.reload();
-}
-
-function getCheckboxValues() {
-    const newCookie = [];
-    for (let i = 0; i < checkboxes.length; i++) {
-        if (checkboxes[i].checked === false) {
-            newCookie.push(checkboxes[i].id.slice(7));
-        }
-    }
-    Cookies.set('grading_details_columns', encodeURIComponent(JSON.stringify(newCookie)), { expires: 365, path: '' });
-}

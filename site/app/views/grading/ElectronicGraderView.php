@@ -891,9 +891,12 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-        $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
-            return !in_array($column['function'], $grading_details_columns, true);
-        });
+        $shownColumns = [];
+        for ($i = 0; $i < count($grading_details_columns); $i++) {
+            if ($grading_details_columns[$i] === "1") {
+                $shownColumns[] = $columns[$i];
+            }
+        }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
@@ -921,7 +924,7 @@ HTML;
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
-            "columns" => $columns,
+            "columns" => $shownColumns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
