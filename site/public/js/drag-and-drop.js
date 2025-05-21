@@ -34,10 +34,8 @@ let MAX_NUM_OF_FILES;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
-// eslint-disable-next-line no-unused-vars
 let num_clipboard_files = 0;
 
-// eslint-disable-next-line no-unused-vars, no-var
 var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
