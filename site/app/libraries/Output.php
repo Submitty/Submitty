@@ -262,10 +262,19 @@ HTML;
      * @param mixed $json
      */
     public function renderJson($json) {
-        $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
-        $this->useFooter(false);
-        $this->useHeader(false);
+    try {
+        $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
+    } catch (\JsonException $e) {
+        $this->output_buffer = json_encode([
+            'status' => 'fail',
+            'message' => 'Unable to encode response. PDF might be too large to display online.',
+        ], JSON_PRETTY_PRINT);
     }
+
+    $this->useFooter(false);
+    $this->useHeader(false);
+}
+
 
     /**
      * Renders a json response for the "success" case
