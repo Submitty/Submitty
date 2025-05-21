@@ -93,11 +93,11 @@
             <option value="id" aria-label="sort by ID" {{ sort == "id" ? 'selected' }}>
                 Section then User ID
             </option>
-            <option value="first" aria-label="sort by First Name" {{ sort == "first" ? 'selected' }}>
-                Section then First Name then User ID
+            <option value="first" aria-label="sort by Given Name" {{ sort == "first" ? 'selected' }}>
+                Section then Given Name then User ID
             </option>
-            <option value="last" aria-label="sort by Last Name" {{ sort == "last" ? 'selected' }}>
-                Section then Last Name then User ID
+            <option value="last" aria-label="sort by Family Name" {{ sort == "last" ? 'selected' }}>
+                Section then Family Name then User ID
             </option>
         </select>
     </div>
@@ -129,13 +129,13 @@
                     </a>
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by First Name">
-                        <span class="tooltiptext" title="sort by First Name">First Name </span><i class="fas fa-sort"></i>
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first" aria-label="sort by Given Name">
+                        <span class="tooltiptext" title="sort by Given Name">Given Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th style="width:110px; text-align: left" scope="col">
-                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Last Name">
-                        <span class="tooltiptext" title="sort by Last Name">Last Name </span><i class="fas fa-sort"></i>
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last" aria-label="sort by Family Name">
+                        <span class="tooltiptext" title="sort by Family Name">Family Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
 

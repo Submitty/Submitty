@@ -65,11 +65,11 @@
     {% endif %}
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() and bulk_upload_access %}
-        <form id="submission-form" method="post">
+        <form id="submission-form" method="POST">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission-type">
+                    <input type='radio' id="radio-normal" name="submission-type" {% if not is_bulk_upload %} checked {% endif %} >
                     Normal Submission
                 </label>
                 <label for="radio-student">
@@ -398,6 +398,8 @@
 
     // set for all but vcs as it has no box submission
     window.num_submission_boxes = {{ is_vcs ? 0 : part_names | length }};
+    window.course = "{{ course }}";
+    window.term = "{{ term }}";
     window.gradeable_id = "{{ gradeable_id }}";
 
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
