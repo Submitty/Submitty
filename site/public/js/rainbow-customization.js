@@ -1,10 +1,10 @@
-/* exported addToTable, deleteRow ResetPerGradeablePercents */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
-const tables = ['plagiarism', 'manualGrade'];
+const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
 // eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
@@ -27,15 +27,6 @@ function ClampGradeablesInBucket(el, num_gradeables) {
     }
 }
 
-// Forces element's value to be non-negative
-function ClampPoints(el) {
-    if (el.value === '') {
-        el.value = el.placeholder;
-        el.classList.remove('override');
-    }
-    el.value = Math.max(0.0, el.value);
-}
-
 // Forces element's value to be non-negative and between 0.0 - 100.0
 // Distinct from ClampPercent(), this is for Per Gradeable Percents
 function ClampPercents(el) {
@@ -43,15 +34,6 @@ function ClampPercents(el) {
         el.value = el.placeholder;
     }
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
-}
-
-function DetectMaxOverride(el) {
-    if (el.value !== el.placeholder) {
-        el.classList.add('override');
-    }
-    else {
-        el.classList.remove('override');
-    }
 }
 
 function ExtractBucketName(s, offset) {
@@ -167,20 +149,51 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
-
-        if (label === '') {
-            $('#save_status').text('All sections MUST have a label before saving');
-        }
 
         // Add to sections
         sections[section] = label;
     });
 
     return sections;
+}
+
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    warningIcon.toggle(hasDuplicates);
 }
 
 function getDisplayBenchmark() {
@@ -251,11 +264,11 @@ function getGradeableBuckets() {
                 // children[0] represents <div id="gradeable-pts-div-*">
                 // children[1] represents <div id="gradeable-percents-div-*">
                 // replace divs with inputs
-                children[0] = children[0].children[0];
+                children[0] = children[0].querySelector('.max-score'); // can be either 1st, 2nd, or 3rd child
                 children[1] = children[1].children[0];
 
                 // Get max points
-                gradeable.max = parseFloat(children[0].value);
+                gradeable.max = parseFloat(children[0].dataset.maxScore);
 
                 // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
                 if ($(children[1]).is(':visible')) {
@@ -332,6 +345,7 @@ function getGradeableBuckets() {
  * @param {string} table
  *      'plagiarism'
  *      'manualGrade'
+ *      'performanceWarnings'
  */
 function getTableData(table) {
     if (!tables.includes(table)) {
@@ -343,6 +357,7 @@ function getTableData(table) {
     const tableMap = {
         plagiarism: 'plagiarism-table-body',
         manualGrade: 'manual-grading-table-body',
+        performanceWarnings: 'performance-warnings-table-body',
     };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -367,6 +382,14 @@ function getTableData(table) {
                 note: thirdInput,
             });
         }
+        else if (table === 'performanceWarnings') {
+            const secondInputArray = secondInput.split(', ');
+            data.push({
+                msg: firstInput,
+                ids: secondInputArray,
+                value: parseFloat(thirdInput),
+            });
+        }
     }
 
     return data;
@@ -377,6 +400,7 @@ function getTableData(table) {
  * @param {string} table
  *     'plagiarism'
  *     'manualGrade'
+ *     'performanceWarnings'
  */
 function addToTable(table) {
     if (!tables.includes(table)) {
@@ -386,10 +410,21 @@ function addToTable(table) {
     const tableMap = {
         plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
         manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+        performanceWarnings: ['performance-warnings-table-body', 'performance-warnings-message', 'performance-warnings-gradeables', 'performance-warnings-score'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
-    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    let secondInput;
+    if (table === 'performanceWarnings') { // Performance Warnings gets an object[] for the second input
+        const secondInputArray = [];
+        $('#performance-warnings-gradeables').select2('data').forEach((element) => {
+            secondInputArray.push(element.id);
+        });
+        secondInput = secondInputArray.join(', ');
+    }
+    else {
+        secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    }
     const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
 
     // Check whether input is allowed
@@ -451,6 +486,27 @@ function addToTable(table) {
             }
             break;
         }
+        case 'performanceWarnings': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all fields.');
+                return;
+            }
+            const inputGradeables = secondInput.split(', ');
+            let entryGradeables = [];
+            $('#performance-warnings-table-body tr').each(function () {
+                entryGradeables = $(this).find('td:nth-child(2)').text().split(', ');
+            });
+            const overlappingGradeables = inputGradeables.filter((inputGradeable) => entryGradeables.includes(inputGradeable));
+            if (overlappingGradeables.length > 0) {
+                alert(`Entry with Gradeable(s) '${overlappingGradeables.join(', ')}' already exists`);
+                return;
+            }
+            if (parseFloat(thirdInput) <= 0) {
+                alert('Score must be a number greater than 0');
+                return;
+            }
+            break;
+        }
     }
 
     // Create a new row and cells
@@ -472,6 +528,9 @@ function addToTable(table) {
     deleteLink.appendChild(deleteIcon);
     deleteLink.onclick = function () {
         deleteRow(this);
+        if (table === 'performanceWarnings') {
+            manageWarningsGradeables('delete');
+        }
     };
     cellDelete.appendChild(deleteLink);
 
@@ -486,6 +545,32 @@ function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
     saveChanges();
+}
+
+/**
+ * Enables or disables gradeable options in the performance warnings table
+ *
+ * @param submitOrDelete 'submit' or 'delete'
+ */
+function manageWarningsGradeables(submitOrDelete) {
+    let entryGradeables = [];
+    $('#performance-warnings-table-body tr').each(function () {
+        entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+    });
+    if (submitOrDelete === 'submit') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (entryGradeables.includes($(this).val())) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+    else if (submitOrDelete === 'delete') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (!entryGradeables.includes($(this).val())) {
+                $(this).removeAttr('disabled');
+            }
+        });
+    }
 }
 
 function getMessages() {
@@ -586,6 +671,7 @@ function buildJSON() {
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
         manual_grade: getTableData('manualGrade'),
+        warning: getTableData('performanceWarnings'),
     };
 
     ret = JSON.stringify(ret);
@@ -707,6 +793,8 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
+    // Run when page loads
+    DetectSameSectionName();
     $("input[name*='display']").change(() => {
         saveChanges();
     });
@@ -717,7 +805,16 @@ $(document).ready(() => {
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
+    $('.benchmark_percent_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     $('.sections_and_labels').on('change keyup paste', () => {
+        saveChanges();
+    });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
+    });
+    $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
     });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
@@ -725,19 +822,21 @@ $(document).ready(() => {
         saveChanges();
     });
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
+    // This mutation observer catches changes to bucket assignments (available buckets to assigned buckets, and vice versa)
+    const targetBucketReassignment = document.querySelector('#buckets_used_list');
+    const observerBucketReassignment = new MutationObserver((mutations) => {
         saveChanges();
     });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
+    const configBucketReassignment = { attributes: true, childList: true, characterData: true };
+    observerBucketReassignment.observe(targetBucketReassignment, configBucketReassignment);
+
+    // This mutation observer catches automatic bucket assignments on page load
+    const targetAutomaticBucketAssignment = document.querySelector('.bucket_detail_div');
+    const observerAutomaticBucketAssignment = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    const configAutomaticBucketAssignment = { attributes: true, attributeFilter: ['style'] };
+    observerAutomaticBucketAssignment.observe(targetAutomaticBucketAssignment, configAutomaticBucketAssignment);
 });
 
 function saveChanges() {
@@ -745,7 +844,14 @@ function saveChanges() {
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
-    formData.append('json_string', buildJSON());
+    try {
+        formData.append('json_string', buildJSON());
+    }
+    catch (err) {
+        console.error(err);
+        $('#save_status').text('An error occurred while saving.');
+        return;
+    }
 
     $.ajax({
         url: url,
@@ -755,13 +861,11 @@ function saveChanges() {
         processData: false,
         contentType: false,
         success: function (response) {
-            console.log(response);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
             else {
-                // lets keep the alert, because users may not notice it even if it fails
-                alert(`An error occurred: ${response.data}`);
+                console.error(response);
             }
         },
         // error: function (jqXHR, textStatus, errorThrown) {
@@ -836,6 +940,7 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
+        warning: '#performance-warnings',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -894,7 +999,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'warning'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
@@ -1000,6 +1105,50 @@ $(document).ready(() => {
         });
     });
 
+    { // Manage performance warnings table
+        $('#performance-warnings-gradeables').select2({
+            theme: 'bootstrap-5',
+            placeholder: ' -- select an option -- ',
+            multiple: true,
+            allowClear: true,
+        });
+        const gradeablesDropdownOptions = $('#performance-warnings-gradeables option');
+        // Remove empty option to trick browser
+        gradeablesDropdownOptions[0].remove();
+        // Hide selected gradeables
+        let entryGradeables = [];
+        $('#performance-warnings-table-body tr').each(function () {
+            entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+        });
+        gradeablesDropdownOptions.each(function () {
+            const gradeableID = $(this).val();
+            if (entryGradeables.includes(gradeableID)) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket), with one decimal place
+    const bucketItemCounts = $('input[id^="config-count-"]');
+    bucketItemCounts.each((index, bucketItemCountDOMElement) => {
+        const bucketItemCount = $(bucketItemCountDOMElement);
+        const bucket = bucketItemCount.prop('id').match(/^config-count-(.+)$/)[1];
+        const gradeablePercents = $(`div[id^="gradeable-percents-div-${bucket}-"]`);
+        gradeablePercents.each((index, gradeablePercentDOMElement) => {
+            const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+            gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            if (gradeablePercentInput.val() === '') {
+                gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
+            }
+        });
+        bucketItemCount.on('blur', () => {
+            gradeablePercents.each((index, gradeablePercentDOMElement) => {
+                const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+                gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            });
+        });
+    });
+
     // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
     const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
     const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
@@ -1067,5 +1216,12 @@ $(document).ready(() => {
                 $(resetButton).toggle(isChecked);
             });
         });
+    });
+});
+
+$(document).ready(() => {
+    // Bind click listener to grade summaries button
+    $('#grade-summaries-button').click(() => {
+        $('#grade-summaries-last-run').text('Running...');
     });
 });

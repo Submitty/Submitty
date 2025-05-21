@@ -14,7 +14,7 @@
             <option value="scores">Autograding Total Score</option>
         </select>
     </div>
-    <div id="myDiv4"></div>
+    <div id="Scatterplot5"></div>
     <script>
         function truncateToThreeDecimals(num) {
             return Math.floor(num * 1000) / 1000;
@@ -128,7 +128,7 @@
                 }
             };
 
-            Plotly.newPlot('myDiv4', data, layout, { displayModeBar: false, displaylogo: false });
+            Plotly.newPlot('Scatterplot5', data, layout, { displayModeBar: false, displaylogo: false });
         }
 
         function getDataArray(value) {
@@ -157,7 +157,7 @@
         updatePlot(getDataArray(initialX), getDataArray(initialY), labels[initialX], labels[initialY]);
     </script>
 
-    <div id="mySmallDiv4">
+    <div id="SmallScatterplot4">
         <script>
             function truncateToThreeDecimals(num) {
                 return Math.floor(num * 1000) / 1000;

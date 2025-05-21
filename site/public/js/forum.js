@@ -331,6 +331,12 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
                 file_array[post_box_id] = [];
                 uploadImageAttachments(`#${post_id}-reply .upload_attachment_box`);
                 hljs.highlightAll();
+
+                // scroll into an active text area if it exists
+                const activeReplyBox = document.querySelector('.post_content_reply[data-active="true"]');
+                if (activeReplyBox) {
+                    activeReplyBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
             catch (error) {
                 displayErrorMessage('Error parsing new post. Please refresh the page.');
@@ -341,6 +347,14 @@ function socketNewOrEditPostHandler(post_id, reply_level, post_box_id = null, ed
 
 function socketDeletePostHandler(post_id) {
     const main_post = $(`#${post_id}`);
+    const thread_box_link = $(`#thread_box_link_${post_id}`);
+    const current_thread = Number($('#current-thread').val());
+
+    if (post_id === current_thread) {
+        // Navigate back to the forum page for deleted threads
+        $('#nav-sidebar-forum')[0].click();
+    }
+
     const sibling_posts = $(`#${post_id} ~ .post_box`).map(function () {
         return $(this).attr('data-reply_level') <= $(`#${post_id}`).attr('data-reply_level') ? this : null;
     });
@@ -353,6 +367,7 @@ function socketDeletePostHandler(post_id) {
         var posts_to_delete = main_post.nextUntil('#post-hr');
     }
 
+    thread_box_link.remove();
     posts_to_delete.filter('.reply-box').remove();
     main_post.add(posts_to_delete).fadeOut(400, () => {
         main_post.add(posts_to_delete).remove();
@@ -430,7 +445,7 @@ function socketDeleteOrMergeThreadHandler(thread_id, merge = false, merge_thread
         }
         else {
             // eslint-disable-next-line no-var, no-redeclare
-            var new_url = buildCourseUrl(['forum', 'threads']);
+            var new_url = buildCourseUrl(['forum']);
         }
         window.location.replace(new_url);
     }
@@ -686,10 +701,7 @@ function initSocketClient() {
                 }
                 break;
             case 'delete_post':
-                // eslint-disable-next-line eqeqeq
-                if ($('data#current-thread').val() == msg.thread_id) {
-                    socketDeletePostHandler(msg.post_id);
-                }
+                socketDeletePostHandler(msg.post_id || msg.thread_id);
                 break;
             case 'edit_post':
                 // eslint-disable-next-line eqeqeq
@@ -716,6 +728,12 @@ function initSocketClient() {
                     likesCount: msg.likesCount,
                     likesFromStaff: msg.likesFromStaff,
                     status: msg.status,
+                    source: msg.source,
+                });
+                break;
+            case 'edit_thread_likes':
+                updateThreadLikesDisplay(msg.thread_id, {
+                    likesCount: msg.likesCount,
                 });
                 break;
             default:
@@ -901,7 +919,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 $('#thread_status').val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
                 if (Date.parse(expiration) > new Date()) {
-                    $('.expiration').show();
+                    $('#pin-expiration-date').show();
                 }
                 $('#expirationDate').val(json.expiration);
                 // Categories
@@ -919,7 +937,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             else {
                 $('#title').prop('disabled', true);
                 $('.edit_thread').hide();
-                $('.expiration').hide();
+                $('#pin-expiration-date').hide();
                 $('#label_lock_thread').hide();
                 $('#thread_form').prop('ignore-cat', true);
                 $('#category-selection-container').hide();
@@ -992,7 +1010,7 @@ function readThreadStatusValues() {
 
 function dynamicScrollLoadPage(element, atEnd) {
     const load_page = $(element).data(atEnd ? 'next_page' : 'prev_page');
-    if (load_page === 0) {
+    if (load_page === -1) {
         return false;
     }
     if ($(element).data('dynamic_lock_load')) {
@@ -1014,7 +1032,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             // eslint-disable-next-line eqeqeq
             if (count == 0) {
                 // Stop further loads
-                $(element).data('next_page', 0);
+                $(element).data('next_page', -1);
             }
             else {
                 $(element).data('next_page', parseInt(load_page) + 1);
@@ -1035,12 +1053,12 @@ function dynamicScrollLoadPage(element, atEnd) {
             arrow_up.after(content);
             if (count === 0) {
                 // Stop further loads
-                $(element).data('prev_page', 0);
+                $(element).data('prev_page', -1);
             }
             else {
                 const prev_page = parseInt(load_page) - 1;
                 $(element).data('prev_page', prev_page);
-                if (prev_page >= 1) {
+                if (prev_page >= 0) {
                     arrow_up.show();
                 }
             }
@@ -1076,6 +1094,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             thread_categories: categories_value,
             thread_status: thread_status_value,
             unread_select: unread_select_value,
+            scroll_down: atEnd,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
             csrf_token: window.csrfToken,
@@ -1119,7 +1138,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         const isTop = element.scrollTop < sensitivity;
         const isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if (isTop) {
-            if ($(element).data('prev_page') !== 0) {
+            if ($(element).data('prev_page') !== -1) {
                 element.scrollTop = sensitivity;
             }
             dynamicScrollLoadPage(element, false);
@@ -1195,7 +1214,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     Cookies.set(`${course}_forum_categories`, categories_value, { path: '/' });
     Cookies.set('forum_thread_status', thread_status_value, { path: '/' });
     Cookies.set('unread_select_value', unread_select_value, { path: '/' });
-    const url = `${buildCourseUrl(['forum', 'threads'])} ? page_number=${(loadFirstPage ? '1' : '-1')}`;
+    const url = `${buildCourseUrl(['forum', 'threads'])}?page_number=${(loadFirstPage ? '0' : '-1')}`;
     $.ajax({
         url: url,
         type: 'POST',
@@ -1246,7 +1265,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     });
 }
 
-function toggleLike(post_id, current_user) {
+function toggleLike(post_id, thread_id, current_user) {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
@@ -1254,6 +1273,7 @@ function toggleLike(post_id, current_user) {
         type: 'POST',
         data: {
             post_id: post_id,
+            thread_id: thread_id,
             current_user: current_user,
             // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
@@ -1285,7 +1305,7 @@ function toggleLike(post_id, current_user) {
 
 function updateLikesDisplay(post_id, data) {
     const likes = data['likesCount'];
-    const liked = data['status'];
+    const liked = data['status'] === 'like';
     const staffLiked = data['likesFromStaff'];
 
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
@@ -1293,13 +1313,13 @@ function updateLikesDisplay(post_id, data) {
 
     // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
+    const user = document.getElementById('posts_list').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
 
-    if (liked === 'unlike') {
-        likeIconSrcElement = likeIconSrcElement.replace('on-duck-button.svg', 'light-mode-off-duck.svg');
-    }
-    else if (liked === 'like') {
-        likeIconSrcElement = likeIconSrcElement.replace('light-mode-off-duck.svg', 'on-duck-button.svg');
+    if (user === data['source']) {
+        const from = liked ? 'light-mode-off-duck.svg' : 'on-duck-button.svg';
+        const to = liked ? 'on-duck-button.svg' : 'light-mode-off-duck.svg';
+        likeIconSrcElement = likeIconSrcElement.replace(from, to);
     }
 
     if (staffLiked > 0) {
@@ -1312,6 +1332,12 @@ function updateLikesDisplay(post_id, data) {
     likeCounter = likes;
     likeIconSrc.src = likeIconSrcElement; // Update the state
     likeCounterElement.innerText = likeCounter;
+}
+
+function updateThreadLikesDisplay(thread_id, data) {
+    const likes = data['likesCount'];
+    const likeCounterElement = document.getElementById(`Thread_likeCounter_${thread_id}`);
+    likeCounterElement.innerText = likes;
 }
 
 function displayHistoryAttachment(edit_id) {
@@ -1643,9 +1669,6 @@ function editCategory(category_id, category_desc, category_color, category_date,
                 // eslint-disable-next-line no-undef
                 removeMessagePopup('theid');
             }, 1000);
-            if (category_color !== null) {
-                $(`#categorylistitem-${category_id}`).css('color', category_color);
-            }
             if (category_desc !== null) {
                 $(`#categorylistitem-${category_id}`).find('.categorylistitem-desc span').text(category_desc);
             }
@@ -1677,7 +1700,9 @@ function refreshCategories() {
             var category_id = parseInt(data[i].split('=')[1]);
             const category_desc = $(`#categorylistitem-${category_id} .categorylistitem-desc span`).text().trim();
             const category_color = $(`#categorylistitem-${category_id} select`).val();
-            order.push([category_id, category_desc, category_color]);
+            const category_diff = parseFloat($(`#categorylistitem-${category_id}`).data('diff'));
+            const category_visible_date = $(`#categorylistitem-${category_id}`).data('visible_date');
+            order.push([category_id, category_desc, category_color, category_diff, category_visible_date]);
         }
 
         // Obtain current selected category
@@ -1696,17 +1721,21 @@ function refreshCategories() {
         // Refresh selected categories
         $('#categories-pick-list').empty();
         order.forEach((category) => {
-            const category_id = category[0];
-            const category_desc = category[1];
-            const category_color = category[2];
-            let selection_class = '';
-            if (selected_button.has(category_id)) {
-                selection_class = 'btn-selected';
+            const category_visible_date = category[4];
+            const category_diff = category[3];
+            if (category_visible_date === '' || category_diff > 0) {
+                const category_id = category[0];
+                const category_desc = category[1];
+                const category_color = category[2];
+                let selection_class = '';
+                if (selected_button.has(category_id)) {
+                    selection_class = 'btn-selected';
+                }
+                const element = `<div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
+                                    <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
+                                </div>`;
+                $('#categories-pick-list').append(element);
             }
-            const element = ` <div tabindex="0" class="btn cat-buttons ${selection_class}" data-color="${category_color}">${category_desc}\
-                                <input aria-label="Category: ${category_desc}" type="checkbox" name="cat[]" value="${category_id}">\
-                            </div>`;
-            $('#categories-pick-list').append(element);
         });
 
         $(".cat-buttons input[type='checkbox']").each(function () {
@@ -1738,14 +1767,21 @@ function refreshCategories() {
 
 function changeColorClass() {
     const color = $(this).data('color');
+    const isDarkMode = $('[data-theme="dark"]').length > 0;
     $(this).css('border-color', color);
     if ($(this).hasClass('btn-selected')) {
         $(this).css('background-color', color);
         $(this).css('color', 'white');
     }
     else {
-        $(this).css('background-color', 'white');
-        $(this).css('color', color);
+        if (isDarkMode) {
+            $(this).css('background-color', 'var(--btn-default-white)');
+            $(this).css('color', 'var(--btn-default-text)');
+        }
+        else {
+            $(this).css('background-color', 'white');
+            $(this).css('color', color);
+        }
     }
 }
 
@@ -1796,12 +1832,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     if (!checkAreYouSureForm()) {
         return;
     }
-    const type = (isDeletion ? '0' : '2');
-    const message = (isDeletion ? 'delete' : 'undelete');
+    const message = (isDeletion ? 'delete' : 'restore');
 
     const confirm = window.confirm(`Are you sure you would like to ${message} this post?: \n\nWritten by:  ${author}  @  ${time}\n\nPlease note: The replies to this comment will also be ${message}d. \n\nIf you ${message} the first post in a thread this will ${message} the entire thread.`);
     if (confirm) {
-        const url = `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=${type}`;
+        const url = buildCourseUrl(['forum', 'posts', 'delete']);
         $.ajax({
             url: url,
             type: 'POST',
@@ -1838,7 +1873,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 window.location.replace(new_url);
             },
             error: function () {
-                window.alert('Something went wrong while trying to delete/undelete a post. Please try again.');
+                window.alert('Something went wrong while trying to delete/restore a post. Please try again.');
             },
         });
     }
@@ -2041,7 +2076,7 @@ function sortTable(sort_element_index, reverse = false) {
 }
 
 function loadThreadHandler() {
-    $('a.thread_box_link').click(function (event) {
+    $('a.thread_box_link').click(async function (event) {
         // if a thread is clicked on the full-forum-page just follow normal GET request else continue with ajax request
         if (window.location.origin + window.location.pathname === buildCourseUrl(['forum'])) {
             return;
@@ -2101,49 +2136,62 @@ function loadThreadHandler() {
 
                 $('.post_reply_form').submit(publishPost);
                 hljs.highlightAll();
+                showAttachmentsOnload();
             },
-            error: function () {
-                window.alert('Something went wrong while trying to display thread details. Please try again.');
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status !== 0) {
+                    // AJAX request fails outside of network issues caused by WebSocket thread updates
+                    console.error('Request failed:', textStatus, errorThrown);
+                    window.alert('Something went wrong while trying to display thread details. Please try again.');
+                }
             },
         });
     });
 }
 
+function showAttachmentsOnload() {
+    // on initial thread load, determine if attachments should be shown
+    if (!window.location.pathname.includes('/forum/threads')) {
+        return;
+    }
+    const showAttach = Cookies.get('show_forum_attachments');
+    if (showAttach === undefined) {
+        Cookies.set('show_forum_attachments', 'false', { expires: 365, path: '/' });
+    }
+    else if (showAttach === 'true') {
+        $('#toggle-attachments-button').find('.status').text('Hide attachments');
+        loadAllInlineImages(true);
+    }
+    else {
+        $('#toggle-attachments-button').find('.status').text('Show attachments');
+    }
+    $('#toggle-attachments-button').find('.attachment-badge').text($('.attachment-btn').length);
+}
+
 // eslint-disable-next-line no-unused-vars
 function loadAllInlineImages(open_override = false) {
-    const toggleButton = $('#toggle-attachments-button');
-
-    const allShown = $('.attachment-well').filter(function () {
-        return $(this).is(':visible');
-    }).length === $('.attachment-well').length;
-    // if the button were to show them all but they have all been individually shown,
-    // we should hide them all
-    if (allShown && toggleButton.hasClass('show-all')) {
-        toggleButton.removeClass('show-all');
+    if (open_override) {
+        $('.attachment-btn').each(function (i) {
+            $(this).click();
+            $('.attachment-well').eq(i).show();
+        });
+        return;
     }
 
-    const allHidden = $('.attachment-well').filter(function () {
-        return !($(this).is(':visible'));
-    }).length === $('.attachment-well').length;
-    // if the button were to hide them all but they have all been individually hidden,
-    // we should show them all
-    if (allHidden && !(toggleButton.hasClass('show-all'))) {
-        toggleButton.addClass('show-all');
-    }
+    const showAttach = Cookies.get('show_forum_attachments') === 'true' ? 'false' : 'true';
+    Cookies.set('show_forum_attachments', showAttach, { expires: 365, path: '/' });
+
+    const buttonText = `${showAttach === 'true' ? 'Hide' : 'Show'} attachments`;
+    $('#toggle-attachments-button').find('.status').text(buttonText);
 
     $('.attachment-btn').each(function (i) {
-        $(this).click();
-
-        // overwrite individual button click behavior to decide if it should be shown/hidden
-        if (toggleButton.hasClass('show-all') || open_override) {
-            $('.attachment-well').eq(i).show();
+        if (showAttach === 'true' && $('.attachment-well').eq(i).is(':hidden')) {
+            $(this).click();
         }
-        else {
-            $('.attachment-well').eq(i).hide();
+        else if (showAttach === 'false' && $('.attachment-well').eq(i).is(':visible')) {
+            $(this).click();
         }
     });
-
-    toggleButton.toggleClass('show-all');
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -2321,7 +2369,7 @@ function updateThread(e) {
     }
 
     $.ajax({
-        url: `${buildCourseUrl(['forum', 'posts', 'modify'])}?modify_type=1`,
+        url: buildCourseUrl(['forum', 'posts', 'modify']),
         type: 'POST',
         data: formData,
         processData: false,
@@ -2568,17 +2616,17 @@ function restoreCreateThreadFromLocal() {
         });
 
         // Optional fields
-        $('.expiration').hide();
+        $('#pin-expiration-date').hide();
         if (Object.prototype.hasOwnProperty.call(data, 'lockDate')) {
             $('#lock_thread_date').val(data.lockDate);
         }
         if (data.isAnnouncement) {
             $('#Announcement').prop('checked', data.isAnnouncement);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (data.pinThread) {
             $('#pinThread').prop('checked', data.pinThread);
-            $('.expiration').show();
+            $('#pin-expiration-date').show();
         }
         if (Object.prototype.hasOwnProperty.call(data, 'expiration')) {
             $('#expirationDate').val(data.expiration);
@@ -2592,6 +2640,7 @@ function clearCreateThreadAutosave() {
 }
 
 $(() => {
+    showAttachmentsOnload();
     if (typeof cleanupAutosaveHistory === 'function') {
         // eslint-disable-next-line no-undef
         cleanupAutosaveHistory('-forum-autosave');
@@ -2654,4 +2703,43 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             },
         });
     }
+}
+
+function showUpduckUsers(post_id, csrf_token) {
+    const url = buildCourseUrl(['forum', 'posts', 'likes', 'details']);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        data: { post_id: post_id },
+        dataType: 'json',
+        success: function (data) {
+            if (data.status === 'success') {
+                $('#popup-post-likes').show();
+                $('body').addClass('popup-active');
+                // eslint-disable-next-line no-undef
+                captureTabInModal('popup-post-likes');
+
+                $('#popup-post-likes .form-body').empty();
+
+                const users = data.data.users;
+                if (users.length === 0) {
+                    $('#popup-post-likes .form-body').append('<p>No one has liked this post yet.</p>');
+                }
+                else {
+                    const userList = $('<ul>');
+                    for (const user of users) {
+                        userList.append(`<li>${user}</li>`);
+                    }
+                    $('#popup-post-likes .form-body').append(userList);
+                }
+                $('#popup-post-likes .close-button').off('click').on('click', () => {
+                    $('#popup-post-likes').hide();
+                    $('body').removeClass('popup-active');
+                });
+            }
+            else {
+                displayErrorMessage('Failed to retrieve users who liked this post.');
+            }
+        },
+    });
 }

@@ -10,6 +10,7 @@ updates:
     commit-message:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: "npm"
     directory: "/site"
     schedule:
@@ -19,6 +20,7 @@ updates:
     commit-message:
       prefix: "[Dependency] "
       prefix-development: "[DevDependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: pip
     directories:
       - "/.setup/pip/"
@@ -29,6 +31,7 @@ updates:
       - dependencies
     commit-message:
       prefix: "[Dependency] "
+    open-pull-requests-limit: 100
   - package-ecosystem: "github-actions"
     directories:
       - "/"
@@ -39,3 +42,4 @@ updates:
       - dependencies
     commit-message:
       prefix: "[DevDependency] "
+    open-pull-requests-limit: 100

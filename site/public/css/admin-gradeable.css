@@ -7,6 +7,10 @@ input[disabled]:not(#admin-gradeable-peers-submit) {
     background: var(--standard-medium-gray);
 }
 
+[data-theme="dark"] input[disabled]:not(#admin-gradeable-peers-submit) {
+    background: var(--standard-dark-gray);
+}
+
 input.readonly.peerstudents {
     border: 1px solid var(--standard-light-gray);
     background-color: var(--standard-pale-gray);
@@ -110,6 +114,7 @@ a.nav-bar.normal-btn:hover {
 a.nav-bar.disabled-btn {
     color: var(--standard-medium-dark-gray);
     cursor: default;
+    /* stylelint-disable-next-line declaration-no-important */
     border: none !important;
     pointer-events: none;
 }
@@ -173,10 +178,12 @@ table#grader-history td {
 
 #checkpoint-numeric-gradeables-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #late-days-message {
     font-style: italic;
+    font-weight: bold;
 }
 
 #timezone-container {
@@ -214,10 +221,10 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container, #subdirectory-settings-container {
+#team-settings-container,
+#subdirectory-settings-container {
     margin-top: 10px;
 }
-
 
 #rebuild-status-panel {
     display: inline-block;
@@ -325,4 +332,15 @@ body::-webkit-scrollbar-track {
 #custom_marks_warning {
     color: var(--standard-vibrant-red);
     font-style: italic;
+}
+
+.warning-banner {
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
+
+.date-warning {
+    display: none;
 }

@@ -2,7 +2,7 @@
     <header>
         <h1>Manage Students</h1>
         <div class="btn-wrapper">
-            <a id="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
+            <a id="toggle-columns" data-testid="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
             <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
@@ -26,11 +26,11 @@
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[2] %}
-                        <th style="text-align:left;">First Name</th>
+                        <th style="text-align:left;">Given Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[3] %}
-                        <th style="text-align:left;">Last Name</th>
+                        <th style="text-align:left;">Family Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[4] %}
@@ -70,11 +70,11 @@
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[13] %}
-                        <th>Legal First Name</th>
+                        <th>Legal Given Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[14] %}
-                        <th>Legal Last Name</th>
+                        <th>Legal Family Name</th>
                         {% set count = count + 1 %}
                     {% endif %}
                     {% if active_student_columns[15] %}
@@ -114,7 +114,7 @@
                                 </td>
                             {% endif %}
                             {% if active_student_columns[1] %}
-                                <td class="align-left td-student-id">{{ student.getId() }}</td>
+                                <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
                             {% endif %}
                             {% if active_student_columns[2] %}
                                 <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
@@ -153,10 +153,10 @@
                                 <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
                             {% endif %}
                             {% if active_student_columns[10] %}
-                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[11] %}
-                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
+                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}" data-testid="delete-student-{{ student.getId() }}-button"><i class="fas fa-trash"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[12] %}
                                 <td class="td-user-numeric-id">{{ student.getNumericId() }}</td>
