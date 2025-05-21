@@ -4,10 +4,9 @@
     "assignment_message" : "Please upload.pdf files",
 
     "autograding_method": "docker",
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
 
     "autograding" : {
         "submission_to_compilation" : [ "*.pdf" ],

@@ -1,5 +1,5 @@
 {
-	"required_capabilities": "cpp",
+    "required_capabilities": "cpp",
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/clang:latest"

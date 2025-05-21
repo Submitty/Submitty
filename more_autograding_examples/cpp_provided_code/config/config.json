@@ -1,16 +1,9 @@
 {
-	"required_capabilities": "cpp",
-
+    "required_capabilities": "cpp",
     "autograding_method": "docker",
-
-	"autograding": {
-        "submission_to_compilation": ["**/*.cpp", "**/*.h"],
-        "compilation_to_runner": ["**/a.out"]
-    },
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/clang:latest"
-	},
+    },
     
     "assignment_message" : "You should not modify the provided main.cpp",
 

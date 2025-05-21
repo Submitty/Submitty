@@ -1,10 +1,9 @@
 {
-	"required_capabilities": "cpp",
+    "required_capabilities": "cpp",
     "autograding_method": "docker",
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
 
     "assignment_message" : "This configuration has an (intentionally) broken custom grader... ",
 

@@ -1,10 +1,9 @@
 {
     "required_capabilities": "default",
     "autograding_method": "docker",
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
     // 3 mb maximum submission size
     "max_submission_size" : 3000000,
 

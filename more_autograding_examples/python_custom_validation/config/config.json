@@ -1,16 +1,9 @@
 {
-	"required_capabilities": "python",
-
+    "required_capabilities": "python",
     "autograding_method": "docker",
-
-	"autograding": {
-        "submission_to_compilation": ["**/*.cpp"],
-        "compilation_to_runner": ["**/a.out"]
-    },
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
 
     "grading_parameters" : {
         "AUTO_POINTS" : 20

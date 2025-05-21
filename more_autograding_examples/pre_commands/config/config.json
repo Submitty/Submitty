@@ -1,17 +1,17 @@
 {
-	"required_capabilities": "python",
-
-  "autograding_method": "docker",
-
-	"autograding": {
-        "submission_to_compilation": ["**/*.py"],
-        "compilation_to_runner": ["**/a.out"],
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+    
+    "autograding": {
+        //"submission_to_compilation": ["**/*.py"],  // todo: confirm these can be deleted
+        //"compilation_to_runner": ["**/a.out"],
         "work_to_details" : ["**/*.txt"]
     },
 
-	"container_options": {
-        "container_image": "submitty/python:latest"
-	},
+
 
   "testcases" : [
     {

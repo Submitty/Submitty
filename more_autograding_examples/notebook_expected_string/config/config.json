@@ -1,9 +1,9 @@
 {
     "required_capabilities": "notebook",
     "autograding_method": "docker",
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
 
     "hide_submitted_files" : true,
 //    "hide_version_and_test_details" : true,

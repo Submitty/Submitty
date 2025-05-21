@@ -1,11 +1,10 @@
 {
-	"required_capabilities": "et-cetera",
-
+    "required_capabilities": "et-cetera",
     "autograding_method": "docker",
-
-	"container_options": {
+    "container_options": {
         "container_image": "submitty/autograding-default:latest"
-	},
+    },
+    
     // This is for assignments where students who reached x amounts of points y days before the submission deadline receive some kind of reward
     // such as another late day. This will not award the late days, it simply shows the given message to the student.
     "early_submission_incentive" : {
