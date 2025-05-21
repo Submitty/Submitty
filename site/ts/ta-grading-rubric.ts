@@ -1,4 +1,5 @@
 import { viewFileFullPanel } from './ta-grading';
+import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 
 /**
  *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
@@ -42,6 +43,15 @@ type Mark = {
     order?: number;
     deleted?: boolean;
 };
+
+type MarkConflictInfo = {
+    domMark: Mark;
+    serverMark: Mark | null;
+    oldServerMark: Mark | null;
+    localDeleted: boolean;
+};
+
+export type MarkConflicts = Record<number, MarkConflictInfo>;
 
 /**
  * An associative object of <component-id> : <mark[]>
@@ -411,7 +421,7 @@ async function ajaxSaveOverallComment(gradeable_id: string | undefined, anon_id:
  * @throws {Error} Throws except when the response returns status 'success'
  * @return {Object}
  */
-async function ajaxAddNewMark(gradeable_id: string | undefined, component_id: number, title: string, points: number, publish: boolean) {
+export async function ajaxAddNewMark(gradeable_id: string | undefined, component_id: number, title: string, points: number, publish: boolean) {
     let response: { status: string; message: string; data: { mark_id: number } } | null;
     try {
         response = await $.ajax({
@@ -450,7 +460,7 @@ async function ajaxAddNewMark(gradeable_id: string | undefined, component_id: nu
  * @throws {Error} Throws except when the response returns status
  * @return {Object}
  */
-async function ajaxDeleteMark(gradeable_id: string | undefined, component_id: number, mark_id: number) {
+export async function ajaxDeleteMark(gradeable_id: string | undefined, component_id: number, mark_id: number) {
     let response: Record<string, string | undefined> | null;
     try {
         response = await $.ajax({
@@ -490,7 +500,7 @@ async function ajaxDeleteMark(gradeable_id: string | undefined, component_id: nu
  * @throws {Error} Throws except when the response returns status 'success'
  * @return {Object}
  */
-async function ajaxSaveMark(gradeable_id: string | undefined, component_id: number, mark_id: number, title: string, points: number, publish: boolean) {
+export async function ajaxSaveMark(gradeable_id: string | undefined, component_id: number, mark_id: number, title: string, points: number, publish: boolean) {
     let response: Record<string, string | undefined> | null;
     try {
         response = await $.ajax({
@@ -1010,7 +1020,7 @@ function getMarkIdFromDOMElement(me: HTMLElement) {
  * @param {int} component_id
  * @return {jQuery}
  */
-function getComponentJQuery(component_id: number) {
+export function getComponentJQuery(component_id: number) {
     return $(`#component-${component_id}`);
 }
 
@@ -1651,7 +1661,7 @@ function isMarkDisabled(mark_id: number) {
  * @param {int} mark_id
  * @return {boolean}
  */
-function isMarkDeleted(mark_id: number) {
+export function isMarkDeleted(mark_id: number) {
     return getMarkJQuery(mark_id).hasClass('mark-deleted');
 }
 
@@ -3070,7 +3080,7 @@ async function saveMarkList(component_id: number) {
     const oldServerMarkList = OLD_MARK_LIST[component_id];
 
     // associative array of associative arrays of marks with conflicts {<mark_id>: {domMark, serverMark, oldServerMark}, ...}
-    const conflictMarks: Record<number, { domMark: Mark; serverMark: Mark | null; oldServerMark: Mark | null; localDeleted: boolean }> = {};
+    const conflictMarks: MarkConflicts = {};
 
     // For each DOM mark, try to save it
     await Promise.all(domMarkList.map(async (domMark) => {
