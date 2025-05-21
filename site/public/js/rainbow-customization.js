@@ -6,7 +6,6 @@ const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
-// eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
@@ -106,7 +105,6 @@ function UpdateUsedPercentage() {
 }
 
 // Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
-// eslint-disable-next-line no-unused-vars
 function UpdateVisibilityBuckets() {
     // For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function () {
@@ -687,10 +685,8 @@ function showLogButton(responseData) {
 function sendSelectedValue() {
     return new Promise((resolve, reject) => {
         const selected_value = $("input[name='customization']:checked").val();
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
         const formData = new FormData();
-        // eslint-disable-next-line no-undef
         formData.append('csrf_token', csrfToken);
         formData.append('selected_value', selected_value);
 
@@ -731,9 +727,7 @@ function sendSelectedValue() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function runBuild() {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['reports', 'build_form']);
 
     sendSelectedValue()
@@ -956,7 +950,6 @@ function setCustomizationItemVisibility(elem) {
 
 $(document).ready(() => {
     // Make the per-gradeable curve inputs toggle when the icon is clicked
-    // eslint-disable-next-line no-unused-vars
     $('.fa-gradeable-curve').click(function (event) {
         const id = jQuery(this).attr('id').split('-')[3];
         $(`#gradeable-curve-div-${id}`).toggle();
@@ -1035,7 +1028,6 @@ $(document).ready(() => {
         const selected_file = $(this)[0].files[0];
         console.log('Selected File: ', selected_file);
 
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
         console.log('URL: ', url);
 
