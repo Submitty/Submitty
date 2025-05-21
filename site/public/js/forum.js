@@ -5,12 +5,10 @@
 /* exported  displayHistoryAttachment */
 /* exported toggleUpduck */
 /* exported toggleLike */
-// eslint-disable-next-line no-unused-vars
 function categoriesFormEvents() {
     $('#ui-category-list').sortable({
         items: '.category-sortable',
         handle: '.handle',
-        // eslint-disable-next-line no-unused-vars
         update: function (event, ui) {
             reorderCategories();
         },
@@ -37,7 +35,6 @@ function categoriesFormEvents() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function openFileForum(directory, file, path) {
     const url = `${buildCourseUrl(['display_file'])}?dir=${directory}&file=${file}&path=${path}`;
     window.open(url, '_blank', 'toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600');
@@ -66,7 +63,6 @@ function resetForumFileUploadAfterError(displayPostId) {
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
 
-// eslint-disable-next-line no-unused-vars
 function checkNumFilesForumUpload(input, post_id) {
     const displayPostId = (typeof post_id !== 'undefined') ? `_${escapeSpecialChars(post_id)}` : '';
     if (input.files.length > 5) {
@@ -240,7 +236,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function createThread(e) {
     e.preventDefault();
     try {
@@ -423,7 +418,6 @@ function socketNewOrEditThreadHandler(thread_id, edit = false) {
                 return;
             }
         },
-        // eslint-disable-next-line no-unused-vars
         error: function (a, b) {
             window.alert('Something went wrong when adding new thread. Please refresh the page.');
         },
@@ -670,7 +664,6 @@ function socketUnpinThreadHandler(thread_id) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function initSocketClient() {
     // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
@@ -745,7 +738,6 @@ function initSocketClient() {
     window.socketClient.open('discussion_forum');
 }
 
-// eslint-disable-next-line no-unused-vars
 function changeThreadStatus(thread_id) {
     const url = `${buildCourseUrl(['forum', 'threads', 'status'])}?status=1`;
     $.ajax({
@@ -778,10 +770,8 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function modifyOrSplitPost(e) {
     e.preventDefault();
-    // eslint-disable-next-line no-var
     const form = $(this);
     const formData = new FormData(form[0]);
     formData.append('deleted_attachments', JSON.stringify(getDeletedAttachments()));
@@ -826,7 +816,6 @@ function modifyOrSplitPost(e) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     const DateTime = luxon.DateTime;
     if (!checkAreYouSureForm()) {
@@ -962,7 +951,6 @@ function unMarkForDeletion(ele) {
     $(ele).text('Delete');
 }
 
-// eslint-disable-next-line no-unused-vars
 function cancelEditPostForum() {
     if (!checkAreYouSureForm()) {
         return;
