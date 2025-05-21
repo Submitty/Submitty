@@ -1245,7 +1245,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 }
 
 function toggleLike(post_id, thread_id, current_user) {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['posts', 'likes']);
     $.ajax({
         url: url,
@@ -1254,7 +1253,6 @@ function toggleLike(post_id, thread_id, current_user) {
             post_id: post_id,
             thread_id: thread_id,
             current_user: current_user,
-            // eslint-disable-next-line no-undef
             csrf_token: csrfToken,
         },
         success: function (data) {
@@ -1263,12 +1261,10 @@ function toggleLike(post_id, thread_id, current_user) {
                 json = JSON.parse(data);
             }
             catch (err) {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
             if (json['status'] === 'fail') {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(json['message']);
                 return;
             }
@@ -1290,7 +1286,6 @@ function updateLikesDisplay(post_id, data) {
     const likeCounterElement = document.getElementById(`likeCounter_${post_id}`);
     let likeCounter = parseInt(likeCounterElement.innerText);
 
-    // eslint-disable-next-line no-useless-concat
     const likeIconSrc = document.getElementById(`likeIcon_${post_id}`);
     const user = document.getElementById('posts_list').dataset.user;
     let likeIconSrcElement = likeIconSrc.src;
@@ -1531,13 +1526,11 @@ function addNewCategory(csrf_token) {
                 displayErrorMessage(json['message']);
                 return;
             }
-            // eslint-disable-next-line no-undef
             displaySuccessMessage(`Successfully created category ${escapeSpecialChars(newCategory)}.`);
             $('#new_category_text').val('');
             // Create new item in #ui-category-list using dummy category
             const category_id = json['data']['new_id'];
             const category_color_code = '#000080';
-            // eslint-disable-next-line no-undef
             const category_desc = escapeSpecialChars(newCategory);
             // eslint-disable-next-line no-undef
             newelement = $($('#ui-category-template li')[0]).clone(true);
@@ -1861,8 +1854,7 @@ function alterAnnouncement(thread_id, confirmString, type, csrf_token) {
             data: {
                 thread_id: thread_id,
                 csrf_token: csrf_token,
-
-            },            
+            },
             success: function (data) {
                 window.location.reload();
             },
@@ -1881,7 +1873,7 @@ function bookmarkThread(thread_id, type) {
         data: {
             thread_id: thread_id,
             csrf_token: csrfToken,
-        },      
+        },
         success: function (data) {
             window.location.replace(buildCourseUrl(['forum', 'threads', thread_id]));
         },
@@ -1955,7 +1947,6 @@ function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
         },
     });
 }
-
 
 function toggleMarkdown(post_box_id, triggered) {
     if (post_box_id === undefined) {
@@ -2241,7 +2232,7 @@ function clearForumFilter() {
     return false;
 }
 
-function loadFilterHandlers() {    
+function loadFilterHandlers() {
     $('#filter_unread_btn').mousedown(function (e) {
         $(this).toggleClass('filter-inactive filter-active');
     });
@@ -2283,7 +2274,7 @@ function loadFilterHandlers() {
     });
 }
 
-function thread_post_handler() {    
+function thread_post_handler() {
     $('.submit_unresolve').click(function (event) {
         const post_box_id = $(this).data('post_box_id');
         $(`#thread_status_input_${post_box_id}`).val(-1);
@@ -2644,8 +2635,7 @@ function pinAnnouncement(thread_id, type, csrf_token) {
             data: {
                 thread_id: thread_id,
                 csrf_token: csrf_token,
-
-            },            
+            },
             success: function (data) {
             },
             error: function () {
