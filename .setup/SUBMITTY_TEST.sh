@@ -15,12 +15,23 @@ run_php_cs() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script lint 2>/dev/null
 }
 
+run_js_es() {
+    npm install
+    npm run eslint
+}
+
+run_css_style() {
+    npm install
+    npm run css-stylelint
+}
 
 if [ -z "$1" ] || [ "$1" == "help" ]; then
     echo "
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
           php-lint: phpcs & phpstan
+          js-lint : eslint
+          css-lint: css-stylelint
           "
 elif [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
@@ -29,12 +40,14 @@ elif [ "$1" == "phpcs" ]; then
 elif [ "$1" == "php-lint" ]; then
     run_php_cs
     run_php_stan "$@"
+elif [ "$1" == "js-lint" ]; then
+    run_js_es
+elif [ "$1" == "css-lint" ]; then
+    run_css_style
 else
-    echo "
-        Unknown test type: $1
-        use phpstan, phpcs, php-lint
-        or help for detail
-        "
+    echo "Unknown test type: $1
+        use phpstan, phpcs, php-lint, js-lint, css-lint
+        or help for detail"
 fi
 
 popd > /dev/null || {
