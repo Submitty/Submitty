@@ -1,11 +1,10 @@
-/* exported togglePanelSelectorModal */
 $(() => {
     // Draggable Popup box
     $('#panels-selector-modal').draggable();
 
     // Single Panel mode
-    const singlePanelCanvas = document.querySelector('#layout-option-1 #single-panel');
-    const singlePanelCanvasCTX = singlePanelCanvas.getContext('2d');
+    const singlePanelCanvas = document.querySelector('#layout-option-1 #single-panel') as HTMLCanvasElement;
+    const singlePanelCanvasCTX = singlePanelCanvas.getContext('2d')!;
 
     singlePanelCanvasCTX.fillStyle = 'aliceblue';
     singlePanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -15,8 +14,8 @@ $(() => {
     singlePanelCanvasCTX.fillRect(5, 20, 288, 120);
 
     // Two panel mode with equal heights on both sides
-    const equalHeight2PanelCanvas = document.querySelector('#layout-option-2 #equal-height');
-    const equalHeight2PanelCanvasCTX = equalHeight2PanelCanvas.getContext('2d');
+    const equalHeight2PanelCanvas = document.querySelector('#layout-option-2 #equal-height') as HTMLCanvasElement;
+    const equalHeight2PanelCanvasCTX = equalHeight2PanelCanvas.getContext('2d')!;
 
     equalHeight2PanelCanvasCTX.fillStyle = 'aliceblue';
     equalHeight2PanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -27,8 +26,8 @@ $(() => {
     equalHeight2PanelCanvasCTX.fillRect(153, 20, 140, 120);
 
     // Two panel mode with taller Left panel
-    const tallLeft2PanelCanvas = document.querySelector('#layout-option-2 #tall-left');
-    const tallLeft2PanelCanvasCTX = tallLeft2PanelCanvas.getContext('2d');
+    const tallLeft2PanelCanvas = document.querySelector('#layout-option-2 #tall-left') as HTMLCanvasElement;
+    const tallLeft2PanelCanvasCTX = tallLeft2PanelCanvas.getContext('2d')!;
 
     tallLeft2PanelCanvasCTX.fillStyle = 'aliceblue';
     tallLeft2PanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -39,8 +38,8 @@ $(() => {
     tallLeft2PanelCanvasCTX.fillRect(153, 20, 140, 120);
 
     // Three Panels with Equal heights and two in left side
-    const equalTwoInLeftPanelCanvas = document.querySelector('#layout-option-3 #equal-two-in-left');
-    const equalTwoInLeftPanelCanvasCTX = equalTwoInLeftPanelCanvas.getContext('2d');
+    const equalTwoInLeftPanelCanvas = document.querySelector('#layout-option-3 #equal-two-in-left') as HTMLCanvasElement;
+    const equalTwoInLeftPanelCanvasCTX = equalTwoInLeftPanelCanvas.getContext('2d')!;
 
     equalTwoInLeftPanelCanvasCTX.fillStyle = 'aliceblue';
     equalTwoInLeftPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -52,8 +51,8 @@ $(() => {
     equalTwoInLeftPanelCanvasCTX.fillRect(153, 20, 140, 120);
 
     // Three Panels with Equal heights and two in right side
-    const equalTwoInRightPanelCanvas = document.querySelector('#layout-option-3 #equal-two-in-right');
-    const equalTwoInRightPanelCanvasCTX = equalTwoInRightPanelCanvas.getContext('2d');
+    const equalTwoInRightPanelCanvas = document.querySelector('#layout-option-3 #equal-two-in-right') as HTMLCanvasElement;
+    const equalTwoInRightPanelCanvasCTX = equalTwoInRightPanelCanvas.getContext('2d')!;
 
     equalTwoInRightPanelCanvasCTX.fillStyle = 'aliceblue';
     equalTwoInRightPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -65,8 +64,8 @@ $(() => {
     equalTwoInRightPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
     // Three Panels with taller Left panel and two in left side
-    const tallLeftTwoInLeftPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-left');
-    const tallLeftTwoInLeftPanelCanvasCTX = tallLeftTwoInLeftPanelCanvas.getContext('2d');
+    const tallLeftTwoInLeftPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-left') as HTMLCanvasElement;
+    const tallLeftTwoInLeftPanelCanvasCTX = tallLeftTwoInLeftPanelCanvas.getContext('2d')!;
 
     tallLeftTwoInLeftPanelCanvasCTX.fillStyle = 'aliceblue';
     tallLeftTwoInLeftPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -78,8 +77,8 @@ $(() => {
     tallLeftTwoInLeftPanelCanvasCTX.fillRect(153, 20, 140, 120);
 
     // Three Panels with taller Left panel and two in right side
-    const tallLeftTwoInRightPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-right');
-    const tallLeftTwoInRightPanelCanvasCTX = tallLeftTwoInRightPanelCanvas.getContext('2d');
+    const tallLeftTwoInRightPanelCanvas = document.querySelector('#layout-option-3 #tall-left-two-in-right') as HTMLCanvasElement;
+    const tallLeftTwoInRightPanelCanvasCTX = tallLeftTwoInRightPanelCanvas.getContext('2d')!;
 
     tallLeftTwoInRightPanelCanvasCTX.fillStyle = 'aliceblue';
     tallLeftTwoInRightPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -91,8 +90,8 @@ $(() => {
     tallLeftTwoInRightPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
     // Four Panels with equal heights
-    const equalFourPanelCanvas = document.querySelector('#layout-option-4 #equal-four-panel');
-    const equalFourPanelCanvasCTX = equalFourPanelCanvas.getContext('2d');
+    const equalFourPanelCanvas = document.querySelector('#layout-option-4 #equal-four-panel') as HTMLCanvasElement;
+    const equalFourPanelCanvasCTX = equalFourPanelCanvas.getContext('2d')!;
 
     equalFourPanelCanvasCTX.fillStyle = 'aliceblue';
     equalFourPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -107,8 +106,8 @@ $(() => {
     equalFourPanelCanvasCTX.fillRect(153, 82, 140, 58);
 
     // Four Panels with taller left panel
-    const tallLeftFourPanelCanvas = document.querySelector('#layout-option-4 #tall-left-four-panel');
-    const tallLeftFourPanelCanvasCTX = tallLeftFourPanelCanvas.getContext('2d');
+    const tallLeftFourPanelCanvas = document.querySelector('#layout-option-4 #tall-left-four-panel') as HTMLCanvasElement;
+    const tallLeftFourPanelCanvasCTX = tallLeftFourPanelCanvas.getContext('2d')!;
 
     tallLeftFourPanelCanvasCTX.fillStyle = 'aliceblue';
     tallLeftFourPanelCanvasCTX.fillRect(0, 0, 350, 200);
@@ -123,7 +122,7 @@ $(() => {
     tallLeftFourPanelCanvasCTX.fillRect(153, 82, 140, 58);
 });
 
-function togglePanelSelectorModal(show) {
+export function togglePanelSelectorModal(show: boolean) {
     if (show) {
         $('#panels-selector-modal').show();
     }
@@ -131,3 +130,5 @@ function togglePanelSelectorModal(show) {
         $('#panels-selector-modal').hide();
     }
 }
+
+window.togglePanelSelectorModal = togglePanelSelectorModal;

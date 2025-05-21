@@ -1613,15 +1613,15 @@ HTML;
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
 
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1701,9 +1701,9 @@ HTML;
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalCss('table.css');
 

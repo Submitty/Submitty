@@ -1,5 +1,3 @@
-/* exported initializeResizablePanels */
-
 /**
  * callback attached to run after the initialization of resizable panels
  *
@@ -16,20 +14,22 @@
  * @param {boolean} isHorizontalResize If set true, horizontal resizing is initiated (top and bottom) else resizing is vertical
  * @param {resizeCallback} callback
  */
-function initializeResizablePanels(panelSel, dragBarSel, isHorizontalResize = false, callback = null) {
+export function initializeResizablePanels(panelSel: string, dragBarSel: string, isHorizontalResize: boolean = false, callback: (updatedVal: string, isHorizontalResize: boolean) => void = () => {}) {
     // Select all the DOM elements for dragging in two-panel-mode
-    const panelEle = document.querySelector(panelSel);
-    const panelCont = panelEle.parentElement;
-    const dragbar = document.querySelector(dragBarSel);
+    const panelEle: HTMLElement = document.querySelector(panelSel)!;
+    const panelCont = panelEle.parentElement!;
+    const dragbar = document.querySelector(dragBarSel) as HTMLElement;
 
-    $(dragbar).css('touch-action', 'none');
+    if (dragbar) {
+        $(dragbar).css('touch-action', 'none');
+    }
 
     let xPos = 0, yPos = 0, panelHeight = 0, panelWidth = 0;
 
     // Width of left side
-    const mouseDownHandler = (e) => {
+    const mouseDownHandler = (e: MouseEvent | TouchEvent | Touch) => {
         // Get the current mouse position
-        if (e.type === 'touchstart') {
+        if (e instanceof TouchEvent) {
             e = e.touches[0];
         }
         xPos = e.clientX;
@@ -64,8 +64,8 @@ function initializeResizablePanels(panelSel, dragBarSel, isHorizontalResize = fa
         document.removeEventListener('touchend', mouseUpHandler);
     };
 
-    const mouseMoveHandler = (e) => {
-        if (e.type === 'touchmove') {
+    const mouseMoveHandler = (e: MouseEvent | TouchEvent | Touch) => {
+        if (e instanceof TouchEvent) {
             e = e.touches[0];
         }
         let updateValue;
