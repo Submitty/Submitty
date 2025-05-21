@@ -63,7 +63,7 @@
         {% endif %}
         <label for="registered_section" class="full-width">
             Registration Section:
-            <select name="registered_section" id="registered_section">
+            <select name="registered_section" id="registered_section" data-testid="registration-section-dropdown">
                 <option value="null">Not Registered</option>
                 {% for section in reg_sections %}
                     <option value='{{ section.sections_registration_id }}'>Section {{ section.sections_registration_id }}</option>
@@ -127,5 +127,5 @@
 {% block close_click_action %}closeButton(){% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" data-testid="submit-user-form-button" />
 {% endblock %}
