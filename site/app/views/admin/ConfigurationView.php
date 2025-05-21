@@ -3,6 +3,7 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\controllers\admin\ConfigurationController;
 
 class ConfigurationView extends AbstractView {
     public function viewConfig(
@@ -10,7 +11,8 @@ class ConfigurationView extends AbstractView {
         $gradeable_seating_options,
         bool $email_enabled,
         array $submitty_admin_user,
-        string $csrf_token
+        string $csrf_token,
+        bool $rainbowCustomizationExists
     ) {
         $this->output->addInternalJs("configuration.js");
         $this->output->addInternalCss("configuration.css");
@@ -26,7 +28,9 @@ class ConfigurationView extends AbstractView {
             "email_room_seating_url" => $this->core->buildCourseUrl(['email_room_seating']),
             "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
             "csrf_token" => $csrf_token,
-            "sections_url" => $this->core->buildCourseUrl(['sections'])
+            "sections_url" => $this->core->buildCourseUrl(['sections']),
+            "rainbowCustomizationExists" => $rainbowCustomizationExists,
+            "all_self_register" => ConfigurationController::ALL_SELF_REGISTER
         ]);
     }
 }

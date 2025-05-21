@@ -120,14 +120,12 @@
     /* dropdown buttons */
     --focus-dropdown: #f5f5f5;
 
-
     /* text and fonts */
     --text-black: #000000; /* use only on white/background-blue */
     --text-white: #ffffff; /* use on all colors */
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
-    --deleted-color: #000000;
 
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
@@ -135,7 +133,7 @@
     --important-post: #ffd700; /* is also for star color */
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
-    --upduck-yellow: #F5BD41;
+    --upduck-yellow: #f5bd41;
 
     /* notebook builder */
     --notebook-builder-form-options-orange: #f7d8ba;
@@ -178,14 +176,14 @@
     --peer-feedback-green: #008000;
 
     /* For categorizing objects */
-    --category-color-1: #F44336;
-    --category-color-2: #FF9800;
-    --category-color-3: #4CAF50;
-    --category-color-4: #4FC3F7;
-    --category-color-5: #7986CB;
-    --category-color-6: #B39DDB;
-    --category-color-7: #F8BBD0;
-    --category-color-8: #CE93D8;
+    --category-color-1: #f44336;
+    --category-color-2: #ff9800;
+    --category-color-3: #4caf50;
+    --category-color-4: #4fc3f7;
+    --category-color-5: #7986cb;
+    --category-color-6: #b39ddb;
+    --category-color-7: #f8bbd0;
+    --category-color-8: #ce93d8;
     --category-color-9: #8ac78e;
     --category-color-10: #b39b61;
     --category-color-11: #6eb9aa;
@@ -210,11 +208,11 @@
         rgb(255 0 255 / 30%),
         rgb(255 0 0 / 30%)
     );
-    
+
     /* poll histogram colors */
     --histogram-default: var(--standard-vibrant-dark-blue);
     --histogram-correct: var(--standard-deep-dark-green);
-    
+
     /* other */
     --box-shadow-very-transparent: #00000020;
     --box-shadow-slightly-transparent: #00000030;
@@ -243,7 +241,6 @@
 
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
-    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
 
@@ -263,7 +260,6 @@
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
-    --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
@@ -303,7 +299,6 @@
     /* dropdown buttons */
     --focus-dropdown: #f5f5f5;
 
-
     /* text and fonts */
     --text-black: #ffffff; /* use only on white/background-blue */
     --text-white: #000000; /* use on all colors */
@@ -314,6 +309,8 @@
     /* discussion forum */
     --attachment-box-color: #4a4a4a;
     --file-upload-table-hover: #4a4a4a;
+    --deleted-discussion-post-grey: #283e57;
+    --deleted-and-unviewed-thread: #3e5f7a;
 
     /* these differ from the colors on the posts for some reason?
           so I will put them here for reference
@@ -375,14 +372,14 @@
 /* Dark Theme Versions of Colors */
 :root[data-theme="dark"] {
     /* For categorizing objects */
-    --category-color-1: #B71C1C;
-    --category-color-2: #BF360C;
-    --category-color-3: #1B5E20;
-    --category-color-4: #1565C0;
-    --category-color-5: #1A237E;
-    --category-color-6: #673AB7;
-    --category-color-7: #D81B60;
-    --category-color-8: #9C27B0;
+    --category-color-1: #b71c1c;
+    --category-color-2: #bf360c;
+    --category-color-3: #1b5e20;
+    --category-color-4: #1565c0;
+    --category-color-5: #1a237e;
+    --category-color-6: #673ab7;
+    --category-color-7: #d81b60;
+    --category-color-8: #9c27b0;
     --category-color-9: #8ac78e;
     --category-color-10: #b39b61;
     --category-color-11: #6eb9aa;
