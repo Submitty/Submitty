@@ -73,6 +73,7 @@ declare global {
         uploadAttachment(): void;
         togglePanelSelectorModal: (show: boolean) => void;
         closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
+        reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         taLayoutDet: {
@@ -824,9 +825,12 @@ function adjustGradingPanelHeader() {
     const headerBox = $('.panel-header-box');
     const navBar = $('#bar_wrapper');
     const navBarBox = $('.navigation-box');
-    const panelsContainer = document.querySelector(
+    const panelsContainer: HTMLElement | null = document.querySelector(
         '.panels-container',
-    ) as HTMLElement;
+    );
+    if (panelsContainer === null) {
+        return;
+    }
 
     if (maxHeaderWidth < headerBox.width()!) {
         maxHeaderWidth = headerBox.width()!;
@@ -1522,7 +1526,10 @@ function updatePanelLayoutModes() {
     for (const panelIdx in panelsBucket) {
         const panelCont = document.querySelector(
             panelsBucket[panelIdx],
-        )!.childNodes;
+        )?.childNodes;
+        if (!panelCont) {
+            continue;
+        }
         // Move all the panels from the left and right buckets to the main panels-container
         for (let idx = 0; idx < panelCont.length; idx++) {
             document.querySelector('.panels-container')!.append(panelCont[idx]);
@@ -2401,8 +2408,3 @@ window.deleteAttachment = function (target: string, file_name: string) {
         });
     }
 };
-$(document).ready(() => {
-    $('#posts_list').css('min-width', '-webkit-fill-available');
-    generateCodeMirrorBlocks(document);
-    loadAllInlineImages(true);
-});

@@ -16,7 +16,10 @@
  */
 export function initializeResizablePanels(panelSel: string, dragBarSel: string, isHorizontalResize: boolean = false, callback: (updatedVal: string, isHorizontalResize: boolean) => void = () => {}) {
     // Select all the DOM elements for dragging in two-panel-mode
-    const panelEle: HTMLElement = document.querySelector(panelSel)!;
+    const panelEle: HTMLElement | null = document.querySelector(panelSel);
+    if (!panelEle) {
+        return;
+    }
     const panelCont = panelEle.parentElement!;
     const dragbar = document.querySelector(dragBarSel) as HTMLElement;
 

@@ -2524,6 +2524,7 @@ async function reloadInstructorEditRubric(gradeable_id: string, itempool_availab
         console.error(err);
     }
 }
+window.reloadInstructorEditRubric = reloadInstructorEditRubric;
 
 /**
  * Reloads the provided component with the grader view
