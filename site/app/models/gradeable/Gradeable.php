@@ -492,8 +492,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_inquiry_start_date',
-        'grade_inquiry_due_date'
     ];
 
     /**
@@ -783,8 +781,6 @@ class Gradeable extends AbstractModel {
         $no_due_date_reqs = [
             'ta_view_start_date',
             'submission_open_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         $no_release_date_reqs = [
@@ -793,8 +789,6 @@ class Gradeable extends AbstractModel {
             'submission_due_date',
             'grade_start_date',
             'grade_due_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         // Now, check if they are in increasing order
@@ -838,12 +832,6 @@ class Gradeable extends AbstractModel {
 
             if ($this->hasReleaseDate()) {
                 $result[] = 'grade_released_date';
-            }
-
-            // Only add in grade inquiry dates if its allowed
-            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$grade_inquiry_modified) {
-                $result[] = 'grade_inquiry_start_date';
-                $result[] = 'grade_inquiry_due_date';
             }
         }
         else {
@@ -1802,8 +1790,7 @@ class Gradeable extends AbstractModel {
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-//        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
-        return false;
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
@@ -2271,6 +2258,14 @@ class Gradeable extends AbstractModel {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Checks if the grade-inquiry settings are valid
+     * @return bool
+     */
+    public function isGradeInquirySettingsValid() {
+        return $this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date <= $this->grade_inquiry_due_date;
     }
 
     /**
