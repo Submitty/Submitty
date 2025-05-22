@@ -37,9 +37,7 @@ class Server implements MessageComponentInterface {
     }
 
     private function log(string $message) {
-        if ($this->core->getConfig()->isDebug()) {
-            echo $message . "\n";
-        }
+        echo $message . "\n";
     }
 
     private function logError(\Throwable $error, ConnectionInterface $conn) {
