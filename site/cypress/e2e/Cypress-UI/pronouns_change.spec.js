@@ -45,7 +45,7 @@ describe('Tests cases abut changing user pronouns', () => {
         // ensure pronouns column is on
         cy.get('[data-testid="toggle-columns"]').click(); // open toggle columns form
         cy.get('[data-testid="toggle-pronouns"]').check();
-        cy.get('[data-testid="toggle-student-col-submit"]').first().click();
+        cy.get('[data-testid="popup-save-button"]').first().click();
 
         // Ensure correctness in table
         cy.get('.td-pronouns:eq( 12 )').should('have.text', 'They/Them');
