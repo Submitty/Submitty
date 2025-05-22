@@ -108,8 +108,8 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.panel-head-active .collapse-icon,
-.expand-icon {
+.expand-icon .collapse-icon,
+.panel-head-active {
     display: none;
 }
 
