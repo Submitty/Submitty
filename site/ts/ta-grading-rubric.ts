@@ -2769,6 +2769,7 @@ async function openComponentInstructorEdit(component_id: number) {
 async function openComponentGrading(component_id: number) {
     try {
         const response: { status: string; message: string; data: { active_graders: typeof ACTIVE_GRADERS_LIST; active_graders_timestamps: typeof ACTIVE_GRADERS_LIST } } = await $.ajax({
+            dataType: 'json',
             type: 'POST',
             async: AJAX_USE_ASYNC,
             data: {
@@ -2940,6 +2941,7 @@ async function closeComponentInstructorEdit(component_id: number, saveChanges: b
 async function closeComponentGrading(component_id: number, saveChanges: boolean) {
     try {
         const response: { status: string; message: string; data: { active_graders: typeof ACTIVE_GRADERS_LIST; active_graders_timestamps: typeof ACTIVE_GRADERS_LIST } } = await $.ajax({
+            dataType: 'json',
             type: 'POST',
             async: AJAX_USE_ASYNC,
             data: {
