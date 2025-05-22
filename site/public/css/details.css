@@ -108,8 +108,9 @@
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
-.expand-icon .collapse-icon,
-.panel-head-active {
+.panel-head-active .collapse-icon,
+/* stylelint-disable-next-line no-descending-specificity */
+.expand-icon {
     display: none;
 }
 
