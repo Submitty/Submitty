@@ -180,7 +180,8 @@ function generateHotkeysList() {
     const parent = $('#hotkeys-list');
 
     parent.replaceWith(window.Twig.twig({
-        href: '/templates/grading/settings/HotkeyList.twig',
+        // @ts-expect-error @types/twig is not compatible with the current version of twig
+        ref: 'HotkeyList',
     }).render({
         keymap: keymap.map((hotkey) => ({
             ...hotkey,
@@ -203,7 +204,8 @@ function generateSettingList() {
     loadTAGradingSettingData();
 
     parent.replaceWith(window.Twig.twig({
-        href: '/templates/grading/settings/GeneralSettingList.twig',
+        // @ts-expect-error @types/twig is not compatible with the current version of twig
+        ref: 'GeneralSettingList',
     }).render({
         settings: settingsData,
     }));

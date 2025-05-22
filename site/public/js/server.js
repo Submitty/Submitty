@@ -809,13 +809,18 @@ function checkRefreshPage(url) {
 function check_server(url) {
     $.get(url,
         (data) => {
+            try {
             // if the response bool is true, reload the page
-            const refresh_bool = JSON.parse(data).data;
-            if (refresh_bool) {
-                location.reload();
+                const refresh_bool = JSON.parse(data).data;
+                if (refresh_bool) {
+                    location.reload();
+                }
+                else {
+                    checkRefreshPage(url);
+                }
             }
-            else {
-                checkRefreshPage(url);
+            catch (e) {
+                console.log('Error parsing server response:', e);
             }
         },
     );

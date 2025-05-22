@@ -4,6 +4,7 @@ import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta
 import {
     closeAllComponents,
     closeComponent,
+    Component,
     ComponentGradeInfo,
     CUSTOM_MARK_ID,
     getAnonId,
@@ -83,6 +84,20 @@ declare global {
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
+        ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]): Promise<string | undefined>;
+        getGradeableId(): string | undefined;
+        getAnonId (): string | undefined;
+        canVerifyGraders(): boolean;
+        getComponentIdFromDOMElement(me: HTMLElement): number;
+        isItempoolAvailable(): string;
+        getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
+        getAllComponentsFromDOM(): Component[];
+        toggleCustomMark(component_id: number): Promise<void>;
+        onToggleEditMode(): Promise<void>;
+        addComponent(peer: boolean): Promise<string | undefined>;
+        deleteComponent(component_id: number): Promise<string | undefined>;
+        addNewMark(component_id: number): Promise<void>;
+
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
@@ -2333,7 +2348,8 @@ window.uploadAttachment = function () {
                     }
                     else {
                         const renderedData = window.Twig.twig({
-                            href: '/templates/grading/Attachments.twig',
+                            // @ts-expect-error @types/twig is not compatible with the current version of twig
+                            ref: 'Attachments',
                         }).render({
                             file: data['data'],
                             id: `a-up-${uploadedAttachmentIndex}`,

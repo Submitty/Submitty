@@ -1707,8 +1707,8 @@ HTML;
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalCss('table.css');
 
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
-        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
                 "gradeable_id" => $gradeable->getId(),

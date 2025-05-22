@@ -17,7 +17,7 @@ type Stats = { section_submitter_count: string; total_submitter_count: string; s
 type Gradeable = {
     components: Component[];
 };
-type Component = {
+export type Component = {
     id: number; title: string; ta_comment: string; student_comment: string; page: number; lower_clamp: number; default: number; max_value: number; upper_clamp: number; is_itempool_linked: boolean; itempool_option: string; peer: boolean;
     marks: Mark[];
 };
@@ -852,6 +852,7 @@ async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id
         return response.data;
     }
 }
+window.ajaxChangeGradedVersion = ajaxChangeGradedVersion;
 
 /**
  * Gets if the 'verify' button should show up for a component
@@ -880,6 +881,7 @@ window.showVerifyComponent = function (graded_component_object: object | undefin
 export function getGradeableId() {
     return $('#gradeable-rubric').attr('data-gradeable_id')!;
 }
+window.getGradeableId = getGradeableId;
 
 /**
  * Gets the anon_id of the submitter being graded
@@ -888,6 +890,7 @@ export function getGradeableId() {
 export function getAnonId(): string {
     return $('#anon-id').attr('data-anon_id')!;
 }
+window.getAnonId = getAnonId;
 
 /**
  * Gets the id of the grader
@@ -911,8 +914,9 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#grader-info').attr('data-can_verify');
+    return $('#grader-info').attr('data-can_verify') === 'true';
 }
+window.canVerifyGraders = canVerifyGraders;
 
 /**
  * Gets if grading is disabled since the selected version isn't the same
@@ -1001,6 +1005,7 @@ function getComponentIdFromDOMElement(me: HTMLElement) {
     }
     return parseInt($(me).parents('.component').attr('data-component_id')!);
 }
+window.getComponentIdFromDOMElement = getComponentIdFromDOMElement;
 
 /**
  * Gets the mark id of a DOM element inside a mark
@@ -1055,8 +1060,9 @@ function getOverallCommentJQuery() {
  * @return {string}
  */
 function isItempoolAvailable() {
-    return $('#gradeable_rubric.electronic_file').attr('data-itempool-available');
+    return $('#gradeable_rubric.electronic_file').attr('data-itempool-available')!;
 }
+window.isItempoolAvailable = isItempoolAvailable;
 
 /**
  * Returns the itempool options
@@ -1076,6 +1082,7 @@ function getItempoolOptions(parsed = false): string | Record<string, string[]> {
         return $('#gradeable_rubric.electronic_file').attr('data-itempool-options')!;
     }
 }
+window.getItempoolOptions = getItempoolOptions;
 
 /**
  * Shows the 'in progress' indicator for a component
@@ -1204,6 +1211,7 @@ function getAllComponentsFromDOM() {
     });
     return components;
 }
+window.getAllComponentsFromDOM = getAllComponentsFromDOM;
 
 /**
  * Gets the page number assigned to a component
@@ -2182,6 +2190,7 @@ export async function onToggleEditMode() {
     }
     disableEditModeBox(false);
 }
+window.onToggleEditMode = onToggleEditMode;
 
 /**
  * Callback for the 'count up' option of a component in instructor edit mode
@@ -2331,6 +2340,7 @@ async function verifyAllComponents() {
 async function addComponent(peer: boolean) {
     return ajaxAddComponent(getGradeableId(), peer);
 }
+window.addComponent = addComponent;
 
 /**
  * Deletes a component from the server
@@ -2340,6 +2350,7 @@ async function addComponent(peer: boolean) {
 function deleteComponent(component_id: number) {
     return ajaxDeleteComponent(getGradeableId(), component_id);
 }
+window.deleteComponent = deleteComponent;
 
 /**
  * Sets the gradeable-wide page setting
@@ -2685,6 +2696,7 @@ async function addNewMark(component_id: number) {
         await injectInstructorEditComponent(component, true);
     }
 }
+window.addNewMark = addNewMark;
 
 /**
  * Toggles the state of a mark in grade mode
@@ -2731,6 +2743,7 @@ function toggleCustomMark(component_id: number) {
         return refreshGradedComponent(component_id, true);
     }
 }
+window.toggleCustomMark = toggleCustomMark;
 /**
  * Opens a component for instructor edit mode
  * NOTE: don't call this function on its own.  Call 'openComponent' Instead
