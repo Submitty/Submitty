@@ -6,6 +6,7 @@ import Popup from './popup.vue';
 const { columns, labels, cookie } = defineProps<{
     columns: string[];
     labels: string[];
+    forced?: string[];
     cookie: string;
 }>();
 
@@ -13,14 +14,14 @@ const selected = ref<boolean[]>([]);
 const visible = ref(false);
 
 function loadColumns() {
-    const cookieData = Cookies.get(cookie)?.split('-') || [];
+    const cookieData = Cookies.get(cookie)?.split('-') || Array(columns.length).fill('1');
     selected.value = columns.map((_, i) => cookieData[i] === '1');
 }
 function saveColumns() {
     Cookies.set(
         cookie,
         selected.value.map((v) => (v ? 1 : 0)).join('-'),
-        { expires: 365, path: '' },
+        { expires: 365, path: '/' },
     );
     window.location.reload();
 }
@@ -71,6 +72,7 @@ onMounted(loadColumns);
             v-model="selected[idx]"
             type="checkbox"
             class="toggle-columns-box"
+            :disabled="forced?.includes(id)"
             :data-testid="id"
           />
           <label :for="id">{{ labels[idx] }}</label>

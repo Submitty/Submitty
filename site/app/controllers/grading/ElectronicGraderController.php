@@ -989,10 +989,7 @@ class ElectronicGraderController extends AbstractController {
             $grading_details_columns = explode("-", $_COOKIE['grading_details_columns']);
         }
         else {
-            //Expires 10 years from today (functionally indefinite)
-            if (setcookie('grading_details_columns', implode("-", array_fill(0, 10, '1')), time() + 60 * 60 * 24 * 365 * 10, '/')) {
-                $grading_details_columns = array_fill(0, 10, '1');
-            }
+            $grading_details_columns = array_fill(0, 10, '1');
         }
 
         //Checks to see if the Grader has access to all users in the course,
