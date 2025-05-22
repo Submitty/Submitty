@@ -809,7 +809,9 @@ function checkRefreshPage(url) {
 function check_server(url) {
     $.get(url,
         (data) => {
-            if (data.indexOf('REFRESH_ME') > -1) {
+            // if the response bool is true, reload the page
+            const refresh_bool = JSON.parse(data).data;
+            if (refresh_bool) {
                 location.reload();
             }
             else {
