@@ -990,8 +990,8 @@ class ElectronicGraderController extends AbstractController {
         }
         else {
             //Expires 10 years from today (functionally indefinite)
-            if (setcookie('grading_details_columns', urlencode(json_encode([])), time() + 60 * 60 * 24 * 365 * 10, '/')) {
-                $grading_details_columns = [];
+            if (setcookie('grading_details_columns', implode("-", array_fill(0, 10, '1')), time() + 60 * 60 * 24 * 365 * 10, '/')) {
+                $grading_details_columns = array_fill(0, 10, '1');
             }
         }
 
