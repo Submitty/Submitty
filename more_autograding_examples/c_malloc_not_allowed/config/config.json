@@ -2,7 +2,7 @@
     "required_capabilities": "cpp",
     "autograding_method": "docker",
     "container_options": {
-        "container_image": "submitty/clang:latest"
+        "container_image": "submitty/gcc:latest"
     },
     "autograding": {
         "submission_to_compilation": ["**/*.c"],
@@ -22,7 +22,7 @@
         {
             "type": "Compilation",
             "title": "Compilation",
-            "command": "clang -Wall -Wextra -Werror -o a.out -- *.c",
+            "command": "gcc -Wall -Wextra -Werror -o a.out *.c",
             "executable_name": "a.out",
             "points": 25
         },
