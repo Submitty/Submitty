@@ -19,7 +19,7 @@ from . import insert_database_version_data, autograding_utils
 def get_queue_time(next_directory, next_to_grade):
     t = time.ctime(os.path.getctime(os.path.join(next_directory, next_to_grade)))
     t = dateutil.parser.parse(t)
-    t = dateutils.get_timezone().localize(t)
+    t = t.astimezone(dateutils.get_timezone())
     return t
 
 

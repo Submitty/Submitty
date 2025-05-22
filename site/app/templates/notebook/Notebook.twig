@@ -1,4 +1,4 @@
-<div class="notebook" id="notebook-main-view">
+<div class="notebook" id="notebook-main-view" data-testid="notebook-main-view">
     <script>
         const USER_ID = "{{student_id}}";
     </script>
@@ -18,7 +18,7 @@
         </div>
     {% endif %}
     {% for cell in notebook %}
-        <div id="content_{{ loop.index0 }}" class="{{ cell.type }}" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
+        <div id="content_{{ loop.index0 }}" class="{{ cell.type }} notebook-cell" {% if cell.item_ref is defined %}data-item-ref={{ cell.item_ref }}{% else %}data-non-item-ref={{data_non_item_ref}}{% set data_non_item_ref = data_non_item_ref + 1 %}{% endif %}>
 
             {# Handle if cell is markdown #}
             {% if cell.type == "markdown" %}
@@ -31,12 +31,12 @@
 
             {# Handle "output" cells #}
             {% elseif cell.type == "output" %}
-                <pre class="notebook-output-cell">{{ cell.output_text }}</pre>
+                <pre class="notebook-output-cell-content">{{ cell.output_text }}</pre>
 
             {# Handle if cell is image #}
             {% elseif cell.type == "image" %}
 
-                <img src="{{ attribute(image_data, cell.image) }}"
+                <img src="{{ image_data is defined ? attribute(image_data, cell.image) : cell.image }}"
 
                 {% if cell.width > 0 %}
                     width="{{ cell.width }}"
@@ -174,7 +174,7 @@
                                            disabled = "disabled"
                                        {% endif %}
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {{ cell.choices[idx].description | markdown_to_html }}
                             </label>
                         {% endfor %}
                     {% else %}
@@ -277,6 +277,7 @@
             {% endif %}
 
         </div>
+        <hr>
 
     {% endfor %}
 
@@ -289,7 +290,7 @@
     //interval is 20 percent of overall time allowed or 10 minutes, whichever is greater
     let interval = Math.floor(((({{ allowed_minutes }}) / 5) > 10 ? ({{ allowed_minutes }}) / 5 : 10));
     let loadTime = 0;
-    let showPopup = false;
+    let show_popup = false;
 
     function notebookPopupSubmitKey(){
         return `${gradeable_id}-${USER_ID}`;
@@ -312,7 +313,7 @@
         const time_taken = Math.floor((curTime - loadTime)/1000);
         const minutes_taken = Math.floor(time_taken / 60);
         if (minutes_taken >= interval ) {
-            if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && showPopup) {
+            if (localStorage.getItem(notebookPopupSubmitKey()) === 'yes' && curTime < user_deadline && show_popup) {
                 $(".notebook-submit-popup").show();
             }
         }

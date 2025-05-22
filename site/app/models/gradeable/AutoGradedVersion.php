@@ -643,6 +643,28 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
+    public function getMetrics_Sum(): array {
+        $who = $this->getGradedGradeable()->getSubmitter()->getId();
+        $gradeable = $this->graded_gradeable->getGradeable();
+        $version = $this->version;
+
+        $metrics = $this->core->getQueries()->getMetricSum($who, $gradeable->getId(), $version);
+        if (isset($metrics[0]['total_elapsed_time']) && isset($metrics[0]['total_max_rss_size'])) {
+            return [
+                'runtime' => $metrics[0]['total_elapsed_time'],
+                'memory' => $metrics[0]['total_max_rss_size']
+            ];
+        }
+        return [
+            'runtime' => null,
+            'memory' => null
+        ];
+    }
+
+    public function getSubmitterId(): string {
+        return $this->getGradedGradeable()->getSubmitter()->getId();
+    }
+
     /**
      * Sets whether or not autograding has been completed for this version
      * @param bool $complete Is autograding complete for this version

@@ -40,10 +40,10 @@
         });
     </script>
 
-    <h2>{{ gradeable.getTitle() }} Notebook Builder</h2>
+    <h2 data-testid="notebook-builder-title">{{ gradeable.getTitle() }} Notebook Builder</h2>
     <div id="notebook-builder">
         <p>Loading...</p>
     </div>
-    <button onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>
+    <button class="btn btn-nav btn-nav-grade btn-default" onclick="javascript:document.getElementById('holder').innerHTML=JSON.stringify(notebook_builder.getJSON(), null, 2)">Show JSON</button>
     <pre id="holder"></pre>
 </div>

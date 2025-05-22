@@ -189,7 +189,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['banner', 'upload']),
+        url: buildUrl(['community_event', 'upload']),
         data: formData,
         processData: false,
         contentType: false,
@@ -199,7 +199,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -211,7 +211,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
@@ -458,7 +458,7 @@ function addLabel(filename, filesize, part, previous) {
 function handle_input_keypress(inactive_version) {
     empty_inputs = false;
     // eslint-disable-next-line no-undef
-    showPopup = true;
+    show_popup = true;
     if (!inactive_version) {
         setButtonStatus();
     }
@@ -812,14 +812,14 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
 
             if (total_size >= max_file_size) {
                 alert('ERROR! Uploaded file(s) exceed max file size.\n'
-                + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
 
             if (total_size >= max_post_size) {
                 alert('ERROR! Uploaded file(s) exceed max PHP POST size.\n'
-                + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
+                    + 'Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.');
                 $('#submit').prop('disabled', false);
                 return;
             }
@@ -855,7 +855,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -945,7 +945,7 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1134,7 +1134,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1196,7 +1196,7 @@ function handleDownloadImages(csrf_token) {
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading.');
                 console.log(data);
             }
         },
@@ -1332,7 +1332,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
+                    + 'send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]');
                 console.log(data);
             }
         },
@@ -1384,6 +1384,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (file_path !== null && file_path !== '') {
+        if (file_path.startsWith('/')) {
+            alert('The file path cannot start with the root directory “/”, use a relative path.');
+            return;
+        }
         const file_name = file_path.split('/').pop();
         if (link_url !== null) {
             const lastSlashIndex = file_path.lastIndexOf('/');
@@ -1441,7 +1445,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
+                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
                 console.log(data);
             }
         },

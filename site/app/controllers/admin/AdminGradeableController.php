@@ -5,6 +5,7 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
+use app\libraries\Utils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
@@ -61,22 +62,23 @@ class AdminGradeableController extends AbstractController {
             'instructions_url' => '',
             'id' => '',
             'type' => '',
-            'bulk_upload' => 'false',
-            'vcs' => 'false',
-            'ta_grading' => 'false',
-            'grade_inquiry_allowed' => 'false',
-            'grade_inquiry_per_component_allowed' => 'false',
-            'discussion_based' => 'false',
+            'bulk_upload' => false,
+            'vcs' => false,
+            'ta_grading' => false,
+            'grade_inquiry_allowed' => false,
+            'grade_inquiry_per_component_allowed' => false,
+            'discussion_based' => false,
             'discussion_thread_id' => '',
-            'team_assignment' => 'false',
+            'team_assignment' => false,
             'team_size_max' => 3,
             'eg_inherit_teams_from' => '',
-            'gradeable_teams_read' => 'false',
+            'gradeable_teams_read' => false,
             'vcs_radio_buttons' => 'submitty-hosted',
             'external_repo' => '',
-            'using_subdirectory' => 'false',
+            'using_subdirectory' => false,
             'vcs_subdirectory' => '',
             'syllabus_bucket' => 'Homework',
+            'autograding_config_path' => ''
         ];
 
         if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['type'])) {
@@ -86,6 +88,7 @@ class AdminGradeableController extends AbstractController {
         $values['id'] = $_POST['id'];
         $values['title'] = $_POST['title'];
         $values['type'] = $_POST['type'];
+        $values['autograding_config_path'] = $_POST['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
         if ($_POST['type'] === 'Electronic File') {
             if (array_key_exists('vcs', $_POST)) {
                 if (!array_key_exists('repository_type', $_POST['vcs'])) {
@@ -101,14 +104,14 @@ class AdminGradeableController extends AbstractController {
                     $values['external_repo'] = $_POST['vcs']['vcs_path'];
                 }
                 if (isset($_POST['vcs']['vcs_subdirectory'])) {
-                    $values['using_subdirectory'] = 'true';
+                    $values['using_subdirectory'] = true;
                     $values['vcs_subdirectory'] = $_POST['vcs']['vcs_subdirectory'];
                 }
-                $values['vcs'] = 'true';
+                $values['vcs'] = true;
                 $values['vcs_radio_buttons'] = $_POST['vcs']['repository_type'];
                 $values['vcs_path'] = $_POST['vcs']['vcs_path'];
             }
-            $values['bulk_upload'] = $_POST['bulk_upload'] ?? 'false';
+            $values['bulk_upload'] = Utils::getBooleanValue($_POST['bulk_upload'] ?? false);
         }
 
         if (array_key_exists('team_gradeable', $_POST)) {
@@ -116,18 +119,18 @@ class AdminGradeableController extends AbstractController {
                 return JsonResponse::getErrorResponse('Team gradeables require a team_size_max value. See documentation for information.');
             }
             $values['eg_inherit_teams_from'] = $_POST['team_gradeable']['inherit_from'] ?? '';
-            $values['team_assignment'] = 'true';
+            $values['team_assignment'] = true;
             $values['team_size_max'] = $_POST['team_gradeable']['team_size_max'];
         }
         if (array_key_exists('discussion_thread_id', $_POST)) {
-            $values['discussion_based'] = $_POST['discussion_based'];
+            $values['discussion_based'] = Utils::getBooleanValue($_POST['discussion_based'] ?? false);
             $values['discussion_thread_id'] = $_POST['discussion_thread_id'];
         }
         if (array_key_exists('ta_grading', $_POST)) {
-            $values['ta_grading'] = $_POST['ta_grading'];
+            $values['ta_grading'] = Utils::getBooleanValue($_POST['ta_grading']);
             if (array_key_exists('grade_inquiries', $_POST)) {
-                $values['grade_inquiry_allowed'] = $_POST['grade_inquiries'] ?? 'false';
-                $values['grade_inquiry_per_component_allowed'] = $_POST['grade_inquiries_per_component'] ?? 'false';
+                $values['grade_inquiry_allowed'] = Utils::getBooleanValue($_POST['grade_inquiries'] ?? false);
+                $values['grade_inquiry_per_component_allowed'] = Utils::getBooleanValue($_POST['grade_inquiries_per_component'] ?? false);
             }
         }
 
@@ -143,9 +146,9 @@ class AdminGradeableController extends AbstractController {
             $values['grade_inquiry_start_date'] = $dates['grade_inquiry_start_date'] ?? null;
             $values['grade_inquiry_due_date'] = $dates['grade_inquiry_due_date'] ?? null;
 
-            $values['has_due_date'] = $dates['has_due_date'] ?? 'true';
-            $values['has_release_date'] = $dates['has_released_date'] ??  'true';
-            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? 'true';
+            $values['has_due_date'] = $dates['has_due_date'] ?? true;
+            $values['has_release_date'] = $dates['has_released_date'] ?? true;
+            $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
         $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
@@ -155,13 +158,45 @@ class AdminGradeableController extends AbstractController {
             if ($build_result !== null) {
                 return JsonResponse::getErrorResponse($build_result);
             }
-            return JsonResponse::getSuccessResponse($_POST['id']);
+            $rubric_components = [];
+            if (isset($_POST['rubric'])) {
+                $gradeable = $this->tryGetGradeable($values['id']);
+                // Delete the default blank component
+                $gradeable->deleteComponent($gradeable->getComponents()[0]);
+                foreach ($_POST['rubric'] as $rubric_component) {
+                    $component_values = [
+                        'title',
+                        'ta_comment',
+                        'student_comment',
+                        'text',
+                        'peer_component',
+                        'page',
+                    ];
+                    if (count(array_diff($component_values, array_keys($rubric_component))) !== 0) {
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component does not have all of the parameters');
+                    }
+                    try {
+                        $rubric_components[] = $gradeable->importComponent($rubric_component);
+                    }
+                    catch (\OutOfBoundsException $exception) {
+                        // Delete gradeable as to not leave the gradeable in a 'broken' state, and users can fix the JSON file and create a
+                        // fully functioning gradeable in one go instead of debugging a non-complete gradeable
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('Rubric component has extra parameters: ' . $exception->getMessage());
+                    }
+                    catch (\Exception $exception) {
+                        $this->deleteGradeable($values['id']);
+                        return JsonResponse::getErrorResponse('An error has occurred: ' . $exception->getMessage());
+                    }
+                }
+                // Save to the database
+                $this->core->getQueries()->updateGradeable($gradeable);
+            }
+            return JsonResponse::getSuccessResponse($values['id']);
         }
-        catch (ValidationException $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getErrorResponse($e->getMessage());
+        catch (ValidationException | \Exception $e) {
+            return JsonResponse::getErrorResponse('An error has occurred: ' . $e->getMessage());
         }
     }
 
@@ -201,7 +236,7 @@ class AdminGradeableController extends AbstractController {
      *     autograding_config_path: string|mixed,
      *     bulk_upload: boolean,
      *     team_gradeable?: array{
-     *         team_max_size: int,
+     *         team_size_max: int,
      *         inherit_from: string|mixed,
      *     },
      *     ta_grading?: boolean,
@@ -244,7 +279,7 @@ class AdminGradeableController extends AbstractController {
             $return_json['bulk_upload'] = $gradeable->isBulkUpload();
             if ($gradeable->isTeamAssignment()) {
                 $team_properties = [
-                    'team_max_size' => $gradeable->getTeamSizeMax(),
+                    'team_size_max' => $gradeable->getTeamSizeMax(),
                     'inherit_from' => ''
                 ];
                 $return_json['team_gradeable'] = $team_properties;
@@ -308,6 +343,7 @@ class AdminGradeableController extends AbstractController {
             $dates['late_submission_allowed'] = $gradeable->isLateSubmissionAllowed();
             $dates['late_days'] = $gradeable->getLateDays();
             $return_json['dates'] = $dates;
+            $return_json['rubric'] = $gradeable->exportComponents();
         }
         return $return_json;
     }
@@ -534,7 +570,7 @@ class AdminGradeableController extends AbstractController {
             'type_string' => $type_string,
             'gradeable_type_strings' => self::gradeable_type_strings,
             'show_edit_warning' => $gradeable->anyManualGrades(),
-
+            'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
@@ -554,6 +590,7 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
+            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1122,20 +1159,20 @@ class AdminGradeableController extends AbstractController {
         $repo_name = '';
         $subdir = '';
         $using_subdirectory = false;
-        if ($details['using_subdirectory'] === 'true') {
+        if (Utils::getBooleanValue($details['using_subdirectory'])) {
             $subdir = $details['vcs_subdirectory'];
             $using_subdirectory = true;
         }
         $vcs_partial_path = '';
         // VCS specific values
-        if ($details['vcs'] === 'true') {
+        if (Utils::getBooleanValue($details['vcs'])) {
             $host_button = $details['vcs_radio_buttons'];
             $host_type = -1;
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
                 $repo_name = $details['id'];
-                $vcs_partial_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+                $vcs_partial_path = $details['id'] . (Utils::getBooleanValue($details['team_assignment']) ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
@@ -1176,7 +1213,7 @@ class AdminGradeableController extends AbstractController {
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
             $jsonThreads = json_encode('{}');
-            $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
+            $discussion_clicked = Utils::getBooleanValue($details['discussion_based'] ?? false);
 
             //Validate user input for discussion threads
             if ($discussion_clicked) {
@@ -1189,12 +1226,12 @@ class AdminGradeableController extends AbstractController {
                 $jsonThreads = json_encode($jsonThreads);
             }
 
-            $grade_inquiry_allowed = isset($details['grade_inquiry_allowed']) && ($details['grade_inquiry_allowed'] === 'true');
-            $grade_inquiry = ($details['grade_inquiry_per_component_allowed'] ?? 'false') === 'true';
+            $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed'] ?? false);
+            $grade_inquiry = Utils::getBooleanValue($details['grade_inquiry_per_component_allowed'] ?? false);
             $autograding_config_path = $details['autograding_config_path'] ?? FileUtils::joinPaths($this->core->getConfig()->getSubmittyInstallPath(), 'more_autograding_examples/upload_only/config');
             $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => $details['team_assignment'] === 'true',
-                'ta_grading' => $details['ta_grading'] === 'true',
+                'team_assignment' => Utils::getBooleanValue($details['team_assignment']),
+                'ta_grading' => Utils::getBooleanValue($details['ta_grading']),
                 'team_size_max' => $details['team_size_max'],
                 'grade_inquiry_allowed' => $grade_inquiry_allowed,
                 'grade_inquiry_per_component_allowed' => $grade_inquiry,
@@ -1271,7 +1308,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
 
         // Setup student permissions specially for scanned exams
-        if ($details['bulk_upload'] === 'true') {
+        if (Utils::getBooleanValue($details['bulk_upload'])) {
             $gradeable->setStudentView(true);
             $gradeable->setStudentViewAfterGrades(true);
             $gradeable->setStudentSubmit(false);
@@ -1386,7 +1423,15 @@ class AdminGradeableController extends AbstractController {
             if (isset($details[$date_property])) {
                 $dates[$date_property] = $details[$date_property];
 
-                if ($dates[$date_property] > DateUtils::MAX_TIME) {
+                if ($date_property === 'late_days') {
+                    if (!is_numeric($dates[$date_property])) {
+                        $errors[$date_property] = 'Late days must be a number';
+                    }
+                    elseif (intval($dates[$date_property]) < 0) {
+                        $errors[$date_property] = 'Late days must be a positive number';
+                    }
+                }
+                elseif ($dates[$date_property] > DateUtils::MAX_TIME) {
                     $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
                 }
 

@@ -87,7 +87,6 @@
     --standard-creamsicle-orange: #ff8040;
     --standard-peachpuff: #ffdab9;
     --standard-vibrant-yellow: #ffff00;
-    --standard-vibrant-purple: #cc66ff;
     --standard-plum-purple: #72518a;
     --standard-vibrant-pink: #fd4472;
     --standard-vibrant-pink-red: #c40233;
@@ -97,21 +96,16 @@
     --standard-deep-dark-green: #006600;
     --standard-mint-green: #00e08e;
     --standard-dark-mint-green: #00a368;
-    --standard-pale-lime-green: #dff0d8;
-    --standard-light-lime-green: #c3e3b5;
-    --standard-medium-lime-green: #99cb84;
     --standard-medium-dark-lime-green: #7dfa78;
     --standard-vibrant-dark-blue: #006699;
     --standard-bronze: #856404;
     --standard-pastel-pink: #f2dede;
     --standard-light-pink: #ff9999;
     --standard-tangerine-yellow: #ffcc00;
-    --standard-pastel-yellow: #fcf8e3;
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
     --standard-beige: #f5f5dc;
-    --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
     --standard-pastel-blue: #d9edf7;
     --standard-light-blue: #99ccff;
@@ -124,10 +118,7 @@
     --subtle-grey-background: #cccccc;
 
     /* dropdown buttons */
-    --hover-dropdown: #f5f5f5;
-    --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
-
 
     /* text and fonts */
     --text-black: #000000; /* use only on white/background-blue */
@@ -135,16 +126,14 @@
     --btn-text-white: #ffffff;
     --btn-text-black: #000000;
     --btn-default-text: #2e2e2e;
-    --deleted-color: #000000;
 
     /* discussion forum */
     --deleted-and-unviewed-thread: #acc0d7;
-    --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /* is also for star color */
     --attachment-box-color: #f5f5f5;
     --file-upload-table-hover: #d1d1d1;
-    --upduck-yellow: #F5BD41;
+    --upduck-yellow: #f5bd41;
 
     /* notebook builder */
     --notebook-builder-form-options-orange: #f7d8ba;
@@ -161,12 +150,10 @@
     /* links */
     --external-link-blue: #2627ee;
     --external-link-hover: #131399;
-    --external-link-disabled: #888888;
     --external-link-active: #991313;
 
     /* sidebar */
     --selected-nav-sidebar: #d9e1e2;
-    --selected-nav-sidebar-text: #000000;
     --nav-sidebar-text: #006398;
     --sidebar-hover-text: #002334;
 
@@ -189,14 +176,14 @@
     --peer-feedback-green: #008000;
 
     /* For categorizing objects */
-    --category-color-1: #F44336;
-    --category-color-2: #FF9800;
-    --category-color-3: #4CAF50;
-    --category-color-4: #4FC3F7;
-    --category-color-5: #7986CB;
-    --category-color-6: #B39DDB;
-    --category-color-7: #F8BBD0;
-    --category-color-8: #CE93D8;
+    --category-color-1: #f44336;
+    --category-color-2: #ff9800;
+    --category-color-3: #4caf50;
+    --category-color-4: #4fc3f7;
+    --category-color-5: #7986cb;
+    --category-color-6: #b39ddb;
+    --category-color-7: #f8bbd0;
+    --category-color-8: #ce93d8;
     --category-color-9: #8ac78e;
     --category-color-10: #b39b61;
     --category-color-11: #6eb9aa;
@@ -221,11 +208,11 @@
         rgb(255 0 255 / 30%),
         rgb(255 0 0 / 30%)
     );
-    
+
     /* poll histogram colors */
     --histogram-default: var(--standard-vibrant-dark-blue);
     --histogram-correct: var(--standard-deep-dark-green);
-    
+
     /* other */
     --box-shadow-very-transparent: #00000020;
     --box-shadow-slightly-transparent: #00000030;
@@ -242,24 +229,37 @@
     --code-box-background-light-gray: #fafafa;
     --code-box-font-color-dark-gray: #343a42;
     --invisible: #00000000;
+
+    /* autograding results */
+    --diff-char: var(--default-black);
+    --diff-background-all: var(--default-white);
+    --diff-background-actual: #fceae9;
+    --diff-background-expected: #defae1;
+    --diff-char-background-actual: #fbc1c0;
+    --diff-char-background-expected: #a8edb0;
 }
 
 [data-black_mode="black"][data-theme="dark"] {
     --default-white: #000000;
-    --deleted-and-unviewed-thread: #939494;
     --background-blue: #000000;
     --default-black: #ffffff;
 
     /* poll histogram colors */
     --histogram-default: var(--standard-light-blue);
     --histogram-correct: var(--standard-medium-dark-lime-green);
+
+    /* autograding results */
+    --diff-background-all: var(--default-white);
+    --diff-background-actual: #2c1c21;
+    --diff-background-expected: #122816;
+    --diff-char-background-actual: #f26b6c;
+    --diff-char-background-expected: #47c73b;
 }
 
 [data-theme="dark"] {
     /* might wanna change blue borders/hover text/sidebar text to submitty blue
       buttons, primarily but also can be used for notifications/anything
       that requires this color scheme */
-    --deleted-and-unviewed-thread: #939494;
     --standard-lightskyblue: #0975b9;
     --standard-mediumorchid: #b240ce;
     --default-white: #36393f;
@@ -297,10 +297,7 @@
     --subtle-grey-background: #555555;
 
     /* dropdown buttons */
-    --hover-dropdown: #f5f5f5;
-    --disabled-dropdown: #888888;
     --focus-dropdown: #f5f5f5;
-
 
     /* text and fonts */
     --text-black: #ffffff; /* use only on white/background-blue */
@@ -312,6 +309,8 @@
     /* discussion forum */
     --attachment-box-color: #4a4a4a;
     --file-upload-table-hover: #4a4a4a;
+    --deleted-discussion-post-grey: #283e57;
+    --deleted-and-unviewed-thread: #3e5f7a;
 
     /* these differ from the colors on the posts for some reason?
           so I will put them here for reference
@@ -327,7 +326,6 @@
 
     /* sidebar */
     --selected-nav-sidebar: #535353;
-    --selected-nav-sidebar-text: #6c6c6c;
     --nav-sidebar-text: #c8c8c8;
     --sidebar-hover-text: #ffffff;
 
@@ -361,19 +359,27 @@
     /* poll histogram colors */
     --histogram-default: var(--standard-light-blue);
     --histogram-correct: var(--standard-medium-dark-lime-green);
+
+    /* autograding results */
+    --diff-char: var(--always-default-white);
+    --diff-background-all: #181c24;
+    --diff-background-actual: #2e1b20;
+    --diff-background-expected: #16261e;
+    --diff-char-background-actual: #7a3133;
+    --diff-char-background-expected: #29562d;
 }
 
 /* Dark Theme Versions of Colors */
 :root[data-theme="dark"] {
     /* For categorizing objects */
-    --category-color-1: #B71C1C;
-    --category-color-2: #BF360C;
-    --category-color-3: #1B5E20;
-    --category-color-4: #1565C0;
-    --category-color-5: #1A237E;
-    --category-color-6: #673AB7;
-    --category-color-7: #D81B60;
-    --category-color-8: #9C27B0;
+    --category-color-1: #b71c1c;
+    --category-color-2: #bf360c;
+    --category-color-3: #1b5e20;
+    --category-color-4: #1565c0;
+    --category-color-5: #1a237e;
+    --category-color-6: #673ab7;
+    --category-color-7: #d81b60;
+    --category-color-8: #9c27b0;
     --category-color-9: #8ac78e;
     --category-color-10: #b39b61;
     --category-color-11: #6eb9aa;

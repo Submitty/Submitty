@@ -43,7 +43,7 @@
     </div>
 
     <div class="option-input col-md-6">
-        <input type='text' name='title' id='g_title' class="required auto_save new-gradeable" style="overflow:hidden" placeholder="(Required)" required value="{{ action != 'new' ? gradeable.getTitle() : '' }}" />
+        <input type='text' name='title' id='g_title' data-testid="create-gradeable-title" class="required auto_save new-gradeable" style="overflow:hidden" placeholder="(Required)" required value="{{ action != 'new' ? gradeable.getTitle() : '' }}" />
     </div>
 </div>
 
@@ -74,7 +74,7 @@
         </label>
     </div>
     <div class="option-input col-md-6">
-        <input type='text' name='id' id="g_id" class="required new-gradeable"
+        <input type='text' name='id' id="g_id" data-testid="create-gradeable-id" class="required new-gradeable"
         value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
     </div>
@@ -115,7 +115,7 @@
             </div>
 
             <div>
-                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
+                <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal" data-testid="radio-student-upload"
                         {{ action != 'new' and not gradeable.isBulkUpload() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
@@ -345,7 +345,7 @@
 </div>
 <div class="row">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
+    <button class="btn btn-primary" type="submit" id="create-gradeable-btn" data-testid="create-gradeable-btn" disabled style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
 

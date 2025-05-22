@@ -105,6 +105,10 @@ class Testcase():
         )
         self.secure_environment.log_container('')
 
+        # force cleanup docker networks at the end of each test case
+        docker_cleanup_output = os.popen("sudo /usr/local/submitty/sbin/docker_cleanup.sh "+self.untrusted_user).read()
+        self.secure_environment.log_container("docker_cleanup: "+docker_cleanup_output.strip())
+
     def _run_execution(self):
         """ Execute this testcase as an execution testcase. """
 

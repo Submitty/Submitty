@@ -234,8 +234,13 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
 
                 let pdfData;
                 try {
-                    pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
+                    pdfData = JSON.parse(data);
+                    // Checking if the response is a failure due to large file size
+                    if (pdfData.status === 'fail') {
+                        $('#pdf-error-message').text(pdfData.message).show();
+                        return;
+                    }
+                    pdfData = atob(pdfData['data']);
                 }
                 catch (err) {
                     console.log(err);

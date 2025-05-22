@@ -15,8 +15,9 @@ use League\CommonMark\Inline\Element\Code;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
 use app\libraries\CustomCodeInlineRenderer;
-use Aptoma\Twig\Extension\MarkdownEngine\PHPLeagueCommonMarkEngine;
-use Aptoma\Twig\Extension\MarkdownExtension;
+use Twig\Extra\Markdown\MarkdownExtension;
+use Twig\Extra\Markdown\MarkdownRuntime;
+use Twig\Extra\Markdown\LeagueMarkdown;
 use Ds\Set;
 
 /**
@@ -99,10 +100,14 @@ class Output {
         return $this->render;
     }
 
+    public function getTwig(): ?\Twig\Environment {
+        return $this->twig;
+    }
+
     public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
-        $debug = $full_load && $this->core->getConfig()->isDebug();
+        $debug = $full_load && $this->core->getConfig()?->isDebug();
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
@@ -135,7 +140,7 @@ class Output {
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $base64_data, string $mime_type, string $title): string {
                 return <<<HTML
-<img alt="${title}" src="data:${mime_type};base64,${base64_data}" />
+<img alt="{$title}" src="data:{$mime_type};base64,{$base64_data}" />
 HTML;
         }, ['is_safe' => ['html']]));
 
@@ -151,7 +156,7 @@ HTML;
         }));
 
         if ($full_load) {
-            if ($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()?->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     'site_uploads'
@@ -171,8 +176,22 @@ HTML;
         $environment->mergeConfig([]);
 
         $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
-        $engine = new PHPLeagueCommonMarkEngine($converter);
-        $this->twig->addExtension(new MarkdownExtension($engine));
+        $this->twig->addExtension(new MarkdownExtension());
+
+        $this->twig->addRuntimeLoader(new class ($converter) implements \Twig\RuntimeLoader\RuntimeLoaderInterface {
+            private CommonMarkConverter $converter;
+
+            public function __construct(CommonMarkConverter $converter) {
+                $this->converter = $converter;
+            }
+
+            public function load(string $class): ?MarkdownRuntime {
+                if (MarkdownRuntime::class === $class) {
+                    return new MarkdownRuntime(new LeagueMarkdown($this->converter));
+                }
+                return null;
+            }
+        });
     }
 
     public function setInternalResources() {
@@ -202,6 +221,11 @@ HTML;
         $this->addInternalJs('menu.js');
         $this->addInternalJs('testcase-output.js');
         $this->addInternalJs('markdown.js');
+
+        // Add vue support
+        $this->addVendorJs(FileUtils::joinPaths('vue', 'vue.runtime.global.prod.js'));
+        $this->css->add($this->timestampResource('submitty-vue.css', 'mjs/vue'));
+        $this->js->add($this->timestampResource('submitty-vue.umd.js', 'mjs/vue'));
     }
 
     /**

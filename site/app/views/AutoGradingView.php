@@ -393,6 +393,7 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),
@@ -505,6 +506,7 @@ class AutoGradingView extends AbstractView {
             'active_same_as_graded' => $active_same_as_graded,
             'is_grade_inquiry_yet_to_start' => $gradeable->isGradeInquiryYetToStart(),
             'is_grade_inquiry_ended' => $gradeable->isGradeInquiryEnded(),
+            'is_grade_inquiry_valid' => $gradeable->isGradeInquirySettingsValid(),
             'grade_inquiry_available' => $grade_inquiry_available,
             'grade_inquiry_message' => $this->core->getConfig()->getGradeInquiryMessage(),
             'num_decimals' => $num_decimals,
@@ -597,6 +599,7 @@ class AutoGradingView extends AbstractView {
                 'points_possible' => $component->getMaxValue(),
                 'student_comment' => $component->getStudentComment(),
 
+                'version_graded' => $container->getGradedVersion(),
                 'total_score' => $container->getTotalScore(),
                 'custom_mark_score' => $container->getScore(),
                 'comment' => $container->getComment(),

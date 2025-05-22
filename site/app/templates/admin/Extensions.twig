@@ -3,12 +3,12 @@
     <h1>Excused Absence Extensions</h1>
     <p>Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.</p>
     <br>
-    <form id="extensions-form" class="exception-form" method="post" enctype="multipart/form-data">
+    <form id="extensions-form" data-testid="extensions-form" class="exception-form" method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="option" value="-1" />
         <div class="option">
             <label for="gradeable-select" class="option-title">Select Gradeable:</label><br>
-            <select name="g_id" id="gradeable-select">
+            <select name="g_id" id="gradeable-select" data-testid="gradeable-select">
                 <option disabled {% if current_gradeable is null %} selected {% endif %} value> -- select an option -- </option>
                 {% for index, value in gradeables %}
                     <option
@@ -33,15 +33,15 @@
             <br>
             <label for="user_id">
                 Student ID:
-                <input name="user_id" id="user_id" class="option-input" type="text">
+                <input name="user_id" id="user_id" data-testid="extension-user-id" class="option-input" type="text">
             </label>
             <label for="late-days">
                 Give the Days of Extension:
-                <input name="late_days" id="late-days" class="option-input" type="text" onkeyup="clearDate()">
+                <input name="late_days" id="late-days" data-testid="extension-late-days" class="option-input" type="text" onkeyup="clearDate()">
             </label>
             <label for="late-calendar">
                 Or Pick a New Due Date:
-                <input name="late_calendar" id="late-calendar" class="option-input" type="text" autocomplete="off" onchange="setLateDays()">
+                <input name="late_calendar" id="late-calendar" data-testid="extension-late-calendar" class="option-input" type="text" autocomplete="off" onchange="setLateDays()">
             </label>
             <label for="reason-for-exception">
                 Reason for Extension:
@@ -82,8 +82,8 @@
             <thead>
                 <tr>
                     <th>Student ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
+                    <th>Given Name</th>
+                    <th>Family Name</th>
                     <th>Number of Days of Extension</th>
                     <th>Reason for Extension</th>
                     <th>Delete</th>

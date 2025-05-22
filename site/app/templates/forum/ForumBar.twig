@@ -48,7 +48,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue);" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click" tabindex="0" style="color: var(--actionable-blue); min-width: 120px; "title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -69,11 +69,15 @@
 					More
 				</button>
 				<div class="dropdown-menu dropdown-menu-right">
+					{% if activeThread != null %}
+	                	<a class="dropdown-item key_to_click" tabindex="0" onClick="markThreadUnread({{activeThread.id}})" title="Mark Thread Unread" aria-label="Mark Thread Unread">Unread Thread</a>
+						<div class="dropdown-divider"></div>
+					{% endif %}
 					{% for more in more_data|slice(1) %}
 						{% if user_group <= more.required_rank %}
 							{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
 							{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-								<a id="{{ more.id }}" class="dropdown-item" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
+								<a id="{{ more.id }}" data-testid="{{ more.id }}" class="dropdown-item" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a>
 						{% endif %}
 					{% endfor %}
 					{% if core.getUser().accessGrading() %}
@@ -82,8 +86,9 @@
 					{% endif %}
 					{% if thread_exists and (is_full_threads_page is not defined or not is_full_threads_page) %}
 						<div class="dropdown-divider"></div>
-						<a class="dropdown-item" href="#" id="toggle-attachments-button" class="key_to_click show-all" tabindex="0" title="Click to toggle all post attachments" onclick="loadAllInlineImages()">
-							Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
+						<a class="dropdown-item key_to_click" href="#" id="toggle-attachments-button" tabindex="0" title="Click to toggle all post attachments" onclick="loadAllInlineImages()">
+							<span class="status"></span>
+							<span class="attachment-badge badge">{{ total_attachments }}</span>
 						</a>
 						<div class="dropdown-divider"></div>
 						<a class="key_to_click dropdown-item"  id="tree" title="Sort posts by reply hierarchy" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical Post Order</a>
@@ -105,11 +110,11 @@
 				{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 				{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
 				{% if link | length > 0 %}
-						<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+						<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} data-testid="{{ button.title }}" title="{{ button.title }}" {{ onclick }} >
 							{{ button.display_text | raw }}
 						</a>
 				{% else %}
-						<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+						<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" data-testid="{{ button.title }}" title="{{ button.title }}" {{ onclick }} >
 							{{ button.display_text | raw }}
 						</button>
 				{% endif %}
@@ -126,7 +131,15 @@
 				}
 
 				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+					background-color: {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-inactive{
 					color: white;
+					border: 1px solid {{ category.color }}
+				}
+
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-active{
 					background-color: {{ category.color }}
 				}
 			{% endfor %}
@@ -135,7 +148,9 @@
 			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
 			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
 				{% for category in categories %}
-					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" data-cat_id="{{ category.category_id }}" data-btn-selected="false">{{ category.category_desc }}</button>
+					{% if category.visible_date is null or category.diff > 0 %}
+						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" data-cat_id="{{ category.category_id }}" data-btn-selected="false">{{ category.category_desc }}</button>
+					{% endif %}
 				{% endfor %}
 			</div>
 			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">

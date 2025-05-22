@@ -9,26 +9,29 @@ $( document ).ready(function() {
         $("#gradeInquiryBoxSection").show();
         $("#ShowGradeInquiryButton").hide();
     }
+    {% if not active_same_as_graded %}
+        $(".ta-results-box").css('background-color', 'var(--standard-light-red)')
+    {% endif %}
 });
 </script>
-
 {% if not been_ta_graded %}
-    <br>
-    <h3>This assignment has not been graded yet</h3>
-{% elseif not active_same_as_graded %}
-    <br>
-    <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+    <h3>This assignment has not been graded yet, please contact an instructor/grader.</h3>
 {% elseif not grading_complete %}
-    <br>
-    <h3>Grading not complete, please contact an instructor/grader</h3>
+    <h3>Grading not complete, please contact an instructor/grader.</h3>
 {% else %}
     <div class="sub">
+        {% if not active_same_as_graded %}
+            <h3 data-testid="version-conflict-ta">A
+            <a href="https://submitty.org/student/submission/submission_version_conflict" target="_blank"> Version Conflict <i class="fa-question-circle" style="font-style:normal;"></i></a>
+            has been detected in your submission. A grade of zero will be recorded in the gradebook. Please resolve as necessary.</h3>
+            <br>
+        {% endif %}
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
-            <div class="box submission-page-total-header">
+            <div class="box submission-page-total-header" data-testid="ta-total-score">
                 <div class="box-title-total key_to_click" tabindex="0">
 
-                    {{ Badge.render(ta_score, ta_max, false) }}
+                    {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
                     <h4>TA / Instructor Grading Total</h4>
                 </div>
             </div>
@@ -36,7 +39,7 @@ $( document ).ready(function() {
 
             {# TA Component boxes #}
             {% for component in ta_components %}
-                {{ TAResultsFunctions.renderComponent(component, false, num_decimals) }}
+                {{ TAResultsFunctions.renderComponent(component, false, num_decimals, active_same_as_graded) }}
             {% endfor %}
         {% endif %}
 
@@ -90,7 +93,7 @@ $( document ).ready(function() {
                                 <div class="no-border-box md-4">
                                     <div class="btn-annotation">
                                         <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        <button class = 'btn btn-default key_to_click' style="margin-right:20px;" onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}&student_id={{ user_id }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download  
+                                        <button class = 'btn btn-default' style="margin-right:20px;" onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}&student_id={{ user_id }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download  
                                         <i class="fas fa-download" title="Download the file"></i></button>
                                     </div>
                                 </div>
@@ -105,14 +108,20 @@ $( document ).ready(function() {
         </div>
         {# Overview #}
         {# /Component boxes #}
-    {% if is_grade_inquiry_yet_to_start %}
-        <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
-    {% elseif grade_inquiry_available %}
-        <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
-        <div id="ShowGradeInquiryButton">
-            <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default key_to_click" tabindex="0">Open Grade Inquiry</button>
-        </div>
-    {% elseif is_grade_inquiry_ended %}
-        <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
-    {% endif %}
+    <div id="grade-inquiry-container" data-testid="grade-inquiry-container">
+        {% if is_grade_inquiry_valid %}
+            {% if is_grade_inquiry_yet_to_start %}
+                <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
+            {% elseif grade_inquiry_available %}
+                <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+                <div id="ShowGradeInquiryButton">
+                    <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default" tabindex="0">Open Grade Inquiry</button>
+                </div>
+            {% elseif is_grade_inquiry_ended %}
+                <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+            {% endif %}
+        {% else %}
+            <i>There will be no grade inquiries. Contact the instructor if this is a mistake.</i>
+        {% endif %}
+    </div>
 {% endif %}
