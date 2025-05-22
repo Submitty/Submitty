@@ -5,7 +5,7 @@
         "container_image": "submitty/clang:latest"
     },
     "autograding": {
-        "submission_to_compilation": ["**/*.cpp", "**/*.txt"],
+        "submission_to_compilation": ["**/*.cpp", "**/*.txt"]
     },
     "grading_parameters" : {
         "AUTO_POINTS" : 22,
