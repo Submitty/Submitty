@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
     /** The user clicked out of the popup, or hit cancel/discard  */
-    dismiss: [ev: MouseEvent | KeyboardEvent];
+    toggle: [ev: MouseEvent | KeyboardEvent];
     /** The user clicked the save button  */
     save: [ev: MouseEvent | KeyboardEvent];
 }>();
@@ -36,7 +36,7 @@ watch(
                     'keydown.popup',
                     (event) => {
                         if (event.key === 'Escape' && props.visible) {
-                            emit('dismiss', event.originalEvent as KeyboardEvent);
+                            emit('toggle', event.originalEvent as KeyboardEvent);
                         }
                     });
             }
@@ -51,64 +51,59 @@ watch(
 </script>
 
 <template>
+  <slot name="trigger">
+    <a
+      class="btn btn-primary"
+      @click="$emit('toggle', $event)"
+    >Toggle popup (you should probably override this)</a>
+  </slot>
   <div
     v-if="visible"
     class="popup-form"
   >
     <div
       class="popup-box"
-      @click="$emit('dismiss', $event)"
+      @click="$emit('toggle', $event)"
     >
       <div
         :id="id"
-        class="popup-window d-flex flex-col"
+        class="popup-window"
         data-testid="popup-window"
         @click.stop
       >
-        <div class="form-title d-flex justify-content-space-between">
+        <div class="form-title">
           <h1>{{ title }}</h1>
-          <div>
+          <button
+            class="btn btn-default close-button"
+            data-testid="close-button"
+            tabindex="0"
+            @click="$emit('toggle', $event)"
+          >
+            Close
+          </button>
+        </div>
+
+        <slot>Default popup content (you should probably override this)</slot>
+
+        <div class="form-buttons">
+          <div class="form-button-container">
             <button
-              class="btn close-button"
-              data-testid="close-button"
+              class="btn btn-default close-button"
+              data-testid="popup-close-button"
               tabindex="0"
-              @click="$emit('dismiss', $event)"
+              @click="$emit('toggle', $event)"
             >
               {{ dismissText }}
-            </button>
-            <button
+            </button> <button
               v-if="savable"
               class="btn btn-primary"
-              data-testid="save-button"
+              data-testid="popup-save-button"
               tabindex="1"
               @click="$emit('save', $event)"
             >
               {{ saveText }}
             </button>
           </div>
-        </div>
-
-        <slot>Default popup content (you should probably override this)</slot>
-
-        <div class="form-button-container">
-          <button
-            v-if="savable"
-            class="btn btn-primary"
-            data-testid="save-button"
-            tabindex="1"
-            @click="$emit('save', $event)"
-          >
-            {{ saveText }}
-          </button>
-          <button
-            v-else
-            class="btn close-button"
-            data-testid="close-button"
-            tabindex="0"
-            @click="$emit('dismiss', $event)"
-          >
-            {{ dismissText }}
-          </button>
         </div>
       </div>
     </div>
