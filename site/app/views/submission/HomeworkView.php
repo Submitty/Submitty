@@ -680,7 +680,7 @@ class HomeworkView extends AbstractView {
                 continue;
             }
             $bulk_upload_data = FileUtils::readJsonFile($dir_files["decoded.json"]['path']);
-        
+
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
                     // later submissions should replace the previous ones
@@ -780,8 +780,8 @@ class HomeworkView extends AbstractView {
                     }
                     else {
                     //set the blank id as invalid for now, after a page refresh it will recorrect
-                    $id = '';
-                    $is_valid = false;
+                        $id = '';
+                        $is_valid = false;
                     }
                     if (array_key_exists('page_count', $data)) {
                         $page_count = $data['page_count'];
@@ -792,7 +792,7 @@ class HomeworkView extends AbstractView {
                     $id = '';
                     if (array_key_exists('page_count', $bulk_upload_data)) {
                         $page_count = $bulk_upload_data['page_count'];
-                        }
+                    }
                 }
 
                 $file += ['page_count' => $page_count,
