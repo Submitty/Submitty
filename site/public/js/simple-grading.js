@@ -661,7 +661,6 @@ function setupSimpleGrading(action) {
                 // // Selection needs to move to above the null section
                 if (new_selector_array[1] === '') {
                     new_selector_array[1] = 1;
-                    // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const temp_cell = $(`#${new_selector_array.join('-')}`);
                         if (!temp_cell.length) {
@@ -954,14 +953,12 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         elem.attr('data-origval', value);
         elem.val(value);
         elem.css('background-color', 'var(--default-white)');
-        // eslint-disable-next-line eqeqeq
         if (value === 0) {
             elem.css('color', 'var(--standard-light-medium-gray)');
         }
         else {
             elem.css('color', '');
         }
-        // eslint-disable-next-line eqeqeq
         if (elem.parent().siblings('.option-small-output').children('.cell-total').text() !== total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }
