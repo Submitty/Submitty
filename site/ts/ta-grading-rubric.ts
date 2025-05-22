@@ -12,9 +12,11 @@ import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 const GRADED_COMPONENTS_LIST: Record<string, ComponentGradeInfo | undefined> = {};
 const COMPONENT_RUBRIC_LIST: Record<string, Component> = {};
 const ACTIVE_GRADERS_LIST: Record<string, string[]> = {};
-let GRADED_GRADEABLE: { peer_gradeable: boolean; user_group: number; active_graders: Record<string, string>[]; active_graders_timestamps: Record<string, string>[]; graded_components: Record<string, GradedComponent> } | null = null;
+let GRADED_GRADEABLE: GradedGradeable | null = null;
 type Stats = { section_submitter_count: string; total_submitter_count: string; section_graded_component_count: string; total_graded_component_count: string; section_total_component_count: string; total_total_component_count: string; submitter_ids: string[]; submitter_anon_ids: Record<string, string> };
 type Gradeable = {
+    id: string;
+    precision: number;
     components: Component[];
 };
 export type Component = {
@@ -49,6 +51,43 @@ type MarkConflictInfo = {
     serverMark: Mark | null;
     oldServerMark: Mark | null;
     localDeleted: boolean;
+};
+type GradedGradeable = {
+    peer_gradeable: boolean;
+    user_group: number;
+    active_graders: Record<string, string[]>;
+    active_graders_timestamps: Record<string, string[]>;
+    graded_components: Record<string, GradedComponent>;
+    modified: boolean;
+    id: number;
+    overall_comments: Record<string, string>;
+    user_viewed_date: string;
+    ta_grading_overall_comments: {
+        logged_in_user: {
+            user_id: string;
+            comment: string;
+        };
+        other_graders: {
+            user_id: string;
+            comment: string;
+        }[];
+    };
+    attachments: {
+        logged_in_user: {
+            user_id: string;
+            attachments: [];
+        };
+        other_graders: {
+            user_id: string;
+            attachments: [];
+        }[];
+    };
+    auto_grading_total: number;
+    auto_grading_earned: number;
+    ta_grading_total: number;
+    ta_grading_earned: number;
+    anon_id: string;
+    itempool_items: Record<number, string>;
 };
 
 export type MarkConflicts = Record<number, MarkConflictInfo>;
@@ -1980,12 +2019,12 @@ window.onGetMarkStats = async function (me: HTMLElement) {
 /**
  * Called when a component gets clicked (for opening / closing)
  * @param me DOM Element of the component header div
- * @param edit_mode editing from ta grading page or instructor edit gradeable page
+ * @param save_changes Whether to save changes or not
  */
-window.onClickComponent = async function (me: HTMLElement, edit_mode = false) {
+window.onClickComponent = async function (me: HTMLElement, save_changes = false) {
     const component_id = getComponentIdFromDOMElement(me);
     try {
-        await toggleComponent(component_id, true, edit_mode);
+        await toggleComponent(component_id, save_changes, false);
     }
     catch (err) {
         console.error(err);
@@ -2432,11 +2471,10 @@ function loadComponentData(gradeable: Gradeable, graded_gradeable: typeof GRADED
         COMPONENT_RUBRIC_LIST[component.id] = component;
         if (graded_gradeable!.active_graders[component.id]) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ACTIVE_GRADERS_LIST[component.id] = Object.entries(graded_gradeable!.active_graders[component.id]).map(([_, index]: [string, string | number]) => {
-                const grader = graded_gradeable!.active_graders[component.id][index];
-                const graderAge = window.luxon.DateTime.fromISO(graded_gradeable!.active_graders_timestamps[component.id][index]).toRelative();
+            ACTIVE_GRADERS_LIST[component.id] = graded_gradeable!.active_graders[component.id].map((grader, index) => {
+                const graderAge = window.luxon.DateTime.fromISO(graded_gradeable!.active_graders_timestamps[component.id.toString()][index]).toRelative();
                 return `${grader} (${graderAge})`;
-            }) ?? [];
+            });
         }
         else {
             ACTIVE_GRADERS_LIST[component.id] = [];
@@ -2609,7 +2647,7 @@ window.closeAllComponents = closeAllComponents;
  * @async
  * @return {void}
  */
-async function toggleComponent(component_id: number, saveChanges: boolean, edit_mode = false) {
+export async function toggleComponent(component_id: number, saveChanges: boolean, edit_mode = false) {
     // Component is open, so close it
     if (isComponentOpen(component_id)) {
         await closeComponent(component_id, saveChanges, edit_mode);

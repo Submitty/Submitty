@@ -20,6 +20,7 @@ import {
     scrollToComponent,
     scrollToOverallComment,
     toggleCommonMark,
+    toggleComponent,
 } from './ta-grading-rubric';
 
 declare global {
@@ -37,7 +38,7 @@ declare global {
         onAddComponent(peer: boolean): Promise<void>;
         onMarkPointsChange(me: HTMLElement): Promise<void>;
         onGetMarkStats(me: HTMLElement): Promise<void>;
-        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
+        onClickComponent(me: HTMLElement, save_changes?: boolean): Promise<void>;
         onCancelEditRubricComponent(me: HTMLElement): void;
         onChangeOverallComment(me: HTMLElement): Promise<void>;
         onCancelComponent(me: HTMLElement): Promise<void>;
@@ -552,14 +553,11 @@ function changeStudentArrowTooltips(data: string) {
     }
 }
 
-const orig_toggleComponent = (component_id: number, saveChanges: boolean, edit_mode: boolean) => window.toggleComponent(component_id, saveChanges, edit_mode);
-window.toggleComponent = function (component_id, saveChanges) {
-    const ret = orig_toggleComponent(component_id, saveChanges, false);
-    return ret.then(() => {
-        changeStudentArrowTooltips(
-            localStorage.getItem('general-setting-arrow-function') || 'default',
-        );
-    });
+window.toggleComponent = async function (component_id, saveChanges) {
+    await toggleComponent(component_id, saveChanges, false);
+    changeStudentArrowTooltips(
+        localStorage.getItem('general-setting-arrow-function') || 'default',
+    );
 };
 
 function checkNotebookScroll() {
