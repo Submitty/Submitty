@@ -77,6 +77,12 @@ declare global {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
+        openFrame(html_file: string, url_file: string, num: string, pdf_full_panel: boolean, panel: string): void;
+        gotoPrevStudent(): void;
+        gotoNextStudent(): void;
+        rotateImage(url: string | undefined, rotateBy: string): void;
+        loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
+        viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         PDF_PAGE_NONE: number;
         PDF_PAGE_STUDENT: number;
         PDF_PAGE_INSTRUCTOR: number;
@@ -1108,6 +1114,7 @@ function gotoPrevStudent() {
         window.location.href = window_location;
     }
 }
+window.gotoPrevStudent = gotoPrevStudent;
 
 function gotoNextStudent() {
     let filter;
@@ -1184,6 +1191,7 @@ function gotoNextStudent() {
         window.location.href = window_location;
     }
 }
+window.gotoNextStudent = gotoNextStudent;
 // Navigate to the prev / next student buttons
 registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
     gotoPrevStudent();
@@ -1377,6 +1385,7 @@ function toggleFullScreenMode() {
     // Save the taLayoutDetails in LS
     saveTaLayoutDetails();
 }
+window.toggleFullScreenMode = toggleFullScreenMode;
 
 function toggleFullLeftColumnMode(forceVal = false) {
     // toggle between the normal left and full left panel mode
@@ -1830,6 +1839,7 @@ function openDiv(num: string) {
     }
     return false;
 }
+window.openDiv = openDiv;
 
 // finds all the open files and folder and stores them in stored_paths
 function findAllOpenedFiles(elem: JQuery<HTMLElement>, current_path: string, path: string, stored_paths: string[], first: boolean) {
@@ -1960,6 +1970,7 @@ function rotateImage(url: string | undefined, rotateBy: string) {
     });
     sessionStorage.setItem(`image-rotate-${url}`, rotate.toString());
 }
+window.rotateImage = rotateImage;
 
 function resizeImageIFrame(imageTarget: JQuery<HTMLImageElement>, iFrameTarget: JQuery<HTMLElement>) {
     if (imageTarget.parent().is(':visible')) {
@@ -2055,7 +2066,7 @@ function openFrame(
     url_file: string,
     num: string,
     pdf_full_panel = true,
-    panel: FileFullPanelOptions = 'submission',
+    panel: string = 'submission',
 ) {
     const iframe = $(`#file_viewer_${num}`);
     const display_file_url = buildCourseUrl(['display_file']);
@@ -2085,7 +2096,7 @@ function openFrame(
             pdf_full_panel
             && url_file.substring(url_file.length - 3) === 'pdf'
         ) {
-            viewFileFullPanel(html_file, url_file, 0, panel)!.then(() => {
+            viewFileFullPanel(html_file, url_file, 0, panel as FileFullPanelOptions)?.then(() => {
                 loadPDFToolbar();
             });
         }
@@ -2124,6 +2135,7 @@ function openFrame(
     }
     return false;
 }
+window.openFrame = openFrame;
 
 export type FileFullPanelOptions = keyof typeof fileFullPanelOptions;
 const fileFullPanelOptions = {
@@ -2157,7 +2169,8 @@ const fileFullPanelOptions = {
     },
 };
 
-export function viewFileFullPanel(name: string, path: string, page_num = 0, panel: FileFullPanelOptions = 'submission') {
+export function viewFileFullPanel(name: string, path: string, page_num = 0, panelStr: string = 'submission') {
+    const panel = panelStr as FileFullPanelOptions;
     if ($(fileFullPanelOptions[panel]['viewer']).length !== 0) {
         $(fileFullPanelOptions[panel]['viewer']).remove();
     }
@@ -2181,8 +2194,10 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
         .promise();
     return promise;
 }
+window.viewFileFullPanel = viewFileFullPanel;
 
-function loadPDF(name: string, path: string, page_num: number, panel: FileFullPanelOptions = 'submission') {
+function loadPDF(name: string, path: string, page_num: number, panelStr: string = 'submission') {
+    const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
     const extension = name.split('.').pop();
@@ -2241,6 +2256,7 @@ function loadPDF(name: string, path: string, page_num: number, panel: FileFullPa
         // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
     }
 }
+window.loadPDF = loadPDF;
 
 window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;

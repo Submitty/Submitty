@@ -2819,7 +2819,7 @@ function scrollToPage(page_num: number) {
             if (filenameNoPeriod.startsWith('upload_page_')) {
                 const currPageNum = parseInt(filename.split('_')[2].split('.')[0]);
                 if (page_num === currPageNum) {
-                    viewFileFullPanel(filename, files[i].getAttribute('file-url')!);
+                    void viewFileFullPanel(filename, files[i].getAttribute('file-url')!);
                     return;
                 }
                 else if (currPageNum > maxPage) {
@@ -2830,7 +2830,7 @@ function scrollToPage(page_num: number) {
             }
         }
         if (maxPage !== -1) {
-            viewFileFullPanel(maxPageName, maxPageLoc);
+            void viewFileFullPanel(maxPageName, maxPageLoc);
             return;
         }
     }
@@ -2844,7 +2844,7 @@ function scrollToPage(page_num: number) {
                 }
             }
             else {
-                viewFileFullPanel('upload.pdf', files[i].getAttribute('file-url')!, page_num - 1);
+                void viewFileFullPanel('upload.pdf', files[i].getAttribute('file-url')!, page_num - 1);
             }
         }
     }
