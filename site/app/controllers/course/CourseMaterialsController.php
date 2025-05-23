@@ -472,7 +472,7 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 if (($overflow = strlen($new_path) - 255) > 0) {
-                    return JsonResponse::getErrorResponse("The new file name is too long. Please reduce it by {$overflow} characters.");
+                    return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
                 $requested_path = explode("/", $requested_path);
@@ -679,7 +679,7 @@ class CourseMaterialsController extends AbstractController {
             $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
 
             if (($overflow = strlen($details['path'][0]) - 255) > 0) {
-                return JsonResponse::getErrorResponse("The file name is too long. Please reduce it by {$overflow} characters.");
+                return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
             }
 
             FileUtils::writeFile($details['path'][0], "");
