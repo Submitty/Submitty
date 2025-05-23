@@ -2225,7 +2225,7 @@ function clearForumFilter() {
     window.filters_applied = [];
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').hide();
+    $('#clear_filter_button').css('visibility', 'hidden');
 
     // eslint-disable-next-line no-undef
     updateThreads(true, null);
@@ -2258,7 +2258,7 @@ function loadFilterHandlers() {
             clearForumFilter();
         }
         else {
-            $('#clear_filter_button').css('display', 'inline-block');
+            $('#clear_filter_button').css('visibility', 'visible');
         }
         // eslint-disable-next-line no-undef
         updateThreads(true, null);
@@ -2352,7 +2352,7 @@ function checkUnread() {
         // eslint-disable-next-line no-undef
         unread_marked = true;
         $('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
-        $('#clear_filter_button').css('display', 'inline-block');
+        $('#clear_filter_button').css('visibility', 'visible');
         return true;
     }
     else {
