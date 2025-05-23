@@ -921,7 +921,9 @@ function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, re
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', version_to_regrade);
+    if (version_to_regrade) {
+        formData.append('version_to_regrade', version_to_regrade);
+    }
     formData.append('regrade_all_students', regrade_all_students);
     formData.append('regrade_all_students_all', regrade_all_students_all);
     $.ajax({

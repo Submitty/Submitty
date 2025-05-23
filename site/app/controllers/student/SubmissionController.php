@@ -1001,7 +1001,10 @@ class SubmissionController extends AbstractController {
                     $version = $i;
                 }
                 else {
-                    $version = intval($_POST['version_to_regrade'] ?? $g->getAutoGradedGradeable()->getActiveVersion());
+                    $version = intval($_POST['version_to_regrade'] ?? 0);
+                    if ($version < 1 || $version > $g->getAutoGradedGradeable()->getHighestVersion()) {
+                        $version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    }
                 }
                 //create file name
                 $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
@@ -1037,7 +1040,7 @@ class SubmissionController extends AbstractController {
             }
         }
         if ($regrade === 'true' || $regrade_all === 'true') {
-            $msg = $count . " submission(s) from " . $who_id . " added to queue for regrading";
+            $msg = $count . " submission(s) from " . $who_id . " added to queue for regrading (" . $version;
         }
         else {
             $msg = $count . " submissions added to queue for regrading";
