@@ -387,7 +387,7 @@ class Gradeable extends AbstractModel {
         ];
 
         foreach ($mapping as $key => $method) {
-            if (array_key_exists($key, $details) && method_exists($this, $method)) {
+            if (array_key_exists($key, $details)) {
                 call_user_func([$this, $method], $details[$key] ?? true);
             }
         }
@@ -1790,8 +1790,7 @@ class Gradeable extends AbstractModel {
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-//        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
-        return false;
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
