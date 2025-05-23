@@ -79,6 +79,7 @@
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% include 'Vue.twig' with {
         'component': 'toggleColumns',
+        'style': 'display: inline;',
         'args': {
             'columns': [
                 "index",

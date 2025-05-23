@@ -4,12 +4,13 @@ import { onMounted, ref } from 'vue';
 import Popup from './popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
-const { columns, labels, cookie, forced, format = 'bits' } = defineProps<{
+const { columns, labels, cookie, forced, format = 'bits', buttonWrapped } = defineProps<{
     columns: string[];
     labels: string[];
     cookie: string;
     forced?: string[];
     format?: ColumnFormats;
+    buttonWrapped?: boolean;
 }>();
 
 const selected = ref<boolean[]>([]);
@@ -77,14 +78,24 @@ onMounted(loadColumns);
     @save="saveColumns"
   >
     <template #trigger>
-      <div class="btn-wrapper">
+      <template v-if="buttonWrapped">
+        <div class="btn-wrapper">
+          <a
+            id="toggle-columns"
+            data-testid="toggle-columns"
+            class="btn btn-primary"
+            @click="toggle"
+          >Toggle Columns</a>
+        </div>
+      </template>
+      <template v-else>
         <a
           id="toggle-columns"
           data-testid="toggle-columns"
           class="btn btn-primary"
           @click="toggle"
         >Toggle Columns</a>
-      </div>
+      </template>
     </template>
     <template #default>
       <p class="toggle-columns-instructions">
@@ -102,7 +113,7 @@ onMounted(loadColumns);
             type="checkbox"
             class="toggle-columns-box"
             :disabled="forced?.includes(id)"
-            :data-testid="id"
+            data-testid="toggle-{{ id }}"
           />
           <label :for="id">{{ labels[idx] }}</label>
         </div>
