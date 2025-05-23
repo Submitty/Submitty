@@ -3,7 +3,8 @@
     "autograding_method": "docker",
     "container_options" : {
         "use_router" : false, // todo: check if this is necessary
-        "container_image": "submitty/autograding-default:latest"
+        //"container_image": "submitty/autograding-default:latest"
+        "container_image": "submitty/python:latest"
     },
     "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
     "part_names" : [ "Python 3", "C", "C++" ],
@@ -19,8 +20,9 @@
             "containers": [
                 {
                     "container_name" : "container1",
-                    "container_image": "submitty/python:latest",
-                    "commands" : ["python3 part2/*.py"]
+                    //"container_image": "submitty/python:latest",
+                    "container_image": "submitty/autograding-default:latest",
+                    "commands" : ["python3 part1/*.py"]
                 }
             ],
             
@@ -43,7 +45,7 @@
                 {
                     "container_name" : "container2",
                     "container_image": "submitty/clang:latest",
-                    "commands" : ["clang -Wall -o p3.out -- part3/*.c"]
+                    "commands" : ["clang -Wall -o p3.out -- part2/*.c"]
                 }
             ],
             
@@ -79,7 +81,7 @@
                 {
                     "container_name" : "container4",
                     "container_image": "submitty/clang:latest",
-                    "commands" : ["clang++ -Wall -o p4.out -- part4/*.cpp"]
+                    "commands" : ["clang++ -Wall -o p4.out -- part3/*.cpp"]
                 }
             ],
             "executable_name" : "p4.out",
