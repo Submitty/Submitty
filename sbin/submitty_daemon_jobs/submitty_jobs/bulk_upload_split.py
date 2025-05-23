@@ -3,11 +3,13 @@
 """Splits a PDF every num pages and moves images and pdfs to split folder."""
 
 import os
-import PyPDF2
 import traceback
+
+import PyPDF2
 from PyPDF2 import PdfWriter
-from . import write_to_log as logger
+
 from . import generate_pdf_images
+from . import write_to_log as logger
 
 try:
     from pdf2image import convert_from_bytes
@@ -22,6 +24,7 @@ def main(args):
     split_path = args[1]
     num = int(args[2])
     log_file_path = args[3]
+    redactions = args[4]
 
     json_file = os.path.join(split_path, "decoded.json")
     log_msg = "Process " + str(os.getpid()) + ": "
@@ -62,7 +65,7 @@ def main(args):
                     i += 1
                 with open(output_filename, 'wb') as out:
                     pdf_writer.write(out)
-                generate_pdf_images.main(output_filename, [])
+                generate_pdf_images.main(output_filename, redactions)
 
                 with open(cover_filename, 'wb') as out:
                     cover_writer.write(out)

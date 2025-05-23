@@ -4,18 +4,20 @@
 
 import os
 import traceback
+
 import numpy
-from . import write_to_log as logger
-from . import submitty_ocr as scanner
+
 from . import generate_pdf_images
+from . import submitty_ocr as scanner
+from . import write_to_log as logger
 
 # try importing required modules
 try:
-    from PyPDF2 import PdfReader, PdfWriter
-    from pdf2image import convert_from_bytes
-    import pyzbar.pyzbar as pyzbar
-    from pyzbar.pyzbar import ZBarSymbol
     import cv2
+    import pyzbar.pyzbar as pyzbar
+    from pdf2image import convert_from_bytes
+    from PyPDF2 import PdfReader, PdfWriter
+    from pyzbar.pyzbar import ZBarSymbol
 except ImportError:
     traceback.print_exc()
     raise ImportError("One or more required python modules not installed correctly")
@@ -29,6 +31,7 @@ def main(args):
     qr_suffix = args[3]
     log_file_path = args[4]
     use_ocr = args[5]
+    redactions = args[6]
 
     buff = "Process " + str(os.getpid()) + ": "
 
@@ -103,14 +106,14 @@ def main(args):
                     logger.write_to_json(json_file, output)
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
-                    generate_pdf_images.main(prev_file, [])
+                    generate_pdf_images.main(prev_file, redactions)
 
                 if id_index == 1:
                     # correct first pdf's page count and print file
                     output[prev_file]['page_count'] = page_count
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
-                    generate_pdf_images.main(prev_file, [])
+                    generate_pdf_images.main(prev_file, redactions)
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfWriter()
@@ -170,7 +173,7 @@ def main(args):
 
         with open(prev_file, 'wb') as out:
             pdf_writer.write(out)
-        generate_pdf_images.main(prev_file, [])
+        generate_pdf_images.main(prev_file, redactions)
         # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)
     except Exception:
