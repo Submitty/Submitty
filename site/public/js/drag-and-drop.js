@@ -34,10 +34,8 @@ let MAX_NUM_OF_FILES;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
-// eslint-disable-next-line no-unused-vars
 let num_clipboard_files = 0;
-
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
@@ -1123,7 +1121,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                     if (data['message'] === 'You do not have access to that page.') {
                         window.location.href = return_url;
                     }
-                    // eslint-disable-next-line valid-typeof
+                    // eslint-disable-next-line valid-typeof, no-constant-binary-expression
                     else if (typeof data['code'] !== undefined && data['code'] === 302) {
                         window.location.href = data['data'];
                     }
