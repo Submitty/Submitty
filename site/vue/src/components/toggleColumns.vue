@@ -78,24 +78,24 @@ onMounted(loadColumns);
     @save="saveColumns"
   >
     <template #trigger>
-      <template v-if="buttonWrapped">
-        <div class="btn-wrapper">
-          <a
-            id="toggle-columns"
-            data-testid="toggle-columns"
-            class="btn btn-primary"
-            @click="toggle"
-          >Toggle Columns</a>
-        </div>
-      </template>
-      <template v-else>
+      <div
+        v-if="buttonWrapped"
+        class="btn-wrapper"
+      >
         <a
           id="toggle-columns"
           data-testid="toggle-columns"
           class="btn btn-primary"
           @click="toggle"
         >Toggle Columns</a>
-      </template>
+      </div>
+      <a
+        v-else
+        id="toggle-columns"
+        data-testid="toggle-columns"
+        class="btn btn-primary"
+        @click="toggle"
+      >Toggle Columns</a>
     </template>
     <template #default>
       <p class="toggle-columns-instructions">
@@ -108,12 +108,12 @@ onMounted(loadColumns);
           class="toggle-checkbox-area"
         >
           <input
-            id="toggle-{{ id }}"
+            :id="`toggle-${id}`"
             v-model="selected[idx]"
             type="checkbox"
             class="toggle-columns-box"
             :disabled="forced?.includes(id)"
-            data-testid="toggle-{{ id }}"
+            :data-testid="`toggle-${id}`"
           />
           <label :for="id">{{ labels[idx] }}</label>
         </div>
