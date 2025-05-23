@@ -34,7 +34,7 @@
 } %}
 
 <div class="full-height content forum_content forum_show_threads">
-
+    <div>
     {% if not thread_exists  %}
         {%  include "forum/ForumBar.twig" with {
                 "current_thread" : button_params.current_thread,
@@ -83,6 +83,7 @@
             "show_filter": true,
             "activeThread" : generate_post_content.activeThread,
         } %}
+        </div>
 
         <div id="thread-container" class="row">
 
