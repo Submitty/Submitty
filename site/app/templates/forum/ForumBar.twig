@@ -40,8 +40,7 @@
 							{% endif %}
 						{% endif %}
 					{% endfor %}
-					
-					<a id="clear_filter_button" class="inline-block text-decoration-none key_to_click clear-filter-button" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="text-decoration-none key_to_click clear-filter-button" tabindex="0" title="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 				</div>
 			</form>
 			{% endif %}
@@ -183,7 +182,7 @@
 
 		if(filters_applied.length > 0 || unread_marked ){
 			$('#forum_filter_bar').css('display', 'inline-block');
-			$('#clear_filter_button').css('display', 'inline-block');
+			$('#clear_filter_button').css('visibility', 'visible');
 		}
 
 		{% if display_option is defined and display_option in ['tree', 'time', 'alpha'] %}

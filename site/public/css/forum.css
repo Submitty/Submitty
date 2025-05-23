@@ -47,6 +47,7 @@
     min-width: 12rem;
     display: flex;
     align-items: stretch;
+    flex-grow: 0.35;
 }
 
 .forum-bar .toolbar-left > form {
@@ -68,15 +69,15 @@
     flex: 0 0 auto;
     display: flex;
     flex-wrap: nowrap;
-    align-items: stretch;
+    align-items: center;
     gap: 0.5rem;
 }
 
 .clear-filter-button {
     flex: 0 1 auto;
+    flex-wrap: wrap;
     min-width: 100px;
-    display: none;
-    white-space: nowrap;
+    visibility: hidden;
     margin-left: 0.5rem;
     color: var(--actionable-blue);
 }
@@ -84,7 +85,7 @@
 /* stylelint-disable-next-line selector-id-pattern */
 #clear_filter_button,
 #unread {
-    display: none;
+    visibility: hidden;
 }
 
 /* stylelint-disable-next-line selector-id-pattern */
