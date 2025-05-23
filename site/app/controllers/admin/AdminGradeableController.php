@@ -535,8 +535,8 @@ class AdminGradeableController extends AbstractController {
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-            $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
-            $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+            $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
+            $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
         }

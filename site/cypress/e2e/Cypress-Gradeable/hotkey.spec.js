@@ -41,7 +41,6 @@ describe('TA grading hotkey testing', () => {
         cy.get('[data-testid="page-2-nav"]').click();
         cy.get('[data-testid="add-new-peer-component"]').click();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
-        cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').eq(12).click();
         cy.get('body').type('{P}');
         cy.get('[data-testid="peer-info"]').should('contain', 'Peer Grading');

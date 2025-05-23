@@ -1225,12 +1225,12 @@ HTML;
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
 
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
-        $this->core->getOutput()->addInternalJs('panel-selector-modal.js');
-        $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1631,7 +1631,7 @@ HTML;
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
-
+      
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
@@ -1709,7 +1709,6 @@ HTML;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
-
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/PeerPanel.twig", [
                 "gradeable_id" => $gradeable->getId(),

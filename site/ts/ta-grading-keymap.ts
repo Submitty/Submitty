@@ -1,6 +1,3 @@
-/* exported registerKeyHandler unregisterKeyHandler showSettings hideSettings remapHotkey remapUnset */
-/* global captureTabInModal Twig */
-
 /**
  * References:
  * https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
@@ -10,14 +7,34 @@
 // Keyboard shortcut handling
 
 // eslint-disable-next-line no-var
-var keymap = [];
+var keymap: KeymapEntry<unknown>[] = [];
 // eslint-disable-next-line no-var
 var remapping = {
     active: false,
     index: 0,
 };
+export type KeymapEntry<T> = {
+    name: string;
+    code: string;
+    fn?: (e: KeyboardEvent, options?: T) => void;
+    originalCode?: string;
+    options?: T;
+};
 
-const settingsData = [
+type SettingsData = {
+    id: string;
+    name: string;
+    values: {
+        name: string;
+        storageCode: string;
+        options: Record<string, string>;
+        optionsGenerator?: (() => Record<string, string>);
+        default: string;
+        currValue?: string;
+    }[];
+}[];
+
+export const settingsData: SettingsData = [
     {
         id: 'general-setting-list',
         name: 'General',
@@ -38,7 +55,8 @@ const settingsData = [
             {
                 name: 'Prev/Next buttons navigate through',
                 storageCode: 'general-setting-navigate-assigned-students-only',
-                options: function () {
+                options: {},
+                optionsGenerator: function (): Record<string, string> {
                     if ($('#ta-grading-settings-list').attr('data-full_access') !== 'true') {
                         return {};
                     }
@@ -87,7 +105,8 @@ window.onkeydown = function (e) {
         return;
     }
 
-    if (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type !== 'checkbox') || e.target.tagName === 'SELECT') {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && (target as HTMLInputElement).type !== 'checkbox') || target.tagName === 'SELECT') {
         return;
     } // disable keyboard event when typing to textarea/input
 
@@ -95,7 +114,7 @@ window.onkeydown = function (e) {
 
     for (let i = 0; i < keymap.length; i++) {
         if (keymap[i].code === codeName) {
-            keymap[i].fn(e, keymap[i].options);
+            keymap[i].fn?.(e, keymap[i].options);
         }
     }
 };
@@ -108,7 +127,7 @@ window.onkeydown = function (e) {
  *     Note the alphabetical order of modifier keys: Alt Control Meta Shift
  * @param {Function} fn Function / callable
  */
-function registerKeyHandler(parameters, fn) {
+export function registerKeyHandler<T>(parameters: KeymapEntry<T>, fn: (e: KeyboardEvent, options?: T) => void) {
     parameters.originalCode = parameters.code || 'Unassigned';
     parameters.fn = fn;
 
@@ -120,58 +139,39 @@ function registerKeyHandler(parameters, fn) {
         parameters.code = parameters.originalCode;
     }
 
-    keymap.push(parameters);
+    keymap.push(parameters as KeymapEntry<unknown>);
 }
-
-/**
- * Unregister a key handler. Arguments are equivalent to registerKeyHandler()
- * @param code Keycode, see registerKeyHandler()
- * @param fn Function / callable
- */
-function unregisterKeyHandler(code, fn) {
-    for (let i = 0; i < keymap.length; i++) {
-        if (keymap[i].code === code || keymap[i].fn === fn) {
-            // Delete 1 at i
-            keymap.splice(i, 1);
-            i--;
-        }
-    }
-}
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+window.registerKeyHandler = function (parameters: object, fn: Function) {
+    registerKeyHandler(parameters as KeymapEntry<unknown>, fn as (e: KeyboardEvent, options?: unknown) => void);
+};
 
 function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
 }
 
-function showSettings() {
+window.showSettings = function () {
     generateSettingList();
     generateHotkeysList();
     $('#settings-popup').show();
     captureTabInModal('settings-popup');
-}
+};
 
-function hideSettings() {
-    if (remapping.active) {
-        return;
-    }
-
-    $('#settings-popup').hide();
-}
-
-Twig.twig({
+window.Twig.twig({
     id: 'HotkeyList',
     href: '/templates/grading/settings/HotkeyList.twig',
     async: true,
 });
 
-function restoreAllHotkeys() {
+window.restoreAllHotkeys = function () {
     keymap.forEach((hotkey, index) => {
-        updateKeymapAndStorage(index, hotkey.originalCode);
+        updateKeymapAndStorage(index, hotkey.originalCode!);
     });
-}
+};
 
-function removeAllHotkeys() {
+window.removeAllHotkeys = function () {
     keymap.forEach((hotkey, index) => updateKeymapAndStorage(index, 'Unassigned'));
-}
+};
 
 /**
  * Generate list of hotkeys on the ui
@@ -179,7 +179,8 @@ function removeAllHotkeys() {
 function generateHotkeysList() {
     const parent = $('#hotkeys-list');
 
-    parent.replaceWith(Twig.twig({
+    parent.replaceWith(window.Twig.twig({
+        // @ts-expect-error @types/twig is not compatible with the current version of twig
         ref: 'HotkeyList',
     }).render({
         keymap: keymap.map((hotkey) => ({
@@ -189,7 +190,7 @@ function generateHotkeysList() {
     }));
 }
 
-Twig.twig({
+window.Twig.twig({
     id: 'GeneralSettingList',
     href: '/templates/grading/settings/GeneralSettingList.twig',
     async: true,
@@ -202,26 +203,28 @@ function generateSettingList() {
     const parent = $('#ta-grading-general-settings');
     loadTAGradingSettingData();
 
-    parent.replaceWith(Twig.twig({
+    parent.replaceWith(window.Twig.twig({
+        // @ts-expect-error @types/twig is not compatible with the current version of twig
         ref: 'GeneralSettingList',
     }).render({
         settings: settingsData,
     }));
 }
 
-function loadTAGradingSettingData() {
+export function loadTAGradingSettingData() {
     for (let i = 0; i < settingsData.length; i++) {
         for (let x = 0; x < settingsData[i].values.length; x++) {
-            if (typeof (settingsData[i].values[x].options) === 'function') {
-                settingsData[i].values[x].options = settingsData[i].values[x].options();
+            const generator = settingsData[i].values[x].optionsGenerator;
+            if (generator) {
+                settingsData[i].values[x].options = generator();
             }
-            const inquiry = Cookies.get('inquiry_status');
+            const inquiry = window.Cookies.get('inquiry_status');
             if (inquiry === 'on') {
                 settingsData[i].values[x].currValue = 'active-inquiry';
             }
             else {
                 if (localStorage.getItem(settingsData[i].values[x].storageCode) !== 'default' && localStorage.getItem(settingsData[i].values[x].storageCode) !== 'active-inquiry') {
-                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode);
+                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode)!;
                 }
                 else {
                     settingsData[i].values[x].currValue = 'default';
@@ -239,7 +242,7 @@ function loadTAGradingSettingData() {
  * Start rebinding a hotkey
  * @param {int} i Index of hotkey to rebind
  */
-function remapHotkey(i) {
+window.remapHotkey = function (i: number) {
     if (remapping.active) {
         return;
     }
@@ -253,17 +256,17 @@ function remapHotkey(i) {
     $('#settings-close').attr('disabled', 'disabled');
     button.attr('disabled', null);
     button.addClass('btn-success');
-}
+};
 
-function updateKeymapAndStorage(index, code) {
+function updateKeymapAndStorage(index: number, code: string) {
     keymap[index].code = code;
     const keymapObject = keymap.reduce((obj, hotkey) => {
         obj[hotkey.name] = {
             code: hotkey.code,
-            originalCode: hotkey.originalCode,
+            originalCode: hotkey.originalCode!,
         };
         return obj;
-    }, {});
+    }, {} as Record<string, { code: string; originalCode: string }>);
     localStorage.setItem('keymap', JSON.stringify(keymapObject));
     generateHotkeysList();
 }
@@ -273,7 +276,7 @@ function updateKeymapAndStorage(index, code) {
  * @param {int} index Index of the hotkey
  * @param {string} code New keycode for the hotkey
  */
-function remapFinish(index, code) {
+function remapFinish(index: number, code: string) {
     for (let i = 0; i < keymap.length; i++) {
         if (index !== i && keymap[i].code === code && code !== 'Unassigned') {
             const button = $(`#remap-${index}`);
@@ -294,56 +297,30 @@ function remapFinish(index, code) {
  * Revert a hotkey to its original code
  * @param {int} i Index of hotkey
  */
-function remapUnset(index) {
+window.remapUnset = function (index: number) {
     remapFinish(index, 'Unassigned');
-}
+};
 
 /**
  * Get the keycode for a hotkey binding from localStorage
  * @param {string} mapName Name of hotkey binding
  * @returns {string|null} Code value if exists, else null
  */
-function remapGetLS(mapName) {
-    let lsKeymap = localStorage.getItem('keymap');
+function remapGetLS(mapName: string): string | null {
+    const lsKeymap = localStorage.getItem('keymap');
     if (lsKeymap === null) {
         return null;
     }
     try {
-        lsKeymap = JSON.parse(lsKeymap);
+        const parsedKeymap = JSON.parse(lsKeymap) as Record<string, { code: string; originalCode: string }>;
+        if (!Object.prototype.hasOwnProperty.call(parsedKeymap, mapName)) {
+            return null;
+        }
+        return parsedKeymap[mapName].code;
     }
-    catch (e) {
+    catch {
         return null;
     }
-    if (!Object.prototype.hasOwnProperty.call(lsKeymap, mapName)) {
-        return null;
-    }
-    return lsKeymap[mapName].code;
-}
-
-/**
- * Save a hotkey binding to localStorage
- * @param {string} mapName Name of hotkey binding
- * @param {string} code New binding code
- */
-function remapSetLS(mapName, code) {
-    let lsKeymap = localStorage.getItem('keymap');
-    if (lsKeymap === null) {
-        lsKeymap = {};
-    }
-    else {
-        try {
-            lsKeymap = JSON.parse(lsKeymap);
-        }
-        catch (e) {
-            lsKeymap = {};
-        }
-    }
-    if (!Object.prototype.hasOwnProperty.call(lsKeymap, mapName)) {
-        lsKeymap[mapName] = {};
-    }
-    lsKeymap[mapName].code = code;
-
-    localStorage.setItem('keymap', JSON.stringify(lsKeymap));
 }
 
 /**
@@ -351,7 +328,7 @@ function remapSetLS(mapName, code) {
  * @param {KeyboardEvent} e Event
  * @returns {string} String form of the event
  */
-function eventToKeyCode(e) {
+function eventToKeyCode(e: KeyboardEvent): string {
     let codeName = e.code;
 
     // Apply modifiers to code name in reverse alphabetical order so they come out alphabetical
