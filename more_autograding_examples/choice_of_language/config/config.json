@@ -1,12 +1,8 @@
 {
     "required_capabilities": "et-cetera",
     "autograding_method": "docker",
-    "container_options" : {
-        "use_router" : false, // todo: check if this is necessary
-        //"container_image": "submitty/autograding-default:latest"
-        "container_image": "submitty/python:latest"
-    },
-    "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
+
+    "assignment_message" : "Please submit your assignment in one of 3 languages.  Only submit to a single bucket.",
     "part_names" : [ "Python 3", "C", "C++" ],
 
     "one_part_only" : true,
@@ -20,8 +16,7 @@
             "containers": [
                 {
                     "container_name" : "container1",
-                    //"container_image": "submitty/python:latest",
-                    "container_image": "submitty/autograding-default:latest",
+                    "container_image": "submitty/python:latest",
                     "commands" : ["python3 part1/*.py"]
                 }
             ],
