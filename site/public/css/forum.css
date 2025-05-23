@@ -36,7 +36,7 @@
 .forum-bar .toolbar-right {
     flex: 0 0 auto;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: stretch;
     margin-left: auto;
     gap: 0.5rem;
