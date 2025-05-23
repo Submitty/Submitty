@@ -34,10 +34,8 @@ let MAX_NUM_OF_FILES;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
-// eslint-disable-next-line no-unused-vars
 let num_clipboard_files = 0;
-
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
@@ -189,7 +187,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['banner', 'upload']),
+        url: buildUrl(['community_event', 'upload']),
         data: formData,
         processData: false,
         contentType: false,
@@ -199,7 +197,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -211,7 +209,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
@@ -1123,7 +1121,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                     if (data['message'] === 'You do not have access to that page.') {
                         window.location.href = return_url;
                     }
-                    // eslint-disable-next-line valid-typeof
+                    // eslint-disable-next-line valid-typeof, no-constant-binary-expression
                     else if (typeof data['code'] !== undefined && data['code'] === 302) {
                         window.location.href = data['data'];
                     }
@@ -1384,6 +1382,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (file_path !== null && file_path !== '') {
+        if (file_path.startsWith('/')) {
+            alert('The file path cannot start with the root directory “/”, use a relative path.');
+            return;
+        }
         const file_name = file_path.split('/').pop();
         if (link_url !== null) {
             const lastSlashIndex = file_path.lastIndexOf('/');

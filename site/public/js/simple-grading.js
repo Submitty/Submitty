@@ -270,37 +270,13 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         {
             csrf_token: csrfToken,
             user_id: user_id,
+            anon_id: parent.data('anon'),
             old_scores: old_scores,
             scores: new_scores,
         },
         (returned_data) => {
-            if (returned_data.data && returned_data.data.date) {
-                const currentDate = new Date(returned_data.data.date);
-                if (!isNaN(currentDate.getTime())) {
-                    const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
-                    elems.each((idx, elem) => {
-                        elem = $(elem);
-                        elem.animate({ 'border-right-width': '0px' }, 400);
-                        elem.attr('data-score', elem.data('score'));
-                        elem.attr('data-grader', elem.data('grader'));
-                        elem.attr('data-date', formattedDate);
-                        elem.find('.simple-grade-grader').text(elem.data('grader'));
-                        elem.find('.simple-grade-date').text(formattedDate);
-                    });
-                    window.socketClient.send({
-                        type: 'update_checkpoint',
-                        elem: elems.attr('id').split('-')[3],
-                        user: parent.data('anon'),
-                        score: elems.data('score'),
-                        grader: elems.data('grader'),
-                        date: formattedDate,
-                    });
-                }
-                else {
-                    console.log('Invalid date received:', returned_data.data.date);
-                }
-            }
-            else {
+            const returned_date = returned_data?.data?.date;
+            if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
                 elems.each((idx, elem) => {
                     elem = $(elem);
@@ -463,20 +439,11 @@ function setupNumericTextCells() {
             {
                 csrf_token: csrfToken,
                 user_id: row_el.data('user'),
+                anon_id: row_el.data('anon'),
+                elem: split_id[3],
                 old_scores: old_scores,
                 scores: scores,
-            },
-
-            () => {
-                // Finds the element that stores the total and updates it to reflect increase
-                // eslint-disable-next-line eqeqeq
-                if (row_el.find('.cell-total').text() != total) {
-                    row_el.find('.cell-total').text(total).hide().fadeIn('slow');
-                }
-
-                window.socketClient.send({ type: 'update_numeric', elem: split_id[3], user: row_el.data('anon'), value: value, total: total });
-            },
-            () => {
+            }, () => {}, () => {
                 elem.css('background-color', '--standard-light-pink');
             },
         );
@@ -694,7 +661,6 @@ function setupSimpleGrading(action) {
                 // // Selection needs to move to above the null section
                 if (new_selector_array[1] === '') {
                     new_selector_array[1] = 1;
-                    // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const temp_cell = $(`#${new_selector_array.join('-')}`);
                         if (!temp_cell.length) {
@@ -987,14 +953,12 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         elem.attr('data-origval', value);
         elem.val(value);
         elem.css('background-color', 'var(--default-white)');
-        // eslint-disable-next-line eqeqeq
         if (value === 0) {
             elem.css('color', 'var(--standard-light-medium-gray)');
         }
         else {
             elem.css('color', '');
         }
-        // eslint-disable-next-line eqeqeq
         if (elem.parent().siblings('.option-small-output').children('.cell-total').text() !== total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }

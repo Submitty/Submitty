@@ -156,7 +156,6 @@ export function applySettings() {
         else if ((!Number.isNaN(forum_post) && s_forum_post == null) || Date.parse(s_forum_post) < forum_post) {
             flag = true;
         }
-        // eslint-disable-next-line eqeqeq
         else if (!Number.isNaN(num_poll) && parseInt(s_num_polls) < num_poll) {
             flag = true;
         }
@@ -232,7 +231,6 @@ export function columnOnClick(n) {
         if (i !== n && $(`#${i}`).children('i').hasClass('fa-angle-up')) {
             $(`#${i}`).children('i').removeClass('fa-angle-up');
         }
-        // eslint-disable-next-line eqeqeq
         else if (i !== n && $(`#${i}`).children('i').hasClass('fa-angle-down')) {
             $(`#${i}`).children('i').removeClass('fa-angle-down');
         }
