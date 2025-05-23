@@ -31,7 +31,7 @@
 {% if is_self_register %}
         <form method="post" action="{{ unregister_url }}">
             <input type="hidden" value="{{ csrf_token }}" name="csrf_token"/>
-            <button class="unregister-button btn" onclick="return confirmUnregister();" type="submit">Unregister from Course</button>
+            <button data-testid="unregister-button" class="unregister-button btn" onclick="return confirmUnregister();" type="submit">Unregister from Course</button>
         </form>
 {% endif %}
     <h1>Gradeables</h1>

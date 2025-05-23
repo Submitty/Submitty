@@ -19,7 +19,7 @@
 
 .unregister-button {
     background-color: var(--standard-medium-blue);
-    float:right;
+    float: right;
     border: none;
     color: var(--btn-text-white);
 }

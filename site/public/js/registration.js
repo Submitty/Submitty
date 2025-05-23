@@ -1,4 +1,4 @@
 /* exported confirmUnregister */
 function confirmUnregister() {
-    return prompt('Are you sure you want to unregister from this course? Type "unregister" to confirm') === 'unregister';
+    return confirm("Are you sure you wish to unregister? You won't have access to this course unless you re-register");
 }
