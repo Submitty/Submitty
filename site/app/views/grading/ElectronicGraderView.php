@@ -502,7 +502,7 @@ HTML;
      * @param array<string, bool> $overrides
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
-     * @param array<string> $grading_details_columns
+     * @param array<string,bool> $grading_details_columns
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $grading_details_columns) {
@@ -891,12 +891,11 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-        $shownColumns = [];
-        for ($i = 0; $i < count($grading_details_columns); $i++) {
-            if ($grading_details_columns[$i] === "1") {
-                $shownColumns[] = $columns[$i];
-            }
-        }
+        if (!empty($grading_details_columns)){
+        $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
+            return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns[$column['function']];
+        });
+    }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
@@ -924,7 +923,7 @@ HTML;
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
-            "columns" => $shownColumns,
+            "columns" => $columns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),

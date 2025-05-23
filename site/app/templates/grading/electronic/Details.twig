@@ -81,16 +81,16 @@
         'component': 'toggleColumns',
         'args': {
             'columns': [
-                "toggle-index",
-                "toggle-section",
-                "toggle-user_id",
-                "toggle-user_given",
-                "toggle-user_family",
-                "toggle-autograding",
-                "toggle-graded_questions",
-                "toggle-total",
-                "toggle-grading",
-                "toggle-active_version"
+                "index",
+                "section",
+                "user_id",
+                "user_given",
+                "user_family",
+                "autograding",
+                "graded_questions",
+                "total",
+                "grading",
+                "active_version"
             ],
             'labels': [
                 "# / Count / Index",
@@ -105,9 +105,10 @@
                 "Active Version"
             ],
             'forced': [
-                'toggle-grading'
+                'grading'
             ],
             'cookie': 'grading_details_columns',
+            'format': 'json',
         },
     } %}
     {% if message is not empty %}
