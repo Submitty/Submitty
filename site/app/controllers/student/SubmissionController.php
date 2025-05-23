@@ -1040,7 +1040,7 @@ class SubmissionController extends AbstractController {
             }
         }
         if ($regrade === 'true' || $regrade_all === 'true') {
-            $msg = $count . " submission(s) from " . $who_id . " added to queue for regrading (" . $version;
+            $msg = $count . " submission(s) from " . $who_id . " added to queue for regrading";
         }
         else {
             $msg = $count . " submissions added to queue for regrading";
