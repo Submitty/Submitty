@@ -891,11 +891,11 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-        if (!empty($grading_details_columns)){
-        $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
-            return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns[$column['function']];
-        });
-    }
+        if (count($grading_details_columns) > 0) {
+            $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
+                return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns[$column['function']];
+            });
+        }
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');

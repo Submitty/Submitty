@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import Popup from './popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
-const { columns, labels, cookie, format = 'bits' } = defineProps<{
+const { columns, labels, cookie, forced, format = 'bits' } = defineProps<{
     columns: string[];
     labels: string[];
     cookie: string;
@@ -55,7 +55,7 @@ function saveColumns() {
     window.location.reload();
 }
 function fillAll(val: boolean) {
-    selected.value = selected.value.map(() => val);
+    selected.value = selected.value.map((_, idx) => forced?.includes(columns[idx]) || val);
 }
 
 function toggle() {
