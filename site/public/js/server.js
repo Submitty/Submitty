@@ -809,7 +809,9 @@ function checkRefreshPage(url) {
 function check_server(url) {
     $.get(url,
         (data) => {
-            if (data.indexOf('REFRESH_ME') > -1) {
+            // if the response bool is true, reload the page
+            const refresh_bool = JSON.parse(data).data;
+            if (refresh_bool) {
                 location.reload();
             }
             else {
@@ -1124,7 +1126,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
 /**
  * TODO: This may be unused.  Check, and potentially remove this function.
  */
-// eslint-disable-next-line no-unused-vars
 function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: 'POST',

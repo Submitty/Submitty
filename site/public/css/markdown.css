@@ -237,7 +237,8 @@
     margin: 2px 2px 2px 5px;
     border: 2px solid var(--submitty-logo-blue);
     border-radius: 50%;
-    animation: markdown-preview-load-spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    animation: markdown-preview-load-spinner 1.2s cubic-bezier(0.5, 0, 0.5, 1)
+        infinite;
     border-color: var(--submitty-logo-blue) transparent transparent transparent;
 }
 

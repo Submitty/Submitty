@@ -1180,7 +1180,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 10
+			count: 9
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -2989,11 +2989,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:ajaxValidGradeable\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -5182,16 +5177,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createNewTerm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has parameter \\$len with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -11153,11 +11138,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has parameter \\$gradeable_title with no type specified\\.$#"
 			count: 1
 			path: app/views/ErrorView.php
 
