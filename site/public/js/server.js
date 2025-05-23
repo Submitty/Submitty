@@ -1126,7 +1126,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
 /**
  * TODO: This may be unused.  Check, and potentially remove this function.
  */
-// eslint-disable-next-line no-unused-vars
 function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: 'POST',

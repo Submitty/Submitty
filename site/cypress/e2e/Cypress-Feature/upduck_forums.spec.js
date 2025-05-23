@@ -3,13 +3,14 @@ import { buildUrl } from '../../support/utils';
 const title1 = 'Attachment contains secret';
 const title2 = 'Different Levels& display order';
 const title3 = 'Simple C++ threading example';
+const upduckWaitTime = 10000;
 
 const upduckPost = (thread_title, thread_number = 0, num_ducks = 0) => {
     cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').eq(thread_number).should('have.text', num_ducks);
     cy.get('[data-testid="upduck-button"]').eq(thread_number).click();
-    cy.wait('@upduck', { responseTimeout: 15000 });
+    cy.wait('@upduck', { requestTimeout: upduckWaitTime });
     cy.get('[data-testid="like-count"]').eq(thread_number).should('have.text', num_ducks + 1);
 };
 
@@ -18,7 +19,7 @@ const removeUpduck = (thread_title, thread_number = 0, num_ducks = 1) => {
     cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
     cy.get('[data-testid="like-count"]').eq(thread_number).should('have.text', num_ducks);
     cy.get('[data-testid="upduck-button"]').eq(thread_number).click();
-    cy.wait('@upduck', { responseTimeout: 15000 });
+    cy.wait('@upduck', { requestTimeout: upduckWaitTime });
     cy.get('[data-testid="like-count"]').eq(thread_number).should('have.text', num_ducks - 1);
 };
 
@@ -197,7 +198,7 @@ describe('Should test upducks relating to students, TAs, and instructors', () =>
 
         // Remove upducks
         cy.get('[data-testid="upduck-button"]').first().click();
-        cy.wait('@upduck', { responseTimeout: 15000 });
+        cy.wait('@upduck', { requestTimeout: upduckWaitTime });
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'forum']);
