@@ -291,7 +291,7 @@ function updateHistogram(updates) {
     Plotly.newPlot(container, data, layout);
 }
 
-function initializeInstructorSocketClient(url) {
+function initializeInstructorSocketClient(poll_id) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
@@ -303,10 +303,13 @@ function initializeInstructorSocketClient(url) {
                 break;
         }
     };
-    window.socketClient.open(url);
+    window.socketClient.open('polls', {
+        instructor: true,
+        poll_id: poll_id,
+    });
 }
 
-function initializeStudentSocketClient(url) {
+function initializeStudentSocketClient(poll_id) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         const submit_button = $('.student-submit');
@@ -340,5 +343,8 @@ function initializeStudentSocketClient(url) {
                 break;
         }
     };
-    window.socketClient.open(url);
+    window.socketClient.open('polls', {
+        instructor: true,
+        poll_id: poll_id,
+    });
 }

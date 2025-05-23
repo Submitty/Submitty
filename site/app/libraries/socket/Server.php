@@ -88,6 +88,7 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
+        assert($request instanceof \Psr\Http\Message\RequestInterface);
 
         if ($this->isWebSocketClient($conn)) {
             $this->php_websocket_clients[$conn->resourceId] = true;
@@ -103,16 +104,63 @@ class Server implements MessageComponentInterface {
         $sessid = $cookies['submitty_session'];
 
         try {
+            $query = $request->getUri()->getQuery();
+            $query_params = [];
+            parse_str($query, $query_params);
+            if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
+                return false;
+            }
+            $term = $query_params['term'];
+            $course = $query_params['course'];
+            $this->core->loadCourseConfig($term, $course);
+            $this->core->loadCourseDatabase();
             $token = TokenManager::parseSessionToken($sessid);
             $session_id = $token->claims()->get('session_id');
             $user_id = $token->claims()->get('sub');
-            $logged_in = $this->core->getSession($session_id, $user_id);
-            if ($logged_in) {
-                $this->setSocketClient($user_id, $conn);
+            if (!$this->core->getSession($session_id, $user_id)) {
+                return false;
             }
-            return $logged_in;
+            if (!$this->core->getAccess()->canI("course.view", ['course' => $course, 'semester' => $term])) {
+                return false;
+            }
+            switch ($query_params['page']) {
+                case 'discussion_forum':
+                case 'polls':
+                    break;
+                case 'grade_inquiry':
+                    if (!isset($query_params['gradeable_id'])) {
+                        return false;
+                    }
+                    $gradeable = $this->core->getQueries()->getGradeableConfig($query_params['gradeable_id']);
+                    $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $query_params['submitter_id']);
+                    if (!$this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
+                        return false;
+                    }
+                    break;
+                case 'grading':
+                    if (!isset($query_params['gradeable_id'])) {
+                        return false;
+                    }
+                    $gradeable = $this->core->getQueries()->getGradeableConfig($query_params['gradeable_id']);
+                    if (!$this->core->getAccess()->canI("grading.simple.grade", ['gradeable' => $gradeable])) {
+                        return false;
+                    }
+                    break;
+                default:
+                    return false;
+            }
+            $this->setSocketClient($user_id, $conn);
+            if (!array_key_exists($query_params['page'], $this->clients)) {
+                $this->clients[$query_params['page']] = new \SplObjectStorage();
+            }
+            $this->clients[$query_params['page']]->attach($conn);
+            $this->setSocketClientPage($query_params['page'], $conn);
+
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - term: '" . $term . "' - course: '" . $course . "' - page: '" . $query_params['page'] . "'");
+            return true;
         }
         catch (\InvalidArgumentException $exc) {
+            $this->logError($exc, $conn);
             return false;
         }
     }
@@ -204,22 +252,7 @@ class Server implements MessageComponentInterface {
 
             $msg = json_decode($msgString, true);
 
-            if (isset($msg["type"]) && $msg["type"] === "new_connection") {
-                if (isset($msg['page']) && is_string($msg['page']) && !isset($this->pages[$from->resourceId])) {
-                    if (!array_key_exists($msg['page'], $this->clients)) {
-                        $this->clients[$msg['page']] = new \SplObjectStorage();
-                    }
-                    $this->clients[$msg['page']]->attach($from);
-                    $this->setSocketClientPage($msg['page'], $from);
-
-                    $course_page = explode('-', $this->getSocketClientPage($from));
-                    $this->log("New connection {$from->resourceId} --> user_id: '" . $this->getSocketUserID($from) . "' - term: '" . $course_page[0] . "' - course: '" . $course_page[1] . "' - page: '" . $course_page[2]);
-                }
-                else {
-                    $from->close();
-                }
-            }
-            elseif (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
+            if (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
                 // user_id is only sent with socket clients open from a php user_agent
                 unset($msg['user_id']);
                 $new_msg_string = json_encode($msg);

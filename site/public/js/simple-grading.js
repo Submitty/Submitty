@@ -907,7 +907,7 @@ function initSocketClient() {
         }
     };
     const gradeable_id = window.location.pathname.split('gradeable/')[1].split('/')[0];
-    window.socketClient.open(gradeable_id);
+    window.socketClient.open('grading', { gradeable_id: gradeable_id });
     updateVisibility();
 }
 
