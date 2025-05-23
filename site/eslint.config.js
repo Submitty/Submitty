@@ -60,26 +60,24 @@ module.exports = tseslint.config(
             ],
         },
     },
+
     {
         name: 'Style rules for all files',
         extends: [
-            /** @type {import("typescript-eslint").Config} */
-            /** @type {unknown} */
-            (
-                stylistic.configs.customize({
-                    braceStyle: 'stroustrup',
-                    indent: 4,
-                    semi: true,
-                    arrowParens: true,
-                })
-            ),
+            stylistic.configs.customize({
+            braceStyle: 'stroustrup',
+            indent: 4,
+            semi: true,
+            arrowParens: true,
+            }),
         ],
         rules: {
-            '@stylistic/linebreak-style': ['error', 'unix'],
-            '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-            '@stylistic/semi-style': ['error'],
+            'linebreak-style': ['error', 'unix'],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'semi-style': ['error'],
         },
     },
+
     {
         name: 'Files in top directory are commonJS and not modules',
         files: ['*.{js,ts}'],
