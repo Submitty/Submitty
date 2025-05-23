@@ -2274,7 +2274,6 @@ function clearForumFilter() {
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
     $('#clear_filter_button').css('visibility', 'hidden');
 
-
     // eslint-disable-next-line no-undef
     updateThreads(true, null);
     return false;
@@ -2309,7 +2308,6 @@ function loadFilterHandlers() {
         }
         else {
             $('#clear_filter_button').css('visibility', 'visible');
-
         }
         // eslint-disable-next-line no-undef
         updateThreads(true, null);
