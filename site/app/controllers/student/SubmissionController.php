@@ -2029,6 +2029,13 @@ class SubmissionController extends AbstractController {
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+
+        // If we are an instructor, we can set the user_id to see regraded submissions
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
+            $anon_id = $_GET['anon_id'];
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        }
+
         $user_id = $submitter_id;
         $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
