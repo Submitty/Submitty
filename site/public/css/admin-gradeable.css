@@ -38,7 +38,7 @@ input[type="text"]:invalid {
 
 select {
     margin-top: 7px;
-    width: available;
+    width: 100%;
     min-width: 60px;
 }
 

@@ -59,8 +59,6 @@ th {
 .filter-buttons:hover,
 .filter-buttons:focus {
     opacity: 0.8;
-    /* stylelint-disable-next-line function-no-unknown */
-    filter: alpha(opacity=80);
 }
 
 .queue-message {
