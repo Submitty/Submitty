@@ -1,6 +1,9 @@
 {
-	"required_capabilities": "cpp",
-
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/gcc:latest"
+    },
     "resource_limits" : {
         "RLIMIT_NPROC" : 10
     },
@@ -22,7 +25,7 @@
 	    "title" : "Compilation",
 	    "command" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
 	    "details" : "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
-	    "executable_name" : "a.out",
+            "executable_name" : "a.out",
 	    "points" : 5
 	},
 

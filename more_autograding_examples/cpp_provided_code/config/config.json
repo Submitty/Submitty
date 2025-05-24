@@ -1,6 +1,10 @@
 {
-	"required_capabilities": "cpp",
-
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/clang:latest"
+    },
+    
     "assignment_message" : "You should not modify the provided main.cpp",
 
     "environment_variables": {

@@ -3,6 +3,11 @@
     "max_submission_size" : 1000000,
     "assignment_message" : "Please upload.pdf files",
 
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
+
     "autograding" : {
         "submission_to_compilation" : [ "*.pdf" ],
         "submission_to_runner" : [ "*.pdf" ],

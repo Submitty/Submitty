@@ -1,6 +1,14 @@
 {
-	"required_capabilities": "cpp",
-
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
+    "autograding": {
+        "submission_to_compilation": ["**/*.cpp", "**/*.txt"],
+        "compilation_to_runner": ["**/a.out"]
+    },
+    
     "grading_parameters" : {
         "AUTO_POINTS" : 20
     },
