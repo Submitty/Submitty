@@ -221,7 +221,7 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         // Retrieve status for each of the panels
-        $(`input[name='peer_panel']`).each(function () {
+        $("input[name='peer_panel']").each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
         const addDataToRequest = function (i, val) {
@@ -268,7 +268,7 @@ $(document).ready(() => {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if ($(`input[name='all_grade']:checked`).val() === 'All Grade All') {
+            if ($("input[name='all_grade']:checked").val() === 'All Grade All') {
                 if (confirm('Each student grades every other student! Continue?')) {
                     const data = { csrf_token: csrfToken };
                     data[this.name] = $(this).val();
