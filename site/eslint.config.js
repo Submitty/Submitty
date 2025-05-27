@@ -65,10 +65,10 @@ module.exports = tseslint.config(
         name: 'Style rules for all files',
         extends: [
             stylistic.configs.customize({
-            braceStyle: 'stroustrup',
-            indent: 4,
-            semi: true,
-            arrowParens: true,
+                braceStyle: 'stroustrup',
+                indent: 4,
+                semi: true,
+                arrowParens: true,
             }),
         ],
         rules: {
