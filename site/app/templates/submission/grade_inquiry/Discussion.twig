@@ -9,12 +9,14 @@
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
-{% if is_inquiry_yet_to_start %}
+{% if not is_inquiry_valid %}
+    <span class="yellow-message" data-testid="invalid-grade-inquiry">Grade inquiries will not start. Contact the instructor if this is unexpected.</span>
+{% elseif is_inquiry_yet_to_start %}
     <span class="yellow-message">Grade inquiries are not yet started. No new grade inquiries can be made.</span>
 {% elseif not is_inquiry_open %}
     <span class="yellow-message">It is currently after grade inquiry deadline. No new grade inquiries can be made.</span>
 {% endif %}
-{% if can_inquiry and has_submission %}
+{% if can_inquiry and has_submission and is_inquiry_valid %}
     {% if grade_inquiry_per_component_allowed %}
         {%  include "submission/grade_inquiry/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
     {% endif %}
@@ -124,3 +126,8 @@
         {% endfor %}
     </div>
 {% endif %}
+<script>
+    window.course = "{{ course }}";
+    window.term = "{{ term }}";
+    window.gradeable_id = "{{ g_id }}";
+</script>

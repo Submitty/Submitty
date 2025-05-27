@@ -81,7 +81,7 @@ const COUNT_DIRECTION_DOWN = -1;
  * Pdf Page settings for components
  * @type {int}
  */
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var PDF_PAGE_NONE = 0;
 // eslint-disable-next-line no-var
 var PDF_PAGE_STUDENT = -1;

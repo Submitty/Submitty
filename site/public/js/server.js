@@ -800,20 +800,22 @@ function toggleDiv(id) {
     return true;
 }
 
-function checkRefreshPage(url) {
+function checkRefreshPage(url, anon_id = '') {
     setTimeout(() => {
-        check_server(url);
+        check_server(url, anon_id);
     }, 1000);
 }
 
-function check_server(url) {
-    $.get(url,
+function check_server(url, anon_id = '') {
+    $.get(url, { anon_id: anon_id },
         (data) => {
-            if (data.indexOf('REFRESH_ME') > -1) {
+            // if the response bool is true, reload the page
+            const refresh_bool = JSON.parse(data).data;
+            if (refresh_bool === true) {
                 location.reload();
             }
             else {
-                checkRefreshPage(url);
+                checkRefreshPage(url, anon_id);
             }
         },
     );
@@ -1124,7 +1126,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
 /**
  * TODO: This may be unused.  Check, and potentially remove this function.
  */
-// eslint-disable-next-line no-unused-vars
 function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: 'POST',

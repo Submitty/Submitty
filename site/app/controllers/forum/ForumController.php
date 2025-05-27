@@ -1471,16 +1471,27 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($_POST['thread_id']);
+        $source = hash('sha3-224', $_POST['current_user']);
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
-            'likesFromStaff' => $output['likesFromStaff']
+            'likesFromStaff' => $output['likesFromStaff'],
+            'source' => $source
+        ]);
+
+        $this->sendSocketMessage([
+            'type' => 'edit_thread_likes',
+            'thread_id' => $_POST['thread_id'],
+            'likesCount' => $thread->getSumUpducks()
         ]);
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
+            'source' => $source, // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
