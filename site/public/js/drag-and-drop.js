@@ -940,7 +940,6 @@ function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade
                 else {
                     displayMessage(data['message'], 'error');
                 }
-
             }
             catch (e) {
                 alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
