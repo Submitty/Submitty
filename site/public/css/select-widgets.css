@@ -24,6 +24,8 @@
     color: var(--standard-dark-gray);
 }
 
-[data-theme="dark"] #select2-time_zone_drop_down-container.select2-selection__rendered {
+[data-theme="dark"]
+/* stylelint-disable-next-line selector-id-pattern */
+#select2-time_zone_drop_down-container.select2-selection__rendered {
     color: var(--text-black);
 }
