@@ -65,14 +65,12 @@ describe('Docker UI Test', () => {
         // Updated time should not be "Unknown"
         cy.get('[data-testid="systemwide-info"]')
             .should('not.contain.text', 'Unknown');
-        */
         // Updated OS info should not be empty
         cy.get('[data-testid="system-info"]')
             .should('not.be.empty');
         // Updated docker version should not be "Error"
         cy.get('[data-testid="docker-version"]')
             .should('not.contain.text', 'Error');
-        */
     });
 
     it('Should filter images with tags', () => {
