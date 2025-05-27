@@ -896,7 +896,7 @@ function gatherInputAnswersByType(type) {
 }
 
 /**
- * @param versions_used
+ * @param version_to_regrade
  * @param versions_allowed
  * @param csrf_token
  * @param gradeable_id
@@ -912,14 +912,16 @@ function gatherInputAnswersByType(type) {
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', versions_used);
+    if (version_to_regrade) {
+        formData.append('version_to_regrade', version_to_regrade);
+    }
     formData.append('regrade_all_students', regrade_all_students);
     formData.append('regrade_all_students_all', regrade_all_students_all);
     $.ajax({

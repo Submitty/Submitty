@@ -15,14 +15,15 @@ function openAllAutoGrading() {
     }
 }
 
-function regrade(single_regrade: number, highest_version: number, gradeable_id: string, user_id: string) {
+// version_to_grade is null when regrading active version
+function regrade(single_regrade: number, version_to_grade: number | null, gradeable_id: string, user_id: string) {
     // if only regrading active version, late day fields left as 0 because they are irrelevant for regrading
     if (single_regrade) {
-        window.handleRegrade(highest_version, getCsrfToken(), gradeable_id, user_id, true);
+        window.handleRegrade(version_to_grade, getCsrfToken(), gradeable_id, user_id, true);
     }
     // regrading all versions
     else {
-        window.handleRegrade(highest_version, getCsrfToken(), gradeable_id, user_id, false, true);
+        window.handleRegrade(version_to_grade, getCsrfToken(), gradeable_id, user_id, false, true);
     }
 }
 
@@ -34,16 +35,8 @@ function closeAllAutoGrading() {
     $("[id^='details_tc_']").find('.loading-tools-show').show();
 }
 
-function autogradingRegradeVersion(SELECTED_VERSION: number) {
-    const autogradingResultsJQuery: JQuery = $('#autograding_results');
-    const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
-    const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
-    regrade(1, SELECTED_VERSION, GRADEABLE_ID, USER_ID);
-}
-
 $(() => {
     const autogradingResultsJQuery: JQuery = $('#autograding_results');
-    const HIGHEST_VERSION = parseInt(autogradingResultsJQuery.attr('data-highest-version')!);
     const GRADEABLE_ID = autogradingResultsJQuery.attr('data-gradeable-id')!;
     const USER_ID = autogradingResultsJQuery.attr('data-user-id')!;
 
@@ -54,15 +47,15 @@ $(() => {
         closeAllAutoGrading();
     });
     $('#autograding-results-regrade-active').on('click', () => {
-        regrade(1, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
+        regrade(1, null, GRADEABLE_ID, USER_ID);
     });
     $('#autograding-results-regrade-all').on('click', () => {
-        regrade(0, HIGHEST_VERSION, GRADEABLE_ID, USER_ID);
+        regrade(0, null, GRADEABLE_ID, USER_ID);
     });
-    $('.autograding-panel-regrade').on('click', () => {
-        const idValue = $('.autograding-panel-regrade').attr('id');
-        if (idValue) {
-            autogradingRegradeVersion(parseInt(idValue));
+    $('.autograding-panel-regrade').on('click', function () {
+        const version_number = $(this).attr('data-version');
+        if (version_number) {
+            regrade(1, parseInt(version_number), GRADEABLE_ID, USER_ID);
         }
     });
 });
