@@ -26,7 +26,7 @@ function setError(name, err) {
         error_elem.text(err);
         error_elem.show();
     }
-    $(`[name="${name}"]`).each((i, elem) => {
+    $(`[name='${name}']`).each((i, elem) => {
         elem.title = err;
         elem.setCustomValidity('Invalid field.');
     });
@@ -40,7 +40,7 @@ function clearError(name, update) {
         error_elem.text('');
         error_elem.hide();
     }
-    $(`[name="${name}"]`).each((i, elem) => {
+    $(`[name='${name}']`).each((i, elem) => {
         elem.title = '';
         elem.setCustomValidity('');
 
@@ -194,14 +194,14 @@ $(document).ready(() => {
         }
 
         // If its rubric-related, then make different request
-        if ($('#gradeable_rubric').find(`[name="${this.name}"]`).length > 0) {
+        if ($('#gradeable_rubric').find(`[name='${this.name}']`).length > 0) {
             // ... but don't automatically save electronic rubric data
             if (!$('#radio_electronic_file').is(':checked')) {
                 saveRubric(false);
             }
             return;
         }
-        if ($('#grader_assignment').find(`[name="${this.name}"]`).length > 0) {
+        if ($('#grader_assignment').find(`[name='${this.name}']`).length > 0) {
             saveGraders();
             return;
         }
@@ -221,7 +221,7 @@ $(document).ready(() => {
             data[this.name] = $(this).val();
         }
         // Retrieve status for each of the panels
-        $('input[name="peer_panel"]').each(function () {
+        $(`input[name='peer_panel']`).each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
         const addDataToRequest = function (i, val) {
@@ -241,7 +241,7 @@ $(document).ready(() => {
         }
 
         // If its date-related, then submit all date data
-        if ($('#gradeable-dates').find(`input[name="${this.name}"]:enabled`).length > 0
+        if ($('#gradeable-dates').find(`input[name='${this.name}']:enabled`).length > 0
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input:enabled,.date-related').each(addDataToRequest);
         }
@@ -268,7 +268,7 @@ $(document).ready(() => {
 
     $('#random_peer_graders_list, #clear_peer_matrix').click(
         function () {
-            if ($('input[name="all_grade"]:checked').val() === 'All Grade All') {
+            if ($(`input[name='all_grade']:checked`).val() === 'All Grade All') {
                 if (confirm('Each student grades every other student! Continue?')) {
                     const data = { csrf_token: csrfToken };
                     data[this.name] = $(this).val();
@@ -540,12 +540,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if (students_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'student' column");
+                    alert('Cannot process file, requires exactly one labelled \'student\' column');
                     return;
                 }
 
                 if (graders_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'grader' column");
+                    alert('Cannot process file, requires exactly one labelled \'grader\' column');
                     return;
                 }
 
@@ -564,7 +564,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
-                    alert("UPDATES DISABLED: no 'container-rubric' element!");
+                    alert('UPDATES DISABLED: no \'container-rubric\' element!');
                     return;
                 }
                 // Don't process updates until the page is done loading
@@ -615,7 +615,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     else {
         const container = $('#container-rubric');
         if (container.length === 0) {
-            alert("UPDATES DISABLED: no 'container-rubric' element!");
+            alert('UPDATES DISABLED: no \'container-rubric\' element!');
             return;
         }
         // Don't process updates until the page is done loading
@@ -662,7 +662,7 @@ function serializeRubric() {
 
         // Ignore all properties not on rubric
         $.each(a, function () {
-            if ($('#gradeable_rubric').find(`[name="${this.name}"]`).length === 0) {
+            if ($('#gradeable_rubric').find(`[name='${this.name}']`).length === 0) {
                 ignore.push(this.name);
             }
         });
