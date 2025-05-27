@@ -263,7 +263,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             e.preventDefault();
                         }
                     });
-                    $("a[value='zoomcustom']").text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
+                    $('a[value=\'zoomcustom\']').text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
                     viewer.innerHTML = '';
                     NUM_PAGES = pdf.numPages;
                     for (let i = 0; i < NUM_PAGES; i++) {
