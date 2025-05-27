@@ -332,10 +332,51 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
+function adjustHeight(el) {
+    el.style.height = el.scrollHeight > el.clientHeight
+        ? `${el.scrollHeight}px`
+        : '30px';
+}
+
+function minimizeHeight(el) {
+    el.style.height = '30px';
+}
+
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $('td.cell-grade').click(function () {
         updateCheckpointCells(this);
+    });
+    $('.cell-grade').change(function () {
+        let elem = $(this);
+        const split_id = elem.attr('id').split('-');
+        const row_el = $(`tr#row-${split_id[2]}-${split_id[3]}`);
+        const scores = {};
+        const old_scores = {};
+        row_el.find('.cell-grade').each(function () {
+            elem = $(this);
+            if (this.tagName.toLowerCase() === 'textarea') {
+                old_scores[elem.data('id')] = `${elem.data('origval')}`;
+                scores[elem.data('id')] = elem.val();
+                elem.data('origval', elem.val());
+                elem.attr('data-origval', elem.val());
+            }
+        });
+        submitAJAX(
+            buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+            {
+                csrf_token: csrfToken,
+                user_id: row_el.data('user'),
+                anon_id: row_el.data('anon'),
+                old_scores: old_scores,
+                scores: scores,
+            },
+            () => {}, // Empty function for success callback, null causing error.
+            () => {
+                console.error('Failed to save data for gradeable:', row_el.data('gradeable'),
+                    'user:', row_el.data('user'));
+            },
+        );
     });
 
     // Initialize based on cookies
@@ -897,7 +938,7 @@ function initSocketClient() {
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'update_checkpoint':
-                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader, msg.date);
+                checkpointSocketHandler(msg.is_text, msg.elem, msg.user, msg.value, msg.grader, msg.date);
                 break;
             case 'update_numeric':
                 numericSocketHandler(msg.elem, msg.user, msg.value, msg.total);
@@ -911,36 +952,45 @@ function initSocketClient() {
     updateVisibility();
 }
 
-function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
+function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date) {
     const tr_elem = $(`table tbody tr[data-anon="${anon_id}"]`);
     if (tr_elem.length > 0) {
         const split_id = tr_elem.attr('id').split('-');
-        const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
-        elem.data('score', score);
-        elem.attr('data-score', score);
-        elem.data('grader', grader);
-        elem.attr('data-grader', grader);
-        elem.data('date', date);
-        elem.attr('data-date', date);
-        elem.find('.simple-grade-grader').text(grader);
-        elem.find('.simple-grade-date').text(date);
-
-        switch (score) {
-            case 1.0:
-                elem.addClass('simple-full-credit');
-                break;
-            case 0.5:
-                elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
-                elem.addClass('simple-half-credit');
-                break;
-            default:
-                elem.removeClass('simple-half-credit');
-                elem.css('background-color', '');
-                break;
+        if (is_text) {
+            const numnumeric = parseInt(tr_elem.parent().data('numnumeric'));
+            const elem = $(`#cell-comment-${split_id[1]}-${split_id[2]}-${elem_id - numnumeric}`);
+            elem.val(value);
         }
-        elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-        elem.animate({ 'border-right-width': '0px' }, 400);
+        // otherwise it is a checkpoint
+        else {
+            const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
+            const score = parseFloat(value);
+            elem.data('score', score);
+            elem.attr('data-score', score);
+            elem.data('grader', grader);
+            elem.attr('data-grader', grader);
+            elem.data('date', date);
+            elem.attr('data-date', date);
+            elem.find('.simple-grade-grader').text(grader);
+            elem.find('.simple-grade-date').text(date);
+
+            switch (score) {
+                case 1.0:
+                    elem.addClass('simple-full-credit');
+                    break;
+                case 0.5:
+                    elem.removeClass('simple-full-credit');
+                    elem.css('background-color', '');
+                    elem.addClass('simple-half-credit');
+                    break;
+                default:
+                    elem.removeClass('simple-half-credit');
+                    elem.css('background-color', '');
+                    break;
+            }
+            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+            elem.animate({ 'border-right-width': '0px' }, 400);
+        }
     }
 }
 
