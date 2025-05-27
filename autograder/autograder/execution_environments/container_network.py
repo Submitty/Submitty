@@ -115,11 +115,12 @@ class Container():
         except docker.errors.ImageNotFound:
 
             docker_error_path = os.path.join(
-                "/".join(self.directory.split("/")[:-3]), 'TMP_SUBMISSION', 'tmp_logs')
+                "/".join(self.directory.split("/")[:-2]), 'TMP_SUBMISSION', 'tmp_logs')
+
             docker_error_data = {
                 "image": f'{self.image}',
                 "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'ERROR: The image {self.image} is not available on {self.full_name}'
+                "error": f'image {self.image} is not available on {self.full_name}\n'
             }
             with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
                 json.dump(docker_error_data, json_file, indent=4)
@@ -130,11 +131,12 @@ class Container():
         except Exception:
 
             docker_error_path = os.path.join(
-                "/".join(self.directory.split("/")[:-3]), 'TMP_SUBMISSION', 'tmp_logs')
+                "/".join(self.directory.split("/")[:-2]), 'TMP_SUBMISSION', 'tmp_logs')
+
             docker_error_data = {
                 "image": f'{self.image}',
                 "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'ERROR: could not create container {self.full_name}'
+                "error": f'could not create container {self.full_name}\n'
             }
             with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
                 json.dump(docker_error_data, json_file, indent=4)
