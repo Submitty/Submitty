@@ -1631,7 +1631,7 @@ HTML;
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
         $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
         $show_clear_conflicts = $graded_gradeable->getTaGradedGradeable()->hasVersionConflict();
-      
+
         return $return . $this->core->getOutput()->renderTwigTemplate("grading/electronic/RubricPanel.twig", [
                 "gradeable" => $gradeable,
                 "student_anon_ids" => $student_anon_ids,
