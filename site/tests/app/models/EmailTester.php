@@ -124,7 +124,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $expected_body = 'test body' . $this->footer;
+        $expected_body = 'email body' . $this->footer;
         $this->assertSame($expected_body, $email->getBody());
     }
 
@@ -142,8 +142,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $expected_without_link = 'email body' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+        $expected_body = 'email body' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
 
-        $this->assertSame($expected_without_link, $email_missing->getBody());
+        $this->assertSame($expected_body, $email_missing->getBody());
     }
 }
