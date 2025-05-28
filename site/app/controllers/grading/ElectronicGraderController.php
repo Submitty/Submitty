@@ -986,7 +986,7 @@ class ElectronicGraderController extends AbstractController {
         //Get grading_details Columns
         $grading_details_columns = [];
         if (isset($_COOKIE['grading_details_columns'])) {
-            $grading_details_columns = json_decode(urldecode($_COOKIE['grading_details_columns']), true);
+            $grading_details_columns = json_decode($_COOKIE['grading_details_columns'], true);
         }
 
         //Checks to see if the Grader has access to all users in the course,

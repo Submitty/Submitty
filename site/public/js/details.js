@@ -2,8 +2,6 @@
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 const MOBILE_BREAKPOINT = 951;
 
-const checkboxes = document.getElementsByClassName('toggle-columns-box');
-
 let collapseItems;
 $(document).ready(() => {
     const collapsedSections = Cookies.get('collapsed_sections');
