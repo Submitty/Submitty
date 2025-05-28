@@ -144,6 +144,7 @@ img {
     @page {
         size: auto;
         margin: 0;
+        /* stylelint-disable-next-line at-rule-descriptor-no-unknown */
         break-inside: avoid;
     }
 
@@ -152,7 +153,6 @@ img {
     }
 
     .content {
-        margin: 2;
         padding: 0;
     }
 

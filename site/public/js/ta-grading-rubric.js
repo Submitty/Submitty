@@ -105,7 +105,7 @@ var AJAX_USE_ASYNC = true;
  * @param err
  */
 function displayAjaxError(err) {
-    console.error("Failed to parse response.  The server isn't playing nice...");
+    console.error('Failed to parse response.  The server isn\'t playing nice...');
     console.error(err);
     // alert("There was an error communicating with the server. Please refresh the page and try again.");
 }
@@ -2170,7 +2170,7 @@ function onClickCountUp(me) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'No Credit');
     $.get('Mark.twig', null, () => {
-        $("input[id^='mark-editor-']").each(function () {
+        $('input[id^=\'mark-editor-\']').each(function () {
             $(this).attr('overall', 'No Credit');
             if (this.value < 0) {
                 this.style.backgroundColor = 'var(--standard-vibrant-yellow)';
@@ -2191,7 +2191,7 @@ function onClickCountDown(me) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'Full Credit');
     $.get('Mark.twig', null, () => {
-        $("input[id^='mark-editor-']").each(function () {
+        $('input[id^=\'mark-editor-\']').each(function () {
             $(this).attr('overall', 'Full Credit');
             if (this.value > 0) {
                 this.style.backgroundColor = 'var(--standard-vibrant-yellow)';
