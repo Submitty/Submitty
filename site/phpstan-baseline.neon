@@ -740,7 +740,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\OptionRepository is not subtype of type app\\\\repositories\\\\poll\\\\OptionRepository\\<app\\\\entities\\\\poll\\\\Option\\>\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/PollController.php
 
 		-
