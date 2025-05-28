@@ -2105,7 +2105,6 @@ function loadThreadHandler() {
             },
         });
     });
-    
     highlightAndScrollToCurrentThread();
 }
 
