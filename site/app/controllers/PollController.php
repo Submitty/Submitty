@@ -122,20 +122,25 @@ class PollController extends AbstractController {
         $response_counts = [];
 
         /** @var Poll|null */
-        $poll = $repo->findByIDWithOptions(intval($poll_id));
+        if ($this->core->getUser()->accessAdmin()) {
+            $poll = $repo->findByIDWithOptions(intval($poll_id));
+        }
+        else {
+            $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
+        }
         if ($poll === null) {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        if ($this->core->getAccess()->canI("view.poll", ["poll" => $poll])) {
-            if ($this->core->getAccess()->canI("view.poll.histogram", ["poll" => $poll])) {
+        if ($this->core->getAccess()->canI("poll.view", ["poll" => $poll])) {
+            if ($this->core->getAccess()->canI("poll.view.histogram", ["poll" => $poll])) {
                 /** @var \app\repositories\poll\OptionRepository */
                 $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
                 $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
             }
         }
         else {
-            $this->core->addErrorMessage("You do not have permission to view this poll");
+            $this->core->addErrorMessage("Poll is not available");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
