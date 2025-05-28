@@ -159,7 +159,6 @@ describe('Docker UI Test', () => {
             + 'already exists in capability cpp');
     });
 
-    
     // NOTE: Can be refactored later to speed up the Cypress test since
     //       we need to wait for the system to install the image
     it('Should add new image and remove it', () => {
@@ -186,7 +185,7 @@ describe('Docker UI Test', () => {
                 return exists;
             });
         }, 10000, 500);
-        
+
         // Check if the image can be removed
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('contain.text', 'Remove');
