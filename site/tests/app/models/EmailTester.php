@@ -127,4 +127,23 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $expected_body = 'test body' . $this->footer;
         $this->assertSame($expected_body, $email->getBody());
     }
+
+    public function testNotificationSettingsWithoutLink(): void {
+        $this->core = new Core();
+        $config = new Config($this->core);
+        $config->setCourse(null);
+        $config->setBaseUrl('http://localhost');
+        $config->setTerm(null);
+        $this->core->setConfig($config);
+
+        $email_missing = new Email($this->core, [
+            'to_user_id' => 'anyuser',
+            'subject' => 'test email',
+            'body' => 'body without course/term',
+        ]);
+
+        $expected_without_link = 'body without course/term' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+
+        $this->assertSame($expected_without_link, $email_missing->getBody());
+    }
 }
