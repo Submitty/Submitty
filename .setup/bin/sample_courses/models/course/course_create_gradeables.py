@@ -15,7 +15,7 @@ import random
 from tempfile import TemporaryDirectory
 from submitty_utils import dateutils
 
-from sqlalchemy import Table, select
+from sqlalchemy import Table, insert, select, text
 
 from sample_courses import *
 from sample_courses.utils import mimic_checkout
@@ -62,11 +62,11 @@ class Course_create_gradeables:
                 while anon_id in anon_ids.values():
                     anon_id = generate_random_user_id(15)
                 anon_ids[user.id] = anon_id
-                gradeable_anon = Table("gradeable_anon", self.metadata, autoload=True)
-                self.conn.execute(gradeable_anon.insert(),
+                gradeable_anon = Table("gradeable_anon", self.metadata, autoload_with=self.engine)
+                self.conn.execute(insert(gradeable_anon).values(
                                   user_id=user.id,
                                   g_id=gradeable.id,
-                                  anon_id=anon_id)
+                                  anon_id=anon_id))
             random.setstate(prev_state)
             # create_teams
             if gradeable.team_assignment is True:
@@ -107,8 +107,8 @@ class Course_create_gradeables:
                     anon_team_id = None
                     if gradeable.team_assignment is True:
                         # If gradeable is team assignment, then make sure to make a team_id and don't over submit
-                        res = self.conn.execute("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams"
-                                                f" ON teams.team_id = gradeable_teams.team_id where user_id='{user.id}' and g_id='{gradeable.id}'")
+                        res = self.conn.execute(text("SELECT teams.team_id, gradeable_teams.anon_id FROM teams INNER JOIN gradeable_teams"
+                                                f" ON teams.team_id = gradeable_teams.team_id where user_id='{user.id}' and g_id='{gradeable.id}'"))
                         temp = res.fetchall()
                         if len(temp) != 0:
                             team_id = temp[0][0]
@@ -193,18 +193,20 @@ class Course_create_gradeables:
                                 submission_count += 1
                                 current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                                 if team_id is not None:
-                                    self.conn.execute(self.electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=None,
-                                                 team_id=team_id, g_version=version, submission_time=current_time_string)
+                                    self.conn.execute(insert(self.electronic_gradeable_data).values(
+                                                        g_id=gradeable.id, user_id=None,
+                                                        team_id=team_id, g_version=version, submission_time=current_time_string))
+                                                 
                                     if version == versions_to_submit:
-                                        self.conn.execute(self.electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
-                                                     team_id=team_id, active_version=active_version)
+                                        self.conn.execute(insert(self.electronic_gradeable_version).values(g_id=gradeable.id, user_id=None,
+                                                     team_id=team_id, active_version=active_version))
                                     json_history["team_history"] = json_team_history[team_id]
                                 else:
-                                    self.conn.execute(self.electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
-                                                g_version=version, submission_time=current_time_string)
+                                    self.conn.execute(insert(self.electronic_gradeable_data).values(g_id=gradeable.id, user_id=user.id,
+                                                g_version=version, submission_time=current_time_string))
                                     if version == versions_to_submit:
-                                        self.conn.execute(self.electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                                    active_version=active_version)
+                                        self.conn.execute(insert(self.electronic_gradeable_version).values(g_id=gradeable.id, user_id=user.id,
+                                                    active_version=active_version))
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
@@ -339,14 +341,14 @@ class Course_create_gradeables:
                                         uppser_clamp_score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                                         score = generate_probability_space({0.7: max_value_score, 0.2: uppser_clamp_score, 0.08: -max_value_score, 0.02: -99999})
                                     grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                                    self.conn.execute(self.gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
+                                    self.conn.execute(insert(self.gradeable_component_data).value(gc_id=component.key, gd_id=gd_id,
                                                  gcd_score=score, gcd_component_comment=generate_random_ta_comment(),
-                                                 gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit)
+                                                 gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=versions_to_submit))
                                     first = True
                                     first_set = False
                                     for mark in component.marks:
                                         if (random.random() < 0.5 and first_set == False and first == False) or random.random() < 0.2:
-                                            self.conn.execute(self.gradeable_component_mark_data.insert(), gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id)
+                                            self.conn.execute(insert(self.gradeable_component_mark_data).values(gc_id=component.key, gd_id=gd_id, gcm_id=mark.key, gcd_grader_id=self.instructor.id))
                                             if(first):
                                                 first_set = True
                                         first = False
@@ -359,7 +361,7 @@ class Course_create_gradeables:
 
                     if (gradeable.type != 0 and gradeable.grade_start_date < NOW and ((gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or random.random() < 0.5) and
                        random.random() < 0.9 and (ungraded_section != (user.get_detail(self.code, 'registration_section') if gradeable.grade_by_registration else user.get_detail(self.code, 'rotating_section')))):
-                        res = self.conn.execute(self.gradeable_data.insert(), g_id=gradeable.id, gd_user_id=user.id)
+                        res = self.conn.execute(insert(self.gradeable_data).values(g_id=gradeable.id, gd_user_id=user.id))
                         gd_id = res.inserted_primary_key[0]
                         skip_grading = random.random()
                         for component in gradeable.components:
@@ -372,8 +374,8 @@ class Course_create_gradeables:
                             else:
                                 score = random.randint(component.lower_clamp * 2, component.upper_clamp * 2) / 2
                             grade_time = gradeable.grade_start_date.strftime("%Y-%m-%d %H:%M:%S%z")
-                            self.conn.execute(self.gradeable_component_data.insert(), gc_id=component.key, gd_id=gd_id,
-                                         gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1)
+                            self.conn.execute(insert(self.gradeable_component_data).values(gc_id=component.key, gd_id=gd_id,
+                                         gcd_score=score, gcd_component_comment="", gcd_grader_id=self.instructor.id, gcd_grade_time=grade_time, gcd_graded_version=-1))
 
         # This segment adds the sample data for features in the sample course only
         if self.code == 'sample':
@@ -400,20 +402,23 @@ class Course_create_gradeables:
                     dir_to_make=os.path.join(course_materials_folder, inner_dir)
                     os.mkdir(dir_to_make)
                     subprocess.run(["chown", "submitty_php:submitty_php", dir_to_make])
-                    self.conn.execute(course_materials_table.insert(),
+                    self.conn.execute(insert(course_materials_table).values(
                             path=dir_to_make,
                             type=2,
                             release_date='2022-01-01 00:00:00',
                             hidden_from_students=False,
-                            priority=0)
+                            priority=0))
                 for f in files:
                     tmpfilepath= os.path.join(dpath,f)
                     filepath=os.path.join(course_materials_folder, os.path.relpath(tmpfilepath, course_materials_source))
                     shutil.copy(tmpfilepath, filepath)
                     subprocess.run(["chown", "submitty_php:submitty_php", filepath])
-                    self.conn.execute(course_materials_table.insert(),
+                    self.conn.execute(insert(course_materials_table).values(
                                 path=filepath,
                                 type=0,
                                 release_date='2022-01-01 00:00:00',
                                 hidden_from_students=False,
-                                priority=0)
+                                priority=0))
+        
+        # commit all of the inserted statements
+        self.conn.commit()
