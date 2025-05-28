@@ -1,6 +1,6 @@
 - name: Read JSON content from a file
   ansible.builtin.set_fact:
-    var_json_list: "{{ lookup('file', 'json_list.txt') | split('\n')  }}"
+    var_json_list: "config_files/{{ lookup('file', 'json_list.txt') | split('\n')  }}"
 
 - name: Use task list to loop through gradeables
   ansible.builtin.include_tasks:
