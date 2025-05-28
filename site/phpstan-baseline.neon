@@ -10342,11 +10342,6 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$component_id \\(string\\) does not accept default value of type int\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$grade_time \\(DateTime\\) does not accept null\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php

@@ -14,30 +14,6 @@ use app\libraries\NumberUtils;
  * @package app\models\gradeable
  *
  * All data describing the configuration of a Gradeable Component
- *
- * @method int getId()
- * @method string getTitle()
- * @method void setTitle($title)
- * @method string getTaComment()
- * @method void setTaComment($ta_comment)
- * @method string getStudentComment()
- * @method void setStudentComment($student_comment)
- * @method float getLowerClamp()
- * @method float getDefault()
- * @method float getMaxValue()
- * @method float getUpperClamp()
- * @method bool isText()
- * @method void setText($is_text)
- * @method bool isPeerComponent()
- * @method void setPeerComponent($is_peer_component)
- * @method int getOrder()
- * @method void setOrder($order)
- * @method int getPage()
- * @method void setIsItempoolLinked($is_linked)
- * @method bool getIsItempoolLinked()
- * @method void setItempool($itempool_name)
- * @method string getItempool()
- * @method Mark[] getMarks()
  */
 class Component extends AbstractModel {
     /** @var Gradeable Reference to the gradeable this belongs to */
@@ -539,5 +515,101 @@ class Component extends AbstractModel {
 
     public function getPenaltyPoints() {
         return $this->hasPenalty() ? abs($this->lower_clamp) : 0;
+    }
+
+    public function getId(): int {
+        return $this->id;
+    }
+
+    public function getTitle(): string {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function getTaComment(): string {
+        return $this->ta_comment;
+    }
+
+    public function setTaComment(string $ta_comment): void {
+        $this->ta_comment = $ta_comment;
+    }
+
+    public function getStudentComment(): string {
+        return $this->student_comment;
+    }
+
+    public function setStudentComment(string $student_comment): void {
+        $this->student_comment = $student_comment;
+    }
+
+    public function getLowerClamp(): float {
+        return $this->lower_clamp;
+    }
+
+    public function getDefault(): float {
+        return $this->default;
+    }
+
+    public function getMaxValue(): float {
+        return $this->max_value;
+    }
+
+    public function getUpperClamp(): float {
+        return $this->upper_clamp;
+    }
+
+    public function isText(): bool {
+        return $this->text;
+    }
+
+    public function setText(bool $is_text): void {
+        $this->text = $is_text;
+    }
+
+    public function isPeerComponent(): bool {
+        return $this->peer_component;
+    }
+
+    public function setPeerComponent(bool $is_peer_component): void {
+        $this->peer_component = $is_peer_component;
+    }
+
+    public function getOrder(): int {
+        return $this->order;
+    }
+
+    public function setOrder(int $order): void {
+        $this->order = $order;
+    }
+
+    public function getPage(): int {
+        return $this->page;
+    }
+
+    public function setIsItempoolLinked(bool $is_linked): void {
+        $this->is_itempool_linked = $is_linked;
+    }
+
+    public function getIsItempoolLinked(): bool {
+        return $this->is_itempool_linked;
+    }
+
+    public function setItempool(string $itempool_name): void {
+        $this->itempool = $itempool_name;
+    }
+
+    public function getItempool(): string {
+        return $this->itempool;
+    }
+
+    /**
+     * Gets the marks for this component.
+     * @return array<Mark>
+     */
+    public function getMarks(): array {
+        return $this->marks;
     }
 }
