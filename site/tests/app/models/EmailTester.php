@@ -120,8 +120,8 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
     public function testNotificationSettingsLink(): void {
         $email = new Email($this->core, [
             'to_user_id' => 'person',
-            'subject' => 'test email',
-            'body' => 'test body',
+            'subject' => 'some email',
+            'body' => 'email body',
         ]);
 
         $expected_body = 'test body' . $this->footer;
@@ -137,12 +137,12 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $this->core->setConfig($config);
 
         $email_missing = new Email($this->core, [
-            'to_user_id' => 'anyuser',
-            'subject' => 'test email',
-            'body' => 'body without course/term',
+            'to_user_id' => 'person',
+            'subject' => 'some email',
+            'body' => 'email body',
         ]);
 
-        $expected_without_link = 'body without course/term' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+        $expected_without_link = 'email body' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
 
         $this->assertSame($expected_without_link, $email_missing->getBody());
     }
