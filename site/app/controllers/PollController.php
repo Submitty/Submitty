@@ -121,8 +121,8 @@ class PollController extends AbstractController {
 
         $response_counts = [];
 
-        /** @var Poll|null */
         if ($this->core->getUser()->accessAdmin()) {
+            /** @var Poll|null */
             $poll = $repo->findByIDWithOptions(intval($poll_id));
         }
         else {
