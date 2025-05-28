@@ -82,7 +82,7 @@ describe('Docker UI Test', () => {
                 .should('not.be.visible');
         });
         // Default filter should have all images
-        cy.get("button[data-capability='default']")
+        cy.get('button[data-capability=\'default\']')
             .click();
         cy.get('.image-row')
             .should('be.visible');
