@@ -108,7 +108,7 @@
 
             <tr class="image-row" >
                 <td>{{ name }}</th>
-                <td>{{ docker_image_owners[image.id] | default("") }}</td>
+                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
                 <td>{{ image.id | trim("sha256:")}}</td>
                 <td>{{ image.size_mb }}</td>
                 <td>{{ tag }}</td>
