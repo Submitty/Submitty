@@ -122,7 +122,7 @@ test('thrown exception is caught and logged to console.error', async () => {
 
     await runSqlQuery();
 
-    const exceptionString = "TypeError: Cannot read properties of undefined (reading 'length')";
+    const exceptionString = 'TypeError: Cannot read properties of undefined (reading \'length\')';
 
     expect(console.error.mock.calls.length).toEqual(1);
     expect(console.error.mock.calls[0][0].toString()).toEqual(exceptionString);

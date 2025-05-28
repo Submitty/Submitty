@@ -3,7 +3,7 @@ import { getCsrfToken } from '../../../utils/server';
 // expand all outputs in Auto-Grading Testcases section
 function openAllAutoGrading() {
     // show all divs whose id starts with testcase_
-    const clickable_divs = $("[id^='tc_']");
+    const clickable_divs = $('[id^=\'tc_\']');
 
     for (let i = 0; i < clickable_divs.length; i++) {
         const clickable_div = clickable_divs[i];
@@ -30,9 +30,9 @@ function regrade(single_regrade: number, version_to_grade: number | null, gradea
 // close all outputs in Auto-Grading Testcases section
 function closeAllAutoGrading() {
     // hide all divs whose id starts with testcase_
-    $("[id^='testcase_']").hide();
-    $("[id^='details_tc_']").find('span').hide();
-    $("[id^='details_tc_']").find('.loading-tools-show').show();
+    $('[id^=\'testcase_\']').hide();
+    $('[id^=\'details_tc_\']').find('span').hide();
+    $('[id^=\'details_tc_\']').find('.loading-tools-show').show();
 }
 
 $(() => {

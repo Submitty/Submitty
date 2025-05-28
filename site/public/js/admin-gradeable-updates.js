@@ -540,12 +540,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if (students_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'student' column");
+                    alert('Cannot process file, requires exactly one labelled \'student\' column');
                     return;
                 }
 
                 if (graders_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'grader' column");
+                    alert('Cannot process file, requires exactly one labelled \'grader\' column');
                     return;
                 }
 
@@ -564,7 +564,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
-                    alert("UPDATES DISABLED: no 'container-rubric' element!");
+                    alert('UPDATES DISABLED: no \'container-rubric\' element!');
                     return;
                 }
                 // Don't process updates until the page is done loading
@@ -615,7 +615,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     else {
         const container = $('#container-rubric');
         if (container.length === 0) {
-            alert("UPDATES DISABLED: no 'container-rubric' element!");
+            alert('UPDATES DISABLED: no \'container-rubric\' element!');
             return;
         }
         // Don't process updates until the page is done loading
