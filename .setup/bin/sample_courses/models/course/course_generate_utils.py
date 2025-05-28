@@ -7,7 +7,7 @@ import random
 import os
 import json
 
-from sqlalchemy import Table, select, func
+from sqlalchemy import Table, insert, select, func
 
 from submitty_utils import dateutils
 
@@ -258,10 +258,10 @@ class Course_generate_utils:
         """
         assert gradeable.team_assignment
         json_team_history = {}
-        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
-        teams_table = Table("teams", self.metadata, autoload=True)
+        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload_with=self.engine)
+        teams_table = Table("teams", self.metadata, autoload_with=self.engine)
         ucounter = self.conn.execute(
-            select([func.count()]).select_from(gradeable_teams_table)
+            select(func.count()).select_from(gradeable_teams_table)
         ).scalar()
         anon_team_ids = []
         for user in self.users:
@@ -299,10 +299,11 @@ class Course_generate_utils:
                     res = self.conn.execute(members_in_team)
                     if res.rowcount < gradeable.max_team_size:
                         self.conn.execute(
-                            teams_table.insert(),
-                            team_id=team_in_section["team_id"],
-                            user_id=user.get_detail(self.code, "id"),
-                            state=1,
+                            insert(teams_table).values(
+                                team_id=team_in_section["team_id"],
+                                user_id=user.get_detail(self.code, "id"),
+                                state=1,
+                            )
                         )
                         team_id_section = team_in_section["team_id"]
                         temp_json_team_history = {
@@ -320,18 +321,20 @@ class Course_generate_utils:
             if not added:
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(
-                    gradeable_teams_table.insert(),
-                    team_id=unique_team_id,
-                    anon_id=anon_team_id,
-                    g_id=gradeable.id,
-                    registration_section=str(reg_section),
-                    rotating_section=str(random.randint(1, self.rotating_sections)),
+                    insert(gradeable_teams_table).values(
+                        team_id=unique_team_id,
+                        anon_id=anon_team_id,
+                        g_id=gradeable.id,
+                        registration_section=str(reg_section),
+                        rotating_section=str(random.randint(1, self.rotating_sections)),
+                    )
                 )
                 self.conn.execute(
-                    teams_table.insert(),
-                    team_id=unique_team_id,
-                    user_id=user.get_detail(self.code, "id"),
-                    state=1,
+                    insert(teams_table).values(
+                        team_id=unique_team_id,
+                        user_id=user.get_detail(self.code, "id"),
+                        state=1,
+                    )
                 )
                 json_team_history[unique_team_id] = [
                     {
@@ -346,4 +349,6 @@ class Course_generate_utils:
                 ucounter += 1
             res.close()
             anon_team_ids.append(anon_team_id)
+
+        self.conn.commit()
         return json_team_history
