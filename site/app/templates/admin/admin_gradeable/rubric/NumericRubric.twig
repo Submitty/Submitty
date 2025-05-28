@@ -7,9 +7,9 @@
 
     <div class="multi-field-wrapper-numeric">
         <h5>Numeric Items</h5>
-        <table class="table-striped numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+        <table class="table-striped numerics-table table table-bordered">
             <!-- Headings -->
-            <thead style="background: #E1E1E1;">
+            <thead>
                 <tr>
                     <th> Label </th>
                     <th> Max Score </th>
@@ -17,14 +17,14 @@
                 </tr>
             </thead>
             <!-- Footers -->
-            <tfoot style="background: #E1E1E1;">
+            <tfoot>
                 <tr>
                     <td><strong> Total </strong></td>
                     <td><strong id="totalScore"></strong></td>
                     <td><strong id="totalEC"></strong></td>
                 </tr>
             </tfoot>
-            <tbody style="background: #f9f9f9;">
+            <tbody>
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
@@ -39,14 +39,16 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="multi-field-wrapper-text">
         <h5>Text Items</h5>
-        <table class="table-striped text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
-            <thead style="background: #E1E1E1;">
+        <table class="table-striped text-table table table-bordered">
+            <thead>
                 <tr>
                     <th> Label </th>
                 </tr>
             </thead>
-            <tbody style="background: #f9f9f9;">
+            <tbody>
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
