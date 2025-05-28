@@ -278,7 +278,9 @@
                     "content" : upload_message
                 } only %}
             </div>
-            <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
+            {% set duplicate_submission = false %}
+            <button type="button" id="submit" class="submit-gradeable btn btn-success {% if duplicate_submission %} disabled btn-no-pointer {% endif %}"
+            {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
             {% if is_notebook %}

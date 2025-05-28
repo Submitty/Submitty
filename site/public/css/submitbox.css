@@ -83,6 +83,10 @@
     text-align: right;
 }
 
+.btn-no-pointer {
+  pointer-events: none;
+}
+
 #gradeable-info h1 {
     margin-right: auto;
 }
