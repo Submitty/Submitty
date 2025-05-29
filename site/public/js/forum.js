@@ -122,7 +122,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     // eslint-disable-next-line no-undef
     for (let j = 0; j < file_array[index].length; j++) {
         // eslint-disable-next-line no-undef
-        if (file_array[index][j].name.indexOf("'") !== -1
+        if (file_array[index][j].name.indexOf('\'') !== -1
             // eslint-disable-next-line no-undef
             || file_array[index][j].name.indexOf('"') !== -1) {
             // eslint-disable-next-line no-undef
@@ -460,7 +460,7 @@ function socketResolveThreadHandler(thread_id) {
 
     // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
-        $("[title='Mark thread as resolved']").remove();
+        $('[title=\'Mark thread as resolved\']').remove();
     }
 }
 
@@ -1402,13 +1402,13 @@ function showSplit(post_id) {
                 if (json['categories_list'].includes(id)) {
                     if (!($(target).hasClass('btn-selected'))) {
                         $(target).addClass('btn-selected').trigger('eventChangeCatClass');
-                        $(target).find("input[type='checkbox']").prop('checked', true);
+                        $(target).find('input[type=\'checkbox\']').prop('checked', true);
                     }
                 }
                 else {
                     if ($(target).hasClass('btn-selected')) {
                         $(target).removeClass('btn-selected').trigger('eventChangeCatClass');
-                        $(target).find("input[type='checkbox']").prop('checked', false);
+                        $(target).find('input[type=\'checkbox\']').prop('checked', false);
                     }
                 }
             }
@@ -1704,7 +1704,7 @@ function refreshCategories() {
             }
         });
 
-        $(".cat-buttons input[type='checkbox']").each(function () {
+        $('.cat-buttons input[type=\'checkbox\']').each(function () {
             if ($(this).parent().hasClass('btn-selected')) {
                 $(this).prop('checked', true);
             }
@@ -1718,11 +1718,11 @@ function refreshCategories() {
     $('.cat-buttons').click(function () {
         if ($(this).hasClass('btn-selected')) {
             $(this).removeClass('btn-selected');
-            $(this).find("input[type='checkbox']").prop('checked', false);
+            $(this).find('input[type=\'checkbox\']').prop('checked', false);
         }
         else {
             $(this).addClass('btn-selected');
-            $(this).find("input[type='checkbox']").prop('checked', true);
+            $(this).find('input[type=\'checkbox\']').prop('checked', true);
         }
         $(this).trigger('eventChangeCatClass');
     });
@@ -2225,7 +2225,7 @@ function clearForumFilter() {
     window.filters_applied = [];
     $('#thread_category button, #thread_status_select button').data('btn-selected', 'false').removeClass('filter-active').addClass('filter-inactive');
     $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
-    $('#clear_filter_button').hide();
+    $('#clear_filter_button').css('visibility', 'hidden');
 
     // eslint-disable-next-line no-undef
     updateThreads(true, null);
@@ -2258,7 +2258,7 @@ function loadFilterHandlers() {
             clearForumFilter();
         }
         else {
-            $('#clear_filter_button').css('display', 'inline-block');
+            $('#clear_filter_button').css('visibility', 'visible');
         }
         // eslint-disable-next-line no-undef
         updateThreads(true, null);
@@ -2352,7 +2352,7 @@ function checkUnread() {
         // eslint-disable-next-line no-undef
         unread_marked = true;
         $('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
-        $('#clear_filter_button').css('display', 'inline-block');
+        $('#clear_filter_button').css('visibility', 'visible');
         return true;
     }
     else {
@@ -2551,11 +2551,11 @@ function restoreCreateThreadFromLocal() {
         $('div.cat-buttons').each((_i, e) => {
             if (categories.includes(e.innerText)) {
                 e.classList.add('btn-selected');
-                $(e).find("input[type='checkbox']").prop('checked', true);
+                $(e).find('input[type=\'checkbox\']').prop('checked', true);
             }
             else {
                 e.classList.remove('btn-selected');
-                $(e).find("input[type='checkbox']").prop('checked', false);
+                $(e).find('input[type=\'checkbox\']').prop('checked', false);
             }
             $(e).trigger('eventChangeCatClass');
         });

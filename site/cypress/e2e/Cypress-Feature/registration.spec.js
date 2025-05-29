@@ -5,7 +5,7 @@ const openMessageFull = `The course Testing Course (testing) for ${getFullCurren
 const selectMessage = 'You may select below to add yourself to the course.';
 const notifiedMessage = 'Your instructor will be notified and can then choose to keep you in the course.';
 
-const no_access_message = "You don't have access to this course.";
+const no_access_message = 'You don\'t have access to this course.';
 
 function register(message) {
     cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
@@ -102,7 +102,7 @@ describe('Tests for self registering for courses', () => {
                 times: 1,
             },
         ).as('userInformation');
-        cy.get('[data-testid="popup-message"]').should('contain', "User 'gutmal' updated");
+        cy.get('[data-testid="popup-message"]').should('contain', 'User \'gutmal\' updated');
         cy.wait('@userInformation');
         cy.logout();
         cy.login('gutmal');

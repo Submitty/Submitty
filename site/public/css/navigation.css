@@ -134,6 +134,7 @@
 
     /* stylelint-disable-next-line no-descending-specificity */
     .panel-head-active .collapse-icon,
+    /* stylelint-disable-next-line no-descending-specificity */
     .expand-icon {
         display: none;
     }
