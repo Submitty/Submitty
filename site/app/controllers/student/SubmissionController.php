@@ -397,7 +397,7 @@ class SubmissionController extends AbstractController {
         if ($file_size > $max_size) {
             return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
         }
-        
+
         // creating uploads/bulk_pdf/gradeable_id directory
 
         $pdf_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "bulk_pdf", $gradeable->getId());
