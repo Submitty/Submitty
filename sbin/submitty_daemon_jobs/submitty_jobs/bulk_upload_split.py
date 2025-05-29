@@ -3,13 +3,11 @@
 """Splits a PDF every num pages and moves images and pdfs to split folder."""
 
 import os
-import traceback
-
 import PyPDF2
+import traceback
 from PyPDF2 import PdfWriter
-
-from . import generate_pdf_images
 from . import write_to_log as logger
+from . import generate_pdf_images
 
 try:
     from pdf2image import convert_from_bytes

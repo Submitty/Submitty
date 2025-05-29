@@ -1978,8 +1978,7 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["POST"])]
-    public function redactions($gradeable_id)
-    {
+    public function updateRedactions(string $gradeable_id): void {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
