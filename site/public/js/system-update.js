@@ -3,7 +3,6 @@
 *
 * @param {String} current_tag - tag Submitty is currently running on
 */
-// eslint-disable-next-line no-unused-vars
 async function getReleases(current_tag) {
     try {
         const response = await fetch('https://api.github.com/repos/Submitty/Submitty/releases');
@@ -131,7 +130,6 @@ function updateReleaseNotes(data, current_tag) {
  * will be expanded, even those that are already expanded.
  * @param {HTMLElement} toggleAllButton
  */
-// eslint-disable-next-line no-unused-vars
 function toggleAllReleases(toggleAllButton) {
     // in this case, collapsed class controls what action the button should take
     //  if toggleAllButton has collapsed - will collapse all
@@ -157,7 +155,6 @@ function toggleAllReleases(toggleAllButton) {
  * @param {HTMLElement} button HTMLElement of the button that was clicked to trigger this function
  * @param {Event} event Event context of the click event that triggered this function
  */
-// eslint-disable-next-line no-unused-vars
 function toggleRelease(button, event) {
     const release = $(button).closest('.box');
     $(button).toggleClass('collapsed');
@@ -249,7 +246,6 @@ function clearFilter() {
  * @param {string} filter The substring to filter by
  *
  */
-// eslint-disable-next-line no-unused-vars
 function filterReleaseNotes(filter) {
     // handle special case of empty filter to save time
     if (filter === '') {

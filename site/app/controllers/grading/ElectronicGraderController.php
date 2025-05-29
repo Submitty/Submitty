@@ -960,6 +960,16 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable,
+                "grades"
+            );
+            return;
+        }
+
         $anon_mode = $gradeable->getInstructorBlind() - 1;
         $anon_mode_enabled = "anon_mode_" . $gradeable_id;
         $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
@@ -3680,6 +3690,9 @@ class ElectronicGraderController extends AbstractController {
         elseif (!$componentItempoolInfo['is_linked'] && !empty($itempool_item)) {
             // Itempool item passed when the component is not linked with itempool
             $error = 'This Component expects only non-empty itempool-item!' . json_encode($componentItempoolInfo) . $itempool_item;
+        }
+        elseif (!$this->core->getAccess()->canI("grading.electronic.view_solution", ["gradeable" => $gradeable])) {
+            $error = 'Insufficient permissions to update solution';
         }
         else {
             try {

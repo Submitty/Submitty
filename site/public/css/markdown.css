@@ -213,7 +213,7 @@
     overflow: auto;
     resize: none;
     min-height: 100px;
-    width: fill-available;
+    width: 100%;
 }
 
 .btn-markdown {
