@@ -347,6 +347,7 @@ function deleteSingleFile(filename, part, previous) {
         }
     }
     setButtonStatus();
+    updateSubmitButtonStatus();
 }
 
 function setButtonStatus(inactive_version = false) {
