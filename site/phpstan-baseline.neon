@@ -9687,26 +9687,6 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$default \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$lower_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$max_value \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$upper_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
