@@ -474,7 +474,7 @@ jobs:
               echo "submitty_dbuser"              # course db pass
               echo ""                             # timezone
               echo ""                             # default locale
-              echo ""                             # default coursematerials file upload limit
+              echo ""                             # default course materials file upload limit
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
