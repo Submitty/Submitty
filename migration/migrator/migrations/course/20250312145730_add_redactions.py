@@ -23,7 +23,7 @@ def up(config, database, semester, course):
                      x2 float NOT NULL,
                      y1 float NOT NULL,
                      y2 float NOT NULL,
-                     FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE,
+                     FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE
                      )
     """)
 

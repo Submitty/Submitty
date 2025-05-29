@@ -1324,10 +1324,10 @@ CREATE TABLE public.gradeable_redaction (
     redaction_id integer NOT NULL,
     g_id character varying(255) NOT NULL,
     page integer NOT NULL,
-    x1 integer NOT NULL,
-    x2 integer NOT NULL,
-    y1 integer NOT NULL,
-    y2 integer NOT NULL
+    x1 double precision NOT NULL,
+    x2 double precision NOT NULL,
+    y1 double precision NOT NULL,
+    y2 double precision NOT NULL
 );
 
 
@@ -3318,6 +3318,14 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment
 
 ALTER TABLE ONLY public.gradeable_data_overall_comment
     ADD CONSTRAINT gradeable_data_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --
