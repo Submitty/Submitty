@@ -112,7 +112,7 @@ describe('Test Rainbow Grading', () => {
 
         cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
         cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
-        cy.get('[data-testid="plagiarism-gradeable-id"]').select(1);
+        cy.get('[data-testid="plagiarism-gradeable-id"]').select(3);
         cy.get('[data-testid="plagiarism-marks"]').type('1');
         cy.get('[data-testid="plagiarism-submit"]').click();
         cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
