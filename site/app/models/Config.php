@@ -418,7 +418,7 @@ class Config extends AbstractModel {
         if (!$submitty_json) {
             throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
-        
+ 
         $this->log_exceptions = true;
 
         $this->base_url = $submitty_json['submission_url'];
