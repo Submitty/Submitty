@@ -2019,12 +2019,12 @@ window.onGetMarkStats = async function (me: HTMLElement) {
 /**
  * Called when a component gets clicked (for opening / closing)
  * @param me DOM Element of the component header div
- * @param save_changes Whether to save changes or not
+ * @param edit_mode editing from ta grading page or instructor edit gradeable page
  */
-window.onClickComponent = async function (me: HTMLElement, save_changes = false) {
+window.onClickComponent = async function (me: HTMLElement, edit_mode = false) {
     const component_id = getComponentIdFromDOMElement(me);
     try {
-        await toggleComponent(component_id, save_changes, false);
+        await toggleComponent(component_id, true, edit_mode);
     }
     catch (err) {
         console.error(err);
