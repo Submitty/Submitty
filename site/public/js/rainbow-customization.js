@@ -198,7 +198,7 @@ function getOmittedSections() {
     // Collect sections omitted from stats
     const omit_section_from_stats = [];
 
-    $.each($("input[name='omit_section']:checked"), function () {
+    $.each($('input[name=\'omit_section\']:checked'), function () {
         omit_section_from_stats.push($(this).val());
     });
 
@@ -808,7 +808,7 @@ $(document).ready(() => {
     $('input[name*=\'display_benchmarks\']').change(() => {
         saveChanges();
     });
-    $("input[name*='omit_section']").change(() => {
+    $('input[name*=\'omit_section\']').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {

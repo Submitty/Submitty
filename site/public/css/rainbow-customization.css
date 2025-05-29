@@ -326,10 +326,10 @@ div:has(.override)
     padding: 4px 6px;
 }
 
-.omit-section-label{
+.omit-section-label {
     padding: 3px;
 }
-  
+
 .section-header {
     display: flex;
     gap: 7px;
