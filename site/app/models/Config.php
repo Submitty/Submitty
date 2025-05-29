@@ -155,8 +155,8 @@ class Config extends AbstractModel {
     /**
      * Maximum file upload size for course materials (in MB)
      * @prop
-     * @var int */
-    protected $course_material_file_upload_limit_mb;
+     */
+    protected int $course_material_file_upload_limit_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
