@@ -754,6 +754,7 @@ class CourseMaterialsController extends AbstractController {
                             if (!$res) {
                                 return JsonResponse::getErrorResponse("Failed to open zip archive");
                             }
+                            
                             $entries = [];
                             $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                             $disallowed_files = ['.ds_store'];

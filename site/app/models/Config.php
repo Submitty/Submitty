@@ -411,6 +411,7 @@ class Config extends AbstractModel {
                 if (!isset($this->saml_options[$key])) {
                     throw new ConfigException("Missing config value for saml options: {$key}");
                 }
+                
             }
         }
 
