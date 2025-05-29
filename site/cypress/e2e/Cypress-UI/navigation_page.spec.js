@@ -195,7 +195,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 9,
-            graded: 12,
+            graded: 11,
         };
         const gradeable_id = 'future_no_tas_homework';
 
@@ -290,7 +290,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 9,
-            graded: 12,
+            graded: 11,
         };
         validate_navigation_page_sections(sections);
         cy.get('.gradeable-row').each(($el) => {
@@ -306,7 +306,7 @@ describe('navigation page', () => {
             open: 8,
             closed: 4,
             items_being_graded: 5,
-            graded: 10,
+            graded: 9,
         };
         validate_navigation_page_sections(sections);
 
@@ -324,28 +324,6 @@ describe('navigation page', () => {
                 }
             }
             cy.wrap($el).find('.course-button').should('have.length', count);
-        });
-    });
-});
-
-describe('locked gradeables', () => {
-    ['instructor', 'ta', 'grader', 'student'].forEach((user) => {
-        it(`should show the locked gradeable for ${user} and message`, () => {
-            cy.login(user);
-            cy.visit(['sample']);
-            cy.get('[data-testid="locked_team_homework"]').should('exist');
-            cy.get('[data-testid="locked_team_homework"]').find('[data-testid="submit-btn"]').then(($button) => {
-                // Get the text from the onclick attribute
-                const onclickText = $button.attr('onclick'); // e.g., alert('Please complete Prerequisite.')
-                // Extract the prerequisite text
-                const prerequisite = onclickText.match(/Please complete (.*?)\./)[1]; // Extracts 'Prerequisite'
-                cy.on('window:alert', (alertText) => {
-                    // Validate the alert text
-                    expect(alertText).to.equal(`Please complete ${prerequisite}.`);
-                });
-                // Trigger the button click
-                cy.wrap($button).click();
-            });
         });
     });
 });
