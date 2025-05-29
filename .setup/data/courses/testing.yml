@@ -86,7 +86,7 @@ gradeables:
         gc_max_value: 10
         gc_upper_clamp: 10
         gc_title: Points
-  
+
   - g_id: locked_homework
     components:
       - gc_lower_clamp: 0
@@ -180,4 +180,3 @@ gradeables:
     g_title: Closed Homework
     gradeable_config: python_simple_homework
     g_bucket: homework
-
