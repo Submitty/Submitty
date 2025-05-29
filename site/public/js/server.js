@@ -859,7 +859,7 @@ function checkColorActivated() {
     // eslint-disable-next-line no-undef
     pos = 0;
     // eslint-disable-next-line no-undef
-    seq = "&&((%'%'BA\r";
+    seq = '&&((%\'%\'BA\r';
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
 
     function inject() {
@@ -1403,7 +1403,7 @@ function escapeSpecialChars(text) {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;',
+        '\'': '&#039;',
     };
 
     return text.replace(/[&<>"']/g, (m) => {

@@ -174,7 +174,7 @@ var AJAX_USE_ASYNC = true;
  * @param err
  */
 function displayAjaxError(err: unknown) {
-    console.error("Failed to parse response.  The server isn't playing nice...");
+    console.error('Failed to parse response.  The server isn\'t playing nice...');
     console.error(err);
     // alert("There was an error communicating with the server. Please refresh the page and try again.");
 }
@@ -2240,7 +2240,7 @@ window.onClickCountUp = function (me: HTMLElement) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'No Credit');
     $.get('Mark.twig', '', () => {
-        const marks: JQuery<HTMLInputElement> = $("input[id^='mark-editor-']");
+        const marks: JQuery<HTMLInputElement> = $('input[id^=\'mark-editor-\']');
         marks.each(function () {
             $(this).attr('overall', 'No Credit');
             if (parseInt(this.value) < 0) {
@@ -2262,15 +2262,9 @@ window.onClickCountDown = function (me: HTMLElement) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'Full Credit');
     $.get('Mark.twig', '', () => {
-        const marks: JQuery<HTMLInputElement> = $("input[id^='mark-editor-']");
+        const marks: JQuery<HTMLInputElement> = $('input[id^=\'mark-editor-\']');
         marks.each(function () {
-            $(this).attr('overall', 'Full Credit');
-            if (parseInt(this.value) > 0) {
-                this.style.backgroundColor = 'var(--standard-vibrant-yellow)';
-            }
-            else {
-                this.style.backgroundColor = 'var(--default-white)';
-            }
+            this.style.backgroundColor = 'var(--default-white)';
         });
     });
 };

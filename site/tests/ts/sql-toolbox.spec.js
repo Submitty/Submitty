@@ -10,24 +10,29 @@ beforeEach(() => {
     }
 
     document.body.innerHTML = `
-        <form>
+    <div>
+      Use this toolbox to run a SELECT query. You cannot run any other type of query, and may only run a single query at a time.
+      You can download a CSV of the query results. Must Run Query before you can Download.
+      <br /><br />
+
         <div>
-            <button id="sql-database-schema">Database Schema Documentation</button>
+            <button id="sql-database-schema" class="btn btn-primary">Database Schema Documentation</button>
             <div id="sql-database-schema-content" hidden>
-                <ul>
-                    <li>
-                        <a class="sql-database-table"></a>
-                        <div class="sql-database-columns"></div>
-                    </li>
-                </ul>
             </div>
         </div>
-        <textarea name='sql'>SELECT * FROM users;</textarea>
-        <div id='run-sql-btn'>Submit</div>
-        <button id="download-sql-btn">Download CSV</button>
-        </form>
-        <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
-        <table id='query-results'></table>
+        <br>
+      <textarea id="toolbox-textarea" name="sql" style="margin-bottom: 2px;" aria-label="Input SQL">SELECT * FROM users;</textarea>
+      <br />
+      <button id='run-sql-btn' class="btn btn-primary">Run Query</button>
+      <button id='download-sql-btn' class="btn btn-primary" disabled>Download CSV</button>
+    </div>
+
+    <div>
+      <h2>Query Results</h2>
+      <div id='query-results-error' class='red-message'><pre id='query-results-error-message'></pre></div>
+      <table id="query-results" class="table table-striped mobile-table">
+      </table>
+    </div>
     `;
 });
 
@@ -122,7 +127,7 @@ test('thrown exception is caught and logged to console.error', async () => {
 
     await runSqlQuery();
 
-    const exceptionString = "TypeError: Cannot read properties of undefined (reading 'length')";
+    const exceptionString = 'TypeError: Cannot read properties of undefined (reading \'length\')';
 
     expect(console.error.mock.calls.length).toEqual(1);
     expect(console.error.mock.calls[0][0].toString()).toEqual(exceptionString);
