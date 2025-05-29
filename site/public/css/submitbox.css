@@ -83,6 +83,19 @@
     text-align: right;
 }
 
+.disable-submit {
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    opacity: 0.4;
+    cursor: default;
+}
+
+.disable-submit:hover {
+    background-color: var(--good-green);
+    filter: alpha(opacity=65);
+}
+
 #gradeable-info h1 {
     margin-right: auto;
 }

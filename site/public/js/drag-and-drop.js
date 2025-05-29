@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
 
 /*
 References:
@@ -299,6 +299,7 @@ function addFile(file, part, check_duplicate_zip = true) {
     }
 
     setButtonStatus();
+    updateSubmitButtonStatus();
 }
 
 // REMOVE FILES
@@ -1035,8 +1036,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('ERROR: No new submission.', 'error');
             return;
         }
 

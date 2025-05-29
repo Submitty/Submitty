@@ -486,7 +486,12 @@
         if (!valid && Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
             valid = true;
         }
-        document.getElementById("submit").disabled = !valid;
+        const submit_button = document.getElementById('submit');
+        if (!valid) {
+            submit_button.classList.add('disable-submit');
+        } else {
+            submit_button.classList.remove('disable-submit');
+        }
     }
 
     $(function() {
