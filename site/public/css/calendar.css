@@ -88,12 +88,12 @@ a.cal-btn:focus {
     text-align: left;
 }
 
-#calendar-item-type-edit{
+#calendar-item-type-edit {
     float: right;
 }
 
-#calendar-today-button{
-    float:right;
+#calendar-today-button {
+    float: right;
     margin-right: 10px;
 }
 
@@ -101,8 +101,6 @@ a.cal-btn:focus {
     margin-bottom: 2px;
     margin-top: 0;
 }
-
-
 
 /* the row of Monday, Tuesday, ... */
 .cal-week-title-row {
@@ -171,13 +169,13 @@ a.cal-btn:focus {
     height: 100px;
 }
 
-.cal-day-cell-twoweek{
+.cal-day-cell-twoweek {
     min-height: 100px;
     max-height: 390px;
     height: 200px;
 }
 
-.cal-day-cell-week{
+.cal-day-cell-week {
     min-height: 100px;
     max-height: 780px;
     height: 400px;
@@ -197,7 +195,8 @@ a.cal-btn:focus {
 
 /* each item in the day cell */
 .cal-gradeable-item {
-    color: var(--text-black)!important;
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--text-black) !important;
     margin: 1px;
     text-decoration: none;
     white-space: normal;
@@ -262,7 +261,8 @@ a.cal-gradeable-status-ann:hover {
     padding: 0;
     font-style: italic;
     border-style: solid;
-    border-width: 3px!important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-width: 3px !important;
 }
 
 a.cal-gradeable-status-ann:focus {
@@ -294,17 +294,22 @@ a.cal-gradeable-status-link:focus {
 
 .calendar-color-blue {
     background-color: var(--standard-medium-vibrant-blue);
-    color: var(--text-black)!important;
+    /* stylelint-disable-next-line declaration-no-important */
+    color: var(--text-black) !important;
 }
 
 /* creating/editing calendar event */
 div.calendar-submit {
     display: grid;
     grid-template-columns: max-content max-content;
-    grid-gap: 5px; 
+    grid-gap: 5px;
 }
-div.calendar-submit label { text-align: "right"; }
-div.calendar-submit label::after { content: ":"; }
+div.calendar-submit label {
+    text-align: right;
+}
+div.calendar-submit label::after {
+    content: ":";
+}
 
 /* Calendar Options Menu */
 div.filter-courses-menu {
@@ -330,7 +335,7 @@ label.course-color-label {
 
 .line-break {
     margin-bottom: 0;
-    margin-top:0.3rem;
+    margin-top: 0.3rem;
 }
 
 /* Calendar Legend */
@@ -361,9 +366,15 @@ div.legend-color {
         margin: 0;
     }
 
-    #calendar-list td:nth-of-type(1)::before { content: "Course"; }
-    #calendar-list td:nth-of-type(2)::before { content: "Gradeable"; }
-    #calendar-list td:nth-of-type(3)::before { content: "Submission Closes"; }
+    #calendar-list td:nth-of-type(1)::before {
+        content: "Course";
+    }
+    #calendar-list td:nth-of-type(2)::before {
+        content: "Gradeable";
+    }
+    #calendar-list td:nth-of-type(3)::before {
+        content: "Submission Closes";
+    }
 
     #calendar-list thead {
         display: none;

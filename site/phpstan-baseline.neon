@@ -768,7 +768,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 7
+			count: 5
 			path: app/controllers/UserProfileController.php
 
 		-
@@ -1180,7 +1180,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 10
+			count: 9
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -2792,16 +2792,6 @@ parameters:
 			path: app/controllers/grading/SimpleGraderController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
-			message: "#^Parameter \\#1 \\$score of method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:setScore\\(\\) expects float, string given\\.$#"
-			count: 1
-			path: app/controllers/grading/SimpleGraderController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/controllers/grading/popup_refactor/RubricGraderController.php
@@ -2999,11 +2989,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:ajaxValidGradeable\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -5192,16 +5177,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createNewTerm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has parameter \\$len with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7813,7 +7788,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
+			count: 1
 			path: app/libraries/socket/Server.php
 
 		-
@@ -7832,22 +7807,12 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$clients type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$pages type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
 
 		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$sessions type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$users type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
 
@@ -11173,11 +11138,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has parameter \\$gradeable_title with no type specified\\.$#"
 			count: 1
 			path: app/views/ErrorView.php
 
