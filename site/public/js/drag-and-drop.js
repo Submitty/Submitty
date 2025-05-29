@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, updateSubmitButtonStatus */
 
 /*
 References:
