@@ -412,13 +412,13 @@ class Config extends AbstractModel {
                     throw new ConfigException("Missing config value for saml options: {$key}");
                 }
             }
-            
         }
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
         if (!$submitty_json) {
             throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
+        
         $this->log_exceptions = true;
 
         $this->base_url = $submitty_json['submission_url'];
