@@ -545,19 +545,19 @@ class Component extends AbstractModel {
         $this->student_comment = $student_comment;
     }
 
-    public function getLowerClamp(): float {
+    public function getLowerClamp(): int {
         return $this->lower_clamp;
     }
 
-    public function getDefault(): float {
+    public function getDefault(): int {
         return $this->default;
     }
 
-    public function getMaxValue(): float {
+    public function getMaxValue(): int {
         return $this->max_value;
     }
 
-    public function getUpperClamp(): float {
+    public function getUpperClamp(): int {
         return $this->upper_clamp;
     }
 
