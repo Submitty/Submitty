@@ -473,12 +473,8 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
-        if (isset($submitty_json['course_material_file_upload_limit_mb'])) {
-            $this->course_material_file_upload_limit_mb = (int) $submitty_json['course_material_file_upload_limit_mb'];
-        }
-        else {
-            $this->course_material_file_upload_limit_mb = 100; // Default to 100 MB if not set
-        }
+        // Default to 100 MB if not set
+        $this->course_material_file_upload_limit_mb = (int) ($submitty_json['course_material_file_upload_limit_mb'] ?? 100);
 
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
