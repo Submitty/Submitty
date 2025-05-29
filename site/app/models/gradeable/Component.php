@@ -31,16 +31,16 @@ class Component extends AbstractModel {
      * @var string The comment visible to the student */
     protected $student_comment = "";
     /** @prop
-     * @var int The minimum points this component can contribute to the score (can be negative) */
+     * @var float The minimum points this component can contribute to the score (can be negative) */
     protected $lower_clamp = 0;
     /** @prop
-     * @var int The number of points this component is worth with no marks */
+     * @var float The number of points this component is worth with no marks */
     protected $default = 0;
     /** @prop
-     * @var int The full value of this component without extra credit */
+     * @var float The full value of this component without extra credit */
     protected $max_value = 0;
     /** @prop
-     * @var int The maximum number of points this component can contribute to the score (can be > $max_value) */
+     * @var float The maximum number of points this component can contribute to the score (can be > $max_value) */
     protected $upper_clamp = 0;
     /** @prop
      * @var bool If this is a text component (true) or a numeric component (false) for numeric/text components */
@@ -545,19 +545,19 @@ class Component extends AbstractModel {
         $this->student_comment = $student_comment;
     }
 
-    public function getLowerClamp(): int {
+    public function getLowerClamp(): float {
         return $this->lower_clamp;
     }
 
-    public function getDefault(): int {
+    public function getDefault(): float {
         return $this->default;
     }
 
-    public function getMaxValue(): int {
+    public function getMaxValue(): float {
         return $this->max_value;
     }
 
-    public function getUpperClamp(): int {
+    public function getUpperClamp(): float {
         return $this->upper_clamp;
     }
 
