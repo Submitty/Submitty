@@ -765,7 +765,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     if (!use_qr_codes) {
         // eslint-disable-next-line eqeqeq
         if (num_pages == '') {
-            alert("You didn't enter the # of page(s)!");
+            alert('You didn\'t enter the # of page(s)!');
             $('#submit').prop('disabled', false);
             return;
         }
@@ -787,7 +787,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
@@ -896,7 +896,7 @@ function gatherInputAnswersByType(type) {
 }
 
 /**
- * @param versions_used
+ * @param version_to_regrade
  * @param versions_allowed
  * @param csrf_token
  * @param gradeable_id
@@ -912,14 +912,16 @@ function gatherInputAnswersByType(type) {
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', versions_used);
+    if (version_to_regrade) {
+        formData.append('version_to_regrade', version_to_regrade);
+    }
     formData.append('regrade_all_students', regrade_all_students);
     formData.append('regrade_all_students_all', regrade_all_students_all);
     $.ajax({
@@ -1041,7 +1043,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1156,7 +1158,7 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
@@ -1250,7 +1252,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1364,7 +1366,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (sections_lock === true && numSections === 0) {
-        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        alert('Restrict to at least one section or select \'No\' button where asked about whether you want to restrict this material/folder to some sections.');
         return;
     }
 
