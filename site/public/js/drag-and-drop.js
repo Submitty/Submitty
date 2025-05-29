@@ -1036,7 +1036,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            displayMessage('ERROR: No new submission.', 'error');
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
