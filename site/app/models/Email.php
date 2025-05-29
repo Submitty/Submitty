@@ -100,12 +100,10 @@ class Email extends AbstractModel {
         $body .= "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
 
         // Adding the notifications settings link after the footer
-        if ($course === null || $term === null) {
-            return $body;
+        if ($course != null || $term != null) {
+             $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
+            $body .= "\nPlease refer to the course syllabus for contact information for your teaching staff.\nUpdate your email notification settings for this course here: " . $notifications_url;
         }
-        $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
-        $body .= "\nPlease refer to the course syllabus for contact information for your teaching staff.\nUpdate your email notification settings for this course here: " . $notifications_url;
-
         return $body;
     }
 }
