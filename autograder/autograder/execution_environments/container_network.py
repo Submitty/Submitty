@@ -20,7 +20,6 @@ class Container():
     create, start, and cleanup after themselves. Note that a network of containers
     can be made up of 1 or more containers.
     """
-
     def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one,
                  is_test_environment, log_function, log_container):
         self.name = container_info['container_name']
@@ -115,12 +114,12 @@ class Container():
         except docker.errors.ImageNotFound:
 
             docker_error_path = os.path.join(
-                "/".join(self.directory.split("/")[:-2]), 'TMP_SUBMISSION', 'tmp_logs')
+                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
 
             docker_error_data = {
                 "image": f'{self.image}',
                 "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'image {self.image} is not available on {self.full_name}\n'
+                "error": f'image {self.image} could not be created in {self.full_name}'
             }
             with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
                 json.dump(docker_error_data, json_file, indent=4)
@@ -131,12 +130,12 @@ class Container():
         except Exception:
 
             docker_error_path = os.path.join(
-                "/".join(self.directory.split("/")[:-2]), 'TMP_SUBMISSION', 'tmp_logs')
+                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
 
             docker_error_data = {
                 "image": f'{self.image}',
                 "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'could not create container {self.full_name}\n'
+                "error": f'could not create container {self.full_name}'
             }
             with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
                 json.dump(docker_error_data, json_file, indent=4)
@@ -211,7 +210,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     Therefore, code is effectively run in a Jailed Sandbox within the container. Containers may
     be networked together to test networked gradeables.
     """
-
     def __init__(self, config, job_id, untrusted_user, testcase_directory, is_vcs,
                  is_batch_job, complete_config_obj, testcase_info, autograding_directory,
                  log_path, stack_trace_log_path, is_test_environment):
