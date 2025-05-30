@@ -82,18 +82,19 @@ class AccessControl {
     /** @var string|null */
     private $permission;
 
-    /**
-     * AccessControl constructor.
-     * @param array $data
-     * @throws \BadMethodCallException
-     */
-    public function __construct(array $data) {
-        foreach ($data as $key => $value) {
-            $method = 'set' . str_replace('_', '', $key);
-            if (!method_exists($this, $method)) {
-                throw new \BadMethodCallException(sprintf('Unknown property "%s" on attribute "%s".', $key, \get_class($this)));
-            }
-            $this->$method($value);
+    public function __construct(
+        string $role = null,
+        string $level = null,
+        string $permission = null,
+    ) {
+        if ($role !== null) {
+            $this->setRole($role);
+        }
+        if ($level !== null) {
+            $this->setLevel($level);
+        }
+        if ($permission !== null) {
+            $this->setPermission($permission);
         }
     }
 
