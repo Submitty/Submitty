@@ -376,12 +376,12 @@ class WebRouter {
             && !str_ends_with($this->parameters['_controller'], 'AuthenticationController')
             && !$this->core->checkCsrfToken()
         ) {
-            $msg = "Invalid CSRF token.";
+            $msg = "Invalid CSRF token. Expected " . $this->core->getCsrfToken(). ". Got " . var_dump($_POST);
             $this->core->addErrorMessage($msg);
             return new MultiResponse(
                 JsonResponse::getFailResponse($msg),
                 null,
-                new RedirectResponse($this->core->buildUrl())
+                null
             );
         }
 

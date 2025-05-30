@@ -1,0 +1,134 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import Popup from './popup.vue';
+import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
+
+interface ServerResult {
+    status: string;
+    message: string | null;
+    data: { [key: string]: number | string | null }[];
+}
+
+const showPopup = ref(false);
+const formElement = ref<HTMLFormElement | null>(null);
+
+const handleToggle = () => {
+    showPopup.value = !showPopup.value;
+
+    if (showPopup.value) {
+        const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
+        const textarea = formElement.value?.querySelector('textarea[name="query"]') as HTMLTextAreaElement;
+        if (textBox && textarea) {
+            textarea.value = textBox.value;
+        }
+    }
+};
+
+const handleSave = async () => {
+    if (!formElement.value) {
+        return;
+    }
+
+    const formData = new FormData(formElement.value);
+
+    try {
+        const response = await fetch(buildCourseUrl(['sql_toolbox', 'save_query']), {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save query');
+        }
+
+        const result = await response.json() as ServerResult;
+        if (result.status === 'success') {
+            showPopup.value = false;
+        }
+        else {
+            alert(`Save failed: ${result.message}`);
+        }
+    }
+    catch (error) {
+        console.error(error);
+        alert(`Error: ${(error as Error).message}`);
+    }
+};
+</script>
+
+<template>
+  <Popup
+    title="Save Query"
+    :visible="showPopup"
+    savable
+    @toggle="handleToggle"
+    @save="handleSave"
+  >
+    <template #trigger>
+      <button
+        class="btn btn-primary"
+        @click="handleToggle"
+      >
+        Save Query
+      </button>
+    </template>
+
+    <template #default>
+      <form
+        ref="formElement"
+        class="form-group"
+        @submit.prevent="handleSave"
+      >
+        <input
+          type="hidden"
+          name="csrf_token"
+          :value="getCsrfToken()"
+        />
+
+        <label
+          for="query-name"
+          class="query-label"
+        >Query Name</label>
+        <input
+          id="query-name"
+          name="query_name"
+          type="text"
+          maxlength="255"
+          placeholder="Enter a name for your query"
+        />
+
+        <label
+          for="query-text"
+          class="query-label"
+        >Query</label>
+        <textarea
+          id="query-text"
+          name="query"
+          rows="6"
+          placeholder="Edit your query here"
+        />
+      </form>
+    </template>
+  </Popup>
+</template>
+
+<style lang="css" scoped>
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#query-name {
+  width: 100%;
+}
+
+#query-text {
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+}
+
+#query-text-label {
+  margin-top: 10px;
+}
+</style>

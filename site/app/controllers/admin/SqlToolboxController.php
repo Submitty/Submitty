@@ -29,7 +29,8 @@ class SqlToolboxController extends AbstractController {
             $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
                 ['schema' => 'public'],
                 ['name' => 'ASC']
-            )
+            ),
+            $this->core->getCsrfToken()
         );
     }
 
@@ -57,5 +58,31 @@ class SqlToolboxController extends AbstractController {
         finally {
             $this->core->getCourseDB()->rollback();
         }
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/save_query")]
+    public function getSavedQuery(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        return JsonResponse::getSuccessResponse($this->core->getQueries()->getInstructorQueries($user_id));
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/save_query", methods: ["POST"])]
+    public function ajaxSaveQuery(): JsonResponse {
+        return JsonResponse::getSuccessResponse();
+        $user_id = $this->core->getUser()->getId();
+        $query = $_POST['query'];
+        $query_name = $_POST['query_name'];
+
+        if ($query_name > 255) {
+            return JsonResponse::getFailResponse("Query name must be less than 255 characters long");
+        }
+
+        $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
+        return JsonResponse::getSuccessResponse("Successfully saved the query");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/delete_query", methods: ["POST"])]
+    public function deleteQuery(): JsonResponse {
+        return JsonResponse::getSuccessResponse();
     }
 }
