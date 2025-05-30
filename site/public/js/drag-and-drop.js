@@ -299,7 +299,6 @@ function addFile(file, part, check_duplicate_zip = true) {
     }
 
     setButtonStatus();
-    updateSubmitButtonStatus();
 }
 
 // REMOVE FILES
@@ -347,10 +346,13 @@ function deleteSingleFile(filename, part, previous) {
         }
     }
     setButtonStatus();
-    updateSubmitButtonStatus();
 }
 
 function setButtonStatus(inactive_version = false) {
+    if (typeof updateSubmitButtonStatus === 'function') {
+        updateSubmitButtonStatus();
+    }
+    
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     let labels = 0;
     for (let i = 0; i < label_array.length; i++) {
