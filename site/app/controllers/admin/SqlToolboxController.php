@@ -29,8 +29,7 @@ class SqlToolboxController extends AbstractController {
             $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
                 ['schema' => 'public'],
                 ['name' => 'ASC']
-            ),
-            $this->core->getCsrfToken()
+            )
         );
     }
 
