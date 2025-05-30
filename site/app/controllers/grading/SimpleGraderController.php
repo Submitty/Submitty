@@ -269,7 +269,8 @@ class SimpleGraderController extends AbstractController {
                     'user' => $anon_id,
                     'grader' => $removing ? "" : $grader->getId(),
                     'elem' => (string) $index,
-                    'score' => (float) $data,
+                    'value' => $data,
+                    'is_text' => $component->isText(),
                     'date' => $removing ? "" : $time->format('Y-m-d H:i:s')
                 ]);
             }
