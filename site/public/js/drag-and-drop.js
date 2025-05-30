@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, updateSubmitButtonStatus */
 
 /*
 References:
@@ -349,6 +349,9 @@ function deleteSingleFile(filename, part, previous) {
 }
 
 function setButtonStatus(inactive_version = false) {
+    if (typeof updateSubmitButtonStatus === 'function') {
+        updateSubmitButtonStatus();
+    }
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     let labels = 0;
     for (let i = 0; i < label_array.length; i++) {
@@ -1035,8 +1038,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
