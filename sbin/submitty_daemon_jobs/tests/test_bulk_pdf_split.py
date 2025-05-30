@@ -20,7 +20,8 @@ class TestBulkPdfSplit(BaseTestCase):
             tgt_filename,
             str(split_path_dir),
             tgt_num_pages,
-            str(split_path_dir.joinpath('bulk_upload_log.txt'))
+            str(split_path_dir.joinpath('bulk_upload_log.txt')),
+            []
         ]
 
         os.chdir(split_path_dir)
@@ -64,7 +65,8 @@ class TestBulkPdfSplit(BaseTestCase):
             tgt_filename,
             str(split_path_dir),
             tgt_num_pages,
-            str(split_path_dir.joinpath('bulk_upload_log.txt'))
+            str(split_path_dir.joinpath('bulk_upload_log.txt')),
+            []
         ]
 
         os.chdir(split_path_dir)
@@ -90,7 +92,8 @@ class TestBulkPdfSplit(BaseTestCase):
             "",
             "",
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            False
+            False,
+            []
         ]
 
         os.chdir(split_path_dir)
@@ -135,7 +138,8 @@ class TestBulkPdfSplit(BaseTestCase):
             "https://url_testing.com/tests/?code=koalas&name=",
             urllib.parse.quote("#D0,.com"),
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            False
+            False,
+            [] 
         ]
 
 
@@ -181,7 +185,8 @@ class TestBulkPdfSplit(BaseTestCase):
             "",
             "",
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            True
+            True,
+            []
         ]
 
         os.chdir(split_path_dir)
