@@ -3,6 +3,7 @@
     "max_submission_size" : 1000000,
     "assignment_message" : "Please upload a single .pdf file containing 500-1000 words.",
 
+    "required_capabilities": "default",
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/pdflatex:latest"

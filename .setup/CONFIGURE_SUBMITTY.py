@@ -569,7 +569,8 @@ if not args.worker:
                           "submitty/python:latest",
                           "submitty/clang:latest",
                           "submitty/gcc:latest",
-                          "submitty/java:latest"
+                          "submitty/java:latest",
+                          "submitty/pdflatex:latest"
                        ]
         }
 

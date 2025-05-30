@@ -13,8 +13,8 @@
     },
 
     "display_testcase_runtime_memory" : true,
-
-  "testcases" : [
+    
+    "testcases" : [
       {
           "type" : "Compilation",
           "title" : "Compilation",

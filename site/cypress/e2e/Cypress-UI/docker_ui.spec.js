@@ -17,7 +17,8 @@ const docker_ui_path = '/admin/docker';
  *         "submitty/python:latest",
  *         "submitty/clang:latest",
  *         "submitty/gcc:latest",
- *         "submitty/java:latest"
+ *         "submitty/java:latest",
+ *         "submitty/pdflatex:latest",
  *     ]
  * }
  * NOTE: sysinfo log is currently broken, so docker version will always show Error. Once this is fixed,

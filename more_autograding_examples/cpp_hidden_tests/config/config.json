@@ -12,10 +12,6 @@
     "container_options": {
         "container_image": "submitty/clang:latest"
     },
-    "autograding": {
-        "submission_to_compilation": ["**/*.cpp"],
-        "compilation_to_runner": ["**/a.out"]
-    },
 
     "testcases" : [
 
