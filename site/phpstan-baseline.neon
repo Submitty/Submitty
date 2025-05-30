@@ -9687,26 +9687,6 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$default \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$lower_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$max_value \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$upper_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
@@ -10338,11 +10318,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$component_id \\(string\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
@@ -12147,47 +12122,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_mode with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$direction with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$overrides with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$past_grade_start_date with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$sort with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$view_all with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
