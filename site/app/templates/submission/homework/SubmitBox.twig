@@ -507,9 +507,9 @@
             var num_pages = 0;
             if ($('#radio-student').is(':checked')) {
                 user_id = $("#user_id").val();
-                // Adds a confirm box to prevent accidental submission as student
-                if (!confirm("Are you sure you want to submit as student " + user_id)) {
-                    $(".submit-gradeable").prop('disabled', false);
+                //Adds a confirm box to prevent accidental submission as student
+                if (!confirm("Are you sure you want to submit as student " + user_id)){
+                    $(".submit-gradeable").prop('disabled',false);
                     return;
                 }
             };
