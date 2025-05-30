@@ -998,14 +998,17 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 if ($regrade_all_students_all === 'true' || $regrade_all === 'true') {
-                    $active_version = $i;
+                    $version = $i;
                 }
                 else {
-                    $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    $version = intval($_POST['version_to_regrade'] ?? 0);
+                    if ($version < 1 || $version > $g->getAutoGradedGradeable()->getHighestVersion()) {
+                        $version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    }
                 }
                 //create file name
                 $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
-                    $gradeable_id, $who_id, $active_version];
+                    $gradeable_id, $who_id, $version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
@@ -1025,7 +1028,7 @@ class SubmissionController extends AbstractController {
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
-                    "version" => $active_version,
+                    "version" => $version,
                     "who" => $who_id
                 ];
                 //add file to directory which will trigger autograding

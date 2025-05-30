@@ -37,7 +37,6 @@ def cleanup(test):
     os.mkdir(os.path.join(test.testcase_path, "data", "part1"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part2"))
     os.mkdir(os.path.join(test.testcase_path, "data", "part3"))
-    os.mkdir(os.path.join(test.testcase_path, "data", "part4"))
 
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG,"test_output", "output.txt"),
@@ -59,7 +58,7 @@ def python3(test):
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "python3.py"),
-                     os.path.join(test.testcase_path, "data", "part2")])
+                     os.path.join(test.testcase_path, "data", "part1")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -72,7 +71,7 @@ def c(test):
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "c.c"),
-                     os.path.join(test.testcase_path, "data", "part3")])
+                     os.path.join(test.testcase_path, "data", "part2")])
     test.run_compile()
     test.run_run()
     test.run_validator()
@@ -85,7 +84,7 @@ def cpp(test):
     cleanup(test)
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "cpp.cpp"),
-                     os.path.join(test.testcase_path, "data", "part4")])
+                     os.path.join(test.testcase_path, "data", "part3")])
     test.run_compile()
     test.run_run()
     test.run_validator()

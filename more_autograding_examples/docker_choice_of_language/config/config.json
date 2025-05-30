@@ -30,7 +30,7 @@
             "containers": [
                 {
                     "commands": "/usr/bin/gcc part2/*.c -o a.out",
-                    "container_image": "submitty/autograding-default:latest"
+                    "container_image": "submitty/gcc:latest"
                 }
             ],
             "extra_credit": true,
@@ -42,8 +42,8 @@
             "title": "C++ Compilation",
             "containers": [
                 {
-                    "commands": "/usr/bin/g++ part3/*.cpp -o a.out",
-                    "container_image": "submitty/autograding-default:latest"
+                    "commands": "/usr/bin/clang++ part3/*.cpp -o a.out",
+                    "container_image": "submitty/clang:latest"
                 }
             ],
             "extra_credit": true,

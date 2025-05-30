@@ -13,11 +13,12 @@ const docker_ui_path = '/admin/docker';
  * If `sponge' command is missing, install `moreutils' package, or edit the file manually:
  * {
  *     "default": [
- *         "submitty/clang:6.0",
  *         "submitty/autograding-default:latest",
- *         "submitty/java:11",
- *         "submitty/python:3.6",
- *         "submittyrpi/csci1200:default"
+ *         "submitty/python:latest",
+ *         "submitty/clang:latest",
+ *         "submitty/gcc:latest",
+ *         "submitty/java:latest",
+ *         "submitty/pdflatex:latest",
  *     ]
  * }
  * NOTE: sysinfo log is currently broken, so docker version will always show Error. Once this is fixed,
@@ -86,7 +87,7 @@ describe('Docker UI Test', () => {
                 .should('not.be.visible');
         });
         // Default filter should have all images
-        cy.get("button[data-capability='default']")
+        cy.get('button[data-capability=\'default\']')
             .click();
         cy.get('.image-row')
             .should('be.visible');
