@@ -14,7 +14,7 @@
 
 <div class="content" id="gradeable-submission-cont">
     <header id="gradeable-info">
-        <h1>
+        <h1 data-testid="new-submission-info">
             New submission for: {{ gradeable_name }}
             {% if gradeable_url|trim != "" %}
                 <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">

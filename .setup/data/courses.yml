@@ -67,6 +67,11 @@
 #
 #     g_min_grading_group: [optional] integer for what groups (and above) are allowed to submit grades. Defaults to 3.
 #
+#     eg_depends_on: [optional] gradeable_id for what the current gradeable should be locked behind.
+#          This will throw an error if the gradeable doesnt exist beforehand.
+#
+#     eg_depends_on_points: [optional] the number of points that the current gradeabe is locked behind
+#
 # These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
 #
 #     eg_config_path: Path to gradeable config. Do not use with gradeable_config.
