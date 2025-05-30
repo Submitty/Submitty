@@ -86,12 +86,14 @@ const handleSave = async () => {
     </template>
 
     <template #default>
-      <div
-        v-if="error.error"
-        class="alert alert-danger"
-      >
-        {{ error.message }}
-      </div>
+      <Transition name="fade-error">
+        <div
+          v-if="error.error"
+          class="alert alert-danger"
+        >
+          {{ error.message }}
+        </div>
+      </Transition>
       <div
         id="form"
         ref="formElement"
@@ -154,5 +156,14 @@ const handleSave = async () => {
 
 #query-text-label {
   margin-top: 10px;
+}
+
+.fade-error-enter-active,
+.fade-error-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-error-enter-from,
+.fade-error-leave-to {
+  opacity: 0;
 }
 </style>
