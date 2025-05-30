@@ -67,7 +67,6 @@ class Course(
         if "gradeables" in course:
             for gradeable in course["gradeables"]:
                 self.gradeables.append(Gradeable(gradeable))
-                # print(self.gradeables[-1].id, ids, [x.id for x in self.gradeables])
                 assert self.gradeables[-1].id not in ids
                 ids.append(self.gradeables[-1].id)
         self.users: list = []
