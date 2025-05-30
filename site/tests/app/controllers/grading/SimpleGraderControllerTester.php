@@ -19,7 +19,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
      * @param $upper_clamp
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($upper_clamp) {
+    private function createMockGradeable(float $upper_clamp) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $component = $this->createMockModel(Component::class);
 
