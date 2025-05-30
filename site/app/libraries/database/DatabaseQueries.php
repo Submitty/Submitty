@@ -9414,4 +9414,53 @@ ORDER BY
         }
         return $this->submitty_db->getRowCount() > 0;
     }
+
+    // ----------------- INSTRUCTOR SQL QUERIES -----------------
+
+    /**
+     * @param string $user_id the userid of the user
+     * @return array
+     */
+    public function getInstructorQueries($user_id): array {
+        $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_name the query name save it as
+     * @param string $query the query to save
+     */
+    public function saveInstructorQueries($user_id, $query_name, $query): void {
+        $this->submitty_db->query(
+            "INSERT INTO instructor_sql_queries (user_id, query_name, query) VALUES (?, ?, ?)",
+            [$user_id, $query_name, $query]
+        );
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $previous_query_name the previous query name that is going to be replaced
+     * @param string $query_name the new query name
+     * @param string $query the query to replace
+     */
+    public function updateInstructorQueries($user_id, $previous_query_name, $query_name, $query): void {
+        $this->submitty_db->query(
+            "UPDATE instructor_sql_queries SET query_name = ?, query = ? WHERE user_id = ? AND query_name = ?",
+            [$query_name, $query, $user_id, $previous_query_name]
+        );
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_name the query name to delete
+     */
+    public function deleteInstructorQueries($user_id, $query_name): void {
+        $this->submitty_db->query(
+            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND query_name = ?",
+            [$user_id, $query_name]
+        );
+    }
+
+    // ----------------- END INSTRUCTOR SQL QUERIES -----------------
 }
