@@ -59,15 +59,14 @@ class SqlToolboxController extends AbstractController {
         }
     }
 
-    #[Route("/courses/{_semester}/{_course}/sql_toolbox/save_query")]
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["GET"])]
     public function getSavedQuery(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
         return JsonResponse::getSuccessResponse($this->core->getQueries()->getInstructorQueries($user_id));
     }
 
-    #[Route("/courses/{_semester}/{_course}/sql_toolbox/save_query", methods: ["POST"])]
-    public function ajaxSaveQuery(): JsonResponse {
-        return JsonResponse::getSuccessResponse();
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["POST"])]
+    public function saveQuery(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
         $query = $_POST['query'];
         $query_name = $_POST['query_name'];
@@ -76,12 +75,14 @@ class SqlToolboxController extends AbstractController {
             return JsonResponse::getFailResponse("Query name must be less than 255 characters long");
         }
 
+        $queries = $this->core->getQueries()->getInstructorQueries($user_id);
+        foreach ($queries as $existing_query) {
+            if ($existing_query['query_name'] === $query_name) {
+                return JsonResponse::getFailResponse("Query name already exists, please choose a different name.");
+            }
+        }
+
         $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
         return JsonResponse::getSuccessResponse("Successfully saved the query");
-    }
-
-    #[Route("/courses/{_semester}/{_course}/sql_toolbox/delete_query", methods: ["POST"])]
-    public function deleteQuery(): JsonResponse {
-        return JsonResponse::getSuccessResponse();
     }
 }

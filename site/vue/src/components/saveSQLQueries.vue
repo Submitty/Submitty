@@ -10,31 +10,44 @@ interface ServerResult {
 }
 
 const showPopup = ref(false);
-const formElement = ref<HTMLFormElement | null>(null);
+const queryData = ref({
+    query_name: '',
+    query: '',
+});
+const error = ref({
+    error: false,
+    message: '',
+});
 
 const handleToggle = () => {
     showPopup.value = !showPopup.value;
 
     if (showPopup.value) {
         const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
-        const textarea = formElement.value?.querySelector('textarea[name="query"]') as HTMLTextAreaElement;
-        if (textBox && textarea) {
-            textarea.value = textBox.value;
+        if (textBox) {
+            queryData.value.query = textBox.value;
         }
     }
 };
 
-const handleSave = async () => {
-    if (!formElement.value) {
-        return;
-    }
+const displayError = (message: string) => {
+    error.value.error = true;
+    error.value.message = message;
+    setTimeout(() => {
+        error.value.error = false;
+    }, 5000);
+};
 
-    const formData = new FormData(formElement.value);
+const handleSave = async () => {
+    const form = new FormData();
+    form.append('csrf_token', getCsrfToken());
+    form.append('query_name', queryData.value.query_name);
+    form.append('query', queryData.value.query);
 
     try {
-        const response = await fetch(buildCourseUrl(['sql_toolbox', 'save_query']), {
+        const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries']), {
             method: 'POST',
-            body: formData,
+            body: form,
         });
 
         if (!response.ok) {
@@ -46,12 +59,11 @@ const handleSave = async () => {
             showPopup.value = false;
         }
         else {
-            alert(`Save failed: ${result.message}`);
+            displayError(result.message ?? 'An unknown error occurred while saving the query');
         }
     }
-    catch (error) {
-        console.error(error);
-        alert(`Error: ${(error as Error).message}`);
+    catch (e) {
+        displayError(`An error occurred while saving the query: ${(e as Error).message ?? 'Unknown error'}`);
     }
 };
 </script>
@@ -74,10 +86,16 @@ const handleSave = async () => {
     </template>
 
     <template #default>
-      <form
+      <div
+        v-if="error.error"
+        class="alert alert-danger"
+      >
+        {{ error.message }}
+      </div>
+      <div
+        id="form"
         ref="formElement"
         class="form-group"
-        @submit.prevent="handleSave"
       >
         <input
           type="hidden"
@@ -86,28 +104,34 @@ const handleSave = async () => {
         />
 
         <label
+          id="query-name-label"
           for="query-name"
           class="query-label"
         >Query Name</label>
         <input
           id="query-name"
-          name="query_name"
+          v-model="queryData.query_name"
+          name="query-name"
           type="text"
           maxlength="255"
           placeholder="Enter a name for your query"
+          required
         />
 
         <label
+          id="query-text-label"
           for="query-text"
           class="query-label"
         >Query</label>
         <textarea
           id="query-text"
+          v-model="queryData.query"
           name="query"
           rows="6"
           placeholder="Edit your query here"
+          required
         />
-      </form>
+      </div>
     </template>
   </Popup>
 </template>
