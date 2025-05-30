@@ -20,7 +20,6 @@
                     "commands" : ["python3 part1/*.py"]
                 }
             ],
-            
             "points" : 5,
             "validation" : [
                 {
@@ -43,11 +42,9 @@
                     "commands" : ["clang -Wall -o p3.out -- part2/*.c"]
                 }
             ],
-            
             "executable_name" : "p3.out",
             "points" : 2
         },
-
         {
             "title" : "C Testing",
             "containers": [
@@ -82,7 +79,6 @@
             "executable_name" : "p4.out",
             "points" : 2
         },
-
         {
             "title" : "C++ Testing",
             "containers": [
@@ -101,6 +97,5 @@
                 }
             ]
         }
-
     ]
 }

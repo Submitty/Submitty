@@ -4,11 +4,10 @@
     "assignment_message" : "Please upload a single .pdf file containing 500-1000 words.",
 
     "autograding_method": "docker",
-
-	"container_options": {
-        "container_image": "submitty/autograding-default:latest"
-	},
-
+    "container_options": {
+        "container_image": "submitty/pdflatex:latest"
+    },
+    
     "autograding" : {
         "submission_to_compilation" : [ "*.pdf" ],
         "submission_to_runner" : [ "*.pdf" ],

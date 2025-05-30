@@ -1,10 +1,6 @@
 {
     "required_capabilities": "python",
     "autograding_method" : "docker",
-    "container_options" : {
-      //States that a given testcase uses a router by default. (Default value is true)
-      "use_router" : false  // todo: this should be checked / fixed...
-    },
     "resource_limits" : {
         // Allow the submission to run for 5 CPU seconds.
         "RLIMIT_CPU" : 5

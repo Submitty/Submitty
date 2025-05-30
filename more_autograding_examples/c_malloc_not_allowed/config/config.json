@@ -5,7 +5,6 @@
         "container_image": "submitty/gcc:latest"
     },
     "autograding": {
-        "submission_to_compilation": ["**/*.c"],
         "compilation_to_runner": ["a.i", "a.out"]
     },
 
