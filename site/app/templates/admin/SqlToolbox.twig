@@ -27,14 +27,19 @@
                     </ul>
                 </div>
             </div>
-
-            <button>View saved Queries</button>
+            
+            {# separate from top div #}
+            {% include 'Vue.twig' with {
+                'component': 'displaySQLQueries',
+                'style': 'margin-top: 10px;'
+            } %}
         </div>
         <br>
         <textarea id="toolbox-textarea" name="sql" style="margin-bottom: 2px;" aria-label="Input SQL"></textarea>
         <br />
         <div id="query-results-buttons">
             <button id='run-sql-btn' class="btn btn-primary">Run Query</button>
+            
             {# need display inline to get rid of div line wrap #}
             {% include 'Vue.twig' with {
                 'component': 'saveSQLQueries',

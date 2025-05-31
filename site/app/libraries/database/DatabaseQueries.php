@@ -9455,10 +9455,10 @@ ORDER BY
      * @param string $user_id the userid of the user
      * @param string $query_name the query name to delete
      */
-    public function deleteInstructorQueries($user_id, $query_name): void {
+    public function deleteInstructorQueries($user_id, $query_id): void {
         $this->submitty_db->query(
-            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND query_name = ?",
-            [$user_id, $query_name]
+            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND id = ?",
+            [$user_id, $query_id]
         );
     }
 

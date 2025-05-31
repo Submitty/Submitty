@@ -68,11 +68,11 @@ class SqlToolboxController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["POST"])]
     public function saveQuery(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
-        $query = $_POST['query'];
         $query_name = $_POST['query_name'];
+        $query = $_POST['query'];
 
-        if ($query_name > 255) {
-            return JsonResponse::getFailResponse("Query name must be less than 255 characters long");
+        if (strlen($query_name) > 255) {
+            return JsonResponse::getFailResponse("Query name must be less than 255 characters long: ". $query_name);
         }
 
         $queries = $this->core->getQueries()->getInstructorQueries($user_id);
@@ -84,5 +84,14 @@ class SqlToolboxController extends AbstractController {
 
         $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
         return JsonResponse::getSuccessResponse("Successfully saved the query");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries/delete", methods: ["POST"])]
+    public function deleteQuery(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $query_id = $_POST['query_id'];
+
+        $this->core->getQueries()->deleteInstructorQueries($user_id, $query_id);
+        return JsonResponse::getSuccessResponse("Successfully deleted the query");
     }
 }

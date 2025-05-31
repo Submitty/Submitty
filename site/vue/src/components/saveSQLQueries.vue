@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from './popup.vue';
-import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
+import { buildCourseUrl, displaySuccessMessage, getCsrfToken } from '../../../ts/utils/server';
 
 interface ServerResult {
     status: string;
@@ -56,14 +56,15 @@ const handleSave = async () => {
 
         const result = await response.json() as ServerResult;
         if (result.status === 'success') {
+            displaySuccessMessage('Query saved successfully!');
             showPopup.value = false;
         }
         else {
-            displayError(result.message ?? 'An unknown error occurred while saving the query');
+            displayError(result.message ?? 'An unknown error occurred while saving the query. Please try again later.');
         }
     }
     catch (e) {
-        displayError(`An error occurred while saving the query: ${(e as Error).message ?? 'Unknown error'}`);
+        displayError(`An error occurred while saving the query: ${(e as Error).message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
     }
 };
 </script>
