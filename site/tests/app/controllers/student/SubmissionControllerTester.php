@@ -2,7 +2,6 @@
 
 namespace tests\app\controllers\student;
 
-use Attribute;
 use app\models\gradeable\GradeableUtils;
 use ZipArchive;
 use app\controllers\student\SubmissionController;
@@ -23,15 +22,9 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use tests\BaseUnitTest;
 use tests\utils\NullOutput;
-
-#[Attribute]
-class HighestVersion {}
-
-#[Attribute]
-class NumParts {}
-
-#[Attribute]
-class MaxSize {}
+use tests\utils\HighestVersion;
+use tests\utils\MaxSize;
+use tests\utils\NumParts;
 
 /**
  * @runTestsInSeparateProcesses

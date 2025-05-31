@@ -5,7 +5,6 @@ namespace tests\app\models\gradeable;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
-use app\models\Config;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\Gradeable;

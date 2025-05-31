@@ -19,6 +19,7 @@
     </testsuite>
     <testsuite name="phpstan extension">
       <directory suffix="Tester.php">./tests/phpstan</directory>
+      <exclude>./tests/phpstan/DoctrineExtensionTester.php</exclude>
     </testsuite>
   </testsuites>
   <logging/>

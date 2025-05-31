@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\models\DockerUI;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
-use app\models\Config;
 use app\libraries\Utils;
 
 class DockerUITester extends BaseUnitTest {

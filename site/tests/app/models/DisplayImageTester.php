@@ -4,10 +4,8 @@ namespace tests\app\models;
 
 use app\exceptions\BadArgumentException;
 use app\exceptions\FileReadException;
-use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\models\Config;
 use app\models\DisplayImage;
 use tests\BaseUnitTest;
 
