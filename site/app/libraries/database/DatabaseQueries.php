@@ -9419,9 +9419,9 @@ ORDER BY
 
     /**
      * @param string $user_id the userid of the user
-     * @return array<string>|null
+     * @return array<string>
      */
-    public function getInstructorQueries($user_id): array|null {
+    public function getInstructorQueries($user_id): array {
         $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
         return $this->submitty_db->rows();
     }
