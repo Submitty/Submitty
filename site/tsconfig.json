@@ -1,10 +1,10 @@
 {
-    "include": ["./ts/**/*.ts", "globals.d.ts", "./public/js/**/*.js"],
+    "include" : ["./ts/**/*.ts", "./public/js/**/*.js"],
     "compilerOptions": {
         "strict": true,
         "allowJs": true,
         "noEmit": true,
         "incremental": true,
-        "outDir": "incremental_build",
+        "outDir": "incremental_build"
     }
 }
