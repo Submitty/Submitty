@@ -9419,9 +9419,9 @@ ORDER BY
 
     /**
      * @param string $user_id the userid of the user
-     * @return array
+     * @return array<string>|null
      */
-    public function getInstructorQueries($user_id): array {
+    public function getInstructorQueries($user_id): array|null {
         $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
         return $this->submitty_db->rows();
     }
@@ -9440,20 +9440,7 @@ ORDER BY
 
     /**
      * @param string $user_id the userid of the user
-     * @param string $previous_query_name the previous query name that is going to be replaced
-     * @param string $query_name the new query name
-     * @param string $query the query to replace
-     */
-    public function updateInstructorQueries($user_id, $previous_query_name, $query_name, $query): void {
-        $this->submitty_db->query(
-            "UPDATE instructor_sql_queries SET query_name = ?, query = ? WHERE user_id = ? AND query_name = ?",
-            [$query_name, $query, $user_id, $previous_query_name]
-        );
-    }
-
-    /**
-     * @param string $user_id the userid of the user
-     * @param string $query_name the query name to delete
+     * @param string $query_id the query id to delete
      */
     public function deleteInstructorQueries($user_id, $query_id): void {
         $this->submitty_db->query(

@@ -96,7 +96,10 @@ const deleteQuery = async (id: number) => {
     </template>
 
     <template #default>
-      <table class="table">
+      <table
+        v-if="queries.length !== 0"
+        class="table"
+      >
         <thead>
           <tr>
             <th>Query Name</th>
@@ -134,6 +137,10 @@ const deleteQuery = async (id: number) => {
           </tr>
         </tbody>
       </table>
+
+      <p v-else>
+        No saved queries available.
+      </p>
     </template>
   </Popup>
 </template>
@@ -144,9 +151,5 @@ const deleteQuery = async (id: number) => {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
-}
-
-.table {
-  width: 100%;
 }
 </style>
