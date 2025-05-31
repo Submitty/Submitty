@@ -46,7 +46,7 @@ const selectQuery = (id: number) => {
     if (query) {
         const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
         if (textBox) {
-            textBox.value = query.query;
+            textBox.value += query.query;
         }
     }
     showPopup.value = false;
