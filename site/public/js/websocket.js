@@ -38,19 +38,25 @@ class WebSocketClient {
         this.serverError = false;
     }
 
-    open(page) {
+    open(page, args = {}) {
         console.log(`WebSocket: connecting to ${this.url}`);
-        this.client = new WebSocket(this.url);
+        const term_course_arr = document.body.dataset.courseUrl.split('/');
+        const course = term_course_arr.pop();
+        const term = term_course_arr.pop();
+        const urlWithParams = new URL(this.url);
+        urlWithParams.searchParams.append('page', page);
+        urlWithParams.searchParams.append('course', course);
+        urlWithParams.searchParams.append('term', term);
+        for (const key in args) {
+            urlWithParams.searchParams.append(key, args[key]);
+        }
+        this.client = new WebSocket(urlWithParams.href);
         this.client.onopen = () => {
             console.log('WebSocket: connected');
             $('#socket-server-system-message').hide();
             if (this.onopen) {
                 this.onopen();
             }
-            const term_course_arr = document.body.dataset.courseUrl.split('/');
-            const course = term_course_arr.pop();
-            const term = term_course_arr.pop();
-            this.client.send(JSON.stringify({ type: 'new_connection', page: `${term}-${course}-${page}` }));
         };
 
         this.client.onmessage = (event) => {
