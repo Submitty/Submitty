@@ -10,19 +10,17 @@
     const peer_info = {% if isPeerPanel %} true {% else %} false {% endif %};
     const is_notebook = {% if is_notebook %} true {% else %} false {% endif %};
 
-    $(document).ready(function () {
-        updateThePanelsElements({
-            autograding_results,
-            grading_rubric,
-            submission_browser,
-            solution_ta_notes,
-            student_info,
-            grade_inquiry_info,
-            discussion_browser,
-            peer_info,
-            "notebook-view": is_notebook
-        });
-    })
+    updateThePanelsElements({
+        autograding_results,
+        grading_rubric,
+        submission_browser,
+        solution_ta_notes,
+        student_info,
+        grade_inquiry_info,
+        discussion_browser,
+        peer_info,
+        "notebook-view": is_notebook
+    });
 </script>
 
 <div id="grading-panel-header">
