@@ -80,7 +80,6 @@ describe('Test cases revolving around grade inquiries', () => {
 
         // TA / Instructor view
         cy.visit(['sample', 'gradeable', gradeableId, 'grading', 'details']);
-        cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="grade-button"]').eq(2).click();
         cy.get('[data-testid="grade-inquiry-info-btn"]').click();
         cy.get('[data-testid="invalid-grade-inquiry"]').should('exist');
