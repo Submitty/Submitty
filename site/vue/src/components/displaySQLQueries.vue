@@ -41,7 +41,7 @@ const handleToggle = async () => {
     }
 };
 
-const selectQuery = (id: number) => {
+const addQuery = (id: number) => {
     const query = queries.value.find((q) => q.id === id);
     if (query) {
         const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
@@ -82,7 +82,7 @@ const deleteQuery = async (id: number) => {
 
 <template>
   <Popup
-    title="Select a Saved Query"
+    title="Add a Saved Query"
     :visible="showPopup"
     @toggle="handleToggle"
   >
@@ -104,7 +104,7 @@ const deleteQuery = async (id: number) => {
           <tr>
             <th>Query Name</th>
             <th>Query Snippet</th>
-            <th>Select</th>
+            <th>Add</th>
             <th>Delete</th>
           </tr>
         </thead>
@@ -122,9 +122,9 @@ const deleteQuery = async (id: number) => {
             <td>
               <button
                 class="btn btn-sm btn-primary"
-                @click="selectQuery(query.id)"
+                @click="addQuery(query.id)"
               >
-                Select
+                Add
               </button>
             </td>
             <td>
