@@ -107,7 +107,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
-    public function invalidQueryDataProvider(): array {
+    public static function invalidQueryDataProvider(): array {
         return [
             ['INSERT INTO foo VALUES (1)'],
             ['UPDATE foo SET bar=1 WHERE baz=2'],

@@ -47,13 +47,9 @@ class DisplayImageTester extends BaseUnitTest {
      * Helpers
      */
     private function getMockCore(string $tmp_dir) {
-        $core = $this->createMockModel(Core::class);
-
-        $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn($tmp_dir);
-        $core->method('getConfig')->willReturn($config);
-
-        return $core;
+        return $this->createMockCore([
+            'tmp_path' => $tmp_dir
+        ]);
     }
 
     /**
@@ -96,7 +92,7 @@ class DisplayImageTester extends BaseUnitTest {
         $this->assertEquals($display_image->getImageBase64(), $test_image_base64);
     }
 
-    public function getImageBase64ResizeProvider(): array {
+    public static function getImageBase64ResizeProvider(): array {
         return [
             [null, null],
             [200, null],
@@ -163,22 +159,20 @@ class DisplayImageTester extends BaseUnitTest {
 
     public function saveUserImageProvider(): array {
         $meta = explode('.', self::TEST_IMAGE);
-        $file_name = $meta[0];
         $file_extension = $meta[1];
-
-        $core = $this->getMockCore(FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString()));
         $test_image_path = FileUtils::joinPaths(__TEST_DATA__, 'images', self::TEST_IMAGE);
 
         return [
-            [$core, self::TEST_USER_NAME, $file_extension, $test_image_path, 'system_images'],
-            [$core, self::TEST_USER_NAME, $file_extension, $test_image_path, 'user_images'],
+            [self::TEST_USER_NAME, $file_extension, $test_image_path, 'system_images'],
+            [self::TEST_USER_NAME, $file_extension, $test_image_path, 'user_images'],
         ];
     }
 
     /**
      * @dataProvider saveUserImageProvider
      */
-    public function testSaveUserImage($core, string $user_id, string $image_extension, string $tmp_file_path, string $folder): void {
+    public function testSaveUserImage(string $user_id, string $image_extension, string $tmp_file_path, string $folder): void {
+        $core = $this->getMockCore(FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString()));
         DisplayImage::saveUserImage($core, $user_id, $image_extension, $tmp_file_path, $folder);
 
         $path = FileUtils::joinPaths($core->getConfig()->getSubmittyPath(), 'user_data', $user_id, $folder);

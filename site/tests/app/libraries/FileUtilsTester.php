@@ -311,7 +311,7 @@ STRING;
         $this->assertEquals(0, FileUtils::getZipSize(FileUtils::joinPaths(__TEST_DATA__, 'test.txt')));
     }
 
-    public function validFileNameProvider() {
+    public static function validFileNameProvider() {
         return [
             ['01_File.txt', true],
             ["file'.txt", false],
@@ -348,7 +348,7 @@ STRING;
         $this->assertFalse(FileUtils::isValidFileName(0));
     }
 
-    public function validImageProvider() {
+    public static function validImageProvider() {
         return [
             [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.gif'), true],
             [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.jpeg'), true],
@@ -365,7 +365,7 @@ STRING;
         $this->assertSame($expected, FileUtils::isValidImage($path));
     }
 
-    public function joinPathsData() {
+    public static function joinPathsData() {
         return [
             ["", ""],
             ["", "", ""],
@@ -396,7 +396,7 @@ STRING;
         $this->assertEquals($expected, $actual);
     }
 
-    public function contentTypeDataProvider(): array {
+    public static function contentTypeDataProvider(): array {
         return [
             ['test.pdf', 'application/pdf'],
             ['test.png', 'image/png'],
@@ -983,7 +983,7 @@ STRING;
         $this->assertEquals($expected, FileUtils::getAllFilesTrimSearchPath($this->path, strlen($this->path)));
     }
 
-    public function areWordsInFileProvider() {
+    public static function areWordsInFileProvider() {
         return [
             ["this is a test\nfile that has some words in it", [], false],
             ["this is a test\nfile that has some words in it", ['test'], true],

@@ -2,6 +2,7 @@
 
 namespace tests\app\controllers\student;
 
+use Attribute;
 use app\models\gradeable\GradeableUtils;
 use ZipArchive;
 use app\controllers\student\SubmissionController;
@@ -20,9 +21,17 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
-use PHPUnit\Util\Test;
 use tests\BaseUnitTest;
 use tests\utils\NullOutput;
+
+#[Attribute]
+class HighestVersion {}
+
+#[Attribute]
+class NumParts {}
+
+#[Attribute]
+class MaxSize {}
 
 /**
  * @runTestsInSeparateProcesses
@@ -97,19 +106,19 @@ class SubmissionControllerTester extends BaseUnitTest {
         $num_parts = 1;
         $max_size = 1000000; // 1 MB
 
-        if (empty(static::$annotations)) {
-            static::$annotations = Test::parseTestMethodAnnotations(get_class($this), $this->getName());
-        }
-        if (isset(static::$annotations['method']['highestVersion'][0])) {
-            $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
-        }
+        $refl = new \ReflectionMethod(get_class($this), $this->name());
+        foreach ($refl->getAttributes() as $attr) {
+            if ($attr->getName() === HighestVersion::class) {
+                $highest_version = $attr->getArguments()[0];
+            }
 
-        if (isset(static::$annotations['method']['numParts'][0])) {
-            $num_parts = intval(static::$annotations['method']['numParts'][0]);
-        }
+            if ($attr->getName() === NumParts::class) {
+                $num_parts = $attr->getArguments()[0];
+            }
 
-        if (isset(static::$annotations['method']['maxSize'][0])) {
-            $max_size = intval(static::$annotations['method']['maxSize'][0]);
+            if ($attr->getName() === MaxSize::class) {
+                $max_size = $attr->getArguments()[0];
+            }
         }
 
         $gradeable = $this->createMockGradeable($num_parts, $max_size);
@@ -135,7 +144,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * Helper method to generate a gradeable. We can use annotations in our testcases
-     * to set various aspects of the gradeable, namely @numParts, and @maxSize for
+     * to set various aspects of the gradeable, namely #[NumParts], and #[MaxSize] for
      * highest version of submission, number of parts, and filesize respectively.
      *
      * @param int    $num_parts
@@ -407,10 +416,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Test what happens if we have two parts
      *
-     * @numParts 2
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
+    #[NumParts(2)]
     public function testUploadTwoBuckets() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
             ->expects($this->any())
@@ -610,10 +619,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * @numParts 2
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
+    #[NumParts(2)]
     public function testSecondVersionPreviousTwoParts() {
         $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
             ->expects($this->any())
@@ -1080,9 +1089,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::recursiveChmod($this->config['course_path'], 0777);
     }
 
-    /**
-     * @numParts 2
-     */
+    #[NumParts(2)]
     public function testFailureToCreatePartFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
@@ -1131,9 +1138,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
-    /**
-     * @highestVersion 2
-     */
+    #[HighestVersion(2)]
     public function testErrorMissingPreviousFolder() {
         $_POST['previous_files'] = json_encode([0 => ['test.txt']]);
 
@@ -1206,9 +1211,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
-    /**
-     * @maxSize 0
-     */
+    #[MaxSize(0)]
     public function testErrorFileTooBig() {
         $this->addUploadFile('test1.txt', 'a');
 
@@ -1598,9 +1601,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Cannot set the version below 0.", $json['message']);
     }
 
-    /**
-     * @highestVersion 1
-     */
+    #[HighestVersion(1)]
     public function testUpdateInvalidVersion() {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 2);
@@ -1614,9 +1615,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Cannot set the version past 1.", $json['message']);
     }
 
-    /**
-     * @highestVersion 2
-     */
+    #[HighestVersion(2)]
     public function testUpdateNoInvalidSettingsFile() {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 1);
@@ -1630,9 +1629,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("Failed to open settings file.", $json['message']);
     }
 
-    /**
-     * @highestVersion 2
-     */
+    #[HighestVersion(2)]
     public function testUpdateCannotWriteSettingsFile() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, true);
@@ -1679,9 +1676,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertMatchesRegularExpression('/[0-9]{4}\-[0-1][0-9]\-[0-3][0-9] [0-2][0-9]:[0-5][0-9]:[0-5][0-9]/', $json['history'][1]['time']);
     }
 
-    /**
-     * @highestVersion 5
-     */
+    #[HighestVersion(5)]
     public function testUpdateSubmission() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, true);
