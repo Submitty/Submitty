@@ -1,3 +1,5 @@
+/* exported initializeResizablePanels */
+
 /**
  * callback attached to run after the initialization of resizable panels
  *
@@ -14,25 +16,20 @@
  * @param {boolean} isHorizontalResize If set true, horizontal resizing is initiated (top and bottom) else resizing is vertical
  * @param {resizeCallback} callback
  */
-export function initializeResizablePanels(panelSel: string, dragBarSel: string, isHorizontalResize: boolean = false, callback: (updatedVal: string, isHorizontalResize: boolean) => void = () => {}) {
+function initializeResizablePanels(panelSel, dragBarSel, isHorizontalResize = false, callback = null) {
     // Select all the DOM elements for dragging in two-panel-mode
-    const panelEle: HTMLElement | null = document.querySelector(panelSel);
-    if (!panelEle) {
-        return;
-    }
-    const panelCont = panelEle.parentElement!;
-    const dragbar = document.querySelector(dragBarSel) as HTMLElement;
+    const panelEle = document.querySelector(panelSel);
+    const panelCont = panelEle.parentElement;
+    const dragbar = document.querySelector(dragBarSel);
 
-    if (dragbar) {
-        $(dragbar).css('touch-action', 'none');
-    }
+    $(dragbar).css('touch-action', 'none');
 
     let xPos = 0, yPos = 0, panelHeight = 0, panelWidth = 0;
 
     // Width of left side
-    const mouseDownHandler = (e: MouseEvent | TouchEvent | Touch) => {
+    const mouseDownHandler = (e) => {
         // Get the current mouse position
-        if (e instanceof TouchEvent) {
+        if (e.type === 'touchstart') {
             e = e.touches[0];
         }
         xPos = e.clientX;
@@ -67,8 +64,8 @@ export function initializeResizablePanels(panelSel: string, dragBarSel: string, 
         document.removeEventListener('touchend', mouseUpHandler);
     };
 
-    const mouseMoveHandler = (e: MouseEvent | TouchEvent | Touch) => {
-        if (e instanceof TouchEvent) {
+    const mouseMoveHandler = (e) => {
+        if (e.type === 'touchmove') {
             e = e.touches[0];
         }
         let updateValue;
