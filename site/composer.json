@@ -29,7 +29,7 @@
     "lcobucci/jwt": "5.3.0",
     "league/commonmark": "1.6.7",
     "maennchen/zipstream-php": "3.1.1",
-    "onelogin/php-saml": "4.2.0",
+    "onelogin/php-saml": "4.3.0",
     "php-ds/php-ds": "1.5.0",
     "ramsey/uuid": "4.7.6",
     "symfony/cache": "6.4.7",
