@@ -1,7 +1,7 @@
 # Development Requirements
 
 # Linters
-pylint==3.3.6
+pylint==3.3.7
 flake8-bugbear==24.12.12
 flake8==7.2.0
 
