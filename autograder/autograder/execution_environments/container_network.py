@@ -152,7 +152,7 @@ class Container():
         }
 
         if error_log not in docker_error_data:
-            docker_error_data.append(error_log) 
+            docker_error_data.append(error_log)
 
         with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
             json.dump(docker_error_data, json_file, indent=4)
