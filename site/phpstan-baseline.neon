@@ -10002,11 +10002,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Method app\\\\models\\\\gradeable\\\\Gradeable\\:\\:setRotatingGraderSections\\(\\) has parameter \\$rotating_grader_sections with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\Gradeable\\:\\:setSubmissionDueDate\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
@@ -10132,22 +10127,7 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept default value of type int\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept int\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$allowed_minutes_overrides type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$instructor_blind \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -10157,22 +10137,7 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$limited_access_blind \\(bool\\) does not accept default value of type int\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_blind \\(bool\\) does not accept default value of type int\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$peer_grading_pairs type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$rotating_grader_sections \\(array\\<array\\<string\\>\\>\\) does not accept array\\<array\\<int, int\\>\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 

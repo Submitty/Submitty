@@ -1071,7 +1071,6 @@ class SubmissionController extends AbstractController {
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable(
             $gradeable,
             $user_id,
-            $gradeable->isTeamAssignment()
         );
 
         if ($graded_gradeable === null) {
