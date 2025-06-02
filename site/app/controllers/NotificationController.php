@@ -38,6 +38,7 @@ class NotificationController extends AbstractController {
         'team_joined_email',
         'team_member_submission_email',
         'self_notification_email',
+        'self_registration_email',
         'all_released_grades_email'
     ];
 
@@ -122,7 +123,8 @@ class NotificationController extends AbstractController {
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
-                $this->core->getUser()->getNotificationSettings()
+                $this->core->getUser()->getNotificationSettings(),
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
             )
         );
     }

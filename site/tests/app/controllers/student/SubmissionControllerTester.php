@@ -1714,10 +1714,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testCheckRefreshFailed1() {
         $controller = new SubmissionController($this->core);
-        $return = $controller->checkRefresh('test', 1);
+        $json = $controller->checkRefresh('test', 1)->json;
 
-        $this->assertFalse($return['refresh']);
-        $this->assertEquals("NO_REFRESH", $return['string']);
+        $this->assertFalse($json['data']);
     }
 
     /*
@@ -1729,10 +1728,9 @@ class SubmissionControllerTester extends BaseUnitTest {
         touch(FileUtils::joinPaths($tmp, "results.json"));
 
         $controller = new SubmissionController($this->core);
-        $return = $controller->checkRefresh('test', 1);
+        $json = $controller->checkRefresh('test', 1)->json;
 
-        $this->assertFalse($return['refresh']);
-        $this->assertEquals("NO_REFRESH", $return['string']);
+        $this->assertFalse($json['data']);
     }
 
 
@@ -1746,9 +1744,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->core->getQueries()->method('getGradeableVersionHasAutogradingResults')->willReturn(true);
 
         $controller = new SubmissionController($this->core);
-        $return = $controller->checkRefresh('test', 1);
+        $json = $controller->checkRefresh('test', 1)->json;
 
-        $this->assertTrue($return['refresh']);
-        $this->assertEquals("REFRESH_ME", $return['string']);
+        $this->assertTrue($json['data']);
     }
 }

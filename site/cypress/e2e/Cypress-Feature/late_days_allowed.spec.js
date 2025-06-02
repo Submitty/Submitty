@@ -6,7 +6,7 @@ describe('Test cases involving the late days allowed page', () => {
         });
 
         it('should not allow access', () => {
-            cy.get('.content').contains("You don't have access to this page");
+            cy.get('.content').contains('You don\'t have access to this page');
         });
     });
 
@@ -34,7 +34,7 @@ describe('Test cases involving the late days allowed page', () => {
         it('check invalid datestamp', () => {
             cy.get('#user_id').type('bitdiddle');
             cy.get('#user_id').blur();
-            cy.get('#datestamp').type("this/isn't/a/date");
+            cy.get('#datestamp').type('this/isn\'t/a/date');
             cy.get('input[type=submit]').click();
             cy.get('#error-0 > span').should('be.visible');
         });

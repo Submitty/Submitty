@@ -536,7 +536,7 @@ class User extends AbstractModel {
 
     /**
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
-     * @param string $name
+     * @param ?string $name
      */
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
@@ -738,6 +738,7 @@ class User extends AbstractModel {
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
         $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
         return $notification_settings;

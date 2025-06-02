@@ -1,3 +1,7 @@
+<div class="warning-banner content" id="gradeable-dates-warnings-banner" data-testid="gradeable-dates-warnings-banner" hidden>
+    <p class="dates-warning" id="grade-inquiry-dates-warning" data-testid="grade-inquiry-dates-warning" hidden>Warning: Grade Inquiry ends before it starts. Students will not be able to make Grade Inquires.</p>
+    <p class="dates-warning" id="no-grade-inquiry-warning" data-testid="no-grade-inquiry-warning" hidden>Warning: Grade Inquiry ends before the assignment is released. Students will not be able to make Grade Inquires.</p>
+</div>
 <div id="gradeable-dates">
     <input data-testid="ta-view-start-date" name="ta_view_start_date" id="date_ta_view" class="date_picker" type="text" value="{{ gradeable.getTaViewStartDate()|date(date_format, timezone_string) }}">
     <label for="date_ta_view">TA Beta Testing Date (visible to TAs)</label>
@@ -62,18 +66,22 @@
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
-
-            <p style="max-width:600px; margin-top:5px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
+            
+            {% if not gradeable.isStudentView() %}
+            <p style="max-width:600px; {{ rainbow_grades_summary != true ? 'color: var(--danger-red);' : '' }}" id="checkpoint-numeric-gradeables-message">
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
                 {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
-            {% if electronic and release_date <= "now"|date(date_format, timezone_string) %}
+            {% endif %}
+
+            {% if electronic and gradeable.isStudentView() and release_date <= "now"|date(date_format, timezone_string) %}
                 <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
                     Note: Gradeable notifications are released at the start of every hour for completed electronic gradeables with student views. <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> have been sent so far.
                 </p>
             {% endif %}
         </div>
     </div>
+
     <div class="electronic_file electronic_file_dates">
         <div class="grade_inquiry_date" {{ grade_inquiry_allowed != true ? 'hidden' : '' }}>
             <input data-testid="grade_inquiry_start_date" name="grade_inquiry_start_date" id="date_grade_inquiry_start" class="date_picker grade_inquiry_start_date" type="text" value="{{ gradeable.getGradeInquiryStartDate()|date(date_format, timezone_string) }}">
