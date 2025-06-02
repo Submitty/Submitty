@@ -806,7 +806,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding"]
     services:
       postgres:
         image: postgres
