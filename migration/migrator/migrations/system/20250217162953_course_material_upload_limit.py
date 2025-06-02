@@ -10,9 +10,9 @@ def up(config):
     :param config: Object holding configuration details about Submitty
     :type config: migrator.config.Config
     """
-    CONFIG_PATH = Path(config.submitty['submitty_install_dir'], 'config', 'submitty.json')
-
-    with CONFIG_PATH.open() as f:
+    CONFIG_PATH = str(Path(config.submitty['submitty_install_dir'], 'config', 'submitty.json'))
+    
+    with open(CONFIG_PATH, "r") as f:
         data = json.load(f)
 
     # Add the new setting if it doesn't exist
