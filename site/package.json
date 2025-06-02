@@ -24,7 +24,7 @@
     "@codemirror/search": "6.5.10",
     "@codemirror/state": "6.5.2",
     "@codemirror/theme-one-dark": "6.1.2",
-    "@codemirror/view": "6.36.4",
+    "@codemirror/view": "6.37.1",
     "@fortawesome/fontawesome-free": "6.7.2",
     "@highlightjs/cdn-assets": "11.11.1",
     "@submitty/pdf-annotate.js": "2.5.1",
