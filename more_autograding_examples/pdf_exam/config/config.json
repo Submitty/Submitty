@@ -1,6 +1,12 @@
 {
     // NOTE: You will also need to update the php7.x-fpm and/or apache settings.
     // https://submitty.org/sysadmin/system_customization
+    "required_capabilities": "default",
+    
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
 
     // 200 mb maximum submission size
     "max_submission_size" : 200000000,
