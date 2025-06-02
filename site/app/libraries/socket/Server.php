@@ -126,6 +126,7 @@ class Server implements MessageComponentInterface {
             }
             switch ($page) {
                 case 'discussion_forum':
+                case 'office_hours_queue':
                     break;
                 case 'polls':
                     if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
