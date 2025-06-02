@@ -8,6 +8,7 @@ from pwd import getpwnam
 from timeit import default_timer as timer
 import shutil
 import docker
+from datetime import datetime
 
 from submitty_utils import dateutils
 from . import secure_execution_environment, rlimit_utils
@@ -133,7 +134,7 @@ class Container():
     def log_docker_error(self, message):
         docker_error_path = os.path.join(
                 '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
-        
+
         docker_error_file = os.path.join(docker_error_path, "docker_error.json")
         docker_error_data = []
         if os.path.exists(docker_error_file):
@@ -145,11 +146,14 @@ class Container():
             except json.JSONDecodeError:
                 docker_error_data = []
 
-        docker_error_data.append({
+        error_log = {
             "image": f'{self.image}',
             "machine": f'{self.full_name.split("_")[0]}',
-            "error": message
-        })
+            "error": message,
+        }
+
+        if error_log not in docker_error_data:
+            docker_error_data.append(error_log) 
 
         with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
             json.dump(docker_error_data, json_file, indent=4)
