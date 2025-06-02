@@ -8,7 +8,6 @@ from pwd import getpwnam
 from timeit import default_timer as timer
 import shutil
 import docker
-from datetime import datetime
 
 from submitty_utils import dateutils
 from . import secure_execution_environment, rlimit_utils
