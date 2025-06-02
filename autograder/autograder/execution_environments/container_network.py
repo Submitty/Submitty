@@ -112,46 +112,12 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
-
-            docker_error_path = os.path.join(
-                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
-        
-            docker_error_file = os.path.join(docker_error_path, "docker_error.json")
-            docker_error_data = []
-            if os.path.exists(docker_error_file):
-                try:
-                    with open(docker_error_file, "r") as json_file:
-                        docker_error_data = json.load(json_file)
-                        if not isinstance(docker_error_data, list):
-                            docker_error_data = []
-                except json.JSONDecodeError:
-                    docker_error_data = []
-
-            docker_error_data.append({
-                "image": f'{self.image}',
-                "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'image {self.image} could not be created in {self.full_name}'
-            })
-
-            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
-                json.dump(docker_error_data, json_file, indent=4)
-
+            self.log_docker_error(f'image could not be created in {self.full_name}')
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
-
-            docker_error_path = os.path.join(
-                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
-
-            docker_error_data = {
-                "image": f'{self.image}',
-                "machine": f'{self.full_name.split("_")[0]}',
-                "error": f'could not create container {self.full_name}'
-            }
-            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
-                json.dump(docker_error_data, json_file, indent=4)
-
+            self.log_docker_error(f'could not create container {self.full_name}')
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
@@ -163,6 +129,30 @@ class Container():
             timer() - container_create_time
         )
         client.close()
+
+    def log_docker_error(self, message):
+        docker_error_path = os.path.join(
+                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
+        
+        docker_error_file = os.path.join(docker_error_path, "docker_error.json")
+        docker_error_data = []
+        if os.path.exists(docker_error_file):
+            try:
+                with open(docker_error_file, "r") as json_file:
+                    docker_error_data = json.load(json_file)
+                    if not isinstance(docker_error_data, list):
+                        docker_error_data = []
+            except json.JSONDecodeError:
+                docker_error_data = []
+
+        docker_error_data.append({
+            "image": f'{self.image}',
+            "machine": f'{self.full_name.split("_")[0]}',
+            "error": message
+        })
+
+        with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+            json.dump(docker_error_data, json_file, indent=4)
 
     def start(self, logfile):
         container_start_time = timer()
