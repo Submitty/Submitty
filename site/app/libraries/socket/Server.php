@@ -272,7 +272,8 @@ class Server implements MessageComponentInterface {
                 $new_msg_string = json_encode($msg);
                 $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
-            } else {
+            }
+            else {
                 $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
             }
         }
