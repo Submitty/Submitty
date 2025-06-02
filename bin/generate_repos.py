@@ -188,8 +188,8 @@ course_connection = course_engine.connect()
 course_metadata = MetaData()
 
 eg_table = Table('electronic_gradeable', course_metadata, autoload_with=course_engine)
-select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
-eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
+select_query = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
+eg = course_connection.execute(select_query, gradeable_id=args.repo_name).fetchone()
 
 is_team = False
 if eg is not None:

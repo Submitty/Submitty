@@ -132,6 +132,7 @@ class Course_data:
                 token="hw_debug",
             )
         )
+        self.conn.commit()
 
         # add, help, remove, pause, etc. students in the queue
         for queue_entry in queue_data["queue_entries"]:
@@ -155,8 +156,8 @@ class Course_data:
                     time_paused_start=queue_entry["time_paused_start"],
                 )
             )
+            self.conn.commit()
 
-        self.conn.commit()
 
     def add_sample_polls_data(self) -> None:
         # set sample course to have polls enabled by default
@@ -207,6 +208,7 @@ class Course_data:
                     release_histogram=poll["release_histogram"],
                 )
             )
+            self.conn.commit()
             for i in range(len(poll["responses"])):
                 self.conn.execute(
                     insert(poll_options_table).values(
@@ -216,6 +218,7 @@ class Course_data:
                         correct=(i in poll["correct_responses"]),
                     )
                 )
+                self.conn.commit()
 
         # generate responses to the polls
         poll_responses_data = []
@@ -258,8 +261,7 @@ class Course_data:
                     option_id=response["option_id"],
                 )
             )
-
-        self.conn.commit()
+            self.conn.commit()
 
     def add_sample_forum_data(self) -> None:
         # set sample course to have forum enabled by default
@@ -289,6 +291,7 @@ class Course_data:
                     color=catData[2],
                 )
             )
+            self.conn.commit()
 
         for thread_id, threadData in enumerate(f_data[1], start=1):
             self.conn.execute(
@@ -308,6 +311,7 @@ class Course_data:
                     category_id=threadData[7],
                 )
             )
+            self.conn.commit()
         counter = 1
         for postData in f_data[0]:
             if postData[10] != "f" and postData[10] != "":
@@ -345,5 +349,4 @@ class Course_data:
                     render_markdown=True if postData[11] == "t" else False,
                 )
             )
-
-        self.conn.commit()
+            self.conn.commit()

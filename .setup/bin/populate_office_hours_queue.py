@@ -52,8 +52,6 @@ def main():
 
     # Find all queues in course
     res = conn.execute(select(queues_table))
-    for row in res.all():
-        print(row['code'])
     queues_lookup = {x["code"]: x for x in res.mappings().all()}
     res.close()
 

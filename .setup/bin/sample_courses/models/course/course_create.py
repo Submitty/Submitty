@@ -115,6 +115,7 @@ class Course_create:
                     registration_section_id=str(section)
                 )
             )
+            submitty_conn.commit()
         table = Table("courses", submitty_metadata, autoload_with=submitty_engine)
         print("(tables loaded)...")
         if self.self_registration_type != 0:
@@ -124,12 +125,14 @@ class Course_create:
                 .where(table.c.course == self.code)
                 .values(default_section_id=1)
             )
+            submitty_conn.commit()
         print("Creating rotating sections ", end="")
         table = Table("sections_rotating", self.metadata, autoload_with=self.engine)
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections + 1):
             print(f"Create section {section}")
             self.conn.execute(insert(table).values(sections_rotating_id=section))
+            self.conn.commit()
 
         print("Create users ", end="")
         submitty_users = Table("courses_users", submitty_metadata, autoload_with=submitty_engine)
@@ -163,11 +166,13 @@ class Course_create:
                     manual_registration=user.get_detail(self.code, "manual")
                 )
             )
+            submitty_conn.commit()
             update = users_table.update(
                 values={users_table.c.rotating_section: bindparam("rotating_section")}
             ).where(users_table.c.user_id == bindparam("b_user_id"))
 
             self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
+            self.conn.commit()
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(
@@ -185,6 +190,7 @@ class Course_create:
                             sections_registration_id=str(grading_registration_section),
                         )
                     )
+                    self.conn.commit()
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -267,8 +273,6 @@ class Course_create:
         )
 
         self.add_gradeables()
-        self.conn.commit()
-        submitty_conn.commit()
         self.conn.close()
         submitty_conn.close()
         os.environ["PGPASSWORD"] = ""

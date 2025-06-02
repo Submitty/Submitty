@@ -194,7 +194,6 @@ def main() -> None:
                           start_date=term_start,
                           end_date=term_end))
     submitty_conn.commit()
-
     submitty_conn.close()
 
     for course_id in sorted(courses.keys()):

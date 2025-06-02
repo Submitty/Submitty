@@ -79,6 +79,7 @@ def main():
                         course=email["course"]
                     )
                 )
+                submitty_conn.commit()
         # course email
         else:
             course = courses[course_selected]
@@ -95,6 +96,7 @@ def main():
                         course=email["course"]
                     )
                 )
+                submitty_conn.commit()
 
 
 def generateRandomSuperuserEmail(recipients):

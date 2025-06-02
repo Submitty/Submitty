@@ -73,6 +73,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         .where(autograding_metrics.c.g_version == bindparam('g_v')),
         {"u_id": user_id, "t_id": team_id, "g_id": gradeable_id, "g_v": version}
     )
+    db.commit()
 
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
@@ -108,6 +109,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                     hidden=testcases[i]["hidden"],
                 )
             )
+            db.commit()
 
     submission_time = results['submission_time']
 
@@ -174,6 +176,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 "autograding_complete": True
             }
         )
+        db.commit()
 
     else:
         result = db.execute(select(func.count()).select_from(data_table)
@@ -219,8 +222,8 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             "submission_time": submission_time,
             "autograding_complete": True
         })
-    
-    db.commit()
+        db.commit()
+
     db.close()
     engine.dispose()
 
