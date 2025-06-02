@@ -104,12 +104,13 @@ class Server implements MessageComponentInterface {
         $sessid = $cookies['submitty_session'];
 
         try {
-            $query = $request->getUri()->getQuery();
             $query_params = [];
+            $query = $request->getUri()->getQuery();
             parse_str($query, $query_params);
             if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
                 return false;
             }
+            $page = $query_params['page'];
             $term = $query_params['term'];
             $course = $query_params['course'];
             $this->core->loadCourseConfig($term, $course);
@@ -123,9 +124,19 @@ class Server implements MessageComponentInterface {
             if (!$this->core->getAccess()->canI("course.view", ['course' => $course, 'semester' => $term])) {
                 return false;
             }
-            switch ($query_params['page']) {
+            switch ($page) {
                 case 'discussion_forum':
+                    break;
                 case 'polls':
+                    if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
+                        return false;
+                    }
+                    $group = $this->core->getUser()->getGroup();
+                    $instructor = filter_var($query_params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                    if (($instructor && $group > 1) || (!$instructor && $group > 4)) {
+                        return false;
+                    }
+                    $page = $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
                     break;
                 case 'grade_inquiry':
                     if (!isset($query_params['gradeable_id'])) {
@@ -150,13 +161,13 @@ class Server implements MessageComponentInterface {
                     return false;
             }
             $this->setSocketClient($user_id, $conn);
-            if (!array_key_exists($query_params['page'], $this->clients)) {
-                $this->clients[$query_params['page']] = new \SplObjectStorage();
+            $page = $term . "-" . $course . "-" . $page;
+            if (!array_key_exists($page, $this->clients)) {
+                $this->clients[$page] = new \SplObjectStorage();
             }
-            $this->clients[$query_params['page']]->attach($conn);
-            $this->setSocketClientPage($query_params['page'], $conn);
-
-            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - term: '" . $term . "' - course: '" . $course . "' - page: '" . $query_params['page'] . "'");
+            $this->clients[$page]->attach($conn);
+            $this->setSocketClientPage($page, $conn);
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $page . "'");
             return true;
         }
         catch (\InvalidArgumentException $exc) {
@@ -253,14 +264,11 @@ class Server implements MessageComponentInterface {
             $msg = json_decode($msgString, true);
 
             if (isset($msg['user_id']) && isset($msg['page']) && is_string($msg['page'])) {
-                // user_id is only sent with socket clients open from a php user_agent
+                // user_id is always sent with socket clients open from a php user_agent
                 unset($msg['user_id']);
                 $new_msg_string = json_encode($msg);
                 $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
-            }
-            else {
-                $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
             }
         }
         catch (\Throwable $t) {

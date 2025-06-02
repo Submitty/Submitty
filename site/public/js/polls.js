@@ -344,7 +344,7 @@ function initializeStudentSocketClient(poll_id) {
         }
     };
     window.socketClient.open('polls', {
-        instructor: true,
+        instructor: false,
         poll_id: poll_id,
     });
 }

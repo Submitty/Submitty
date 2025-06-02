@@ -40,9 +40,7 @@ class WebSocketClient {
 
     open(page, args = {}) {
         console.log(`WebSocket: connecting to ${this.url}`);
-        const term_course_arr = document.body.dataset.courseUrl.split('/');
-        const course = term_course_arr.pop();
-        const term = term_course_arr.pop();
+        const [term, course] = document.body.dataset.courseUrl.split('/').slice(4);
         const urlWithParams = new URL(this.url);
         urlWithParams.searchParams.append('page', page);
         urlWithParams.searchParams.append('course', course);
