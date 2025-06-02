@@ -101,7 +101,7 @@ describe('Test Rainbow Grading', () => {
         // Ensure tables can be added to and removed from
         // TODO: add checks for other tables once features are implemented
         cy.get('[data-testid="manual-grading-user-id"]').type('adamsg');
-        cy.get('[data-testid="manual-grading-grade"]').select(1);
+        cy.get('[data-testid="manual-grading-grade"]').select('A');
         cy.get('[data-testid="manual-grading-note"]').type('MESSAGE');
         cy.get('[data-testid="manual-grading-submit"]').click();
         cy.get('[data-testid="manual-grading-table-body"] > tr > td').as('manual-grading-table-elements');
@@ -112,7 +112,7 @@ describe('Test Rainbow Grading', () => {
 
         cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
         cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
-        cy.get('[data-testid="plagiarism-gradeable-id"]').select(1);
+        cy.get('[data-testid="plagiarism-gradeable-id"]').select('numeric');
         cy.get('[data-testid="plagiarism-marks"]').type('1');
         cy.get('[data-testid="plagiarism-submit"]').click();
         cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
@@ -211,6 +211,31 @@ describe('Test Rainbow Grading', () => {
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
         cy.visit(['testing', 'grades']);
         cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
+    });
+});
+describe('Test Automatic Nightly Processing for Rainbow Grades', () => {
+    it('should be toggled on by default with error message', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'config']);
+        cy.get('[data-testid="auto-rainbow-grades"]').as('nightly-processing-checkbox');
+        cy.get('[data-testid="customization-exists-warning"]').as('warning-message');
+
+        // Ensure Nightly Processing is on by default
+        cy.get('@nightly-processing-checkbox').should('be.checked');
+
+        // Ensure Nightly Processing warning only exists when Nightly Processing is on and there is no customization.json
+        cy.window().its('customizationExists').then((customizationExists) => {
+            // TODO: delete customization.json so that both possibilities are examined
+            if (customizationExists === true) {
+                cy.get('@warning-message').should('not.be.visible');
+            }
+            else {
+                cy.get('@warning-message').should('be.visible');
+            }
+        });
+        cy.get('@nightly-processing-checkbox').uncheck();
+        cy.get('@warning-message').should('not.be.visible');
+        cy.get('@nightly-processing-checkbox').check();
     });
 });
 const checkCheckbox = (testId) => {

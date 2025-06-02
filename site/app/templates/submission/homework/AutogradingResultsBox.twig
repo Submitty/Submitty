@@ -2,7 +2,17 @@
     <div class="sub">
 
         {# Actual results #}
-        {% if in_queue or in_progress_grading %}
+        {% if docker_error %}
+            <p class="red-message">Docker Image not present on machine. Please contact your instructor about this.</p>
+            {% if docker_error_data is not null %}
+                <p>Error Details:</p>
+                <ul>
+                    {% for key, value in docker_error_data %}
+                        <li>{{ key }}: {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% elseif in_queue or in_progress_grading %}
             {% if in_progress_grading %}
                 <p class="red-message">
                     This submission is currently being graded.
@@ -12,9 +22,6 @@
                     This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
                 </p>
             {% endif %}
-            <script>
-                checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
-            </script>
         {% elseif results is not defined %}
             <p class="red-message">
                 Something went wrong when grading this submission. Please contact your instructor about this.

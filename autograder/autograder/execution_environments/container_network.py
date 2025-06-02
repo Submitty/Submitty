@@ -112,10 +112,34 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
+
+            docker_error_path = os.path.join(
+                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
+
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'image {self.image} could not be created in {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
+
+            docker_error_path = os.path.join(
+                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
+
+            docker_error_data = {
+                "image": f'{self.image}',
+                "machine": f'{self.full_name.split("_")[0]}',
+                "error": f'could not create container {self.full_name}'
+            }
+            with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+                json.dump(docker_error_data, json_file, indent=4)
+
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
@@ -333,8 +357,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 created_containers.append(container)
             except Exception:
                 self.log_message(
-                  f"ERROR: Could not create container {container.name}"
-                  f" with image {container.image}"
+                    f"ERROR: Could not create container {container.name}"
+                    f" with image {container.image}"
                 )
                 self.log_stack_trace(traceback.format_exc())
 
@@ -508,13 +532,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 network.client.api.close()
                 network.client.close()
                 self.log_message(
-                  f'{dateutils.get_current_time()} '
-                  f'destroying docker network {network}'
+                    f'{dateutils.get_current_time()} '
+                    f'destroying docker network {network}'
                 )
             except Exception:
                 self.log_message(
-                  f'{dateutils.get_current_time()} ERROR: Could not remove docker '
-                  f'network {network}'
+                    f'{dateutils.get_current_time()} ERROR: Could not remove docker '
+                    f'network {network}'
                 )
         self.networks.clear()
 

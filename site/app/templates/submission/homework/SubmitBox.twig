@@ -14,7 +14,7 @@
 
 <div class="content" id="gradeable-submission-cont">
     <header id="gradeable-info">
-        <h1>
+        <h1 data-testid="new-submission-info">
             New submission for: {{ gradeable_name }}
             {% if gradeable_url|trim != "" %}
                 <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
@@ -65,11 +65,11 @@
     {% endif %}
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() and bulk_upload_access %}
-        <form id="submission-form" method="post">
+        <form id="submission-form" method="POST">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission-type">
+                    <input type='radio' id="radio-normal" name="submission-type" {% if not is_bulk_upload %} checked {% endif %} >
                     Normal Submission
                 </label>
                 <label for="radio-student">

@@ -565,11 +565,12 @@ if not args.worker:
     if not os.path.isfile(CONTAINERS_JSON):
         container_dict = {
             "default": [
-                          "submitty/clang:6.0",
                           "submitty/autograding-default:latest",
-                          "submitty/java:11",
-                          "submitty/python:3.6",
-                          "submittyrpi/csci1200:default"
+                          "submitty/python:latest",
+                          "submitty/clang:latest",
+                          "submitty/gcc:latest",
+                          "submitty/java:latest",
+                          "submitty/pdflatex:latest"
                        ]
         }
 

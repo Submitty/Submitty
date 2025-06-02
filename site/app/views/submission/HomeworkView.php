@@ -670,16 +670,21 @@ class HomeworkView extends AbstractView {
         $cover_images = [];
         $count = 1;
         $count_array = [];
-        $bulk_upload_data = [];
         $matches = [];
         $use_ocr = false;
 
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
+            # read the decoded.json file
+            if (!array_key_exists('decoded.json', $dir_files)) {
+                continue;
+            }
+            $bulk_upload_data = FileUtils::readJsonFile($dir_files["decoded.json"]['path']);
+
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
                     // later submissions should replace the previous ones
-                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
+                    continue;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -731,7 +736,7 @@ class HomeworkView extends AbstractView {
                         $cover_image = $img;
                     }
                 }
-                $files[] = [
+                $file = [
                     'clean_timestamp' => $clean_timestamp,
                     'filename_full' => $filename_full,
                     'filename' => $filename,
@@ -739,66 +744,64 @@ class HomeworkView extends AbstractView {
                     'url_full' => $url_full,
                     'cover_image' => $cover_image
                 ];
-                $count++;
-            }
-        }
-
-        for ($i = 0; $i < count($files); $i++) {
-            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)) {
-                continue;
-            }
-            elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[$files[$i]['filename_full']];
-            }
-
-            $page_count = 0;
-            $is_valid = true;
-            $id = '';
-
-            //decoded.json may be read before the associated data is written, check if key exists first
-            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
-                $data = $bulk_upload_data[$files[$i]['filename_full']];
-
-                if ($use_ocr) {
-                    $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
-
-                    $matches = [];
-                    if (strpos($tgt_string, '_') !== false) {
-                        $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
-                    }
+                if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($file['filename_full'], $bulk_upload_data)) {
+                    continue;
+                }
+                elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                    $data = $bulk_upload_data[$file['filename_full']];
                 }
 
-                if (array_key_exists('id', $data)) {
-                    $id = $data['id'];
-                    if (is_numeric($id)) {
-                        $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                $page_count = 0;
+                $is_valid = true;
+                $id = '';
+
+                //decoded.json may be read before the associated data is written, check if key exists first
+                if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                    $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
+                    $data = $bulk_upload_data[$file['filename_full']];
+
+                    if ($use_ocr) {
+                        $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
+
+                        $matches = [];
+                        if (strpos($tgt_string, '_') !== false) {
+                            $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                        }
+                    }
+
+                    if (array_key_exists('id', $data)) {
+                        $id = $data['id'];
+                        if (is_numeric($id)) {
+                            $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                        }
+                        else {
+                            $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                        }
                     }
                     else {
-                        $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                        $id = '';
+                        $is_valid = false;
+                    }
+                    if (array_key_exists('page_count', $data)) {
+                        $page_count = $data['page_count'];
                     }
                 }
                 else {
-                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                    $is_valid = true;
                     $id = '';
-                    $is_valid = false;
+                    if (array_key_exists('page_count', $bulk_upload_data)) {
+                        $page_count = $bulk_upload_data['page_count'];
+                    }
                 }
-                if (array_key_exists('page_count', $data)) {
-                    $page_count = $data['page_count'];
-                }
-            }
-            else {
-                $is_valid = true;
-                $id = '';
-                if (array_key_exists('page_count', $bulk_upload_data)) {
-                    $page_count = $bulk_upload_data['page_count'];
-                }
-            }
 
-            $files[$i] += ['page_count' => $page_count,
-                           'id' => $id,
-                           'valid' => $is_valid,
-                           'matches' => $matches ];
+                $file += ['page_count' => $page_count,
+                        'id' => $id,
+                        'valid' => $is_valid,
+                        'matches' => $matches ];
+                $files[] = $file;
+                $count++;
+            }
         }
 
         $semester = $this->core->getConfig()->getTerm();
@@ -1070,6 +1073,8 @@ class HomeworkView extends AbstractView {
 
 
         $param = array_merge($param, [
+            'docker_error' => $version_instance->dockerErrorFileExists(),
+            'docker_error_data' => null,
             'gradeable_id' => $gradeable->getId(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1078,6 +1083,13 @@ class HomeworkView extends AbstractView {
             'show_testcases' => $show_testcases,
             'show_incentive_message' => $show_incentive_message
         ]);
+
+        if ($param['docker_error']) {
+            $docker_error_data = $version_instance->getDockerErrorFileData();
+            if ($docker_error_data !== null) {
+                $param['docker_error_data'] = $docker_error_data;
+            }
+        }
 
         $this->core->getOutput()->addInternalJs('confetti.js');
         $this->core->getOutput()->addInternalJs('submission-page.js');
@@ -1424,7 +1436,8 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry_message' => $grade_inquiry_message,
             'can_inquiry' => $can_inquiry,
-            'is_inquiry_yet_to_start' => $graded_gradeable->getGradeable()->isGradeInquiryYetToStart(),
+            'is_inquiry_valid' => $graded_gradeable->getGradeable()->isGradeInquirySettingsValid(),
+            'is_inquiry_yet_to_start' => ($graded_gradeable->getGradeable()->isGradeInquiryYetToStart() || !$graded_gradeable->getGradeable()->isTaGradeReleased()),
             'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,

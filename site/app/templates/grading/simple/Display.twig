@@ -245,11 +245,7 @@
 {# Render the grading columns for a lab #}
 {% macro render_lab_cols(gradeable, section_id, grade, index) %}
     {% for component in grade.getGradeable().getComponents() %}
-        {% if component.isText() %}
-            <td>
-                {{ component.getComment() }}
-            </td>
-        {% else %}
+        {% if not component.isText() %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
@@ -275,6 +271,25 @@
 
             </td>
         {% endif %}
+    {% endfor %}
+    {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
+        {% set ta_grade = grade.getTaGradedGradeable() %}
+        {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
+        <td class="option-small-input">
+            <textarea class="option-small-box cell-grade"
+                  tabindex="0" id="cell-comment-{{ section_id }}-{{ index }}-{{loop.index0 }}"
+                  contenteditable
+                  onclick="this.dataset.typing || this.select()"
+                  ondblclick="this.dataset.typing = true;"
+                  onblur="this.dataset.typing = false; minimizeHeight(this);"
+                  onfocus="adjustHeight(this);"
+                  onkeyup="adjustHeight(this);"
+                  data-id="{{ component.getId() }}"
+                  aria-label="{{component.getTitle()}} value for {{grade.getSubmitter().getUser().getDisplayedGivenName()}} {{grade.getSubmitter().getUser().getDisplayedFamilyName()}}"
+                  rows="1"
+                  style="resize: vertical;"
+            >{{ component_grade.getComment() | default('') }}</textarea>
+        </td>
     {% endfor %}
 {% endmacro %}
 
