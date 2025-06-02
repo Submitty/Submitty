@@ -826,13 +826,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # If the matrix is currently on Autograding, we should use the dev course
+      # If the matrix is currently on Autograding, we should use the development course
       # and use the no_submissions flag
       - name: Run setup script with inputs (Autograding)
         if: ${{ matrix.containers == 'Autograding' }}
         uses: ./.github/actions/e2e-Setup-Composite
         with:
-          courses: dev
+          courses: development
           flags: --no_submissions
 
       - name: Run setup script without inputs (Other containers)
