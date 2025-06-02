@@ -276,10 +276,9 @@ $(document).ready(() => {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
-                    if (key === 'grade_released_date' && data['notifications_sent'] !== undefined) {
-                        document.querySelector('#date_released').dataset.original = data[key];
-                        document.querySelector('#notification-total').textContent = data['notifications_sent'];
-                        document.querySelector('#container-rubric').dataset.notifications_sent = data['notifications_sent'];
+                    if (key === 'grade_released_date' && data['notifications_sent'] === 0) {
+                        document.getElementById('gradeable-notifications-message').remove();
+                        document.querySelector('#container-rubric').dataset.notifications_sent = '0';
                     }
                 }
                 updateErrorMessage();
