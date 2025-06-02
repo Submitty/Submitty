@@ -14,7 +14,7 @@ opencv-python-headless==4.11.0.86
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
 requests==2.32.3
 python-pam==2.0.2
-ruamel.yaml==0.18.10
+ruamel.yaml==0.18.12
 psycopg2-binary==2.9.10
 sqlalchemy==1.4.29
 psutil==6.1.1
@@ -37,5 +37,5 @@ pdf2image==1.17.0
 numpy==2.2.3
 
 # python libraries for OCR for digit recognition
-onnx==1.17.0
+onnx==1.18.0
 onnxruntime==1.20.1
