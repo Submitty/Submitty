@@ -1851,6 +1851,7 @@ class SubmissionController extends AbstractController {
                     file_put_contents($settings_file, FileUtils::encodeJson($settings));
                 }
             }
+            return $this->core->getOutput()->renderResultMessage($message, $success, false);
         }
         return $this->core->getOutput()->renderResultMessage($message, $success);
     }

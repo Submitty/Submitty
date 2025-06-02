@@ -37,4 +37,31 @@ describe('Tests cases revolving around gradeable access and submition', () => {
             // cy.readFile('cypress/downloads/file1.txt').should('eq','a\n');
         });
     });
+
+    it('Should test whether or not certain users have access to gradeable', () => {
+        // users should not have access to locked homework
+        ['smithj', 'student', 'instructor2'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['testing']);
+            cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').click();
+            cy.on('window:alert', (text) => {
+                expect(text).to.include('Please complete Open Homework first with a score of 0 point(s).');
+            });
+            if (user !== 'instructor2') {
+                cy.visit(['testing', 'gradeable', 'locked_homework']);
+                cy.get('[data-testid="popup-message"]').contains('You have not unlocked this gradeable yet');
+            }
+            cy.logout();
+        });
+
+        // users should have access to locked homework
+        ['kinge', 'adamsg', 'aphacker'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['testing']);
+            cy.get('[data-testid="locked_homework"]').find('[data-testid="submit-btn"]').click();
+            cy.visit(['testing', 'gradeable', 'locked_homework']);
+            cy.get('[data-testid="new-submission-info"]').should('exist');
+            cy.logout();
+        });
+    });
 });
