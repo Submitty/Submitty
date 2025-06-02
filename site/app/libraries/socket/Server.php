@@ -148,6 +148,7 @@ class Server implements MessageComponentInterface {
                     if (!$this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
                         return false;
                     }
+                    $page = $page . '-' . $query_params['gradeable_id'] . '_' . $query_params['submitter_id'];
                     break;
                 case 'grading':
                     if (!isset($query_params['gradeable_id'])) {
@@ -157,6 +158,7 @@ class Server implements MessageComponentInterface {
                     if (!$this->core->getAccess()->canI("grading.simple.grade", ['gradeable' => $gradeable])) {
                         return false;
                     }
+                    $page = $page . '-' . $query_params['gradeable_id'];
                     break;
                 default:
                     return false;
@@ -270,6 +272,8 @@ class Server implements MessageComponentInterface {
                 $new_msg_string = json_encode($msg);
                 $this->broadcast($from, $new_msg_string, $msg['page']);
                 $from->close();
+            } else {
+                $this->broadcast($from, $msgString, $this->getSocketClientPage($from));
             }
         }
         catch (\Throwable $t) {

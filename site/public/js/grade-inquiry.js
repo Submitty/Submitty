@@ -181,7 +181,7 @@ function initGradingInquirySocketClient() {
                 console.log('Undefined message received.');
         }
     };
-    const gradeable_id = window.location.pathname.split('gradeable/')[1];
+    const gradeable_id = window.gradeable_id;
     const submitter_id = $('#submitter_id').val();
     window.socketClient.open('grade_inquiry', {
         gradeable_id: gradeable_id,
