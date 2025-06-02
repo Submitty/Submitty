@@ -62,7 +62,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^22.10.3",
     "@types/twig": "^1.12.16",
-    "@typescript-eslint/parser": "^8.32.1",
+    "@typescript-eslint/parser": "^8.33.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/tsconfig": "^0.7.0",
