@@ -84,7 +84,7 @@
         mode=0;
         modeCount=0;
 
-        if( bucketInputTotal?.value !=''){
+        if( bucketInputTotal && bucketInputTotal.value !=''){
             let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
             if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
                 alert('Error: Invalid bucket size.');
@@ -101,7 +101,7 @@
             return mode;
         }
 
-        if(bucketInputAuto?.value != ''){
+        if(bucketInputAuto && bucketInputAuto.value != ''){
             let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
             if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
                 alert('Error: Invalid bucket size.');
@@ -118,7 +118,7 @@
             return mode;
         }
 
-        if(bucketInputManual?.value!=''){
+        if(bucketInputManual && bucketInputManual.value!=''){
             let bucketInputManualValue = parseFloat(bucketInputManual.value);
             if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
                 alert('Error: Invalid bucket size.');
