@@ -1067,7 +1067,7 @@ ALTER TABLE ONLY public.saml_mapped_users
 --
 
 ALTER TABLE ONLY public.instructor_sql_queries
-    ADD CONSTRAINT instructor_sql_queries_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+    ADD CONSTRAINT instructor_sql_queries_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --
