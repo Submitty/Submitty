@@ -134,7 +134,8 @@ ignore-paths=
     migration/tests/test_handle_migration.py,
     migration/tests/test_dumper.py,
     sample_files/sample_CSV/test_grades.py,
-    sample_files/sample_CSV/verify.py
+    sample_files/sample_CSV/verify.py,
+    site/cypress/fixtures
 
 [FORMAT]
 max-line-length=100
