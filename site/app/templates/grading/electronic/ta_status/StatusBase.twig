@@ -101,8 +101,8 @@
             return mode;
         }
 
-        let bucketInputAutoValue = parseFloat(bucketInputAuto?.value);
         if(bucketInputAuto?.value != ''){
+            let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
             if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
                 alert('Error: Invalid bucket size.');
                 return ;
@@ -118,8 +118,8 @@
             return mode;
         }
 
-        let bucketInputManualValue = parseFloat(bucketInputManual?.value);
         if(bucketInputManual?.value!=''){
+            let bucketInputManualValue = parseFloat(bucketInputManual.value);
             if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
                 alert('Error: Invalid bucket size.');
                 return ;
