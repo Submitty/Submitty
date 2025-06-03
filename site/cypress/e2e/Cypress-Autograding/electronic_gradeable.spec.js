@@ -15,7 +15,7 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     });
 };
 
-describe('Test the cpp cats gradeable', () => {
+describe('Test the development course gradeables', () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
         const fullScores = [2, 3, 4, 4, 4, 4, 4];
         cy.login('instructor');
