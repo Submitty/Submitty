@@ -1030,7 +1030,7 @@ HTML;
         //$ta_grading is used in AutoGradingView to determine if hidden autograding points will be shown, we want to always show them to graders unless they are peer graders
         $ta_grading = $this->core->getUser()->getGroup() !== User::GROUP_STUDENT;
 
-        $this->core->getOutput()->addInternalJs("resizable-panels.js");
+        $this->core->getOutput()->addInternalModuleJs("resizable-panels.js");
 
         $error_message = [
             "color" => "",
