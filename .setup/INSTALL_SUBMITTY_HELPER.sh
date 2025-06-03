@@ -1118,4 +1118,7 @@ else
     chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateSystemInfo
+
+    chown "root:${DAEMON_USER}" "${SUBMITTY_INSTALL_DIR}/sbin/repair_autograding.sh"
+    chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/repair_autograding.sh"
 fi

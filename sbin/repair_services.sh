@@ -10,8 +10,6 @@ repair_services() {
         "postgresql"
         "nullsmtpd"
         "submitty_websocket_server"
-        "submitty_autograding_worker"
-        "submitty_autograding_shipper"
         "submitty_daemon_jobs_handler"
     )
 
