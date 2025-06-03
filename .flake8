@@ -33,7 +33,8 @@ exclude=
     sbin/compare_reuploads.py,
     sbin/count_autograding_logs.py,
     sbin/untrusted_canary.py,
-    tests
+    tests,
+    site/cypress/fixures
 
 per-file-ignores =
     .github/workflows/pr_title_tester.py:E501,W605
