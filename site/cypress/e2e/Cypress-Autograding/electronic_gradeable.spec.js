@@ -17,7 +17,7 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     // make sure that we have no files.
     cy.get('[data-testid="file-upload-table-1"] > tr').should('not.exist');
     cy.get('[data-testid="select-files"]').attachFile(fileUploadName);
-    cy.get('[data-testid="submit-gradeable-btn"').click();
+    cy.get('[data-testid="submit-gradeable"').click();
     cy.get('[data-testid="popup-message"]').contains('Successfully uploaded version');
 
     cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 60000 });
