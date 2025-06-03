@@ -38,7 +38,7 @@ declare global {
         onAddComponent(peer: boolean): Promise<void>;
         onMarkPointsChange(me: HTMLElement): Promise<void>;
         onGetMarkStats(me: HTMLElement): Promise<void>;
-        onClickComponent(me: HTMLElement, save_changes?: boolean): Promise<void>;
+        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
         onCancelEditRubricComponent(me: HTMLElement): void;
         onChangeOverallComment(me: HTMLElement): Promise<void>;
         onCancelComponent(me: HTMLElement): Promise<void>;
@@ -554,7 +554,7 @@ function changeStudentArrowTooltips(data: string) {
 }
 
 window.toggleComponent = async function (component_id, saveChanges) {
-    await toggleComponent(component_id, saveChanges, false);
+    await toggleComponent(component_id, saveChanges);
     changeStudentArrowTooltips(
         localStorage.getItem('general-setting-arrow-function') || 'default',
     );

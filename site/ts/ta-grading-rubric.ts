@@ -3033,7 +3033,7 @@ export async function closeComponent(component_id: number, saveChanges = true, e
         await closeComponentGrading(component_id, saveChanges);
         setComponentInProgress(component_id, false);
         if (!edit_mode) {
-            if (!GRADED_GRADEABLE!.peer_gradeable) {
+            if (!GRADED_GRADEABLE?.peer_gradeable) {
                 await refreshTotalScoreBox();
             }
             else {
