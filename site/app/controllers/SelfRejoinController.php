@@ -27,7 +27,8 @@ class SelfRejoinController extends AbstractController {
             'noAccessCourse',
             $this->canRejoinCourse($user_id, $course, $term),
             $this->core->buildCourseUrl(["rejoin_course"]),
-            $this->core->getQueries()->getSelfRegistrationType($term, $course)
+            $this->core->getQueries()->getSelfRegistrationType($term, $course),
+            $this->core->getQueries()->getDefaultRegistrationSection($term, $course)
         );
     }
 
@@ -215,7 +216,7 @@ class SelfRejoinController extends AbstractController {
             you may move the student to the Null section.
         EMAIL;
 
-        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false);
+        $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $emails = [];
         $details = ["subject" => $subject, "body" => $body];
         foreach ($instructor_ids as $instructor_id) {

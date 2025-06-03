@@ -85,7 +85,6 @@ aside {
 
 /* stylelint-disable-next-line no-duplicate-selectors */
 .navigation-box.smaller-navbar #grading-setting-btn,
-.navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #two-panel-exchange-btn,
 .navigation-box.mobile-view #two-panel-mode-btn,
 .navigation-box.smaller-navbar #prev-ungraded-student-navlink,
@@ -150,6 +149,7 @@ aside {
 
 /* stylelint-disable-next-line no-descending-specificity */
 #fullscreen-btn-cont.active i.fa-expand,
+/* stylelint-disable-next-line no-descending-specificity */
 #fullscreen-btn-cont i.fa-compress {
     display: none;
 }
@@ -176,7 +176,7 @@ button > i.fas:hover {
     --default-box-shadow: 1px 1px 2px black;
 }
 
-[data-black_mode="black"][data-theme="dark"]  {
+[data-black_mode="black"][data-theme="dark"] {
     --default-border-color: grey;
     --default-box-shadow: 1px 1px 2px grey;
 }
@@ -428,6 +428,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:hover,
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:focus {
     color: var(--default-white);
 }
@@ -1172,6 +1173,7 @@ tr.is_publish {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .gradeable .component .row.divider,
+/* stylelint-disable-next-line no-descending-specificity */
 .solution-box .row.divider {
     background: var(--standard-light-gray);
     height: 2px;
@@ -1270,6 +1272,7 @@ tr.is_publish {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container input,
+/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container textarea {
     box-sizing: border-box;
 }
@@ -1528,6 +1531,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
@@ -1538,6 +1547,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 

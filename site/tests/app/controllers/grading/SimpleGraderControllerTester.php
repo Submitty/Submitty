@@ -19,7 +19,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
      * @param $upper_clamp
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($upper_clamp) {
+    private function createMockGradeable(float $upper_clamp) {
         $gradeable = $this->createMockModel(Gradeable::class);
         $component = $this->createMockModel(Component::class);
 
@@ -200,7 +200,7 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $gradeable->method('getType')->willReturn(GradeableType::NUMERIC_TEXT);
         $graded_gradeable = $this->createMockGradedGradeable(2);
         $core = $this->createMockCore(
-            ['csrf_token' => true],
+            ['csrf_token' => true, 'base_url' => 'http://example.com/'],
             [],
             ['getGradeableConfig' => $gradeable, 'getUserById' => $user, 'getGradedGradeable' => $graded_gradeable],
             ['canI' => true]
