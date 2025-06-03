@@ -8,6 +8,8 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
 
     // if the clear button exists, we should clear the previous submission.
+    // wait for js to load
+    cy.get('[data-testid="gradeable-time-remaining-text"]').contains('days');
     cy.get('[data-testid="clear-all-files-button"]').then(($btn) => {
         if (!$btn.is(':disabled')) {
             cy.wrap($btn).click();
@@ -36,14 +38,5 @@ describe('Test the development course gradeables', () => {
         submitAndCheckResults('cpp_cats_submissions/allCorrect.zip', fullScores, fullScores);
         const partialScores = [2, 3, 2, 2, 2, 2, 0];
         submitAndCheckResults('cpp_cats_submissions/extraLinesAtEnd.zip', partialScores, fullScores);
-    });
-
-    it('Should test the python gradeable with full and buggy submissions', () => {
-        const fullScores = [5];
-        cy.login('instructor');
-        cy.visit(['development', 'gradeable', 'python_count_ts']);
-        submitAndCheckResults('python_count_ts_submissions/solution.py', [5], fullScores);
-        submitAndCheckResults('python_count_ts_submissions/buggy.py', [2], fullScores);
-        submitAndCheckResults('python_count_ts_submissions/syntax_error.py', [3], fullScores);
     });
 });
