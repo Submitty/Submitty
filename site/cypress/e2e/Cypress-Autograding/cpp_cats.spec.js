@@ -3,7 +3,6 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
 
-    cy.get('[data-testid="clear-all-files-button"]').click();
     cy.get('[data-testid="file-upload-table-1"] > tr').should('not.exist');
     cy.get('[data-testid="select-files"]').attachFile(fileUploadName);
     cy.get('[data-testid="submit-gradeable-btn"').click();
