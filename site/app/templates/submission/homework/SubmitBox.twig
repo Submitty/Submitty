@@ -244,7 +244,7 @@
                             {% if viewing_inactive_version %}
                                 disabled="disabled"
                             {% endif %}/>
-                    <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                    <table class="file-upload-table" data-testid="file-upload-table-{{ loop.index }}" id="file-upload-table-{{ loop.index }}">
                       <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
                         <th>Size:</th>
@@ -278,7 +278,7 @@
                     "content" : upload_message
                 } only %}
             </div>
-            <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
+            <button type="button" id="submit" class="submit-gradeable btn btn-success" data-testid="submit-gradeable-btn" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
             {% if is_notebook %}
@@ -292,7 +292,7 @@
         {% endif %}
 
         {% if part_names is not empty %}
-            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
+            <button type="button" id="startnew" class="btn btn-primary" data-testid="clear-all-files-button">Clear</button>
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
