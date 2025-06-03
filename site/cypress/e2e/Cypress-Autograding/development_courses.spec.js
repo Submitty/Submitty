@@ -37,6 +37,7 @@ describe('Test course should exist', () => {
         checkGradeable('notebook_filesubmission');
         checkGradeable('notebook_itempool');
         checkGradeable('notebook_itempool_random');
+        // comment this out if we want to test time limit
         checkGradeable('notebook_time_limit');
         checkGradeable('pdf_exam');
         checkGradeable('pdf_word_count');
