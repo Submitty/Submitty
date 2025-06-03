@@ -14,7 +14,7 @@ def up(config, database):
     database.execute("""
         CREATE TABLE IF NOT EXISTS public.instructor_sql_queries (
             id SERIAL PRIMARY KEY,
-            user_id character varying REFERENCES users (user_id),
+            user_id character varying REFERENCES users (user_id) ON DELETE CASCADE,
             query_name VARCHAR(255),
             query TEXT
         )
