@@ -852,7 +852,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const anon = json.anon;
             const change_anon = json.change_anon;
             const user_id = escapeSpecialChars(json.user);
-            const time = DateTime.fromISO(json.post_time, {zone: 'local'});
+            const time = DateTime.fromISO(json.post_time, { zone: 'local' });
             const categories_ids = json.categories_ids;
             const date = time.toLocaleString(DateTime.DATE_SHORT);
             const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);

@@ -21,7 +21,7 @@ use app\entities\forum\Thread;
 use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
-use Datetime;
+use DateTime;
 
 /**
  * Class ForumHomeController
