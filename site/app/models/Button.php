@@ -7,36 +7,6 @@ use app\libraries\Core;
 /**
  * Represents a button to display on the page
  * @package app\models
- * @method string getTitle()
- * @method string|null getSubtitle()
- * @method string|null getName()
- * @method \DateTime|null getDate()
- * @method string|null getHref()
- * @method string|null getOnclick()
- * @method string getClass()
- * @method string|null getId()
- * @method bool isDisabled()
- * @method string getPrerequisite()
- * @method bool isTitleOnHover()
- * @method float|null getProgress()
- * @method string|null getAriaLabel()
- * @method string|null getBadge()
- * @method string|null getIcon()
- * @method bool getPrefix()
- *
- * @method void setTitle(string $title)
- * @method void setSubtitle(string|null $subtitle)
- * @method void setDate(\DateTime|null $date)
- * @method void setHref(string|null $href)
- * @method void setOnclick(string|null $on_click)
- * @method void setClass(string $class)
- * @method void setId(string|null $id)
- * @method void setDisabled(bool $disabled)
- * @method void setTitleOnHover(bool $titleOnHover)
- * @method void setProgress(float|null $progress)
- * @method void setAriaLabel(string|null $ariaLabel)
- * @method void setBadge(string|null $badge)
- * @method void setIcon(string|null $icon)
  */
 class Button extends AbstractModel {
     /** @prop
@@ -122,5 +92,101 @@ class Button extends AbstractModel {
      */
     public function hasOnclick() {
         return !($this->getOnclick() == null);
+    }
+    public function getTitle(): ?string {
+        return $this->title;
+    }
+
+    public function getSubtitle(): ?string {
+        return $this->subtitle;
+    }
+
+    public function getName(): ?string {
+        return $this->name;
+    }
+
+    public function getDate(): ?\DateTime {
+        return $this->date;
+    }
+
+    public function getHref(): ?string {
+        return $this->href;
+    }
+
+    public function getOnclick(): ?string {
+        return $this->onclick;
+    }
+
+    public function getClass(): string {
+        return $this->class;
+    }
+    public function getId(): ?string {
+        return $this->id;
+    }
+    public function isDisabled(): bool {
+        return $this->disabled;
+    }
+    public function getPrerequisite(): ?string {
+        return $this->prerequisite;
+    }
+    public function isTitleOnHover(): bool {
+        return $this->title_on_hover;
+    }
+    public function getProgress(): ?float {
+        return $this->progress;
+    }
+    public function getAriaLabel(): ?string {
+        return $this->aria_label;
+    }
+    public function getBadge(): ?string {
+        return $this->badge;
+    }
+    public function getIcon(): ?string {
+        return $this->icon;
+    }
+
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
+    public function setSubtitle(?string $subtitle): void {
+        $this->subtitle = $subtitle;
+    }
+
+    public function setDate(?\DateTime $date): void {
+        $this->date = $date;
+    }
+
+    public function setHref(?string $href): void {
+        $this->href = $href;
+    }
+
+    public function setOnclick(?string $on_click): void {
+        $this->onclick = $on_click;
+    }
+
+    public function setClass(string $class): void {
+        $this->class = $class;
+    }
+    public function setId(?string $id): void {
+        $this->id = $id;
+    }
+    public function setDisabled(bool $disabled): void {
+        $this->disabled = $disabled;
+    }
+    public function setTitleOnHover(bool $titleOnHover): void {
+        $this->title_on_hover = $titleOnHover;
+    }
+    public function setProgress(?float $progress): void {
+        $this->progress = $progress;
+    }
+    public function setAriaLabel(?string $ariaLabel): void {
+        $this->aria_label = $ariaLabel;
+    }
+    public function setBadge(?string $badge): void {
+        $this->badge = $badge;
+    }
+    public function setIcon(?string $icon): void {
+        $this->icon = $icon;
     }
 }

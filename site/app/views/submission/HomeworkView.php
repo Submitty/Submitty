@@ -1073,6 +1073,8 @@ class HomeworkView extends AbstractView {
 
 
         $param = array_merge($param, [
+            'docker_error' => $version_instance->dockerErrorFileExists(),
+            'docker_error_data' => null,
             'gradeable_id' => $gradeable->getId(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1081,6 +1083,13 @@ class HomeworkView extends AbstractView {
             'show_testcases' => $show_testcases,
             'show_incentive_message' => $show_incentive_message
         ]);
+
+        if ($param['docker_error']) {
+            $docker_error_data = $version_instance->getDockerErrorFileData();
+            if ($docker_error_data !== null) {
+                $param['docker_error_data'] = $docker_error_data;
+            }
+        }
 
         $this->core->getOutput()->addInternalJs('confetti.js');
         $this->core->getOutput()->addInternalJs('submission-page.js');

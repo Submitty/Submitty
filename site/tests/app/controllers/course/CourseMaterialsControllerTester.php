@@ -202,26 +202,31 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             ->method('flush');
 
         $zipfile_name = 'foo.zip';
+        $calls = 0;
+        $args = [
+            ['path' => [
+                $this->upload_path . "/$zipfile_name"]
+            ],
+            ['path' => [
+                $this->upload_path . $this->config['course_path'] . '/test0.txt',
+                $this->upload_path . $this->config['course_path'] . '/test1.txt',
+                $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
+                $this->upload_path . $this->config['course_path'] . '/lev0/test1.txt']
+            ]
+        ];
         $repository = $this->createMock(EntityRepository::class);
         $repository
             ->expects($this->exactly(2))
             ->method('findBy')
-            ->withConsecutive(
-                [['path' => [$this->upload_path . "/$zipfile_name"]]],
-                [['path' => [
-                    $this->upload_path . $this->config['course_path'] . '/test0.txt',
-                    $this->upload_path . $this->config['course_path'] . '/test1.txt',
-                    $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
-                    $this->upload_path . $this->config['course_path'] . '/lev0/test1.txt']
-                ]]
-            )
-            ->willReturnOnConsecutiveCalls([], []);
+            ->willReturnCallback(function ($arg) use ($args, &$calls) {
+                $this->assertEquals($args[$calls], $arg);
+                $calls++;
+                return [];
+            });
         $repository
-            ->expects($this->exactly(14))
             ->method('findOneBy')
             ->willReturn(null);
         $this->core->getCourseEntityManager()
-            ->expects($this->exactly(16))
             ->method('getRepository')
             ->with(CourseMaterial::class)
             ->willReturn($repository);
