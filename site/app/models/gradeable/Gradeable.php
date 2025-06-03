@@ -2704,7 +2704,7 @@ class Gradeable extends AbstractModel {
         $this->allowed_minutes = $minutes;
     }
 
-    public function getDependsOn(): string {
+    public function getDependsOn(): ?string {
         return $this->depends_on;
     }
 
@@ -2712,7 +2712,7 @@ class Gradeable extends AbstractModel {
         $this->depends_on = $depends_on;
     }
 
-    public function getDependsOnPoints(): int {
+    public function getDependsOnPoints(): ?int {
         return $this->depends_on_points;
     }
 
