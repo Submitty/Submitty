@@ -719,6 +719,7 @@ submitty@vagrant
 do-not-reply@vagrant
 localhost
 25
+100
 " | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug --setup-for-sample-courses --websocket-port ${WEBSOCKET_PORT}
 
         # Set these manually as they're not asked about during CONFIGURE_SUBMITTY.py
