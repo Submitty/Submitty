@@ -30,8 +30,8 @@ class NotebookBuilderController extends AbstractController {
      * @param string $g_id Gradeable ID
      * @param string $mode The mode notebook builder should open in.  May be either 'new' or 'edit', this lets
      * notebook builder know to save a new configuration or edit the existing one.
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/notebook_builder/{g_id}/{mode<new|edit>}", methods: ["GET"])]
     public function builder(string $g_id, string $mode) {
         try {
@@ -118,9 +118,7 @@ class NotebookBuilderController extends AbstractController {
         ]);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/notebook_builder/save", methods: ["POST"])]
     public function save(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
@@ -145,9 +143,7 @@ class NotebookBuilderController extends AbstractController {
         return JsonResponse::getSuccessResponse();
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/notebook_builder/file", methods: ["POST"])]
     public function file(): JsonResponse {
         $gradeable = $this->getValidGradeable($_POST['g_id']);
