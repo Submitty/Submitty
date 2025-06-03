@@ -13,7 +13,7 @@ for component in "${components[@]}"; do
       cmd_prefix="sudo -u submitty_daemon"
     fi
 
-    $cmd_prefix python3 "$status_script" --daemon "$component" --target "$target" status
+    output=$($cmd_prefix python3 "$status_script" --daemon "$component" --target "$target" status)
     status=$?
 
     if [[ "$status" -ne 1 ]]; then
@@ -24,7 +24,7 @@ for component in "${components[@]}"; do
             sudo touch "${log_file}"
         fi
 
-        echo -e "Restarting autograding ${component} for ${target}\n\nLast status: ${status_codes[$status]}" | sudo tee -a "${log_file}"
+        echo -e "Restarting autograding ${component} for ${target} (status: ${status_codes[$status]})\n\n${output}" | sudo tee -a "${log_file}"
         echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}"
 
         $cmd_prefix python3 "$status_script" --daemon "$component" --target "$target" restart
