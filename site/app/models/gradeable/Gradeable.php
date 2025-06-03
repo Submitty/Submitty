@@ -233,13 +233,13 @@ class Gradeable extends AbstractModel {
      * @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
     /** @prop
-     * @var string are a list of hidden files and the lowest_access_group that can see those files */
+     * @var ?string are a list of hidden files and the lowest_access_group that can see those files */
     protected $hidden_files = "";
     /** @prop
-     * @var int will limited access graders grade the gradeable blindly*/
+     * @var ?int will limited access graders grade the gradeable blindly*/
     protected $limited_access_blind = 1;
     /** @prop
-     * @var int will peer graders grade the gradeable blindly*/
+     * @var ?int will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
      * @var bool will peer graders access the autograding panel*/
@@ -257,7 +257,7 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders access the discussion panel*/
     protected $peer_discussion = true;
     /** @prop
-     * @var int will instructors have blind peer grading enabled*/
+     * @var ?int will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
 
     /**
@@ -2772,27 +2772,27 @@ class Gradeable extends AbstractModel {
         return $this->peer_grading_pairs;
     }
 
-    public function getHiddenFiles(): string {
+    public function getHiddenFiles(): ?string {
         return $this->hidden_files;
     }
 
-    public function setHiddenFiles(string $hidden_files): void {
+    public function setHiddenFiles(?string $hidden_files): void {
         $this->hidden_files = $hidden_files;
     }
 
-    public function setLimitedAccessBlind(int $limited_access_blind): void {
+    public function setLimitedAccessBlind(?int $limited_access_blind): void {
         $this->limited_access_blind = $limited_access_blind;
     }
 
-    public function getLimitedAccessBlind(): int {
+    public function getLimitedAccessBlind(): ?int {
         return $this->limited_access_blind;
     }
 
-    public function setPeerBlind(int $peer_blind): void {
+    public function setPeerBlind(?int $peer_blind): void {
         $this->peer_blind = $peer_blind;
     }
 
-    public function getPeerBlind(): int {
+    public function getPeerBlind(): ?int {
         return $this->peer_blind;
     }
 
@@ -2836,11 +2836,11 @@ class Gradeable extends AbstractModel {
         return $this->peer_discussion;
     }
 
-    public function setInstructorBlind(int $instructor_blind): void {
+    public function setInstructorBlind(?int $instructor_blind): void {
         $this->instructor_blind = $instructor_blind;
     }
 
-    public function getInstructorBlind(): int {
+    public function getInstructorBlind(): ?int {
         return $this->instructor_blind;
     }
 
