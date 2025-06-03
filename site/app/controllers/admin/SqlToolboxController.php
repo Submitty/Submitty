@@ -71,6 +71,10 @@ class SqlToolboxController extends AbstractController {
         $query_name = $_POST['query_name'];
         $query = $_POST['query'];
 
+        if(empty(trim($query_name)) || empty(trim($query))) {
+            return JsonResponse::getFailResponse("Query name or query cannot be empty");
+        }
+
         if (strlen($query_name) > 255) {
             return JsonResponse::getFailResponse("Query name must be less than 255 characters long: " . $query_name);
         }
@@ -84,7 +88,10 @@ class SqlToolboxController extends AbstractController {
         $user_id = $this->core->getUser()->getId();
         $query_id = $_POST['query_id'];
 
-        $this->core->getQueries()->deleteInstructorQueries($user_id, $query_id);
+        $deleted = $this->core->getQueries()->deleteInstructorQueries($user_id, $query_id);
+        if (!$deleted) {
+            return JsonResponse::getFailResponse("Failed to delete the query, it may not exist or you may not be the query owner");
+        }
         return JsonResponse::getSuccessResponse("Successfully deleted the query");
     }
 }

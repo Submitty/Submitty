@@ -39,8 +39,7 @@
         <br />
         <div id="query-results-buttons">
             <button id='run-sql-btn' class="btn btn-primary">Run Query</button>
-            
-            {# need display inline to get rid of div line wrap #}
+
             {% include 'Vue.twig' with {
                 'component': 'saveSQLQueries',
                 'style': 'display: inline;'

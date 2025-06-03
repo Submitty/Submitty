@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from './popup.vue';
-import { buildCourseUrl, getCsrfToken, displayErrorMessage } from '../../../ts/utils/server';
+import { buildCourseUrl, getCsrfToken, displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
 
 interface QueryEntry {
     id: number;
@@ -68,13 +68,20 @@ const deleteQuery = async (id: number) => {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to delete query');
+            throw new Error('Failed to delete query.');
         }
 
-        await fetchQueries();
+        const json = await response.json() as ServerResult;
+        if (json.status === 'fail') {
+            throw new Error(json.message ?? 'Failed to delete query.');
+        }
+
+        queries.value = queries.value.filter((query) => query.id !== id);
+        displaySuccessMessage('Query deleted successfully!');
     }
     catch (e) {
         console.error('Error deleting query:', e);
+        displayErrorMessage(`Error deleting query: ${(e as Error).message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
     }
 };
 

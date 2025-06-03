@@ -9441,12 +9441,14 @@ ORDER BY
     /**
      * @param string $user_id the userid of the user
      * @param string $query_id the query id to delete
+     * @return bool true if the query was deleted, false otherwise
      */
-    public function deleteInstructorQueries($user_id, $query_id): void {
+    public function deleteInstructorQueries($user_id, $query_id): bool {
         $this->submitty_db->query(
             "DELETE FROM instructor_sql_queries WHERE user_id = ? AND id = ?",
             [$user_id, $query_id]
         );
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     // ----------------- END INSTRUCTOR SQL QUERIES -----------------
