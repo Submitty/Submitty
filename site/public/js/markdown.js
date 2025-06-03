@@ -69,3 +69,16 @@ $(document).ready(() => {
     }
     resizeTextarea(targetTextarea.get(0));
 });
+
+$(document).on('click', '.markdown-write-mode', function () {
+    const markdownArea = $(this).closest('.markdown-area');
+    const textarea = markdownArea.find('textarea').get(0);
+    const finalHeight = Number($(textarea).data('finalHeight'));
+    textarea.style.height = `${finalHeight}px`;
+});
+
+$(document).on('click', '.markdown-preview-mode', function () {
+    const markdownArea = $(this).closest('.markdown-area');
+    const textarea = markdownArea.find('textarea').get(0);
+    $(textarea).data('finalHeight', $(textarea).outerHeight());
+});
