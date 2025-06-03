@@ -94,7 +94,7 @@
             var dataTotal=tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
             bucketInputTotal.value='';
-            document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+            document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
             +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
             '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
             {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
