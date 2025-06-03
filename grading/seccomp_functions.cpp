@@ -29,6 +29,7 @@
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
 #define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
+#define ALLOW_SYSCALL_BY_NUMBER(num, name)  allow_syscall(sc,num,name)
 
 inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string) {
   //std::cout << "allow " << syscall_string << std::endl;
@@ -57,6 +58,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
+  //scmp_filter_ctx sc = seccomp_init(SCMP_ACT_LOG);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
   if (seccomp_arch_native() != target_arch) {
     res = seccomp_arch_add(sc, target_arch);

@@ -30,6 +30,8 @@
 
 extern const int CPU_TO_WALLCLOCK_TIME_BUFFER;  // defined in default_config.h
 
+// set to 0 for debugging/disabling seccomp filter & 1 for normal use
+#define SECCOMP_ENABLED 1
 
 #define DIR_PATH_MAX 1000
 
@@ -818,11 +820,11 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   }
   // END SECCOMP
 
-  //if (SECCOMP_ENABLED != 0) {
-  // std::cout << "seccomp filter enabled" << std::endl;
-  //} else {
-  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
-  // }
+  if (SECCOMP_ENABLED != 0) {
+    std::cout << "seccomp filter enabled" << std::endl;
+  } else {
+    std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  }
 
 
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
@@ -943,9 +945,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
 
   // print this out here (before losing our output)
-  //  if (SECCOMP_ENABLED != 0) {
-  // std::cout << "going to install syscall filter for " << my_program << std::endl;
-  //}
+  if (SECCOMP_ENABLED != 0) {
+     std::cout << "going to install syscall filter for " << my_program << std::endl;
+  }
 
   /*************************************************
   *
@@ -953,13 +955,14 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   *
   **************************************************/
 
-  // SECCOMP: install the filter (system calls restrictions)
-  if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
-    logfile << "seccomp filter install failed" << std::endl;
-    return 1;
+  if (SECCOMP_ENABLED != 0) {
+    // SECCOMP: install the filter (system calls restrictions)
+    if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
+      logfile << "seccomp filter install failed" << std::endl;
+      return 1;
+    }
+    // END SECCOMP
   }
-  // END SECCOMP
-
 
   /*************************************************
   *
