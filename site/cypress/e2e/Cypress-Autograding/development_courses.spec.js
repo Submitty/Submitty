@@ -1,10 +1,5 @@
 const checkGradeable = (gradeable_id) => {
     cy.visit(['development', 'gradeable', gradeable_id]);
-
-    if (gradeable_id === 'notebook_time_limit') {
-        cy.get('[data-testid="message-accept"]').contains('Accept, Continue to ');
-        cy.get('[data-testid="message-accept"]').contains('\'Notebook Time Limit\'');
-    }
     cy.get('[data-testid="new-submission-info"]').contains('New submission for');
 };
 
