@@ -31,6 +31,7 @@
             </div>
             <div class="report-card-btn-cont">
                 <button id="grade-summaries-button"
+                        data-testid="grade-summaries-button"
                         onclick="location.href='{{ summaries_url }}'"
                         class="btn btn-primary"
                         tabindex="0"
@@ -44,27 +45,31 @@
         </div>
 
         <div id="save_status_container" class="customization_item">
-            <div id="build_buttons">
-                <button
+            <div id="status_head">
+                <div id="build_buttons">
+                    <button
                     id="btn-build-customization"
                     data-testid="btn-build-customization"
                     class="btn btn-primary"
                     tabindex="0"
                     type="button"
                     onclick="runBuild()"
-                >
+                    >
                     <i class="fas fa-magic-wand-sparkles" title="Build customization"></i>
                     Build
-                </button>
-            </div>
-            <span id="status_label" style="padding-right: 4px;">Status: </span>
-            <div id="save_status" data-testid="save-status">
-                No changes to save
-            </div>
-            <div id="save_status_buttons">
-                <button style="margin-left: 60px; padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div id="status_label" style="padding-right: 4px;">Status: </div>
+                    <div id="save_status" data-testid="save-status" style="margin-right: 60px;">
+                    No changes to save
+                    </div>
+                </div>
+                <div id="save_status_buttons">
+                    <button style="padding: 5px 12px;" class="btn btn-default" id="show_log_button" data-testid="log-button" type="button">
                     Log
-                </button>
+                    </button>
+                </div>
             </div>
             <div id="save_status_log"></div>
         </div>
@@ -190,7 +195,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                <div id="gradeable_config" data-testid="gradeable-config" style="background-color:var(--standard-peachpuff);margin-top:50px;width:1000px;padding:5px;">
+                <div id="gradeable_config" data-testid="gradeable-config" class="gradeable-configuration">
                     <h2>Category/Gradeable Configuration:
                         <i id="pencilIcon" class="fas fa-pencil-alt black-btn"></i>
                     </h2>
@@ -227,7 +232,7 @@
                                             {% set per_gradeable_percents_checked = true %}
                                         {% endif %}
                                     {% endfor %}
-                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle fa-rb tooltip">
+                                    <i id="per-gradeable-percents-warning-{{ bucket }}" class="fas fa-exclamation-triangle rainbow-grades-warning-triangle fa-rb tooltip">
                                         <span class="tooltiptext tooltipbottom">{# Message composed in JavaScript #}</span>
                                     </i>
                                     <input id="per-gradeable-percents-checkbox-{{ bucket }}" type="checkbox" name="per-gradeable-percents-{{ bucket }}" {{ per_gradeable_percents_checked ? 'checked' : '' }}>
@@ -252,42 +257,58 @@
                                 </div>
                                 <div style="margin-top:10px">
                                     <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        {% set manual_points = false %}
+                                        {% set auto_points = false %}
+                                        {% for gradeable in gradeables %}
+                                            {% if gradeable['manual_grading_points'] != 0 %}
+                                                {% set manual_points = true %}
+                                            {% endif %}
+                                            {% if gradeable['autograded_grading_points'] != 0 %}
+                                                {% set auto_points = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <li style="margin: 3px">
+                                            <div class="gradeable-points-div">
+                                                {% if manual_points %}
+                                                    <span class="gradeable-points">Manual Pts</span>
+                                                {% endif %}
+                                                {% if auto_points %}
+                                                    <span class="gradeable-points">Auto Pts</span>
+                                                {% endif %}
+                                                {% if manual_points or auto_points %}
+                                                    <span class="gradeable-points" style="border-right: 1px solid var(--default-white);">Total Pts</span>
+                                                {% endif %}
+                                            </div>
+                                        </li>
                                         {% for gradeable in gradeables %}
                                             <li class="gradeable-li pt-1" style="border-top: 1px solid #FFFFFF;">
-                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}">
-                                                    <input type="text"
-                                                           class="gradeable-custom-item-input {{ gradeable["override"] ? "override" : "" }}"
-                                                           aria-label="{{gradeable["title"]}} max score"
-                                                           placeholder="{{ gradeable["max_score"] }}"
-                                                           value="{{ gradeable["override"] ? gradeable["override_max"] : gradeable["max_score"] }}"
-                                                           id="maxscore-{{ gradeable["id"] }}"
-                                                           data-grade-release-date="{{ gradeable["grade_release_date"] }}"
-                                                           onblur="ClampPoints(this);"
-                                                           onkeyup="DetectMaxOverride(this);">
-                                                    <span>pts</span>
+                                                <div id="gradeable-pts-div-{{ gradeable["id"] }}" class="gradeable-points-div">
+                                                    {% if manual_points %}
+                                                        <span class="gradeable-points">{{ gradeable['manual_grading_points'] }}</span>
+                                                    {% endif %}
+                                                    {% if auto_points %}
+                                                        <span class="gradeable-points">{{ gradeable['autograded_grading_points'] }}</span>
+                                                    {% endif %}
+                                                    <span class="gradeable-points max-score"
+                                                          style="border-right: 1px solid var(--default-white);"
+                                                          aria-label="{{gradeable["title"]}} max score"
+                                                          id="maxscore-{{ gradeable["id"] }}"
+                                                          data-max-score="{{ gradeable["max_score"] }}"
+                                                          data-grade-release-date="{{ gradeable["grade_release_date"] }}">
+                                                          {{ gradeable['max_score'] }}
+                                                    </span>
                                                 </div>
                                                 <div id="gradeable-percents-div-{{ bucket }}-{{ gradeable["id"] }}">
                                                     <input type="text"
-                                                           {% set default_percent = ((1 / gradeables|length) * 100)|round(1, 'floor') %}
-                                                           class="gradeable-custom-item-input"
+                                                           class="gradeable-custom-item-input gradeable-percents-div"
                                                            aria-label="{{gradeable["title"]}} percent"
-                                                           placeholder="{{ default_percent }}"
-                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : default_percent }}"
+                                                           value="{{ gradeable["override_percent"] ? gradeable["percent"] : "" }}"
                                                            id="percents-{{ gradeable["id"] }}"
                                                            onblur="ClampPercents(this); ClampPerGradeablePercents(this, '{{ bucket }}')">
                                                     <span>%</span>
                                                 </div>
                                                 <div class="gradeable-li-right-of-input">
                                                     <div class="gradeable-li-info">
-                                                        <i class="fas fa-exclamation-triangle fa-rb tooltip">
-                                                            <span class="tooltiptext tooltipbottom">
-                                                                WARNING: Max Score has been overridden in Rainbow Grades
-                                                                <br><br>
-                                                                Actual Max Score: {{ gradeable["max_score"] }}
-                                                                <br>
-                                                                Override Max Score: <span id="override-maxscore-{{ gradeable["id"] }}"></span>
-                                                            </span>
-                                                        </i>
                                                         <i class="fas fa-chart-line fa-gradeable-curve fa-rb" id="gradeable-curve-button-{{ gradeable['id'] }}"></i>
                                                         {{ gradeable["title"] }}
                                                         <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
@@ -346,12 +367,14 @@ To remove a curve simply blank all boxes."></i>
                 <h2>Benchmark Percents</h2>
                 <p class="rg_info_message">You may adjust the minimum percent required to receive certain letter grades.  Enter this percentage as a decimal number.<br />As an example 90% would be entered as .9</p>
                 <div class="input-boxes">
+                    {% set default_percents = {
+                        'lowest_a-': 0.9,
+                        'lowest_b-': 0.8,
+                        'lowest_c-': 0.7,
+                        'lowest_d': 0.6
+                    } %}
                     {% for benchmark in benchmarks_with_input_fields %}
-                        {% if benchmark_percents[benchmark] is defined %}
-                            {% set percent = benchmark_percents[benchmark] %}
-                        {% else %}
-                            {% set percent = '' %}
-                        {% endif %}
+                        {% set percent = benchmark_percents[benchmark] is defined ? benchmark_percents[benchmark] : default_percents[benchmark] %}
 
                         <label for="benchmark_{{ benchmark }}" class="{{ benchmark }} input-label">{{ benchmark }}</label>
                         <input type="text" id="benchmark_{{ benchmark }}" data-testid="benchmark-{{ benchmark }}" class="benchmark_percent_input {{ benchmark }}" data-benchmark="{{ benchmark }}" value="{{ percent }}">
@@ -359,7 +382,14 @@ To remove a curve simply blank all boxes."></i>
                 </div>
             </div>
             <div id="section_labels" data-testid="section-labels" class="customization_item">
-                <h2>Section Labels</h2>
+                <div class="section-header">
+                    <h2>Section Labels</h2>
+                    <i id="section-duplicate-warning" class="fas fa-exclamation-triangle same-section-name-warning-triangle fa-rb tooltip">
+                        <span class="tooltiptext tooltipbottom">
+                            WARNING: Multiple sections have the same name. This may result in unexpected behavior.
+                        </span>
+                    </i>
+                </div>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
                 <div class="input-boxes">

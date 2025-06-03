@@ -33,13 +33,6 @@
                     $("#merge-threads .form-body").css("min-height", "inherit");
                     $("#merge-threads .form-body").css('overflow-y', 'initial');
                     document.getElementsByClassName('chosen-search-input')[0].setAttribute('aria-label', 'Chosen thread');
-
-                    $("#merge-threads").children("form").submit(function () {
-                        var child_thread_id = $('#merge_thread_child').val();
-                        var parent_thread_id = $('#merge_thread_parent').val();
-                        window.socketClient.send({'type': "merge_thread", 'thread_id': child_thread_id, 'merge_thread_id': parent_thread_id});
-                        return;
-                    });
                 });
             </script>
         </div>

@@ -9,7 +9,7 @@ class NumbersUtilsTester extends TestCase {
     /**
      * @return array -containing the test cases as { expectedValue, value, precision}
      */
-    public function roundPointValueData() {
+    public static function roundPointValueData() {
         return [
             [6.0, 6, 0.05],
             [1.002, 1, 0.006],
@@ -37,7 +37,7 @@ class NumbersUtilsTester extends TestCase {
         $this->assertSame(12.134, NumberUtils::roundPointValue(12.134, 0));
     }
 
-    public function randomIndicesData(): array {
+    public static function randomIndicesData(): array {
         return [
             [-1, []],
             [0, []],

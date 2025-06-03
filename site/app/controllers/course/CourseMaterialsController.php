@@ -453,6 +453,9 @@ class CourseMaterialsController extends AbstractController {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
+            if (strpos($requested_path, '/') === 0) {
+                return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
+            }
             $new_path = FileUtils::joinPaths($upload_path, $requested_path);
 
             if (isset($_POST['title'])) {
@@ -466,6 +469,10 @@ class CourseMaterialsController extends AbstractController {
             if ($path !== $new_path) {
                 if (!FileUtils::ValidPath($new_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
+                }
+
+                if (($overflow = strlen($new_path) - 255) > 0) {
+                    return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
                 $requested_path = explode("/", $requested_path);
@@ -670,6 +677,11 @@ class CourseMaterialsController extends AbstractController {
                 );
             }
             $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
+
+            if (($overflow = strlen($details['path'][0]) - 255) > 0) {
+                return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
+            }
+
             FileUtils::writeFile($details['path'][0], "");
         }
         else {
