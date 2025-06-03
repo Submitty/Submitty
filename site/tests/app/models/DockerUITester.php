@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\models\DockerUI;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
-use app\models\Config;
 use app\libraries\Utils;
 
 class DockerUITester extends BaseUnitTest {
@@ -79,10 +78,9 @@ class DockerUITester extends BaseUnitTest {
         $this->sysinfo_log_file = FileUtils::joinPaths(dirname(__DIR__, 3), 'tests', 'data', 'logs', 'docker', 'sysinfo.txt');
         $this->assertFileExists($this->docker_job_log_file);
 
-        $this->core = $this->createMockModel(Core::class);
-        $config = $this->createMockModel(Config::class);
-        $config->method('getSubmittyPath')->willReturn($this->tmp_dir);
-        $this->core->method('getConfig')->willReturn($config);
+        $this->core = $this->createMockCore([
+            'tmp_path' => $this->tmp_dir
+        ]);
     }
 
     /** tearDown runs after each unit test in this file */
