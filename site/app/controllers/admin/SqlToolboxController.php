@@ -71,7 +71,7 @@ class SqlToolboxController extends AbstractController {
         $query_name = $_POST['query_name'];
         $query = $_POST['query'];
 
-        if(empty(trim($query_name)) || empty(trim($query))) {
+        if (empty(trim($query_name)) || empty(trim($query))) {
             return JsonResponse::getFailResponse("Query name or query cannot be empty");
         }
 
