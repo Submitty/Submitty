@@ -2708,7 +2708,7 @@ class Gradeable extends AbstractModel {
         return $this->depends_on;
     }
 
-    public function setDependsOn(string $depends_on): void {
+    public function setDependsOn(?string $depends_on): void {
         $this->depends_on = $depends_on;
     }
 
@@ -2716,7 +2716,7 @@ class Gradeable extends AbstractModel {
         return $this->depends_on_points;
     }
 
-    public function setDependsOnPoints(int $depends_on_points): void {
+    public function setDependsOnPoints(?int $depends_on_points): void {
         $this->depends_on_points = $depends_on_points;
     }
 
