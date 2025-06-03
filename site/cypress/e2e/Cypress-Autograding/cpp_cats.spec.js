@@ -1,3 +1,7 @@
+// This should work for any electronic gradeable that uses zip as their primary submission method.
+// fileUploadName is where the file is relative to fixures directory
+// expected scores is a list of expected scores that the user should have
+// full scores is a list of scores that means 100%
 const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     assert(expectedScores.length === fullScores.length);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
@@ -5,7 +9,7 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
 
     cy.get('[data-testid="file-upload-table-1"] > tr').should('not.exist');
     cy.get('[data-testid="select-files"]').attachFile(fileUploadName);
-    cy.get('[data-testid="submit-gradeable-btn"').click();
+    cy.get('[data-testid="submit-gradeable"').click();
     cy.get('[data-testid="popup-message"]').contains('Successfully uploaded version');
 
     cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 60000 });
