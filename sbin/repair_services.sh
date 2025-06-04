@@ -31,12 +31,10 @@ repair_autograding() {
 
     for component in "${components[@]}"; do
         for target in "${targets[@]}"; do
-            local output
-            output=$(sudo python3 "$status_script" --daemon "$component" --target "$target" status)
-            local status=$?
+            local output=$(sudo python3 "$status_script" --daemon "$component" --target "$target" status)
+            local last_status=$?
 
-            if [[ "$status" -ne 1 ]]; then
-                local last_status=$(sudo systemctl status "submitty_autograding_${component}")
+            if [[ "$last_status" -ne 1 ]]; then
                 log_service_restart "autograding" \
                     "Failure detected in autograding ${component} for ${target} (status: ${status_codes[$status]})" \
                     "${output}\n\n${last_status}"
@@ -51,7 +49,7 @@ repair_autograding() {
 }
 
 repair_services() {
-    # Simple restarts via systemctl
+    # Simple service restarts via systemctl
     local services=(
         "nginx"
         "apache2"
@@ -69,7 +67,7 @@ repair_services() {
         fi
     done
 
-    # Restart all autograding service components if needed via utility scripts
+    # Autograding service component restarts via utility scripts
     repair_autograding
 }
 
