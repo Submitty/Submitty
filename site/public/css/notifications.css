@@ -76,6 +76,15 @@
     margin: 5px;
 }
 
+.row-spacing {
+    padding-top: 20px;
+}
+
+.notification-settings-header {
+    /* stylelint-disable-next-line declaration-no-important */
+    margin-bottom: 0px !important; /* Overrides .content h2 { in server.css*/
+}
+
 @media (min-width: 768px) {
     #notification-header {
         display: table-row;
