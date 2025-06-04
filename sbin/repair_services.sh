@@ -35,7 +35,6 @@ repair_autograding() {
     local restart=false
     local components=("shipper" "worker")
     local targets=("primary" "perform_on_all_workers")
-    local status_codes=("inactive" "active" "failure" "bad_arguments" "io_error")
     local status_script="/usr/local/submitty/sbin/shipper_utils/systemctl_wrapper.py"
     local restart_script="/usr/local/submitty/sbin/restart_shipper_and_all_workers.py"
     local workers=$(jq 'keys | length' /usr/local/submitty/config/autograding_workers.json)
@@ -44,7 +43,7 @@ repair_autograding() {
         for target in "${targets[@]}"; do
             local cmd_prefix
 
-            # Ignore remote health checks if there are no remote workers initialized
+            # Ignore remote health checks if there are no remote workers configured
             if [[ "$target" == "perform_on_all_workers" && "$workers" -le 1 ]]; then
                 continue
             fi
@@ -78,7 +77,7 @@ repair_autograding() {
                 local last_status=$(sudo systemctl status "submitty_autograding_${component}")
 
                 log_service_restart "autograding" \
-                    "Failure detected in autograding ${component} for ${source} machine(s) (status: ${status_codes[$status]})" \
+                    "Failure detected within the autograding ${component} for ${source} machine(s)" \
                     "${output}${spacing}${last_status}"
                 restart=true
             fi
@@ -95,7 +94,7 @@ repair_systemctl_service() {
 
     if ! sudo systemctl is-active --quiet "${service}"; then
         local last_status=$(sudo systemctl status "${service}")
-        log_service_restart "${service}" "Failure detected in ${services[$service]}" "${last_status}"
+        log_service_restart "${service}" "Failure detected within the ${services[$service]}" "${last_status}"
         sudo systemctl restart "${service}"
     fi
 }
