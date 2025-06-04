@@ -407,6 +407,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -416,6 +417,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -648,6 +650,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -814,6 +817,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -891,6 +895,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
