@@ -1,17 +1,22 @@
+{% import _self as self %}
+
 <div class="content">
     <div class="sub">
-
         {# Actual results #}
         {% if docker_error %}
-            <p class="red-message">Docker Image not present on machine. Please contact your instructor about this.</p>
-            {% if docker_error_data is not null %}
-                <p>Error Details:</p>
-                <ul>
-                    {% for key, value in docker_error_data %}
-                        <li>{{ key }}: {{ value }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+            <div style="background-color: var(--standard-light-red);">
+                <div style="padding: 30px;">
+                    <p style="font-size: 26px; font-style: italic; font-weight: bold;">Docker Image not present on machine. Please contact your instructor about this.</p>
+                    {% if docker_error_data is not null %}
+                        <p style="padding-top: 15px; font-weight: bold;">Error Details:</p>
+                        <ul style="padding-left: 30px;">
+                            {% for key, value in docker_error_data %}
+                                <li>{{ key }}: {{ value }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
         {% elseif in_queue or in_progress_grading %}
             {% if in_progress_grading %}
                 <p class="red-message">
