@@ -8,8 +8,7 @@ int main(int argc, char *argv[])
 {
     printf("hello world\n");
     fflush(stdout);
-    int answer = syscall(SYS_mmap,0,0,0,0,0,0);
-    printf("system call return value = %d\n",answer);
+    int ret = syscall(SYS_mmap,0,0,0,0,0,0);
     printf("goodbye\n");
     return 0;
 }

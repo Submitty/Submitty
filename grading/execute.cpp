@@ -764,7 +764,8 @@ void OutputSignalDescriptiveErrorMessageToExecuteLogfile(int what_signal, std::o
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config,
+int exec_this_command(const std::string &cmd, std::ofstream &logfile,
+                      const nlohmann::json &whole_config, const nlohmann::json &test_case_config,
                       std::string program_name, const nlohmann::json &test_case_limits,
                       const nlohmann::json &assignment_limits, const bool timestamped_stdout) {
 
@@ -954,7 +955,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   **************************************************/
 
   // SECCOMP: install the filter (system calls restrictions)
-  if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
+  if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config, test_case_config)) {
     logfile << "seccomp filter install failed" << std::endl;
     return 1;
   }
@@ -1156,6 +1157,7 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
+      const nlohmann::json &test_case_config,
       const bool windowed,
       const std::string display_variable2,
       const bool timestamped_stdout) {
@@ -1240,7 +1242,7 @@ int execute(const std::string &cmd,
       dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
       close(dispatcherpipe[0]); // close read end of the pipe
     }
-    int child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits, timestamped_stdout);
+    int child_result = exec_this_command(cmd,logfile,whole_config, test_case_config, program_name,test_case_limits,assignment_limits, timestamped_stdout);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -1320,7 +1322,7 @@ int execute(const std::string &cmd,
                   close(dispatcherpipe[0]); // close read end of the pipe
                 }
                 int child_result;
-                child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits,timestamped_stdout);
+                child_result = exec_this_command(cmd,logfile,whole_config, test_case_config, program_name,test_case_limits,assignment_limits,timestamped_stdout);
 
                 // send the system status code back to the parent process
                 //std::cout << "    child_result = " << child_result << std::endl;

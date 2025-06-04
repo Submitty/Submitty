@@ -14,8 +14,8 @@
 	{
 	    "type" : "Compilation",
 	    "title" : "Compilation",
-	    "command" : "/usr/bin/gcc -Wall -Werror -o a.out *.c",
-	    "details" : "/usr/bin/gcc -Wall -Werror -o a.out *.c",
+	    "command" : "/usr/bin/gcc -Wall -Wextra -o a.out *.c",
+	    "details" : "/usr/bin/gcc -Wall -Wextra -o a.out *.c",
             "executable_name" : "a.out",
 	    "points" : 1
 	},
@@ -26,11 +26,11 @@
 		"./a.out"
 	    ],
 	    "details" : "./a.out",
-	    "points" : 3,
+	    "points" : 10,
 	    "validation" : [
 		{
 		    "method" : "diff",
-                    "expected_string" : "hello world\nsystem call return value = \ngoodbye\n",
+                    "expected_string" : "hello world\ngoodbye\n",
 		    "actual_file" : "STDOUT.txt",
 		    "show_actual" : "always",
                     "deduction" : 1.0
@@ -57,11 +57,11 @@
 		"./a.out"
 	    ],
 	    "details" : "./a.out",
-	    "points" : 3,
+	    "points" : 8,
 	    "validation" : [
 		{
 		    "method" : "diff",
-                    "expected_string" : "hello world\nsystem call return value = \ngoodbye\n",
+                    "expected_string" : "hello world\ngoodbye\n",
 		    "actual_file" : "STDOUT.txt",
 		    "show_actual" : "always",
                     "deduction" : 1.0
@@ -89,11 +89,11 @@
 		"./a.out"
 	    ],
 	    "details" : "./a.out",
-	    "points" : 3,
+	    "points" : 6,
 	    "validation" : [
 		{
 		    "method" : "diff",
-                    "expected_string" : "hello world\nsystem call return value = \ngoodbye\n",
+                    "expected_string" : "hello world\ngoodbye\n",
 		    "actual_file" : "STDOUT.txt",
 		    "show_actual" : "always",
                     "deduction" : 1.0

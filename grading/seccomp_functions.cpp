@@ -28,15 +28,16 @@
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
+#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name,execute_logfile)
 
-inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string) {
-  static int c = 0;
-  c++;
-  std::cerr << "allow " << c << " " << syscall_string << std::endl;
+static int total_allowed_system_calls = 0;
+
+inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string, std::ofstream &execute_logfile) {
+  total_allowed_system_calls++;
+  //execute_lofgile << "allow " << total_allowed_system_calls << " " << syscall_string << std::endl;
   int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
   if (res < 0) {
-    std::cerr << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
+    execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
   }
 }
 
@@ -55,8 +56,9 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 // ===========================================================================
 // ===========================================================================
 
-int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile, const nlohmann::json &whole_config) {
-
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile, const nlohmann::json &whole_config, const nlohmann::json &test_case_config) {
+  total_allowed_system_calls = 0;
+ 
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
@@ -122,7 +124,9 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
-  const nlohmann::json &config_safelist = whole_config.value("allow_system_calls",nlohmann::json());
+  const nlohmann::json &whole_config_safelist = whole_config.value("allow_system_calls",nlohmann::json());
+  const nlohmann::json &config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
+  
   for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
        cwitr != config_safelist.end(); cwitr++) {
     std::string my_category = *cwitr;
@@ -351,8 +355,9 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
            [restricted_categories](const std::string &s){
              assert (restricted_categories.find(s) != restricted_categories.end()); });
 
-  allow_system_calls(sc,categories);
-
+  allow_system_calls(sc,categories,execute_logfile);
+  execute_logfile << "total allowed_system_calls = " << total_allowed_system_calls << std::endl;
+  
   if (seccomp_load(sc) < 0)
     return 1; // failure
 
