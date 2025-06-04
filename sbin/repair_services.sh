@@ -44,25 +44,24 @@ repair_autograding() {
 
     for component in "${components[@]}"; do
         for target in "${targets[@]}"; do
-            local cmd_prefix
-
             # Ignore remote health checks if there are no remote workers configured
             if [[ "${target}" == "perform_on_all_workers" && "${workers}" -le 1 ]]; then
                 continue
             fi
 
+            local cmd=()
+
             if [[ "${target}" == "primary" ]]; then
-                cmd_prefix="sudo"
+                cmd=(sudo python3 "${status_script}" --daemon "${component}" --target "${target}" status)
             else
-                cmd_prefix="sudo -u submitty_daemon"
+                cmd=(sudo -u submitty_daemon python3 "${status_script}" --daemon "${component}" --target "${target}" status)
             fi
 
             local output
-            output=$("${cmd_prefix}" python3 "${status_script}" --daemon "${component}" --target "${target}" status)
-            local status
-            status=$?
+            output=$("${cmd[@]}")
+            local status=$?
 
-            if [[ "${status}" -ne 1 ]] && [[ ! "${output}" =~ "is active" ]]; then
+            if [[ "${status}" -ne 1 ]]; then
                 local source
 
                 if [[ "${target}" == "primary" ]]; then
