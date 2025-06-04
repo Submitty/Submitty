@@ -349,9 +349,8 @@ function deleteSingleFile(filename, part, previous) {
 }
 
 function setButtonStatus(inactive_version = false) {
-    if (typeof updateSubmitButtonStatus === 'function') {
-        updateSubmitButtonStatus();
-    }
+    updateSubmitButtonStatus();
+
     // we only want to clear buckets if there's any labels in it (otherwise it's "blank")
     let labels = 0;
     for (let i = 0; i < label_array.length; i++) {
@@ -389,6 +388,33 @@ function setButtonStatus(inactive_version = false) {
     }
     else if (use_previous) {
         $('#getprev').prop('disabled', false);
+    }
+}
+
+function updateSubmitButtonStatus() {
+    let valid = false;
+    // check if new files added
+    for (let i = 0; i < file_array.length; i++) {
+        if (file_array[i].length !== 0) {
+            valid = true;
+        }
+    }
+    // check if files from previous submission changed
+    if (!valid && changed) {
+        for (let j = 0; j < previous_files.length; j++) {
+            if (previous_files[j] != 0) {
+                valid = true;
+            }
+        }
+    }
+    if (!valid && Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
+        valid = true;
+    }
+    const submit_button = document.getElementById('submit');
+    if (!valid) {
+        submit_button.classList.add('disable-submit');
+    } else {
+        submit_button.classList.remove('disable-submit');
     }
 }
 
