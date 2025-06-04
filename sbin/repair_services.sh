@@ -36,7 +36,7 @@ repair_autograding() {
 
             if [[ "$last_status" -ne 1 ]]; then
                 log_service_restart "autograding" \
-                    "Failure detected in autograding ${component} for ${target} (status: ${status_codes[$status]})" \
+                    "Failure detected in autograding ${component} for ${target} (status: ${status_codes[$last_status]})" \
                     "${output}\n\n${last_status}"
                 restart=true
             fi
@@ -48,27 +48,37 @@ repair_autograding() {
     fi
 }
 
+repair_systemctl_service() {
+    local service="$1"
+
+    if ! sudo systemctl is-active --quiet "${service}"; then
+        local last_status=$(sudo systemctl status "${service}")
+        log_service_restart "${service}" "Restarting ${service}" "${last_status}"
+        sudo systemctl restart "${service}"
+    fi
+}
+
 repair_services() {
-    # Simple service restarts via systemctl
     local services=(
         "nginx"
         "apache2"
         "postgresql"
         "nullsmtpd"
+        "autograding"
         "submitty_websocket_server"
         "submitty_daemon_jobs_handler"
     )
 
     for service in "${services[@]}"; do
-        if ! sudo systemctl is-active --quiet "${service}"; then
-            local last_status=$(sudo systemctl status "${service}")
-            log_service_restart "${service}" "Restarting ${service}" "${last_status}"
-            sudo systemctl restart "${service}"
-        fi
+        case "${service}" in
+            "autograding")
+                repair_autograding
+                ;;
+            *)
+                repair_systemctl_service "${service}"
+                ;;
+        esac
     done
-
-    # Autograding service component restarts via utility scripts
-    repair_autograding
 }
 
 repair_services
