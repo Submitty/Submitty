@@ -806,7 +806,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding"]
     services:
       postgres:
         image: postgres
@@ -825,7 +825,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: ./.github/actions/e2e-Setup-Composite
+
+      # If the matrix is currently on Autograding, we should use the development course
+      # and use the no_submissions flag
+      - name: Run setup script with inputs (Autograding)
+        if: ${{ matrix.containers == 'Autograding' }}
+        uses: ./.github/actions/e2e-Setup-Composite
+        with:
+          courses: development
+          flags: --no_submissions
+
+      - name: Run setup script without inputs (Other containers)
+        if: ${{ matrix.containers != 'Autograding' }}
+        uses: ./.github/actions/e2e-Setup-Composite
+
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v4
