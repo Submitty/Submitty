@@ -1,0 +1,22 @@
+.error-header {
+    font-size: 26px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.error-details {
+    padding-top: 15px;
+    font-weight: bold;
+}
+
+.error-container {
+    padding: 30px;
+}
+
+.error-listing {
+    padding-left: 30px;
+}
+
+.error-content {
+    padding-bottom: 8px;
+}

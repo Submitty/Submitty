@@ -1,17 +1,15 @@
-{% import _self as self %}
-
 <div class="content">
     <div class="sub">
         {# Actual results #}
         {% if docker_error %}
             <div style="background-color: var(--standard-light-red);">
-                <div style="padding: 30px;">
-                    <p style="font-size: 26px; font-style: italic; font-weight: bold;">Docker Image not present on machine. Please contact your instructor about this.</p>
+                <div class="error-container">
+                    <p class="error-header">Docker Image not present on machine. Please contact your instructor about this.</p>
                     {% if docker_error_data is not null %}
-                        <p style="padding-top: 15px; font-weight: bold;">Error Details:</p>
-                        <ul style="padding-left: 30px;">
+                        <p class="error-details">Error Details:</p>
+                        <ul class="error-listing">
                             {% for error in docker_error_data %}
-                                <li style="padding-bottom: 8px">
+                                <li class="error-content">
                                     <strong>Image:</strong> {{ error.image }}<br>
                                     <strong>Machine:</strong> {{ error.machine }}<br>
                                     <strong>Error:</strong> {{ error.error }}<br>
