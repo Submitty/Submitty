@@ -28,9 +28,9 @@ log_service_restart() {
         sudo touch "${log_file}"
     fi
 
-    echo -e "${timestamp}:${services["${service}"]}\n" | sudo tee -a "${log_file}" > /dev/null
-    echo -e "${message}\n\n${last_status}" | sudo tee -a "${log_file}" > /dev/null
-    echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}" > /dev/null
+    echo -e "${timestamp}:${services["${service}"]}\n" | sudo tee -a "${log_file}"
+    echo -e "${message}\n\n${last_status}" | sudo tee -a "${log_file}"
+    echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}"
 }
 
 repair_autograding() {
