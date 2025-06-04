@@ -894,8 +894,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 const thread_title = json.title;
                 const thread_lock_date = json.lock_thread_date;
                 const thread_status = json.thread_status;
-                let expiration = json.expiration.replace('-', '/');
-                expiration = expiration.replace('-', '/');
+                const expiration = json.expiration;
                 $('#title').prop('disabled', false);
                 $('.edit_thread').show();
                 $('#label_lock_thread').show();
@@ -905,7 +904,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                     $('#pin-expiration-date').show();
                 }
-                $('#expirationDate').val(json.expiration);
+                $('#expirationDate').val(expiration);
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
