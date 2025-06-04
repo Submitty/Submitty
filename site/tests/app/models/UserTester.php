@@ -256,7 +256,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function validateUserDataProvider(): array {
+    public static function validateUserDataProvider(): array {
         $return = [
             ['user_id', 'test', true],
             ['user_id', 'system_user-1', true],
