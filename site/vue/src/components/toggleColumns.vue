@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import Popup from './popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
-const { columns, labels, cookie, forced, format = 'bits', buttonWrapped } = defineProps<{
+const { columns, labels, cookie, forced = [], format = 'bits', buttonWrapped } = defineProps<{
     columns: string[];
     labels: string[];
     cookie: string;

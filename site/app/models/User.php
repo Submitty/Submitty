@@ -27,7 +27,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
- * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
  * @method void setDisplayNameOrder()
