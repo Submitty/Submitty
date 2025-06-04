@@ -101,7 +101,7 @@ describe('Test Rainbow Grading', () => {
         // Ensure tables can be added to and removed from
         // TODO: add checks for other tables once features are implemented
         cy.get('[data-testid="manual-grading-user-id"]').type('adamsg');
-        cy.get('[data-testid="manual-grading-grade"]').select(1);
+        cy.get('[data-testid="manual-grading-grade"]').select('A');
         cy.get('[data-testid="manual-grading-note"]').type('MESSAGE');
         cy.get('[data-testid="manual-grading-submit"]').click();
         cy.get('[data-testid="manual-grading-table-body"] > tr > td').as('manual-grading-table-elements');
@@ -112,7 +112,7 @@ describe('Test Rainbow Grading', () => {
 
         cy.get('[data-testid="plagiarism"]').should('be.visible'); // Visibility not based on checkbox
         cy.get('[data-testid="plagiarism-user-id"]').type('adamsg');
-        cy.get('[data-testid="plagiarism-gradeable-id"]').select(1);
+        cy.get('[data-testid="plagiarism-gradeable-id"]').select('numeric');
         cy.get('[data-testid="plagiarism-marks"]').type('1');
         cy.get('[data-testid="plagiarism-submit"]').click();
         cy.get('[data-testid="plagiarism-table-body"] > tr > td').as('plagiarism-table-elements');
