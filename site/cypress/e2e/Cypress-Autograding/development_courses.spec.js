@@ -1,15 +1,19 @@
 const checkGradeable = (gradeable_id) => {
-    cy.visit(['development', 'gradeable', gradeable_id]);
+    cy.visit(['development']);
+    cy.get(`[data-testid="${gradeable_id}"`).find('[data-testid="submit-btn"]').click();
+
+    if (gradeable_id === 'notebook_time_limit') {
+        cy.get('[data-testid="load-message-accept"]').should('exist');
+        cy.get('[data-testid="load-gradeable-message"').contains('This gradeable is TIMED');
+        return;
+    }
+
     cy.get('[data-testid="new-submission-info"]').contains('New submission for');
 };
 
 describe('Test course should exist', () => {
     it('Check test course exists', () => {
-        cy.login();
-        cy.visit(['development']);
-        // no popup message saying that course does not exist
-        cy.get('[data-testid="popup-message"]').should('not.exist');
-
+        cy.login('instructor');
         checkGradeable('c_failure_messages');
         checkGradeable('c_malloc_not_allowed');
         checkGradeable('choice_of_language');
@@ -37,7 +41,6 @@ describe('Test course should exist', () => {
         checkGradeable('notebook_filesubmission');
         checkGradeable('notebook_itempool');
         checkGradeable('notebook_itempool_random');
-        // comment this out if we want to test time limit
         checkGradeable('notebook_time_limit');
         checkGradeable('pdf_exam');
         checkGradeable('pdf_word_count');
