@@ -3,21 +3,31 @@
 
 #### This script repairs core services that are not currently active
 
+declare -A services=(
+    ["nginx"]="Nginx Server"
+    ["apache2"]="Web Server"
+    ["postgresql"]="Database Server"
+    ["nullsmtpd"]="Mail Server"
+    ["autograding"]="Autograding Shipper/Workers"
+    ["submitty_websocket_server"]="WebSocket Server"
+    ["submitty_daemon_jobs_handler"]="Daemon Jobs Handler"
+)
+
 log_service_restart() {
     local service="$1"
-    local action="$2"
+    local message="$2"
     local last_status="$3"
 
     local today=$(date +%Y%m%d)
-    local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+    local timestamp=$(date "+%Y-%m-%d:%H:%M:%S")
     local log_file="/var/log/services/${today}.txt"
 
     if [[ ! -f "${log_file}" ]]; then
         sudo touch "${log_file}"
     fi
 
-    echo -e "<${timestamp}>:<${service}>" | sudo tee -a "${log_file}" > /dev/null
-    echo -e "${action}\n\n${last_status}" | sudo tee -a "${log_file}" > /dev/null
+    echo -e "${timestamp}: ${services[$service]}\n" | sudo tee -a "${log_file}" > /dev/null
+    echo -e "${message}\n\n${last_status}" | sudo tee -a "${log_file}" > /dev/null
     echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}" > /dev/null
 }
 
@@ -28,16 +38,48 @@ repair_autograding() {
     local status_codes=("inactive" "active" "failure" "bad_arguments" "io_error")
     local status_script="/usr/local/submitty/sbin/shipper_utils/systemctl_wrapper.py"
     local restart_script="/usr/local/submitty/sbin/restart_shipper_and_all_workers.py"
+    local workers=$(jq 'keys | length' /usr/local/submitty/config/autograding_workers.json)
 
     for component in "${components[@]}"; do
         for target in "${targets[@]}"; do
-            local output=$(sudo python3 "$status_script" --daemon "$component" --target "$target" status)
-            local last_status=$?
+            local cmd_prefix
 
-            if [[ "$last_status" -ne 1 ]]; then
+            # Ignore remote health checks if there are no remote workers initialized
+            if [[ "$target" == "perform_on_all_workers" && "$workers" -le 1 ]]; then
+                continue
+            fi
+
+            if [[ "$target" == "primary" ]]; then
+                cmd_prefix="sudo"
+            else
+                cmd_prefix="sudo -u submitty_daemon"
+            fi
+
+            local output=$($cmd_prefix python3 "$status_script" --daemon "$component" --target "$target" status)
+            local status=$?
+
+            if [[ "$status" -ne 1 ]] && [[ ! "$output" =~ "is active" ]]; then
+                local source
+
+                if [[ $target == "primary" ]]; then
+                    source="local"
+                else
+                    source="remote"
+                fi
+
+                local spacing
+
+                if [[ -z "$output" ]]; then
+                    spacing=""
+                else
+                    spacing="\n\n"
+                fi
+
+                local last_status=$(sudo systemctl status "submitty_autograding_${component}")
+
                 log_service_restart "autograding" \
-                    "Failure detected in autograding ${component} for ${target} (status: ${status_codes[$last_status]})" \
-                    "${output}\n\n${last_status}"
+                    "Failure detected in autograding ${component} for ${source} machine(s) (status: ${status_codes[$status]})" \
+                    "${output}${spacing}${last_status}"
                 restart=true
             fi
         done
@@ -53,23 +95,13 @@ repair_systemctl_service() {
 
     if ! sudo systemctl is-active --quiet "${service}"; then
         local last_status=$(sudo systemctl status "${service}")
-        log_service_restart "${service}" "Restarting ${service}" "${last_status}"
+        log_service_restart "${service}" "Failure detected in ${services[$service]}" "${last_status}"
         sudo systemctl restart "${service}"
     fi
 }
 
 repair_services() {
-    local services=(
-        "nginx"
-        "apache2"
-        "postgresql"
-        "nullsmtpd"
-        "autograding"
-        "submitty_websocket_server"
-        "submitty_daemon_jobs_handler"
-    )
-
-    for service in "${services[@]}"; do
+    for service in "${!services[@]}"; do
         case "${service}" in
             "autograding")
                 repair_autograding
