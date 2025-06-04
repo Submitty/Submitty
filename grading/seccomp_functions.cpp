@@ -31,7 +31,9 @@
 #define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
 
 inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string) {
-  //std::cout << "allow " << syscall_string << std::endl;
+  static int c = 0;
+  c++;
+  std::cerr << "allow " << c << " " << syscall_string << std::endl;
   int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
   if (res < 0) {
     std::cerr << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
@@ -339,7 +341,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // }
 
   else {
-    categories = restricted_categories; //TODO: fix
+    //    categories = safelist_categories; //restricted_categories; //TODO: fix
     // UGH, don't want this here
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }
