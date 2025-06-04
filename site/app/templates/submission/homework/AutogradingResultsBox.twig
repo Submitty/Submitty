@@ -11,7 +11,7 @@
                         <p style="padding-top: 15px; font-weight: bold;">Error Details:</p>
                         <ul style="padding-left: 30px;">
                             {% for error in docker_error_data %}
-                                <li>
+                                <li style="padding-bottom: 8px">
                                     <strong>Image:</strong> {{ error.image }}<br>
                                     <strong>Machine:</strong> {{ error.machine }}<br>
                                     <strong>Error:</strong> {{ error.error }}<br>
