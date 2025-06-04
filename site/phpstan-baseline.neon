@@ -11517,26 +11517,6 @@ parameters:
 			path: app/views/admin/ConfigurationView.php
 
 		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 5
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\DockerView\\:\\:displayDockerPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\DockerView\\:\\:displayDockerPage\\(\\) has parameter \\$docker_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Parameter \\#2 \\$bytes of static method app\\\\libraries\\\\Utils\\:\\:formatBytes\\(\\) expects int, string given\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\EmailRoomSeatingView\\:\\:displayPage\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/EmailRoomSeatingView.php
