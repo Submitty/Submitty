@@ -402,7 +402,7 @@ function updateSubmitButtonStatus() {
     // check if files from previous submission changed
     if (!valid && changed) {
         for (let j = 0; j < previous_files.length; j++) {
-            if (previous_files[j] != 0) {
+            if (previous_files[j] !== 0) {
                 valid = true;
             }
         }
@@ -413,7 +413,8 @@ function updateSubmitButtonStatus() {
     const submit_button = document.getElementById('submit');
     if (!valid) {
         submit_button.classList.add('disable-submit');
-    } else {
+    }
+    else {
         submit_button.classList.remove('disable-submit');
     }
 }
