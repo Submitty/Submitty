@@ -1403,7 +1403,7 @@ class ForumController extends AbstractController {
                         return $x->getId();
                     })->toArray();
                     $output['thread_status'] = $result->getThread()->getStatus();
-                    $output['expiration'] = $result->getThread()->getPinnedExpiration()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['expiration'] = $result->getThread()->getPinnedExpiration()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
             }
