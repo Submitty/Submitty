@@ -95,11 +95,11 @@ def connect_db(db_name):
 
 def construct_notifications(term, course, pending):
     """Construct pending gradeable notifications for the current course."""
+    timestamps = {}
     gradeables, site, email = [], [], []
     course_name = get_full_course_name(term, course)
 
     for notification in pending:
-        timestamp = datetime.datetime.now()
         gradeable = {
             "id": notification[0],
             "title": notification[1],
@@ -109,6 +109,10 @@ def construct_notifications(term, course, pending):
             "site_enabled": notification[5],
             "email_enabled": notification[6]
         }
+
+        timestamp = timestamps.setdefault(
+            gradeable['id'], datetime.datetime.now()
+        )
 
         # Metadata-related content
         gradeable_url = (f"{BASE_URL_PATH}/courses/{term}/{course}"
