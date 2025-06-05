@@ -27,7 +27,26 @@
     {% if num_visible_testcases > 0 %}
         {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
-
+        {% if docker_error %}
+            <div style="background-color: var(--standard-light-red);">
+                <div class="error-container">
+                    <p class="error-header">Docker Image not present on machine. Please contact your instructor about this.</p>
+                    {% if docker_error_data is not null %}
+                        <p class="error-details">Error Details:</p>
+                        <ul class="error-listing">
+                            {% for error in docker_error_data %}
+                                <li class="error-content">
+                                    <strong>Image:</strong> {{ error.image }}<br>
+                                    <strong>Machine:</strong> {{ error.machine }}<br>
+                                    <strong>Error:</strong> {{ error.error }}<br>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
         <div class="box submission-page-total-header key_to_click" tabindex="0"
             {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"
