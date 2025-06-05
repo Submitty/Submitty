@@ -21,6 +21,7 @@ use app\entities\forum\Thread;
 use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
+use DateTime;
 
 /**
  * Class ForumHomeController
@@ -1366,30 +1367,43 @@ class ForumController extends AbstractController {
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
-            $result = $this->core->getQueries()->getPost($post_id);
-            $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+            $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
+            $post_id = $_POST["post_id"];
+            $result = $repo->getPostDetail($post_id);
             $GLOBALS['totalAttachments'] = 0;
             $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
                 "post_attachments" => ForumUtils::getForumAttachments(
                     $post_id,
-                    $result['thread_id'],
-                    $post_attachments[$post_id][0],
+                    $result->getThread()->getId(),
+                    $result->getAttachments()->filter(function ($x) {
+                        return $x->isCurrent();
+                    })->map(function ($x) {
+                        return $x->getFileName();
+                    })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 )
             ]);
-            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result->getAuthor()->getId()])) {
                 $output = [];
-                $output['post'] = $result["content"];
-                $output['post_time'] = $result['timestamp'];
-                $output['anon'] = $result['anonymous'];
-                $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-                $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-                $output['markdown'] = $result['render_markdown'];
+                $output['post'] = $result->getContent();
+                //Use standard ISO time as forum.js is responsible for formatting
+                $output['post_time'] = $result->getTimestamp()->format(DateTime::ATOM);
+
+                $output['anon'] = $result->isAnonymous();
+                $output['change_anon'] = $this->modifyAnonymous($result->getAuthor()->getId());
+                $output['user'] = $output['anon'] ? 'Anonymous' : $result->getAuthor()->getId();
+                $output['markdown'] = $result->isRenderMarkdown();
                 $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
-                    $this->getThreadContent($_POST["thread_id"], $output);
+                    $output['lock_thread_date'] = $result->getThread()->getLockDate()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['title'] = $result->getThread()->getTitle();
+                    $output['categories_ids'] =  $result->getThread()->getCategories()->map(function ($x) {
+                        return $x->getId();
+                    })->toArray();
+                    $output['thread_status'] = $result->getThread()->getStatus();
+                    $output['expiration'] = $result->getThread()->getPinnedExpiration()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
             }
@@ -1398,15 +1412,6 @@ class ForumController extends AbstractController {
             }
         }
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
-    }
-
-    private function getThreadContent($thread_id, &$output) {
-        $result = $this->core->getQueries()->getThread($thread_id);
-        $output['lock_thread_date'] = $result['lock_thread_date'];
-        $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
-        $output['thread_status'] = $result["status"];
-        $output['expiration'] = $result["pinned_expiration"];
     }
 
     // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
