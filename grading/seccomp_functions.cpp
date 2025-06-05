@@ -59,7 +59,7 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 std::set<std::string> system_call_categories_based_on_program
 (const std::string &my_program, const std::set<std::string> &restricted_categories) {
 
-  std::set<std::string> answer = {
+  std::set<std::string> default_categories = {
     "PROCESS_CONTROL_NEW_PROCESS_THREAD",
     "PROCESS_CONTROL_SCHEDULING",
     "PROCESS_CONTROL_ADVANCED",
@@ -71,7 +71,9 @@ std::set<std::string> system_call_categories_based_on_program
     "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
     "TGKILL"
   };
-      
+
+  std::set<std::string> answer;
+
   // --------------------------------------------------------------
   // HELPER UTILTIY PROGRAMS
   if (my_program == "/bin/cp") {
@@ -86,7 +88,6 @@ std::set<std::string> system_call_categories_based_on_program
   else if (my_program == "/usr/bin/time") {
     answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
   }
-
   else if (my_program == "/usr/bin/strace") {
     answer = restricted_categories;
   }
@@ -96,21 +97,21 @@ std::set<std::string> system_call_categories_based_on_program
   else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
     //TODO
     answer = restricted_categories;
-    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    answer.insert("FILE_MANAGEMENT_RARE");
-    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    //    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    //answer.insert("FILE_MANAGEMENT_RARE");
+    //answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
   }
 
   // ---------------------------------------------------------------
   // PYTHON
   else if (my_program.find("/usr/bin/python") != std::string::npos) {
     answer = restricted_categories; //TODO: fix
-    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    answer.insert("FILE_MANAGEMENT_RARE");
-    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
-    answer.insert("PROCESS_CONTROL_ADVANCED");
+    //answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    //answer.insert("FILE_MANAGEMENT_RARE");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    //answer.insert("PROCESS_CONTROL_ADVANCED");
   }
 
   // ---------------------------------------------------------------
@@ -207,7 +208,7 @@ std::set<std::string> system_call_categories_based_on_program
   }
 
   else {
-    answer = restricted_categories;
+    answer = default_categories;
   }
   
   return answer;
@@ -285,17 +286,17 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   std::set<std::string> default_categories =
     system_call_categories_based_on_program(my_program,restricted_categories);
 
-  execute_logfile << "categories based on program " << default_categories.size() << std::endl;
+  //execute_logfile << "categories based on program " << default_categories.size() << std::endl;
   
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
   const nlohmann::json &whole_config_safelist = whole_config.value("allow_system_calls",default_categories);
 
-  execute_logfile << "categories based on global config " << default_categories.size() << std::endl;
+  //execute_logfile << "categories based on global config " << whole_config_safelist.size() << std::endl;
   
   const nlohmann::json &config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
 
-  execute_logfile << "categories based on test case config " << default_categories.size() << std::endl;
+  //execute_logfile << "categories based on test case config " << config_safelist.size() << std::endl;
 
   std::set<std::string> categories;
   for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
@@ -312,8 +313,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     assert (restricted_categories.find(my_category) != restricted_categories.end());
     categories.insert(my_category);
   }
- 
-  //  categories = restricted_categories;
+
+  //execute_logfile << "categories " << categories.size() << std::endl;
 
   // make sure all categories are valid
   for_each(categories.begin(),categories.end(),

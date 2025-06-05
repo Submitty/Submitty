@@ -9,7 +9,6 @@
         "PROCESS_CONTROL_ADVANCED",
         "PROCESS_CONTROL_NEW_PROCESS_THREAD"
     ],
-    
     "testcases" : [
 	{
 	    "type" : "Compilation",
