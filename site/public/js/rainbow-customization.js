@@ -1,12 +1,11 @@
-/* exported addToTable, deleteRow */
+/* exported addToTable, deleteRow manageWarningsGradeables ResetPerGradeablePercents */
 /* global buildCourseUrl csrfToken displayErrorMessage displaySuccessMessage */
 
 const benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'];
 const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'];
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
-const tables = ['plagiarism', 'manualGrade'];
+const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
-// eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
@@ -18,24 +17,22 @@ function ExtractBuckets() {
     $('#custom_form').submit();
 }
 
-// Forces element's value to be non-negative
-// eslint-disable-next-line no-unused-vars
-function ClampPoints(el) {
-    if (el.value === '') {
-        el.value = el.placeholder;
-        el.classList.remove('override');
+// Forces the number of expected gradeables to be greater than or equal to the current number of gradeables
+function ClampGradeablesInBucket(el, num_gradeables) {
+    if (isNaN(el.value) || el.value < num_gradeables) {
+        el.value = num_gradeables;
+        displayErrorMessage('The expected number of gradeables must be greater than or equal to the current number of gradeables.');
+        saveChanges();
     }
-    el.value = Math.max(0.0, el.value);
 }
 
-// eslint-disable-next-line no-unused-vars
-function DetectMaxOverride(el) {
-    if (el.value !== el.placeholder) {
-        el.classList.add('override');
+// Forces element's value to be non-negative and between 0.0 - 100.0
+// Distinct from ClampPercent(), this is for Per Gradeable Percents
+function ClampPercents(el) {
+    if (el.value === '') {
+        el.value = el.placeholder;
     }
-    else {
-        el.classList.remove('override');
-    }
+    el.value = Math.min(Math.max(el.value, 0.0), 100.0);
 }
 
 function ExtractBucketName(s, offset) {
@@ -52,17 +49,47 @@ function ExtractBucketName(s, offset) {
 }
 
 // Forces element's value to be in range [0.0,100.0]
-// eslint-disable-next-line no-unused-vars
 function ClampPercent(el) {
     el.value = Math.min(Math.max(el.value, 0.0), 100.0);
     UpdateUsedPercentage();
     $(`#config-percent-${ExtractBucketName(el.id, 1)}`).text(`${el.value}%`);
 }
 
+// Forces sum of Per Gradeable Percents in a bucket to be below 100.0
+function ClampPerGradeablePercents(el, bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+    let sum = 0.0;
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        sum += parseFloat(textbox.val());
+    });
+
+    const warningIcon = $(`#per-gradeable-percents-warning-${bucket}`);
+    if (sum > 100.0) {
+        const excess = sum - 100.0;
+        warningIcon.show();
+        $(warningIcon.children()[0]).text(`WARNING: Per Gradeable Percents exceeds 100 by ${excess}. Do not be alarmed if this is due to Extra Credit`);
+    }
+    else {
+        warningIcon.hide();
+    }
+}
+
+// Resets Per Gradeable Percents in a given bucket to an even split
+function ResetPerGradeablePercents(bucket) {
+    const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+
+    percentsInputsInBucket.each((index, percentInput) => {
+        const textbox = $(percentInput).children().first();
+        textbox.val('').blur(); // If the textbox is empty, it resets to an even split onblur
+    });
+}
+
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent']").filter(function () {
+    $('input[id^=\'percent-\']').filter(function () {
         return $(this).parent().css('display') !== 'none';
     }).each(function () {
         val += parseFloat($(this).val());
@@ -78,7 +105,6 @@ function UpdateUsedPercentage() {
 }
 
 // Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
-// eslint-disable-next-line no-unused-vars
 function UpdateVisibilityBuckets() {
     // For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function () {
@@ -98,7 +124,6 @@ function UpdateVisibilityBuckets() {
     used_buckets.each(function () {
         // Extract the bucket name
         const bucket = ExtractBucketName($(this).attr('id'), 1);
-        console.log(`prev_bucket: ${prev_bucket} bucket: ${bucket}`);
         if (bucket !== prev_bucket) {
             $(`#config-${bucket}`).css('display', 'block');
             $(`#config-${prev_bucket}`).after($(`#config-${bucket}`));
@@ -111,7 +136,7 @@ function getDisplay() {
     // Collect display
     const display = [];
 
-    $.each($("input[name='display']:checked"), function () {
+    $.each($('input[name=\'display\']:checked'), function () {
         display.push($(this).val());
     });
 
@@ -122,14 +147,10 @@ function getSection() {
     // Collect sections and labels
     const sections = {};
 
-    $.each($("input[class='sections_and_labels']"), function () {
+    $.each($('.sections_and_labels'), function () {
         // Get data
         const section = this.getAttribute('data-section').toString();
         const label = this.value;
-
-        if (label === '') {
-            $('#save_status').text('All sections MUST have a label before saving');
-        }
 
         // Add to sections
         sections[section] = label;
@@ -138,11 +159,46 @@ function getSection() {
     return sections;
 }
 
+// Adds override class to sections with the same name, and shows warning if any sections have the same name
+function DetectSameSectionName() {
+    const labelCounts = {};
+    let hasDuplicates = false;
+
+    // Reset labels to remove override class
+    $('.sections_and_labels').removeClass('override');
+
+    // Count number of each section name, skip invalid names
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (!label) {
+            return;
+        }
+
+        if (!labelCounts[label]) {
+            labelCounts[label] = 0;
+        }
+        labelCounts[label] += 1;
+    });
+
+    // Add override class to duplicate section names only
+    $('.sections_and_labels').each(function () {
+        const label = this.value;
+        if (labelCounts[label] > 1) {
+            $(this).addClass('override');
+            hasDuplicates = true;
+        }
+    });
+
+    // Show/hide warning triangle
+    const warningIcon = $('#section-duplicate-warning');
+    warningIcon.toggle(hasDuplicates);
+}
+
 function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
 
-    $.each($("input[name='display_benchmarks']:checked"), function () {
+    $.each($('input[name=\'display_benchmarks\']:checked'), function () {
         display_benchmarks.push($(this).val());
     });
 
@@ -203,9 +259,19 @@ function getGradeableBuckets() {
                 const gradeable = {};
 
                 const children = $(this).children();
+                // children[0] represents <div id="gradeable-pts-div-*">
+                // children[1] represents <div id="gradeable-percents-div-*">
+                // replace divs with inputs
+                children[0] = children[0].querySelector('.max-score'); // can be either 1st, 2nd, or 3rd child
+                children[1] = children[1].children[0];
 
                 // Get max points
-                gradeable.max = parseFloat(children[0].value);
+                gradeable.max = parseFloat(children[0].dataset.maxScore);
+
+                // Get gradeable final grade percent, but only if Per Gradeable Percents was selected
+                if ($(children[1]).is(':visible')) {
+                    gradeable.percent = parseFloat(children[1].value) / 100.0;
+                }
 
                 // Get gradeable release date
                 gradeable.release_date = children[0].dataset.gradeReleaseDate;
@@ -277,6 +343,7 @@ function getGradeableBuckets() {
  * @param {string} table
  *      'plagiarism'
  *      'manualGrade'
+ *      'performanceWarnings'
  */
 function getTableData(table) {
     if (!tables.includes(table)) {
@@ -288,6 +355,7 @@ function getTableData(table) {
     const tableMap = {
         plagiarism: 'plagiarism-table-body',
         manualGrade: 'manual-grading-table-body',
+        performanceWarnings: 'performance-warnings-table-body',
     };
     const tableBody = document.getElementById(tableMap[table]);
     const rows = tableBody.getElementsByTagName('tr');
@@ -312,6 +380,14 @@ function getTableData(table) {
                 note: thirdInput,
             });
         }
+        else if (table === 'performanceWarnings') {
+            const secondInputArray = secondInput.split(', ');
+            data.push({
+                msg: firstInput,
+                ids: secondInputArray,
+                value: parseFloat(thirdInput),
+            });
+        }
     }
 
     return data;
@@ -322,6 +398,7 @@ function getTableData(table) {
  * @param {string} table
  *     'plagiarism'
  *     'manualGrade'
+ *     'performanceWarnings'
  */
 function addToTable(table) {
     if (!tables.includes(table)) {
@@ -331,10 +408,21 @@ function addToTable(table) {
     const tableMap = {
         plagiarism: ['plagiarism-table-body', 'plagiarism-user-id', 'g_id', 'marks'],
         manualGrade: ['manual-grading-table-body', 'manual-grading-user-id', 'manual-grading-grade', 'manual-grading-note'],
+        performanceWarnings: ['performance-warnings-table-body', 'performance-warnings-message', 'performance-warnings-gradeables', 'performance-warnings-score'],
     };
 
     const firstInput = document.getElementById(tableMap[table][1]).value.trim();
-    const secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    let secondInput;
+    if (table === 'performanceWarnings') { // Performance Warnings gets an object[] for the second input
+        const secondInputArray = [];
+        $('#performance-warnings-gradeables').select2('data').forEach((element) => {
+            secondInputArray.push(element.id);
+        });
+        secondInput = secondInputArray.join(', ');
+    }
+    else {
+        secondInput = document.getElementById(tableMap[table][2]).value.trim();
+    }
     const thirdInput = document.getElementById(tableMap[table][3]).value.trim();
 
     // Check whether input is allowed
@@ -396,6 +484,27 @@ function addToTable(table) {
             }
             break;
         }
+        case 'performanceWarnings': {
+            if (firstInput === '' || secondInput === '' || thirdInput === '') {
+                alert('Please fill in all fields.');
+                return;
+            }
+            const inputGradeables = secondInput.split(', ');
+            let entryGradeables = [];
+            $('#performance-warnings-table-body tr').each(function () {
+                entryGradeables = $(this).find('td:nth-child(2)').text().split(', ');
+            });
+            const overlappingGradeables = inputGradeables.filter((inputGradeable) => entryGradeables.includes(inputGradeable));
+            if (overlappingGradeables.length > 0) {
+                alert(`Entry with Gradeable(s) '${overlappingGradeables.join(', ')}' already exists`);
+                return;
+            }
+            if (parseFloat(thirdInput) <= 0) {
+                alert('Score must be a number greater than 0');
+                return;
+            }
+            break;
+        }
     }
 
     // Create a new row and cells
@@ -417,6 +526,9 @@ function addToTable(table) {
     deleteLink.appendChild(deleteIcon);
     deleteLink.onclick = function () {
         deleteRow(this);
+        if (table === 'performanceWarnings') {
+            manageWarningsGradeables('delete');
+        }
     };
     cellDelete.appendChild(deleteLink);
 
@@ -431,6 +543,32 @@ function deleteRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
     saveChanges();
+}
+
+/**
+ * Enables or disables gradeable options in the performance warnings table
+ *
+ * @param submitOrDelete 'submit' or 'delete'
+ */
+function manageWarningsGradeables(submitOrDelete) {
+    let entryGradeables = [];
+    $('#performance-warnings-table-body tr').each(function () {
+        entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+    });
+    if (submitOrDelete === 'submit') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (entryGradeables.includes($(this).val())) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+    else if (submitOrDelete === 'delete') {
+        $('#performance-warnings-gradeables option').each(function () {
+            if (!entryGradeables.includes($(this).val())) {
+                $(this).removeAttr('disabled');
+            }
+        });
+    }
 }
 
 function getMessages() {
@@ -476,7 +614,7 @@ function getBenchmarkPercent() {
 
 function getFinalCutoffPercent() {
     // Verify that final_grade is used, otherwise set values to default (which will be unused)
-    if (!$("input[value='final_grade']:checked").val()) {
+    if (!$('input[value=\'final_grade\']:checked').val()) {
         return {
             'A': 93.0,
             'A-': 90.0,
@@ -531,6 +669,7 @@ function buildJSON() {
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
         manual_grade: getTableData('manualGrade'),
+        warning: getTableData('performanceWarnings'),
     };
 
     ret = JSON.stringify(ret);
@@ -545,11 +684,9 @@ function showLogButton(responseData) {
 
 function sendSelectedValue() {
     return new Promise((resolve, reject) => {
-        const selected_value = $("input[name='customization']:checked").val();
-        // eslint-disable-next-line no-undef
+        const selected_value = $('input[name=\'customization\']:checked').val();
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
         const formData = new FormData();
-        // eslint-disable-next-line no-undef
         formData.append('csrf_token', csrfToken);
         formData.append('selected_value', selected_value);
 
@@ -590,9 +727,7 @@ function sendSelectedValue() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function runBuild() {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['reports', 'build_form']);
 
     sendSelectedValue()
@@ -652,17 +787,28 @@ function checkBuildStatus() {
 }
 
 $(document).ready(() => {
-    $("input[name*='display']").change(() => {
+    // Run when page loads
+    DetectSameSectionName();
+    $('input[name*=\'display\']').change(() => {
         saveChanges();
     });
     // Register change handlers to update the status message when form inputs change
-    $("input[name*='display_benchmarks']").change(() => {
+    $('input[name*=\'display_benchmarks\']').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
         saveChanges();
     });
+    $('.benchmark_percent_input').on('change keyup paste', () => {
+        saveChanges();
+    });
     $('.sections_and_labels').on('change keyup paste', () => {
+        saveChanges();
+    });
+    $('.sections_and_labels').on('input', () => {
+        DetectSameSectionName();
+    });
+    $('.final_cutoff_input').on('change keyup paste', () => {
         saveChanges();
     });
     // Attach a focusout event handler to all input and textarea elements within #gradeables after user finishes typing
@@ -670,19 +816,21 @@ $(document).ready(() => {
         saveChanges();
     });
 
-    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
-    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    // select the target node
-    const target = document.querySelector('#buckets_used_list');
-    // create an observer instance
-    // eslint-disable-next-line no-unused-vars
-    const observer = new MutationObserver((mutations) => {
+    // This mutation observer catches changes to bucket assignments (available buckets to assigned buckets, and vice versa)
+    const targetBucketReassignment = document.querySelector('#buckets_used_list');
+    const observerBucketReassignment = new MutationObserver((mutations) => {
         saveChanges();
     });
-    // configuration of the observer:
-    const config = { attributes: true, childList: true, characterData: true };
-    // pass in the target node, as well as the observer options
-    observer.observe(target, config);
+    const configBucketReassignment = { attributes: true, childList: true, characterData: true };
+    observerBucketReassignment.observe(targetBucketReassignment, configBucketReassignment);
+
+    // This mutation observer catches automatic bucket assignments on page load
+    const targetAutomaticBucketAssignment = document.querySelector('.bucket_detail_div');
+    const observerAutomaticBucketAssignment = new MutationObserver((mutations) => {
+        saveChanges();
+    });
+    const configAutomaticBucketAssignment = { attributes: true, attributeFilter: ['style'] };
+    observerAutomaticBucketAssignment.observe(targetAutomaticBucketAssignment, configAutomaticBucketAssignment);
 });
 
 function saveChanges() {
@@ -690,7 +838,14 @@ function saveChanges() {
     const url = buildCourseUrl(['reports', 'rainbow_grades_customization_save']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
-    formData.append('json_string', buildJSON());
+    try {
+        formData.append('json_string', buildJSON());
+    }
+    catch (err) {
+        console.error(err);
+        $('#save_status').text('An error occurred while saving.');
+        return;
+    }
 
     $.ajax({
         url: url,
@@ -700,13 +855,11 @@ function saveChanges() {
         processData: false,
         contentType: false,
         success: function (response) {
-            console.log(response);
             if (response['status'] === 'success') {
                 $('#save_status').text('All changes saved');
             }
             else {
-                // lets keep the alert, because users may not notice it even if it fails
-                alert(`An error occurred: ${response.data}`);
+                console.error(response);
             }
         },
         // error: function (jqXHR, textStatus, errorThrown) {
@@ -734,7 +887,7 @@ function saveChanges() {
 }
 
 $(document).ready(() => {
-    $("input[name='customization']").change(() => {
+    $('input[name=\'customization\']').change(() => {
         $('#save_status').text('Switched customization, need to rebuild');
     });
 });
@@ -781,6 +934,7 @@ function setCustomizationItemVisibility(elem) {
         final_grade: '#final_grade_cutoffs',
         messages: '#cust_messages',
         section: '#section_labels',
+        warning: '#performance-warnings',
     };
     const checkbox_name = elem.value;
     const cust_item_id = checkbox_to_cust_item[checkbox_name];
@@ -796,7 +950,6 @@ function setCustomizationItemVisibility(elem) {
 
 $(document).ready(() => {
     // Make the per-gradeable curve inputs toggle when the icon is clicked
-    // eslint-disable-next-line no-unused-vars
     $('.fa-gradeable-curve').click(function (event) {
         const id = jQuery(this).attr('id').split('-')[3];
         $(`#gradeable-curve-div-${id}`).toggle();
@@ -839,7 +992,7 @@ $(document).ready(() => {
      * Configure visibility handler for all customization items other than benchmark percents
      * Visibility is controlled by whether the corresponding boxes are selected in the display area
      */
-    const dropdown_checkboxes = ['final_grade', 'messages', 'section'];
+    const dropdown_checkboxes = ['final_grade', 'messages', 'section', 'warning'];
     $('#display input').each(function () {
         if (dropdown_checkboxes.includes(this.value)) {
             // Set the initial visibility on load
@@ -875,7 +1028,6 @@ $(document).ready(() => {
         const selected_file = $(this)[0].files[0];
         console.log('Selected File: ', selected_file);
 
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
         console.log('URL: ', url);
 
@@ -943,5 +1095,125 @@ $(document).ready(() => {
         dropLowestDivs.each((index, dropLowestDiv) => {
             $(dropLowestDiv).css('display', isChecked ? 'block' : 'none');
         });
+    });
+
+    { // Manage performance warnings table
+        $('#performance-warnings-gradeables').select2({
+            theme: 'bootstrap-5',
+            placeholder: ' -- select an option -- ',
+            multiple: true,
+            allowClear: true,
+        });
+        const gradeablesDropdownOptions = $('#performance-warnings-gradeables option');
+        // Remove empty option to trick browser
+        gradeablesDropdownOptions[0].remove();
+        // Hide selected gradeables
+        let entryGradeables = [];
+        $('#performance-warnings-table-body tr').each(function () {
+            entryGradeables = entryGradeables.concat($(this).find('td:nth-child(2)').text().split(', '));
+        });
+        gradeablesDropdownOptions.each(function () {
+            const gradeableID = $(this).val();
+            if (entryGradeables.includes(gradeableID)) {
+                $(this).attr('disabled', 'disabled');
+            }
+        });
+    }
+
+    // Set placeholder values of Per Gradeable Percents to (1 / # items in bucket), with one decimal place
+    const bucketItemCounts = $('input[id^="config-count-"]');
+    bucketItemCounts.each((index, bucketItemCountDOMElement) => {
+        const bucketItemCount = $(bucketItemCountDOMElement);
+        const bucket = bucketItemCount.prop('id').match(/^config-count-(.+)$/)[1];
+        const gradeablePercents = $(`div[id^="gradeable-percents-div-${bucket}-"]`);
+        gradeablePercents.each((index, gradeablePercentDOMElement) => {
+            const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+            gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            if (gradeablePercentInput.val() === '') {
+                gradeablePercentInput.val(gradeablePercentInput.attr('placeholder'));
+            }
+        });
+        bucketItemCount.on('blur', () => {
+            gradeablePercents.each((index, gradeablePercentDOMElement) => {
+                const gradeablePercentInput = $(gradeablePercentDOMElement).find('input');
+                gradeablePercentInput.attr('placeholder', Math.floor(1 / parseFloat(bucketItemCount.val()) * 1000) / 10);
+            });
+        });
+    });
+
+    // Per Gradeable Percents checked on-ready if at least one Per Gradeable Percents is checked
+    const enablePerGradeablePercents = $('#enable-per-gradeable-percents');
+    const perGradeablePercentsCheckboxes = $('input[id^="per-gradeable-percents-checkbox-"]');
+    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
+        if ($(perGradeablePercentsCheckboxDOMElement).is(':checked')) {
+            enablePerGradeablePercents.prop('checked', true);
+            return false; // Break loop
+        }
+    });
+
+    // Control visibility of per gradeable percent checkboxes
+    const perGradeablePercentsLabels = $('label[id^="per-gradeable-percents-label-"]');
+    const perGradeablePercentsReset = $('button[id^="per-gradeable-percents-reset-"]');
+    const isChecked = enablePerGradeablePercents.is(':checked');
+    perGradeablePercentsCheckboxes.each((index, checkbox) => {
+        $(checkbox).toggle(isChecked);
+    });
+    perGradeablePercentsLabels.each((index, label) => {
+        $(label).toggle(isChecked);
+    });
+    perGradeablePercentsReset.each((index, button) => {
+        if (isChecked === false) { // Only hide, otherwise element will be out of place
+            $(button).hide();
+        }
+    });
+    enablePerGradeablePercents.change(function (event) {
+        event.stopPropagation();
+        const isChecked = $(this).is(':checked');
+        perGradeablePercentsCheckboxes.each((index, checkbox) => {
+            $(checkbox).toggle(isChecked);
+        });
+        perGradeablePercentsLabels.each((index, label) => {
+            $(label).toggle(isChecked);
+        });
+        perGradeablePercentsReset.each((index, button) => {
+            if (isChecked === false) { // Only hide, otherwise element will be out of place
+                $(button).hide();
+            }
+        });
+    });
+
+    // Control visibility of per gradeable percent input boxes
+    perGradeablePercentsCheckboxes.each((index, perGradeablePercentsCheckboxDOMElement) => {
+        const perGradeablePercentsCheckbox = $(perGradeablePercentsCheckboxDOMElement);
+        const bucket = perGradeablePercentsCheckbox[0].id.match(/^per-gradeable-percents-checkbox-(.+)$/)[1];
+        const percentsInputsInBucket = $(`div[id^="gradeable-percents-div-${bucket}"]`);
+        const resetButtonInBucket = $(`button[id^="per-gradeable-percents-reset-${bucket}"]`);
+        ClampPerGradeablePercents(percentsInputsInBucket.children()[0], bucket);
+
+        const isChecked = perGradeablePercentsCheckbox.is(':checked');
+        percentsInputsInBucket.each((index, percentInput) => {
+            $(percentInput).toggle(isChecked);
+        });
+        resetButtonInBucket.each((index, resetButton) => {
+            $(resetButton).toggle(isChecked);
+        });
+
+        perGradeablePercentsCheckbox.change(function (event) {
+            event.stopPropagation();
+            const isChecked = $(this).is(':checked');
+            percentsInputsInBucket.each((index, percentInput) => {
+                $(percentInput).toggle(isChecked);
+            });
+            resetButtonInBucket.each((index, resetButton) => {
+                $(resetButton).toggle(isChecked);
+            });
+        });
+    });
+});
+
+$(document).ready(() => {
+    // Bind click listener to grade summaries button
+    $('#grade-summaries-button').click(() => {
+        $('#grade-summaries-last-run').text('Running...');
     });
 });

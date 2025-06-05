@@ -28,19 +28,19 @@
             <input type="text" name="user_numeric_id" id="user_numeric_id" placeholder="Digits Only (Optional)" />
         </label>
         <label for="user_givenname">
-            Legal First Name:
+            Legal Given Name:
             <input type="text" name="user_givenname" id="user_givenname" placeholder="(Required)" />
         </label>
         <label for="user_preferred_givenname">
-            Preferred First Name:
+            Preferred Given Name:
             <input type="text" name="user_preferred_givenname" id="user_preferred_givenname" placeholder="(Optional)" />
         </label>
         <label for="user_familyname">
-            Legal Last Name:
+            Legal Family Name:
             <input type="text" name="user_familyname" id="user_familyname" placeholder="(Required)" />
         </label>
         <label for="user_preferred_familyname">
-            Preferred Last Name:
+            Preferred Family Name:
             <input type="text" name="user_preferred_familyname" id="user_preferred_familyname" placeholder="(Optional)" />
         </label>
         <label for="user_email">
@@ -63,7 +63,7 @@
         {% endif %}
         <label for="registered_section" class="full-width">
             Registration Section:
-            <select name="registered_section" id="registered_section">
+            <select name="registered_section" id="registered_section" data-testid="registration-section-dropdown">
                 <option value="null">Not Registered</option>
                 {% for section in reg_sections %}
                     <option value='{{ section.sections_registration_id }}'>Section {{ section.sections_registration_id }}</option>
@@ -127,5 +127,5 @@
 {% block close_click_action %}closeButton(){% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" data-testid="submit-user-form-button" />
 {% endblock %}

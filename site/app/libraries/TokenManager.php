@@ -111,7 +111,7 @@ class TokenManager {
         ];
         foreach ($headers as $key => $value) {
             if ($token->headers()->get($key) !== $value) {
-                throw new \InvalidArgumentException("Invalid value for ${key}: ${value}");
+                throw new \InvalidArgumentException("Invalid value for {$key}: {$value}");
             }
         }
 

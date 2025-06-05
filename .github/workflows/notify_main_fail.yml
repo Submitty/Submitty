@@ -2,7 +2,7 @@ name: Notify on Main Failure
 
 on:
   workflow_run:
-    workflows: [Submitty CI]
+    workflows: [CI]
     types: [completed]
     branches:
       - 'main'

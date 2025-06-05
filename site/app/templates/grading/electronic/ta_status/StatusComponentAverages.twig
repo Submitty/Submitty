@@ -1,7 +1,7 @@
 {# Setup for Component Average Graphs#}
 
 <div id="component-averages" class="page-content">
-    <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
+    <div id="Graph2"><!-- Plotly chart will be drawn inside this DIV --></div>
     
     <script>
         var xValue = [];
@@ -53,13 +53,19 @@
         var data = [trace2, trace1];
 
         var layout = {
-            title: 'Manually Graded Component Averages',
+            title: {
+                text: 'Manually Graded Component Averages',
+            },
             barmode: 'overlay',
             xaxis: {
-                title: 'Components'
+                title: {
+                    text: 'Components'
+                }
             },
             yaxis:{
-                title: 'Scores'
+                title: {
+                    text: 'Scores'
+                }
             },
             font: {
                 family: '"Source Sans Pro", sans-serif',
@@ -67,7 +73,7 @@
 
         };
 
-        Plotly.newPlot('myDiv2', data, layout, {displayModeBar: false,displaylogo: false});
+        Plotly.newPlot('Graph2', data, layout, {displayModeBar: false,displaylogo: false});
     </script>
      <br/>
     <br/>

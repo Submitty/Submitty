@@ -21,12 +21,14 @@ $( document ).ready(function() {
 {% else %}
     <div class="sub">
         {% if not active_same_as_graded %}
-            <h3>The version you have selected to be graded above does not match the version graded by your TA/instructor, please contact TA/instructor if necessary to resolve the problem.</h3>
+            <h3 data-testid="version-conflict-ta">A
+            <a href="https://submitty.org/student/submission/submission_version_conflict" target="_blank"> Version Conflict <i class="fa-question-circle" style="font-style:normal;"></i></a>
+            has been detected in your submission. A grade of zero will be recorded in the gradebook. Please resolve as necessary.</h3>
             <br>
         {% endif %}
         {% if ta_components | length > 0 %}
             {# TA/Instructor Manual total #}
-            <div class="box submission-page-total-header">
+            <div class="box submission-page-total-header" data-testid="ta-total-score">
                 <div class="box-title-total key_to_click" tabindex="0">
 
                     {{ Badge.render(ta_score, ta_max, false, active_same_as_graded) }}
@@ -106,14 +108,20 @@ $( document ).ready(function() {
         </div>
         {# Overview #}
         {# /Component boxes #}
-    {% if is_grade_inquiry_yet_to_start %}
-        <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
-    {% elseif grade_inquiry_available %}
-        <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
-        <div id="ShowGradeInquiryButton">
-            <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default" tabindex="0">Open Grade Inquiry</button>
-        </div>
-    {% elseif is_grade_inquiry_ended %}
-        <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
-    {% endif %}
+    <div id="grade-inquiry-container" data-testid="grade-inquiry-container">
+        {% if is_grade_inquiry_valid %}
+            {% if is_grade_inquiry_yet_to_start %}
+                <i>Grade Inquiries will start from</i> <b>{{ grade_inquiry_start_date|date(date_time_format)  }}</b>
+            {% elseif grade_inquiry_available %}
+                <i>Grade inquiries are due by</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+                <div id="ShowGradeInquiryButton">
+                    <button type="button" title="Open Grade Inquiry" onclick="$('#gradeInquiryBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#gradeInquiryBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default" tabindex="0">Open Grade Inquiry</button>
+                </div>
+            {% elseif is_grade_inquiry_ended %}
+                <i>Grade inquiries closed on</i> <b>{{ grade_inquiry_due_date|date(date_time_format)  }}</b>
+            {% endif %}
+        {% else %}
+            <i>There will be no grade inquiries. Contact the instructor if this is a mistake.</i>
+        {% endif %}
+    </div>
 {% endif %}

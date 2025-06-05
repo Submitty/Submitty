@@ -1,0 +1,40 @@
+name: Move PR to In Review
+on:
+  pull_request_target:
+    types:
+      - review_requested
+
+env:
+  PR_ID: ${{ github.event.pull_request.number }}
+
+jobs:
+  move-to-in-review:
+    name: Move to In Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+
+      - name: Get PR project ID
+        id: get-pr-id
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          PR_PROJECT_ID="$(gh project item-list -L 9999 --owner Submitty 1 --format json --jq "[.items[] | {id, labels, status, title: .content.title, repo: .content.repository, number: .content.number}] | .[] | select(.number == "$PR_ID").id")"
+          echo "pr-project-id="${PR_PROJECT_ID:?}"" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Move PR to In Review
+        if: ${{ ! github.event.pull_request.draft }}
+        env:
+          PR_PROJECT_ID: ${{ steps.get-pr-id.outputs.pr-project-id }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          source .github/bin/board_automation_helper.sh
+          gh project item-edit --project-id "$PROJECT_ID" --id "$PR_PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$IN_REVIEW_ID"
