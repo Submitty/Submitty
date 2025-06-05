@@ -4,7 +4,6 @@ import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta
 import {
     closeAllComponents,
     closeComponent,
-    Component,
     ComponentGradeInfo,
     CUSTOM_MARK_ID,
     getAnonId,
@@ -16,19 +15,17 @@ import {
     getPrevComponentId,
     isSilentEditModeEnabled,
     NO_COMPONENT_ID,
+    toggleComponent as oldToggleComponent,
     onToggleEditMode,
     scrollToComponent,
     scrollToOverallComment,
     toggleCommonMark,
-    toggleComponent,
 } from './ta-grading-rubric';
 
 declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
         reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
-        toggleComponent(component_id: number, saveChanges: boolean, edit_mode: boolean): Promise<void>;
-        onAjaxInit(): void;
         showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
         onAddNewMark(me: HTMLElement): Promise<void>;
         onRestoreMark(me: HTMLElement): void;
@@ -85,14 +82,10 @@ declare global {
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
-        ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]): Promise<string | undefined>;
         getGradeableId(): string | undefined;
-        getAnonId (): string | undefined;
         canVerifyGraders(): boolean;
-        getComponentIdFromDOMElement(me: HTMLElement): number;
         isItempoolAvailable(): string;
         getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
-        getAllComponentsFromDOM(): Component[];
         toggleCustomMark(component_id: number): Promise<void>;
         onToggleEditMode(): Promise<void>;
         addComponent(peer: boolean): Promise<string | undefined>;
@@ -569,12 +562,13 @@ function changeStudentArrowTooltips(data: string) {
     }
 }
 
-window.toggleComponent = async function (component_id, saveChanges) {
-    await toggleComponent(component_id, saveChanges);
+async function toggleComponent(component_id: number, saveChanges: boolean, edit_mode: boolean): Promise<void> {
+    void edit_mode; // to avoid unused variable warning
+    await oldToggleComponent(component_id, saveChanges);
     changeStudentArrowTooltips(
         localStorage.getItem('general-setting-arrow-function') || 'default',
     );
-};
+}
 
 function checkNotebookScroll() {
     if (
@@ -1697,7 +1691,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
     if (openComponentId === NO_COMPONENT_ID) {
         // No component is open, so open the first one
         const componentId = getComponentIdByOrder(0);
-        void window.toggleComponent(componentId, true, false).then(() => {
+        void toggleComponent(componentId, true, false).then(() => {
             scrollToComponent(componentId);
         });
     }
@@ -1705,7 +1699,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
         // Last component is open, close it and then open and scroll to first component
         void closeComponent(openComponentId, true).then(() => {
             const componentId = getComponentIdByOrder(0);
-            void window.toggleComponent(componentId, true, false).then(() => {
+            void toggleComponent(componentId, true, false).then(() => {
                 scrollToComponent(componentId);
             });
         });
@@ -1713,7 +1707,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
     else {
         // Any other case, open the next one
         const nextComponentId = getNextComponentId(openComponentId);
-        void window.toggleComponent(nextComponentId, true, false).then(() => {
+        void toggleComponent(nextComponentId, true, false).then(() => {
             scrollToComponent(nextComponentId);
         });
     }
@@ -1740,7 +1734,7 @@ registerKeyHandler(
             // First component is open, close it and then open and scroll to the last one
             void closeComponent(openComponentId, true).then(() => {
                 const componentId = getComponentIdByOrder(numComponents - 1);
-                void window.toggleComponent(componentId, true, false).then(() => {
+                void toggleComponent(componentId, true, false).then(() => {
                     scrollToComponent(componentId);
                 });
             });
@@ -1748,7 +1742,7 @@ registerKeyHandler(
         else {
             // Any other case, open the previous one
             const prevComponentId = getPrevComponentId(openComponentId);
-            void window.toggleComponent(prevComponentId, true, false).then(() => {
+            void toggleComponent(prevComponentId, true, false).then(() => {
                 scrollToComponent(prevComponentId);
             });
         }

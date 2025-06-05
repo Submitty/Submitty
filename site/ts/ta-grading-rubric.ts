@@ -862,7 +862,7 @@ async function ajaxVerifyAllComponents(gradeable_id: string | undefined, anon_id
  * @throws {Error} Throws except when the response returns status 'success'
  * @return {Object}
  */
-async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]) {
+export async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]) {
     let response: Record<string, string | undefined> | null;
     try {
         response = await $.ajax({
@@ -890,7 +890,6 @@ async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id
         return response.data;
     }
 }
-window.ajaxChangeGradedVersion = ajaxChangeGradedVersion;
 
 /**
  * Gets if the 'verify' button should show up for a component
@@ -928,7 +927,6 @@ window.getGradeableId = getGradeableId;
 export function getAnonId(): string {
     return $('#anon-id').attr('data-anon_id')!;
 }
-window.getAnonId = getAnonId;
 
 /**
  * Gets the id of the grader
@@ -1037,13 +1035,12 @@ function setRubricDOMElements(elements: string | Element | DocumentFragment | Do
  * @param me DOM element
  * @return {int}
  */
-function getComponentIdFromDOMElement(me: HTMLElement) {
+export function getComponentIdFromDOMElement(me: HTMLElement) {
     if ($(me).hasClass('component')) {
         return parseInt($(me).attr('data-component_id')!);
     }
     return parseInt($(me).parents('.component').attr('data-component_id')!);
 }
-window.getComponentIdFromDOMElement = getComponentIdFromDOMElement;
 
 /**
  * Gets the mark id of a DOM element inside a mark
@@ -1242,14 +1239,13 @@ function setMarkTitle(mark_id: number, title: string | number | string[] | ((thi
  * Loads all components from the DOM
  * @returns {Array}
  */
-function getAllComponentsFromDOM() {
+export function getAllComponentsFromDOM() {
     const components: Component[] = [];
     $('.component').each(function () {
         components.push(getComponentFromDOM(getComponentIdFromDOMElement(this)));
     });
     return components;
 }
-window.getAllComponentsFromDOM = getAllComponentsFromDOM;
 
 /**
  * Gets the page number assigned to a component
