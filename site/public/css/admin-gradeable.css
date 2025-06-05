@@ -348,3 +348,13 @@ body::-webkit-scrollbar-track {
 .text-table {
     max-width: 25%;
 }
+
+.statistic-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-top: 5px;
+    row-gap: 5px;
+    column-gap: 15px;
+}

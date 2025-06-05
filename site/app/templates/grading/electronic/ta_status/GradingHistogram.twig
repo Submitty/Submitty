@@ -105,30 +105,24 @@
             }
         };
 
-        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false});
+        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
     </script>
 
-    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}" style="margin-top: 5px;">
-        <style>
-            .statistic-value {
-                margin-right: 15px;
-            }
-        </style>
-
+    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}" class="statistic-container">
         <script>
             document.write(
-                '<span class="statistic-value">' +
+                '<span>' +
                     '<b>Mean: </b>' +
                     {{ type == 'total' ? overall_average != null ? overall_average.getAverageScore() | default(0) : 0
                     : (type == 'auto' ? autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0
                     : (type == 'manual' ? manual_average != null ? manual_average.getAverageScore() | default(0) : 0 ))
                     }} + '</span>' +
-                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
-                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
-                    '<span class="statistic-value"><b>Minimum: </b>' + min{{ type }} + '</span>' +
-                    '<span class="statistic-value"><b>Maximum: </b>' + max{{ type }} + '</span>' +
-                    '<span class="statistic-value"><b>Range: </b>' + `[${min{{ type }}}, ${max{{ type }}}]` + '</span>' +
-                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min{{ type }} + '</span>' +
+                    '<span><b>Maximum: </b>' + max{{ type }} + '</span>' +
+                    '<span><b>Range: </b>' + `[${min{{ type }}}, ${max{{ type }}}]` + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
                     {{ type == 'total' ? overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0
                     : type == 'auto' ? autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0
                     : manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0

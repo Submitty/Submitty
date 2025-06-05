@@ -95,16 +95,16 @@
             Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
             bucketInputTotal.value='';
             document.getElementById("SmallHistogram").innerHTML=
-                '<span class="statistic-value">' +
+                '<span>' +
                     '<b>Mean: </b>' +
                     {{ overall_average != null ? overall_average.getAverageScore() | default(0) : 0 }}
                     + '</span>' +
-                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
-                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
-                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
-                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
-                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
-                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
                     {{ overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
             return mode;
@@ -121,16 +121,16 @@
             Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputAuto.value='';
             document.getElementById("SmallHistogram3").innerHTML=
-                '<span class="statistic-value">' +
+                '<span>' +
                     '<b>Mean: </b>' +
                     {{ autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0 }}
                     + '</span>' +
-                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
-                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
-                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
-                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
-                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
-                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
                     {{ autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
             return mode;
@@ -147,16 +147,16 @@
             Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputManual.value='';
             document.getElementById("SmallHistogram4").innerHTML=
-                '<span class="statistic-value">' +
+                '<span>' +
                     '<b>Mean: </b>' +
                     {{ manual_average != null ? manual_average : 0 }}
                     + '</span>' +
-                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
-                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
-                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
-                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
-                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
-                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
                     {{ manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
             return mode;
