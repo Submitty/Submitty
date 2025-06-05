@@ -90,13 +90,17 @@ select {
     margin: -10px 0px 10px 0px;
 }
 
-.bucket-size-container input {
+.bucket-size-input {
     width: auto;
 }
 
-.bucket-size-container button {
+.bucket-size-submit-button {
+    width: 75px;
     height: 30px;
+    cursor: pointer;
     padding: 0px 10px;
+    caret-color: transparent;
+    background-color: var(--actionable-blue);
 }
 
 .peer-button {

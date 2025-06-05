@@ -4,21 +4,21 @@
 
     <div class="bucket-size-container">
         <input
+            class="bucket-size-input"
             type='text'
             id='bucket-size-{{ type }}'
             name='bucket-val'
             value=""
             placeholder="Enter bucket size"
         />
-        <button
+        <input
             name="sub-{{ type }}"
-            class="btn btn-primary key_to_click"
+            class="bucket-size-submit-button btn btn-primary key_to_click"
             tabindex="0"
             id="submit_bucket_{{ type }}"
+            value="Submit"
             onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
-        >
-            Submit
-        </button>
+        />
     </div>
 
     <div id="Histogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
