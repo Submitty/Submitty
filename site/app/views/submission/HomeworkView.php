@@ -527,6 +527,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addInternalJs('submit-box.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
