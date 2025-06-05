@@ -53,13 +53,19 @@
         var data = [trace2, trace1];
 
         var layout = {
-            title: 'Manually Graded Component Averages',
+            title: {
+                text: 'Manually Graded Component Averages',
+            },
             barmode: 'overlay',
             xaxis: {
-                title: 'Components'
+                title: {
+                    text: 'Components'
+                }
             },
             yaxis:{
-                title: 'Scores'
+                title: {
+                    text: 'Scores'
+                }
             },
             font: {
                 family: '"Source Sans Pro", sans-serif',

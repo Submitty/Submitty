@@ -115,13 +115,19 @@
             var data = [trace1, trace2, trace3];
 
             var layout = {
-                title: `${xLabel} vs. ${yLabel}`,
+                title: {
+                    text: `${xLabel} vs. ${yLabel}`
+                },
                 barmode: 'overlay',
                 xaxis: {
-                    title: xLabel
+                    title: {
+                        text: xLabel
+                    }
                 },
                 yaxis: {
-                    title: yLabel
+                    title: {
+                        text: yLabel
+                    }
                 },
                 font: {
                     family: '"Source Sans Pro", sans-serif',
