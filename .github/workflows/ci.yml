@@ -407,6 +407,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -416,6 +417,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -648,6 +650,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -806,7 +809,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding"]
     services:
       postgres:
         image: postgres
@@ -814,6 +817,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -825,7 +829,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: ./.github/actions/e2e-Setup-Composite
+
+      # If the matrix is currently on Autograding, we should use the development course
+      # and use the no_submissions flag
+      - name: Run setup script with inputs (Autograding)
+        if: ${{ matrix.containers == 'Autograding' }}
+        uses: ./.github/actions/e2e-Setup-Composite
+        with:
+          courses: development
+          flags: --no_submissions
+
+      - name: Run setup script without inputs (Other containers)
+        if: ${{ matrix.containers != 'Autograding' }}
+        uses: ./.github/actions/e2e-Setup-Composite
+
       # TODO: Remove this block after upgrading jsPDF
       - name: Cache Node Modules
         uses: actions/cache@v4
@@ -878,6 +895,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
