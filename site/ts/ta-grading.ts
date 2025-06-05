@@ -236,6 +236,23 @@ $(() => {
         }
     });
 
+    window.addEventListener('resize', () => {
+        const name_div = $('#grading-panel-student-name');
+        // have to calculate the height since the item is positioned absolutely
+        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
+        const padding_bottom = 12;
+        name_div.css('height', height - padding_bottom);
+        name_div.show();
+        const panel_buttons_bbox = $('.panel-header-box')[0].getClientRects()[0];
+        const name_div_bbox = name_div[0].getClientRects()[0];
+
+        const overlap_margin = 15;
+        const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
+        if (overlapping || window.taLayoutDet.isFullLeftColumnMode) {
+            $('#grading-panel-student-name').hide();
+        }
+    });
+
     loadTAGradingSettingData();
 
     for (let i = 0; i < settingsData.length; i++) {
