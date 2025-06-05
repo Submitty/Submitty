@@ -23,9 +23,6 @@ def up(config):
         with open(CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
-        print("Migration complete: Added 'course_material_file_upload_limit_mb' to submitty.json")
-
-
 def down(config):
     """
     Run down migration (rollback).
