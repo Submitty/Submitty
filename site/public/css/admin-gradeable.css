@@ -82,7 +82,8 @@ select {
     min-height: 35px;
 }
 
-.bucket-size-container, .scatterplot-type-container {
+.bucket-size-container,
+.scatterplot-type-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
