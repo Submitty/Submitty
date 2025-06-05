@@ -34,7 +34,7 @@ static int total_allowed_system_calls = 0;
 
 inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string, std::ofstream &execute_logfile) {
   total_allowed_system_calls++;
-  //execute_lofgile << "allow " << total_allowed_system_calls << " " << syscall_string << std::endl;
+  //execute_logfile << "allow " << total_allowed_system_calls << " " << syscall_string << std::endl;
   int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
   if (res < 0) {
     execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
@@ -122,9 +122,24 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   };
 
 
+  
+  std::set<std::string> default_categories = {
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_SCHEDULING",
+    "PROCESS_CONTROL_ADVANCED",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "FILE_MANAGEMENT_RARE",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "TGKILL"
+  };
+  
+
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
-  const nlohmann::json &whole_config_safelist = whole_config.value("allow_system_calls",nlohmann::json());
+  const nlohmann::json &whole_config_safelist = whole_config.value("allow_system_calls",default_categories);
   const nlohmann::json &config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
   
   for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
@@ -356,7 +371,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
              assert (restricted_categories.find(s) != restricted_categories.end()); });
 
   allow_system_calls(sc,categories,execute_logfile);
-  execute_logfile << "total allowed_system_calls = " << total_allowed_system_calls << std::endl;
+  //execute_logfile << "system call filter configured with " << total_allowed_system_calls << " allowed system calls" << std::endl;
   
   if (seccomp_load(sc) < 0)
     return 1; // failure
