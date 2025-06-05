@@ -392,6 +392,10 @@ EMAIL;
             $this->core->addErrorMessage('You must specify an email to send the verification to.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
+        if ($this->core->getQueries()->hasQueuedRegistrationEmail($_GET['email'])) {
+            $this->core->addErrorMessage('Please wait before sending a new email, it may take up to five minutes to send.');
+            return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
+        }
         // Attempt to update values, if user is not found, false is returned.
         $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
         if (!UnverifiedUsersManager::updateUserVerificationValues($this->core, $_GET['email'], $verification_values['code'], $verification_values['expiration'])) {

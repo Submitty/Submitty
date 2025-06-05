@@ -5340,6 +5340,17 @@ AND gc_id IN (
             VALUES " . $value_param_string,
             $flattened_params
         );
+        
+    }
+
+    /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null" , [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
