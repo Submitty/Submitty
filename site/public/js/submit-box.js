@@ -1,4 +1,5 @@
 /* exported updateSubmitButtonStatus */
+/* global file_array, changed, previous_files */
 
 function updateSubmitButtonStatus() {
     let valid = false;
