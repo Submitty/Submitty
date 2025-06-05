@@ -124,30 +124,24 @@ class PollController extends AbstractController {
         if ($this->core->getUser()->accessAdmin()) {
             /** @var Poll|null */
             $poll = $repo->findByIDWithOptions(intval($poll_id));
-            if ($poll === null) {
-                $this->core->addErrorMessage("Invalid Poll ID");
-                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
-            }
-            /** @var \app\repositories\poll\OptionRepository */
-            $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
-            $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
         }
         else {
-            /** @var Poll|null */
             $poll = $repo->findByStudentID($this->core->getUser()->getId(), intval($poll_id));
-            if ($poll === null) {
-                $this->core->addErrorMessage("Invalid Poll ID");
-                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
-            }
-            if (!$poll->isVisible()) {
-                $this->core->addErrorMessage("Poll is not available");
-                return new RedirectResponse($this->core->buildCourseUrl(['polls']));
-            }
-            if ($poll->isHistogramAvailable()) {
+        }
+        if ($poll === null) {
+            $this->core->addErrorMessage("Invalid Poll ID");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
+        }
+        if ($this->core->getAccess()->canI("poll.view", ["poll" => $poll])) {
+            if ($this->core->getAccess()->canI("poll.view.histogram", ["poll" => $poll])) {
                 /** @var \app\repositories\poll\OptionRepository */
                 $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
                 $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
             }
+        }
+        else {
+            $this->core->addErrorMessage("Poll is not available");
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
         return new WebResponse(
