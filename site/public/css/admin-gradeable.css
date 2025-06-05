@@ -348,6 +348,7 @@ body::-webkit-scrollbar-track {
 
 #gradeable-config-edit-bar {
     display: none;
+}
 
 .warning-banner {
     display: none;
