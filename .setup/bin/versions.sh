@@ -9,7 +9,7 @@ export AnalysisTools_Version=v22.03.00
 export AnalysisToolsTS_Version=v23.10.00
 export Lichen_Version=v23.09.00
 export RainbowGrades_Version=v24.12.00
-export Tutorial_Version=v24.07.00
+export Tutorial_Version=v25.06.00
 export SysadminTools_Version=v25.01.00
 export Localization_Version=v23.08.02
 
