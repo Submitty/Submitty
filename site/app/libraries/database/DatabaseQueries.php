@@ -5340,7 +5340,6 @@ AND gc_id IN (
             VALUES " . $value_param_string,
             $flattened_params
         );
-        
     }
 
     /**
@@ -5348,7 +5347,8 @@ AND gc_id IN (
      */
     public function hasQueuedEmail(string $email): bool {
         $this->submitty_db->query(
-            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null" , [$email]
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
         );
         return $this->submitty_db->getRowCount() > 0;
     }

@@ -392,7 +392,7 @@ EMAIL;
             $this->core->addErrorMessage('You must specify an email to send the verification to.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
-        if ($this->core->getQueries()->hasQueuedRegistrationEmail($_GET['email'])) {
+        if ($this->core->getQueries()->hasQueuedEmail($_GET['email'])) {
             $this->core->addErrorMessage('Please wait before sending a new email, it may take up to five minutes to send.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
         }
