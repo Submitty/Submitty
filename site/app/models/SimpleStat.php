@@ -36,6 +36,9 @@ class SimpleStat extends AbstractModel {
      * @var float Average grade */
     protected $average_score = 0;
     /** @prop
+     * @var float Total score */
+    protected $total_score = 0;
+    /** @prop
      * @var float Standard deviation*/
     protected $standard_deviation = 0;
     /** @prop
@@ -60,6 +63,7 @@ class SimpleStat extends AbstractModel {
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];
             $this->average_score = $details['avg_comp_score'];
+            $this->total_score = $details['total_comp_score'];
             $this->standard_deviation = $details['std_dev'];
             $this->order = $details['gc_order'];
             $this->is_peer_component = $details['gc_is_peer'];

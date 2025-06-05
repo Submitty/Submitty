@@ -149,7 +149,7 @@
             document.getElementById("SmallHistogram4").innerHTML=
                 '<span>' +
                     '<b>Mean: </b>' +
-                    {{ manual_average != null ? manual_average : 0 }}
+                    {{ manual_average != null ? manual_average.getAverageScore() | default(0) : 0 }}
                     + '</span>' +
                     '<span><b>Mode: </b>' + mode + '</span>' +
                     '<span><b>Median: </b>' + median + '</span>' +

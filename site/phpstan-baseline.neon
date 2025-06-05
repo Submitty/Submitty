@@ -5696,7 +5696,7 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageComponentScores\\(\\) has no return type specified\\.$#"
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageManualScores\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 

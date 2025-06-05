@@ -275,8 +275,6 @@ class ElectronicGraderView extends AbstractView {
             }
             if (count($component_averages) !== 0) {
                 foreach ($component_averages as $comp) {
-                    /* @var SimpleStat $comp */
-                    // TODO: manual average SimpleState is totally broken
                     $manual_average += $comp->getAverageScore();
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
