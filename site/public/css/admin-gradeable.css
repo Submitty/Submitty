@@ -82,12 +82,25 @@ select {
     min-height: 35px;
 }
 
-.bucket-size-container {
+.bucket-size-container, .scatterplot-type-container {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 4px;
     margin: 10px 0;
+}
+
+.scatterplot-type-container {
+    gap: 8px;
+    margin: 0 0 10px 0;
+}
+
+.scatterplot-type-container * {
+    width: 100%;
+}
+
+.scatterplot-statistics {
+    margin-top: 10px;
 }
 
 .bucket-size-input {
@@ -100,7 +113,7 @@ select {
     cursor: pointer;
     padding: 0 10px;
     caret-color: transparent;
-    background-color: var(--actionable-blue);
+    background-color: var(--actionable-blue) !important;
 }
 
 .peer-button {
