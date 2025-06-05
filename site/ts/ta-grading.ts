@@ -332,7 +332,6 @@ $(() => {
         }
     });
 
-    // eslint-disable-next-line eqeqeq
     if (
         localStorage.getItem('notebook-setting-file-submission-expand')
         === 'true'
@@ -932,7 +931,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=file_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name
                                     === file_path[x]
@@ -948,7 +946,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=div_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name
                                     === file_path[x]
@@ -962,7 +959,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=div_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name === file_path[x]
                                 ) {

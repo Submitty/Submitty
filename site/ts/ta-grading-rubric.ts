@@ -150,9 +150,8 @@ const COUNT_DIRECTION_DOWN = -1;
  * Pdf Page settings for components
  * @type {int}
  */
-// eslint-disable-next-line no-unused-vars, no-var
+
 window.PDF_PAGE_NONE = 0;
-// eslint-disable-next-line no-var
 window.PDF_PAGE_STUDENT = -1;
 window.PDF_PAGE_INSTRUCTOR = -2;
 
@@ -2464,7 +2463,6 @@ function loadComponentData(gradeable: Gradeable, graded_gradeable: typeof GRADED
     for (const component of gradeable.components) {
         COMPONENT_RUBRIC_LIST[component.id] = component;
         if (graded_gradeable!.active_graders[component.id]) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ACTIVE_GRADERS_LIST[component.id] = graded_gradeable!.active_graders[component.id].map((grader, index) => {
                 const graderAge = window.luxon.DateTime.fromISO(graded_gradeable!.active_graders_timestamps[component.id.toString()][index]).toRelative();
                 return `${grader} (${graderAge})`;
