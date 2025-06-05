@@ -5,7 +5,7 @@
  * @param {number[]} expectedScores the expected score for the submission
  */
 const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
-    assert(expectedScores.length === fullScores.length);
+    expect(expectedScores.length).to.eq(fullScores.length);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
 
