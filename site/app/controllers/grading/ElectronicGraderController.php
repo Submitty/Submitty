@@ -709,15 +709,16 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
 
-            $manual_average = array_sum($ta_graded_components) / count($ta_graded_components);
-            $std_dev = $this->calculateStandardDeviation($ta_graded_components);
-            $details = [
-                'max' => max($ta_graded_components),
-                'avg_score' => $manual_average,
-                'std_dev' => $std_dev,
-                'count' => count($ta_graded_components)
-            ];
-            $manual_average = new SimpleStat($this->core, $details);
+            // $manual_average = array_sum($ta_graded_components) / count($ta_graded_components);
+            // $std_dev = $this->calculateStandardDeviation($ta_graded_components);
+            // $details = [
+            //     'max' => max($ta_graded_components),
+            //     'avg_score' => $manual_average,
+            //     'std_dev' => $std_dev,
+            //     'count' => count($ta_graded_components)
+            // ];
+            // $manual_average = new SimpleStat($this->core, $details);
+            $manual_average = array_sum($component_averages);
 
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
