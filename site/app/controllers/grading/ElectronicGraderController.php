@@ -24,6 +24,7 @@ use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\SimpleStat;
 
 class ElectronicGraderController extends AbstractController {
     /**
@@ -501,6 +502,21 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
+    private function calculateStandardDeviation(array $ta_graded_components): float {
+        $count = count($ta_graded_components);
+
+        if ($count < 2) {
+            return 0.0;
+        }
+
+        $mean = array_sum($ta_graded_components) / $count;
+        $sum_squared_diff = array_reduce($ta_graded_components, function ($carry, $val) use ($mean) {
+            return $carry + pow($val - $mean, 2);
+        }, 0);
+
+        return sqrt($sum_squared_diff / ($count - 1));
+    }
+
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
@@ -688,11 +704,21 @@ class ElectronicGraderController extends AbstractController {
             $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
             $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
             $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
+            $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
-            $manual_average = array_sum($component_averages);
+
+            $manual_average = array_sum($ta_graded_components) / count($ta_graded_components);
+            $std_dev = $this->calculateStandardDeviation($ta_graded_components);
+            $details = [
+                'max' => max($ta_graded_components),
+                'avg_score' => $manual_average,
+                'std_dev' => $std_dev,
+                'count' => count($ta_graded_components)
+            ];
+            $manual_average = new SimpleStat($this->core, $details);
+
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
