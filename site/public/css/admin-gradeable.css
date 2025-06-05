@@ -79,7 +79,24 @@ select {
 .tab-bar-wrapper {
     border-bottom: 1px solid var(--standard-medium-gray);
     display: flex;
-    height: 35px;
+    min-height: 35px;
+}
+
+.bucket-size-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: -10px 0px 10px 0px;
+}
+
+.bucket-size-container input {
+    width: auto;
+}
+
+.bucket-size-container button {
+    height: 30px;
+    padding: 0px 10px;
 }
 
 .peer-button {

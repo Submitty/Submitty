@@ -2,24 +2,24 @@
 
 <div id="{{ type == 'manual' ? 'manual-grading-score-histogram' : type == 'total' ? 'total-score-histogram' : type == 'auto' ? 'autograding-score-histogram' }}" class="page-content">
 
-    <br>
-    <input
-        style='width: auto'
-        type='text'
-        id='bucket-size-{{ type }}'
-        name='bucket-val'
-        value=""
-        placeholder="Enter bucket size"
-    />
-
-    <input
-        name="sub-{{ type }}"
-        class="btn btn-primary key_to_click"
-        tabindex="0"
-        id="submit_bucket_{{ type }}"
-        value="Submit Bucket Size for {{ type|capitalize }}"
-        onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
-    />
+    <div class="bucket-size-container">
+        <input
+            type='text'
+            id='bucket-size-{{ type }}'
+            name='bucket-val'
+            value=""
+            placeholder="Enter bucket size"
+        />
+        <button
+            name="sub-{{ type }}"
+            class="btn btn-primary key_to_click"
+            tabindex="0"
+            id="submit_bucket_{{ type }}"
+            onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
+        >
+            Submit
+        </button>
+    </div>
 
     <div id="Histogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
 
@@ -105,7 +105,7 @@
             }
         };
 
-        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false});
+        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
     </script>
 
     <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
