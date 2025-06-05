@@ -94,10 +94,19 @@
             var dataTotal=tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
             bucketInputTotal.value='';
-            document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram").innerHTML=
+                '<span class="statistic-value">' +
+                    '<b>Mean: </b>' +
+                    {{ overall_average != null ? overall_average.getAverageScore() | default(0) : 0 }}
+                    + '</span>' +
+                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
+                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
+                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
+                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
+                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    {{ overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -111,10 +120,19 @@
             var dataAuto = tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputAuto.value='';
-            document.getElementById("SmallHistogram3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram3").innerHTML=
+                '<span class="statistic-value">' +
+                    '<b>Mean: </b>' +
+                    {{ autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0 }}
+                    + '</span>' +
+                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
+                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
+                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
+                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
+                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    {{ autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -128,9 +146,19 @@
             var dataAuto = tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputManual.value='';
-            document.getElementById("SmallHistogram4").innerHTML='<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram4").innerHTML=
+                '<span class="statistic-value">' +
+                    '<b>Mean: </b>' +
+                    {{ manual_average != null ? manual_average : 0 }}
+                    + '</span>' +
+                    '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
+                    '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
+                    '<span class="statistic-value"><b>Minimum: </b>' + min + '</span>' +
+                    '<span class="statistic-value"><b>Maximum: </b>' + max + '</span>' +
+                    '<span class="statistic-value"><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span class="statistic-value"><b>Standard Deviation: </b>' +
+                    {{ manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -207,20 +235,16 @@
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if component_averages|length != 0 and histograms['tTA']|length != 0 %}
+            {% if ta_grading_enabled %}
                 <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'manual'})  }}</div>
             {% endif %}
 
-            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
+            {% if autograding_enabled %}
                 <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'auto'})  }}</div>
-                {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
-                    <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
-                {% endif %}
+                <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
             {% endif %}   
 
-            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
-                <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
-            {% endif %}
+            <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
         </div>
         <br/>
         </form>

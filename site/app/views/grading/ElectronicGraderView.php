@@ -318,7 +318,9 @@ class ElectronicGraderView extends AbstractView {
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
             "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
                 && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
-            "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
+            "ta_grading_enabled" => $gradeable->isTaGrading(),
+            "autograding_enabled" => $gradeable->hasAutogradingConfig() ? $gradeable->getAutogradingConfig()->anyPoints() : false,
+            "autograding_non_extra_credit" => $gradeable->hasAutogradingConfig() ? $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() : 0,
             "peer" => $peer,
             "blind_status" => $gradeable->getPeerBlind(),
             "team_total" => $team_total,
