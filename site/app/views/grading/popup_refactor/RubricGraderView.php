@@ -104,8 +104,8 @@ class RubricGraderView extends AbstractView {
      * @return void
      */
     private function addJavaScriptCode(): void {
-        $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
-        $this->core->getOutput()->addInternalJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
     }
 
     /**

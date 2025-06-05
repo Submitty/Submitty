@@ -1,6 +1,11 @@
 {
-  "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
-  "testcases": [
+    "assignment_message": "Calculate average and standard deviation given a list of number by filtering only positive numbers. Result expected with a precision of three decimal places.",
+    "required_capabilities": "python",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/python:latest"
+    },
+    "testcases": [
     {
       "title" : "Require Perfect Character to Character Match",
       "command" : [ "python3 *.py test_input.txt" ],

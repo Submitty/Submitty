@@ -79,7 +79,7 @@ class AccessTester extends BaseUnitTest {
         self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $gg3, $user3));
     }
 
-    public function checkGroupPrivilegeProvider() {
+    public static function checkGroupPrivilegeProvider() {
         //This might seem overkill but maybe one day we'll replace these numbers with something
         // fancier and we need to make sure nothing breaks
         return [

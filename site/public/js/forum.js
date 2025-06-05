@@ -1242,6 +1242,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             Cookies.remove('forum_thread_status', { path: '/' });
         },
     });
+
+    highlightAndScrollToCurrentThread();
 }
 
 function toggleLike(post_id, thread_id, current_user) {
@@ -2103,6 +2105,7 @@ function loadThreadHandler() {
             },
         });
     });
+    highlightAndScrollToCurrentThread();
 }
 
 function showAttachmentsOnload() {
@@ -2682,4 +2685,17 @@ function showUpduckUsers(post_id, csrf_token) {
             }
         },
     });
+}
+
+// Highlights and scrolls to the current thread if it exists.
+function highlightAndScrollToCurrentThread() {
+    const activeThreadId = $('#current-thread').val();
+    if (activeThreadId) {
+        const activeThread = $(`[data-thread_id='${activeThreadId}'] .thread_box`);
+        if (activeThread.length) {
+            $('.thread_box').removeClass('active');
+            activeThread.addClass('active');
+            scrollThreadListTo(activeThread[0]);
+        }
+    }
 }
