@@ -1,6 +1,12 @@
 /* exported updateSubmitButtonStatus */
 /* global file_array, changed, previous_files */
 
+const orig_setButtonStatus = setButtonStatus;
+function setButtonStatus(inactive_version = false) {
+    updateSubmitButtonStatus();
+    orig_setButtonStatus(inactive_version);
+}
+
 function updateSubmitButtonStatus() {
     let valid = false;
     // check if new files added
