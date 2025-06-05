@@ -486,7 +486,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config->loadMasterConfigs($this->config_path);
     }
 
-    public function getRequiredSections() {
+    public static function getRequiredSections() {
         return [
             ['database_details'],
             ['course_details']
@@ -515,7 +515,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         }
     }
 
-    public function getRequiredSettings() {
+    public static function getRequiredSettings() {
         $settings = [
             'course_details' => [
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
@@ -664,7 +664,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->checkFeatureFlagEnabled('feature_1'));
     }
 
-    public function ldapOptionsDataProvider() {
+    public static function ldapOptionsDataProvider() {
         return [['url'], ['uid'], ['bind_dn']];
     }
 

@@ -1093,6 +1093,7 @@ class HomeworkView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('confetti.js');
         $this->core->getOutput()->addInternalJs('submission-page.js');
+        $this->core->getOutput()->addInternalCss('autograding-results-box.css');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/AutogradingResultsBox.twig', $param);
     }
 
