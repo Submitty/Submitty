@@ -174,7 +174,7 @@
                                            disabled = "disabled"
                                        {% endif %}
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {{ cell.choices[idx].description | markdown_to_html }}
                             </label>
                         {% endfor %}
                     {% else %}

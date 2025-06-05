@@ -152,21 +152,45 @@ class UserProfileController extends AbstractController {
     #[Route("/user_profile/change_preferred_names", methods: ["POST"])]
     public function changeUserName(): JsonResponse {
         $user = $this->core->getUser();
-        if (isset($_POST['given_name']) && isset($_POST['family_name']) && !empty($_POST['given_name']) && !empty($_POST['family_name'])) {
+        if (isset($_POST['given_name']) && isset($_POST['family_name'])) {
             $newGivenName = trim($_POST['given_name']);
             $newFamilyName = trim($_POST['family_name']);
 
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_givenname', $newGivenName) === true && $user->validateUserData('user_preferred_familyname', $newFamilyName) === true) {
-                $user->setPreferredGivenName($newGivenName);
-                $user->setPreferredFamilyName($newFamilyName);
+                if (
+                    (($newGivenName === ""
+                    && $user->getPreferredGivenName() === null)
+                    || $newGivenName === $user->getDisplayedGivenName())
+                    && (($newFamilyName === ""
+                    && $user->getPreferredFamilyName() === null)
+                    || $newFamilyName === $user->getDisplayedFamilyName())
+                ) {
+                    return JsonResponse::getErrorResponse("No changes detected to update preferred names!");
+                }
+                if ($newGivenName === "" || $newGivenName === $user->getLegalGivenName()) {
+                    $user->setPreferredGivenName(null);
+                }
+                else {
+                    $user->setPreferredGivenName($newGivenName);
+                }
+                if ($newFamilyName === "" || $newFamilyName === $user->getLegalFamilyName()) {
+                    $user->setPreferredFamilyName(null);
+                }
+                else {
+                    $user->setPreferredFamilyName($newFamilyName);
+                }
                 //User updated flag tells auto feed to not clobber some of the user's data.
-                $user->setUserUpdated(true);
+                $user->setUserUpdated(!is_null($user->getPreferredGivenName()) || !is_null($user->getPreferredFamilyName()));
                 $this->core->getQueries()->updateUser($user);
                 return JsonResponse::getSuccessResponse([
                     'message' => "Preferred names updated successfully!",
-                    'given_name' => $newGivenName,
-                    'family_name' => $newFamilyName
+                    'displayed_given_name' => $user->getDisplayedGivenName(),
+                    'displayed_family_name' => $user->getDisplayedFamilyName(),
+                    'preferred_given_name' => $user->getPreferredGivenName() ?? "",
+                    'preferred_family_name' => $user->getPreferredFamilyName() ?? "",
+                    'abbreviation_options' => implode('|', array_map(fn($i) => $user->getDisplayAbbreviatedName($i), range(0, 3))),
+                    'current_abbreviation' => $user->getDisplayAbbreviatedName()
                 ]);
             }
             else {
