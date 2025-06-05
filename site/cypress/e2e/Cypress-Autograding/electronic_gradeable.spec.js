@@ -1,15 +1,17 @@
-// This should work for any electronic gradeable
-// fileUploadName is where the file is relative to fixures directory
-// expected scores is a list of expected scores that the user should have
-// full scores is a list of scores that means 100%
+/**
+ * Uploads a file and compares the results with expected scores.
+ * @param {string} fileUploadName the fixture to upload
+ * @param {number[]} fullScores the max scores for the gradeables
+ * @param {number[]} expectedScores the expected score for the submission
+ */
 const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     assert(expectedScores.length === fullScores.length);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
 
-    // if the clear button exists, we should clear the previous submission.
-    // wait for js to load
+    // Wait for client JS to load - reduces flakyness
     cy.get('[data-testid="gradeable-time-remaining-text"]').contains('days');
+    // If the clear button exists, we should click it.
     cy.get('[data-testid="clear-all-files-button"]').then(($btn) => {
         if (!$btn.is(':disabled')) {
             cy.wrap($btn).click();
@@ -22,6 +24,7 @@ const submitAndCheckResults = (fileUploadName, expectedScores, fullScores) => {
     cy.get('[data-testid="submit-gradeable"').click();
     cy.get('[data-testid="popup-message"]').contains('Successfully uploaded version');
 
+    // wait for autograding results and compares expected to score pills
     cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 60000 });
     cy.get('[data-testid="autograding-total-no-hidden"]').find('[data-testid="score-pill-badge"]').contains(`${expectedTotal} / ${scoreTotal}`);
     cy.get('[data-testid="results-box"]').each(($el, index) => {
@@ -36,7 +39,6 @@ describe('Test the development course gradeables', () => {
         cy.visit(['development', 'gradeable', 'cpp_cats']);
 
         submitAndCheckResults('cpp_cats_submissions/allCorrect.zip', fullScores, fullScores);
-        const partialScores = [2, 3, 2, 2, 2, 2, 0];
-        submitAndCheckResults('cpp_cats_submissions/extraLinesAtEnd.zip', partialScores, fullScores);
+        submitAndCheckResults('cpp_cats_submissions/extraLinesAtEnd.zip', [2, 3, 2, 2, 2, 2, 0], fullScores);
     });
 });
