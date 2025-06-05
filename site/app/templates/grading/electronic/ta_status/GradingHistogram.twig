@@ -12,10 +12,10 @@
             placeholder="Enter bucket size"
         />
         <input
-            name="sub-{{ type }}"
             class="bucket-size-submit-button btn btn-primary key_to_click"
             tabindex="0"
             id="submit_bucket_{{ type }}"
+            name="sub-{{ type }}"
             value="Submit"
             onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
         />
