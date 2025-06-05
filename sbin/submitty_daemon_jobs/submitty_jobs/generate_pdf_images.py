@@ -13,10 +13,17 @@ class Redaction:
         self.coordinates = coordinates
 
 
-def main(pdf_file_path: str, redactions: List[Redaction], rerun: bool = False):
+def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     directory = os.path.dirname(pdf_file_path)
     if directory:
         os.chdir(os.path.dirname(pdf_file_path))
+    # Ensure the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    # Delete any existing images that match the pattern
+    for filename in os.listdir(output_dir):
+        if filename.startswith(os.path.basename(pdf_file_path)[:-4]) and filename.endswith(".jpg"):
+            os.remove(os.path.join(output_dir, filename))
     try:
         pdfPages = PdfReader(pdf_file_path, strict=False)
         with open(pdf_file_path, "rb") as open_file:
@@ -24,19 +31,14 @@ def main(pdf_file_path: str, redactions: List[Redaction], rerun: bool = False):
                 open_file.read(),
             )
         for page_number in range(len(pdfPages.pages)):
-            if rerun:
-                image_filename = (
-                    os.path.dirname(pdf_file_path)
-                    + "/."
-                    + os.path.basename(pdf_file_path)[:-4]
-                    + "_page_"
-                    + str(page_number + 1).zfill(2)
-                    + ".jpg"
-                )
-            else:
-                image_filename = (
-                    pdf_file_path[:-4] + "_" + str(page_number + 1).zfill(3) + ".jpg"
-                )
+            image_filename = (
+                output_dir
+                + "/."
+                + os.path.basename(pdf_file_path)[:-4]
+                + "_page_"
+                + str(page_number + 1).zfill(2)
+                + ".jpg"
+            )
             imagePages[page_number].save(
                 image_filename, "JPEG", quality=20, optimize=True
             )

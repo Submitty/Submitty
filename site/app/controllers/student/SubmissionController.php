@@ -437,7 +437,6 @@ class SubmissionController extends AbstractController {
         $term = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
         $use_ocr = $this->core->getConfig()->checkFeatureFlagEnabled('submitty_ocr') && $_POST['use_ocr'] === "true";
-        $redactions = $gradeable->getRedactions();
 
         if ($is_qr) {
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
@@ -460,7 +459,6 @@ class SubmissionController extends AbstractController {
                     "filename"  => $uploaded_file["name"][$i],
                     "is_qr"     => true,
                     "use_ocr"   => $use_ocr,
-                    "redactions" => $redactions
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
@@ -487,7 +485,6 @@ class SubmissionController extends AbstractController {
                     "filename"  => $uploaded_file["name"][$i],
                     "num"       => $num_pages,
                     "is_qr"     => false,
-                    "redactions" => $redactions
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
@@ -725,10 +722,6 @@ class SubmissionController extends AbstractController {
         //do the same thing for images
         $i = 1;
         foreach ($image_files as $image) {
-            // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
-                return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
-            }
             if (!@unlink($image)) {
                 return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
             }
@@ -830,6 +823,19 @@ class SubmissionController extends AbstractController {
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+        }
+        $generate_images_data = [
+            "job"       => "GeneratePdfImages",
+            "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
+            "output_dir" => str_replace("submissions", "results", $version_path),
+        ];
+
+        $generate_images_job  = "/var/local/submitty/daemon_job_queue/generate_images_" . $who_id . "_" . $new_version . ".json";
+
+        //add new job to queue
+        if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
+            $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");

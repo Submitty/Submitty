@@ -253,7 +253,6 @@ class BulkUpload(CourseJob):
         gradeable_id = self.job_details['g_id']
         filename = self.job_details['filename']
         is_qr = self.job_details['is_qr']
-        redactions = [generate_pdf_images.Redaction(**r) for r in self.job_details.get('redactions', [])]
 
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
@@ -335,12 +334,11 @@ class BulkUpload(CourseJob):
                         qr_suffix,
                         log_file_path,
                         use_ocr,
-                        redactions,
                     ]
                 )
             else:
                 bulk_upload_split.main(
-                    [filename, split_path, num, log_file_path, redactions]
+                    [filename, split_path, num, log_file_path]
                 )
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
@@ -362,12 +360,13 @@ class BulkUpload(CourseJob):
 class GeneratePdfImages(AbstractJob):
     def run_job(self):
         pdf_file_path = self.job_details["pdf_file_path"]
+        output_dir = self.job_details["output_dir"]
         # optionally get redactions
         redactions = self.job_details.get("redactions", [])
         generate_pdf_images.main(
             pdf_file_path,
+            output_dir,
             [generate_pdf_images.Redaction(**r) for r in redactions],
-            True,
         )
 
     def cleanup_job(self):

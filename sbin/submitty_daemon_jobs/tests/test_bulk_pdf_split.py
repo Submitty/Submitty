@@ -21,7 +21,6 @@ class TestBulkPdfSplit(BaseTestCase):
             str(split_path_dir),
             tgt_num_pages,
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            []
         ]
 
         os.chdir(split_path_dir)
@@ -66,7 +65,6 @@ class TestBulkPdfSplit(BaseTestCase):
             str(split_path_dir),
             tgt_num_pages,
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            []
         ]
 
         os.chdir(split_path_dir)
@@ -92,8 +90,7 @@ class TestBulkPdfSplit(BaseTestCase):
             "",
             "",
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            False,
-            []
+            False
         ]
 
         os.chdir(split_path_dir)
@@ -139,7 +136,6 @@ class TestBulkPdfSplit(BaseTestCase):
             urllib.parse.quote("#D0,.com"),
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
             False,
-            [] 
         ]
 
 
@@ -186,7 +182,6 @@ class TestBulkPdfSplit(BaseTestCase):
             "",
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
             True,
-            []
         ]
 
         os.chdir(split_path_dir)
