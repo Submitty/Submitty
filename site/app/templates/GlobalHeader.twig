@@ -252,10 +252,14 @@
             Manually reload this page to see updates.{% if sysadmin_email is not empty %} Notify the
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
-        <div class="system-message warning" id="performance-warning-system-message" style="display: none;">
-            <span id="performance-warning-system-message-text"></span>
-            <i id="close-performance-warning-system-message" class="fa fa-times" style="padding: 4px; cursor: pointer;"></i>
-        </div>
+        {% include 'Vue.twig' with {
+            'component': 'performanceWarning',
+            'args': {
+                "performanceWarning": performance_warning,
+                "submittyQueries": submitty_queries,
+                "courseQueries": course_queries
+            }
+        } %}
         <div id='messages'>
             <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
             {% for message in messages %}
@@ -270,7 +274,7 @@
                         {% endif %}
                         {{ message.error | nl2br }}
                     </span>
-                    <a class="fas fa-times key_to_click" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
+                    <a class="fas fa-times key_to_click" data-testid="remove-popup" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                 </div>
             {% endfor %}
         </div>

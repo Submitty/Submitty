@@ -1,15 +1,15 @@
 <div id="gradeable_rubric">
-    <label for="numeric_num-items">How many numeric items?</label> <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    <label for="numeric_num-items">How many numeric items?</label> <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="number" min="1" step="1" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
     &emsp;&emsp;
 
-    <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="number" min="0" step="1" value="0" class="int_val ignore"/>
     <br /> <br />
 
     <div class="multi-field-wrapper-numeric">
         <h5>Numeric Items</h5>
-        <table class="table-striped numerics-table table table-bordered" style=" border: 1px solid #AAA; max-width:50% !important;">
+        <table class="table-striped numerics-table table table-bordered">
             <!-- Headings -->
-            <thead style="background: #E1E1E1;">
+            <thead>
                 <tr>
                     <th> Label </th>
                     <th> Max Score </th>
@@ -17,21 +17,21 @@
                 </tr>
             </thead>
             <!-- Footers -->
-            <tfoot style="background: #E1E1E1;">
+            <tfoot>
                 <tr>
                     <td><strong> Total </strong></td>
                     <td><strong id="totalScore"></strong></td>
                     <td><strong id="totalEC"></strong></td>
                 </tr>
             </tfoot>
-            <tbody style="background: #f9f9f9;">
+            <tbody>
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
                         <input style="width: 200px" name="numeric_label_0" type="text" aria-label="label for numeric item 0" class="numeric_label" value="0" />
                     </td>
                     <td>
-                        <input style="width: 60px" type="text" name="max_score_0" aria-label="max score for numeric item 0" class="max_score" value="0" onchange="calculateTotalScore();"/>
+                        <input style="width: 60px" type="number" min="0" step="1" value="0" name="max_score_0" aria-label="max score for numeric item 0" class="max_score" value="0" onchange="calculateTotalScore();"/>
                     </td>
                     <td>
                         <input type="checkbox" name="numeric_extra_0" aria-label="is numeric item 0 counted as extra credit?" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
@@ -39,14 +39,16 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="multi-field-wrapper-text">
         <h5>Text Items</h5>
-        <table class="table-striped text-table table table-bordered" style=" border: 1px solid #AAA; max-width:25% !important;">
-            <thead style="background: #E1E1E1;">
+        <table class="table-striped text-table table table-bordered">
+            <thead>
                 <tr>
                     <th> Label </th>
                 </tr>
             </thead>
-            <tbody style="background: #f9f9f9;">
+            <tbody>
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
@@ -75,8 +77,8 @@
             else total_score += max_score;
         });
 
-        $("#totalScore").html(total_score);
-        $("#totalEC").html("(" + total_ec + ")");
+        $("#totalScore").text(total_score.toFixed(2));
+        $("#totalEC").text(`(${total_ec.toFixed(2)})`);
     }
 
     $(document).ready(function() {
@@ -143,14 +145,15 @@
         });
 
         $('#numeric_num-items').on('change', function (e) {
-            var requestedNumeric = this.value;
+            var requestedNumeric = parseInt(this.value) || 0;
             if (isNaN(requestedNumeric) || requestedNumeric < 0) {
                 requestedNumeric = 0;
             }
-
-            if(requestedNumeric == 0 && $('#numeric_num_text_items').val() == 0){
+            if (requestedNumeric === 0) {
                 alert('You must have at least one item');
                 $('#save_status').text('Some Changes Failed!').css('color', 'red');
+                $('#numeric_num-items').val(1);
+                return;
             } else {
                 while (numNumeric < requestedNumeric) {
                     addNumeric(numNumeric + 1, 0, false);

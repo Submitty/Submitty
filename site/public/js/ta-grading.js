@@ -195,7 +195,6 @@ $(() => {
     }
 
     // Remove the select options which are open
-    // eslint-disable-next-line no-unused-vars
     function hidePanelPositionSelect() {
         $('select.panel-position-cont').hide();
         document.removeEventListener('click', hidePanelPositionSelect);
@@ -225,8 +224,6 @@ function changeStudentArrowTooltips(data) {
             data = 'default';
         }
     }
-    console.log(inquiry_status);
-    console.log(data);
     let component_id = NO_COMPONENT_ID;
     switch (data) {
         case 'ungraded':
@@ -302,7 +299,6 @@ const orig_toggleComponent = window.toggleComponent;
 window.toggleComponent = function (component_id, saveChanges) {
     const ret = orig_toggleComponent(component_id, saveChanges);
     return ret.then(() => {
-        console.log(localStorage.getItem('general-setting-arrow-function'));
         changeStudentArrowTooltips(localStorage.getItem('general-setting-arrow-function') || 'default');
     });
 };
@@ -561,7 +557,6 @@ function adjustGradingPanelHeader() {
     document.querySelector('.panels-container').style.height = `calc(100% - ${height}px)`;
 }
 
-// eslint-disable-next-line no-unused-vars
 function onAjaxInit() { }
 
 function readCookies() {
@@ -576,8 +571,7 @@ function readCookies() {
     const files = Cookies.get('files') || '';
 
     $('#silent-edit-id').prop('checked', silent_edit_enabled);
-
-    // eslint-disable-next-line no-func-assign, no-global-assign
+    // eslint-disable-next-line no-func-assign
     onAjaxInit = function () {
         $(`#title-${opened_mark}`).click();
         if (scroll_pixel > 0) {

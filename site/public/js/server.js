@@ -800,20 +800,22 @@ function toggleDiv(id) {
     return true;
 }
 
-function checkRefreshPage(url) {
+function checkRefreshPage(url, anon_id = '') {
     setTimeout(() => {
-        check_server(url);
+        check_server(url, anon_id);
     }, 1000);
 }
 
-function check_server(url) {
-    $.get(url,
+function check_server(url, anon_id = '') {
+    $.get(url, { anon_id: anon_id },
         (data) => {
-            if (data.indexOf('REFRESH_ME') > -1) {
+            // if the response bool is true, reload the page
+            const refresh_bool = JSON.parse(data).data;
+            if (refresh_bool === true) {
                 location.reload();
             }
             else {
-                checkRefreshPage(url);
+                checkRefreshPage(url, anon_id);
             }
         },
     );
@@ -852,7 +854,7 @@ function checkColorActivated() {
     // eslint-disable-next-line no-undef
     pos = 0;
     // eslint-disable-next-line no-undef
-    seq = "&&((%'%'BA\r";
+    seq = '&&((%\'%\'BA\r';
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
 
     function inject() {
@@ -1124,7 +1126,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
 /**
  * TODO: This may be unused.  Check, and potentially remove this function.
  */
-// eslint-disable-next-line no-unused-vars
 function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: 'POST',
@@ -1224,7 +1225,7 @@ function displayWarningMessage(message) {
  */
 function displayMessage(message, type) {
     const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
+    message = `<div id="${id}" data-testid="popup-message" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
     $('#messages').fadeIn('slow');
     if (type === 'success' || type === 'warning') {
@@ -1397,7 +1398,7 @@ function escapeSpecialChars(text) {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;',
+        '\'': '&#039;',
     };
 
     return text.replace(/[&<>"']/g, (m) => {
@@ -1650,7 +1651,7 @@ function enableKeyToClick() {
 }
 
 function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
-    $('#save_status').html('Saving Feedback...');
+    $('#save_status').text('Saving Feedback...').css('color', 'var(--text-black)');
     const url = buildCourseUrl(['gradeable', g_id, 'feedback', 'set']);
     const formData = new FormData();
     formData.append('csrf_token', csrfToken);
@@ -1666,15 +1667,15 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
         contentType: false,
         success: function (data) {
             if (data.status === 'success') {
-                $('#save_status').html('All Changes Saved');
+                $('#save_status').text('All Changes Saved').css('color', 'var(--text-black)');
             }
             else {
-                $('#save_status').html('Error Saving Changes');
+                $('#save_status').text('Error Saving Changes').css('color', 'red');
             }
         },
         error: function () {
             window.alert('Something went wrong. Please try again.');
-            $('#save_status').html('<span style="color: red">Some Changes Failed!</span>');
+            $('#save_status').text('Some Changes Failed!').css('color', 'red');
         },
     });
 }

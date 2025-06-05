@@ -250,7 +250,7 @@ class ForumThreadView extends AbstractView {
                 "display_option" => $display_option,
                 "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken(),
-                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
+                "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']),
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
                 "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
                 "split_url" => $this->core->buildCourseUrl(['forum', 'posts', 'split']),
@@ -396,18 +396,7 @@ class ForumThreadView extends AbstractView {
         }
         return $button_params;
     }
-    /**
-     * @param Post[] $reply_hierarchy
-     * @return Post[]
-     */
-    private function BuildReplyHeirarchy(Post $post, array &$reply_hierarchy = [], int $reply_level = 1): array {
-        $reply_hierarchy[] = $post;
-        $post->setReplyLevel($reply_level);
-        foreach ($post->getChildren() as $child) {
-            $this->BuildReplyHeirarchy($child, $reply_hierarchy, $reply_level + 1);
-        }
-        return $reply_hierarchy;
-    }
+
 
     /**
      * Renders or formats a list of posts.
@@ -421,6 +410,7 @@ class ForumThreadView extends AbstractView {
     public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
         $first = true;
         $post_data = [];
+        $anon_user_id = hash('sha3-224', $this->core->getUser()->getId());
         $csrf_token = $this->core->getCsrfToken();
         $GLOBALS['totalAttachments'] = 0;
         $user = $this->core->getUser();
@@ -431,7 +421,7 @@ class ForumThreadView extends AbstractView {
 
         $posts = [];
         if ($display_option == "tree") {
-            $posts = $this->BuildReplyHeirarchy($first_post);
+            $posts = ForumUtils::BuildReplyHeirarchy($first_post);
         }
         else {
             // posts were ordered at query-time by repository
@@ -492,6 +482,7 @@ class ForumThreadView extends AbstractView {
             "form_action_link" => $form_action_link,
             "merge_thread_content" => $merge_thread_content,
             "csrf_token" => $csrf_token,
+            "anon_user_id" => $anon_user_id,
             "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],
@@ -634,6 +625,7 @@ class ForumThreadView extends AbstractView {
                 $class .= " new_thread";
             }
             if ($thread->isDeleted()) {
+                $class = str_replace(" new_thread", "", $class);
                 if ($isNewThread) {
                     $class .= " deleted-unviewed";
                 }
@@ -702,8 +694,10 @@ class ForumThreadView extends AbstractView {
                 "fa_class" => $fa_class,
                 "tooltip" => $tooltip,
                 "is_locked" => $thread->isLocked(),
+                "num_posts" => count($thread->getPosts()),
                 "date" => $date_content,
                 "current_user_posted" => $thread->getAuthor()->getId() === $current_user,
+                "sum_ducks" => $thread->getSumUpducks(),
             ];
 
             if ($is_full_page) {
@@ -736,7 +730,6 @@ class ForumThreadView extends AbstractView {
                     "render_markdown" => $first_post->isRenderMarkdown(),
                     "author_info" => $author_info,
                     "deleted" => $first_post->isDeleted(),
-                    "sum_ducks" => $thread->getSumUpducks()
                 ]);
             }
             $thread_content[] = $thread_info;
@@ -832,11 +825,11 @@ class ForumThreadView extends AbstractView {
             $classes[] = "first_post";
         }
         $isNewPost = false;
-        if ($thread->getNewPosts($user->getId())->contains($post) || $user->getId() === $post->getAuthor()->getId()) {
+        if ($thread->getNewPosts($user->getId())->contains($post)) {
             $classes[] = "new_post";
             $isNewPost = true;
             if ($post->getAuthor()->accessGrading()) {
-                $classes[] = "important new_post important-new";
+                $classes[] = "important important-new";
             }
         }
         else {
@@ -873,7 +866,7 @@ class ForumThreadView extends AbstractView {
         if (($user->accessGrading() || $post->getAuthor()->getId() === $user->getId()) && (!$thread->isLocked() || $user->accessFullGrading())) {
             if ($deleted && $user->accessGrading()) {
                 $ud_toggle_status = "false";
-                $ud_button_title = "Undelete post";
+                $ud_button_title = "Restore post";
                 $ud_button_icon = "fa-undo";
             }
             else {
@@ -911,7 +904,7 @@ class ForumThreadView extends AbstractView {
                 return $x->getId();
             })->contains($user->getId()),
             "taTrue" => !$post->getUpduckers()->filter(function ($x) {
-                return $x->accessFullGrading();
+                return $x->accessGrading();
             })->isEmpty(),
         ];
 
@@ -1139,14 +1132,14 @@ class ForumThreadView extends AbstractView {
         foreach ($users as $user => $details) {
             $given_name = $details["given_name"];
             $family_name = $details["family_name"];
-            $post_count = count($details["posts"]);
-            $posts = json_encode($details["posts"]);
-            $ids = json_encode($details["id"]);
-            $timestamps = json_encode($details["timestamps"]);
-            $thread_ids = json_encode($details["thread_id"]);
-            $thread_titles = json_encode($details["thread_title"]);
-            $num_deleted = ($details["num_deleted_posts"]);
-            $total_upducks = ($details["total_upducks"]);
+            $post_count = isset($details["posts"]) ? count($details["posts"]) : 0;
+            $posts = isset($details["posts"]) ? json_encode($details["posts"]) : null;
+            $ids = isset($details["id"]) ? json_encode($details["id"]) : null;
+            $timestamps = isset($details["timestamp"]) ? json_encode($details["timestamps"]) : null;
+            $thread_ids = isset($details["thread_id"]) ? json_encode($details["thread_id"]) : null;
+            $thread_titles = isset($details["thread_title"]) ? json_encode($details["thread_title"]) : null;
+            $num_deleted = $details["num_deleted_posts"];
+            $total_upducks = $details["total_upducks"];
 
             $userData[] = [
                 "family_name" => $family_name,

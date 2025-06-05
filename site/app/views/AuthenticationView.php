@@ -56,9 +56,9 @@ class AuthenticationView extends AbstractView {
     public function signupForm(array $content): string {
         $this->core->getOutput()->addInternalCss("input.css");
         $this->core->getOutput()->addInternalCss("links.css");
+        $this->core->getOutput()->addInternalJs("authentication.js");
         $this->core->getOutput()->addInternalCss("authentication.css");
         $this->core->getOutput()->enableMobileViewport();
-
         $signup_content = "# Sign Up";
         $path = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "signup.md");
         if (file_exists($path) && is_readable($path)) {

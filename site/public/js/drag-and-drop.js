@@ -34,10 +34,8 @@ let MAX_NUM_OF_FILES;
 // eslint-disable-next-line no-var
 var empty_inputs = true;
 
-// eslint-disable-next-line no-unused-vars
 let num_clipboard_files = 0;
-
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var student_ids = []; // all student ids
 
 function initializeDragAndDrop() {
@@ -189,7 +187,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
         }
     }
     $.ajax({
-        url: buildUrl(['banner', 'upload']),
+        url: buildUrl(['community_event', 'upload']),
         data: formData,
         processData: false,
         contentType: false,
@@ -199,7 +197,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
                 const jsondata = JSON.parse(data);
 
                 if (jsondata['status'] === 'success') {
-                    window.location.href = buildUrl(['banner']);
+                    window.location.href = buildUrl(['community_events']);
                 }
                 else {
                     alert(jsondata['message']);
@@ -211,7 +209,7 @@ function handleUploadBanner(closeTime, releaseTime, extraName, linkName) {
             }
         },
         error: function () {
-            window.location.href = buildUrl(['banner']);
+            window.location.href = buildUrl(['community_events']);
         },
     });
 }
@@ -767,7 +765,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     if (!use_qr_codes) {
         // eslint-disable-next-line eqeqeq
         if (num_pages == '') {
-            alert("You didn't enter the # of page(s)!");
+            alert('You didn\'t enter the # of page(s)!');
             $('#submit').prop('disabled', false);
             return;
         }
@@ -789,7 +787,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
@@ -898,7 +896,7 @@ function gatherInputAnswersByType(type) {
 }
 
 /**
- * @param versions_used
+ * @param version_to_regrade
  * @param versions_allowed
  * @param csrf_token
  * @param gradeable_id
@@ -914,14 +912,16 @@ function gatherInputAnswersByType(type) {
  * regrade_all_students - regrade the active version for every student who submitted a certain gradeable
  * regrade_all_students_all regrade every version for every student who submitted a certain gradeable
  */
-function handleRegrade(versions_used, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
+function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, regrade = false, regrade_all = false, regrade_all_students = false, regrade_all_students_all = false) {
     const submit_url = buildCourseUrl(['gradeable', gradeable_id, 'regrade']);
     const formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('user_id', user_id);
     formData.append('regrade', regrade);
     formData.append('regrade_all', regrade_all);
-    formData.append('version_to_regrade', versions_used);
+    if (version_to_regrade) {
+        formData.append('version_to_regrade', version_to_regrade);
+    }
     formData.append('regrade_all_students', regrade_all_students);
     formData.append('regrade_all_students_all', regrade_all_students_all);
     $.ajax({
@@ -1043,7 +1043,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1123,7 +1123,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                     if (data['message'] === 'You do not have access to that page.') {
                         window.location.href = return_url;
                     }
-                    // eslint-disable-next-line valid-typeof
+                    // eslint-disable-next-line valid-typeof, no-constant-binary-expression
                     else if (typeof data['code'] !== undefined && data['code'] === 302) {
                         window.location.href = data['data'];
                     }
@@ -1158,7 +1158,7 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
@@ -1252,7 +1252,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1366,7 +1366,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (sections_lock === true && numSections === 0) {
-        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        alert('Restrict to at least one section or select \'No\' button where asked about whether you want to restrict this material/folder to some sections.');
         return;
     }
 
@@ -1384,6 +1384,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (file_path !== null && file_path !== '') {
+        if (file_path.startsWith('/')) {
+            alert('The file path cannot start with the root directory “/”, use a relative path.');
+            return;
+        }
         const file_name = file_path.split('/').pop();
         if (link_url !== null) {
             const lastSlashIndex = file_path.lastIndexOf('/');

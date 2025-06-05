@@ -17,8 +17,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setNumericId(string $id)
  * @method string getPassword()
  * @method string getLegalGivenName() Get the given name of the loaded user
- * @method string getPreferredGivenName() Get the preferred given name of the loaded user
- * @method string getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
+ * @method string|null getPreferredGivenName() Get the preferred given name of the loaded user
+ * @method string|null getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
  *                                        otherwise return the legal given name field for the user.
  * @method string getLegalFamilyName() Get the family name of the loaded user
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
@@ -31,8 +31,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
  * @method void setDisplayNameOrder()
- * @method string getVerificationCode()
- * @method int getVerificationExpiration()
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -109,8 +107,8 @@ class User extends AbstractModel {
      * @var string The given name of the user */
     protected $legal_given_name;
     /** @prop
-     * @var string The preferred given name of the user */
-    protected $preferred_given_name = "";
+     * @var ?string The preferred given name of the user */
+    protected $preferred_given_name;
     /** @prop
      * @var  string The given name to be displayed by the system (either given name or preferred given name) */
     protected $displayed_given_name;
@@ -118,8 +116,8 @@ class User extends AbstractModel {
      * @var string The family name of the user */
     protected $legal_family_name;
     /** @prop
-     * @var string The preferred family name of the user */
-    protected $preferred_family_name = "";
+     * @var ?string The preferred family name of the user */
+    protected $preferred_family_name;
     /** @prop
      * @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
@@ -141,12 +139,7 @@ class User extends AbstractModel {
     /** @prop
      * @var string The secondary email of the user */
     protected $secondary_email;
-    /** @prop
-     * @var string Email verification code */
-    protected $verification_code;
-    /** @prop
-     * @var int Timestamp of the expiration of the verification code */
-    protected $verification_expiration;
+
     /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
@@ -246,7 +239,9 @@ class User extends AbstractModel {
             $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
-        $this->setPronouns($details['user_pronouns']);
+        if (isset($details['user_pronouns'])) {
+            $this->setPronouns($details['user_pronouns']);
+        }
 
         if (isset($details['display_name_order'])) {
             $this->setDisplayNameOrder($details['display_name_order']);
@@ -267,8 +262,8 @@ class User extends AbstractModel {
         }
 
         $this->email = $details['user_email'];
-        $this->secondary_email = $details['user_email_secondary'];
-        $this->email_both = $details['user_email_secondary_notify'];
+        $this->secondary_email = $details['user_email_secondary'] ?? '';
+        $this->email_both = $details['user_email_secondary_notify'] ?? '';
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
@@ -298,11 +293,6 @@ class User extends AbstractModel {
 
         $this->time_zone = $details['time_zone'] ?? 'NOT_SET/NOT_SET';
 
-        if (isset($details['user_verification_code'])) {
-            $this->core->getQueries()->updateUserVerificationValues($details['user_email'], $details['user_verification_code'], $details['user_verification_expiration']);
-            $this->verification_expiration = $details['user_verification_expiration'];
-            $this->verification_code = $details['user_verification_code'];
-        }
         if (isset($details['user_preferred_locale'])) {
             $this->preferred_locale = $details['user_preferred_locale'];
             $this->core->getConfig()->setLocale($this->preferred_locale);
@@ -549,7 +539,7 @@ class User extends AbstractModel {
 
     /**
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
-     * @param string $name
+     * @param ?string $name
      */
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
@@ -750,6 +740,7 @@ class User extends AbstractModel {
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
         return $notification_settings;
     }

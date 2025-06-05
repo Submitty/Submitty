@@ -8,7 +8,7 @@
 
 /* global buildCourseUrl csrfToken displayErrorMessage renderGradingGradeable renderPeerGradeable renderInstructorEditGradeable
    viewFileFullPanel resizeNoScrollTextareas openMarkConflictPopup renderEditComponent renderEditComponentHeader
-   renderGradingComponent renderGradingComponentHeader renderTotalScoreBox renderRubricTotalBox */
+   renderGradingComponent renderGradingComponentHeader renderTotalScoreBox renderRubricTotalBox luxon */
 
 /**
  *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
@@ -20,6 +20,7 @@
 
 const GRADED_COMPONENTS_LIST = {};
 const COMPONENT_RUBRIC_LIST = {};
+const ACTIVE_GRADERS_LIST = {};
 let GRADED_GRADEABLE = null;
 
 /**
@@ -80,7 +81,7 @@ const COUNT_DIRECTION_DOWN = -1;
  * Pdf Page settings for components
  * @type {int}
  */
-// eslint-disable-next-line no-unused-vars, no-var
+// eslint-disable-next-line no-var
 var PDF_PAGE_NONE = 0;
 // eslint-disable-next-line no-var
 var PDF_PAGE_STUDENT = -1;
@@ -104,7 +105,7 @@ var AJAX_USE_ASYNC = true;
  * @param err
  */
 function displayAjaxError(err) {
-    console.error("Failed to parse response.  The server isn't playing nice...");
+    console.error('Failed to parse response.  The server isn\'t playing nice...');
     console.error(err);
     // alert("There was an error communicating with the server. Please refresh the page and try again.");
 }
@@ -569,7 +570,7 @@ async function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
 async function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
     let response;
     try {
-        response = $.getJSON({
+        response = await $.getJSON({
             type: 'POST',
             async: AJAX_USE_ASYNC,
             url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
@@ -2169,7 +2170,7 @@ function onClickCountUp(me) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'No Credit');
     $.get('Mark.twig', null, () => {
-        $("input[id^='mark-editor-']").each(function () {
+        $('input[id^=\'mark-editor-\']').each(function () {
             $(this).attr('overall', 'No Credit');
             if (this.value < 0) {
                 this.style.backgroundColor = 'var(--standard-vibrant-yellow)';
@@ -2190,7 +2191,7 @@ function onClickCountDown(me) {
     const mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'Full Credit');
     $.get('Mark.twig', null, () => {
-        $("input[id^='mark-editor-']").each(function () {
+        $('input[id^=\'mark-editor-\']').each(function () {
             $(this).attr('overall', 'Full Credit');
             if (this.value > 0) {
                 this.style.backgroundColor = 'var(--standard-vibrant-yellow)';
@@ -2373,6 +2374,7 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
     try {
         await loadComponentData(gradeable, GRADED_GRADEABLE);
         const elements = await renderGradingGradeable(getGraderId(), gradeable, GRADED_GRADEABLE,
+            ACTIVE_GRADERS_LIST,
             isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
         setRubricDOMElements(elements);
         await openCookieComponent();
@@ -2391,6 +2393,16 @@ async function reloadGradingRubric(gradeable_id, anon_id) {
 async function loadComponentData(gradeable, graded_gradeable) {
     for (const component of gradeable.components) {
         COMPONENT_RUBRIC_LIST[component.id] = component;
+        if (graded_gradeable.active_graders[component.id]) {
+            ACTIVE_GRADERS_LIST[component.id] = graded_gradeable.active_graders[component.id]?.map((_, index) => {
+                const grader = graded_gradeable.active_graders[component.id][index];
+                const graderAge = luxon.DateTime.fromISO(graded_gradeable.active_graders_timestamps[component.id][index]).toRelative();
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+        else {
+            ACTIVE_GRADERS_LIST[component.id] = [];
+        }
     }
     if (graded_gradeable.graded_components) {
         const graded_array = Object.values(graded_gradeable.graded_components);
@@ -2427,6 +2439,7 @@ async function updateTotals(gradeable_id, anon_id) {
         alert(`Could not fetch graded gradeable: ${err.message}`);
     }
     const elements = await renderGradingGradeable(getGraderId(), gradeable, graded_gradeable,
+        ACTIVE_GRADERS_LIST,
         isGradingDisabled(), canVerifyGraders(), getDisplayVersion());
     setRubricDOMElements(elements);
 }
@@ -2450,7 +2463,7 @@ async function reloadPeerRubric(gradeable_id, anon_id) {
         alert(`Could not fetch gradeable rubric: ${err.message}`);
     }
     try {
-        await ajaxGetGradedGradeable(gradeable_id, anon_id, true);
+        graded_gradeable = await ajaxGetGradedGradeable(gradeable_id, anon_id, true);
     }
     catch (err) {
         alert(`Could not fetch graded gradeable: ${err.message}`);
@@ -2712,6 +2725,33 @@ async function openComponentInstructorEdit(component_id) {
  * @return {void}
  */
 async function openComponentGrading(component_id) {
+    try {
+        const response = await $.getJSON({
+            type: 'POST',
+            async: AJAX_USE_ASYNC,
+            data: {
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: getAnonId(),
+            },
+            url: buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'graded_gradeable', 'open_component']),
+        });
+        if (response.status !== 'success') {
+            console.error(`Something went wrong fetching the gradeable rubric: ${response.message}`);
+            return;
+        }
+        for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]).toRelative();
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
     OLD_GRADED_COMPONENT_LIST[component_id] = GRADED_COMPONENTS_LIST[component_id];
     OLD_MARK_LIST[component_id] = COMPONENT_RUBRIC_LIST[component_id].marks;
 
@@ -2855,10 +2895,37 @@ async function closeComponentInstructorEdit(component_id, saveChanges) {
  * @return {void}
  */
 async function closeComponentGrading(component_id, saveChanges) {
-    GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
-    COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
+    try {
+        const response = await $.getJSON({
+            type: 'POST',
+            async: AJAX_USE_ASYNC,
+            data: {
+                csrf_token: csrfToken,
+                component_id: component_id,
+                anon_id: getAnonId(),
+            },
+            url: buildCourseUrl(['gradeable', getGradeableId(), 'grading', 'graded_gradeable', 'close_component']),
+        });
+        if (response.status !== 'success') {
+            console.error(`Something went wrong fetching the gradeable rubric: ${response.message}`);
+            return;
+        }
+        for (const component of Object.keys(ACTIVE_GRADERS_LIST)) {
+            ACTIVE_GRADERS_LIST[component] = response.data.active_graders[component]?.map((_, index) => {
+                const grader = response.data.active_graders[component][index];
+                const graderAge = luxon.DateTime.fromISO(response.data.active_graders_timestamps[component][index]).toRelative();
+                return `${grader} (${graderAge})`;
+            }) ?? [];
+        }
+    }
+    catch (err) {
+        displayAjaxError(err);
+        throw err;
+    }
 
     if (saveChanges) {
+        GRADED_COMPONENTS_LIST[component_id] = getGradedComponentFromDOM(component_id);
+        COMPONENT_RUBRIC_LIST[component_id] = getComponentFromDOM(component_id);
         await saveComponent(component_id);
     }
     // Finally, render the graded component in non-edit mode with the mark list hidden
@@ -3000,13 +3067,11 @@ async function saveMarkList(component_id) {
             };
         }
     }));
-    // No conflicts, so don't open the popup
-    if (Object.keys(conflictMarks).length === 0) {
-        return;
+    // If conflicts, open the popup
+    if (Object.keys(conflictMarks).length !== 0) {
+        await openMarkConflictPopup(component_id, conflictMarks);
     }
 
-    // Prompt the user with any conflicts
-    await openMarkConflictPopup(component_id, conflictMarks);
     const markOrder = {};
     domMarkList.forEach((mark) => {
         markOrder[mark.id] = mark.order;
@@ -3354,7 +3419,7 @@ async function injectInstructorEditComponentHeader(component, showMarkList) {
  */
 async function injectGradingComponent(component, graded_component, editable, showMarkList) {
     const student_grader = $('#student-grader').attr('is-student-grader');
-    const elements = await renderGradingComponent(getGraderId(), component, graded_component, isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks());
+    const elements = await renderGradingComponent(getGraderId(), component, graded_component, ACTIVE_GRADERS_LIST[component.id], isGradingDisabled(), canVerifyGraders(), getPointPrecision(), editable, showMarkList, getComponentVersionConflict(graded_component), student_grader, TA_GRADING_PEER, getAllowCustomMarks());
     setComponentContents(component.id, elements);
 }
 

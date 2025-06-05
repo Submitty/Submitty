@@ -1,5 +1,6 @@
 ---
 submitty_install_submitty_version: main
+submitty_install_github_url: https://github.com/Submitty/Submitty.git
 submitty_install_db_host: localhost
 submitty_install_db_port: 5432
 submitty_install_submitty_dbuser: submitty_dbuser

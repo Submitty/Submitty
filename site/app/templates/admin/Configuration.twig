@@ -16,7 +16,7 @@
             <br>
             <span class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</span>
         </label>
-        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" />
+        <input class="config-row" type="text" name="course_name" id="course-name" value="{{ fields['course_name'] }}" data-testid="course-name" />
 
         <label for="course-home-url" class="config-row">
             <span class="option-title">Course Home URL</span>
@@ -240,14 +240,22 @@
         {% if submitty_admin_user['verified'] %}
             {% if submitty_admin_user['in_course'] %}
                 <div class="config-row checkbox-row">
-                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+                    <input type="checkbox" name="auto_rainbow_grades" id="auto-rainbow-grades" data-testid="auto-rainbow-grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
-                        <span class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</span>
-                        <br>
-                        <span class="option-alt">
-                            With a valid customization.json Rainbow Grades configuration,<br>
+                        <span class="option-title block">Automatic Nightly Processing for Rainbow Grades Generation</span>
+                        <span class="option-alt block">
+                            With a valid customization.json Rainbow Grades configuration,
                             a Submitty cron job will update Rainbow Grades every night at approximately 2am.
+                            The job will not run if this course is archived.
                         </span>
+                        <span class="red-message block" id="customization-exists-warning" data-testid="customization-exists-warning" data-value={{ not rainbowCustomizationExists ? "true" : "false" }} style="display: {{ fields['auto_rainbow_grades'] and not rainbowCustomizationExists ? 'block' : 'none' }};">
+                            WARNING: Automatic rainbow grades generation will not occur until you have supplied a
+                            customization.json file.  To have one generated for you, you may use the Grades Configuration tab.
+                            You may also manually create the file and upload it to your course's rainbow_grades directory.
+                        </span>
+                        <script>
+                            window.customizationExists = {{ rainbowCustomizationExists ? 'true' : 'false' }};
+                        </script>
                     </label>
                 </div>
             {% else %}
@@ -258,11 +266,11 @@
             </div>
             {% endif %}
         {% else %}
-        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
-        <div class="option-alt">
-          NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
-          Please ask your system administrator to configure this option on your server.<br><br>
-        </div>
+            <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+            <div class="option-alt">
+              NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
+              Please ask your system administrator to configure this option on your server.<br><br>
+            </div>
         {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
             <span class="option-title">Display Room Seating Guide</span>
@@ -317,7 +325,7 @@
                         id="all-self-registration"
                         data-testid="all-self-registration"
                         value="true"
-                        {{ fields['self_registration_type'] == constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') ? 'checked' : '' }}
+                        {{ fields['self_registration_type'] == all_self_register ? 'checked' : '' }}
                         onclick="return confirmSelfRegistration(this, {{ fields['registration_sections'] is empty ? 'true' : 'false' }})"
                     />
                     <div>
@@ -333,6 +341,9 @@
                         <br/>
                         <span class="option-title">Default Section</span>
                         <select name="default_section_id" id="default-section-id" data-testid="default-section-id" >
+                            {% if fields['default_section'] is null %}
+                                <option value="" selected> NULL </option>
+                            {% endif %}
                             {% for section in fields['registration_sections'] %}
                                 <option 
                                     value="{{ section['sections_registration_id'] }}" 

@@ -1,10 +1,11 @@
 <div class="content shadow" id="login-box">
     <div id="login-guest">
-     <!-- Add correct URL eventually -->
-        <h1> Verify your Email <a target=_blank href="https://submitty.org">
+        <h1> Verify your Email
         <i style="font-style:normal;" class="fa-question-circle"></i>
         </a> </h1>
     </div>
+    <p> Email may take up to 5 minutes to send </p>
+    <br/>
     <form method="GET" id="verify-email" action="{{ verify_email_url }}" >
         Enter Verification Code
         <input type="text" name="verification_code" required data-testid="verification-code" />

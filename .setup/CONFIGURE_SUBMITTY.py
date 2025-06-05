@@ -309,16 +309,6 @@ else:
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
-
-    while True:
-        user_create_account = get_input("Enable Create New Account feature? [y/n]", 'y')
-        if user_create_account.lower() in ['yes', 'y']:
-            USER_CREATE_ACCOUNT = True
-            break
-        elif user_create_account.lower() in ['no', 'n']:
-            USER_CREATE_ACCOUNT = False
-            break
-    print()
     
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
@@ -346,6 +336,13 @@ else:
         'bind_dn': default_auth_options.get('bind_dn', '')
     }
 
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
+        user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
+        if user_create_account.lower() in ['yes', 'y']:
+            USER_CREATE_ACCOUNT = True
+        else:
+            USER_CREATE_ACCOUNT = False
+        print()
     if AUTHENTICATION_METHOD == 'LdapAuthentication':
         LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
         LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
@@ -455,8 +452,9 @@ else:
 
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
-    config['user_create_account'] = USER_CREATE_ACCOUNT
     config['debugging_enabled'] = DEBUGGING_ENABLED
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
+        config['user_create_account'] = USER_CREATE_ACCOUNT
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
@@ -645,10 +643,10 @@ user_id_requirements = {
     }
 }
 
-accepted_emails = {
-    "gmail.com": True,
-    "rpi.edu": True
-}
+accepted_emails = [
+    "gmail.com",
+    "rpi.edu"
+]
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
@@ -670,11 +668,11 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
-    config['user_create_account'] = USER_CREATE_ACCOUNT
-    config['accepted_emails'] = accepted_emails
-    config['user_id_requirements'] = user_id_requirements
-    config['is_ci'] = False
-
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
+        config['user_create_account'] = USER_CREATE_ACCOUNT
+        config['accepted_emails'] = accepted_emails
+        config['user_id_requirements'] = user_id_requirements
+    
 config['worker'] = True if args.worker == 1 else False
 
 with open(SUBMITTY_JSON, 'w') as json_file:
