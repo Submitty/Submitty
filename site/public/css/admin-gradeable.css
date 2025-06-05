@@ -92,7 +92,7 @@ select {
 
 .scatterplot-type-container {
     gap: 8px;
-    margin: 0 0 10px 0;
+    margin: 0 0 10px;
 }
 
 .scatterplot-type-container * {
@@ -113,6 +113,7 @@ select {
     cursor: pointer;
     padding: 0 10px;
     caret-color: transparent;
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--actionable-blue) !important;
 }
 
