@@ -1,4 +1,4 @@
-### Why is this change necessary?
+### Why is this change necessary? How to reproduce the issue?
 <!-- List issue if it fixes/closes/implements one using the "Fixes #<number>" or "Closes #<number>" syntax -->
 
 ### What is the new behavior?
@@ -7,5 +7,5 @@
 ### Unit Tests and E2E Tests
 <!-- Include Unit Tests and E2E Tests as necessary, or make issue to do so -->
 
-### Other information?
+### Other information. How to test this PR? What modules need to be tested?
 <!-- Is this a breaking change? -->
