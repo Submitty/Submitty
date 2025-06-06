@@ -335,7 +335,7 @@ body::-webkit-scrollbar-track {
 }
 
 .config-folder-view {
-    list-style-type: none; 
+    list-style-type: none;
     display: none;
     margin-top: 0.5em;
 }
