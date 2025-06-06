@@ -16,9 +16,13 @@ def up(config, database, semester, course):
     """
     database.execute(
         """
-            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT TRUE NOT NULL;
-            ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT TRUE NOT NULL;
-            ALTER TABLE electronic_gradeable_version ADD COLUMN IF NOT EXISTS g_notification_sent BOOLEAN DEFAULT FALSE NOT NULL;
+            ALTER TABLE notification_settings
+            ADD COLUMN IF NOT EXISTS all_released_grades BOOLEAN DEFAULT TRUE NOT NULL,
+            ADD COLUMN IF NOT EXISTS all_released_grades_email BOOLEAN DEFAULT TRUE NOT NULL;
+
+            ALTER TABLE electronic_gradeable_version
+            ADD COLUMN IF NOT EXISTS g_notification_sent BOOLEAN DEFAULT FALSE NOT NULL;
+
             UPDATE electronic_gradeable_version egv
             SET g_notification_sent = TRUE
             WHERE EXISTS (
