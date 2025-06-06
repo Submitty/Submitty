@@ -31,8 +31,8 @@
 }
 
 .config-button-disabled {
-  background-color: inherit;
-  opacity: 0.5;
-  pointer-events: none;
-  cursor: not-allowed;
+    background-color: inherit;
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
 }

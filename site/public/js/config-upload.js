@@ -37,44 +37,43 @@ function openDeletePopup(file_path) {
 $(document).ready(() => {
     let unUploadedFile = false;
 
-    document.getElementById("config-submit-button").disabled = true;
-    document.getElementById("config-cancel-button").disabled = true;
+    document.getElementById('config-submit-button').disabled = true;
+    document.getElementById('config-cancel-button').disabled = true;
 
     function updateConfigButtonsStatus() {
-        if(unUploadedFile) {
-            document.getElementById("config-submit-button").disabled = false;
-            document.getElementById("config-cancel-button").disabled = false;
+        if (unUploadedFile) {
+            document.getElementById('config-submit-button').disabled = false;
+            document.getElementById('config-cancel-button').disabled = false;
         }
         else {
-            document.getElementById("config-submit-button").disabled = true;
-            document.getElementById("config-cancel-button").disabled = true;
+            document.getElementById('config-submit-button').disabled = true;
+            document.getElementById('config-cancel-button').disabled = true;
         }
     }
 
-    document.getElementById("config-upload-form").addEventListener("change", function(event) {
-        if (document.getElementById("configFile").files.length === 1) {
+    document.getElementById('config-upload-form').addEventListener('change', (event) => {
+        if (document.getElementById('configFile').files.length === 1) {
             unUploadedFile = true;
             updateConfigButtonsStatus();
         }
     });
 
-    document.getElementById("config-upload-form").addEventListener("submit", function(event) {
+    document.getElementById('config-upload-form').addEventListener('submit', (event) => {
         unUploadedFile = false;
         updateConfigButtonsStatus();
     });
 
-    document.getElementById("config-upload-form").addEventListener("reset", function(event) {
+    document.getElementById('config-upload-form').addEventListener('reset', (event) => {
         if (unUploadedFile === true) {
             unUploadedFile = false;
             updateConfigButtonsStatus();
         }
     });
 
-    window.addEventListener("beforeunload", function (event) {
+    window.addEventListener('beforeunload', (event) => {
         if (unUploadedFile === true) {
             event.preventDefault();
-            return "";
+            return '';
         }
     });
 });
-
