@@ -28,7 +28,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->core = new Core();
+        $this->core = $this->createMockCore();
 
         $this->controller = new SqlToolboxController($this->core);
     }
@@ -61,15 +61,15 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $prop->setValue($tables[1], 'foo');
         $prop->setAccessible(false);
 
-        $columnsProp = $reflection->getProperty('columns');
-        $columnsProp->setAccessible(true);
-        $columnsProp->setValue($tables[0], new ArrayCollection());
-        $columnsProp->setAccessible(false);
+        $prop = $reflection->getProperty('columns');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[0], new ArrayCollection());
+        $prop->setAccessible(false);
 
-        $columnsProp = $reflection->getProperty('columns');
-        $columnsProp->setAccessible(true);
-        $columnsProp->setValue($tables[1], new ArrayCollection());
-        $columnsProp->setAccessible(false);
+        $prop = $reflection->getProperty('columns');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[1], new ArrayCollection());
+        $prop->setAccessible(false);
 
         /** @var EntityManager&\PHPUnit\Framework\MockObject\MockObject $entity_manager */
         $entity_manager = $this->createMock(EntityManager::class);
