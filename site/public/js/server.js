@@ -816,7 +816,7 @@ function check_server(url, anon_id = '') {
                     location.reload();
                 }
                 else {
-                    checkRefreshPage(url);
+                    checkRefreshPage(url, anon_id);
                 }
             }
             catch (e) {
