@@ -195,7 +195,7 @@ runs:
     
     - name: Check logs
       if: failure()
-      run: 
+      run: |
         apache2ctl configtest
         systemctl status apache2.service --no-pager
         journalctl -xeu apache2.service --no-pager
