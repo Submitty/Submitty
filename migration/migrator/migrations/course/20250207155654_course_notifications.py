@@ -25,12 +25,8 @@ def up(config, database, semester, course):
 
             UPDATE electronic_gradeable_version egv
             SET g_notification_sent = TRUE
-            WHERE EXISTS (
-                SELECT 1
-                FROM gradeable g
-                WHERE g.g_id = egv.g_id
-                AND g.g_grade_released_date < NOW()
-            );
+            FROM gradeable g
+            WHERE g.g_id = egv.g_id AND g.g_grade_released_date < NOW();
         """
     )
 
