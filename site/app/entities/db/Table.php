@@ -21,7 +21,7 @@ class Table {
 
     #[ORM\Id]
     #[ORM\Column(name: "table_name", type: Types::STRING)]
-    protected string $name;
+    private string $name;
 
     /**
      * @var Collection<Column>
@@ -31,7 +31,7 @@ class Table {
     #[ORM\JoinColumn(name: "table_schema", referencedColumnName: "table_schema")]
     #[ORM\JoinColumn(name: "table_name", referencedColumnName: "table_name")]
     #[ORM\OrderBy(["position" => "ASC"])]
-    protected Collection $columns;
+    private Collection $columns;
 
     public function __construct() {
         throw new \RuntimeException("Cannot create new information_schema.table");

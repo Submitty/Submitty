@@ -29,20 +29,17 @@ class SqlToolboxController extends AbstractController {
         );
 
         // need to map to json-encodeable format
-        foreach ($sql_tables as $sql_table) {
-            $columns = [];
-            foreach ($sql_table->getColumns()->toArray() as $column) {
-                $columns[] = [
-                    'name' => $column->getName(),
-                    'type' => $column->getType(),
-                ];
-            }
-
-            $sql_structure_data[] = [
+        $sql_structure_data = array_map(function ($sql_table) {
+            return [
                 'name' => $sql_table->getName(),
-                'columns' => $columns,
+                'columns' => array_map(function ($column) {
+                    return [
+                        'name' => $column->getName(),
+                        'type' => $column->getType(),
+                    ];
+                }, $sql_table->getColumns()->toArray()),
             ];
-        }
+        }, $sql_tables);
 
 
         $user_id = $this->core->getUser()->getId();
