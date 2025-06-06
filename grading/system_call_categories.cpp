@@ -320,6 +320,8 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
     ALLOW_SYSCALL(iopl);
     ALLOW_SYSCALL(ioprio_get);
     ALLOW_SYSCALL(ioprio_set);
+    ALLOW_SYSCALL(io_uring_setup);
+    //ALLOW_SYSCALL_BY_NUMBER(0x3f0, "rrcall_check_presence"); // Julia invokes; gets ENOSYS.
   }
 
   // RESTRICTED : DEVICE_MANAGEMENT_NEW_DEVICE
