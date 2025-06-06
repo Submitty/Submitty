@@ -12,7 +12,7 @@ class CodeMirrorUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame($expected, CodeMirrorUtils::getCodeMirrorMode($type));
     }
 
-    public function codeMirrorModeDataProvider(): array {
+    public static function codeMirrorModeDataProvider(): array {
         return [
             ['c', 'text/x-csrc'],
             ['c++', 'text/x-c++src'],

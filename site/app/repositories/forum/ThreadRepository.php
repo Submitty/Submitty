@@ -16,7 +16,7 @@ class ThreadRepository extends EntityRepository {
      */
     private function getThreadBlock(string $user_id, int $block_number): array {
         $block_size = 30;
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
@@ -43,7 +43,7 @@ class ThreadRepository extends EntityRepository {
         }
         $block = $this->getThreadBlock($user_id, $block_number);
 
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
         // AddSelect allows us to join server-side, reducing the number of database queries.
@@ -104,7 +104,7 @@ class ThreadRepository extends EntityRepository {
 
 
     public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree', bool $get_deleted = false): ?Thread {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')
@@ -168,7 +168,7 @@ class ThreadRepository extends EntityRepository {
      * @return Thread[]
      */
     public function getMergeThreadOptions(Thread $thread): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')
@@ -189,7 +189,7 @@ class ThreadRepository extends EntityRepository {
         if (count($thread_ids) === 0 || count($user_ids) === 0) {
             return [];
         }
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')

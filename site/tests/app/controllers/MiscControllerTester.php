@@ -22,7 +22,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
         }
     }
 
-    public function userDataProvider() {
+    public static function userDataProvider() {
         $user_details = [
             'user_id' => 'test',
             'user_givenname' => 'Test',
