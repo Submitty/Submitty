@@ -1,5 +1,3 @@
-import { ajaxChangeGradedVersion, getAllComponentsFromDOM, getAnonId, getComponentIdFromDOMElement, getGradeableId } from '../../../ts/ta-grading-rubric';
-
 describe('Test cases for checking the clear version conflicts button in the TA grading interface', () => {
     it('Clear conflict button should appear only when there is a version conflict, and work', () => {
         cy.login('instructor');
@@ -31,7 +29,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
 
         // reset state
         cy.window().then(async (win) => {
-            await ajaxChangeGradedVersion(getGradeableId(), getAnonId(), 2, getAllComponentsFromDOM().map((x) => x.id));
+            await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2, win.getAllComponentsFromDOM().map((x) => x.id));
         });
 
         cy.reload();
@@ -68,7 +66,7 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         // reset state
         cy.get('@test-component').children().eq(0).then((el) => {
             cy.window().then(async (win) => {
-                await ajaxChangeGradedVersion(getGradeableId(), getAnonId(), 2, [getComponentIdFromDOMElement(el[0])]);
+                await win.ajaxChangeGradedVersion(win.getGradeableId(), win.getAnonId(), 2, [win.getComponentIdFromDOMElement(el[0])]);
             });
         });
 
