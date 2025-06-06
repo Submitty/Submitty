@@ -199,6 +199,7 @@ runs:
         apache2ctl configtest
         systemctl status apache2.service --no-pager
         journalctl -xeu apache2.service --no-pager
+      shell: bash
 
 
     - name: Set up nginx
