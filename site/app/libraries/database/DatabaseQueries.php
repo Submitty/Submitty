@@ -2313,13 +2313,13 @@ ORDER BY merged_data.{$section_key}
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageManualScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
+    public function getAverageComponentScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
-        $params = [$g_id, $g_id, $g_id];
+        $params = [$g_id, $g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2335,68 +2335,62 @@ ORDER BY merged_data.{$section_key}
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
 
+        $return = [];
         $this->course_db->query("
-SELECT
-  ROUND(AVG(total_score), 2) AS avg_score,
-  ROUND(STDDEV_POP(total_score), 2) AS std_dev,
-  MAX(total_score) AS max_score,
-  COUNT(*) AS count
-FROM (
-  SELECT gd.gd_{$user_or_team_id}, SUM(
-    CASE
-      WHEN (gc_default + COALESCE(sum_points, 0) + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-      WHEN (gc_default + COALESCE(sum_points, 0) + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-      ELSE (gc_default + COALESCE(sum_points, 0) + gcd_score)
-    END
-  ) AS total_score
-  FROM gradeable_component_data AS gcd
-  LEFT JOIN gradeable_component AS gc ON gcd.gc_id = gc.gc_id
-  LEFT JOIN (
-    SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
-    FROM gradeable_component_mark_data AS gcmd
-    LEFT JOIN gradeable_component_mark AS gcm 
-      ON gcmd.gcm_id = gcm.gcm_id AND gcmd.gc_id = gcm.gc_id
-    GROUP BY gcmd.gc_id, gcmd.gd_id
-  ) AS marks ON gcd.gc_id = marks.gc_id AND gcd.gd_id = marks.gd_id
-  LEFT JOIN (
-    SELECT gd.gd_{$user_or_team_id}, gd.gd_id
-    FROM gradeable_data AS gd
-    WHERE gd.g_id = ?
-  ) AS gd ON gcd.gd_id = gd.gd_id
-  INNER JOIN (
-    SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
-    FROM {$users_or_teams} AS {$u_or_t}
-    WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
-  ) AS {$u_or_t} ON gd.gd_{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-  INNER JOIN (
-    SELECT egv.{$user_or_team_id}, egv.active_version
-    FROM electronic_gradeable_version AS egv
-    WHERE egv.g_id = ? AND egv.active_version > 0
-  ) AS egv ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-  {$bad_submissions_condition}
-  WHERE gc.g_id = ? {$null_section_condition}
-  GROUP BY gd.gd_{$user_or_team_id}
-) AS student_totals
+SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
+  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
+  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+    SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
+    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
+    FROM gradeable_component_data AS gcd
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
+    LEFT JOIN(
+      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
+      FROM gradeable_component_mark_data AS gcmd
+      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+      GROUP BY gcmd.gc_id, gcmd.gd_id
+      )AS marks
+    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
+    LEFT JOIN(
+      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
+      FROM gradeable_data AS gd
+      WHERE gd.g_id=?
+    ) AS gd ON gcd.gd_id=gd.gd_id
+    INNER JOIN(
+      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+      FROM {$users_or_teams} AS {$u_or_t}
+      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    INNER JOIN(
+      SELECT egv.{$user_or_team_id}, egv.active_version
+      FROM electronic_gradeable_version AS egv
+      WHERE egv.g_id=? AND egv.active_version>0
+    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+    {$bad_submissions_condition}
+    WHERE g_id=? {$null_section_condition}
+  )AS parts_of_comp
+)AS comp
+LEFT JOIN (
+	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+	FROM grade_inquiries AS rr
+	WHERE rr.g_id=? AND rr.status=-1
+	GROUP BY rr.gc_id
+) AS rr ON rr.gc_id=comp.gc_id
+GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
+ORDER BY gc_order
         ", $params);
-        if ($this->course_db->getRowCount() === 0) {
-            return null;
+        foreach ($this->course_db->rows() as $row) {
+            $info = ['g_id' => $g_id, 'section_key' => $section_key, 'team' => $is_team];
+            $return[] = new SimpleStat($this->core, array_merge($row, $info));
         }
-        $row = $this->course_db->row();
-
-        $info = [
-            'g_id' => $g_id,
-            'max' => $row['max_score'],
-            'avg_score' => $row['avg_score'],
-            'std_dev' => $row['std_dev'],
-            'count' => $row['count']
-        ];
-
-        return new SimpleStat($this->core, $info);
+        return $return;
     }
 
     public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
