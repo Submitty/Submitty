@@ -1,3 +1,4 @@
+import { getCsrfToken } from '../../../ts/utils/server';
 import { buildUrl } from '../../support/utils';
 
 describe('Test cases for checking the clear version conflicts button in the TA grading interface', () => {
@@ -30,18 +31,16 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         cy.get('[data-testid="version-warning"]').should('not.exist');
 
         // reset state
-        cy.window().then(async (win) => {
-            cy.request({
-                method: 'POST',
-                url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
-                form: true,
-                body: {
-                    anon_id: 'K8jI3q4qpdCc1jw',
-                    graded_version: 2,
-                    component_ids: [64, 65, 66, 67],
-                    csrf_token: win.csrfToken,
-                },
-            });
+        cy.request({
+            method: 'POST',
+            url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
+            form: true,
+            body: {
+                anon_id: 'K8jI3q4qpdCc1jw',
+                graded_version: 2,
+                component_ids: [64, 65, 66, 67],
+                csrf_token: getCsrfToken(),
+            },
         });
 
         cy.reload();
@@ -76,18 +75,16 @@ describe('Test cases for checking the clear version conflicts button in the TA g
         });
 
         // reset state
-        cy.window().then(async (win) => {
-            cy.request({
-                method: 'POST',
-                url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
-                form: true,
-                body: {
-                    anon_id: 'K8jI3q4qpdCc1jw',
-                    graded_version: 2,
-                    component_ids: [64],
-                    csrf_token: win.csrfToken,
-                },
-            });
+        cy.request({
+            method: 'POST',
+            url: buildUrl(['sample', 'gradeable', 'grading_homework', 'grading', 'graded_gradeable', 'change_grade_version']),
+            form: true,
+            body: {
+                anon_id: 'K8jI3q4qpdCc1jw',
+                graded_version: 2,
+                component_ids: [64],
+                csrf_token: getCsrfToken(),
+            },
         });
 
         cy.reload();
