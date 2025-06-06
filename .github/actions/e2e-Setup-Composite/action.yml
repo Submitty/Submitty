@@ -192,6 +192,14 @@ runs:
         sudo service php${PHP_VER}-fpm restart
         sudo service apache2 restart
       shell: bash
+    
+    - name: Check logs
+      if: failure()
+      run: 
+        apache2ctl configtest
+        systemctl status apache2.service --no-pager
+        journalctl -xeu apache2.service --no-pager
+
 
     - name: Set up nginx
       run: |
