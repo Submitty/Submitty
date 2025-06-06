@@ -14,6 +14,7 @@ use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use ReflectionClass;
 use tests\BaseUnitTest;
 
@@ -59,6 +60,16 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $prop->setAccessible(true);
         $prop->setValue($tables[1], 'foo');
         $prop->setAccessible(false);
+
+        $columnsProp = $reflection->getProperty('columns');
+        $columnsProp->setAccessible(true);
+        $columnsProp->setValue($tables[0], new ArrayCollection());
+        $columnsProp->setAccessible(false);
+
+        $columnsProp = $reflection->getProperty('columns');
+        $columnsProp->setAccessible(true);
+        $columnsProp->setValue($tables[1], new ArrayCollection());
+        $columnsProp->setAccessible(false);
 
         /** @var EntityManager&\PHPUnit\Framework\MockObject\MockObject $entity_manager */
         $entity_manager = $this->createMock(EntityManager::class);
