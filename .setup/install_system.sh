@@ -861,6 +861,8 @@ fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
 
+su -c 'docker pull submitty/libreoffice-writer:latest' ${DAEMON_USER}
+
 #################################################################
 # RESTART SERVICES
 ###################

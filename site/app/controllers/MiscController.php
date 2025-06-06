@@ -425,6 +425,7 @@ class MiscController extends AbstractController {
         if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
+            $folder_names[] = "submissions_processed";
             $folder_names[] = "checkout";
         }
 
