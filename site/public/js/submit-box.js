@@ -3,8 +3,7 @@
 
 const orig_setButtonStatus = setButtonStatus;
 
-// eslint-disable-next-line no-global-assign
-setButtonStatus = function (inactive_version = false) {
+window.setButtonStatus = function (inactive_version = false) {
     updateSubmitButtonStatus();
     orig_setButtonStatus(inactive_version);
 };
