@@ -5201,6 +5201,7 @@ AND gc_id IN (
             'team_joined_email',
             'team_member_submission',
             'self_notification',
+            'all_released_grades',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -5211,6 +5212,7 @@ AND gc_id IN (
             'team_member_submission_email',
             'self_registration_email',
             'self_notification_email',
+            'all_released_grades_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -5761,6 +5763,14 @@ AND gc_id IN (
         ", [$gradeable->getId()]);
     }
 
+    public function resetGradeableNotifications(Gradeable $gradeable): void {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET g_notification_sent = FALSE
+            WHERE g_id = ?;
+        ", [$gradeable->getId()]);
+    }
+
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -5881,7 +5891,8 @@ AND gc_id IN (
               gc.*,
               pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
-              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
+              (SELECT COUNT(*) FROM electronic_gradeable_version WHERE g_id = g.g_id AND g_notification_sent IS TRUE) AS notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -8811,12 +8822,13 @@ WHERE current_state IN
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
-                 ns.self_notification,
+                 ns.self_notification, ns.all_released_grades,
                  ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
-                 ns.self_notification_email,sr.grading_registration_sections
+                 ns.self_notification_email, ns.all_released_grades_email,
+                 sr.grading_registration_sections
 
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
