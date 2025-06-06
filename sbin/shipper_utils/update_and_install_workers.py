@@ -85,14 +85,17 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         get_sysinfo.print_distribution()
         client = docker.from_env()
         try:
-            # List all images
-            image_set = {
-                image_name
-                for image in client.images.list()
-                for image_name in image.attrs["RepoTags"]
-            }
+            # Precompute dicts
+            image_id_to_tags = {}
+            tag_to_image_id = {}
+            for image in client.images.list():
+                tags = image.attrs.get("RepoTags") or []
+                for tag in tags:
+                    tag_to_image_id[tag] = image.id
+                image_id_to_tags.setdefault(image.id, []).extend(tags)
 
-            images_to_remove = set.difference(image_set, images_to_update)
+            image_tags = set(tag_to_image_id.keys())
+            images_to_remove = set.difference(image_tags, images_to_update)
 
             # Prevent removal of system docker containers
             with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
@@ -101,15 +104,19 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
 
             # Remove images
-            for imageRemoved in images_to_remove:
+            for image_tag_to_remove in images_to_remove:
                 try:
-                    image_id = client.images.get(imageRemoved).id
-                    thread_object.add_message("Removed image " + imageRemoved)
-                except docker.errors.ImageNotFound as e:
-                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {imageRemoved}"))
+                    image_id = tag_to_image_id.get(image_tag_to_remove)
+                    ref_tags = image_id_to_tags.get(image_id, [])
+                    # If the image has multiple tags (aliases), remove by tag; otherwise, remove by ID
+                    if len(ref_tags) > 1:
+                        client.images.remove(image_tag_to_remove)
+                    else:
+                        client.images.remove(image_id)
+                    thread_object.add_message("Removed image " + image_tag_to_remove)
+                except docker.errors.ImageNotFound:
+                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {image_tag_to_remove} ({image_id}) to remove."))
                     continue
-                try:
-                    client.images.remove(image_id, True)
                 except Exception as e:
                     thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}"))
                     traceback.print_exc(file=sys.stderr)
