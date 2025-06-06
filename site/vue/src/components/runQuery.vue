@@ -40,7 +40,6 @@ const runQuery = async () => {
         emit('changeData', result.data);
     }
     catch (e) {
-        console.log({ error: true, message: (e as Error).message || 'An error occurred while running the query.' });
         emit('changeError', true, (e as Error).message || 'An error occurred while running the query.');
     }
 };

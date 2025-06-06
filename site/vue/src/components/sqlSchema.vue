@@ -36,10 +36,12 @@ function toggle(event: MouseEvent) {
           v-for="row in data"
           :key="row.name"
         >
-          <a
+          <button
             class="sql-database-table"
             @click="toggle"
-          >{{ row.name }}</a>
+          >
+            {{ row.name }}
+          </button>
           <div
             class="sql-database-columns"
             hidden

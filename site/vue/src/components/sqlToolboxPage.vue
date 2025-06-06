@@ -32,7 +32,6 @@ function addQuery(id: number, query_name: string, query: string) {
     queries.value.push({ id, query_name, query });
 }
 function changeError(error: boolean, message: string) {
-    console.log('changeError', error, message);
     queryError.value.error = error;
     queryError.value.message = message;
 }

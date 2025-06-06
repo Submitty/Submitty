@@ -39,7 +39,7 @@ function downloadCsv() {
 
 <template>
   <button
-    v-show="data.length"
+    v-if="data.length"
     id="download-sql-btn"
     class="btn btn-primary"
     @click="downloadCsv"

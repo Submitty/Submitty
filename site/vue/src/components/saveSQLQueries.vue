@@ -3,12 +3,10 @@ import { ref } from 'vue';
 import Popup from './popup.vue';
 import { buildCourseUrl, displaySuccessMessage, getCsrfToken } from '../../../ts/utils/server';
 
-type QueryData = {
+const data = defineModel<{
     query_name: string;
     query: string;
-};
-
-const data = defineModel<QueryData>('data', { required: true });
+}>('data', { required: true });
 
 const emit = defineEmits<{
     add: [id: number, query_name: string, query: string];
