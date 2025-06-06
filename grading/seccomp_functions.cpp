@@ -285,17 +285,20 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   
   std::set<std::string> default_categories =
     system_call_categories_based_on_program(my_program,restricted_categories);
-
   //execute_logfile << "categories based on program " << default_categories.size() << std::endl;
-  
+
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
-  const nlohmann::json &whole_config_safelist = whole_config.value("allow_system_calls",default_categories);
+  nlohmann::json whole_config_safelist = whole_config.value("allow_system_calls",default_categories);
 
   //execute_logfile << "categories based on global config " << whole_config_safelist.size() << std::endl;
   
-  const nlohmann::json &config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
-
+  nlohmann::json config_safelist = whole_config_safelist;
+  try {
+    config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
+  } catch (...) {
+    // custom_doit validation don't have a valid test_case_config json object
+  }
   //execute_logfile << "categories based on test case config " << config_safelist.size() << std::endl;
 
   std::set<std::string> categories;
