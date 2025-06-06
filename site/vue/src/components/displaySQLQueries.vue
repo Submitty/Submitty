@@ -1,58 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import Popup from './popup.vue';
 import { buildCourseUrl, getCsrfToken, displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
+import { ref } from 'vue';
+import type { QueryListEntry } from '../../../ts/sql-toolbox';
 
-interface QueryEntry {
-    id: number;
-    query_name: string;
-    query: string;
-}
+const { queries } = defineProps<{
+    queries: QueryListEntry[];
+}>();
+
+const emit = defineEmits<{
+    delete: [id: number];
+    addToQuery: [query: string];
+}>();
 
 interface ServerResult {
     status: string;
     message: string | null;
-    data: QueryEntry[];
+    data: { [key: string]: number | string | null }[];
 }
 
 const showPopup = ref(false);
-const queries = ref<QueryEntry[]>([]);
 
-const fetchQueries = async () => {
-    try {
-        const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries']));
-        if (!response.ok) {
-            throw new Error('Failed to fetch queries');
-        }
-        const result = await response.json() as ServerResult;
-        queries.value = result.data || [];
-    }
-    catch (e) {
-        displayErrorMessage(`Error fetching queries: ${e instanceof Error ? e.message : 'Unknown error'}`);
-        console.error('Error fetching queries:', e);
-        showPopup.value = false;
-    }
-};
-
-const handleToggle = async () => {
+const handleToggle = () => {
     showPopup.value = !showPopup.value;
-    if (showPopup.value) {
-        await fetchQueries();
-    }
 };
 
 const addQuery = (id: number) => {
-    const query = queries.value.find((q) => q.id === id);
+    const query = queries.find((q) => q.id === id);
     if (query) {
-        const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
-        if (textBox) {
-            textBox.value += query.query;
-        }
+        emit('addToQuery', query.query);
     }
-    showPopup.value = false;
 };
 
-const deleteQuery = async (id: number) => {
+const handleDeletion = async (id: number) => {
     if (!confirm('Are you sure you want to delete this query?')) {
         return;
     }
@@ -76,7 +56,8 @@ const deleteQuery = async (id: number) => {
             throw new Error(json.message ?? 'Failed to delete query.');
         }
 
-        queries.value = queries.value.filter((query) => query.id !== id);
+        // remove the query from the main ref
+        emit('delete', id);
         displaySuccessMessage('Query deleted successfully!');
     }
     catch (e) {
@@ -95,6 +76,7 @@ const deleteQuery = async (id: number) => {
   >
     <template #trigger>
       <button
+        id="saved-queries-btn"
         class="btn btn-primary"
         @click="handleToggle"
       >
@@ -138,7 +120,7 @@ const deleteQuery = async (id: number) => {
               <a
                 class="fa fa-trash"
                 aria-hidden="true"
-                @click="deleteQuery(query.id)"
+                @click="handleDeletion(query.id)"
               />
             </td>
           </tr>
@@ -153,6 +135,10 @@ const deleteQuery = async (id: number) => {
 </template>
 
 <style lang="css" scoped>
+#saved-queries-btn {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
 .td-wrap-element {
   width: 50%;
   white-space: pre-wrap;

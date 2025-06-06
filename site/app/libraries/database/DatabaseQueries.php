@@ -9430,12 +9430,14 @@ ORDER BY
      * @param string $user_id the userid of the user
      * @param string $query_name the query name save it as
      * @param string $query the query to save
+     * @return int the last inserted id
      */
-    public function saveInstructorQueries($user_id, $query_name, $query): void {
+    public function saveInstructorQueries($user_id, $query_name, $query): int {
         $this->submitty_db->query(
             "INSERT INTO instructor_sql_queries (user_id, query_name, query) VALUES (?, ?, ?)",
             [$user_id, $query_name, $query]
         );
+        return $this->submitty_db->getLastInsertId();
     }
 
     /**

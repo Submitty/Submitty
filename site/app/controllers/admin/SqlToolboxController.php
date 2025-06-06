@@ -23,13 +23,33 @@ use Symfony\Component\Routing\Annotation\Route;
 class SqlToolboxController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {
+        $sql_tables = $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
+                ['schema' => 'public'],
+                ['name' => 'ASC']
+        );
+
+        // need to map to json-encodeable format
+        $sql_structure_data = array_map(function ($sql_table) {
+            $columns = $sql_table->getColumns();
+            return [
+                'name' => $sql_table->getName(),
+                'columns' => array_map(function ($column) {
+                    return [
+                        'name' => $column->getName(),
+                        'type' => $column->getType(),
+                    ];
+                }, iterator_to_array($columns)),
+            ];
+        }, $sql_tables);
+
+        $user_id = $this->core->getUser()->getId();
+        $user_queries = $this->core->getQueries()->getInstructorQueries($user_id);
+        
         return new WebResponse(
             SqlToolboxView::class,
             'showToolbox',
-            $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
-                ['schema' => 'public'],
-                ['name' => 'ASC']
-            )
+            $sql_structure_data,
+            $user_queries
         );
     }
 
@@ -79,8 +99,8 @@ class SqlToolboxController extends AbstractController {
             return JsonResponse::getFailResponse("Query name must be less than 255 characters long: " . $query_name);
         }
 
-        $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
-        return JsonResponse::getSuccessResponse("Successfully saved the query");
+        $saved_row = $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
+        return JsonResponse::getSuccessResponse($saved_row);
     }
 
     #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries/delete", methods: ["POST"])]

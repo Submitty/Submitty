@@ -3,32 +3,28 @@ import { ref } from 'vue';
 import Popup from './popup.vue';
 import { buildCourseUrl, displaySuccessMessage, getCsrfToken } from '../../../ts/utils/server';
 
-interface ServerResult {
+type QueryData = {
+    query_name: string;
+    query: string;
+};
+
+const data = defineModel<QueryData>('data', { required: true });
+
+const emit = defineEmits<{
+    add: [id: number, query_name: string, query: string];
+}>();
+
+type ServerResult = {
     status: string;
     message: string | null;
-    data: { [key: string]: number | string | null }[];
-}
+    data: number;
+};
 
 const showPopup = ref(false);
-const queryData = ref({
-    query_name: '',
-    query: '',
-});
 const error = ref({
     error: false,
     message: '',
 });
-
-const handleToggle = () => {
-    showPopup.value = !showPopup.value;
-
-    if (showPopup.value) {
-        const textBox = document.getElementById('toolbox-textarea') as HTMLTextAreaElement;
-        if (textBox) {
-            queryData.value.query = textBox.value;
-        }
-    }
-};
 
 const displayError = (message: string) => {
     error.value.error = true;
@@ -38,11 +34,15 @@ const displayError = (message: string) => {
     }, 5000);
 };
 
+const handleToggle = () => {
+    showPopup.value = !showPopup.value;
+};
+
 const handleSave = async () => {
     const form = new FormData();
     form.append('csrf_token', getCsrfToken());
-    form.append('query_name', queryData.value.query_name);
-    form.append('query', queryData.value.query);
+    form.append('query_name', data.value.query_name);
+    form.append('query', data.value.query);
 
     try {
         const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries']), {
@@ -57,7 +57,11 @@ const handleSave = async () => {
         const result = await response.json() as ServerResult;
         if (result.status === 'success') {
             displaySuccessMessage('Query saved successfully!');
+            const insertedId: number = result.data;
+            emit('add', insertedId, data.value.query_name, data.value.query);
             showPopup.value = false;
+            data.value.query_name = '';
+            data.value.query = '';
         }
         else {
             displayError(result.message ?? 'An unknown error occurred while saving the query. Please try again later.');
@@ -100,12 +104,6 @@ const handleSave = async () => {
         ref="formElement"
         class="form-group"
       >
-        <input
-          type="hidden"
-          name="csrf_token"
-          :value="getCsrfToken()"
-        />
-
         <label
           id="query-name-label"
           for="query-name"
@@ -113,7 +111,7 @@ const handleSave = async () => {
         >Query Name</label>
         <input
           id="query-name"
-          v-model="queryData.query_name"
+          v-model="data.query_name"
           name="query-name"
           type="text"
           maxlength="255"
@@ -128,7 +126,7 @@ const handleSave = async () => {
         >Query</label>
         <textarea
           id="query-text"
-          v-model="queryData.query"
+          v-model="data.query"
           name="query"
           rows="6"
           placeholder="Edit your query here"
