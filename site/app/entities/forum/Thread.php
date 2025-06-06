@@ -58,8 +58,8 @@ class Thread {
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
     protected DateTime $pinned_expiration;
 
-    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE)]
-    protected DateTime $announced;
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $announced;
 
     /**
      * @var Collection<Post>
@@ -96,12 +96,20 @@ class Thread {
         return $this->title;
     }
 
+    public function setTitle(string $title): void {
+        $this->title = $title;
+    }
+
     public function getAuthor(): UserEntity {
         return $this->author;
     }
 
     public function isDeleted(): bool {
         return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): void {
+        $this->deleted = $deleted;
     }
 
     public function getMergedThread(): ?Thread {
@@ -116,12 +124,16 @@ class Thread {
         return $this->status;
     }
 
-    public function setStatus(int $newStatus): void {
-        $this->status = $newStatus;
+    public function setStatus(int $status): void {
+        $this->status = $status;
     }
 
     public function getLockDate(): ?DateTime {
         return $this->lock_thread_date;
+    }
+
+    public function setLockDate(?DateTime $lock_thread_date): void {
+        $this->lock_thread_date = $lock_thread_date;
     }
 
     public function isLocked(): bool {
@@ -132,12 +144,20 @@ class Thread {
         return $this->pinned_expiration;
     }
 
+    public function setPinnedExpiration(DateTime $pinned_expiration): void {
+        $this->pinned_expiration = $pinned_expiration;
+    }
+
     public function isPinned(): bool {
         return $this->pinned_expiration > new DateTime("now");
     }
 
-    public function IsPinnedExpiring(): bool {
+    public function isPinnedExpiring(): bool {
         return $this->pinned_expiration <= (new DateTime("now"))->add(DateInterval::createFromDateString("7 days"));
+    }
+
+    public function isAnnounced(): bool {
+        return !is_null($this->announced);
     }
 
     /**
@@ -152,6 +172,14 @@ class Thread {
      */
     public function getCategories(): Collection {
         return $this->categories;
+    }
+
+    /**
+     * @param Collection<Category> $categories
+     * @return void
+     */
+    public function setCategories(Collection $categories): void {
+        $this->categories = $categories;
     }
     public function isUnread(string $user_id): bool {
         return !$this->getNewPosts($user_id)->isEmpty();
@@ -183,5 +211,13 @@ class Thread {
         return $this->posts->filter(function ($x) {
             return $x->getParent()->getId() === -1;
         })->first();
+    }
+
+    public function getSumUpducks(): int {
+        $sum_upducks = 0;
+        foreach ($this->getPosts() as $post) {
+            $sum_upducks += count($post->getUpduckers());
+        }
+        return $sum_upducks;
     }
 }

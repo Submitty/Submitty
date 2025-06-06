@@ -16,6 +16,7 @@
 }
 
 .no-content {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: transparent !important;
 }
 

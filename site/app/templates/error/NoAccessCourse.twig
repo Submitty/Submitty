@@ -1,5 +1,5 @@
 <div class="content" data-testid="no-access-message">
-    {% if self_registration_type != constant('app\\controllers\\admin\\ConfigurationController::ALL_SELF_REGISTER') %}
+    {% if self_registration_type != all_self_register %}
         You don't have access to this course. <br />
         This is <b>{{course_name}}</b> for <b>{{semester}}</b>. <br/>
         If you think this is a mistake,
@@ -16,8 +16,11 @@
             please contact your instructor to gain access. <br/>
             Click <a href="{{main_url}}"> here </a> to back to homepage and see your courses list.
         {% endif %}
+    {% elseif default_section_id is null %}
+        The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration, however the instructor has not set a default section id.
+        <br/>Please alert your instructor.
     {% else %}
-        The course <b>{{ course_name != course_id ? 'course_name (course_id)' : course_name  }}</b> for <b>{{ semester }}</b> is open to self registration <br />
+        The course <b>{{ course_name }} {{ course_name != course_id ? '(' ~ course_id ~ ') ' : '' }}</b>for <b>{{ semester }}</b> is open to self registration <br />
         You may select below to add yourself to the course. <br/>
         Your instructor will be notified and can then choose to keep you in the course.
         {% if course_home_url != '' %}

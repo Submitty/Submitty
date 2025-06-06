@@ -30,22 +30,20 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="row">
-                <div class="heading col-md-4"></div>
+            <div class="row row-spacing">
+                <div class="heading col-md-4">
+                    <h2 class="notification-settings-header">Forum</h2>
+                </div>
                 <div class="heading col-md-3">
-                    <h2>Notification Settings</h2>
+                    <h2 class="notification-settings-header">Notification Settings</h2>
                 </div>
                 {% if email_enabled %}
                     <div class="heading col-md-5">
-                        <h2>Email Settings</h2>
+                        <h2 class="notification-settings-header">Email Settings</h2>
                     </div>
                 {% endif %}
             </div>
-
-            <div class="heading">
-                <h2>Forum</h2>
-                <hr>
-            </div>
+            <div><hr></div>
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <span>
@@ -151,7 +149,7 @@
                         <span>
                             <span class="option-title">All Modified Threads & Posts</span>
                             <br>
-                            <span class="option-alt">Alert me when a thread/post has been edited, deleted, or undeleted</span>
+                            <span class="option-alt">Alert me when a thread/post has been edited, deleted, or restored</span>
                         </span>
                     </div>
                     <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All Modified Threads & Posts" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="checked"{% endif %}></div>
@@ -161,8 +159,8 @@
                 </div>
             {% endif %}
 
-            <div class="heading">
-                <h2>Grade Inquiry</h2>
+            <div class="heading row-spacing">
+                <h2 class="notification-settings-header">Grade Inquiry</h2>
                 <hr>
             </div>
 
@@ -226,8 +224,8 @@
                 {% endif %}
             </div>
 
-            <div class="heading">
-                <h2>Team</h2>
+            <div class="heading row-spacing">
+                <h2 class="notification-settings-header">Team</h2>
                 <hr>
             </div>
 
@@ -287,7 +285,40 @@
                     <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email My Actions/Updates" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="checked"{% endif %}></div>
                 {% endif %}
             </div>
-
+        
+            {% if is_instructor and is_self_registration %}
+                <div class="heading">
+                    <h2 class="notification-settings-header">Registration</h2>
+                    <hr>
+                </div>
+                <div class="option row">
+                    <div class="option-desc col-md-4">
+                        <span>
+                            <span class="option-title">New Self Registration</span>
+                            <br>
+                            <span class="option-alt">Notify me of self-registrations</span>
+                        </span>
+                    </div>
+                    <div 
+                        class="option-input col-md-3 notification-setting-input"
+                    >
+                    </div>
+                    {% if email_enabled %}
+                        <div 
+                            class="option-input col-md-5 email-setting-input"
+                        >
+                                <input 
+                                    type="checkbox" 
+                                    data-testid="self-registration"
+                                    aria-label="Email All New Self Registrations" 
+                                    name="self_registration_email" 
+                                    id="self-registration-email" 
+                                    {% if notification_saves['self_registration_email'] %} checked {% endif %}
+                                >
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </form>
     <script>
