@@ -43,7 +43,7 @@ $(document).ready(() => {
             desiredHeight += 5;
             textarea.style.height = `${desiredHeight}px`;
         }
-        textarea.style.overflowY = 'hidden';
+        textarea.style.overflowY = 'auto';
     };
 
     targetTextarea.on('input', function () {
@@ -68,4 +68,17 @@ $(document).ready(() => {
         observer.observe(container, config);
     }
     resizeTextarea(targetTextarea.get(0));
+});
+
+$(document).on('click', '.markdown-write-mode', function () {
+    const markdownArea = $(this).closest('.markdown-area');
+    const textarea = markdownArea.find('textarea').get(0);
+    const finalHeight = Number($(textarea).data('finalHeight'));
+    textarea.style.height = `${finalHeight}px`;
+});
+
+$(document).on('click', '.markdown-preview-mode', function () {
+    const markdownArea = $(this).closest('.markdown-area');
+    const textarea = markdownArea.find('textarea').get(0);
+    $(textarea).data('finalHeight', $(textarea).outerHeight());
 });
