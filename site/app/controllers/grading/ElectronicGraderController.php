@@ -694,48 +694,18 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
 
-            // Manual Average and Standard Deviation Calculations
-            $total_count = 0; // Total number of samples across all components
-            $overall_avg = 0;
-
-            foreach ($component_averages as $c) {
-                $count = $c->getCount();
-                $overall_avg += $c->getAverageScore();
-                $total_count += $count;
-            }
-
-            $variance_sum = 0;
-
-            foreach ($component_averages as $c) {
-                $count = $c->getCount();
-                $avg = $c->getAverageScore();
-                $stdev = $c->getStandardDeviation();
-
-                /*
-                    For each component, variance contribution is:
-                    n_i * [ (std_dev_i)^2 + (mean_i - overall_mean)^2 ]
-                        - (std_dev_i)^2 is the variance within the component
-                        - (mean_i - overall_mean)^2 is the squared difference between component mean and overall mean (between-group variance)
-                    Multiplying by count n_i weights the contribution by how many samples are in the component
-                */
-                $variance_sum += $count * (pow($stdev, 2) + pow($avg - $overall_avg, 2));
-            }
-
-            // Finally, total variance is the weighted sum divided by total samples
-            $overall_variance = $variance_sum / $total_count;
-
-            // Standard deviation is the square root of variance
-            $overall_stdev = sqrt($overall_variance);
-
-            $manual_average = new SimpleStat($this->core, [
-                'avg_score' => $overall_avg,
-                'std_dev' => $overall_stdev,
-                'max' => 0,
-                'count' => 0
-            ]);
-
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
+
+            $manual_average = new SimpleStat($this->core, [
+                'avg_score' => $overall_average['manual_avg_score'],
+                'std_dev' => $overall_average['manual_std_dev'],
+                'max' => $overall_average['manual_max_score'],
+                'count' => $overall_average['count']
+            ]);
+
+            $overall_average = new SimpleStat($this->core, $overall_average);
+
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
