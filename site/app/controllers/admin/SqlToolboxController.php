@@ -30,7 +30,6 @@ class SqlToolboxController extends AbstractController {
 
         // need to map to json-encodeable format
         $sql_structure_data = array_map(function ($sql_table) {
-            $columns = $sql_table->getColumns();
             return [
                 'name' => $sql_table->getName(),
                 'columns' => array_map(function ($column) {
@@ -38,7 +37,7 @@ class SqlToolboxController extends AbstractController {
                         'name' => $column->getName(),
                         'type' => $column->getType(),
                     ];
-                }, iterator_to_array($columns)),
+                }, $sql_table->getColumns()->toArray()),
             ];
         }, $sql_tables);
 
