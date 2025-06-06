@@ -18,10 +18,11 @@
 }
 
 .unregister-button {
-    background-color: var(--standard-medium-blue);
+    background-color: var(--actionable-blue);
     float: right;
     border: none;
     color: var(--btn-text-white);
+
 }
 
 .gradeable-row:nth-last-child(1) {
