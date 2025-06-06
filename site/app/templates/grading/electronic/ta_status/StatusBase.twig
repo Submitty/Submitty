@@ -190,7 +190,7 @@
         </div>
     {% elseif core.getUser().getGroup() < 4 %}
         <form id="gradeable-form" class="form-signin" method="post" enctype="multipart/form-data" onsubmit="return checkForm();">
-        <div class="tab-bar-wrapper" style="margin-bottom: 10px;">
+        <div class="tab-bar-wrapper">
             <a class="nav-bar key_to_click" id="page_0_nav" onclick="onChangeNavTab(0);">Data</a>
             <a class="nav-bar key_to_click" id="page_1_nav" onclick="onChangeNavTab(1);">Manual Grading Component Averages</a>
             <a class="nav-bar key_to_click" id="page_2_nav" onclick="onChangeNavTab(2);">Manual Grading Histogram</a>
@@ -198,9 +198,9 @@
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
         </div>
-        <div class="modal-body">
+        <div class="modal-body gradeable-status-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
-            
+
             {# Only create div if we can create the stats #}
             {% if component_averages|length != 0 %}
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>

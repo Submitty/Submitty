@@ -82,6 +82,10 @@ select {
     min-height: 35px;
 }
 
+.gradeable-status-body {
+    margin-top: 10px;
+}
+
 .bucket-size-container,
 .scatterplot-type-container {
     display: flex;
