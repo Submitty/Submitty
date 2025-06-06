@@ -38,7 +38,7 @@ input[type="text"]:invalid {
 
 select {
     margin-top: 7px;
-    width: available;
+    width: 100%;
     min-width: 60px;
 }
 
@@ -216,10 +216,10 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container, #subdirectory-settings-container {
+#team-settings-container,
+#subdirectory-settings-container {
     margin-top: 10px;
 }
-
 
 #rebuild-status-panel {
     display: inline-block;
@@ -327,4 +327,24 @@ body::-webkit-scrollbar-track {
 #custom_marks_warning {
     color: var(--standard-vibrant-red);
     font-style: italic;
+}
+
+.warning-banner {
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
+
+.date-warning {
+    display: none;
+}
+
+.numerics-table,
+.checkpoints-table {
+    max-width: 50%;
+}
+
+.text-table {
+    max-width: 25%;
 }
