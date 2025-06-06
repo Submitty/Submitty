@@ -1932,21 +1932,6 @@ parameters:
 			path: app/controllers/forum/ForumController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has parameter \\$output with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has parameter \\$thread_id with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreads\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
