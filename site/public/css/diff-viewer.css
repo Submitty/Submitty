@@ -1,6 +1,7 @@
 @import url("google/inconsolata.css");
 
 .diff-container-box {
+    display: grid;
     overflow: auto;
     background-color: var(--standard-pale-gray);
     border: 1px solid var(--standard-light-gray);
@@ -28,6 +29,7 @@
 }
 
 .highlight-hover {
+    /* stylelint-disable-next-line declaration-no-important */
     background-color: var(--standard-light-blue-gray) !important;
 }
 
@@ -53,10 +55,13 @@
 .line_number,
 .line_code {
     vertical-align: top;
+    /* stylelint-disable-next-line declaration-no-important */
     max-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     height: 20px !important;
     font-family: "Courier New", Courier, monospace;
     font-size: 16px;
+    /* stylelint-disable-next-line declaration-no-important */
     line-height: 20px !important;
     padding: 0 5px;
 }
@@ -64,10 +69,15 @@
 
 /* stylelint-disable-next-line selector-class-pattern */
 .line_code_inner {
+    /* stylelint-disable-next-line declaration-no-important */
     max-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     line-height: 20px !important;
+    /* stylelint-disable-next-line declaration-no-important */
     padding: 0 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     overflow-x: scroll !important;
 }
 

@@ -34,7 +34,6 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
         $this->core->getOutput()->addInternalJs('userform.js');
-        $this->core->getOutput()->addInternalJs('manage-students.js');
         $this->core->getOutput()->addInternalJs('directory.js');
         $this->core->getOutput()->enableMobileViewport();
 
@@ -125,7 +124,7 @@ class UsersView extends AbstractView {
         ]);
     }
 
-    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
+    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section, ?string $default_section, bool $is_self_register) {
         $this->core->getOutput()->addBreadcrumb('Manage Sections');
         $reg_sections_count = [];
         foreach ($students as $student) {
@@ -149,7 +148,9 @@ class UsersView extends AbstractView {
             "max_section" => $max_section,
             "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
             "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "default_section" => $default_section,
+            "is_self_register" => $is_self_register
         ]);
     }
 }

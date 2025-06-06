@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
@@ -18,11 +19,9 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-    // The message that should be returned to the user if they fail the required validation to enable the nightly
-    // rainbow grades build checkbox
-    const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
-    'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
-    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
+    const NO_SELF_REGISTER = 0; // Self registration disabled
+    const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
+    const ALL_SELF_REGISTER = 2; // Self registration allowed, and all users who register are automatically added
 
     /**
      * @return MultiResponse
@@ -48,6 +47,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
+            'self_registration_type'         => $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
+            'registration_sections'          => $this->core->getQueries()->getRegistrationSections(),
+            'default_section'                => $this->core->getQueries()->getDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse()),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
             'queue_message'                  => $this->core->getConfig()->getQueueMessage(),
@@ -88,7 +90,8 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $this->core->getCsrfToken()
+                $this->core->getCsrfToken(),
+                $this->doesRainbowCustomizationExist()
             )
         );
     }
@@ -163,25 +166,18 @@ class ConfigurationController extends AbstractController {
             }
         }
         elseif ($name === 'auto_rainbow_grades') {
-            // Special validation for auto_rainbow_grades checkbox
-            // Get a new customization json object
-            $customization_json = new RainbowCustomizationJSON($this->core);
-
-            // If a manual_customization.json does not exist, then check for the presence of a regular one
-            if (!$customization_json->doesManualCustomizationExist()) {
-                // Attempt to populate it from the customization.json in the course rainbow_grades directory
-                // If no file exists do not allow user to enable this check mark until one is supplied
-                try {
-                    $customization_json->loadFromJsonFile();
-                }
-                catch (\Exception $e) {
-                    return MultiResponse::JsonOnlyResponse(
-                        JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
-                    );
-                }
-            }
-
             $entry = $entry === "true";
+        }
+
+        if ($name === 'all_self_registration') {
+            $this->core->getQueries()->setSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry === 'true' ?  ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER);
+            $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $_POST['default_section']);
+            $name = 'self_registration_type';
+            $entry = $entry === 'true' ? ConfigurationController::ALL_SELF_REGISTER : ConfigurationController::NO_SELF_REGISTER;
+        }
+
+        if ($name === 'default_section_id') {
+            $this->core->getQueries()->setDefaultRegistrationSection($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(), $entry);
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {
@@ -195,7 +191,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_json = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_json['course_details'][$name])) {
+        if (!isset($config_json['course_details'][$name]) && !str_contains($name, 'self_registration') && $name !== 'default_section_id') {
             return MultiResponse::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
@@ -228,5 +224,18 @@ class ConfigurationController extends AbstractController {
         });
 
         return array_merge([['g_id' => '', 'g_title' => '--None--']], $gradeable_seating_options);
+    }
+
+    private function doesRainbowCustomizationExist(): bool {
+        $customization_json = new RainbowCustomizationJSON($this->core);
+        if (!$customization_json->doesManualCustomizationExist()) { // Check if manual_customization.json exists
+            try {
+                $customization_json->loadFromJsonFile(); // Check if any customization.json exists
+            }
+            catch (FileReadException $e) { // loadFromJsonFile() throws FileReadException if file is missing or empty
+                return false;
+            }
+        }
+        return true;
     }
 }

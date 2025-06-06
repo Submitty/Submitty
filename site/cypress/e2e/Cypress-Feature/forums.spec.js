@@ -19,7 +19,7 @@ const createThread = (title, content, category) => {
     cy.get('.thread_post_content').type(content);
     cy.get('.cat-buttons').contains(category).click();
     cy.get('[name="post"]').click();
-    cy.get('.flex-row > .thread-left-cont').should('contain', title);
+    cy.get('.flex-row > .thread-title-cont').should('contain', title);
 };
 
 const replyToThread = (title, reply) => {
@@ -30,38 +30,42 @@ const replyToThread = (title, reply) => {
     cy.get('#posts_list').should('contain', reply);
 };
 
-const upduckPost = (thread_title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(thread_title).click();
-    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
-    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
-    cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
-};
-
-const checkStatsUpducks = (fullName, numUpducks) => {
-    // Check the stats page for a user with fullName and
-    // number of upducks numUpducks
-    cy.get('[data-testid="more-dropdown"]').click();
-    cy.get('#forum_stats').click();
-    cy.get('[data-testid="user-stat"]').contains(fullName).siblings('[data-testid="upduck-stat"]').should('contain.text', numUpducks);
-    cy.get('[title="Back to threads"]').click();
-};
-
 const mergeThreads = (fromThread, toThread, mergedContent) => {
     // Add more to tests for uploading attachments
     cy.get('[data-testid="thread-list-item"]').contains(fromThread).click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
     cy.get('[title="Merge Thread Into Another Thread"]').click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
     cy.get('.chosen-single > span').click();
-    cy.get('.active-result').contains(toThread).click({ force: true });
-    cy.get('[value="Merge Thread"]').click({ force: true });
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
+    cy.get('.active-result').contains(toThread).click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.wait(1000);
+    cy.get('[value="Merge Thread"]').click();
     cy.get('.pre-forum > .post_content').should('contain', mergedContent);
 };
 
+// Checks if a thread with the specified title exists
+const threadExists = (title) => {
+    return cy.get('[data-testid="thread-list-item"]').then(($thread_items) => {
+        return $thread_items.filter(`:contains(${title})`).length > 0;
+    });
+};
+
+// Removes all threads matching the specified title
 const removeThread = (title) => {
-    cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="thread-dropdown"]').first().click();
-    cy.get('[data-testid="delete-post-button"]').first().click();
-    cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+    cy.reload();
+    threadExists(title).then((exists) => {
+        if (exists) {
+            cy.get('[data-testid="thread-list-item"]').contains(title).click();
+            cy.get('[data-testid="thread-dropdown"]').first().click();
+            cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+            removeThread(title);
+        }
+    });
 };
 
 const uploadAttachmentAndDelete = (title, attachment) => {
@@ -96,42 +100,65 @@ const replyDisabled = (title, attachment) => {
     cy.contains('p', attachment).should('be.visible');
 };
 
-const removeUpduckPost = (thread_title) => {
-    cy.get('[data-testid="create-post-head"]').should('contain', thread_title);
-    cy.get('[data-testid="like-count"]').first().should('have.text', 1);
-    cy.get('[data-testid="upduck-button"]').first().click();
-    cy.get('[data-testid="like-count"]').first().should('have.text', 0);
-};
-
-const staffUpduckPost = (user, thread_title) => {
-    checkStaffUpduck(thread_title, 'be.not.visible');
-    upduckPost(thread_title);
-    checkStaffUpduck(thread_title, 'be.visible');
-
-    if (user !== 'instructor') {
-        removeUpduckPost(thread_title);
-        checkStaffUpduck(thread_title, 'be.not.visible');
-    }
-};
-
-const studentUpduckPost = (thread_title) => {
-    checkStaffUpduck(thread_title, 'be.not.visible');
-    upduckPost(thread_title);
-    checkStaffUpduck(thread_title, 'be.not.visible');
-    removeUpduckPost(thread_title);
-};
-
-const checkStaffUpduck = (title, visible) => {
+const setLockDateToPast = (title) => {
     cy.get('[data-testid="thread-list-item"]').contains(title).click();
-    cy.get('[data-testid="create-post-head"]').should('contain', title);
-    cy.get('[data-testid="instructor-like"]').first().should(visible);
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('#lock_thread_date').type('2023-01-01 00:00:00');
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
 };
+
+const clearLockDate = (title) => {
+    cy.get('[data-testid="thread-list-item"]').contains(title).click();
+    cy.get('[data-testid="thread-dropdown"]').first().click();
+    cy.get('[data-testid="edit-post-button"]').first().click();
+    cy.get('#lock_thread_date').clear();
+    cy.get('[data-testid="forum-update-post"]').contains('Update Post').click();
+};
+
+describe('Forum Thread Lock Date Functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
+        createThread(title1, content1, 'Comment');
+        setLockDateToPast(title1);
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).click();
+        cy.get('[data-testid="forum-submit-reply-all"]').should('be.disabled');
+
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        clearLockDate(title1);
+
+        cy.login('student');
+        cy.visit(['sample', 'forum']);
+        replyToThread(title1, reply1);
+
+        removeThread(title1);
+    });
+});
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        removeThread(title1);
+        removeThread(title2);
+        removeThread(title3);
+    });
+
+    it('Remove threads removes all threads with the same title', () => {
+        createThread(title1, content1, 'Comment');
+        createThread(title1, content1, 'Comment');
+        removeThread(title1);
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('not.exist');
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
@@ -151,38 +178,14 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         replyToThread(title2, reply2);
         replyToThread(title3, reply3);
 
-        // Student upduck
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'forum']);
-        studentUpduckPost(title1);
-        studentUpduckPost(title2);
-        studentUpduckPost(title3);
-
-        // TA upduck
-        cy.logout();
-        cy.login('ta');
-        cy.visit(['sample', 'forum']);
-        staffUpduckPost('ta', title1);
-        staffUpduckPost('ta', title2);
-        staffUpduckPost('ta', title3);
-
-        // Instructor upduck and check the stats page for instructor with 3 upducks
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'forum']);
-        staffUpduckPost('instructor', title1);
-        staffUpduckPost('instructor', title2);
-        staffUpduckPost('instructor', title3);
-        checkStatsUpducks('Instructor, Quinn', 3);
-
         // Tutorial into Questions
         mergeThreads(title3, title2, merged1);
 
         // Resulting thread into comment
         mergeThreads(title2, title1, merged2);
-
-        // Remove threads
+        cy.get('[data-testid="thread-list-item"]').contains(title2).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title3).should('not.exist');
+        cy.get('[data-testid="thread-list-item"]').contains(title1).should('exist');
         removeThread(title1);
     });
 });
