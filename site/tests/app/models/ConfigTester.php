@@ -94,8 +94,30 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
+            'user_create_account' => false,
             "duck_special_effects" => false,
             "default_locale" => "default",
+            "user_id_requirements" => [
+                "all" => true,
+                "require_name" => false,
+                "min_length" => 6,
+                "max_length" => 25,
+                "name_requirements" => [
+                    "given_first" => false,
+                    "given_name" => 2,
+                    "family_name" => 4
+                ],
+                "require_email" => false,
+                "email_requirements" => [
+                    "whole_email" => false,
+                    "whole_prefix" => false,
+                    "prefix_count" => 6
+                ]
+            ],
+            "accepted_emails" => [
+                "gmail.com",
+                "rpi.edu"
+            ]
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -330,6 +352,28 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
+            'user_create_account' => false,
+            "user_id_requirements" => [
+                "all" => true,
+                "require_name" => false,
+                "min_length" => 6,
+                "max_length" => 25,
+                "name_requirements" => [
+                    "given_first" => false,
+                    "given_name" => 2,
+                    "family_name" => 4
+                ],
+                "require_email" => false,
+                "email_requirements" => [
+                    "whole_email" => false,
+                    "whole_prefix" => false,
+                    "prefix_count" => 6
+                ]
+            ],
+            "accepted_emails" => [
+                "gmail.com",
+                "rpi.edu"
+            ],
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
