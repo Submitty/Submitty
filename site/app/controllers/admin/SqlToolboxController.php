@@ -24,8 +24,8 @@ class SqlToolboxController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {
         $sql_tables = $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
-                ['schema' => 'public'],
-                ['name' => 'ASC']
+            ['schema' => 'public'],
+            ['name' => 'ASC']
         );
 
         // need to map to json-encodeable format
@@ -44,7 +44,7 @@ class SqlToolboxController extends AbstractController {
 
         $user_id = $this->core->getUser()->getId();
         $user_queries = $this->core->getQueries()->getInstructorQueries($user_id);
-        
+
         return new WebResponse(
             SqlToolboxView::class,
             'showToolbox',
@@ -91,7 +91,7 @@ class SqlToolboxController extends AbstractController {
         $query_name = $_POST['query_name'];
         $query = $_POST['query'];
 
-        if (empty(trim($query_name)) || empty(trim($query))) {
+        if (trim($query_name) === '' || trim($query) === '') {
             return JsonResponse::getFailResponse("Query name or query cannot be empty");
         }
 
