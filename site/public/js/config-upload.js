@@ -51,19 +51,19 @@ $(document).ready(() => {
         }
     }
 
-    document.getElementById('config-upload-form').addEventListener('change', (event) => {
+    $('#config-upload-form').on('change', '#configFile', function () {
         if (document.getElementById('configFile').files.length === 1) {
             unUploadedFile = true;
             updateConfigButtonsStatus();
         }
     });
 
-    document.getElementById('config-upload-form').addEventListener('submit', (event) => {
+    $('#config-upload-form').on('submit', function () {
         unUploadedFile = false;
         updateConfigButtonsStatus();
     });
 
-    document.getElementById('config-upload-form').addEventListener('reset', (event) => {
+    $('#config-upload-form').on('reset', function () {
         if (unUploadedFile === true) {
             unUploadedFile = false;
             updateConfigButtonsStatus();
