@@ -20,7 +20,7 @@ class Database:
         :param environment: Environment for database
         :type environment: str
         """
-        self.DynamicBase = declarative_base(class_registry=dict())
+        self.DynamicBase = declarative_base()
         if 'database_driver' not in params:
             raise RuntimeError('Need to supply a driver')
         connection_string = Database.get_connection_string(params)
@@ -28,8 +28,7 @@ class Database:
         self.engine = create_engine(connection_string)
         self.engine.connect()
         self.inspector = inspect(self.engine)
-        self.Session = sessionmaker()
-        self.Session.configure(bind=self.engine)
+        self.Session = sessionmaker(self.engine)
         self.session = self.Session()
 
         self.migration_table = get_migration_table(environment, self.DynamicBase)
@@ -79,6 +78,7 @@ class Database:
         :type query: str
         :rtype: sqlalchemy.engine.ResultProxy
         """
+        # print(f'hello{query}')
         return self.session.execute(query)
 
     def commit(self):

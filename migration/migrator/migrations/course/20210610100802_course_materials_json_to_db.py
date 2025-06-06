@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from sqlalchemy import insert
+from sqlalchemy import text
 
 def up(config, database, semester, course):
     """
@@ -19,33 +19,37 @@ def up(config, database, semester, course):
     """
     # create tables here
     database.execute(
-        """
-        CREATE TABLE IF NOT EXISTS course_materials (
-            id serial PRIMARY KEY,
-            path varchar(255) UNIQUE,
-            type smallint NOT NULL,
-            release_date timestamptz,
-            hidden_from_students BOOL,
-            priority float8 NOT NULL
-        );
-        """
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS course_materials (
+                id serial PRIMARY KEY,
+                path varchar(255) UNIQUE,
+                type smallint NOT NULL,
+                release_date timestamptz,
+                hidden_from_students BOOL,
+                priority float8 NOT NULL
+            );
+            """
+        )
     )
     database.execute(
-        """
-        CREATE TABLE IF NOT EXISTS course_materials_sections (
-            course_material_id integer NOT NULL,
-            section_id varchar(255) NOT NULL,
-            CONSTRAINT fk_course_material_id
-                FOREIGN KEY(course_material_id)
-                    REFERENCES course_materials(id)
-                    ON DELETE CASCADE,
-            CONSTRAINT fk_section_id
-                FOREIGN KEY(section_id)
-                    REFERENCES sections_registration(sections_registration_id)
-                    ON DELETE CASCADE,
-            CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id)
-        );
-        """
+        text(
+            """
+            CREATE TABLE IF NOT EXISTS course_materials_sections (
+                course_material_id integer NOT NULL,
+                section_id varchar(255) NOT NULL,
+                CONSTRAINT fk_course_material_id
+                    FOREIGN KEY(course_material_id)
+                        REFERENCES course_materials(id)
+                        ON DELETE CASCADE,
+                CONSTRAINT fk_section_id
+                    FOREIGN KEY(section_id)
+                        REFERENCES sections_registration(sections_registration_id)
+                        ON DELETE CASCADE,
+                CONSTRAINT pk_course_material_section PRIMARY KEY (course_material_id, section_id)
+            );
+            """
+        )
     )
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
@@ -100,7 +104,8 @@ def up(config, database, semester, course):
                     result = database.session.execute(query, params)
                     course_material_id = result.fetchone()[0]
                     for section in sections:
-                        query = """
+                        query = text(
+                            """
                             INSERT INTO course_materials_sections (
                                 course_material_id,
                                 section_id
@@ -109,6 +114,7 @@ def up(config, database, semester, course):
                                 :course_material_id, :section_id
                             ) ON CONFLICT(course_material_id, section_id) DO NOTHING
                             """
+                        )
                         params = {
                             'course_material_id': course_material_id,
                             'section_id': section
@@ -122,22 +128,24 @@ def up(config, database, semester, course):
                         curpath += '/' + dir
                         paths.add(curpath)
             for dir in paths:
-                query = """
-                    INSERT INTO course_materials (
-                        type,
-                        path,
-                        release_date,
-                        hidden_from_students,
-                        priority
-                    )
-                    VALUES (
-                        :type, :path, :release_date, :hidden_from_students, :priority
-                    ) ON CONFLICT(path) DO UPDATE SET
-                    type = EXCLUDED.type,
-                    release_date = EXCLUDED.release_date,
-                    hidden_from_students = EXCLUDED.hidden_from_students,
-                    priority = EXCLUDED.priority
-                """
+                query = text(
+                    """
+                        INSERT INTO course_materials (
+                            type,
+                            path,
+                            release_date,
+                            hidden_from_students,
+                            priority
+                        )
+                        VALUES (
+                            :type, :path, :release_date, :hidden_from_students, :priority
+                        ) ON CONFLICT(path) DO UPDATE SET
+                        type = EXCLUDED.type,
+                        release_date = EXCLUDED.release_date,
+                        hidden_from_students = EXCLUDED.hidden_from_students,
+                        priority = EXCLUDED.priority
+                    """
+                )
                 priority = 0
                 if isinstance(data, dict) and dir in data:
                     priority = data[dir]['sort_priority']

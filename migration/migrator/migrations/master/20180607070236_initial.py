@@ -9,9 +9,14 @@ def up(config, database):
 
 
 def down(config, database):
-    database.execute("""
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO public;
-""")
+    database.execute(
+        text(
+            """
+            DROP SCHEMA public CASCADE;
+            CREATE SCHEMA public;
+            GRANT ALL ON SCHEMA public TO postgres;
+            GRANT ALL ON SCHEMA public TO public;
+            """
+        )
+    )
+        

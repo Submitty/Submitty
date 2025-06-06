@@ -9,9 +9,12 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    database.execute("""
-DROP SCHEMA public CASCADE;
-CREATE SCHEMA public;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO public;
-""")
+    database.execute(text(
+        """
+            DROP SCHEMA public CASCADE;
+            CREATE SCHEMA public;
+            GRANT ALL ON SCHEMA public TO postgres;
+            GRANT ALL ON SCHEMA public TO public;
+            """
+        )
+    )

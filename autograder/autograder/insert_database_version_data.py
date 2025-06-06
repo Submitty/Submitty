@@ -62,15 +62,17 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
-    autograding_metrics = Table('autograding_metrics', metadata, autoload=True)
+    metadata = MetaData()
+    autograding_metrics = Table('autograding_metrics', metadata, autoload_with=engine)
     db.execute(
         delete(autograding_metrics)
         .where(autograding_metrics.c.user_id == bindparam('u_id'))
         .where(autograding_metrics.c.team_id == bindparam('t_id'))
         .where(autograding_metrics.c.g_id == bindparam('g_id'))
         .where(autograding_metrics.c.g_version == bindparam('g_v')),
-        u_id=user_id,  t_id=team_id, g_id=gradeable_id, g_v=version)
+        {"u_id": user_id, "t_id": team_id, "g_id": gradeable_id, "g_v": version}
+    )
+    db.commit()
 
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
@@ -106,6 +108,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                     hidden=testcases[i]["hidden"],
                 )
             )
+            db.commit()
 
     submission_time = results['submission_time']
 
@@ -128,7 +131,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     will need to handle the active version afterwards.
     """   # noqa: B018
     if is_team is True:
-        result = db.execute(select([func.count()]).select_from(data_table)
+        result = db.execute(select(func.count()).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
                             .where(data_table.c.team_id == bindparam('team_id'))
                             .where(data_table.c.g_version == bindparam('g_version')),
@@ -157,23 +160,29 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
-        db.execute(query_type,
-                   g_id=gradeable_id, u_g_id=gradeable_id,
-                   team_id=team_id, u_team_id=team_id,
-                   g_version=version, u_g_version=version,
-                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
-                   autograding_non_hidden_extra_credit=non_hidden_ec,
-                   autograding_hidden_non_extra_credit=hidden_non_ec,
-                   autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time,
-                   autograding_complete=True)
+        db.execute(query_type, {
+                "g_id": gradeable_id,
+                "u_g_id": gradeable_id,
+                "team_id": team_id,
+                "u_team_id": team_id,
+                "g_version": version,
+                "u_g_version": version,
+                "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
+                "autograding_non_hidden_extra_credit": non_hidden_ec,
+                "autograding_hidden_non_extra_credit": hidden_non_ec,
+                "autograding_hidden_extra_credit": hidden_ec,
+                "submission_time": submission_time,
+                "autograding_complete": True
+            }
+        )
+        db.commit()
 
     else:
-        result = db.execute(select([func.count()]).select_from(data_table)
+        result = db.execute(select(func.count()).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
                             .where(data_table.c.user_id == bindparam('user_id'))
                             .where(data_table.c.g_version == bindparam('g_version')),
-                            g_id=gradeable_id, user_id=user_id, g_version=version)
+                            { "g_id": gradeable_id, "user_id": user_id, "g_version": version })
         row = result.fetchone()
         result.close()
         query_type = data_table.insert()
@@ -198,16 +207,22 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
-        db.execute(query_type,
-                   g_id=gradeable_id, u_g_id=gradeable_id,
-                   user_id=user_id, u_user_id=user_id,
-                   g_version=version, u_g_version=version,
-                   autograding_non_hidden_non_extra_credit=non_hidden_non_ec,
-                   autograding_non_hidden_extra_credit=non_hidden_ec,
-                   autograding_hidden_non_extra_credit=hidden_non_ec,
-                   autograding_hidden_extra_credit=hidden_ec,
-                   submission_time=submission_time,
-                   autograding_complete=True)
+        db.execute(query_type, {
+            "g_id": gradeable_id,
+            "u_g_id": gradeable_id,
+            "user_id": user_id,
+            "u_user_id": user_id,
+            "g_version": version,
+            "u_g_version": version,
+            "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
+            "autograding_non_hidden_extra_credit": non_hidden_ec,
+            "autograding_hidden_non_extra_credit": hidden_non_ec,
+            "autograding_hidden_extra_credit": hidden_ec,
+            "submission_time": submission_time,
+            "autograding_complete": True
+        })
+        db.commit()
+
     db.close()
     engine.dispose()
 
