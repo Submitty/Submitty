@@ -322,7 +322,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
              assert (restricted_categories.find(s) != restricted_categories.end()); });
 
   allow_system_calls(sc,categories,execute_logfile);
-  execute_logfile << "system call filter configured with " << total_allowed_system_calls << " allowed system calls" << std::endl;
+  //execute_logfile << "system call filter configured with " << total_allowed_system_calls << " allowed system calls" << std::endl;
   
   if (seccomp_load(sc) < 0)
     return 1; // failure
