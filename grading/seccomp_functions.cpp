@@ -299,19 +299,24 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   //execute_logfile << "categories based on test case config " << config_safelist.size() << std::endl;
 
   std::set<std::string> categories;
-  for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
-       cwitr != config_safelist.end(); cwitr++) {
-    //for (nlohmann::json::const_iterator cwitr = categories.begin();
-    // cwitr != categories.end(); cwitr++) {
-    std::string my_category = *cwitr;
-    if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
-      my_category = my_category.substr(27,my_category.size()-27);
-      std::cout << " typo in system call category name " << my_category << std::endl;
-      assert(0);
+  if (config_safelist.size() == 1 &&
+      *config_safelist.begin() == "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS") {
+    categories = restricted_categories;
+  } else {
+    for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
+         cwitr != config_safelist.end(); cwitr++) {
+      //for (nlohmann::json::const_iterator cwitr = categories.begin();
+      // cwitr != categories.end(); cwitr++) {
+      std::string my_category = *cwitr;
+      if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
+        my_category = my_category.substr(27,my_category.size()-27);
+        std::cout << " typo in system call category name " << my_category << std::endl;
+        assert(0);
+      }
+      // make sure categories is valid
+      assert (restricted_categories.find(my_category) != restricted_categories.end());
+      categories.insert(my_category);
     }
-    // make sure categories is valid
-    assert (restricted_categories.find(my_category) != restricted_categories.end());
-    categories.insert(my_category);
   }
 
   //execute_logfile << "categories " << categories.size() << std::endl;
