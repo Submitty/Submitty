@@ -33,3 +33,47 @@ function openDeletePopup(file_path) {
     $('[name="config_path"]').val(file_path);
     $('#delete_config_popup').css('display', 'block');
 }
+
+$(document).ready(() => {
+    let unUploadedFile = false;
+
+    document.getElementById('config-submit-button').disabled = true;
+    document.getElementById('config-cancel-button').disabled = true;
+
+    function updateConfigButtonsStatus() {
+        if (unUploadedFile) {
+            document.getElementById('config-submit-button').disabled = false;
+            document.getElementById('config-cancel-button').disabled = false;
+        }
+        else {
+            document.getElementById('config-submit-button').disabled = true;
+            document.getElementById('config-cancel-button').disabled = true;
+        }
+    }
+
+    $('#config-upload-form').on('change', '#configFile', (event) => {
+        if (document.getElementById('configFile').files.length === 1) {
+            unUploadedFile = true;
+            updateConfigButtonsStatus();
+        }
+    });
+
+    $('#config-upload-form').on('submit', (event) => {
+        unUploadedFile = false;
+        updateConfigButtonsStatus();
+    });
+
+    $('#config-upload-form').on('reset', (event) => {
+        if (unUploadedFile === true) {
+            unUploadedFile = false;
+            updateConfigButtonsStatus();
+        }
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+        if (unUploadedFile === true) {
+            event.preventDefault();
+            return '';
+        }
+    });
+});
