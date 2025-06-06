@@ -2319,7 +2319,7 @@ ORDER BY merged_data.{$section_key}
         $user_or_team_id = "user_id";
         $null_section_condition = "";
         $bad_submissions_condition = "";
-        $params = [$g_id, $g_id, $g_id, $g_id];
+        $params = [$g_id, $g_id, $g_id];
         if ($is_team) {
             $u_or_t = "t";
             $users_or_teams = "gradeable_teams";
@@ -2341,77 +2341,61 @@ ORDER BY merged_data.{$section_key}
         }
 
         $this->course_db->query("
-SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, MAX(comp_score) AS max_comp_score, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
-  SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
-  CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-  WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-  ELSE (gc_default + sum_points + gcd_score) END AS comp_score FROM(
+SELECT
+  ROUND(AVG(comp_score), 2) AS avg_score,
+  ROUND(STDDEV_POP(comp_score), 2) AS std_dev,
+  MAX(comp_score) AS max_score,
+  COUNT(*) AS count
+FROM (
+  SELECT
+    CASE
+      WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+      WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+      ELSE (gc_default + sum_points + gcd_score)
+    END AS comp_score
+  FROM (
     SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
-    CASE WHEN sum_points IS NULL THEN 0 ELSE sum_points END AS sum_points, gcd_score
+           COALESCE(sum_points, 0) AS sum_points, gcd_score
     FROM gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component AS gc ON gcd.gc_id=gc.gc_id
-    LEFT JOIN(
+    LEFT JOIN gradeable_component AS gc ON gcd.gc_id = gc.gc_id
+    LEFT JOIN (
       SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
       FROM gradeable_component_mark_data AS gcmd
-      LEFT JOIN gradeable_component_mark AS gcm ON gcmd.gcm_id=gcm.gcm_id AND gcmd.gc_id=gcm.gc_id
+      LEFT JOIN gradeable_component_mark AS gcm 
+        ON gcmd.gcm_id = gcm.gcm_id AND gcmd.gc_id = gcm.gc_id
       GROUP BY gcmd.gc_id, gcmd.gd_id
-      )AS marks
-    ON gcd.gc_id=marks.gc_id AND gcd.gd_id=marks.gd_id
-    LEFT JOIN(
+    ) AS marks ON gcd.gc_id = marks.gc_id AND gcd.gd_id = marks.gd_id
+    LEFT JOIN (
       SELECT gd.gd_{$user_or_team_id}, gd.gd_id
       FROM gradeable_data AS gd
-      WHERE gd.g_id=?
-    ) AS gd ON gcd.gd_id=gd.gd_id
-    INNER JOIN(
+      WHERE gd.g_id = ?
+    ) AS gd ON gcd.gd_id = gd.gd_id
+    INNER JOIN (
       SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
       FROM {$users_or_teams} AS {$u_or_t}
       WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
-    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
-    INNER JOIN(
+    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+    INNER JOIN (
       SELECT egv.{$user_or_team_id}, egv.active_version
       FROM electronic_gradeable_version AS egv
-      WHERE egv.g_id=? AND egv.active_version>0
-    ) AS egv ON egv.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}
+      WHERE egv.g_id = ? AND egv.active_version > 0
+    ) AS egv ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
     {$bad_submissions_condition}
-    WHERE g_id=? {$null_section_condition}
-  )AS parts_of_comp
-)AS comp
-LEFT JOIN (
-	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
-	FROM grade_inquiries AS rr
-	WHERE rr.g_id=? AND rr.status=-1
-	GROUP BY rr.gc_id
-) AS rr ON rr.gc_id=comp.gc_id
-GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
-ORDER BY gc_order
+    WHERE g_id = ? {$null_section_condition}
+  ) AS parts_of_comp
+) AS comp_scores
         ", $params);
-        $max_score = 0;
-        $overall_avg_score = 0;
-        $count = $this->course_db->getRowCount();
-
-        if ($count === 0) {
+        if ($this->course_db->getRowCount() === 0) {
             return null;
         }
-
-        foreach ($this->course_db->rows() as $row) {
-            $overall_avg_score += $row['avg_comp_score'];
-            $max_score = max($max_score, $row['max_comp_score']);
-        }
-
-        $sum_of_variances = 0;
-
-        foreach ($this->course_db->rows() as $row) {
-            $sum_of_variances += pow($row['std_dev'], 2);
-        }
-
-        $overall_std_dev = sqrt($sum_of_variances);
+        $row = $this->course_db->row();
 
         $info = [
             'g_id' => $g_id,
-            'max' => $max_score,
-            'avg_score' => $overall_avg_score,
-            'std_dev' => $overall_std_dev,
-            'count' => $count
+            'max' => $row['max_score'],
+            'avg_score' => $row['avg_score'],
+            'std_dev' => $row['std_dev'],
+            'count' => $row['count']
         ];
 
         return new SimpleStat($this->core, $info);
