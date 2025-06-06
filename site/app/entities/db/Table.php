@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\entities\db;
 
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -34,7 +35,7 @@ class Table {
     protected Collection $columns;
 
     public function __construct() {
-        $this->columns = new Collection();
+        $this->columns = new ArrayCollection();
         throw new \RuntimeException("Cannot create new information_schema.table");
     }
 
