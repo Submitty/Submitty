@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\models\User;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\entities\db\Table;
@@ -29,6 +30,17 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         parent::setUp();
 
         $this->core = new Core();
+        $this->core->setUser(new User($this->core, [
+            'user_id' => 'testUser',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => '',
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false,
+            'user_group' => 1
+        ]));
 
         $this->controller = new SqlToolboxController($this->core);
     }
