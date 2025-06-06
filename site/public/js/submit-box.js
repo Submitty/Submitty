@@ -1,7 +1,7 @@
 /* exported updateSubmitButtonStatus */
 /* global file_array, changed, previous_files setButtonStatus */
 
-const orig_setButtonStatus = setButtonStatus;
+const orig_setButtonStatus = window.setButtonStatus;
 
 window.setButtonStatus = function (inactive_version = false) {
     updateSubmitButtonStatus();
