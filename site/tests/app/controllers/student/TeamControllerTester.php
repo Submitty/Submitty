@@ -150,7 +150,7 @@ class TeamControllerTester extends BaseUnitTest {
         $this->assertEquals($clean_invite_id, $expectation);
     }
 
-    public function provideTestCleanInviteId(): array {
+    public static function provideTestCleanInviteId(): array {
         return [
             'assert removes whitespace' => ['      rcsid    ', 'rcsid'],
             'assert converts all chars to lowercase' => ['      RcSiD    ', 'rcsid'],
