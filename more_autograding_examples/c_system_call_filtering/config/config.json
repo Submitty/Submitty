@@ -11,6 +11,7 @@
     ],
     "testcases" : [
 	{
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
 	    "type" : "Compilation",
 	    "title" : "Compilation",
 	    "command" : "/usr/bin/gcc -Wall -Wextra -o a.out *.c",
