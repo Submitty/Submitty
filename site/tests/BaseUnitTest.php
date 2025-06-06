@@ -74,6 +74,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
+        $config->method('getCourseMaterialFileUploadLimitMb')->willReturn($config_values['course_material_file_upload_limit_mb'] ?? 100);
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
         DateUtils::setTimezone($config->getTimezone());

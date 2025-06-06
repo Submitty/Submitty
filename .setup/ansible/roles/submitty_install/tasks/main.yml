@@ -42,6 +42,7 @@
         {{ submitty_install_submitty_course_dbuser_password }}
         {{ submitty_install_timezone }}
         {{ submitty_install_language }}
+        {{ submitty_install_course_materials_file_upload_limit_mb }}
         {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
         {{ submitty_install_vcs_url }}
         {{ submitty_install_institution_name }}
