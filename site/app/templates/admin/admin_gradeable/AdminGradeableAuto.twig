@@ -112,7 +112,7 @@
 
     <div class="raw-config-info">
         <div class="option-title">Or:</div>
-        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="toggleGradeableConfigEdit(); openDiv('gradeable-config-structure'); ">Manually Edit Autograding Configuration</a>
+        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="cancelGradeableConfigEdit(); openDiv('gradeable-config-structure'); ">Manually Edit Autograding Configuration</a>
         <ul class="config-folder-view" id="gradeable-config-structure">
             {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
         </ul>
