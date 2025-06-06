@@ -1,0 +1,24 @@
+.upload-buttons-padding {
+    padding-top: 12px;
+}
+
+.upload-button {
+    background-color: var(--good-green);
+    color: var(--always-default-white);
+}
+
+.upload-button:hover {
+    background-color: var(--hover-good-green);
+    color: var(--always-default-white);
+}
+
+.cancel-upload-button {
+    background-color: var(--danger-red);
+    color: var(--always-default-white);
+    padding-left: 10px;
+}
+
+.cancel-upload-button:hover {
+    background-color: var(--focus-danger-red);
+    color: var(--always-default-white);
+}
