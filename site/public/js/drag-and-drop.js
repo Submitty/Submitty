@@ -1,7 +1,7 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
+            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
 /* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
 
 /*
@@ -1035,8 +1035,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
