@@ -2342,48 +2342,46 @@ ORDER BY merged_data.{$section_key}
 
         $this->course_db->query("
 SELECT
-  ROUND(AVG(comp_score), 2) AS avg_score,
-  ROUND(STDDEV_POP(comp_score), 2) AS std_dev,
-  MAX(comp_score) AS max_score,
+  ROUND(AVG(total_score), 2) AS avg_score,
+  ROUND(STDDEV_POP(total_score), 2) AS std_dev,
+  MAX(total_score) AS max_score,
   COUNT(*) AS count
 FROM (
-  SELECT
+  SELECT gd.gd_{$user_or_team_id}, SUM(
     CASE
-      WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
-      WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
-      ELSE (gc_default + sum_points + gcd_score)
-    END AS comp_score
-  FROM (
-    SELECT gcd.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, gc_lower_clamp, gc_default, gc_upper_clamp,
-           COALESCE(sum_points, 0) AS sum_points, gcd_score
-    FROM gradeable_component_data AS gcd
-    LEFT JOIN gradeable_component AS gc ON gcd.gc_id = gc.gc_id
-    LEFT JOIN (
-      SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
-      FROM gradeable_component_mark_data AS gcmd
-      LEFT JOIN gradeable_component_mark AS gcm 
-        ON gcmd.gcm_id = gcm.gcm_id AND gcmd.gc_id = gcm.gc_id
-      GROUP BY gcmd.gc_id, gcmd.gd_id
-    ) AS marks ON gcd.gc_id = marks.gc_id AND gcd.gd_id = marks.gd_id
-    LEFT JOIN (
-      SELECT gd.gd_{$user_or_team_id}, gd.gd_id
-      FROM gradeable_data AS gd
-      WHERE gd.g_id = ?
-    ) AS gd ON gcd.gd_id = gd.gd_id
-    INNER JOIN (
-      SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
-      FROM {$users_or_teams} AS {$u_or_t}
-      WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
-    ) AS {$u_or_t} ON gd.gd_{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-    INNER JOIN (
-      SELECT egv.{$user_or_team_id}, egv.active_version
-      FROM electronic_gradeable_version AS egv
-      WHERE egv.g_id = ? AND egv.active_version > 0
-    ) AS egv ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
-    {$bad_submissions_condition}
-    WHERE g_id = ? {$null_section_condition}
-  ) AS parts_of_comp
-) AS comp_scores
+      WHEN (gc_default + COALESCE(sum_points, 0) + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
+      WHEN (gc_default + COALESCE(sum_points, 0) + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
+      ELSE (gc_default + COALESCE(sum_points, 0) + gcd_score)
+    END
+  ) AS total_score
+  FROM gradeable_component_data AS gcd
+  LEFT JOIN gradeable_component AS gc ON gcd.gc_id = gc.gc_id
+  LEFT JOIN (
+    SELECT SUM(gcm_points) AS sum_points, gcmd.gc_id, gcmd.gd_id
+    FROM gradeable_component_mark_data AS gcmd
+    LEFT JOIN gradeable_component_mark AS gcm 
+      ON gcmd.gcm_id = gcm.gcm_id AND gcmd.gc_id = gcm.gc_id
+    GROUP BY gcmd.gc_id, gcmd.gd_id
+  ) AS marks ON gcd.gc_id = marks.gc_id AND gcd.gd_id = marks.gd_id
+  LEFT JOIN (
+    SELECT gd.gd_{$user_or_team_id}, gd.gd_id
+    FROM gradeable_data AS gd
+    WHERE gd.g_id = ?
+  ) AS gd ON gcd.gd_id = gd.gd_id
+  INNER JOIN (
+    SELECT {$u_or_t}.{$user_or_team_id}, {$u_or_t}.{$section_key}
+    FROM {$users_or_teams} AS {$u_or_t}
+    WHERE {$u_or_t}.{$user_or_team_id} IS NOT NULL
+  ) AS {$u_or_t} ON gd.gd_{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+  INNER JOIN (
+    SELECT egv.{$user_or_team_id}, egv.active_version
+    FROM electronic_gradeable_version AS egv
+    WHERE egv.g_id = ? AND egv.active_version > 0
+  ) AS egv ON egv.{$user_or_team_id} = {$u_or_t}.{$user_or_team_id}
+  {$bad_submissions_condition}
+  WHERE gc.g_id = ? {$null_section_condition}
+  GROUP BY gd.gd_{$user_or_team_id}
+) AS student_totals
         ", $params);
         if ($this->course_db->getRowCount() === 0) {
             return null;
