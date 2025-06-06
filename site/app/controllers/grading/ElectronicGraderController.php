@@ -18,13 +18,13 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
 use app\libraries\Logger;
+use app\models\SimpleStat;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\SimpleStat;
 
 class ElectronicGraderController extends AbstractController {
     /**
