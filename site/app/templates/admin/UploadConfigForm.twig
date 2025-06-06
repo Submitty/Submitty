@@ -35,40 +35,10 @@
         <h2>Upload Config:</h2>
         <input type="file" id="configFile" name="config_upload" class="choose-file-input"/><br />
         <div class="upload-buttons-padding">
-            <input type="submit" value="Upload" class="upload-button btn"/>
-            <button type='reset' class="cancel-upload-button btn">Cancel Upload</button>
+            <input type="submit" id="config-submit-button" value="Upload" class="upload-button btn"/>
+            <button type='reset' id="config-cancel-button" class="cancel-upload-button btn">Cancel Upload</button>
         </div>
     </form>
-
-    <script>
-    let unUploadedFile = false;
-    document.getElementById("config-upload-form").addEventListener("change", function(event) {
-        if(document.getElementById("configFile").files.length == 1) {
-            unUploadedFile = true;
-        }
-    });
-
-    document.getElementById("config-upload-form").addEventListener("submit", function(event) {
-        unUploadedFile = false;
-    });
-
-    document.getElementById("config-upload-form").addEventListener("reset", function(event) {
-        if(unUploadedFile == true) {
-            unUploadedFile = false;
-
-        }
-    });
-
-    window.addEventListener("beforeunload", function (event) {
-        if(unUploadedFile == true){
-            event.preventDefault();
-            return "";
-        }
-    });
-
-    </script>
-
-    <br>
 </div>
 
 {% if all_files|length > 0 %}

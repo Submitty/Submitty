@@ -29,3 +29,10 @@
     background-color: var(--focus-danger-red);
     color: var(--always-default-white);
 }
+
+.config-button-disabled {
+  background-color: inherit;
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
