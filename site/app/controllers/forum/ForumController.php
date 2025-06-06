@@ -21,6 +21,7 @@ use app\entities\forum\Thread;
 use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
+use DateTime;
 
 /**
  * Class ForumHomeController
@@ -1017,7 +1018,7 @@ class ForumController extends AbstractController {
 
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
-            if ($lock_thread_date_input !== false) {
+            if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
@@ -1366,30 +1367,43 @@ class ForumController extends AbstractController {
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
-            $result = $this->core->getQueries()->getPost($post_id);
-            $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+            $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
+            $post_id = $_POST["post_id"];
+            $result = $repo->getPostDetail($post_id);
             $GLOBALS['totalAttachments'] = 0;
             $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
                 "post_attachments" => ForumUtils::getForumAttachments(
                     $post_id,
-                    $result['thread_id'],
-                    $post_attachments[$post_id][0],
+                    $result->getThread()->getId(),
+                    $result->getAttachments()->filter(function ($x) {
+                        return $x->isCurrent();
+                    })->map(function ($x) {
+                        return $x->getFileName();
+                    })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 )
             ]);
-            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result->getAuthor()->getId()])) {
                 $output = [];
-                $output['post'] = $result["content"];
-                $output['post_time'] = $result['timestamp'];
-                $output['anon'] = $result['anonymous'];
-                $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-                $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-                $output['markdown'] = $result['render_markdown'];
+                $output['post'] = $result->getContent();
+                //Use standard ISO time as forum.js is responsible for formatting
+                $output['post_time'] = $result->getTimestamp()->format(DateTime::ATOM);
+
+                $output['anon'] = $result->isAnonymous();
+                $output['change_anon'] = $this->modifyAnonymous($result->getAuthor()->getId());
+                $output['user'] = $output['anon'] ? 'Anonymous' : $result->getAuthor()->getId();
+                $output['markdown'] = $result->isRenderMarkdown();
                 $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
-                    $this->getThreadContent($_POST["thread_id"], $output);
+                    $output['lock_thread_date'] = $result->getThread()->getLockDate()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['title'] = $result->getThread()->getTitle();
+                    $output['categories_ids'] =  $result->getThread()->getCategories()->map(function ($x) {
+                        return $x->getId();
+                    })->toArray();
+                    $output['thread_status'] = $result->getThread()->getStatus();
+                    $output['expiration'] = $result->getThread()->getPinnedExpiration()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
             }
@@ -1400,15 +1414,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
-    private function getThreadContent($thread_id, &$output) {
-        $result = $this->core->getQueries()->getThread($thread_id);
-        $output['lock_thread_date'] = $result['lock_thread_date'];
-        $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
-        $output['thread_status'] = $result["status"];
-        $output['expiration'] = $result["pinned_expiration"];
-    }
-
+    // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
@@ -1421,9 +1427,9 @@ class ForumController extends AbstractController {
             $content = $posts[$i]["content"];
             if (!isset($users[$user])) {
                 $users[$user] = [];
-                $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];
@@ -1442,6 +1448,14 @@ class ForumController extends AbstractController {
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
+            // user has only upducks and no posts, need to set some information
+            if (!isset($users[$user])) {
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
+                $users[$user]["total_threads"] = 0;
+            }
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
@@ -1462,16 +1476,27 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($_POST['thread_id']);
+        $source = hash('sha3-224', $_POST['current_user']);
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
-            'likesFromStaff' => $output['likesFromStaff']
+            'likesFromStaff' => $output['likesFromStaff'],
+            'source' => $source
+        ]);
+
+        $this->sendSocketMessage([
+            'type' => 'edit_thread_likes',
+            'thread_id' => $_POST['thread_id'],
+            'likesCount' => $thread->getSumUpducks()
         ]);
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
+            'source' => $source, // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
