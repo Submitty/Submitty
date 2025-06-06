@@ -25,7 +25,7 @@
 
     <br><br>
 
-    <form id="config_upload_form" action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
+    <form id="config-upload-form" action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <label>Upload Config: <input type="file" id="configFile" name="config_upload" /><br /></label>
         <input type="submit" value="Upload" /><br />
@@ -34,17 +34,17 @@
 
     <script>
     let unUploadedFile = false;
-    document.getElementById("configUpload").addEventListener("change", function(event) {
+    document.getElementById("config-upload-form").addEventListener("change", function(event) {
         if(document.getElementById("configFile").files.length == 1) {
             unUploadedFile = true;
         }
     });
 
-    document.getElementById("configUpload").addEventListener("submit", function(event) {
+    document.getElementById("config-upload-form").addEventListener("submit", function(event) {
         unUploadedFile = false;
     });
 
-    document.getElementById("configUpload").addEventListener("reset", function(event) {
+    document.getElementById("config-upload-form").addEventListener("reset", function(event) {
         if(unUploadedFile == true) {
             unUploadedFile = false;
 
