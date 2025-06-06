@@ -1,11 +1,12 @@
 /* exported updateSubmitButtonStatus */
-/* global file_array, changed, previous_files setButtonStatus*/
+/* global file_array, changed, previous_files setButtonStatus */
 
+// eslint-disable-next-line no-global-assign
 const orig_setButtonStatus = setButtonStatus;
 
-setButtonStatus = function(inactive_version = false) {
-  updateSubmitButtonStatus();
-  orig_setButtonStatus(inactive_version);
+setButtonStatus = function (inactive_version = false) {
+    updateSubmitButtonStatus();
+    orig_setButtonStatus(inactive_version);
 };
 
 function updateSubmitButtonStatus() {
