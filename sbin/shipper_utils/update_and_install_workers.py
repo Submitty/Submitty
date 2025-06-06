@@ -85,6 +85,7 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
         get_sysinfo.print_distribution()
         client = docker.from_env()
         try:
+            # Precompute dicts
             image_id_to_tags = {}
             tag_to_image_id = {}
             for image in client.images.list():
@@ -103,17 +104,18 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
 
             # Remove images
-            for imageRemoved in images_to_remove:
+            for image_tag_to_remove in images_to_remove:
                 try:
-                    image_id = tag_to_image_id.get(imageRemoved)
+                    image_id = tag_to_image_id.get(image_tag_to_remove)
                     ref_tags = image_id_to_tags.get(image_id, [])
+                    # If the image has multiple tags (aliases), remove by tag; otherwise, remove by ID
                     if len(ref_tags) > 1:
-                        client.images.remove(imageRemoved)
+                        client.images.remove(image_tag_to_remove)
                     else:
                         client.images.remove(image_id)
-                    thread_object.add_message("Removed image " + imageRemoved)
+                    thread_object.add_message("Removed image " + image_tag_to_remove)
                 except docker.errors.ImageNotFound:
-                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {imageRemoved}"))
+                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {image_tag_to_remove} ({image_id}) to remove."))
                     continue
                 except Exception as e:
                     thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}"))
