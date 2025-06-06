@@ -1,5 +1,13 @@
+.config-header {
+    flex-grow: 1;
+}
+
+.choose-file-input {
+    width: 400px;
+}
+
 .upload-buttons-padding {
-    padding-top: 12px;
+    padding-top: 24px;
 }
 
 .upload-button {
@@ -15,7 +23,6 @@
 .cancel-upload-button {
     background-color: var(--danger-red);
     color: var(--always-default-white);
-    padding-left: 10px;
 }
 
 .cancel-upload-button:hover {
