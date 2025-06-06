@@ -329,6 +329,27 @@ body::-webkit-scrollbar-track {
     font-style: italic;
 }
 
+.raw-config-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.config-folder-view {
+    list-style-type: none;
+    display: none;
+    margin-top: 0.5em;
+}
+
+#gradeable-config-edit {
+    min-height: 500px;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#gradeable-config-edit-bar {
+    display: none;
+}
+
 .warning-banner {
     display: none;
     margin: 0 0 1em;
