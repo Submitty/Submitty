@@ -501,21 +501,6 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    private function calculateStandardDeviation(array $ta_graded_components): float {
-        $count = count($ta_graded_components);
-
-        if ($count < 2) {
-            return 0.0;
-        }
-
-        $mean = array_sum($ta_graded_components) / $count;
-        $sum_squared_diff = array_reduce($ta_graded_components, function ($carry, $val) use ($mean) {
-            return $carry + pow($val - $mean, 2);
-        }, 0);
-
-        return sqrt($sum_squared_diff / ($count - 1));
-    }
-
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.

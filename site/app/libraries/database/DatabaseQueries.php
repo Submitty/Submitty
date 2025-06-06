@@ -2313,7 +2313,7 @@ ORDER BY merged_data.{$section_key}
         return $this->course_db->row()['cnt'];
     }
 
-    public function getAverageManualScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section): array {
+    public function getAverageManualScores(string $g_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
         $u_or_t = "u";
         $users_or_teams = "users";
         $user_or_team_id = "user_id";
@@ -2335,14 +2335,13 @@ ORDER BY merged_data.{$section_key}
             $bad_submissions_condition = "INNER JOIN(
                 SELECT DISTINCT ldc.{$user_or_team_id}
                 FROM late_day_cache AS ldc
-                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0 
+                WHERE ldc.g_id=? AND ( submission_days_late = 0 OR ldc.late_days_change != 0
               ) )AS ldc ON ldc.{$user_or_team_id}={$u_or_t}.{$user_or_team_id}";
             $params[] = $g_id;
         }
 
-        $return = [];
         $this->course_db->query("
-SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, SUM(comp_score) AS total_comp_score, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
+SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, MAX(comp_score) AS max_comp_score, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
   SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
@@ -2386,11 +2385,36 @@ LEFT JOIN (
 GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
         ", $params);
-        foreach ($this->course_db->rows() as $row) {
-            $info = ['g_id' => $g_id, 'section_key' => $section_key, 'team' => $is_team];
-            $return[] = new SimpleStat($this->core, array_merge($row, $info));
+        $max_score = 0;
+        $overall_avg_score = 0;
+        $count = $this->course_db->getRowCount();
+
+        if ($count === 0) {
+            return null;
         }
-        return $return;
+
+        foreach ($this->course_db->rows() as $row) {
+            $overall_avg_score += $row['avg_comp_score'];
+            $max_score = max($max_score, $row['max_comp_score']);
+        }
+
+        $sum_of_variances = 0;
+
+        foreach ($this->course_db->rows() as $row) {
+            $sum_of_variances += pow($row['std_dev'], 2);
+        }
+
+        $overall_std_dev = sqrt($sum_of_variances);
+
+        $info = [
+            'g_id' => $g_id,
+            'max' => $max_score,
+            'avg_score' => $overall_avg_score,
+            'std_dev' => $overall_std_dev,
+            'count' => $count
+        ];
+
+        return new SimpleStat($this->core, $info);
     }
 
     public function getAverageGraderScores(string $g_id, int $gc_id, string $section_key, bool $is_team, string $bad_submissions, string $null_section) {
