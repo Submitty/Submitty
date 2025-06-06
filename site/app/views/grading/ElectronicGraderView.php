@@ -275,7 +275,6 @@ class ElectronicGraderView extends AbstractView {
             }
             if (count($component_averages) !== 0) {
                 foreach ($component_averages as $comp) {
-                    $manual_average += $comp->getAverageScore();
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
                     $percentage = 0;

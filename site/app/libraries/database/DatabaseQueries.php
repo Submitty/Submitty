@@ -2624,7 +2624,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         $this->course_db->query(
             "
-SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
+SELECT round(AVG(g_score),2) AS manual_avg_score, round(AVG(autograding),2) AS autograding_avg_score, round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS manual_std_dev, round(stddev_pop(autograding),2) AS autograding_std_dev, round(stddev_pop(g_score + autograding),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
     SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
       SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
