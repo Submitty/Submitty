@@ -28,7 +28,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->core = $this->createMockCore();
+        $this->core = new Core();
 
         $this->controller = new SqlToolboxController($this->core);
     }

@@ -42,7 +42,7 @@ class SqlToolboxController extends AbstractController {
         }, $sql_tables);
 
 
-        $user_id = $this->core->getUser()->getId();
+        $user_id = $this->core->getUser()?->getId();
         $user_queries = $this->core->getQueries()->getInstructorQueries($user_id);
 
         return new WebResponse(
