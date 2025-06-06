@@ -10,7 +10,7 @@ class GlobalView extends AbstractView {
      * @param array<array<string>> $audio
      * @param array<BannerImage> $eventBannerImages
      */
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages, bool $performance_warning) {
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, string $duck_gif, $page_name, $content_only, array $eventBannerImages, bool $performance_warning) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -93,6 +93,7 @@ class GlobalView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "enable_banner" => $this->core->getConfig()->isDuckBannerEnabled(),
             "duck_img" => $duck_img,
+            "duck_gif" => $duck_gif,
             "use_mobile_viewport" => $this->output->useMobileViewport(),
             "sysadmin_email" => $this->core->getConfig()->getSysAdminEmail(),
             "collapse_sidebar" => array_key_exists('collapse_sidebar', $_COOKIE) && $_COOKIE['collapse_sidebar'] === 'true',
