@@ -73,7 +73,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals("&lt;test<br />\n<br />\ntest&gt;", Utils::prepareHtmlString($string));
     }
 
-    public function elementDataProvider() {
+    public static function elementDataProvider() {
         return [
             [[], null, null],
             [[1], 1, 1],
@@ -179,7 +179,7 @@ class UtilsTester extends BaseUnitTest {
         }
     }
 
-    public function imageDataProvider() {
+    public static function imageDataProvider() {
         return [
             ['test', false],
             ['test.txt', false],
@@ -196,7 +196,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($is_image, Utils::isImage($name));
     }
 
-    public function uploadedImageProvider() {
+    public static function uploadedImageProvider() {
         return [
             [__TEST_DATA__ . '/images/test_image.png', true],
             [__TEST_DATA__ . '/images/test_image.jpg', true],
@@ -249,7 +249,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertFalse(Utils::checkUploadedImageFile('invalid'));
     }
 
-    public function comparableNullableGtProvider() {
+    public static function comparableNullableGtProvider() {
         return [
             [null, null, false],
             [null, 1, false],
@@ -267,7 +267,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::compareNullableGt($left, $right));
     }
 
-    public function safeCalcPercentProvider() {
+    public static function safeCalcPercentProvider() {
         return [
             [100, 5, false, 20],
             [-100, 5, false, -20],
@@ -459,7 +459,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::getAutoFillData($users));
     }
 
-    public function booleanProvider() {
+    public static function booleanProvider() {
         return [
             ['true', true],
             ['on', true],
@@ -642,7 +642,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::getAutoFillData($users, $versions));
     }
 
-    public function returnBytesProvider() {
+    public static function returnBytesProvider() {
         return [
             ['10B', 10],
             ['1M', 1048576],
@@ -661,7 +661,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::returnBytes($byte_string));
     }
 
-    public function formatBytesProvider() {
+    public static function formatBytesProvider() {
         return [
             ['b', 0, '0B'],
             ['b', 100, '100B'],
@@ -682,7 +682,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
     }
 
-    public function formatBytesRoundingProvider() {
+    public static function formatBytesRoundingProvider() {
         return [
             ['b', 0, '0B'],
             ['b', 1000, '1000B'],

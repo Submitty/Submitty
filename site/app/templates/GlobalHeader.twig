@@ -126,7 +126,7 @@
     {% endif %}
 
 </head>
-<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
     <div id="submitty-body" class="flex-col">
         {% if not content_only %}

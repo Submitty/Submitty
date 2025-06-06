@@ -1,5 +1,12 @@
 {
-	"required_capabilities": "cpp",
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/gcc:latest"
+    },
+    "autograding": {
+        "compilation_to_runner": ["a.i", "a.out"]
+    },
 
     "grading_parameters": {
         "TOTAL_POINTS": 100,
@@ -10,15 +17,11 @@
         "PENALTY_POINTS": 0
     },
 
-    "autograding": {
-        "compilation_to_runner": ["a.i", "a.out"]
-    },
-
     "testcases": [
         {
             "type": "Compilation",
             "title": "Compilation",
-            "command": "clang -Wall -Wextra -Werror -o a.out -- *.c",
+            "command": "gcc -Wall -Wextra -Werror -o a.out *.c",
             "executable_name": "a.out",
             "points": 25
         },
