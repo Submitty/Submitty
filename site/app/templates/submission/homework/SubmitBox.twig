@@ -45,7 +45,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
-                <h2 id="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
+                <h2 id="gradeable-time-remaining-text" data-testid="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">
@@ -244,7 +244,7 @@
                             {% if viewing_inactive_version %}
                                 disabled="disabled"
                             {% endif %}/>
-                    <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                    <table class="file-upload-table" data-testid="file-upload-table-{{ loop.index }}" id="file-upload-table-{{ loop.index }}">
                       <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
                         <th>Size:</th>
@@ -292,7 +292,7 @@
         {% endif %}
 
         {% if part_names is not empty %}
-            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
+            <button type="button" id="startnew" class="btn btn-primary" data-testid="clear-all-files-button">Clear</button>
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
