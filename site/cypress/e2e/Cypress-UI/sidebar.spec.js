@@ -5,8 +5,13 @@ const currentSemester = getCurrentSemester();
 function sidebarContains(title, extension, header = title) {
     cy.get('[data-testid="sidebar"]').contains(title).should('have.attr', 'href').and('contain', extension);
     cy.visit(extension);
-    cy.get('#main > .content').should('contain', header);
-    cy.get('#main > .content').should('not.contain', 'Server Error');
+
+    let selector = '#main > .content';
+    if (title === 'SQL Toolbox') {
+        selector = '#main > div > .content';
+    }
+    cy.get(selector).should('contain', header);
+    cy.get(selector).should('not.contain', 'Server Error');
 }
 
 function baseSidebar() {
