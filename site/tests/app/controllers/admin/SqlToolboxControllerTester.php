@@ -30,17 +30,17 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         parent::setUp();
 
         $this->core = new Core();
-        $this->core->setUser(new User($this->core, [
-            'user_id' => 'testUser',
+        $user = new User($this->core, [
+            'user_id' => 'test',
             'user_givenname' => 'Test',
             'user_familyname' => 'Person',
             'user_pronouns' => '',
             'display_pronouns' => false,
-            'user_email' => '',
+            'user_email' => null,
             'user_email_secondary' => '',
-            'user_email_secondary_notify' => false,
-            'user_group' => 1
-        ]));
+            'user_email_secondary_notify' => false
+        ]);
+        $this->core->setUser($user);
 
         $this->controller = new SqlToolboxController($this->core);
     }
