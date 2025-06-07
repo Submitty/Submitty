@@ -11657,11 +11657,6 @@ parameters:
 			path: app/views/admin/ReportView.php
 
 		-
-			message: "#^Method app\\\\views\\\\admin\\\\SqlToolboxView\\:\\:showToolbox\\(\\) has parameter \\$tables with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/admin/SqlToolboxView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\StudentActivityDashboardView\\:\\:createTable\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/StudentActivityDashboardView.php
