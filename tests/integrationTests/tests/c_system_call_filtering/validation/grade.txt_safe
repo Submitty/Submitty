@@ -1,0 +1,7 @@
+test01: Compilation                                          1 /  1  
+test02: just the basics                                     10 / 10  
+test03: allowing process_control_scheduling                  8 /  8  
+test04: allow process_control_scheduling AND device_management_advanced   6 /  6  
+SubmissionLimit: Submission Limit                                             
+Automatic grading total:                                         25 / 25
+Non-hidden automatic grading total:                              25 / 25
