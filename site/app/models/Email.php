@@ -10,6 +10,8 @@ use app\libraries\Core;
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
  * @method void     setUserId($uid)
+ * @method void     setEmailAddress(string $email_address)
+ * @method void     setToName(string $to_name)
 
  * @method string   getSubject()
  * @method string   getBody()
