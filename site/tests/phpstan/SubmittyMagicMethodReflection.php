@@ -65,7 +65,12 @@ class SubmittyMagicMethodReflection implements MethodReflection {
         $params = [];
         foreach ($mt->getParameters() as $n => $p) {
             $params[] = new NativeParameterReflection(
-                $n, $p->isOptional(), $p->getType(), $p->passedByReference(), $p->isVariadic(), $p->getDefaultValue()
+                $n,
+                $p->isOptional(),
+                $p->getType(),
+                $p->passedByReference(),
+                $p->isVariadic(),
+                $p->getDefaultValue()
             );
         }
         return [new SubmittyMagicVariant($params, $mt->getReturnType())];
