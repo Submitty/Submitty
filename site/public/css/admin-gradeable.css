@@ -403,6 +403,5 @@ body::-webkit-scrollbar-track {
     flex-wrap: wrap;
     justify-content: flex-start;
     margin-top: 5px;
-    row-gap: 5px;
-    column-gap: 15px;
+    gap: 5px 15px;
 }
