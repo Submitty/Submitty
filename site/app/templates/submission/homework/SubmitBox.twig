@@ -467,15 +467,17 @@
     }
 
     $(function() {
-        if(!{{ is_vcs ? "true" : "false" }}) {
+        {% if not is_vcs %}
             updateSubmitButtonStatus();
-        }
+        {% endif %}
         $(".submit-gradeable").click(function(e) { // Submit button
             e.preventDefault(); // Prevent form submission for safety
-            if (!{{ is_vcs ? "true" : "false" }} && !isValidSubmission() && empty_inputs) {
-                displayMessage('Duplicate submission detected. No attempts used', 'warning');
-                return;
-            }
+            {% if not is_vcs %}
+                if (!isValidSubmission() && empty_inputs) {
+                    displayMessage('Duplicate submission detected. No attempts used', 'warning');
+                    return;
+                }
+            {% endif %}
             $(".submit-gradeable").prop('disabled', true);
             window.onbeforeunload = null;
             var user_id = "";
