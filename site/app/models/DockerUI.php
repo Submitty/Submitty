@@ -143,7 +143,7 @@ class DockerUI extends AbstractModel {
                 $valB = $b->created_timestamp;
                 return $direction === 'ASC' ? $valB <=> $valA : $valA <=> $valB;
             }
-            
+
             return 0;
         });
 
