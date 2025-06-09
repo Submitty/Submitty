@@ -1,22 +1,7 @@
 <div class="content">
     <div class="sub">
-
         {# Actual results #}
-        {% if docker_error %}
-            <p class="red-message">Docker Image not present on machine. Please contact your instructor about this.</p>
-            {% if docker_error_data is not null %}
-                <p>Error Details:</p>
-                <ul>
-                    {% for error in docker_error_data %}
-                        <li>
-                            <strong>Image:</strong> {{ error.image }}<br>
-                            <strong>Machine:</strong> {{ error.machine }}<br>
-                            <strong>Error:</strong> {{ error.error }}<br>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% elseif in_queue or in_progress_grading %}
+        {% if in_queue or in_progress_grading %}
             {% if in_progress_grading %}
                 <p class="red-message">
                     This submission is currently being graded.

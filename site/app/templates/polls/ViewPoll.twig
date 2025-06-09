@@ -188,7 +188,9 @@
             const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
             const layout = {
-                title: title_text.documentElement.textContent,
+                title: {
+                    text: title_text.documentElement.textContent,
+                },
                 paper_bgcolor: $("body").css("--default-white"),
                 plot_bgcolor: $("body").css("--default-white"),
                 font: {
