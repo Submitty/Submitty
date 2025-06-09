@@ -1,4 +1,9 @@
 {
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
     // explicitly grab the necessary submitted files for static analysis
     "autograding" : {
         "submission_to_runner" : [ "*.cpp", "*.c", "*.hpp", "*.h", "*.c", "*.hpp" ]

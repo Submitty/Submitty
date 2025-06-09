@@ -11,7 +11,7 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
      *
      * @return array
      */
-    public function diffDir() {
+    public static function diffDir() {
         $needed_files = ['input_actual.txt', 'input_expected.txt',
             'input_differences.json', 'output_actual.txt', 'output_expected.txt'];
         $dir = __TEST_DATA__ . '/diffs';

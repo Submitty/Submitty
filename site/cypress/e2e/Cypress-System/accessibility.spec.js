@@ -102,7 +102,7 @@ describe('Test cases for the site\'s adherence to accessibility guidelines', () 
 
                             foundErrorMessages.push(error.message);
                             foundErrors.push({
-                                error: error.message.replace(/\u201c|\u201d/g, "'").trim(),
+                                error: error.message.replace(/\u201c|\u201d/g, '\'').trim(),
                                 htmlExtract: error.extract.trim(),
                                 type: error.type.trim(),
                             });

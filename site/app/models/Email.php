@@ -85,9 +85,25 @@ class Email extends AbstractModel {
             $extra[] = "Click here for more info: " . $relevant_url;
         }
 
+        // Adding any extra information
         if (count($extra) > 0) {
             $body .= "\n\n" . implode("\n", $extra);
         }
-        return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
+
+        // Adding notification footer
+        $config = $this->core->getConfig();
+        $base_url = rtrim($config->getBaseUrl(), "/");
+        $course = $config->getCourse();
+        $term = $config->getTerm();
+
+        // Adding the footer note first
+        $body .= "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
+
+        // Adding the notifications settings link after the footer
+        if ($course !== null && $term !== null) {
+            $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
+            $body .= "\nPlease refer to the course syllabus for contact information for your teaching staff.\nUpdate your email notification settings for this course here: " . $notifications_url;
+        }
+        return $body;
     }
 }

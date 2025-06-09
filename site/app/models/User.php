@@ -27,7 +27,6 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
- * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
  * @method void setDisplayNameOrder()
@@ -737,6 +736,7 @@ class User extends AbstractModel {
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
         return $notification_settings;
     }
