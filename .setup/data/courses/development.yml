@@ -29,6 +29,30 @@ gradeables:
             gcm_points: -5
     eg_max_random_submissions: 0
 
+  - gradeable_config: c_system_call_filtering
+    components:
+      - gc_lower_clamp: 0
+        gc_default: 5
+        gc_max_value: 5
+        gc_upper_clamp: 5
+        gc_title: Grade Adjustments
+        marks:
+          - gcm_note: No Adjustments
+            gcm_points: 0
+          - gcm_note: Deduction
+            gcm_points: -5
+    g_ta_view_start_date: -2 days
+    eg_submission_open_date: -1 days
+    eg_submission_due_date: +1000 days
+    eg_has_due_date: true
+    eg_has_release_date: true
+    g_grade_start_date: +1005 days
+    g_grade_due_date: +1010 days
+    g_grade_released_date: +1010 days
+    eg_grade_inquiry_start_date: +1011 days
+    eg_grade_inquiry_due_date: +1015 days
+    eg_max_random_submissions: 0
+
   - gradeable_config: choice_of_language
     components:
       - gc_lower_clamp: 0

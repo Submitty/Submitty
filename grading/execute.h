@@ -18,14 +18,16 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
+      const nlohmann::json &test_case_config,
       const bool windowed,
       const std::string display_variable,
       const bool timestamped_stdout);
 
-int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config, std::string program_name,
+int exec_this_command(const std::string &cmd, std::ofstream &logfile,
+                      const nlohmann::json &whole_config, const nlohmann::json &test_case_config, std::string program_name,
                       const nlohmann::json &test_case_limits, const nlohmann::json &assignment_limits, const bool timestamped_stdout);
 
-int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile, const nlohmann::json &whole_config);
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile, const nlohmann::json &whole_config, const nlohmann::json &test_case_config);
 
 // implemented in execute_limits.cpp
 void set_environment_variables(const nlohmann::json &environment_variables);

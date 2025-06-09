@@ -83,59 +83,57 @@
         betterBuckets=new Map();
         mode=0;
         modeCount=0;
-        {% if overall_average is not null and overall_average.getAverageScore() != "" %}
-            if( bucketInputTotal.value !=''){
-                let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
-                if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
-                    alert('Error: Invalid bucket size.');
-                    return;
-                }
-                mode=fillBuckets(rangeT,bucketInputTotalValue,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                var dataTotal=tracing(xBuckets,yValue);
-                Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
-                bucketInputTotal.value='';
-                document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT;
-                return mode;
+
+        if( bucketInputTotal && bucketInputTotal.value !=''){
+            let bucketInputTotalValue = parseFloat(bucketInputTotal.value);
+            if (isNaN(bucketInputTotalValue) || bucketInputTotalValue === 0) {
+                alert('Error: Invalid bucket size.');
+                return;
             }
-        {% endif %}
-        {% if autograded_average is not null and autograded_average.getCount() != 0 %}
+            mode=fillBuckets(range,bucketInputTotalValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+            var dataTotal=tracing(xBuckets,yValue);
+            Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
+            bucketInputTotal.value='';
+            document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            return mode;
+        }
+
+        if(bucketInputAuto && bucketInputAuto.value != ''){
             let bucketInputAutoValue = parseFloat(bucketInputAuto.value);
-            if(bucketInputAuto.value!=''){
-                if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
-                    alert('Error: Invalid bucket size.');
-                    return ;
-                }
-                mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
-                var dataAuto = tracing(xBuckets,yValue);
-                Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
-                bucketInputAuto.value='';
-                document.getElementById("SmallHistogram3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
-                return mode;
+            if (isNaN(bucketInputAutoValue) || bucketInputAutoValue === 0) {
+                alert('Error: Invalid bucket size.');
+                return ;
             }
-        {% endif %}
-        {% if component_averages|length != 0  %}
+            mode=fillBuckets(range,bucketInputAutoValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+            var dataAuto = tracing(xBuckets,yValue);
+            Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+            bucketInputAuto.value='';
+            document.getElementById("SmallHistogram3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+            {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            return mode;
+        }
+
+        if(bucketInputManual && bucketInputManual.value!=''){
             let bucketInputManualValue = parseFloat(bucketInputManual.value);
-            if(bucketInputManual.value!=''){
-                if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
-                    alert('Error: Invalid bucket size.');
-                    return ;
-                }
-                mode=fillBuckets(range,bucketInputManualValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
-                var dataAuto = tracing(xBuckets,yValue);
-                Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
-                bucketInputManual.value='';
-                document.getElementById("SmallHistogram4").innerHTML='<b>Mode: </b>'
-                +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-                '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
-                return mode;
+            if (isNaN(bucketInputManualValue) || bucketInputManualValue === 0) {
+                alert('Error: Invalid bucket size.');
+                return ;
             }
-        {% endif %}
+            mode=fillBuckets(range,bucketInputManualValue,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
+            var dataAuto = tracing(xBuckets,yValue);
+            Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
+            bucketInputManual.value='';
+            document.getElementById("SmallHistogram4").innerHTML='<b>Mode: </b>'
+            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
+            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            return mode;
+        }
+
         mode=fillBucketsForRange(range,betterBuckets,xValue,yValue,xBuckets,mode,modeCount,max,min);
         return  mode;
     }
@@ -200,10 +198,9 @@
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
         </div>
-        <br/>
-        <div class="modal-body">
+        <div class="modal-body gradeable-status-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
-            
+
             {# Only create div if we can create the stats #}
             {% if component_averages|length != 0 %}
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>

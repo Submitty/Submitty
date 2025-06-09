@@ -1,4 +1,5 @@
 <div
   class="markdown {{ class is defined ? class }}"
   style="{{ style is defined ? style : '' }}"
+  {% if test_id is defined %} data-testid="{{ test_id }}" {% endif %}
 >{{ content | markdown_to_html }}</div>
