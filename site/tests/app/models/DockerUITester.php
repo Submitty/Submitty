@@ -128,9 +128,9 @@ class DockerUITester extends BaseUnitTest {
         $image = $docker_ui->getDockerImages('name', 'ASC')[0];
         $this->assertEquals("lichen:latest", $image->primary_name);
 
-        $image = $docker_ui->getDockerImages('name', 'ASC')[2];
-        $this->assertEquals("submitty/docker-test-saml-idp:latest", $image->primary_name);
+        $image = $docker_ui->getDockerImages('name', 'ASC')[10];
+        $this->assertEquals("ubuntu:custom", $image->primary_name);
         $this->assertEquals(1, count($image->aliases));
-        $this->assertEquals("submitty/autograding-default:latest", $image->aliases[0]);
+        $this->assertEquals("submitty/autograding-default:latest", $image->aliases[1]);
     }
 }
