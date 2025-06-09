@@ -28,13 +28,16 @@
 
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name)
+#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name,execute_logfile)
 
-inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string) {
-  //std::cout << "allow " << syscall_string << std::endl;
+static int total_allowed_system_calls = 0;
+
+inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string, std::ofstream &execute_logfile) {
+  total_allowed_system_calls++;
+  //execute_logfile << "allow " << total_allowed_system_calls << " " << syscall_string << std::endl;
   int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
   if (res < 0) {
-    std::cerr << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
+    execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
   }
 }
 
@@ -53,8 +56,172 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 // ===========================================================================
 // ===========================================================================
 
-int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile, const nlohmann::json &whole_config) {
+std::set<std::string> system_call_categories_based_on_program
+(const std::string &my_program, const std::set<std::string> &restricted_categories) {
 
+  std::set<std::string> default_categories = {
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_SCHEDULING",
+    "PROCESS_CONTROL_ADVANCED",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "FILE_MANAGEMENT_RARE",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "TGKILL"
+  };
+
+  std::set<std::string> answer;
+
+  // --------------------------------------------------------------
+  // HELPER UTILTIY PROGRAMS
+  if (my_program == "/bin/cp") {
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+  }
+  else if (my_program == "/bin/mv") {
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+  }
+  else if (my_program == "/usr/bin/time") {
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+  }
+  else if (my_program == "/usr/bin/strace") {
+    answer = restricted_categories;
+  }
+
+  // ---------------------------------------------------------------
+  // SUBMITTY ANALYSIS TOOLS
+  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
+    //TODO
+    answer = restricted_categories;
+    //    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    //answer.insert("FILE_MANAGEMENT_RARE");
+    //answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+  }
+
+  // ---------------------------------------------------------------
+  // PYTHON
+  else if (my_program.find("/usr/bin/python") != std::string::npos) {
+    answer = restricted_categories; //TODO: fix
+    //answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    //answer.insert("FILE_MANAGEMENT_RARE");
+    //answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    //answer.insert("PROCESS_CONTROL_ADVANCED");
+  }
+
+  // ---------------------------------------------------------------
+  // C/C++ COMPILATION
+  else if (my_program == "/usr/bin/g++" ||
+           my_program == "/usr/bin/gcc" ||
+           my_program.find("/usr/bin/clang") != std::string::npos) {
+    answer.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    answer.insert("FILE_MANAGEMENT_PERMISSIONS");
+    answer.insert("FILE_MANAGEMENT_RARE");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("TGKILL");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    answer.insert("UNKNOWN");
+  }
+
+  // ---------------------------------------------------------------
+  // CMAKE/MAKE COMPILATION
+  else if (my_program == "/usr/bin/cmake" ||
+           my_program == "/usr/bin/make") {
+    answer = restricted_categories;
+  }
+
+  // ---------------------------------------------------------------
+  // JAVA COMPILATION
+  else if (my_program == "/usr/bin/javac") {
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    answer.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+    answer.insert("PROCESS_CONTROL_SCHEDULING");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+    answer.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    answer.insert("FILE_MANAGEMENT_PERMISSIONS");
+    answer.insert("FILE_MANAGEMENT_CAPABILITIES");
+    answer.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+    answer.insert("FILE_MANAGEMENT_RARE");
+    answer.insert("INFORMATION_MAINTENANCE_ADVANCED");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    answer.insert("TGKILL");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
+    answer.insert("UNKNOWN");
+    answer.insert("UNKNOWN_MODULE");
+  }
+
+  // ---------------------------------------------------------------
+  // JAVA
+  else if (my_program == "/usr/bin/java") {
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
+    answer.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    answer.insert("FILE_MANAGEMENT_PERMISSIONS");
+    answer.insert("FILE_MANAGEMENT_RARE");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+    answer.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    answer.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("PROCESS_CONTROL_SCHEDULING");
+    answer.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+    answer.insert("FILE_MANAGEMENT_CAPABILITIES");
+    answer.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+    answer.insert("INFORMATION_MAINTENANCE_ADVANCED");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    answer.insert("TGKILL");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
+    answer.insert("UNKNOWN");
+    answer.insert("UNKNOWN_MODULE");
+  }
+
+  // ---------------------------------------------------------------
+  // C++ Memory Debugging
+  // FIXME: update with the actual dr memory install location?
+  else if (my_program.find("drmemory") != std::string::npos ||
+           my_program.find("valgrind") != std::string::npos) {
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    answer.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
+    answer.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
+    answer.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
+    answer.insert("FILE_MANAGEMENT_PERMISSIONS");
+    answer.insert("FILE_MANAGEMENT_RARE");
+    answer.insert("PROCESS_CONTROL_ADVANCED");
+    answer.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
+    answer.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+    answer.insert("PROCESS_CONTROL_SYNCHRONIZATION");
+    answer.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
+    answer.insert("TGKILL");
+  }
+
+  else {
+    answer = default_categories;
+  }
+  
+  return answer;
+}
+
+
+// ===========================================================================
+// ===========================================================================
+
+int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile,
+                           const nlohmann::json &whole_config, const nlohmann::json &test_case_config) {
+  total_allowed_system_calls = 0;
+ 
   int res;
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
@@ -72,7 +239,6 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // cannot pass them the number for the target: only for the source.
   // We could use raw seccomp-bpf instead.
 
-  std::set<std::string> categories;
 
   // grep ' :' grading/system_call_categories.cpp | grep SAFELIST | cut -f 6 -d ' '
   // grep ' :' grading/system_call_categories.cpp | grep RESTRICTED | cut -f 6 -d ' '
@@ -116,241 +282,56 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   std::set<std::string> forbidden_categories = {
     "INFORMATION_MAINTENANCE_SET_TIME"
   };
-
+  
+  std::set<std::string> default_categories =
+    system_call_categories_based_on_program(my_program,restricted_categories);
+  //execute_logfile << "categories based on program " << default_categories.size() << std::endl;
 
   // ---------------------------------------------------------------
   // READ ALLOWED SYSTEM CALLS FROM CONFIG.JSON
-  const nlohmann::json &config_safelist = whole_config.value("allow_system_calls",nlohmann::json());
-  for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
-       cwitr != config_safelist.end(); cwitr++) {
-    std::string my_category = *cwitr;
-    if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
-      my_category = my_category.substr(27,my_category.size()-27);
+  nlohmann::json whole_config_safelist = whole_config.value("allow_system_calls",default_categories);
+
+  //execute_logfile << "categories based on global config " << whole_config_safelist.size() << std::endl;
+  
+  nlohmann::json config_safelist = whole_config_safelist;
+  try {
+    config_safelist = test_case_config.value("allow_system_calls",whole_config_safelist);
+  } catch (...) {
+    // custom_doit validation don't have a valid test_case_config json object
+  }
+  //execute_logfile << "categories based on test case config " << config_safelist.size() << std::endl;
+
+  std::set<std::string> categories;
+  if (config_safelist.size() == 1 &&
+      *config_safelist.begin() == "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS") {
+    categories = restricted_categories;
+  } else {
+    for (nlohmann::json::const_iterator cwitr = config_safelist.begin();
+         cwitr != config_safelist.end(); cwitr++) {
+      //for (nlohmann::json::const_iterator cwitr = categories.begin();
+      // cwitr != categories.end(); cwitr++) {
+      std::string my_category = *cwitr;
+      if (my_category.size() > 27 && my_category.substr(0,27) == "ALLOW_SYSTEM_CALL_CATEGORY_") {
+        my_category = my_category.substr(27,my_category.size()-27);
+        std::cout << " typo in system call category name " << my_category << std::endl;
+        assert(0);
+      }
+      // make sure categories is valid
+      assert (restricted_categories.find(my_category) != restricted_categories.end());
+      categories.insert(my_category);
     }
-    // make sure categories is valid
-    assert (restricted_categories.find(my_category) != restricted_categories.end());
-    categories.insert(my_category);
   }
 
-  // --------------------------------------------------------------
-  // HELPER UTILTIY PROGRAMS
-  if (my_program == "/bin/cp") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-  }
-  else if (my_program == "/bin/mv") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-  }
-  else if (my_program == "/usr/bin/time") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-  }
-
-  else if (my_program == "/usr/bin/strace") {
-    categories = restricted_categories;
-  }
-
-  // ---------------------------------------------------------------
-  // SUBMITTY ANALYSIS TOOLS
-  else if (my_program == SUBMITTY_INSTALL_DIRECTORY+"/SubmittyAnalysisTools/count") {
-    //TODO
-    categories = restricted_categories;
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-  }
-
-  // ---------------------------------------------------------------
-  // PYTHON
-  else if (my_program.find("/usr/bin/python") != std::string::npos) {
-    categories = restricted_categories; //TODO: fix
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-  }
-
-  // ---------------------------------------------------------------
-  // C/C++ COMPILATION
-  else if (my_program == "/usr/bin/g++" ||
-           my_program == "/usr/bin/gcc" ||
-           my_program.find("/usr/bin/clang") != std::string::npos) {
-    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("TGKILL");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
-    categories.insert("UNKNOWN");
-  }
-
-  // ---------------------------------------------------------------
-  // CMAKE/MAKE COMPILATION
-  else if (my_program == "/usr/bin/cmake" ||
-           my_program == "/usr/bin/make") {
-    categories = restricted_categories;
-  }
-
-  // ---------------------------------------------------------------
-  // JAVA COMPILATION
-  else if (my_program == "/usr/bin/javac") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
-    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-    categories.insert("PROCESS_CONTROL_SCHEDULING");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_CAPABILITIES");
-    categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("INFORMATION_MAINTENANCE_ADVANCED");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-    categories.insert("TGKILL");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
-    categories.insert("UNKNOWN");
-    categories.insert("UNKNOWN_MODULE");
-  }
-
-  // ---------------------------------------------------------------
-  // JAVA
-  else if (my_program == "/usr/bin/java") {
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS");
-    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
-    categories.insert("PROCESS_CONTROL_MEMORY_ADVANCED");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SCHEDULING");
-    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-    categories.insert("FILE_MANAGEMENT_CAPABILITIES");
-    categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
-    categories.insert("INFORMATION_MAINTENANCE_ADVANCED");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-    categories.insert("TGKILL");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
-    categories.insert("UNKNOWN");
-    categories.insert("UNKNOWN_MODULE");
-  }
-
-  // ---------------------------------------------------------------
-  // SWI PROLOG
-  else if (my_program == "/usr/bin/swipl") {
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-  }
-
-  // RACKET SCHEME
-  else if (my_program == "/usr/bin/plt-r5rs") {
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-  }
-
-  // ---------------------------------------------------------------
-  // C++ Memory Debugging
-  // FIXME: update with the actual dr memory install location?
-  else if (my_program.find("drmemory") != std::string::npos ||
-           my_program.find("valgrind") != std::string::npos) {
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_KILL");
-    categories.insert("FILE_MANAGEMENT_EXTENDED_ATTRIBUTES");
-    categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-    categories.insert("DEVICE_MANAGEMENT_NEW_DEVICE");
-    categories.insert("TGKILL");
-  }
-
-  // ---------------------------------------------------------------
-  // IMAGE COMPARISON
-  else if (my_program == "/usr/bin/compare") {
-    categories.insert("FILE_MANAGEMENT_PERMISSIONS");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SCHEDULING");
-  }
-
-  // ---------------------------------------------------------------
-  else if (my_program == "/usr/bin/sort") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-    categories.insert("PROCESS_CONTROL_SCHEDULING");
-    categories.insert("FILE_MANAGEMENT_RARE");
-    categories.insert("PROCESS_CONTROL_ADVANCED");
-    categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-  }
-
-  // ---------------------------------------------------------------
-  //KEYBOARD INPUT
-  else if(my_program == "/usr/bin/xdotool"){
-    categories = restricted_categories; //TODO: fix
-  }
-
-  // ---------------------------------------------------------------
-  //WINDOW FOCUS
-  else if(my_program == "/usr/bin/wmctrl"){
-    categories = restricted_categories; //TODO: fix
-  }
-
-  // ---------------------------------------------------------------
-  //WINDOW INFORMATION
-  else if(my_program == "/usr/bin/xwininfo"){
-    categories = restricted_categories; //TODO: fix
-  }
-
-  // ---------------------------------------------------------------
-  //SCREENSHOT FUNCTIONALITY
-  else if(my_program == "/usr/bin/scrot"){
-    categories = restricted_categories; //TODO: fix
-  }
-  // else if(my_program == "/usr/bin/gdb") {
-  //   categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
-  //   categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
-  //   categories.insert("FILE_MANAGEMENT_RARE");
-  //   categories.insert("PROCESS_CONTROL_ADVANCED");
-  //   categories.insert("PROCESS_CONTROL_GET_SET_USER_GROUP_ID");
-  //   categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-  //   categories.insert("PROCESS_CONTROL_SYNCHRONIZATION");
-  // }
-
-  else {
-    categories = restricted_categories; //TODO: fix
-    // UGH, don't want this here
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
-  }
+  //execute_logfile << "categories " << categories.size() << std::endl;
 
   // make sure all categories are valid
   for_each(categories.begin(),categories.end(),
            [restricted_categories](const std::string &s){
              assert (restricted_categories.find(s) != restricted_categories.end()); });
 
-  allow_system_calls(sc,categories);
-
+  allow_system_calls(sc,categories,execute_logfile);
+  //execute_logfile << "system call filter configured with " << total_allowed_system_calls << " allowed system calls" << std::endl;
+  
   if (seccomp_load(sc) < 0)
     return 1; // failure
 
