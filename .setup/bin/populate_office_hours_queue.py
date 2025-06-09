@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-from sqlalchemy import create_engine, Table, MetaData, select, update, insert
+from sqlalchemy import create_engine, Table, MetaData, select, update, insert, text
 import random
 import os
 from datetime import datetime, timedelta
@@ -45,14 +45,14 @@ def main():
     engine = create_engine(
         f"postgresql:///{database}?host={DB_HOST}&port={DB_PORT}&user={DB_USER}&password={DB_PASS}")
     conn = engine.connect()
-    metadata = MetaData(bind=engine)
-    queues_table = Table("queue_settings", metadata, autoload=True)
-    queue_entries_table = Table("queue", metadata, autoload=True)
-    users_table = Table("users", metadata, autoload=True)
+    metadata = MetaData()
+    queues_table = Table("queue_settings", metadata, autoload_with=engine)
+    queue_entries_table = Table("queue", metadata, autoload_with=engine)
+    users_table = Table("users", metadata, autoload_with=engine)
 
     # Find all queues in course
     res = conn.execute(select(queues_table))
-    queues_lookup = {x["code"]: x for x in res}
+    queues_lookup = {x["code"]: x for x in res.mappings()}
     res.close()
 
     # finds all open queues
@@ -64,7 +64,7 @@ def main():
 
     # Find all students in class
     res = conn.execute(select(users_table))
-    all_users = res.fetchall()
+    all_users = res.mappings().all()
     res.close()
 
     # Find all ids of students and graders
@@ -97,7 +97,7 @@ def main():
     # Otherwise, they will get either emptied or removed
     res = conn.execute(
         select(queue_entries_table).where(queue_entries_table.c.current_state != "done"))
-    tmp = res.fetchall()
+    tmp = res.mappings().all()
     res.close()
     for row in tmp:
         update_dict = dict()
@@ -116,6 +116,7 @@ def main():
             (queue_entries_table.c.user_id == row["user_id"]) &
             (queue_entries_table.c.time_in == row["time_in"]))
         conn.execute(update_query)
+        conn.commit()
 
     # Hardcoding options that we could use
     queue_current_states = ["done", "being_helped", "waiting"]
@@ -189,10 +190,10 @@ def main():
         else:
             queue_entry["contact_info"] = None
 
-        res = conn.execute(f"SELECT max(time_in) FROM queue WHERE user_id = \
+        res = conn.execute(text(f"SELECT max(time_in) FROM queue WHERE user_id = \
             '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = \
             UPPER(TRIM('{queue_entry['queue_code']}')) AND \
-            (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)")
+            (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)"))
         queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
         res.close()
 
@@ -221,6 +222,7 @@ def main():
         queue_data.append(queue_entry)
 
     conn.execute(insert(queue_entries_table).values(queue_data))
+    conn.commit()
 
 
 if __name__ == "__main__":
