@@ -164,6 +164,21 @@ class AutoGradingView extends AbstractView {
                     ])
                 ];
             }
+            else if (substr($file_path, strlen($file_path) - 6, 6) == ".ipynb") {
+                $public = $autocheck->getPublic();
+                $file_name = pathinfo($file_path, PATHINFO_BASENAME);
+                $file_path = urlencode($file_path);
+                $checks[] = [
+                    "notebook" => true,
+                    "name" => $file_name,
+                    "path" => $file_path,
+                    "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                        "dir" => $public ? "results_public" : "results",
+                        "file" => $file_name,
+                        "path" => $file_path
+                    ])
+                ];
+            }
             else {
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $check = [
