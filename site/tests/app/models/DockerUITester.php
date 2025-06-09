@@ -124,11 +124,11 @@ class DockerUITester extends BaseUnitTest {
         $this->assertEquals(true, $worker->is_enabled);
         $this->assertEquals(false, $worker->failed_to_update);
 
-        $this->assertEquals(11, count($docker_ui->getDockerImages()));
-        $image = $docker_ui->getDockerImages()[0];
+        $this->assertEquals(11, count($docker_ui->getDockerImages('name', 'ASC')));
+        $image = $docker_ui->getDockerImages('name', 'ASC')[0];
         $this->assertEquals("submitty/tutorial:database_client", $image->primary_name);
 
-        $image = $docker_ui->getDockerImages()[2];
+        $image = $docker_ui->getDockerImages('name', 'ASC')[2];
         $this->assertEquals("ubuntu:custom", $image->primary_name);
         $this->assertEquals(1, count($image->aliases));
         $this->assertEquals("submitty/autograding-default:latest", $image->aliases[0]);

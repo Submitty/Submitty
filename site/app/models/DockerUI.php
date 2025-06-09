@@ -20,7 +20,7 @@ use app\data_objects\DockerImage;
  * @method string getLastRan()
  * @method string getSysinfoLastUpdated()
  * @method array getErrorLogs()
- * @method array getDockerImages()
+ * @method array getDockerImages(string $sort = 'name', string $direction = 'ASC')
  * @method array getFailImages()
  */
 class DockerUI extends AbstractModel {
