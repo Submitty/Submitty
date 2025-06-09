@@ -125,7 +125,7 @@ class DockerUITester extends BaseUnitTest {
         $this->assertEquals(false, $worker->failed_to_update);
 
         $this->assertEquals(11, count($docker_ui->getDockerImages('name', 'ASC')));
-        $image = $docker_ui->getDockerImages('name', 'ASC')[0];
+        $image = $docker_ui->getDockerImages('name', 'DESC')[0];
         $this->assertEquals("submitty/tutorial:database_client", $image->primary_name);
 
         $image = $docker_ui->getDockerImages('name', 'ASC')[2];
