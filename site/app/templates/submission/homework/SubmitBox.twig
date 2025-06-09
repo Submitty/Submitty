@@ -467,10 +467,12 @@
     }
 
     $(function() {
-        updateSubmitButtonStatus();
+        if(!{{ is_vcs ? "true" : "false" }}) {
+            updateSubmitButtonStatus();
+        }
         $(".submit-gradeable").click(function(e) { // Submit button
             e.preventDefault(); // Prevent form submission for safety
-            if (!isValidSubmission() && empty_inputs) {
+            if (!{{ is_vcs ? "true" : "false" }} && !isValidSubmission() && empty_inputs) {
                 displayMessage('Duplicate submission detected. No attempts used', 'warning');
                 return;
             }
