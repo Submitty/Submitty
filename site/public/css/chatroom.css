@@ -58,7 +58,7 @@
 
 .message-content {
     max-width: 90%;
-    word-break: break-word;
+    overflow-wrap: break-word;
     margin-left: 0.5rem;
 }
 
