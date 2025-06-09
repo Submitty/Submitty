@@ -129,19 +129,19 @@ class DockerUI extends AbstractModel {
                 if ($cmp === 0) {
                     $cmp = strcmp($tagA, $tagB);
                 }
-                return $direction === 'ASC' ? -$cmp : $cmp;
+                return $direction === 'ASC' ? $cmp : -$cmp;
             }
 
             if ($sort === 'size') {
                 $valA = (float) str_replace('MB', '', $a->size_mb);
                 $valB = (float) str_replace('MB', '', $b->size_mb);
-                return $direction === 'ASC' ? $valB <=> $valA : $valA <=> $valB;
+                return $direction === 'ASC' ? $valA <=> $valB : $valB <=> $valA;
             }
 
             if ($sort === 'created') {
                 $valA = $a->created_timestamp;
                 $valB = $b->created_timestamp;
-                return $direction === 'ASC' ? $valB <=> $valA : $valA <=> $valB;
+                return $direction === 'ASC' ? $valA <=> $valB : $valB <=> $valA;
             }
 
             return 0;
