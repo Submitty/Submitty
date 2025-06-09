@@ -122,7 +122,7 @@
                     '<span><b>Median: </b>' + median + '</span>' +
                     '<span><b>Minimum: </b>' + min{{ type }} + '</span>' +
                     '<span><b>Maximum: </b>' + max{{ type }} + '</span>' +
-                    '<span><b>Range: </b>' + `[${min{{ type }}}, ${max{{ type }}}]` + '</span>' +
+                    '<span><b>Range: </b>' + (max{{ type }} - min{{ type }}) + '</span>' +
                     '<span><b>Standard Deviation: </b>' +
                     {{ type == 'total' ? overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0
                     : type == 'auto' ? autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0

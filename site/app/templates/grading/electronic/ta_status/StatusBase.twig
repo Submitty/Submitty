@@ -103,7 +103,7 @@
                     '<span><b>Median: </b>' + median + '</span>' +
                     '<span><b>Minimum: </b>' + min + '</span>' +
                     '<span><b>Maximum: </b>' + max + '</span>' +
-                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
                     '<span><b>Standard Deviation: </b>' +
                     {{ overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
@@ -129,7 +129,7 @@
                     '<span><b>Median: </b>' + median + '</span>' +
                     '<span><b>Minimum: </b>' + min + '</span>' +
                     '<span><b>Maximum: </b>' + max + '</span>' +
-                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
                     '<span><b>Standard Deviation: </b>' +
                     {{ autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
@@ -155,7 +155,7 @@
                     '<span><b>Median: </b>' + median + '</span>' +
                     '<span><b>Minimum: </b>' + min + '</span>' +
                     '<span><b>Maximum: </b>' + max + '</span>' +
-                    '<span><b>Range: </b>' + `[${min}, ${max}]` + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
                     '<span><b>Standard Deviation: </b>' +
                     {{ manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0 }} +
                 '</span>'
