@@ -16,6 +16,9 @@ class DockerView extends AbstractView {
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->enableMobileViewport();
 
+        $sort = $_COOKIE['sort'] ?? 'name';
+        $direction = $_COOKIE['direction'] ?? 'ASC';
+
         return $this->output->renderTwigTemplate(
             "admin/Docker.twig",
             [
@@ -27,7 +30,9 @@ class DockerView extends AbstractView {
                 "admin_url" => $this->core->buildUrl(["admin"]),
                 "last_updated" => $docker_ui->getLastRan(),
                 "sysinfo_last_updated" => $docker_ui->getSysinfoLastUpdated(),
-                "docker_images" => $docker_ui->getDockerImages(),
+                "sort" => $sort,
+                "direction" => $direction,
+                "docker_images" => $docker_ui->getDockerImages($sort, $direction),
                 "fail_images" => $docker_ui->getFailImages(),
                 "error_logs" => $docker_ui->getErrorLogs(),
                 "docker_image_owners" => $docker_ui->getDockerImageOwners(),

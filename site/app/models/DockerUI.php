@@ -114,6 +114,43 @@ class DockerUI extends AbstractModel {
     }
 
     /**
+     * Sorts docker images in ascending or descending order by name, size, or creation date.
+     * @return array<DockerImage>
+     */
+    public function getDockerImages(string $sort = 'name', string $direction = 'ASC'): array {
+        $images = $this->docker_images;
+
+        usort($images, function ($a, $b) use ($sort, $direction) {
+            [$nameA, $tagA] = explode(':', $a->primary_name);
+            [$nameB, $tagB] = explode(':', $b->primary_name);
+
+            if ($sort === 'name') {
+                $cmp = strcmp($nameA, $nameB);
+                if ($cmp === 0) {
+                    $cmp = strcmp($tagA, $tagB);
+                }
+                return $direction === 'ASC' ? -$cmp : $cmp;
+            }
+
+            if ($sort === 'size') {
+                $valA = (float) str_replace('MB', '', $a->size_mb);
+                $valB = (float) str_replace('MB', '', $b->size_mb);
+                return $direction === 'ASC' ? $valB <=> $valA : $valA <=> $valB;
+            }
+
+            if ($sort === 'created') {
+                $valA = $a->created_timestamp;
+                $valB = $b->created_timestamp;
+                return $direction === 'ASC' ? $valB <=> $valA : $valA <=> $valB;
+            }
+            
+            return 0;
+        });
+
+        return $images;
+    }
+
+    /**
      * Collect which capabilities are present along with the workers associated with and any that are unaassociated
      * @param array<mixed> $autograding_containers - parsed JSON with autograding container information
      * @param array<mixed> $autograding_workers - parsed JSON with autograding worker information

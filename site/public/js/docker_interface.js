@@ -161,3 +161,22 @@ $(document).ready(() => {
     $('#add-field').on('input', addFieldOnChange);
     $('#add-field').trigger('input');
 });
+
+function sortTableByColumn(sort_type = 'id', direction) {
+    Cookies.set('sort', sort_type, { path: '/' });
+    Cookies.set('direction', direction, { path: '/' });
+    sessionStorage.setItem('scrollY', window.scrollY);
+    location.reload();
+}
+
+// Scroll to original location after page is fully loaded (doesn't work without buffer)
+document.addEventListener("DOMContentLoaded", () => {
+    const scrollY = sessionStorage.getItem('scrollY');
+    if (scrollY !== null) {
+        setTimeout(() => {
+            window.scrollTo(0, parseInt(scrollY));
+        }, 10);
+        sessionStorage.removeItem('scrollY');
+    }
+});
+

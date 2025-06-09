@@ -1,3 +1,5 @@
+{% import _self as sort %}
+
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
 
@@ -89,17 +91,18 @@
     <table class="table table-striped docker-table mobile-table">
         <thead>
             <tr>
-                <th>Image Name</th>
+                {{ sort.sortable_header('Image Name', 'name', sort, direction) }}
                 <th>Owner</th>
                 <th>Id</th>
-                <th>Size</th>
+                {{ sort.sortable_header('Size', 'size', sort, direction) }}
                 <th>Tag</th>
-                <th>Created</th>
+                {{ sort.sortable_header('Created', 'created', sort, direction) }}
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
                 <th>Remove</th>
             </tr>
         </thead>
+
         <tbody>
         {% for image in docker_images %}
             {% set full = image.primary_name | split(":") %}
@@ -178,3 +181,18 @@
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
+
+{% macro sortable_header(title, sort_key, current_sort, direction) %}
+<th>
+    <a href="#"
+      onclick="sortTableByColumn('{{ sort_key }}', '{{ current_sort == sort_key ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
+      {% if current_sort == sort_key %}class="active-sort"{% endif %}>
+          {{ title }}
+      {% if current_sort == sort_key %}
+          <i class="fa {{ direction == 'ASC' ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
+      {% else %}
+          <i class="fa fa-sort"></i>
+      {% endif %}
+    </a>
+</th>
+{% endmacro %}
