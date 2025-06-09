@@ -162,7 +162,7 @@ $(document).ready(() => {
     $('#add-field').trigger('input');
 });
 
-function sortTableByColumn(sort_type = 'id', direction) {
+function sortTableByColumn(sort_type, direction) {
     Cookies.set('sort', sort_type, { path: '/' });
     Cookies.set('direction', direction, { path: '/' });
     sessionStorage.setItem('scrollY', window.scrollY);
@@ -170,7 +170,7 @@ function sortTableByColumn(sort_type = 'id', direction) {
 }
 
 // Scroll to original location after page is fully loaded (doesn't work without buffer)
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     const scrollY = sessionStorage.getItem('scrollY');
     if (scrollY !== null) {
         setTimeout(() => {
@@ -179,4 +179,3 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.removeItem('scrollY');
     }
 });
-

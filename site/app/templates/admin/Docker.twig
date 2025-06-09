@@ -1,4 +1,4 @@
-{% import _self as sort %}
+{% import _self as self %}
 
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
@@ -91,12 +91,12 @@
     <table class="table table-striped docker-table mobile-table">
         <thead>
             <tr>
-                {{ sort.sortable_header('Image Name', 'name', sort, direction) }}
+                {{ self.sortable_header('Image Name', 'name', sort, direction) }}
                 <th>Owner</th>
                 <th>Id</th>
-                {{ sort.sortable_header('Size', 'size', sort, direction) }}
+                {{ self.sortable_header('Size', 'size', sort, direction) }}
                 <th>Tag</th>
-                {{ sort.sortable_header('Created', 'created', sort, direction) }}
+                {{ self.sortable_header('Created', 'created', sort, direction) }}
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
                 <th>Remove</th>
