@@ -122,6 +122,14 @@ select {
     background-color: var(--actionable-blue) !important;
 }
 
+.missing-data-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 50px;
+}
+
 .peer-button {
     background-color: var(--standard-plum-purple);
     color: white;

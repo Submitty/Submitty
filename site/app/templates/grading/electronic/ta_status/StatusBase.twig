@@ -230,14 +230,14 @@
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
 
             {% if component_averages|length == 0 %}
-                <div class="page-content" id="page_1_content"><p>No component averages data available.</p></div>
+                <div class="page-content missing-data-container" id="page_1_content"><p>No component averages data available.</p></div>
             {% else %}
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
             {% if ta_grading_enabled %}
                 {% if component_averages|length == 0 or histograms['tTA']|length == 0 %}
-                    <div class="page-content" id="page_2_content"><p>No manual grading data available.</p></div>
+                    <div class="page-content missing-data-container" id="page_2_content"><p>No manual grading data available.</p></div>
                 {% else %}
                     <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'manual'})  }}</div>
                 {% endif %}
@@ -245,20 +245,20 @@
 
             {% if autograding_enabled %}
                 {% if component_averages|length == 0 or histograms['tTA']|length == 0 %}
-                    <div class="page-content" id="page_3_content"><p>No autograding data available.</p></div>
+                    <div class="page-content missing-data-container" id="page_3_content"><p>No autograding data available.</p></div>
                 {% else %}
                     <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'auto'})  }}</div>
                 {% endif %}
 
                 {% if histograms['runtime']|length == 0 or histograms['runtime'][0] == 0 %}
-                    <div class="page-content" id="page_5_content"><p>No runtime data available.</p></div>
+                    <div class="page-content missing-data-container" id="page_5_content"><p>No runtime data available.</p></div>
                 {% else %}
                     <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
                 {% endif %}
             {% endif %}
 
             {% if (overall_average == null or overall_average.getCount() == 0) or component_averages|length == 0 %}
-                <div class="page-content" id="page_4_content"><p>No overall data available.</p></div>
+                <div class="page-content missing-data-container" id="page_4_content"><p>No overall data available.</p></div>
             {% else %}
                 <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
             {% endif %}
