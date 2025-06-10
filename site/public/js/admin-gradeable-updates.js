@@ -917,6 +917,10 @@ function loadGradeableEditor(g_id, file_path) {
     });
 }
 
+function toggleGradeableConfigEdit() {
+  $('#gradeable-config-structure').toggleClass('open').toggle();
+}
+
 function cancelGradeableConfigEdit() {
     $('#gradeable-config-edit-bar').hide();
 }
