@@ -1,8 +1,8 @@
-### Why is this change important & necessary?
+### Why is this Change Important & Necessary?
 <!-- Include any github issue that is fixed/closed using "Fixes #<number>" or "Closes #<number>" syntax.  
 Alternately write "Partially addresses #<number>" or "Related to #<number>" as appropriate. -->
 
-### What is the new behavior?
+### What is the New Behavior?
 <!-- Include before & after screenshots/videos if the user interface has changed. -->
 
 ### What steps should a reviewer take to reproduce or test the bug or new feature?
@@ -12,7 +12,7 @@ Alternately write "Partially addresses #<number>" or "Related to #<number>" as a
 If this PR does not add/update the necessary automated tests, write a new github issue and link it below.  
 Link related PRs or new github issue to update documentation. -->
 
-### Other information.
+### Other information
 <!-- Is this a breaking change?  
 Does this PR include migrations to update existing installations?  
 Are there security concerns with this PR? -->
