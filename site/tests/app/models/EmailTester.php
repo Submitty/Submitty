@@ -146,4 +146,14 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame($expected_body, $email_missing->getBody());
     }
+
+        public function testHeaderWithUndefinedCourse(): void {
+        $email = new Email($this->core, [
+            'to_user_id' => 'person',
+            'subject' => 'some email',
+            'body' => 'email body',
+        ]);
+
+        $this->assertSame('[Submitty]: some email', $email->getSubject());
+    }
 }
