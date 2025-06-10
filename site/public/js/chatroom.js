@@ -1,7 +1,7 @@
 /* global csrfToken */
 
 // eslint-disable-next-line no-unused-vars
-function fetchMessages(chatroomId, my_id, when = new Date(0)) {
+function fetchMessages(chatroomId) {
     $.ajax({
         // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
@@ -114,6 +114,8 @@ function initChatroomSocketClient(chatroomId) {
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
+            default:
+                console.error(msg);
         }
     };
     window.socketClient.open(`chatroom_${chatroomId}`);
@@ -174,13 +176,10 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function toggle_chatroom(chatroomId, active) {
     const form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
-    if (active) {
-        if (confirm('This will terminate this chatroom session. Are you sure?')) {
-            form.submit();
-        }
+    if (active && confirm('This will terminate this chatroom session. Are you sure?')) {
+        form.submit();
     }
     else {
         form.submit();
@@ -208,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         initChatroomSocketClient(chatroomId);
 
-        fetchMessages(chatroomId, userId);
+        fetchMessages(chatroomId);
 
         const sendButton = document.querySelector('.send-message-btn');
         const messageInput = document.querySelector('.message-input');

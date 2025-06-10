@@ -60,7 +60,6 @@ class ChatroomView extends AbstractView {
         $display_name = $user->getDisplayFullName();
         $roomId = $chatroom->getId();
         $sessKey = "anon_name_chatroom_{$roomId}";
-        $boolKey = "anon_name_chatroom_{$roomId}_bool";
         if ($anonymous) {
             if (!isset($_SESSION[$sessKey])) {
                 $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];

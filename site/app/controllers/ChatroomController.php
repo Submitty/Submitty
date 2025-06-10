@@ -131,9 +131,6 @@ class ChatroomController extends AbstractController {
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
-        foreach ($chatroom->getMessages() as $message) {
-            $em->remove($message);
-        }
         unset($_SESSION["anon_name_chatroom_{$chatroom_id}"]);
         $em->remove($chatroom);
         $em->flush();
@@ -159,12 +156,7 @@ class ChatroomController extends AbstractController {
         if (isset($_POST['description'])) {
             $chatroom->setDescription($_POST['description']);
         }
-        if (isset($_POST['allow-anon'])) {
-            $chatroom->setAllowAnon(true);
-        }
-        else {
-            $chatroom->setAllowAnon(false);
-        }
+        $chatroom->setAllowAnon(isset($_POST['allow-anon']));
 
         $em->flush();
 
@@ -240,6 +232,11 @@ class ChatroomController extends AbstractController {
         }
 
         $role = $user->accessAdmin() ? 'instructor' : 'student';
+
+        if (strcmp($_POST['content'], "") == 0){
+            return JsonResponse::getFailResponse("Can't send blank message.");
+        }
+
         $msg_json = [];
         $msg_json['content'] = $_POST['content'];
         $msg_json['user_id'] = $user_id;
