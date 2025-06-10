@@ -167,7 +167,7 @@ function sortTableByColumn(sortKey) {
     const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
 
     let newDirection;
-    (currentSort === sortKey) ? (newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC') : (newDirection = 'ASC')
+    (currentSort === sortKey) ? (newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC') : (newDirection = 'ASC');
 
     Cookies.set('docker_table_key', sortKey, { path: '/' });
     Cookies.set('docker_table_direction', newDirection, { path: '/' });
@@ -182,7 +182,7 @@ function applySort(sortKey, direction) {
     const rows = Array.from(tbody.querySelectorAll('tr'));
     const colMap = { name: 0, size: 3, created: 5 };
     const colIndex = colMap[sortKey];
-    
+
     rows.sort((rowA, rowB) => {
         const aText = rowA.children[colIndex].textContent.trim();
         const bText = rowB.children[colIndex].textContent.trim();
@@ -191,23 +191,25 @@ function applySort(sortKey, direction) {
             const [nameA, tagA = ''] = aText.split(':');
             const [nameB, tagB = ''] = bText.split(':');
             cmp = nameA.localeCompare(nameB);
-            if (cmp === 0) cmp = tagA.localeCompare(tagB);
-        } else if (sortKey === 'size') {
+            if (cmp === 0) { cmp = tagA.localeCompare(tagB); }
+        }
+        else if (sortKey === 'size') {
             const valA = parseFloat(aText.replace('MB', ''));
             const valB = parseFloat(bText.replace('MB', ''));
             cmp = valA - valB;
-        } else if (sortKey === 'created') {
+        }
+        else if (sortKey === 'created') {
             const dateA = new Date(aText);
             const dateB = new Date(bText);
             cmp = dateA - dateB;
         }
         return direction === 'ASC' ? cmp : -cmp;
     });
-    rows.forEach(row => tbody.appendChild(row));
+    rows.forEach((row) => tbody.appendChild(row));
 }
 
 function updateSortIcons(activeKey, direction) {
-    document.querySelectorAll('.sortable-header').forEach(link => {
+    document.querySelectorAll('.sortable-header').forEach((link) => {
         const icon = link.querySelector('i');
         const key = link.dataset.sortKey;
 
@@ -230,4 +232,3 @@ window.addEventListener('DOMContentLoaded', () => {
         updateSortIcons(savedSort, savedDirection);
     }
 });
-
