@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage */
+/* global csrfToken, buildCourseUrl, displayErrorMessage, WebSocketClient */
 
 function fetchMessages(chatroomId) {
     $.ajax({

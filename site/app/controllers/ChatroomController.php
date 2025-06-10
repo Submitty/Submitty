@@ -233,7 +233,7 @@ class ChatroomController extends AbstractController {
 
         $role = $user->accessAdmin() ? 'instructor' : 'student';
 
-        if (strcmp($_POST['content'], "") == 0) {
+        if (strcmp($_POST['content'], "") === 0) {
             return JsonResponse::getFailResponse("Can't send blank message.");
         }
 
