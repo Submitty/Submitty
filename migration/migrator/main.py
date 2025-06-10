@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 from typing import Set
 
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from . import db, get_dir_path, get_migrations_path, get_triggers_path, get_environments
@@ -238,7 +239,7 @@ def handle_migration(args):
 
             courses = {}
             for course in database.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course'
+                text('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course')
             ):
                 if course['term'] not in courses:
                     courses[course['term']] = []
@@ -514,7 +515,7 @@ def load_triggers(args, output=True):
 
         elif environment == 'course':
             courses = masterdb.execute(
-                'SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;'
+                text('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;')
             ).all()
             masterdb.close()
             first_err = True  # make sure first error appears on new line
