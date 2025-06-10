@@ -148,12 +148,12 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
     }
 
         public function testHeaderWithUndefinedCourse(): void {
-        $email = new Email($this->core, [
-            'to_user_id' => 'person',
-            'subject' => 'some email',
-            'body' => 'email body',
-        ]);
+            $no_course_email = new Email($this->core, [
+                'to_user_id' => 'person',
+                'subject' => 'some email',
+                'body' => 'email body',
+            ]);
 
-        $this->assertSame('[Submitty]: some email', $email->getSubject());
+        $this->assertSame('[Submitty]: some email', $no_course_email->getSubject());
     }
 }
