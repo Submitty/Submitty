@@ -190,14 +190,12 @@
 {% macro sortable_header(title, sort_key, current_sort, direction) %}
 <th>
     <a href="#"
-    onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
-    {% if current_sort == sort_key %}class="active-sort"{% endif %}>
-          {{ title }}
-      {% if current_sort == sort_key %}
-          <i class="fa {{ direction == 'ASC' ? 'fa-sort-up' : 'fa-sort-down' }}"></i>
-      {% else %}
-          <i class="fa fa-sort"></i>
-      {% endif %}
+       onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
+       class="sortable-header"
+       data-sort-key="{{ sort_key }}">
+        {{ title }}
+        <i class="fa fa-sort"></i>
     </a>
 </th>
 {% endmacro %}
+

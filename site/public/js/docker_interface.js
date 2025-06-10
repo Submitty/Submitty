@@ -162,26 +162,22 @@ $(document).ready(() => {
     $('#add-field').trigger('input');
 });
 
-function sortTableByColumn(sortKey, clickedDirection = null) {
+function sortTableByColumn(sortKey) {
     const currentSort = Cookies.get('sort');
     const currentDirection = Cookies.get('direction') || 'ASC';
 
     let newDirection;
 
-    if (clickedDirection) {
-        // Use the explicit direction passed in (from template)
-        newDirection = clickedDirection;
-    } else if (currentSort === sortKey) {
-        // Toggle if same column
-        newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC';
-    } else {
-        // Default to ASC on new column
-        newDirection = 'ASC';
-    }
+    (currentSort === sortKey) ? (newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC') : (newDirection = 'ASC')
 
     Cookies.set('sort', sortKey, { path: '/' });
     Cookies.set('direction', newDirection, { path: '/' });
 
+    applySort(sortKey, newDirection);
+    updateSortIcons(sortKey, newDirection);
+}
+
+function applySort(sortKey, direction) {
     const table = document.getElementById('docker-table');
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
@@ -216,9 +212,34 @@ function sortTableByColumn(sortKey, clickedDirection = null) {
             cmp = dateA - dateB;
         }
 
-        return newDirection === 'ASC' ? cmp : -cmp;
+        return direction === 'ASC' ? cmp : -cmp;
     });
 
     rows.forEach(row => tbody.appendChild(row));
 }
+
+function updateSortIcons(activeKey, direction) {
+    document.querySelectorAll('.sortable-header').forEach(link => {
+        const icon = link.querySelector('i');
+        const key = link.dataset.sortKey;
+
+        icon.classList.remove('fa-sort-up', 'fa-sort-down');
+        icon.classList.add('fa-sort');
+
+        if (key === activeKey) {
+            icon.classList.remove('fa-sort');
+            icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+        }
+    });
+}
+
+// Keeps the specified sort on reload
+window.addEventListener('DOMContentLoaded', () => {
+    const savedSort = Cookies.get('sort');
+    const savedDirection = Cookies.get('direction') || 'ASC';
+    if (savedSort) {
+        applySort(savedSort, savedDirection);
+        updateSortIcons(savedSort, savedDirection);
+    }
+});
 
