@@ -83,6 +83,16 @@
     text-align: right;
 }
 
+.disable-submit {
+    box-shadow: none;
+    opacity: 0.4;
+    cursor: default;
+}
+
+.disable-submit:hover {
+    background-color: var(--good-green);
+}
+
 #gradeable-info h1 {
     margin-right: auto;
 }
