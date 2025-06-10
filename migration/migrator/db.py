@@ -1,7 +1,7 @@
 """SQLAlchemy Tables module."""
 
 from pathlib import Path
-from sqlalchemy import Column, create_engine, inspect
+from sqlalchemy import Column, create_engine, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
 from sqlalchemy.orm import sessionmaker
@@ -78,7 +78,7 @@ class Database:
         :type query: str
         :rtype: sqlalchemy.engine.ResultProxy
         """
-        return self.session.execute(query)
+        return self.session.execute(text(query))
 
     def commit(self):
         """Run commit on the current session."""
