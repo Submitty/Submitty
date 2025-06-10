@@ -224,5 +224,6 @@ def main():
     conn.execute(insert(queue_entries_table).values(queue_data))
     conn.commit()
 
+
 if __name__ == "__main__":
     main()

@@ -200,10 +200,8 @@ def main():
     dbconn_course = dbengine_course.connect()
     metadata = MetaData()
     table_users = Table('users', metadata, autoload_with=dbconn_course)
-    table_egdata = Table('electronic_gradeable_data',
-                             metadata, autoload_with=dbconn_course)
-    table_egver = Table('electronic_gradeable_version',
-                            metadata, autoload_with=dbconn_course)
+    table_egdata = Table('electronic_gradeable_data', metadata, autoload_with=dbconn_course)
+    table_egver = Table('electronic_gradeable_version', metadata, autoload_with=dbconn_course)
     ret = dbconn_course.execute(select(table_users))
     user_list = set(row['user_id'] for row in ret.mappings().all())
     ret.close()
