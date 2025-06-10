@@ -33,7 +33,7 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
         },
         success: function (response) {
             const msg = JSON.parse(response);
-            if (msg.status !== 'success'){
+            if (msg.status !== 'success') {
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
@@ -45,7 +45,7 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
 }
 
 function appendMessage(displayName, role, ts, content) {
-    let timestamp = ts || new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+    const timestamp = ts || new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
 
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
@@ -94,12 +94,12 @@ function socketChatMessageHandler(msg) {
 }
 
 function initChatroomSocketClient(chatroomId) {
-    // eslint-disable-next-line no-undef
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
+                break;
             default:
                 console.error(msg);
         }
@@ -107,14 +107,12 @@ function initChatroomSocketClient(chatroomId) {
     window.socketClient.open(`chatroom_${chatroomId}`);
 }
 
-// eslint-disable-next-line no-unused-vars
 function newChatroomForm() {
     const form = $('#create-chatroom-form');
     form.css('display', 'block');
     document.getElementById('chatroom-allow-anon').checked = true;
 }
 
-// eslint-disable-next-line no-unused-vars
 function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) {
     const form = $('#edit-chatroom-form');
     form.css('display', 'block');
@@ -124,7 +122,6 @@ function editChatroomForm(chatroom_id, baseUrl, title, description, allow_anon) 
     document.getElementById('chatroom-anon-allow').checked = allow_anon;
 }
 
-// eslint-disable-next-line no-unused-vars
 function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
     if (confirm(`This will delete chatroom '${chatroom_name}'. Are you sure?`)) {
         const url = `${base_url}/delete`;
