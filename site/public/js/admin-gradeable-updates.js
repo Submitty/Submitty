@@ -239,9 +239,9 @@ $(document).ready(() => {
 
                 if (original !== updating && updating >= new Date()) {
                     const resend = confirm(
-                        'Notifications for this gradeable have already been sent to students. '
-                        + 'If you change the release date, would you like to resend notifications to '
-                        + 'students when the new release date is reached?',
+                        'Students have been notified and emailed that grades for this gradeable have been released. '
+                        + 'If you change the grades release date, would you like to resend notifications and emails to '
+                        + 'students when the new grades release date is reached?',
                     );
 
                     data['notifications_sent'] = resend ? 0 : notifications_sent;

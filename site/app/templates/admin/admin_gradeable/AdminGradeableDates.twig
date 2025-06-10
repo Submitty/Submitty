@@ -76,7 +76,7 @@
 
             {% if electronic and gradeable.isStudentView() and release_date <= "now"|date(date_format, timezone_string) %}
                 <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
-                    Note: Gradeable notifications are released at the start of every hour for completed electronic gradeables with student views. <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> have been sent so far.
+                    Note: Grades released notifications are sent and emailed at the start of every hour for students with complete TA/Manual grades. <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> notifications have been sent.
                 </p>
             {% endif %}
         </div>
