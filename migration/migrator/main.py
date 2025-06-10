@@ -240,7 +240,7 @@ def handle_migration(args):
             courses = {}
             for course in database.execute(
                 text('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course')
-            ):
+            ).mappings():
                 if course['term'] not in courses:
                     courses[course['term']] = []
                 courses[course['term']].append(course['course'])
