@@ -82,7 +82,7 @@ def check_output(output_cells):
     with open("circuit_submitted.png", "wb") as f:
         f.write(circuit)
 
-    histogram = base64.b64decode(output_cells[5 ][0]['image/png'])
+    histogram = base64.b64decode(output_cells[5][0]['image/png'])
     with open("histogram_submitted.png", "wb") as f:
         f.write(histogram)
 
