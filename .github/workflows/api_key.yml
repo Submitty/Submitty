@@ -14,6 +14,7 @@ jobs:
         id: get_key
         run: |
           echo "Fetching API key with basic auth..."
+          curl -s http://localhost:1511/api/key
           API_KEY=$(curl -s -u instructor:instructor http://localhost:1511/api/key)
           echo "API_KEY=$API_KEY"
           echo "api_key=$API_KEY" >> "$GITHUB_OUTPUT"
