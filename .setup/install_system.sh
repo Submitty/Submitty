@@ -469,10 +469,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    # Install mod_qos for Apache to handle rate limiting
-    sudo apt-get install -y libapache2-mod-qos
-
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel qos
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
 
     # Install nginx to serve websocket connections
     sudo apt-get install -qqy nginx-full

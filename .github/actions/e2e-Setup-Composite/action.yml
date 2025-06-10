@@ -193,12 +193,6 @@ runs:
         sudo service apache2 restart
       shell: bash
 
-    - name: Install mod_qos for Apache
-      run: |
-        sudo apt-get install -y libapache2-mod-qos
-        sudo a2enmod qos
-      shell: bash
-
     - name: Set up nginx
       run: |
         cd $SUBMITTY_REPOSITORY
