@@ -144,16 +144,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $expected_body = 'email body' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
 
+        $this->assertSame('[Submitty]: some email', $email_missing->getSubject());
         $this->assertSame($expected_body, $email_missing->getBody());
-    }
-
-        public function testHeaderWithUndefinedCourse(): void {
-            $no_course_email = new Email($this->core, [
-                'to_user_id' => 'person',
-                'subject' => 'some email',
-                'body' => 'email body',
-            ]);
-
-        $this->assertSame('[Submitty]: some email', $no_course_email->getSubject());
     }
 }
