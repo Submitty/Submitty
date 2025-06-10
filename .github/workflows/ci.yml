@@ -831,6 +831,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Copy Autograding Files
+        if: ${{ matrix.containers == 'Autograding' }}
+        run: |
+          cp -R ${{env.SUBMITTY_REPOSITORY}}/more_autograding_examples/ ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/
+
       # If the matrix is currently on Autograding, we should use the development course
       # and use the no_submissions flag
       - name: Run setup script with inputs (Autograding)

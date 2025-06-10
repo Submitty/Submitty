@@ -55,10 +55,12 @@ const submitGradeable = (versionNumber) => {
  * @param {number[]} fullScores the max scores for the gradeables
  */
 const checkNonHiddenResults = (versionNumber, expectedScores, fullScores) => {
-    expect(expectedScores.length).to.eq(fullScores.length);
     // switchVersion(versionNumber);
+
+    expect(expectedScores.length).to.eq(fullScores.length);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
+
     // wait for autograding results and compares expected to score pills
     cy.get('[data-testid="autograding-total-no-hidden"]', { timeout: 60000 });
     cy.get('[data-testid="autograding-total-no-hidden"]').find('[data-testid="score-pill-badge"]').contains(`${expectedTotal} / ${scoreTotal}`);
@@ -67,20 +69,27 @@ const checkNonHiddenResults = (versionNumber, expectedScores, fullScores) => {
     });
 };
 
+const constructFileName = (gradeable, fileName) => {
+    const baseFolder = 'more_autograding_examples';
+    return `${baseFolder}/${gradeable}/submissions/${fileName}`;
+};
+
 describe('Test the development course gradeables', () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
         const fullScores = [2, 3, 4, 4, 4, 4, 4];
-        cy.login('bitdiddle');
+        cy.login('fishea');
 
+        // use 'let' later for multiple gradeables
+        const gradeable = 'cpp_cats';
         // submits and checks the all correct files
-        newSubmission('cpp_cats');
-        submitFiles('cpp_cats_submissions/allCorrect.zip', 1, true);
+        newSubmission(gradeable);
+        submitFiles(constructFileName(gradeable, 'allCorrect.zip'), 1, true);
         submitGradeable(1);
         checkNonHiddenResults(1, fullScores, fullScores);
 
         // submits the half incorrect files
-        newSubmission('cpp_cats');
-        submitFiles('cpp_cats_submissions/extraLinesAtEnd.zip', 1, true);
+        newSubmission(gradeable);
+        submitFiles(constructFileName(gradeable, 'extraLinesAtEnd.zip'), 1, true);
         submitGradeable(2);
         checkNonHiddenResults(2, [2, 3, 2, 2, 2, 2, 0], fullScores);
     });
