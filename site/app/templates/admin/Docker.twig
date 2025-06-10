@@ -25,54 +25,48 @@
 <div class="content">
     <h2 class="docker-header">Worker Machines</h2>
     <table class="machine-table">
-        <thead>
-            <tr>
-                <th rowspan="2" style="text-align: center; vertical-align: middle;">Machine</th>
-                <th rowspan="2" style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
-                <th rowspan="2" style="text-align: center; vertical-align: middle;">System Info</th>
-                <th rowspan="2" style="text-align: center; vertical-align: middle;">Docker Version</th>
-                <th colspan="{{ capabilities|length }}">Capabilities</th>
-            </tr>
-            <tr>
-                {% for capability in capabilities %}
-                    <td>{{ capability }}</td>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for worker in worker_machines %}
-                <tr data-enabled="{{ worker.is_enabled == true and worker.failed_to_update == false }}">
-                    <th style="vertical-align: middle;">{{ worker.name }}</th>
-                    <td>{{ worker.num_autograding_workers }}</td>
-                    <td data-testid="system-info">
-                        {% if worker.system_information is not null %}
-                            OS: {{ worker.os }} <br />
-                            Disk Usage: {{ worker.system_information.disk_usage }} <br />
-                            Load: {{ worker.system_information.load }} <br />
-                            Worker: {{ worker.system_information.worker_service }} <br />
-                            {% if worker.system_information.shipper_service is not null %}
-                                Shipper: {{ worker.system_information.shipper_service }} <br />
-                            {% endif %}
-                            {% if worker.system_information.daemon_service is not null %}
-                                Daemon: {{ worker.system_information.daemon_service }}
-                            {% endif %}
-                        {% else %}
-                            No information parsed for {{ worker.name }}
-                        {% endif %}
-                    </td>
-                    <td data-testid="docker-version">{{ worker.docker_version }}</td>
-                    {% for capability in capabilities %}
-                        <td>
-                            {% if capability in worker.capabilities %}
-                                <i class="fas fa-check"></i>
-                            {% else %}
-                                <i class="fas fa-x"></i>
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
+        <tr>
+            <th rowspan=2 style="text-align: center; vertical-align: middle;">Machine</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle;">Num Autograding Workers</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">System Info</th>
+            <th rowspan=2 style="text-align: center; vertical-align: middle">Docker Version</th>
+            <th colspan={{capabilities|length}}>Capabilities</th>
+        </tr>
+        <tr>
+            {% for capability in capabilities %}
+                <td>{{capability}}</td>
             {% endfor %}
-        </tbody>
+        </tr>
+        {% for worker in worker_machines %}
+            <tr data-enabled = {{worker.is_enabled == true and worker.failed_to_update == false }}>
+            <th style="vertical-align: middle;">{{worker.name}}</th>
+            <td>{{worker.num_autograding_workers}}</td>
+            <td data-testid="system-info">
+                {% if worker.system_information is not null %}
+                    OS: {{ worker.os }} <br />
+                    Disk Usage: {{ worker.system_information.disk_usage }} <br/>
+                    Load: {{ worker.system_information.load }} <br />
+                    Worker: {{ worker.system_information.worker_service }} <br/>
+                    {% if worker.system_information.shipper_service is not null %}
+                        Shipper: {{  worker.system_information.shipper_service }}<br/>
+                    {% endif %}
+                    {% if worker.system_information.daemon_service is not null %}
+                        Daemon: {{ worker.system_information.daemon_service }}
+                    {% endif %}
+                {% else %}
+                    No information parsed for {{ worker.name }}
+                {% endif %}
+            </td>
+            <td data-testid="docker-version">{{ worker.docker_version }}</td>
+            {% for capability in capabilities %}
+                <td>
+                {% if capability in worker.capabilities %}
+                    <i class="fas fa-check"></i>
+                {% else %}
+                    <i class="fas fa-x"></i>
+                {% endif %}
+                </td>
+            {% endfor %}
     </table>
 
 </div>
