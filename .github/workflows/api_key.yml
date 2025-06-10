@@ -1,0 +1,26 @@
+name: Fetch API Key with Auth
+
+on: [push, workflow_dispatch]
+
+jobs:
+  fetch_key_and_run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Fetch API key with basic auth
+        id: get_key
+        run: |
+          echo "Fetching API key with basic auth..."
+          API_KEY=$(curl -s -u instructor:instructor http://localhost:1511/api/key)
+          echo "API_KEY=$API_KEY"
+          echo "api_key=$API_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Use the API key
+        env:
+          API_KEY: ${{ steps.get_key.outputs.api_key }}
+        run: |
+          echo "Using API key: $API_KEY"
+          # Place your logic here that uses $API_KEY
