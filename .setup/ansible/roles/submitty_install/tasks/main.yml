@@ -148,3 +148,13 @@
   ansible.builtin.service:
     name: submitty_autograding_shipper
     state: started
+
+- name: Install mod_qos for Apache
+  apt:
+    name: libapache2-mod-qos
+    state: present
+    update_cache: yes
+
+- name: Enable mod_qos for Apache
+  command: a2enmod qos
+  notify: Restart Apache

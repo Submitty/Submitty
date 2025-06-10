@@ -469,7 +469,10 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel
+    # Install mod_qos for Apache to handle rate limiting
+    sudo apt-get install -y libapache2-mod-qos
+
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite proxy_http proxy_wstunnel qos
 
     # Install nginx to serve websocket connections
     sudo apt-get install -qqy nginx-full
@@ -554,7 +557,7 @@ EOF
     #################
 
     # Edit php settings.  Note that if you need to accept larger files,
-    # you’ll need to increase both upload_max_filesize and
+    # you'll need to increase both upload_max_filesize and
     # post_max_filesize
 
     sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
