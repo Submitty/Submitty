@@ -43,6 +43,7 @@ export function getApiKey(user_id, password) {
     }).then((response) => {
         return response.body.data.token;
     });
+
 }
 
 /**

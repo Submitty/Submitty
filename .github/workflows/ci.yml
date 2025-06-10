@@ -926,11 +926,6 @@ jobs:
           ssh -T localhost
           sudo systemctl start postgresql
 
-      - name: Get API key
-        shell: bash
-        run: |
-          echo "x"
-
       - name: Run ansible scripts
         shell: bash
         run: |
@@ -938,7 +933,16 @@ jobs:
           cd .setup/ansible
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner submitty_install_submitty_version=${{ github.sha }} submitty_install_github_url=https://github.com/${{ github.repository }}.git' -i inventory/submitty playbooks/submitty_install.yml
           ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_course_creation.yml
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_homework_creation.yml -e "localhost/api/${SEMESTER}/course/upload"
+       
+      - name: Get API key
+        shell: bash
+        run: |
+          API_KEY=(curl -s -X POST http://localhost:1511/api/token -H "Content-Type: application/x-www-form-urlencoded" -d "user_id=instructor&password=instructor" | grep -oP '"token"\s*:\s*"\K[^"]+')
+      
+      - name: Create Homework
+        shell: bash
+        run:
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_homework_creation.yml -e "localhost/api/${SEMESTER}/course/upload" -e "${API_KEY}""
 
       - name: Set perms
         shell: bash
