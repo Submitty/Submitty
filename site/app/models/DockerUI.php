@@ -20,7 +20,7 @@ use app\data_objects\DockerImage;
  * @method string getLastRan()
  * @method string getSysinfoLastUpdated()
  * @method array getErrorLogs()
- * @method array getDockerImages(string $sort = 'name', string $direction = 'ASC')
+ * @method array getDockerImages()
  * @method array getFailImages()
  */
 class DockerUI extends AbstractModel {
@@ -111,43 +111,6 @@ class DockerUI extends AbstractModel {
      */
     public function getDockerImageOwners(): array {
         return $this->json_data['image_owners'];
-    }
-
-    /**
-     * Sorts docker images in ascending or descending order by name, size, or creation date.
-     * @return array<DockerImage>
-     */
-    public function getDockerImages(string $sort = 'name', string $direction = 'ASC'): array {
-        $images = $this->docker_images;
-
-        usort($images, function ($a, $b) use ($sort, $direction) {
-            [$nameA, $tagA] = explode(':', $a->primary_name);
-            [$nameB, $tagB] = explode(':', $b->primary_name);
-
-            if ($sort === 'name') {
-                $cmp = strcmp($nameA, $nameB);
-                if ($cmp === 0) {
-                    $cmp = strcmp($tagA, $tagB);
-                }
-                return $direction === 'ASC' ? $cmp : -$cmp;
-            }
-
-            if ($sort === 'size') {
-                $valA = (float) str_replace('MB', '', $a->size_mb);
-                $valB = (float) str_replace('MB', '', $b->size_mb);
-                return $direction === 'ASC' ? $valA <=> $valB : $valB <=> $valA;
-            }
-
-            if ($sort === 'created') {
-                $valA = $a->created_timestamp;
-                $valB = $b->created_timestamp;
-                return $direction === 'ASC' ? $valA <=> $valB : $valB <=> $valA;
-            }
-
-            return 0;
-        });
-
-        return $images;
     }
 
     /**
