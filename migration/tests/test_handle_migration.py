@@ -3,7 +3,6 @@ from copy import deepcopy
 from io import StringIO
 from pathlib import Path
 import shutil
-from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 import sys
 import tempfile
@@ -38,18 +37,16 @@ class TestHandleMigration(unittest.TestCase):
         return database
 
     def create_course_table(self, database):
-        database.execute(text("""
+        database.execute("""
             CREATE TABLE courses (
                 term character varying(255) NOT NULL,
                 course character varying(255) NOT NULL,
                 status smallint DEFAULT 1 NOT NULL
             );
-            """))
+            """)
 
     def add_course(self, database, semester, course, status=1):
-        database.execute(
-            text(f"INSERT INTO courses VALUES ('{semester}', '{course}', {status})")
-        )
+        database.execute(f"INSERT INTO courses VALUES ('{semester}', '{course}', {status})")
         database.commit()
 
     def test_no_course_dir(self):
