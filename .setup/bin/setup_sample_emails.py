@@ -57,9 +57,7 @@ def main():
             )
         ))
     users["superuser"] = list(submitty_conn.execute(
-        text(
-            "SELECT DISTINCT user_id, user_email FROM users"
-        )
+        text("SELECT DISTINCT user_id, user_email FROM users")
     ))
 
     # These are not realistic emails as the email content does not check who owns

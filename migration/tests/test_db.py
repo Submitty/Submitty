@@ -1,6 +1,8 @@
 import shutil
 import tempfile
 import unittest
+
+from sqlalchemy import text
 import migrator.db
 
 
@@ -15,13 +17,13 @@ class TestDb(unittest.TestCase):
 
     def test_db(self):
         db = migrator.db.Database({'database_driver': 'sqlite'}, 'master')
-        db.execute("""
+        db.execute(text("""
             CREATE TABLE users (
                 id INTEGER NOT NULL, name VARCHAR,
                 fullname VARCHAR,
                 password VARCHAR,
                 PRIMARY KEY (id)
-            )""")
+            )"""))
         db.commit()
         self.assertTrue(db.has_table('users'))
         self.assertFalse(db.has_table('fake'))

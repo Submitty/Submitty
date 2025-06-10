@@ -138,15 +138,15 @@ def main():
             #add each submission to the database.
             current_time_string = dateutils.write_submitty_date()
 
-            conn.execute(insert(electronic_gradeable_data), { "g_id": args.assignment_name, "user_id": user_name,
-                         "g_version": submission, "submission_time": current_time_string })
+            conn.execute(insert(electronic_gradeable_data), {"g_id": args.assignment_name, "user_id": user_name,
+                         "g_version": submission, "submission_time": current_time_string})
             conn.commit()
             #If this is the first submission, create a new entry in the table, otherwise, update.
             #TODO use a more reliable method of determining if this is the first submission.
             if int(submission) == 1:
                 print("Entered new user " + user_name + " because submission was " + submission)
-                conn.execute(insert(electronic_gradeable_version), { "g_id": args.assignment_name, "user_id": user_name,
-                         "active_version": user_assignment_settings['active_version'] })
+                conn.execute(insert(electronic_gradeable_version), {"g_id": args.assignment_name, "user_id": user_name,
+                         "active_version": user_assignment_settings['active_version']})
                 conn.commit()
             else:
                 print("UPDATED: where g_id is " + args.assignment_name + " and user id is " + user_name + " to value " + str(user_assignment_settings['active_version']))
