@@ -191,7 +191,9 @@ function applySort(sortKey, direction) {
             const [nameA, tagA = ''] = aText.split(':');
             const [nameB, tagB = ''] = bText.split(':');
             cmp = nameA.localeCompare(nameB);
-            if (cmp === 0) { cmp = tagA.localeCompare(tagB); }
+            if (cmp === 0) {
+                cmp = tagA.localeCompare(tagB);
+            }
         }
         else if (sortKey === 'size') {
             const valA = parseFloat(aText.replace('MB', ''));
