@@ -97,11 +97,10 @@ def find_all_unarchived_courses():
                                                         DB_HOST, db_name)
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
-
+    metadata = MetaData()
     # find all courses that have status == 1 (unarchived)
-    courses_table = Table('courses', metadata, autoload=True)
-    result = db.execute(select([courses_table]).where(courses_table.c.status == 1))
+    courses_table = Table('courses', metadata, autoload_with=engine)
+    result = db.execute(select(courses_table).where(courses_table.c.status == 1))
 
     for row in result:
         semester = row.term

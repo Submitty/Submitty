@@ -4,7 +4,7 @@ This script can be used to assign gradeable-specific anonymous ids
 to the members of a course that don't already have anon ids.
 """
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam
+from sqlalchemy import create_engine, Table, MetaData, bindparam, insert, select, update
 import string
 import random
 import json
@@ -46,7 +46,7 @@ def main():
         try:
             db_engine = create_engine(conn_str)
             db_conn = db_engine.connect()
-            db_metadata = MetaData(bind=db_engine)
+            db_metadata = MetaData()
             break
         except Exception as e:
             if i == (max_retries - 1):
@@ -54,11 +54,11 @@ def main():
                 print(f"Attempted {max_retries} times but failed to "
                       "establish a connection with main Submitty database.\n")
                 sys.exit()
-    courses = Table("courses", db_metadata, autoload=True)
-    courses_select = courses.select()
+    courses = Table("courses", db_metadata, autoload_with=db_engine)
+    courses_select = select(courses)
     courses_rows = db_conn.execute(courses_select)
     num_rows = 0
-    for course_row in courses_rows:
+    for course_row in courses_rows.mappings():
         temp_num_rows = num_rows
         print(f"Course: {course_row['course']}\nSemester: {course_row['term']}")
         DB_NAME = f"submitty_{course_row['term']}_{course_row['course']}"
@@ -75,7 +75,7 @@ def main():
             try:
                 course_engine = create_engine(course_conn_str)
                 conn = course_engine.connect()
-                metadata = MetaData(bind=course_engine)
+                metadata = MetaData()
                 connected = True
                 break
             except Exception as e:
@@ -86,27 +86,27 @@ def main():
                   f"establish a connection with database '{DB_NAME}'.\n")
             continue
 
-        users = Table("users", metadata, autoload=True)
-        user_select = users.select()
+        users = Table("users", metadata, autoload_with=course_engine)
+        user_select = select(users)
         user_rows_obj = conn.execute(user_select)
-        user_rows = list(user_rows_obj)
+        user_rows = user_rows_obj.mappings().all()
 
-        gradeable = Table("gradeable", metadata, autoload=True)
-        g_select = gradeable.select()
+        gradeable = Table("gradeable", metadata, autoload_with=course_engine)
+        g_select = select(gradeable)
         gradeable_rows = conn.execute(g_select)
 
-        gradeable_anon = Table("gradeable_anon", metadata, autoload=True)
+        gradeable_anon = Table("gradeable_anon", metadata, autoload_with=course_engine)
         print("Performing anonymization...")
-        for g_row in gradeable_rows:
+        for g_row in gradeable_rows.mappings():
             gradeable_id = g_row["g_id"]
-            select = gradeable_anon.select().where(
+            select_query = select(gradeable_anon).where(
                 gradeable_anon.c.g_id == bindparam('gradeable_id')
             )
-            existing_rows = conn.execute(select, gradeable_id=gradeable_id)
+            existing_rows = conn.execute(select_query, {"gradeable_id": gradeable_id})
             existing_user_ids = []
             anon_ids = []
             users_to_update = []
-            for row in existing_rows:
+            for row in existing_rows.mappings():
                 existing_user_ids.append(row['user_id'])
                 anon_ids.append(row['anon_id'])
                 if row['anon_id'] == '':
@@ -122,18 +122,20 @@ def main():
                     anon_ids.append(anon)
                     if user_id not in existing_user_ids:
                         new_row = {'user_id': user_id, 'g_id': gradeable_id, 'anon_id': anon}
-                        insert = gradeable_anon.insert().values(new_row)
-                        conn.execute(insert)
+                        insert_query = insert(gradeable_anon).values(new_row)
+                        conn.execute(insert_query)
+                        conn.commit()
                         print(f"  Insert user: {user_id} for gradeable: {gradeable_id}")
                         num_rows += 1
                     elif user_id in users_to_update:
                         new_info = {'anon_id': anon}
-                        update = gradeable_anon.update(values=new_info).where(
+                        update_query = update(gradeable_anon).values(new_info).where(
                             gradeable_anon.c.user_id == bindparam('b_user_id'),
                             gradeable_anon.c.g_id == bindparam('b_g_id')
                         )
                         print(f"  Update: {user_id} for gradeable: {gradeable_id}")
-                        conn.execute(update, b_user_id=user_id, b_g_id=gradeable_id)
+                        conn.execute(update_query, b_user_id=user_id, b_g_id=gradeable_id)
+                        conn.commit()
                         num_rows += 1
         conn.close()
         print(f"Rows created/updated: {num_rows-temp_num_rows}\n")

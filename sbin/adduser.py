@@ -8,7 +8,7 @@ import argparse
 import json
 from os import path
 import subprocess
-from sqlalchemy import create_engine, MetaData, Table, bindparam
+from sqlalchemy import create_engine, MetaData, Table, bindparam, insert, select
 
 from submitty_utils import db_utils
 
@@ -74,10 +74,10 @@ def main():
 
     engine = create_engine(conn_str)
     connection = engine.connect()
-    metadata = MetaData(bind=engine)
-    users_table = Table('users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select, user_id=user_id).fetchone()
+    metadata = MetaData()
+    users_table = Table('users', metadata, autoload_with=engine)
+    select_query = select(users_table).where(users_table.c.user_id == bindparam('user_id'))
+    user = connection.execute(select_query, {"user_id": user_id}).fetchone()
     defaults = {
         'user_givenname': None,
         'user_preferred_givenname': None,
@@ -125,8 +125,9 @@ def main():
         connection.execute(query, b_user_id=user_id)
     else:
         update['user_id'] = user_id
-        query = users_table.insert()
-        connection.execute(query, **update)
+        query = insert(users_table)
+        connection.execute(query, update)
+        connection.commit()
 
 
 if __name__ == '__main__':

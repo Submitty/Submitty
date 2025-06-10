@@ -116,7 +116,6 @@ def main():
             (queue_entries_table.c.user_id == row["user_id"]) &
             (queue_entries_table.c.time_in == row["time_in"]))
         conn.execute(update_query)
-        conn.commit()
 
     # Hardcoding options that we could use
     queue_current_states = ["done", "being_helped", "waiting"]
@@ -194,7 +193,7 @@ def main():
             '{queue_entry['user_id']}' AND UPPER(TRIM(queue_code)) = \
             UPPER(TRIM('{queue_entry['queue_code']}')) AND \
             (removal_type IN ('helped', 'self_helped') OR help_started_by IS NOT NULL)"))
-        queue_entry["last_time_in_queue"] = res.fetchall()[0][0]
+        queue_entry["last_time_in_queue"] = res.all()[0][0]
         res.close()
 
         if queue_entry["help_started_by"] is not None:
@@ -223,7 +222,6 @@ def main():
 
     conn.execute(insert(queue_entries_table).values(queue_data))
     conn.commit()
-
 
 if __name__ == "__main__":
     main()

@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
-import sqlalchemy as sql
+from sqlalchemy import create_engine, Table, MetaData, select, insert, update
 import sys
 import typing
 
@@ -194,18 +194,18 @@ def parseArgs():
 
 def main():
     parseArgs()
-    dbengine_course = sql.create_engine(
+    dbengine_course = create_engine(
         f'postgresql:///submitty_{ARG_SEMESTER}_{ARG_COURSE}?host={ARG_DB_HOST}'
         f'&port={ARG_DB_PORT}&user={ARG_DB_USER}&password={ARG_DB_PASS}')
     dbconn_course = dbengine_course.connect()
-    metadata = sql.MetaData(dbengine_course)
-    table_users = sql.Table('users', metadata, autoload=True)
-    table_egdata = sql.Table('electronic_gradeable_data',
-                             metadata, autoload=True)
-    table_egver = sql.Table('electronic_gradeable_version',
-                            metadata, autoload=True)
-    ret = dbconn_course.execute(sql.select(table_users))
-    user_list = set(row['user_id'] for row in ret.all())
+    metadata = MetaData()
+    table_users = Table('users', metadata, autoload_with=dbconn_course)
+    table_egdata = Table('electronic_gradeable_data',
+                             metadata, autoload_with=dbconn_course)
+    table_egver = Table('electronic_gradeable_version',
+                            metadata, autoload_with=dbconn_course)
+    ret = dbconn_course.execute(select(table_users))
+    user_list = set(row['user_id'] for row in ret.mappings().all())
     ret.close()
 
     # function for query to electronic_gradeable_data table
@@ -218,7 +218,7 @@ def main():
             print(f'    g_version            = {g_version}')
             print(f'    submission_time      = {submission_time}')
             print(f'    autograding_complete = {autograding_complete}')
-        query = table_egdata.insert().values(
+        query = insert(table_egdata).values(
             g_id=g_id, user_id=user_id, g_version=g_version,
             submission_time=submission_time,
             autograding_complete=autograding_complete
@@ -226,6 +226,7 @@ def main():
         if ARG_VERBOSE:
             print(f'    SQL: {query}')
         dbconn_course.execute(query)
+        dbconn_course.commit()
 
     # function for query to electronic_gradeable_version table
     def update_egver(g_id: str, user_id: str, active_version: int):
@@ -234,7 +235,7 @@ def main():
             print(f'    g_id           = {g_id}')
             print(f'    user_id        = {user_id}')
             print(f'    active_version = {active_version}')
-        query = table_egver.select().where(
+        query = select(table_egver).where(
             (table_egver.c.g_id == g_id) &
             (table_egver.c.user_id == user_id)
         )
@@ -244,13 +245,13 @@ def main():
             print(f'    SQL: {query}')
             print(f'    egver_data = {rows}')
         if len(rows) == 0:  # INSERT
-            query = table_egver.insert().values(
+            query = insert(table_egver).values(
                 g_id=g_id,
                 user_id=user_id,
                 active_version=active_version
             )
         else:  # UPDATE
-            query = table_egver.update().values(
+            query = update(table_egver).values(
                 active_version=active_version
             ).where(
                 (table_egver.columns.g_id == g_id) &
@@ -259,6 +260,8 @@ def main():
         if ARG_VERBOSE:
             print(f'    SQL: {query}')
         dbconn_course.execute(query)
+        dbconn_course.commit()
+
     for user in os.listdir(ARG_SUBMISSIONS):
         if not Path(ARG_SUBMISSIONS, user).is_dir():
             continue

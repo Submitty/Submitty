@@ -12,7 +12,7 @@ import json
 
 from submitty_utils import dateutils
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, Table, MetaData, insert, text
 
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETUP_DATA_PATH = os.path.join(CURRENT_PATH, "..", "data")
@@ -41,21 +41,26 @@ def main():
         "postgresql://{}:{}@{}/submitty".format(DB_USER, DB_PASS, DB_HOST)
         )
     submitty_conn = submitty_engine.connect()
-    submitty_metadata = MetaData(bind=submitty_engine)
-    email_table = Table('emails', submitty_metadata, autoload=True)
+    submitty_metadata = MetaData()
+    email_table = Table('emails', submitty_metadata, autoload_with=submitty_engine)
 
     courses = list(submitty_conn.execute("SELECT term, course FROM courses"))
     users = {}
 
     for course in courses:
         users[course.course + ' ' + course.term] = list(submitty_conn.execute(
-            "SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
-            ON courses_users.user_id = users.user_id\
-            WHERE courses_users.term = '{}'\
-            AND courses_users.course = '{}'".format(course.term, course.course)))
+            text(
+                "SELECT DISTINCT users.user_id, users.user_email FROM users INNER JOIN courses_users\
+                ON courses_users.user_id = users.user_id\
+                WHERE courses_users.term = '{}'\
+                AND courses_users.course = '{}'".format(course.term, course.course)
+            )
+        ))
     users["superuser"] = list(submitty_conn.execute(
-        "SELECT DISTINCT user_id, user_email FROM users")
-    )
+        text(
+            "SELECT DISTINCT user_id, user_email FROM users"
+        )
+    ))
 
     # These are not realistic emails as the email content does not check who owns
     #  the course and the body is often times nonsensical
@@ -69,30 +74,36 @@ def main():
             emails = generateRandomSuperuserEmail(users["superuser"])
             for email in emails:
                 submitty_conn.execute(
-                    email_table.insert(),
-                    user_id=email["user_id"],
-                    subject=email["subject"],
-                    body=email["body"],
-                    created=email["created"],
-                    email_address=email["email_address"],
-                    term=email["term"],
-                    course=email["course"]
+                    insert(email_table),
+                    {
+                        "user_id": email["user_id"],
+                        "subject": email["subject"],
+                        "body": email["body"],
+                        "created": email["created"],
+                        "email_address": email["email_address"],
+                        "term": email["term"],
+                        "course": email["course"]
+                    }
                 )
+                submitty_conn.commit()
         # course email
         else:
             course = courses[course_selected]
             emails = generateRandomCourseEmail(users[course.course + ' ' + course.term], course)
             for email in emails:
                 submitty_conn.execute(
-                    email_table.insert(),
-                    user_id=email["user_id"],
-                    subject=email["subject"],
-                    body=email["body"],
-                    created=email["created"],
-                    email_address=email["email_address"],
-                    term=email["term"],
-                    course=email["course"]
+                    insert(email_table),
+                    {
+                        "user_id": email["user_id"],
+                        "subject": email["subject"],
+                        "body": email["body"],
+                        "created": email["created"],
+                        "email_address": email["email_address"],
+                        "term": email["term"],
+                        "course": email["course"]
+                    }
                 )
+                submitty_conn.commit()
 
 
 def generateRandomSuperuserEmail(recipients):
