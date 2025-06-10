@@ -465,9 +465,16 @@
             );
         }
     }
+
     $(function() {
-        $(".submit-gradeable").click(function(e){ // Submit button
-            $(".submit-gradeable").prop('disabled',true);
+        updateSubmitButtonStatus();
+        $(".submit-gradeable").click(function(e) { // Submit button
+            e.preventDefault(); // Prevent form submission for safety
+            if (!isValidSubmission() && empty_inputs) {
+                displayMessage('Duplicate submission detected. No attempts used', 'warning');
+                return;
+            }
+            $(".submit-gradeable").prop('disabled', true);
             window.onbeforeunload = null;
             var user_id = "";
             var num_pages = 0;
