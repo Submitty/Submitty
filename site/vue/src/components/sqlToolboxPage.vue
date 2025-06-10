@@ -60,11 +60,13 @@ const queryError = ref({
 
       <div id="query-results-buttons">
         <RunQuery
+          id="run-sql-btn"
           :query="currentQuery.query"
           @change-data="changeData"
           @change-error="changeError"
         />
         <DownloadQuery
+          id="download-query-btn"
           :data="resultsData"
         />
       </div>
@@ -81,7 +83,9 @@ const queryError = ref({
   margin-top: 5px;
   margin-bottom: 5px;
 }
-#query-results-buttons * {
+#run-sql-btn,
+#download-sql-btn
+{
   margin-top: 5px;
   margin-right: 5px;
 }
