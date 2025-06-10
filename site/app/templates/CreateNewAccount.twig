@@ -16,13 +16,13 @@
                     @{{ email }}<br/>
                 {% endfor %}
             </div>
-            <input type="text" name="email" required data-testid="email" />
+            <input type="text" name="email" required data-testid="email" value="{{ email }}" />
         </div>
         <div class="display-box">
             <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>
             <div class="hidden-helper" id="userid-helper">
                 UserID Requirements:<br/>
-                {% if user_id_reqs["all"] == true %}
+                {% if user_id_reqs["any_password"] == true %}
                 * Must be greater than {{ user_id_reqs["min_length"] }} 
                     characters, and less than
                     {{ user_id_reqs["max_length"] }}
@@ -39,21 +39,21 @@
                     {% if user_id_reqs['whole_email'] %} 
                         * Must be the whole email
                     {% elseif user_id_reqs['whole_prefix'] %}
-                        * Must equal the email minus @extension /// FIX WORDING
+                        * Must be the email prefix (i.e. user given user@example.com)
                     {% else %}
                         * Must equal the first {{ user_id_reqs['prefix_count'] }} characters of your email
                     {% endif %}
                 {% endif %}
             </div>
-            <input type="text" name="user_id" data-testid="user-id" required />
+            <input type="text" name="user_id" data-testid="user-id" required value="{{ user_id }}" />
         </div>
         <div class="display-box">
             Given Name
-            <input type="text" name="given_name" data-testid="given-name" required />
+            <input type="text" name="given_name" data-testid="given-name" required value="{{ given_name }}" />
         </div>
         <label>
             Family Name
-            <input type="text" name="family_name" data-testid="family-name" required />
+            <input type="text" name="family_name" data-testid="family-name" required value="{{ family_name }}" />
         </label>
         <div class="display-box">
            <p style="display:block">Password <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="password">Show Requirements</button></p>
@@ -71,6 +71,6 @@
             Re-Enter Password
             <input type="password" name="confirm_password" data-testid="confirm-password" required id="confirm-password-input" onblur="checkPasswordsMatch()" />
         </label>
-        <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" data-testid="sign-up-button" />
+        <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" data-testid="sign-up-button" onclick="return confirmInputs();" />
     </form>
 </div>

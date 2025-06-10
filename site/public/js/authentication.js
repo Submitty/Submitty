@@ -1,4 +1,4 @@
-/* exported showRequirements  */
+/* exported showRequirements, checkPasswordsMatch  */
 /* global displayErrorMessage */
 function showRequirements(id_string) {
     $(`#${id_string}-helper`).toggle();

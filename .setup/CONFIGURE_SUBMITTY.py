@@ -342,10 +342,7 @@ else:
 
     if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
         user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
-        if user_create_account.lower() in ['yes', 'y']:
-            USER_CREATE_ACCOUNT = True
-        else:
-            USER_CREATE_ACCOUNT = False
+        USER_CREATE_ACCOUNT = user_create_account.lower() in ['yes', 'y']
         print()
     if AUTHENTICATION_METHOD == 'LdapAuthentication':
         LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
@@ -649,8 +646,7 @@ user_id_requirements = {
 }
 
 accepted_emails = [
-    "gmail.com",
-    "rpi.edu"
+    "gmail.com"
 ]
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR

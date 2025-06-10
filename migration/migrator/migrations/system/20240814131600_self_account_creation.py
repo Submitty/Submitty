@@ -1,7 +1,7 @@
 """Migration for the Submitty system."""
 import json
 user_id_requirements = {
-    "all": True,
+    "any_password": True,
     "require_name": False,
     "min_length": 6,
     "max_length": 25,

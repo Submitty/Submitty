@@ -344,7 +344,7 @@ EMAIL;
      */
     #[Route("/authentication/create_account", methods: ['GET'])]
     public function signupForm(): ResponseInterface {
-        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        // Check if the user is already logged in
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
@@ -367,7 +367,7 @@ EMAIL;
      */
     #[Route("/authentication/email_verification")]
     public function showVerifyEmailForm(): ResponseInterface {
-        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        // Check if the user is already logged in
         if (!$this->core->getConfig()->isUserCreateAccount()) {
             $this->core->addErrorMessage('Users cannot create their own account, Please have your system administrator add you.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
@@ -380,7 +380,7 @@ EMAIL;
      */
     #[Route("/authentication/resend_email")]
     public function resendVerificationEmail(): ResponseInterface {
-        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        // Check if the user is already logged in
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
@@ -410,7 +410,7 @@ EMAIL;
 
     #[Route("/authentication/verify_email")]
     public function verifyEmail(): RedirectResponse {
-        // Check if the user is already logged in, if yes, redirect to home or another appropriate page
+        // Check if the user is already logged in
         if ($this->logged_in) {
             return new RedirectResponse($this->core->buildUrl(['home']));
         }
@@ -464,8 +464,7 @@ EMAIL;
         $confirm_password = $_POST['confirm_password'];
         $given_name = $_POST['given_name'];
         $family_name = $_POST['family_name'];
-
-        $user_exists = $this->core->getQueries()->getUserIdEmailExists($email, $user_id);
+        $user_exists = $this->core-> getQueries()->getUserIdEmailExists($email, $user_id);
         $unverified_users = UnverifiedUsersManager::getUnverifiedUsers($this->core, $email, $user_id);
 
         if ($user_exists || count($unverified_users) !== 0) {

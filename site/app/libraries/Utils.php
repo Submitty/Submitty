@@ -117,13 +117,15 @@ class Utils {
      * @param array<mixed> $requirements The user id requirements taken from the config file, like length, name requirements, etc.
      */
     public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
+        // 
+        if ($requirements['any_password'] === true) {
+            return true;
+        }
+
         if ($requirements['max_length'] <= strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
             return false;
         }
 
-        if ($requirements['all'] === true) {
-            return true;
-        }
         elseif ($requirements['require_name'] === true) {
             $name_requirements = $requirements['name_requirements'];
             $given_first = $name_requirements['given_first'] === 'true';
@@ -158,10 +160,10 @@ class Utils {
     /**
      * Checks if the email extension is in the accepted emails part of the Submitty config file
      *
-     * @param array<string> $accepted_emails Array of accepted email extensions, like @gmail.com, @rpi.edu, etc.
+     * @param array<string> $accepted_emails Array of accepted email extensions, like @gmail.com etc.
      */
     public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
-        $split_email = explode('@', $email);
+        $split_email = explode('@', trim($email));
         // No @ symbol found
         if (count($split_email) < 2) {
             return false;
