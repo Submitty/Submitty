@@ -163,15 +163,14 @@ $(document).ready(() => {
 });
 
 function sortTableByColumn(sortKey) {
-    const currentSort = Cookies.get('sort');
-    const currentDirection = Cookies.get('direction') || 'ASC';
+    const currentSort = Cookies.get('docker_table_key');
+    const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
 
     let newDirection;
-
     (currentSort === sortKey) ? (newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC') : (newDirection = 'ASC')
 
-    Cookies.set('sort', sortKey, { path: '/' });
-    Cookies.set('direction', newDirection, { path: '/' });
+    Cookies.set('docker_table_key', sortKey, { path: '/' });
+    Cookies.set('docker_table_direction', newDirection, { path: '/' });
 
     applySort(sortKey, newDirection);
     updateSortIcons(sortKey, newDirection);
@@ -181,22 +180,13 @@ function applySort(sortKey, direction) {
     const table = document.getElementById('docker-table');
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
-
-    const colMap = {
-        name: 0,
-        size: 3,
-        created: 5
-    };
-
+    const colMap = { name: 0, size: 3, created: 5 };
     const colIndex = colMap[sortKey];
-    if (colIndex === undefined) return;
-
+    
     rows.sort((rowA, rowB) => {
         const aText = rowA.children[colIndex].textContent.trim();
         const bText = rowB.children[colIndex].textContent.trim();
-
         let cmp = 0;
-
         if (sortKey === 'name') {
             const [nameA, tagA = ''] = aText.split(':');
             const [nameB, tagB = ''] = bText.split(':');
@@ -211,10 +201,8 @@ function applySort(sortKey, direction) {
             const dateB = new Date(bText);
             cmp = dateA - dateB;
         }
-
         return direction === 'ASC' ? cmp : -cmp;
     });
-
     rows.forEach(row => tbody.appendChild(row));
 }
 
@@ -235,8 +223,8 @@ function updateSortIcons(activeKey, direction) {
 
 // Keeps the specified sort on reload
 window.addEventListener('DOMContentLoaded', () => {
-    const savedSort = Cookies.get('sort');
-    const savedDirection = Cookies.get('direction') || 'ASC';
+    const savedSort = Cookies.get('docker_table_key');
+    const savedDirection = Cookies.get('docker_table_direction') || 'ASC';
     if (savedSort) {
         applySort(savedSort, savedDirection);
         updateSortIcons(savedSort, savedDirection);
