@@ -918,7 +918,7 @@ function loadGradeableEditor(g_id, file_path) {
 }
 
 function toggleGradeableConfigEdit() {
-  $('#gradeable-config-structure').toggleClass('open').toggle();
+    $('#gradeable-config-structure').toggleClass('open').toggle();
 }
 
 function cancelGradeableConfigEdit() {
