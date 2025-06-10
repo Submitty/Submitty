@@ -162,20 +162,63 @@ $(document).ready(() => {
     $('#add-field').trigger('input');
 });
 
-function sortTableByColumn(sort_type, direction) {
-    Cookies.set('sort', sort_type, { path: '/' });
-    Cookies.set('direction', direction, { path: '/' });
-    sessionStorage.setItem('scrollY', window.scrollY);
-    location.reload();
+function sortTableByColumn(sortKey, clickedDirection = null) {
+    const currentSort = Cookies.get('sort');
+    const currentDirection = Cookies.get('direction') || 'ASC';
+
+    let newDirection;
+
+    if (clickedDirection) {
+        // Use the explicit direction passed in (from template)
+        newDirection = clickedDirection;
+    } else if (currentSort === sortKey) {
+        // Toggle if same column
+        newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+        // Default to ASC on new column
+        newDirection = 'ASC';
+    }
+
+    Cookies.set('sort', sortKey, { path: '/' });
+    Cookies.set('direction', newDirection, { path: '/' });
+
+    const table = document.getElementById('docker-table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const colMap = {
+        name: 0,
+        size: 3,
+        created: 5
+    };
+
+    const colIndex = colMap[sortKey];
+    if (colIndex === undefined) return;
+
+    rows.sort((rowA, rowB) => {
+        const aText = rowA.children[colIndex].textContent.trim();
+        const bText = rowB.children[colIndex].textContent.trim();
+
+        let cmp = 0;
+
+        if (sortKey === 'name') {
+            const [nameA, tagA = ''] = aText.split(':');
+            const [nameB, tagB = ''] = bText.split(':');
+            cmp = nameA.localeCompare(nameB);
+            if (cmp === 0) cmp = tagA.localeCompare(tagB);
+        } else if (sortKey === 'size') {
+            const valA = parseFloat(aText.replace('MB', ''));
+            const valB = parseFloat(bText.replace('MB', ''));
+            cmp = valA - valB;
+        } else if (sortKey === 'created') {
+            const dateA = new Date(aText);
+            const dateB = new Date(bText);
+            cmp = dateA - dateB;
+        }
+
+        return newDirection === 'ASC' ? cmp : -cmp;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
 }
 
-// Scroll to original location after page is fully loaded (doesn't work without buffer)
-document.addEventListener('DOMContentLoaded', () => {
-    const scrollY = sessionStorage.getItem('scrollY');
-    if (scrollY !== null) {
-        setTimeout(() => {
-            window.scrollTo(0, parseInt(scrollY));
-        }, 10);
-        sessionStorage.removeItem('scrollY');
-    }
-});
