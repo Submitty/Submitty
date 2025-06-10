@@ -1,7 +1,7 @@
 <div class="content">
     <h1> Live Lecture Chat </h1>
     {% if user_admin %} <!--only instructors can create chat rooms-->
-        <a href='javascript:newChatroomForm()' class="btn btn-primary">New Chatroom</a>
+        <a href='javascript:newChatroomForm()' data-testid="new-chatroom-btn" class="btn btn-primary">New Chatroom</a>
     {% endif %}
     <hr>
     <div class="chatrooms-table-wrapper table-responsive">
@@ -24,7 +24,7 @@
                         <th scope="col" style="text-align: right"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
                         <tr>
                             <td>
@@ -32,7 +32,7 @@
                             </td>
                             <td>
                                 {% if not chatroom.isActive() %}
-                                    <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}", "{{ base_url }}");' class="fas fa-trash-alt black-btn"></a>
+                                    <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}", "{{ base_url }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
                                 {% endif %}
                             </td>
                             <td>
@@ -51,20 +51,20 @@
                                 </form>
                                 {% if not chatroom.isActive() %}
                                     <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)">
-                                        start session
+                                        Start Session
                                     </button>
                                 {% else %}
                                     <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)">
                                         <i class="fas fa-pause"></i>
-                                        end session
+                                        End Session
                                     </button>
                                 {% endif %}
                             </td>
                             <td>
-                                <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">join</a>
+                                <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
                                 {% if chatroom.isAllowAnon() %}
                                     <i> or </i>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">join as anon.</a>
+                                    <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -104,7 +104,7 @@
                                     <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
                                     {% if chatroom.isAllowAnon() %}
                                         <i> or </i>
-                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">join as anon.</a>
+                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">Join As Anon.</a>
                                     {% endif %}
                                 </td>
                             </tr>

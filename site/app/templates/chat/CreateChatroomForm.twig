@@ -8,14 +8,14 @@
             <label for="create-chatroom-title">
                 Chatroom Title:
             </label>
-            <input type="text" name="title" id="create-chatroom-title" placeholder="Enter name here..."/>
+            <input type="text" name="title" id="create-chatroom-title" data-testid="chatroom-name-entry" placeholder="Enter name here..."/>
             <label for="create-chatroom-description">
                 Description:
             </label>
-            <input type="text" name="description" id="create-chatroom-description" placeholder="Enter description here...">
+            <input type="text" name="description" id="create-chatroom-description" data-testid="chatroom-description-entry" placeholder="Enter description here...">
             <label for="chatroom-allow-anon" id="allow-anon-label">
                 Allow people to join anonymously?
-                <input type="checkbox" name="allow-anon" id="chatroom-allow-anon">
+                <input type="checkbox" name="allow-anon" id="chatroom-allow-anon" data-testid="enable-disable-anon">
             </label>
         </div>
     </form>
@@ -28,5 +28,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input type="submit" class="btn btn-primary submit-create-chatroom" onclick="create_room()">
+    <input type="submit" class="btn btn-primary submit-create-chatroom" data-testid="submit-chat-creation" onclick="create_room()">
 {% endblock %}
