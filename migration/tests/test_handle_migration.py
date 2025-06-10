@@ -48,7 +48,7 @@ class TestHandleMigration(unittest.TestCase):
 
     def add_course(self, database, semester, course, status=1):
         database.execute(
-            f"INSERT INTO courses VALUES ('{semester}', '{course}', {status})"
+            text(f"INSERT INTO courses VALUES ('{semester}', '{course}', {status})")
         )
         database.commit()
 
