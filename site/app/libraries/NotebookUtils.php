@@ -25,7 +25,7 @@ class NotebookUtils {
             'image/bmp',
             'text/plain', // Fall back to text/plain if it is available.
         ];
-        $img_size_limit = 1024; // 500KB limit
+        $img_size_limit = 1024 * 1024; // 1MB limit
         foreach ($filedata['cells'] as $cell) {
             switch ($cell['cell_type']) {
                 case 'markdown':
@@ -41,7 +41,7 @@ class NotebookUtils {
                                         $markdown = str_replace("attachment:$filename", $data_uri, $markdown);
                                     }
                                     else {
-                                        $log_message = 'Image skipped: exceeds size limit of' . $img_size_limit . 'bytes.';
+                                        $log_message = 'Image skipped: exceeds size limit of ' . $img_size_limit . ' bytes.';
                                         $markdown = $markdown . PHP_EOL . $log_message;
                                     }
                                 } else {
@@ -107,10 +107,10 @@ class NotebookUtils {
                                         'alt_text' => $output_text,
                                     ];
                                 } else {
-                                    $log_message = 'Image' . $output_type . ' skipped: exceeds size limit of ' . $img_size_limit . ' bytes.';
+                                    $log_message = 'Image skipped: exceeds size limit of ' . $img_size_limit . ' bytes.';
                                     $cells[] = [
                                         'type' => 'output',
-                                        'output_text' => $markdown . PHP_EOL . $log_message,
+                                        'output_text' => $log_message,
                                     ];
                                 }
                             }
