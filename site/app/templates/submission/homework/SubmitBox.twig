@@ -227,6 +227,7 @@
             {% for part in part_names %}
                 {# uploadIndex and input-file + Index required for drag-and-drop.js #}
                 <div tabindex="0"
+                     data-testid="upload-files-{{ loop.index }}"
                      id="upload{{ loop.index }}"
                      class="upload-box"
                      onkeypress="clicked_on_box(event)"
