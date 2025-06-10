@@ -1,9 +1,7 @@
-/* global csrfToken */
+/* global csrfToken, buildCourseUrl, displayErrorMessage */
 
-// eslint-disable-next-line no-unused-vars
 function fetchMessages(chatroomId) {
     $.ajax({
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'messages']),
         type: 'GET',
         dataType: 'json',
@@ -22,10 +20,8 @@ function fetchMessages(chatroomId) {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function sendMessage(chatroomId, userId, displayName, role, content) {
     $.ajax({
-        // eslint-disable-next-line no-undef
         url: buildCourseUrl(['chat', chatroomId, 'send']),
         type: 'POST',
         data: {
@@ -36,12 +32,8 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
             content: content,
         },
         success: function (response) {
-            try {
-                // eslint-disable-next-line no-unused-vars
-                const json = JSON.parse(response);
-            }
-            catch (e) {
-                // eslint-disable-next-line no-undef
+            const msg = JSON.parse(response);
+            if (msg.status !== 'success'){
                 displayErrorMessage('Error parsing data. Please try again.');
                 return;
             }
@@ -53,13 +45,7 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
 }
 
 function appendMessage(displayName, role, ts, content) {
-    let timestamp = ts;
-    if (!timestamp) {
-        timestamp = new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
-    }
-    else {
-        timestamp = new Date(ts).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' });
-    }
+    let timestamp = ts || new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
 
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
