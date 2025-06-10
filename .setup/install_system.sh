@@ -557,7 +557,7 @@ EOF
     #################
 
     # Edit php settings.  Note that if you need to accept larger files,
-    # you'll need to increase both upload_max_filesize and
+    # you’ll need to increase both upload_max_filesize and
     # post_max_filesize
 
     sed -i -e 's/^max_execution_time = 30/max_execution_time = 60/g' /etc/php/${PHP_VERSION}/fpm/php.ini
