@@ -132,7 +132,7 @@ class Course_create:
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections + 1):
             print(f"Create section {section}")
-            self.conn.execute(insert(table), { "sections_rotating_id": section })
+            self.conn.execute(insert(table), {"sections_rotating_id": section})
             self.conn.commit()
 
         print("Create users ", end="")

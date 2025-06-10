@@ -124,11 +124,11 @@ class Course_data:
         # make two sample queues
         self.conn.execute(
             insert(queues_table),
-            { "open": True, "code": "Lab Help", "token": "lab" }
+            {"open": True, "code": "Lab Help", "token": "lab"}
         )
         self.conn.execute(
             insert(queues_table),
-            { "open": True, "code": "Homework Debugging", "token": "hw_debug" }
+            {"open": True, "code": "Homework Debugging", "token": "hw_debug"}
         )
         self.conn.commit()
 

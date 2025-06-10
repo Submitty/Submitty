@@ -70,7 +70,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         .where(autograding_metrics.c.team_id == bindparam('t_id'))
         .where(autograding_metrics.c.g_id == bindparam('g_id'))
         .where(autograding_metrics.c.g_version == bindparam('g_v')),
-        { 'u_id': user_id, 't_id': team_id, 'g_id': gradeable_id, 'g_v': version }
+        {'u_id': user_id, 't_id': team_id, 'g_id': gradeable_id, 'g_v': version}
     )
 
     if len(testcases) != len(results['testcases']):
@@ -164,18 +164,18 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         db.execute(
             query_type,
             {
-            "g_id": gradeable_id,
-            "u_g_id": gradeable_id,
-            "team_id": team_id,
-            "u_team_id": team_id,
-            "g_version": version,
-            "u_g_version": version,
-            "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
-            "autograding_non_hidden_extra_credit": non_hidden_ec,
-            "autograding_hidden_non_extra_credit": hidden_non_ec,
-            "autograding_hidden_extra_credit": hidden_ec,
-            "submission_time": submission_time,
-            "autograding_complete": True
+                "g_id": gradeable_id,
+                "u_g_id": gradeable_id,
+                "team_id": team_id,
+                "u_team_id": team_id,
+                "g_version": version,
+                "u_g_version": version,
+                "autograding_non_hidden_non_extra_credit": non_hidden_non_ec,
+                "autograding_non_hidden_extra_credit": non_hidden_ec,
+                "autograding_hidden_non_extra_credit": hidden_non_ec,
+                "autograding_hidden_extra_credit": hidden_ec,
+                "submission_time": submission_time,
+                "autograding_complete": True
             }
         )
 
@@ -185,7 +185,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             .where(data_table.c.g_id == bindparam('g_id'))
             .where(data_table.c.user_id == bindparam('user_id'))
             .where(data_table.c.g_version == bindparam('g_version')),
-            { "g_id": gradeable_id, "user_id": user_id, "g_version": version }
+            {"g_id": gradeable_id, "user_id": user_id, "g_version": version}
         )
         row = result.fetchone()
         result.close()

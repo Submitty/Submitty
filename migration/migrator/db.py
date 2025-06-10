@@ -23,7 +23,7 @@ class Database:
         self.DynamicBase = declarative_base(class_registry=dict())
         if 'database_driver' not in params:
             raise RuntimeError('Need to supply a driver')
-        
+
         connection_string = Database.get_connection_string(params)
         self.engine = create_engine(connection_string)
         self.conn = self.engine.connect()
