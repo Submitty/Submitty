@@ -13,9 +13,7 @@ const { resultsData, queryError } = defineProps<{
       id="query-results-error"
       class="red-message"
     >
-      <pre id="query-results-error-message">
-        {{ queryError.message }}
-      </pre>
+      <pre id="query-results-error-message">{{ queryError.message }}</pre>
     </div>
 
     <table

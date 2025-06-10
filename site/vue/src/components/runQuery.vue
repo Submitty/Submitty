@@ -8,14 +8,14 @@ const emit = defineEmits<{
     changeError: [error: boolean, message: string];
 }>();
 const runQuery = async () => {
-    emit('changeError', false, '');
-    emit('changeData', []);
     const result = await runSqlQuery(query) as SqlQueryResult;
     if (result.status === 'fail') {
         emit('changeError', true, result.message);
+        emit('changeData', []);
     }
     else {
         emit('changeData', result.data);
+        emit('changeError', false, '');
     }
 };
 </script>
