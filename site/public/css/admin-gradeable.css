@@ -392,10 +392,13 @@ body::-webkit-scrollbar-track {
     min-height: 500px;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+    overflow: auto;
+    resize: vertical;
 }
 
 #gradeable-config-edit-bar {
     display: none;
+    overflow: hidden;
 }
 
 .warning-banner {
