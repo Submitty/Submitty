@@ -1,7 +1,7 @@
 import os
 import sys
 import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
+from nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor, CellExecutionError
 from nbconvert import HTMLExporter
 import matplotlib.pyplot as plt
 import matplotlib.image as img
@@ -16,6 +16,10 @@ def execute_notebook(notebook_path, timeout=600):
     with open(notebook_path) as f:
         # Load the notebook and do not convert it to a specific version
         nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
+
+    # Clear output of notebook
+    cop = ClearOutputPreprocessor()
+    nb, _ = cop.preprocess(nb, {})
 
     # Sets preprocessor with the following parameters:
     # - timeout: maximum time in seconds to execute a cell
@@ -59,7 +63,7 @@ def parse_notebook(notebook_path):
     return outputs
 
 def check_output(output_cells):
-    # jupyter notebook parsing includes newline and print also creates a newline
+    # Jupyter notebook parsing includes newline and print also creates a newline
     print(output_cells[0][0].strip(), end='')
 
     img_one = base64.b64decode(output_cells[1][0]['image/png'])
