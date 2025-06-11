@@ -383,7 +383,8 @@ class AdminGradeableController extends AbstractController {
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
-            'notifications_sent' => 0
+            'notifications_sent' => 0,
+            'notifications_pending' => 0
         ]);
     }
 
