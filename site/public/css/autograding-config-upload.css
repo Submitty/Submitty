@@ -1,5 +1,13 @@
+.config-header-div {
+    display: flex;
+}
+
 .config-header {
     flex-grow: 1;
+}
+
+.back-to-submissions-btn {
+    margin-top: 6px
 }
 
 .choose-file-input {

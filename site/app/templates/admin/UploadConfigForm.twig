@@ -5,10 +5,10 @@
 {% endif %}
 
 <div class="content">
-    <div style="display: flex;">
+    <div class="config-header-div">
         <h1 class="config-header">Upload Autograding Config</h1>
         {% if gradeable_id|length %}
-            <a data-testid="back-to-autograding" class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Back To Submissions/Autograding</a>
+            <a data-testid="back-to-autograding" class="btn btn-primary back-to-submissions-btn" href={{ back_url }}>Back To Submissions/Autograding</a>
         {% endif %}
     </div>
     <br>
