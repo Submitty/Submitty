@@ -1,4 +1,4 @@
-/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, saveAndWarnUnsubmitted, setButtonStatus */
+/* global USER_ID, autosaveEnabled, cleanupAutosaveHistory, deferredSave, saveAndWarnUnsubmitted */
 
 /**
  * Checks all radio buttons or checkboxes that were previously checked in the recent submission
