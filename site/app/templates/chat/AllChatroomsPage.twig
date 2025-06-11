@@ -26,9 +26,9 @@
                 </thead>
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
-                        <tr>
+                        <tr data-testid="chatroom-item">
                             <td>
-                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn"></a>
+                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn" data-testid="edit-chatroom"></a>
                             </td>
                             <td>
                                 {% if not chatroom.isActive() %}
@@ -36,12 +36,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span title="{{ chatroom.getTitle() }}">
+                                <span title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                     {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
                                 </span>
                             </td>
                             <td>
-                                <span title="{{ chatroom.getDescription() }}">
+                                <span title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
                                     {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
                                 </span>
                             </td>
@@ -88,7 +88,7 @@
                         {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
                             <tr>
                                 <td>
-                                    <span class="display-short" title="{{ chatroom.getTitle() }}">
+                                    <span class="display-short" title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                         {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
                                     </span>
                                 </td>
