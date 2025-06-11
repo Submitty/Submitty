@@ -71,7 +71,8 @@ class Email extends AbstractModel {
     //inject course label into subject
     private function formatSubject(string $subject): string {
         $course = $this->core->getConfig()->getCourse();
-        return "[Submitty $course]: " . $subject;
+        $label = $course ? "[Submitty $course]" : "[Submitty]";
+        return "$label: $subject";
     }
 
     //inject a "do not reply" note in the footer of the body
