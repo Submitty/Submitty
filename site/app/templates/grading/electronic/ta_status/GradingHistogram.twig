@@ -63,7 +63,7 @@
             mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
         } else {
             mode = xValue[0];
-            xBuckets = [mode];
+            xBuckets = [String(mode)];
             yValue = [xValue.length];
         }
 
