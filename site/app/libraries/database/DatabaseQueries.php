@@ -5892,7 +5892,15 @@ AND gc_id IN (
               pgp.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
-              (SELECT COUNT(*) FROM electronic_gradeable_version WHERE g_id = g.g_id AND g_notification_sent IS TRUE) AS notifications_sent
+              (
+                SELECT COUNT(*)
+                FROM (
+                    SELECT 1
+                    FROM electronic_gradeable_version
+                    WHERE g_id = g.g_id AND g_notification_sent IS TRUE
+                    GROUP BY user_id, team_id
+                ) AS distinct_submissions
+            ) AS notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT
