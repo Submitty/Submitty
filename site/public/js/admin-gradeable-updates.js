@@ -883,12 +883,12 @@ function hideBuildLog() {
 let savedConfig;
 
 // Register beforeunload listener once
-window.addEventListener('beforeunload', function (event) {
-  const isEdited = $('#gradeable-config-edit').data('edited');
-  if (isEdited) {
-    event.preventDefault();
-    event.return = '';
-  }
+window.addEventListener('beforeunload', (event) => {
+    const isEdited = $('#gradeable-config-edit').data('edited');
+    if (isEdited) {
+        event.preventDefault();
+        event.return = '';
+    }
 });
 
 let originalConfigContent = null;
@@ -922,7 +922,7 @@ function loadGradeableEditor(g_id, file_path) {
                     const current = $(this).val();
                     $(this).data('edited', current !== originalConfigContent);
                 });
-                 editbox.css({
+                editbox.css({
                     'min-width': '-webkit-fill-available',
                 });
 
@@ -931,19 +931,18 @@ function loadGradeableEditor(g_id, file_path) {
             catch {
                 displayErrorMessage('Error parsing data. Please try again');
             }
-        }
+        },
     });
 }
 
-
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
-    var editorButton = document.getElementById("open-config-editor");
-    if (editorButton.innerHTML === "Open Editor") {
-        editorButton.innerHTML = "Close Editor";
+    var editorButton = document.getElementById('open-config-editor');
+    if (editorButton.innerHTML === 'Open Editor') {
+        editorButton.innerHTML = 'Close Editor';
     }
     else {
-        editorButton.innerHTML = "Open Editor";
+        editorButton.innerHTML = 'Open Editor';
         cancelGradeableConfigEdit(); // Ensure unsaved changes are deleted
     }
 }
