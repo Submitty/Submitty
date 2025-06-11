@@ -355,8 +355,6 @@ function setButtonStatus(inactive_version = false) {
         labels += label_array[i].length;
     }
 
-    console.log(labels);
-
     if (labels === 0) {
         $('#startnew').prop('disabled', true);
         if (empty_inputs) {
