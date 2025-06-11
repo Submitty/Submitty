@@ -101,10 +101,11 @@ describe('Tests for enabling Live Lecture Chat', () => {
         toggleLiveChat().then(() => {
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="new-chatroom-btn"]').should('exist');
-        });
-        toggleLiveChat().then(() => {
-            cy.visit(['sample', 'chat']);
-            cy.get('[data-testid="new-chatroom-btn"]').should('not.exist');
+        }).then(() => {
+            toggleLiveChat().then(() => {
+                cy.visit(['sample', 'chat']);
+                cy.get('[data-testid="new-chatroom-btn"]').should('not.exist');
+            });
         });
     });
     
@@ -121,16 +122,26 @@ describe('Tests for enabling Live Lecture Chat', () => {
                 cy.reload();
             });
         });
-    })
+    });
 
     it('Should test editing chats', () => {
-        toggleLiveChat();
-        cy.visit(['sample', 'chat']);
-        deleteChatroom(title1);
-        createChatroom(title1, description1, true);
-        editChatroom(title1, title2, description2, true, false);
-        deleteChatroom(title2);
-        toggleLiveChat();
+        toggleLiveChat().then(() => {
+            cy.visit(['sample', 'chat']);
+            deleteChatroom(title1);
+            createChatroom(title1, description1, true);
+            editChatroom(title1, title2, description2, true, false);
+            deleteChatroom(title2);
+            toggleLiveChat().then(() => {
+                cy.reload();
+            });
+        });
+    });
+
+    it('Should test starting chat sessions and chatting', () => {
+
+    });
+
+    it('Should test anonymity', () => {
 
     })
 });
