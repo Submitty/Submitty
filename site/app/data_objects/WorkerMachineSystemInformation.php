@@ -31,8 +31,8 @@ class WorkerMachineSystemInformation {
     public function __construct(
         string $associated_worker,
         string $worker_service,
-        string $shipper_service,
-        string $daemon_service,
+        ?string $shipper_service,
+        ?string $daemon_service,
         string $disk_usage,
         string $load
     ) {
