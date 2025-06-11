@@ -880,6 +880,20 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
+let savedConfig;
+
+// Register beforeunload listener once
+window.addEventListener('beforeunload', function (event) {
+  const isEdited = $('#gradeable-config-edit').data('edited');
+  if (isEdited) {
+    event.preventDefault();
+    event.return = '';
+  }
+});
+
+let originalConfigContent = null;
+
+// When you load the editor
 function loadGradeableEditor(g_id, file_path) {
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'load']),
@@ -891,38 +905,52 @@ function loadGradeableEditor(g_id, file_path) {
         },
         success: function (data) {
             try {
-                let json = JSON.parse(data);
-                if (json['status'] === 'fail') {
-                    displayErrorMessage(json['message']);
+                const json = JSON.parse(data);
+                if (json.status === 'fail') {
+                    displayErrorMessage(json.message);
                     return;
                 }
-                json = json['data'];
 
+                const configData = json.data;
+                const editbox = $('#gradeable-config-edit');
+
+                originalConfigContent = configData.config_content;
+                editbox.val(originalConfigContent);
                 $('#gradeable-config-edit-bar').show();
-                const editbox = $('textarea#gradeable-config-edit');
-                editbox.val(json.config_content);
-                editbox.css({
+
+                editbox.off('input').on('input', function () {
+                    const current = $(this).val();
+                    $(this).data('edited', current !== originalConfigContent);
+                });
+                 editbox.css({
                     'min-width': '-webkit-fill-available',
                 });
-                editbox.data('file-path', file_path);
+
+                editbox.data('edited', false);
             }
-            catch (err) {
+            catch {
                 displayErrorMessage('Error parsing data. Please try again');
-                return;
             }
-        },
-        error: function () {
-            window.alert('Something went wrong while loading the gradeable config. Please try again.');
-        },
+        }
     });
 }
 
+
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
+    var editorButton = document.getElementById("open-config-editor");
+    if (editorButton.innerHTML === "Open Editor") {
+        editorButton.innerHTML = "Close Editor";
+    }
+    else {
+        editorButton.innerHTML = "Open Editor";
+        cancelGradeableConfigEdit(); // Ensure unsaved changes are deleted
+    }
 }
 
 function cancelGradeableConfigEdit() {
     $('#gradeable-config-edit-bar').hide();
+    $('#gradeable-config-edit').data('edited', false);
 }
 
 function saveGradeableConfigEdit(g_id) {
@@ -943,6 +971,8 @@ function saveGradeableConfigEdit(g_id) {
                     displayErrorMessage(json['message']);
                     return;
                 }
+                originalConfigContent = $('#gradeable-config-edit').val();
+                $('#gradeable-config-edit').data('edited', false);
                 cancelGradeableConfigEdit();
                 ajaxCheckBuildStatus();
             }

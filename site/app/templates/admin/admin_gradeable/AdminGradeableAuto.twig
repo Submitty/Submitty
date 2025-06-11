@@ -113,13 +113,13 @@
 
     <div class="raw-config-info">
         <div class="option-title raw-config-info-header">Manual Configuration:</div>
-        <a class="btn btn-primary" tabindex="0" id="edit-gradeable" onclick="toggleGradeableConfigEdit()">Open Editor</a>
+        <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
         <div id="gradeable-config-structure">
             <ul class="config-folder-view">
                 {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
             </ul>
             <div id="gradeable-config-edit-bar">
-                <textarea id="gradeable-config-edit" aria-label="Edit Gradeable Configuration"></textarea>
+                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration"></textarea>
                 <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
                 <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
             </div>
