@@ -167,8 +167,8 @@ class ChatroomController extends AbstractController {
     /**
      * @AccessControl(role="INSTRUCTOR")
      */
-    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleOnOff", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
-    public function toggleChatroomOnOff(string $chatroom_id): RedirectResponse {
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
+    public function toggleChatroomActiveStatus(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
@@ -177,7 +177,7 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
-        $chatroom->toggle_on_off();
+        $chatroom->toggleActiveStatus();
 
         $em->flush();
 
@@ -212,7 +212,7 @@ class ChatroomController extends AbstractController {
             return JsonResponse::getFailResponse("Chatroom not found");
         }
         if (!$chatroom->isActive() && !$user->accessAdmin()) {
-            return JsonResponse::getFailResponse("No access");
+            return JsonResponse::getFailResponse("This chatroom is not enabled");
         }
 
         $sessKey = "anon_name_chatroom_{$chatroom_id}";
@@ -233,8 +233,8 @@ class ChatroomController extends AbstractController {
 
         $role = $user->accessAdmin() ? 'instructor' : 'student';
 
-        if (strcmp($_POST['content'], "") == 0) {
-            return JsonResponse::getFailResponse("Can't send blank message.");
+        if (strcmp($_POST['content'], "") === 0) {
+            return JsonResponse::getFailResponse("Can't send blank message");
         }
 
         $msg_json = [];

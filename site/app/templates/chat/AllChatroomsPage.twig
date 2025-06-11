@@ -46,7 +46,7 @@
                                 </span>
                             </td>
                             <td>
-                                <form id="chatroom_toggle_form_{{ chatroom.getId() }}" action="{{ base_url }}/{{ chatroom.getId() }}/toggleOnOff" method="post">
+                                <form id="chatroom_toggle_form_{{ chatroom.getId() }}" action="{{ base_url }}/{{ chatroom.getId() }}/toggleActiveStatus" method="post">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 </form>
                                 {% if not chatroom.isActive() %}
