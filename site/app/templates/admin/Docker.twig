@@ -183,13 +183,13 @@
 </div>
 
 {% macro sortable_header(title, sort_key) %}
-<th>
-    <a href="#"
-       onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
-       class="sortable-header"
-       data-sort-key="{{ sort_key }}">
-        {{ title }}
-        <i class="fa fa-sort"></i>
-    </a>
-</th>
+    <th>
+        <a href="#"
+        onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
+        class="sortable-header"
+        data-sort-key="{{ sort_key }}">
+            {{ title }}
+            <i class="fa fa-sort"></i>
+        </a>
+    </th>
 {% endmacro %}
