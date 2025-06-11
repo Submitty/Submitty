@@ -59,7 +59,13 @@
             range{{ type }} = max{{ type }}-min{{ type }};
         }
 
-        mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+        if (min{{ type }} != max{{ type }}) {
+            mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+        } else {
+            mode = xValue[0];
+            xBuckets = [mode];
+            yValue = [xValue.length];
+        }
 
         if (max{{ type }}==0 && min{{ type }}==50) {
             min{{ type }}=0;
@@ -83,6 +89,7 @@
                 }
             }
         };
+        console.log(trace1);
 
         var data = [trace1];
 
@@ -105,6 +112,8 @@
                 family: '"Source Sans Pro", sans-serif',
             }
         };
+
+        console.log(data);
 
         Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
     </script>
