@@ -208,7 +208,7 @@ class DockerUITester extends BaseUnitTest {
             "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
             "image_owners" => [],
         ]);
-        
+
         $worker = $docker_ui->getWorkerMachines()[0];
         $info = $worker->system_information;
         $this->assertEquals('Service Not Found', $info->worker_service);
