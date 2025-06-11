@@ -1253,6 +1253,89 @@ WHERE term=? AND course=? AND user_id=?",
     }
 
     /**
+     * Get pending gradeable notifications for a given gradeable id
+     *
+     * @param string $g_id the gradeable id to get notifications for
+     * @return int
+     */
+    public function getPendingGradeableNotifications($g_id): int {
+        /*
+        TODO: This query is a variation of a similar query found within `/sbin/send_notification.py`.
+        ElectronicGraderController.showStatus() and ElectronicGraderView.statusPage() should be refactored
+        to ensure the gradeable status data is accessible to other application components, such as
+        AdminGradeableController for modularity.
+        */
+        $this->course_db->query(
+            "
+            WITH gradeables AS (
+                SELECT DISTINCT
+                    g.g_id AS g_id,
+                    g.g_title AS g_title,
+                    t.team_id AS team_id,
+                    COALESCE(egv.user_id, t.user_id) AS user_id,
+                    eg.eg_use_ta_grading AS eg_use_ta_grading,
+                    egd.autograding_complete AS autograding_complete,
+                    gc.gc_id AS component,
+                    CONCAT(gcd.gd_id, '-', gcd.gc_id, '-', gcd.gcd_grader_id)
+                        AS graded_component
+                FROM gradeable AS g
+                INNER JOIN electronic_gradeable AS eg
+                    ON g.g_id = eg.g_id
+                    AND eg.eg_student_view IS TRUE
+                    AND g.g_grade_released_date <= NOW()
+                INNER JOIN electronic_gradeable_version AS egv
+                    ON g.g_id = egv.g_id
+                    AND egv.active_version != '0'
+                    AND egv.g_notification_sent IS FALSE
+                INNER JOIN gradeable_component AS gc
+                    ON g.g_id = gc.g_id
+                INNER JOIN gradeable_data AS gd
+                    ON g.g_id = gd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                LEFT JOIN gradeable_teams AS gt
+                    ON gd.g_id = gt.g_id
+                    AND gd.gd_team_id = gt.team_id
+                LEFT JOIN teams AS t
+                    ON gt.team_id = t.team_id
+                LEFT JOIN electronic_gradeable_data AS egd
+                    ON g.g_id = egd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                    AND egv.active_version = egd.g_version
+                LEFT JOIN gradeable_component_data AS gcd
+                    ON gd.gd_id = gcd.gd_id
+                    AND gc.gc_id = gcd.gc_id
+                    AND gcd.gcd_grader_id IS NOT NULL
+                    AND egv.active_version = gcd.gcd_graded_version
+            )
+            SELECT DISTINCT
+                g_id,
+                g_title,
+                team_id,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
+                COALESCE(ns.all_released_grades, TRUE) AS site_enabled,
+                COALESCE(ns.all_released_grades_email, TRUE) AS email_enabled
+            FROM gradeables AS g
+            INNER JOIN users AS u
+                ON g.user_id = u.user_id
+            LEFT JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
+            WHERE g.g_id = ?
+            GROUP BY g_id, g_title, u.user_id, u.user_email, team_id,
+                ns.all_released_grades, ns.all_released_grades_email,
+                eg_use_ta_grading,autograding_complete
+            HAVING (
+                eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE
+                OR
+                COUNT(component) = COUNT(graded_component)
+            );", [$g_id]);
+
+        return count($this->course_db->rows());
+    }
+
+    /**
      * Create a string that consists placeholder parameters (?) enclosed in parentheses.
      * These placeholders will then be used for parameter binding when executing the SQL query.
      * When $len is zero, this function will return '(NULL)' so that it won't break SQL syntax.

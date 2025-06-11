@@ -132,8 +132,8 @@ def construct_notifications(term, course, pending):
         notification_content = "Grade Released: " + gradeable["title"]
         email_subject = (f"[Submitty {course}] Grade Released: "
                          f"{gradeable['title']}")
-        email_body = (f"Your grade for {gradeable['title']} in course \n"
-                      f"{get_full_course_name(term, course)} is now available.\n\n"
+        email_body = (f"Your grade is now available for {gradeable['title']} "
+                      f"in course \n{get_full_course_name(term, course)}.\n\n"
                       f"Click here for more info: {gradeable_url}\n\n"
                       f"--\nNOTE: This is an automated "
                       "email notification, which is unable to receive replies."
