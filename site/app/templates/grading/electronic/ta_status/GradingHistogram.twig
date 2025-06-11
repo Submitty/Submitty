@@ -89,7 +89,6 @@
                 }
             }
         };
-        console.log(trace1);
 
         var data = [trace1];
 
@@ -112,8 +111,6 @@
                 family: '"Source Sans Pro", sans-serif',
             }
         };
-
-        console.log(data);
 
         Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
     </script>
