@@ -88,7 +88,7 @@ class Chatroom {
         $this->description = $description;
     }
 
-    public function toggle_on_off(): void {
+    public function toggleActiveStatus(): void {
         $this->is_active = !$this->is_active;
     }
 

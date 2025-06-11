@@ -34,7 +34,7 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
         success: function (response) {
             const msg = JSON.parse(response);
             if (msg.status !== 'success') {
-                displayErrorMessage('Error parsing data. Please try again.');
+                displayErrorMessage(msg.message);
                 return;
             }
         },
