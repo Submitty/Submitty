@@ -9,8 +9,10 @@ import os
 import datetime
 import sys
 import getpass
-from sqlalchemy import create_engine  # pylint: disable=import-error
-from sqlalchemy.orm import Session  # pylint: disable=import-error
+from json import JSONDecodeError
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import DatabaseError
 
 try:
     CONFIG_PATH = os.path.join(
@@ -37,10 +39,10 @@ try:
     DB_HOST = DATABASE_CONFIG["database_host"]
     DB_USER = DATABASE_CONFIG["database_user"]
     DB_PASSWORD = DATABASE_CONFIG["database_password"]
-except Exception as config_fail_error:  # pylint: disable=broad-except
+except (JSONDecodeError, RuntimeError, IOError) as config_fail_error:
     print(
         f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR"
-        + {config_fail_error}
+        + f"{config_fail_error}"
     )
     sys.exit(1)
 
@@ -49,15 +51,21 @@ DATA_DIR_PATH = SUBMITTY_CONFIG["submitty_data_dir"]
 COURSE_DIR_PATH = os.path.join(DATA_DIR_PATH, 'courses')
 NOTIFICATION_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "notifications")
 
-TODAY = datetime.datetime.now()
-LOG_FILE = open(  # pylint: disable=consider-using-with
-    os.path.join(
-        NOTIFICATION_LOG_PATH,
-        f"{TODAY.year:04d}{TODAY.month:02d}{TODAY.day:02d}.txt",
-    ),
-    "a",
-    encoding="utf-8"
+DATE = datetime.datetime.now()
+LOG_FILE_PATH = os.path.join(
+    NOTIFICATION_LOG_PATH, f"{DATE.year:04d}{DATE.month:02d}{DATE.day:02d}.txt"
 )
+
+
+try:
+    # open() is required to ensure file can be used globally
+    LOG_FILE = open(LOG_FILE_PATH, "a", encoding="utf-8")  # pylint: disable=consider-using-with
+except IOError as log_file_error:
+    print(
+        f"[{datetime.datetime.now()}] ERROR: CORE SUBMITTY CONFIGURATION ERROR"
+        + f"{log_file_error}"
+    )
+    sys.exit(1)
 
 
 def get_full_course_name(term, course):
@@ -97,7 +105,6 @@ def construct_notifications(term, course, pending):
     """Construct pending gradeable notifications for the current course."""
     timestamps = {}
     gradeables, site, email = [], [], []
-    course_name = get_full_course_name(term, course)
 
     for notification in pending:
         gradeable = {
@@ -106,7 +113,9 @@ def construct_notifications(term, course, pending):
             "team_id": notification[2],
             "user_id": notification[3],
             "user_email": notification[4],
+            # Potentially send via the notification page
             "site_enabled": notification[5],
+            # Potentially send via email
             "email_enabled": notification[6]
         }
 
@@ -123,8 +132,8 @@ def construct_notifications(term, course, pending):
         notification_content = "Grade Released: " + gradeable["title"]
         email_subject = (f"[Submitty {course}] Grade Released: "
                          f"{gradeable['title']}")
-        email_body = (f"Your grade for {gradeable['title']} in course \n{course_name}"
-                      f"is now available.\n\n"
+        email_body = (f"Your grade for {gradeable['title']} in course \n"
+                      f"{get_full_course_name(term, course)} is now available.\n\n"
                       f"Click here for more info: {gradeable_url}\n\n"
                       f"--\nNOTE: This is an automated "
                       "email notification, which is unable to receive replies."
@@ -134,10 +143,6 @@ def construct_notifications(term, course, pending):
                       f"{BASE_URL_PATH}/courses/{term}/{course}/notifications"
                       "/settings"
                       )
-
-        # Truncate the notification content if it exceeds 40 characters
-        if len(notification_content) > 40:
-            notification_content = notification_content[:36] + "..."
 
         if gradeable["site_enabled"] is True:
             site.append({
@@ -214,7 +219,7 @@ def send_notifications(course, course_db, master_db, lists):
             # Commit the changes to the individual databases
             course_db.commit()
             master_db.commit()
-    except Exception as notification_error:  # pylint: disable=broad-except
+    except DatabaseError as notification_error:
         # Rollback the changes if an error occurs
         course_db.rollback()
         master_db.rollback()
@@ -324,11 +329,15 @@ def main():
              f"status for {notified} submission{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
         LOG_FILE.close()
-    except Exception as notification_error:  # pylint: disable=broad-except
+    except DatabaseError as notification_error:
         m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
              f"{str(notification_error)}")
         LOG_FILE.write(f"{m}\n")
         print(m)
+    finally:
+        # Manually close the log file to avoid resource leaks
+        if LOG_FILE and not LOG_FILE.closed:
+            LOG_FILE.close()
 
 
 if __name__ == "__main__":
