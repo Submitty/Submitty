@@ -4,9 +4,7 @@
 const orig_setButtonStatus = window.setButtonStatus;
 
 window.setButtonStatus = function (inactive_version = false) {
-    console.log(0.5);
     orig_setButtonStatus(inactive_version);
-    console.log(1);
     updateSubmitButtonStatus();
 };
 
