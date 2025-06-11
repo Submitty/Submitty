@@ -467,9 +467,8 @@
     }
 
     $(function() {
-        {% if is_vcs %} 
-            window.is_vcs = true;
-        {% endif %}
+        {% if is_vcs %} window.is_vcs = true; {% endif %}
+        {% if is_notebook %} window.is_notebook = true; {% endif %}
         updateSubmitButtonStatus();
         $(".submit-gradeable").click(function(e) { // Submit button
             e.preventDefault(); // Prevent form submission for safety
