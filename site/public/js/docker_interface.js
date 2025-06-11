@@ -167,7 +167,12 @@ function sortTableByColumn(sortKey) {
     const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
 
     let newDirection;
-    (currentSort === sortKey) ? (newDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC') : (newDirection = 'ASC');
+    if (currentSort === sortKey) {
+        newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
+    }
+    else {
+        newDirection = 'ASC';
+    }
 
     Cookies.set('docker_table_key', sortKey, { path: '/admin/docker' });
     Cookies.set('docker_table_direction', newDirection, { path: '/admin/docker' });
