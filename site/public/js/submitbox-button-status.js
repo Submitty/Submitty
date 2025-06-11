@@ -11,9 +11,6 @@ window.setButtonStatus = function (inactive_version = false) {
 function updateSubmitButtonStatus() {
     const submit_button = document.getElementById('submit');
     if (!isValidSubmission()) {
-        submit_button.disabled = true;
-    }
-    if (submit_button.disabled) {
         submit_button.classList.add('disable-submit');
     }
     else {

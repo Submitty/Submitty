@@ -4,7 +4,6 @@
         "strict": true,
         "allowJs": true,
         "noEmit": true,
-        "incremental": true,
-        "outDir": "incremental_build",
+        "incremental": false,
     }
 }
