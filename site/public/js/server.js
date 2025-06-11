@@ -809,13 +809,18 @@ function checkRefreshPage(url, anon_id = '') {
 function check_server(url, anon_id = '') {
     $.get(url, { anon_id: anon_id },
         (data) => {
+            try {
             // if the response bool is true, reload the page
-            const refresh_bool = JSON.parse(data).data;
-            if (refresh_bool === true) {
-                location.reload();
+                const refresh_bool = JSON.parse(data).data;
+                if (refresh_bool === true) {
+                    location.reload();
+                }
+                else {
+                    checkRefreshPage(url, anon_id);
+                }
             }
-            else {
-                checkRefreshPage(url, anon_id);
+            catch (e) {
+                console.log('Error parsing server response:', e);
             }
         },
     );
@@ -854,7 +859,7 @@ function checkColorActivated() {
     // eslint-disable-next-line no-undef
     pos = 0;
     // eslint-disable-next-line no-undef
-    seq = "&&((%'%'BA\r";
+    seq = '&&((%\'%\'BA\r';
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
 
     function inject() {
@@ -1398,7 +1403,7 @@ function escapeSpecialChars(text) {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;',
+        '\'': '&#039;',
     };
 
     return text.replace(/[&<>"']/g, (m) => {

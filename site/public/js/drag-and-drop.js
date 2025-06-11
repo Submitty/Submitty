@@ -1,8 +1,8 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
+            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
 
 /*
 References:
@@ -765,7 +765,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     if (!use_qr_codes) {
         // eslint-disable-next-line eqeqeq
         if (num_pages == '') {
-            alert("You didn't enter the # of page(s)!");
+            alert('You didn\'t enter the # of page(s)!');
             $('#submit').prop('disabled', false);
             return;
         }
@@ -787,7 +787,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
     let total_size = 0;
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 $('#submit').prop('disabled', false);
@@ -940,7 +940,7 @@ function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, re
                     window.location.reload();
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
@@ -1035,15 +1035,14 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1128,7 +1127,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                         window.location.href = data['data'];
                     }
                     else {
-                        alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                        displayMessage(data['message'], 'error');
                     }
                 }
             }
@@ -1158,7 +1157,7 @@ function handleDownloadImages(csrf_token) {
     // Files selected
     for (let i = 0; i < file_array.length; i++) {
         for (let j = 0; j < file_array[i].length; j++) {
-            if (file_array[i][j].name.indexOf("'") !== -1
+            if (file_array[i][j].name.indexOf('\'') !== -1
                 || file_array[i][j].name.indexOf('"') !== -1) {
                 alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                 return;
@@ -1191,7 +1190,7 @@ function handleDownloadImages(csrf_token) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
@@ -1252,7 +1251,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         // Files selected
         for (let i = 0; i < file_array.length; i++) {
             for (let j = 0; j < file_array[i].length; j++) {
-                if (file_array[i][j].name.indexOf("'") !== -1
+                if (file_array[i][j].name.indexOf('\'') !== -1
                     || file_array[i][j].name.indexOf('"') !== -1) {
                     alert(`ERROR! You may not use quotes in your filename: ${file_array[i][j].name}`);
                     return;
@@ -1366,7 +1365,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
 
     if (sections_lock === true && numSections === 0) {
-        alert("Restrict to at least one section or select 'No' button where asked about whether you want to restrict this material/folder to some sections.");
+        alert('Restrict to at least one section or select \'No\' button where asked about whether you want to restrict this material/folder to some sections.');
         return;
     }
 
