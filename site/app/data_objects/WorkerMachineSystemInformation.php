@@ -12,11 +12,11 @@ class WorkerMachineSystemInformation {
     /** Name of worker machine this information is associated with */
     public string $associated_worker;
     /** State of worker_service */
-    public ?string $worker_service;
+    public string $worker_service;
     /** State of worker_service */
-    public ?string $shipper_service;
+    public string $shipper_service;
     /** State of worker_service */
-    public ?string $daemon_service;
+    public string $daemon_service;
     /** Disk usage in percetange */
     public string $disk_usage;
     /** String with a unix load average
@@ -30,9 +30,9 @@ class WorkerMachineSystemInformation {
     /** Create a new WorkerSystemInformation object */
     public function __construct(
         string $associated_worker,
-        ?string $worker_service,
-        ?string $shipper_service,
-        ?string $daemon_service,
+        string $worker_service,
+        string $shipper_service,
+        string $daemon_service,
         string $disk_usage,
         string $load
     ) {
@@ -53,11 +53,11 @@ class WorkerMachineSystemInformation {
     public static function fromArray(array $data, string $name): self {
         return new self(
             $name,
-            $data['worker'] ?? null,
-            $data['shipper'] ?? null,
-            $data['daemon'] ?? null,
-            $data['disk'] ?? 'No status collected',
-            $data['load'] ?? 'No status collected'
+            $data['worker'] ?? 'No Status Collected',
+            $data['shipper'] ?? 'No Status Collected',
+            $data['daemon'] ?? 'No Status Collected',
+            $data['disk'] ?? 'No Status Collected',
+            $data['load'] ?? 'No Status Collected'
         );
     }
 }

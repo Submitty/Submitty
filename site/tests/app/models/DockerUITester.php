@@ -180,7 +180,7 @@ class DockerUITester extends BaseUnitTest {
         $this->assertNotNull($info);
         $this->assertEquals('Running', $info->worker_service);
         $this->assertEquals('Unknown Error', $info->shipper_service);
-        $this->assertNull($info->daemon_service);
+        $this->assertEquals('Service Not Found', $info->daemon_service);
         $this->assertEquals('50.55%', $info->disk_usage);
         $this->assertEquals('0.025, 0.01, 0.015', $info->load);
 
@@ -211,9 +211,9 @@ class DockerUITester extends BaseUnitTest {
         
         $worker = $docker_ui->getWorkerMachines()[0];
         $info = $worker->system_information;
-        $this->assertNull($info->worker_service);
-        $this->assertNull($info->shipper_service);
-        $this->assertNull($info->daemon_service);
+        $this->assertEquals('Service Not Found', $info->worker_service);
+        $this->assertEquals('Service Not Found', $info->shipper_service);
+        $this->assertEquals('Service Not Found', $info->daemon_service);
         $this->assertEquals('50.56%', $info->disk_usage);
         $this->assertEquals('0.0278, 0.03, 0.025', $info->load);
     }
