@@ -2019,7 +2019,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         if (!$gradeable->isUsingUploadedConfig()) {
-            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded configurations for the current course and semester.");
+            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded autograding configurations for the current course and semester.");
             return;
         }
 
