@@ -76,7 +76,6 @@ class DockerUITester extends BaseUnitTest {
 
         $this->docker_job_log_file = FileUtils::joinPaths(dirname(__DIR__, 3), 'tests', 'data', 'logs', 'docker', 'install_containers.txt');
         $this->sysinfo_log_file = FileUtils::joinPaths(dirname(__DIR__, 3), 'tests', 'data', 'logs', 'docker', 'sysinfo.txt');
-        $this->assertFileExists($this->docker_job_log_file);
 
         $this->core = $this->createMockCore([
             'tmp_path' => $this->tmp_dir
@@ -104,6 +103,9 @@ class DockerUITester extends BaseUnitTest {
     }
 
     public function testParsingLogLines() {
+        $this->assertFileExists($this->docker_job_log_file);
+        $this->assertFileExists($this->sysinfo_log_file);
+
         //place some dummy data first
         FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "docker", "20251234.txt"), file_get_contents($this->docker_job_log_file));
         FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo", "20251234.txt"), file_get_contents($this->sysinfo_log_file));
@@ -132,5 +134,87 @@ class DockerUITester extends BaseUnitTest {
         $this->assertEquals("ubuntu:custom", $image->primary_name);
         $this->assertEquals(1, count($image->aliases));
         $this->assertEquals("submitty/autograding-default:latest", $image->aliases[0]);
+
+        $info = $worker->system_information;
+        $this->assertNotNull($info);
+        $this->assertEquals('Running', $info->worker_service);
+        $this->assertEquals('Running', $info->shipper_service);
+        $this->assertEquals('Running', $info->daemon_service);
+        $this->assertEquals('50.763%', $info->disk_usage);
+        $this->assertEquals('0.08203125, 0.0166015625, 0.00537109375', $info->load);
+    }
+
+    public function testSysinfoWithUnknownServices() {
+        $this->assertFileExists($this->docker_job_log_file);
+        $this->assertFileExists($this->sysinfo_log_file);
+
+        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "docker", "20251234.txt"), file_get_contents($this->docker_job_log_file));
+        FileUtils::writeFile(FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo", "20251234.txt"), file_get_contents($this->sysinfo_log_file));
+        $test = <<<SYSINFO
+        ------------------------------
+        System Info :: primary
+        Worker Service: Running
+        Shipper Service: Unknown Error
+        Daemon Job Handler: Service Not Found
+        Disk Usage: 50.55%
+        System Load: (0.025, 0.01, 0.015)
+
+        [Last ran on: 2025-01-13T21:00:01.328600]
+
+        SYSINFO;
+        file_put_contents(
+            FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo", "20251234.txt"),
+            $test,
+            FILE_APPEND | LOCK_EX
+        );
+
+        $docker_ui = new DockerUI($this->core, [
+            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true),
+            "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
+            "image_owners" => [],
+        ]);
+
+        $worker = $docker_ui->getWorkerMachines()[0];
+
+        $info = $worker->system_information;
+        $this->assertNotNull($info);
+        $this->assertEquals('Running', $info->worker_service);
+        $this->assertEquals('Unknown Error', $info->shipper_service);
+        $this->assertNull($info->daemon_service);
+        $this->assertEquals('50.55%', $info->disk_usage);
+        $this->assertEquals('0.025, 0.01, 0.015', $info->load);
+
+        $test = <<<SYSINFO
+        ------------------------------
+        System Info :: primary
+        Worker Service: Service Not Found
+        Shipper Service: Service Not Found
+        Daemon Job Handler: Service Not Found
+        Disk Usage: 50.56%
+        System Load: (0.0278, 0.03, 0.025)
+
+        [Last ran on: 2025-01-13T21:00:01.338600]
+
+        SYSINFO;
+
+        file_put_contents(
+            FileUtils::joinPaths($this->tmp_dir, "logs", "sysinfo", "20251234.txt"),
+            $test,
+            FILE_APPEND | LOCK_EX
+        );
+
+        $docker_ui = new DockerUI($this->core, [
+            "autograding_containers" => json_decode($this::getAutogradingContainersJson(), true),
+            "autograding_workers" => json_decode($this::getAutogradingWorkersJson(), true),
+            "image_owners" => [],
+        ]);
+        
+        $worker = $docker_ui->getWorkerMachines()[0];
+        $info = $worker->system_information;
+        $this->assertNull($info->worker_service);
+        $this->assertNull($info->shipper_service);
+        $this->assertNull($info->daemon_service);
+        $this->assertEquals('50.56%', $info->disk_usage);
+        $this->assertEquals('0.0278, 0.03, 0.025', $info->load);
     }
 }

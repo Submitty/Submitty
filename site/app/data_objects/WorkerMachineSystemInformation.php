@@ -12,7 +12,7 @@ class WorkerMachineSystemInformation {
     /** Name of worker machine this information is associated with */
     public string $associated_worker;
     /** State of worker_service */
-    public string $worker_service;
+    public ?string $worker_service;
     /** State of worker_service */
     public ?string $shipper_service;
     /** State of worker_service */
@@ -30,7 +30,7 @@ class WorkerMachineSystemInformation {
     /** Create a new WorkerSystemInformation object */
     public function __construct(
         string $associated_worker,
-        string $worker_service,
+        ?string $worker_service,
         ?string $shipper_service,
         ?string $daemon_service,
         string $disk_usage,
@@ -53,7 +53,7 @@ class WorkerMachineSystemInformation {
     public static function fromArray(array $data, string $name): self {
         return new self(
             $name,
-            $data['worker'] ?? 'No status collected',
+            $data['worker'] ?? null,
             $data['shipper'] ?? null,
             $data['daemon'] ?? null,
             $data['disk'] ?? 'No status collected',

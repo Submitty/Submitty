@@ -322,6 +322,13 @@ class DockerUI extends AbstractModel {
             $is_match = preg_match("/System Info :: (.+)/", $buffer, $matches);
             if (preg_match("/System Info :: (.+)/", $buffer, $matches) === 1) {
                 $current_machine = $matches[1];
+                // $machine_system_details[$current_machine] = [
+                //     'worker' => 'No status collected',
+                //     'shipper' => null,
+                //     'daemon' => null,
+                //     'disk' => 'No status collected',
+                //     'load' => 'No status collected',
+                // ];
             }
 
             if ($current_machine === null) {
