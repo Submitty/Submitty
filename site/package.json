@@ -64,7 +64,7 @@
     "@types/node": "^24.0.0",
     "@types/twig": "^1.12.16",
     "@typescript-eslint/parser": "^8.32.1",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/tsconfig": "^0.7.0",
     "babel-jest": "^29.7.0",
