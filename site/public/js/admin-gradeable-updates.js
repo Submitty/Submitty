@@ -937,7 +937,7 @@ function loadGradeableEditor(g_id, file_path) {
 
 function toggleGradeableConfigEdit() {
     $('#gradeable-config-structure').toggleClass('open').toggle();
-    var editorButton = document.getElementById('open-config-editor');
+    let editorButton = document.getElementById('open-config-editor');
     if (editorButton.innerHTML === 'Open Editor') {
         editorButton.innerHTML = 'Close Editor';
     }
