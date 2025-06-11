@@ -10,9 +10,9 @@ import datetime
 import sys
 import getpass
 from json import JSONDecodeError
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy import create_engine  # pylint: disable=import-error
+from sqlalchemy.orm import Session  # pylint: disable=import-error
+from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
 
 try:
     CONFIG_PATH = os.path.join(
@@ -58,7 +58,7 @@ LOG_FILE_PATH = os.path.join(
 
 
 try:
-    # open() is required to ensure file can be used globally
+    # open() is required to ensure the log file can be used globally
     LOG_FILE = open(LOG_FILE_PATH, "a", encoding="utf-8")  # pylint: disable=consider-using-with
 except IOError as log_file_error:
     print(
@@ -329,7 +329,7 @@ def main():
              f"status for {notified} submission{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
         LOG_FILE.close()
-    except DatabaseError as notification_error:
+    except (IOError, DatabaseError) as notification_error:
         m = (f"[{datetime.datetime.now()}] Error Sending Notification(s): "
              f"{str(notification_error)}")
         LOG_FILE.write(f"{m}\n")
