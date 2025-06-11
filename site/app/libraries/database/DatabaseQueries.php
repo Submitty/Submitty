@@ -1330,7 +1330,9 @@ WHERE term=? AND course=? AND user_id=?",
                 eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE
                 OR
                 COUNT(component) = COUNT(graded_component)
-            );", [$g_id]);
+            );",
+            [$g_id]
+        );
 
         return count($this->course_db->rows());
     }
