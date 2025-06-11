@@ -28,9 +28,9 @@
 {% endif %}
 
 <div id="gradeables-content" class="content">
-{% if is_self_register %}
-    <button data-testid="unregister-button" class="unregister-button btn" onclick="confirmUnregister()" type="submit">Unregister from Course</button>
-{% endif %}
+    {% if is_self_register %}
+        <button data-testid="unregister-button" class="unregister-button btn btn-primary" onclick="confirmUnregister()" type="submit">Unregister from Course</button>
+    {% endif %}
     <h1>Gradeables</h1>
     {% if sections|length > 0 %}
         <div id="gradeables">

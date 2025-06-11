@@ -94,7 +94,7 @@ function confirmSelfRegistration(element, needs_reg_sections) {
         alert('You need to create at least one registration section first');
         return false;
     }
-    if ($('#default-section-id').val() == '') {
+    if ($('#default-section-id').val() === '') {
         alert('You need to select a registration section first');
         return false;
     }

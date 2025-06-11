@@ -1,4 +1,5 @@
 /* exported confirmUnregister */
+/* global showPopup */
 function confirmUnregister() {
     $('.popup-form').css('display', 'none');
     const form = $('#unregister-user-form');

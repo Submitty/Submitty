@@ -107,9 +107,10 @@ describe('Tests for self registering for courses', () => {
         cy.logout();
         cy.login('gutmal');
         cy.visit();
-        register();
-        cy.on('window:confirm', () => true);
+        register(openMessageFull);
+        cy.visit(['testing']);
         cy.get('[data-testid="unregister-button"]').click();
+        cy.get('[data-testid="unregister-confirm"]').click();
         cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
         cy.get('[data-testid="testing-button"]').should('exist');
         cy.logout();

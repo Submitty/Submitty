@@ -22,7 +22,6 @@
     float: right;
     border: none;
     color: var(--btn-text-white);
-
 }
 
 .gradeable-row:nth-last-child(1) {
