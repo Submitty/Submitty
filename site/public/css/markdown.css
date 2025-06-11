@@ -197,8 +197,8 @@
 }
 
 .markdown-area textarea {
-    resize: none;
-    overflow-y: hidden;
+    resize: vertical;
+    overflow: auto;
     min-height: 100px;
     tab-size: 4;
 }
@@ -213,7 +213,7 @@
     overflow: auto;
     resize: none;
     min-height: 100px;
-    width: fill-available;
+    width: 100%;
 }
 
 .btn-markdown {

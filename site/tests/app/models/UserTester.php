@@ -192,7 +192,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_invite_email' => true,
                 'team_joined_email' => true,
                 'team_member_submission_email' => true,
-                'self_notification_email' => false
+                'self_notification_email' => false,
+                'self_registration_email' => true,
             ],
             'registration_subsection' => '',
             'enforce_single_session' => false
@@ -255,7 +256,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function validateUserDataProvider(): array {
+    public static function validateUserDataProvider(): array {
         $return = [
             ['user_id', 'test', true],
             ['user_id', 'system_user-1', true],

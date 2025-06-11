@@ -52,7 +52,7 @@ class Course_create:
     def create(self) -> None:
         # Sort users and gradeables in the name of determinism
         self.users.sort(key=lambda x: x.get_detail(self.code, "id"))
-        self.gradeables.sort(key=lambda x: x.id)
+        self.gradeables.sort(key=lambda g: (g.depends_on is not None, g.id))
         self.course_path = os.path.join(
             SUBMITTY_DATA_DIR, "courses", self.semester, self.code
         )

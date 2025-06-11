@@ -2,7 +2,53 @@
     <header>
         <h1>Manage Students</h1>
         <div class="btn-wrapper">
-            <a id="toggle-columns" data-testid="toggle-columns" href="javascript:toggleColumnsForm()" class="btn btn-primary">Toggle Columns</a>
+            {# Need 'flex: 1' to preserve the space given by parent div #}
+            {% include 'Vue.twig' with {
+                'component': 'toggleColumns',
+                'style': 'flex: 1', 
+                'args': {
+                    'buttonWrapped': true,
+                    'columns': [
+                        'registration-section',
+                        'user-id',
+                        'first-name',
+                        'last-name',
+                        'pronouns',
+                        'rotating-section',
+                        'time-zone',
+                        'view-grades',
+                        'late-days',
+                        'registration-type',
+                        'edit-student',
+                        'delete-student',
+                        'user-numeric-id',
+                        'legal-first-name',
+                        'legal-last-name',
+                        'email',
+                        'secondary-email',
+                    ],
+                    'labels': [
+                        'Registration Section',
+                        'User ID',
+                        'Given Name',
+                        'Family Name',
+                        'Pronouns',
+                        'Rotating Section',
+                        'UTC Offset / Time Zone',
+                        'View Grades',
+                        'Late Days',
+                        'Registration Type',
+                        'Edit Student',
+                        'Delete Student',
+                        'User Numeric ID',
+                        'Legal Given Name',
+                        'Legal Family Name',
+                        'Email',
+                        'Secondary Email',
+                    ],
+                    'cookie': 'active_student_columns',
+                },
+            } %}
             <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
             <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
             <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
@@ -114,7 +160,7 @@
                                 </td>
                             {% endif %}
                             {% if active_student_columns[1] %}
-                                <td class="align-left td-student-id">{{ student.getId() }}</td>
+                                <td class="align-left td-student-id" data-testid="student-id-td">{{ student.getId() }}</td>
                             {% endif %}
                             {% if active_student_columns[2] %}
                                 <td class="align-left td-given-name">{{ student.getDisplayedGivenName() }}</td>
@@ -153,10 +199,10 @@
                                 <td class="td-registration-type">{{ student.getRegistrationType() }}</td>
                             {% endif %}
                             {% if active_student_columns[10] %}
-                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}"><i class="fas fa-pencil-alt"></i></a></td>
+                                <td class="td-edit-student"><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{student.getDisplayedGivenName()}} {{student.getDisplayedFamilyName()}}" data-testid="edit-student-{{ student.getId() }}-button" ><i class="fas fa-pencil-alt"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[11] %}
-                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}"><i class="fas fa-trash"></i></a></td>
+                                <td class="td-delete-student"><a href="javascript:deleteUserForm('{{ student.getId() }}', '{{ student.getDisplayedGivenName() }}', '{{ student.getDisplayedFamilyName() }}');" aria-label="delete student {{ student.getDisplayedGivenName() }} {{ student.getDisplayedFamilyName() }}" data-testid="delete-student-{{ student.getId() }}-button"><i class="fas fa-trash"></i></a></td>
                             {% endif %}
                             {% if active_student_columns[12] %}
                                 <td class="td-user-numeric-id">{{ student.getNumericId() }}</td>
@@ -183,7 +229,6 @@
     {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}
-{% include('admin/users/ToggleManageStudentsColumns.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}
 {% include('admin/users/DeleteUserForm.twig') %}
