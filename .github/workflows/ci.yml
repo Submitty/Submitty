@@ -937,12 +937,12 @@ jobs:
       - name: Get API key
         shell: bash
         run: |
-          API_KEY=(curl -s -X POST http://localhost:1511/api/token -H "Content-Type: application/x-www-form-urlencoded" -d "user_id=instructor&password=instructor" | grep -oP '"token"\s*:\s*"\K[^"]+')
+          echo 'RESPONSE=(curl -s -X POST http://localhost:1511/api/token -H "Content-Type: application/x-www-form-urlencoded" -d "user_id=instructor&password=instructor")' >> $GITHUB_ENV'
       
       - name: Create Homework
         shell: bash
         run:
-          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_homework_creation.yml -e "localhost/api/${SEMESTER}/course/upload" -e "${API_KEY}""
+          ansible-playbook --private-key /home/runner/.ssh/id_rsa -e 'ansible_user=runner' -i inventory/submitty playbooks/submitty_homework_creation.yml -e "localhost/api/${SEMESTER}/course/upload" -e "${{ fromJson(env.RESPONSE).token }}"
 
       - name: Set perms
         shell: bash
