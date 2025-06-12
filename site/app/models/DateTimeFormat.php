@@ -7,7 +7,7 @@ use app\libraries\Core;
 
 class DateTimeFormat extends AbstractModel {
     // Set of legal specifiers
-    const SPECIFIERS = ['MDY', 'DMY'];
+    const SPECIFIERS = ['MDY', 'DMY', 'YMD'];
 
     // Keys available to use with getDateFormat
     const DATE_FORMATS_KEYS = [
@@ -42,6 +42,17 @@ class DateTimeFormat extends AbstractModel {
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T'
+        ],
+        // ISO 8601 Standard Date Format, US Time and Timezone format
+        'YMD' => [
+            'gradeable' => 'Y-m-d @ h:i A T',
+            'gradeable_with_seconds' => 'Y-m-d @ h:i:s A T',
+            'forum' => 'Y-m-d g:i A',
+            'notification' => 'Y-m-d g:i A',
+            'solution_ta_notes' => 'Y-m-d g:i A',
+            'office_hours_queue' => 'g:i A',
+            'date_time_picker' => 'Y-m-d H:i:s',
+            'late_days_allowed' => 'Y-m-d h:i:s A T'
         ]
     ];
 
