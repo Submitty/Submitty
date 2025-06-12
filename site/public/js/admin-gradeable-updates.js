@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
+/* global csrfToken, buildCourseUrl, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
@@ -976,6 +976,7 @@ function saveGradeableConfigEdit(g_id) {
                 $('#gradeable-config-edit').data('edited', false);
                 cancelGradeableConfigEdit();
                 ajaxCheckBuildStatus();
+                displaySuccessMessage('Autograding configuration successfully updated.');
             }
             catch (err) {
                 displayErrorMessage('Error parsing data. Please try again');
