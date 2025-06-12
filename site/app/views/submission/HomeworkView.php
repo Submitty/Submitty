@@ -527,7 +527,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
-        $this->core->getOutput()->addInternalJs('submit-box.js');
+        $this->core->getOutput()->addInternalJs('submitbox-button-status.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
@@ -1074,8 +1074,6 @@ class HomeworkView extends AbstractView {
 
 
         $param = array_merge($param, [
-            'docker_error' => $version_instance->dockerErrorFileExists(),
-            'docker_error_data' => null,
             'gradeable_id' => $gradeable->getId(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
@@ -1085,16 +1083,8 @@ class HomeworkView extends AbstractView {
             'show_incentive_message' => $show_incentive_message
         ]);
 
-        if ($param['docker_error']) {
-            $docker_error_data = $version_instance->getDockerErrorFileData();
-            if ($docker_error_data !== null) {
-                $param['docker_error_data'] = $docker_error_data;
-            }
-        }
-
         $this->core->getOutput()->addInternalJs('confetti.js');
         $this->core->getOutput()->addInternalJs('submission-page.js');
-        $this->core->getOutput()->addInternalCss('autograding-results-box.css');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/AutogradingResultsBox.twig', $param);
     }
 
