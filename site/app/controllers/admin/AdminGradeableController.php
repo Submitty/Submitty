@@ -543,34 +543,36 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
         }
-        $config_dir = $gradeable->getAutogradingConfigPath();
+        try {
+            $file_iter = new \RecursiveDirectoryIterator($gradeable->getAutogradingConfigPath(), \RecursiveDirectoryIterator::SKIP_DOTS);
 
-        if (is_dir($config_dir)) {
-            $config_file = FileUtils::joinPaths($config_dir, 'config.json');
+            while ($file_iter->valid()) {
+                if ($file_iter->current()->getFilename() == 'config.json') {
+                    $json_parser = new JsonParser();
+                    $json = file_get_contents($file_iter->current()->getPathName());
 
-            if (file_exists($config_file)) {
-                $json_parser = new JsonParser();
-                $json = file_get_contents($config_file);
+                    // Warn instructors for duplicate keys in config.json
+                    try {
+                        // Remove // and /* */ comments as many config files contain them (invalid JSON)
+                        $content = preg_replace('!//.*!', '', $json);
+                        $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
 
-                // Warn instructors for duplicate keys in config.json
-                try {
-                    // Remove // and /* */ comments as many config files contain them (invalid JSON)
-                    $content = preg_replace('!//.*!', '', $json);
-                    $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
+                        $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
+                    } catch (DuplicateKeyException $e) {
+                        $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
+                    } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
 
-                    $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
-                } catch (DuplicateKeyException $e) {
-                    $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
-                } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
-
-                // Warn instructors about invalid JSON content
-                try {
-                    $json_parser->parse($json);
-                } catch (ParsingException $e) {
-                    $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+                    // Warn instructors about invalid JSON content
+                    try {
+                        $json_parser->parse($json);
+                    } catch (ParsingException $e) {
+                        $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+                    }
                 }
+                $file_iter->next();
             }
         }
+        catch (\Exception $e) { } // Ignore for now (testing)
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));

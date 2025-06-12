@@ -115,30 +115,38 @@ class AutogradingConfigController extends AbstractController {
                 );
             }
         }
-        $config_file = FileUtils::joinPaths($target_dir, 'config.json');
 
-        if (is_file($config_file)) {
-            $json_parser = new JsonParser();
-            $json = file_get_contents($config_file);
+        try {
+            $file_iter = new \RecursiveDirectoryIterator($target_dir, \RecursiveDirectoryIterator::SKIP_DOTS);
 
-            // Warn instructors for duplicate keys in config.json
-            try {
-                // Remove // and /* */ comments as many config files contain them (invalid JSON)
-                $content = preg_replace('!//.*!', '', $json);
-                $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
+            while ($file_iter->valid()) {
+                if ($file_iter->current()->getFilename() == 'config.json') {
+                    $json_parser = new JsonParser();
+                    $json = file_get_contents($file_iter->current()->getPathName());
 
-                $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
-            } catch (DuplicateKeyException $e) {
-                $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
-            } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
+                    // Warn instructors for duplicate keys in config.json
+                    try {
+                        // Remove // and /* */ comments as many config files contain them (invalid JSON)
+                        $content = preg_replace('!//.*!', '', $json);
+                        $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
 
-            // Warn instructors about invalid JSON content
-            try {
-                $json_parser->parse($json);
-            } catch (ParsingException $e) {
-                $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+                        $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
+                    } catch (DuplicateKeyException $e) {
+                        $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
+                    } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
+
+                    // Warn instructors about invalid JSON content
+                    try {
+                        $json_parser->parse($json);
+                    } catch (ParsingException $e) {
+                        $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+                    }
+                }
+                $file_iter->next();
             }
         }
+        catch (\Exception $e) { } // Ignore for now (testing)
+
         $msg = 'Gradeable config uploaded';
         $this->core->addSuccessMessage($msg);
 
