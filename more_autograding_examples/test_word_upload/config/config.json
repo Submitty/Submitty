@@ -10,11 +10,7 @@
 
   "resource_limits": {
     "RLIMIT_FSIZE": 99000000,
-    "RLIMIT_NPROC": 100,
-    "RLIMIT_SIGPENDING": 100,
-    "RLIMIT_MSGQUEUE": 100,
-    "RLIMIT_RTTIME": 1000000,
-    "RLIMIT_CPU": 600
+    "RLIMIT_NPROC": 10
   },
 
   // needed for /usr/bin/mv
