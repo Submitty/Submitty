@@ -162,16 +162,6 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
-			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
 			message: "#^Only booleans are allowed in \\|\\|, int given on the left side\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
