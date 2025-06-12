@@ -905,28 +905,30 @@ function loadGradeableEditor(g_id, file_path) {
         },
         success: function (data) {
             try {
-                const json = JSON.parse(data);
+                let json = JSON.parse(data);
                 if (json.status === 'fail') {
-                    displayErrorMessage(json.message);
+                    displayErrorMessage(json['message']);
                     return;
                 }
 
-                const configData = json.data;
-                const editbox = $('#gradeable-config-edit');
-
-                originalConfigContent = configData.config_content;
-                editbox.val(originalConfigContent);
                 $('#gradeable-config-edit-bar').show();
+
+                const configData = json['data'];
+                originalConfigContent = configData.config_content;
+                const editbox = $('textarea#gradeable-config-edit');
+                editbox.val(originalConfigContent);
 
                 editbox.off('input').on('input', function () {
                     const current = $(this).val();
                     $(this).data('edited', current !== originalConfigContent);
                 });
+
                 editbox.css({
                     'min-width': '-webkit-fill-available',
                 });
 
                 editbox.data('edited', false);
+                editbox.data('file-path', file_path);
             }
             catch {
                 displayErrorMessage('Error parsing data. Please try again');
