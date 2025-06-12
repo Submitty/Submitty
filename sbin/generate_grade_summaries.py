@@ -97,7 +97,7 @@ def main():
                 semester, course, save_response["message"]
             ), file=stderr)
 
-        if len(load_response) > 0:
+        if "rg_web_ui" in load_response:
             print("Successfully loaded Rainbow Grades GUI customization for {}.{}".format(
                 semester, course
             ))
