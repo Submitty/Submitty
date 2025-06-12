@@ -112,7 +112,7 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
-            self.log_docker_error(f'image is not available')
+            self.log_docker_error('image is not available')
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
