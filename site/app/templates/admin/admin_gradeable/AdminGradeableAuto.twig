@@ -88,7 +88,7 @@
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
-                <select name="autograding_config_path" id="autograding_config_selector">
+                <select name="autograding_config_path" id="autograding_config_selector" onChange="reloadPage()">
                     <option>{{ gradeable.getAutogradingConfigPath() }}</option>
                     {% for path in all_config_paths %}
                         <option value={{path.1}}>{{path.0}}</option>
@@ -154,6 +154,10 @@
 
 <script>
     registerSelect2Widget("autograding_config_selector");
+
+    function reloadPage() {
+        window.location.reload();
+    }
     
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
 
