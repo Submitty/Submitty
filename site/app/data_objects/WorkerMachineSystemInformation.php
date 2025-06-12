@@ -14,9 +14,9 @@ class WorkerMachineSystemInformation {
     /** State of worker_service */
     public string $worker_service;
     /** State of worker_service */
-    public ?string $shipper_service;
+    public string $shipper_service;
     /** State of worker_service */
-    public ?string $daemon_service;
+    public string $daemon_service;
     /** Disk usage in percetange */
     public string $disk_usage;
     /** String with a unix load average
@@ -53,11 +53,11 @@ class WorkerMachineSystemInformation {
     public static function fromArray(array $data, string $name): self {
         return new self(
             $name,
-            $data['worker'] ?? 'No status collected',
-            $data['shipper'] ?? null,
-            $data['daemon'] ?? null,
-            $data['disk'] ?? 'No status collected',
-            $data['load'] ?? 'No status collected'
+            $data['worker'] ?? 'No Status Collected',
+            $data['shipper'] ?? 'No Status Collected',
+            $data['daemon'] ?? 'No Status Collected',
+            $data['disk'] ?? 'No Status Collected',
+            $data['load'] ?? 'No Status Collected'
         );
     }
 }
