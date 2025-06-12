@@ -40,7 +40,9 @@
                         <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() == "1" ? 1 : 0}}">
                     {% endif %}
                     <div class="notification-contents">
-                        {{ notification.getNotifyContent() }}
+                        <div class="notification-content">
+                            {{ notification.getNotifyContent() }}
+                        </div>
                         <div class="mobile-notification-time">
                             {{ notification.getNotifyTime() }}
                         </div>

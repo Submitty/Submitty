@@ -46,6 +46,15 @@
     flex-grow: 1;
 }
 
+.notification-content {
+    display: -webkit-box;
+    line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
 .mobile-notification-time {
     font-size: 12px;
     color: var(--standard-medium-dark-gray);
