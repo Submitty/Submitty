@@ -102,8 +102,8 @@ def main():
                 semester, course
             ))
         else:
-            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{}".format(
-                semester, course
+            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{}. Response - {}".format(
+                semester, course, load_response
             ), file=stderr)
     else:
         print("ERROR: Submitty Service Unavailable.", file=stderr)
