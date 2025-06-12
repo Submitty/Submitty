@@ -640,19 +640,20 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Generates the rainbow grades customization page
+     * Generates the rainbow grades customization page or writes to the customization file
+     * based on the existence of the "json_string" request body.
      *
      * @return array<string, mixed>|null
      */
-    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
-    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
     public function generateCustomization(): array| null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
         if (isset($_POST["json_string"])) {
-            //Handle user input (the form) being submitted
+            // Handle user input (the form) being submitted
             try {
                 $customization->processForm();
 
