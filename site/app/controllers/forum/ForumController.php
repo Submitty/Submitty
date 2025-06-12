@@ -392,12 +392,10 @@ class ForumController extends AbstractController {
             $categories_ids[] = (int) $category_id;
         }
         if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
-            $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("One of the fields was empty or bad. Please re-submit your thread.");
         }
         elseif (!$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("You must select valid categories. Please re-submit your thread.");
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
