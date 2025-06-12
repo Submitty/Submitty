@@ -41,4 +41,4 @@ def down(config, database, semester, course):
     :param course: Code of course being migrated
     :type course: str
     """
-    database.execute("DROP TABLE IF EXISTS gradeable_redaction")
+    pass

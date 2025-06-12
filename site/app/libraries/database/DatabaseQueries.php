@@ -6107,12 +6107,12 @@ AND gc_id IN (
             if (isset($row["redaction_id"])) {
                 // Create the redaction data
                 $redaction_properties = [
-                'id',
-                'page',
-                'x1',
-                'y1',
-                'x2',
-                'y2'
+                    'id',
+                    'page',
+                    'x1',
+                    'y1',
+                    'x2',
+                    'y2'
                 ];
                 $unpacked_redaction_data = [];
                 foreach ($redaction_properties as $property) {
