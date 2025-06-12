@@ -8,7 +8,7 @@ use app\models\Config;
 use app\models\User;
 
 class DateUtilsTester extends \PHPUnit\Framework\TestCase {
-    public function dayDiffProvider(): array {
+    public static function dayDiffProvider(): array {
         return [
             [1, "Now", "Tomorrow"],
             [0, "2017-01-12 19:10:53.000000", "2017-01-12 19:10:53.000000"],
@@ -32,7 +32,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($expected, DateUtils::calculateDayDiff($date1, $date2));
     }
 
-    public function validateTimestampProvider(): array {
+    public static function validateTimestampProvider(): array {
         return [
             ['01-25-2019', true],
             ['02-29-2020', true],
@@ -56,7 +56,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertTrue(DateUtils::validateTimestamp($expected) === $valid);
     }
 
-    public function validateTimestampFormatProvider(): array {
+    public static function validateTimestampFormatProvider(): array {
         return [
             // valid formats
             ['m-d-Y', '02-29-2020', true],
@@ -92,7 +92,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         DateUtils::parseDateTime('this is an invalid date', new \DateTimeZone('America/New_York'));
     }
 
-    public function parseDateTimeProvider(): array {
+    public static function parseDateTimeProvider(): array {
         return [
             ['01/20/2019T13:24:55Z', 'Etc/GMT+5', 'd/m/Y\TH:i:s', '20/01/2019T08:24:55'],
             // max time value
@@ -171,7 +171,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertNotContains('UTC', $timezones);
     }
 
-    public function utcOffsetProvider(): array {
+    public static function utcOffsetProvider(): array {
         // we cannot test a timezone with DST here as offset will shift through the year
         return [
             ['NOT_SET/NOT_SET', 'NOT SET'],
@@ -188,7 +188,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame($expected, DateUtils::getUTCOffset($timezone));
     }
 
-    public function convertTimeStampProvider(): array {
+    public static function convertTimeStampProvider(): array {
         return [
             ['NOT_SET/NOT_SET', '2020-06-12 12:55:00', 'Y-m-d H:i:s', '2020-06-12 12:55:00'],
             ['NOT_SET/NOT_SET', '2020-06-12 12:55:00Z+01:00', 'Y-m-d H:i:s', '2020-06-12 08:55:00'],
@@ -221,7 +221,7 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame($expected, DateUtils::convertTimeStamp($user, $timestamp, $format));
     }
 
-    public function timeIntToStringProvider(): array {
+    public static function timeIntToStringProvider(): array {
         return [
             [0, '0:00'],
             [5, '0:05'],
