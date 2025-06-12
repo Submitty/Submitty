@@ -10,6 +10,10 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Seld\JsonLint\JsonParser;
+use Seld\JsonLint\DuplicateKeyException;
+use Seld\JsonLint\ParsingException;
+
 
 /**
  * Class AutogradingConfigController
@@ -111,8 +115,33 @@ class AutogradingConfigController extends AbstractController {
                 );
             }
         }
+        $config_file = FileUtils::joinPaths($target_dir, 'config.json');
+
+        if (is_file($config_file)) {
+            $json_parser = new JsonParser();
+            $json = file_get_contents($config_file);
+
+            // Warn instructors for duplicate keys in config.json
+            try {
+                // Remove // and /* */ comments as many config files contain them (invalid JSON)
+                $content = preg_replace('!//.*!', '', $json);
+                $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
+
+                $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
+            } catch (DuplicateKeyException $e) {
+                $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
+            } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
+
+            // Warn instructors about invalid JSON content
+            try {
+                $json_parser->parse($json);
+            } catch (ParsingException $e) {
+                $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+            }
+        }
         $msg = 'Gradeable config uploaded';
         $this->core->addSuccessMessage($msg);
+
         return new MultiResponse(
             JsonResponse::getSuccessResponse([
                 'config_path' => $target_dir

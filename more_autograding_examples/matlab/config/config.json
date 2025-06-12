@@ -11,6 +11,10 @@
       "submission_to_runner" : [ "*.m"],
       "work_to_details" : ["*.png"]
   },
+  "autograding" : {
+      "submission_to_runner" : [ "*.m"],
+      "work_to_details" : ["*.png"]
+  },
   "allow_system_calls" : [
         "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
         "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_SIGNALS",
