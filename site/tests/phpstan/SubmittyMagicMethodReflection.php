@@ -97,6 +97,9 @@ class SubmittyMagicMethodReflection implements MethodReflection {
     }
 
     public function hasSideEffects(): TrinaryLogic {
-        return TrinaryLogic::createMaybe();
+        if (str_starts_with($this->method_name, "set")) {
+            return TrinaryLogic::createYes();
+        }
+        return TrinaryLogic::createNo();
     }
 }
