@@ -16,6 +16,9 @@ use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use Seld\JsonLint\JsonParser;
+use Seld\JsonLint\ParsingException;
+use Seld\JsonLint\DuplicateKeyException;
 
 /**
  * Class AdminGradeableController
@@ -539,6 +542,34 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
+        }
+        $config_dir = $gradeable->getAutogradingConfigPath();
+
+        if (is_dir($config_dir)) {
+            $config_file = FileUtils::joinPaths($config_dir, 'config.json');
+
+            if (file_exists($config_file)) {
+                $json_parser = new JsonParser();
+                $json = file_get_contents($config_file);
+
+                // Warn instructors for duplicate keys in config.json
+                try {
+                    // Remove // and /* */ comments as many config files contain them (invalid JSON)
+                    $content = preg_replace('!//.*!', '', $json);
+                    $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
+
+                    $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
+                } catch (DuplicateKeyException $e) {
+                    $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
+                } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
+
+                // Warn instructors about invalid JSON content
+                try {
+                    $json_parser->parse($json);
+                } catch (ParsingException $e) {
+                    $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
+                }
+            }
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
