@@ -98,7 +98,7 @@ class UnverifiedUserEntity {
             $this->user_password = password_hash($user_password, PASSWORD_DEFAULT);
         }
         else {
-            $this->user_password = $password;
+            $this->user_password = $user_password;
         }
     }
 

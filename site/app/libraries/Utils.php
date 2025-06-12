@@ -117,14 +117,14 @@ class Utils {
      * @param array<mixed> $requirements The user id requirements taken from the config file, like length, name requirements, etc.
      */
     public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
-        // Allow any password
-        if ($requirements['any_password'] === true) {
-            return true;
-        }
-
         if ($requirements['max_length'] <= strlen($user_id) || $requirements['min_length'] > strlen($user_id)) {
             return false;
         }
+        // Allow any user ID, if it fits in the size restraints.
+        if ($requirements['any_user_id'] === true) {
+            return true;
+        }
+
         elseif ($requirements['require_name'] === true) {
             $name_requirements = $requirements['name_requirements'];
             $given_first = $name_requirements['given_first'] === 'true';
