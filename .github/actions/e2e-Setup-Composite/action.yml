@@ -196,7 +196,8 @@ runs:
     - name: Check logs
       if: failure()
       run: |
-        ls -l /usr/lib/apache2/suexec
+        sudo apt-get install net-tools
+        netstat -anvp tcp | awk 'NR<3 || /LISTEN/'
         systemctl status apache2.service --no-pager
         journalctl -xeu apache2.service --no-pager
         apache2ctl configtest
