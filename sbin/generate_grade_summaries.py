@@ -56,7 +56,6 @@ def main():
 
     """Automatically call Save & Load GUI Customization API endpoints"""
     try:
-
         customization_file = os.path.join(data_dir, 'courses', semester, course, 'rainbow_grades', 'customization.json')
         if not os.path.exists(customization_file):
             raise Exception('Unable to locate customization.json file')
@@ -79,8 +78,10 @@ def main():
             ),
             headers={'Authorization': token},
         )
-    except Exception:
-        print("ERROR: Invalid arguments.", file=stderr)
+    except Exception as save_load_exception:
+        print("ERROR: Failed to save or load Rainbow Grades GUI customization for {}.{} - {}".format(
+            semester, course, save_load_exception
+        ), file=stderr)
         exit(-1)
 
     if save_response.status_code == 200 and load_response.status_code == 200:
@@ -92,20 +93,18 @@ def main():
                 semester, course
             ))
         else:
-            print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{}.".format(
-                semester, course
+            print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
+                semester, course, save_response["message"]
             ), file=stderr)
-            print("Reason:{}".format(save_response["message"]), file=stderr)
 
         if len(load_response) > 0:
             print("Successfully loaded Rainbow Grades GUI customization for {}.{}".format(
                 semester, course
             ))
         else:
-            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{}.".format(
+            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{}".format(
                 semester, course
             ), file=stderr)
-            print("Reason:{}".format(load_response), file=stderr)
     else:
         print("ERROR: Submitty Service Unavailable.", file=stderr)
 
@@ -117,8 +116,10 @@ def main():
             ),
             headers={'Authorization': token}
         )
-    except Exception:
-        print("ERROR: Invalid arguments.", file=stderr)
+    except Exception as grade_generation_exception:
+        print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
+            semester, course, grade_generation_exception
+        ), file=stderr)
         exit(-1)
 
     if grade_generation_response.status_code == 200:
@@ -128,11 +129,8 @@ def main():
                 semester, course
             ))
         else:
-            print("ERROR: Failed to generate grade summaries for {}.{}.".format(
-                semester, course
-            ), file=stderr)
-            print("Reason:{}".format(
-                grade_generation_response["message"]
+            print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
+                semester, course, grade_generation_response["message"]
             ), file=stderr)
     else:
         print("ERROR: Submitty Service Unavailable.", file=stderr)
