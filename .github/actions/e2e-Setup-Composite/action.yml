@@ -197,9 +197,9 @@ runs:
       if: failure()
       run: |
         ls -l /usr/lib/apache2/suexec
-        apache2ctl configtest
         systemctl status apache2.service --no-pager
         journalctl -xeu apache2.service --no-pager
+        apache2ctl configtest
       shell: bash
 
 
