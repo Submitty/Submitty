@@ -94,13 +94,16 @@ class AutoGradingView extends AbstractView {
             }
         }
 
-        $queueData = [ 'in_queue' => false ];
+        $queueData = [
+            'in_queue' => false,
+            'check_refresh_submission_url' => $this->core->buildCourseUrl([ 'gradeable', $gradeable->getId(), $version_instance->getVersion(), 'check_refresh' ]),
+            'in_progress_grading' => $version_instance->isGrading()
+        ];
 
         if ($version_instance->isQueued()) {
             $queueData['in_queue'] = true;
             $queueData['queue_pos'] = $version_instance->getQueuePosition();
             $queueData['queue_total'] = $this->core->getGradingQueue()->getQueueCount();
-            $queueData['check_refresh_submission_url'] = $this->core->buildCourseUrl([ 'gradeable', $gradeable->getId(), $version_instance->getVersion(), 'check_refresh' ]);
         }
 
         $this->core->getOutput()->addInternalCss('autograding-results-box.css');
@@ -123,7 +126,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grading' => $gradeable->isTaGrading(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'docker_error' => $docker_error,
-            'docker_error_data' => $docker_error_data,
+            'docker_error_data' => $docker_error_data
         ]));
     }
 
