@@ -124,8 +124,7 @@ class Utils {
         if ($requirements['any_user_id'] === true) {
             return true;
         }
-
-        elseif ($requirements['require_name'] === true) {
+        if ($requirements['require_name'] === true) {
             $name_requirements = $requirements['name_requirements'];
             $given_first = $name_requirements['given_first'] === 'true';
 
@@ -138,7 +137,7 @@ class Utils {
             }
             return false;
         }
-        elseif ($requirements['require_email'] === true) {
+        if ($requirements['require_email'] === true) {
             if ($requirements['email_requirements']['whole_email']) {
                 return $user_id === $email;
             }
@@ -151,9 +150,7 @@ class Utils {
                 return substr($user_id, 0, $requirements['email_requirements']['prefix_count']) === substr($email, 0, $requirements['email_requirements']['prefix_count']);
             }
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     /**

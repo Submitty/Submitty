@@ -17,7 +17,7 @@ function inputData(email = valid_email, user_id = valid_user_id, password = vali
 
 describe('Self account creation tests', () => {
     it('Test all paths of account creation', () => {
-        cy.visit()
+        cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
         // Not accepted email extension
         inputData('test.email.bad@bad.com');
@@ -36,7 +36,7 @@ describe('Self account creation tests', () => {
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Password does not meet the requirements');
         // Passwords don't match
-        inputData(undefined, undefined, 'Password123!', 'NotPassword123!')
+        inputData(undefined, undefined, 'Password123!', 'NotPassword123!');
         cy.get('[data-testid="confirm-password"]').blur();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'Passwords do not match');
 
