@@ -5,7 +5,6 @@ namespace app\controllers\forum;
 use app\entities\UserEntity;
 use app\libraries\Core;
 use app\libraries\ForumUtils;
-use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
