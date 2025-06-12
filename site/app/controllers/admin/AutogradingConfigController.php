@@ -149,7 +149,6 @@ class AutogradingConfigController extends AbstractController {
 
         $msg = 'Gradeable config uploaded';
         $this->core->addSuccessMessage($msg);
-
         return new MultiResponse(
             JsonResponse::getSuccessResponse([
                 'config_path' => $target_dir
