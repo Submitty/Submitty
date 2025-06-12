@@ -68,14 +68,14 @@ def main():
                 base_url, semester, course
             ),
             headers={'Authorization': token},
-            data = {"json_string": json.dumps(customization_data)}
+            data={"json_string": json.dumps(customization_data)}
         )
         save_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
                 base_url, semester, course
             ),
             headers={'Authorization': token},
-            data = {"json_string": json.dumps(customization_data)}
+            data={"json_string": json.dumps(customization_data)}
         )
     except Exception:
         print("ERROR: Invalid arguments.", file=stderr)
@@ -93,12 +93,10 @@ def main():
                 semester, course
             ), file=stderr)
             print("Reason:{}".format(
-                load_response["message"],
-                save_response["message"]
+                load_response["message"] + " " + save_response["message"]
             ), file=stderr)
     else:
         print("ERROR: Submitty Service Unavailable.", file=stderr)
-
 
     """Automatically call Generate Grade Summaries API"""
     try:

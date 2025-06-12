@@ -611,10 +611,14 @@ class ReportController extends AbstractController {
         }
     }
 
-
+    /**
+     * Writes to the rainbow grades customization file
+     *
+     * @return array<string, mixed>
+     */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
     #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
-    public function writeToCustomization() {
+    public function writeToCustomization(): array {
         // Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -635,10 +639,14 @@ class ReportController extends AbstractController {
         return $this->core->getOutput()->renderJsonError($msg);
     }
 
-
+    /**
+     * Generates the rainbow grades customization page
+     *
+     * @return array<string, mixed>|null
+     */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
     #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
-    public function generateCustomization() {
+    public function generateCustomization(): array| null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -708,6 +716,8 @@ class ReportController extends AbstractController {
                 'csrfToken' => $this->core->getCsrfToken(),
             ]);
         }
+
+        return null;
     }
 
 
