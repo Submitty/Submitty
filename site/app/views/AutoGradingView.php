@@ -126,7 +126,7 @@ class AutoGradingView extends AbstractView {
             'is_ta_grading' => $gradeable->isTaGrading(),
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'docker_error' => $docker_error,
-            'docker_error_data' => $docker_error_data
+            'docker_error_data' => $docker_error_data,
         ]));
     }
 
