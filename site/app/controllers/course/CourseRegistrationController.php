@@ -16,15 +16,20 @@ class CourseRegistrationController extends AbstractController {
         $subject = "Self-registration of $user for course $course";
         $body = "Student $user has self-registered for course $course for term $term.";
         $emails = [];
-        foreach ($instructors as $instructor) {
-            $emails[] = new Email(
-                $this->core,
-                [
-                    "subject" => $subject,
-                    "body" => $body,
-                    "to_user_id" => $instructor
-                ]
-            );
+        $instructors_settings = $this->core->getQueries()->getUsersNotificationSettings($instructors);
+
+        foreach ($instructors_settings as $instructor_setting) {
+            // If the instructor has notifications enabled for self registrations add to email list
+            if ($instructor_setting['self_registration_email']) {
+                $emails[] = new Email(
+                    $this->core,
+                    [
+                        'subject' => $subject,
+                        'body' => $body,
+                        'to_user_id' => $instructor_setting['user_id'],
+                    ]
+                );
+            }
         }
 
         $this->core->getNotificationFactory()->sendEmails($emails);
@@ -50,8 +55,21 @@ class CourseRegistrationController extends AbstractController {
 
     public function registerCourseUser(string $term, string $course): void {
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-        $this->core->getUser()->setRegistrationSection($default_section);
-        $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+        $user = $this->core->getUser();
+        $user_id = $user->getId();
+        if ($this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
+            if ($this->core->getQueries()->checkStudentActiveInCourse($user_id, $course, $term)) {
+                // User is already registered and active
+                return;
+            }
+            $this->core->getUser()->setRegistrationSection($default_section);
+            $this->core->getQueries()->updateUser($user, $term, $course);
+        }
+        else {
+            $this->core->getUser()->setRegistrationSection($default_section);
+            $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+        }
+
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
         $this->notifyInstructors($this->core->getUser()->getId(), $term, $course, $instructor_ids);
     }

@@ -412,6 +412,7 @@ class ForumThreadView extends AbstractView {
     public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
         $first = true;
         $post_data = [];
+        $anon_user_id = hash('sha3-224', $this->core->getUser()->getId());
         $csrf_token = $this->core->getCsrfToken();
         $GLOBALS['totalAttachments'] = 0;
         $user = $this->core->getUser();
@@ -483,6 +484,7 @@ class ForumThreadView extends AbstractView {
             "form_action_link" => $form_action_link,
             "merge_thread_content" => $merge_thread_content,
             "csrf_token" => $csrf_token,
+            "anon_user_id" => $anon_user_id,
             "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],

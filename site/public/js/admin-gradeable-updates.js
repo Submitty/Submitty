@@ -155,6 +155,7 @@ $(document).ready(() => {
     };
 
     ajaxCheckBuildStatus();
+    checkWarningBanners();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
@@ -261,6 +262,7 @@ $(document).ready(() => {
                     }
                 }
                 updateErrorMessage();
+                checkWarningBanners();
             }, updateGradeableErrorCallback);
     });
 
@@ -312,6 +314,35 @@ $(document).ready(() => {
             }
         });
 });
+
+function checkWarningBanners() {
+    $('#gradeable-dates-warnings-banner').hide();
+    if ($('#yes_grade_inquiry_allowed').is(':checked')) {
+        const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
+        const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
+
+        // hide/show the element when the start date is before/after the due date respectfully
+        if (grade_inquiry_start_date > grade_inquiry_due_date) {
+            $('#grade-inquiry-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#grade-inquiry-dates-warning').hide();
+        }
+    }
+
+    if ($('#has_release_date_yes').is(':checked')) {
+        const release_date = $('#date_released').val();
+        const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
+        if (release_date > grade_inquiry_due_date) {
+            $('#no-grade-inquiry-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#release-dates-warning').hide();
+        }
+    }
+}
 
 function ajaxRebuildGradeableButton() {
     const gradeable_id = $('#g_id').val();
@@ -509,12 +540,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if (students_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'student' column");
+                    alert('Cannot process file, requires exactly one labelled \'student\' column');
                     return;
                 }
 
                 if (graders_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'grader' column");
+                    alert('Cannot process file, requires exactly one labelled \'grader\' column');
                     return;
                 }
 
@@ -533,7 +564,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
-                    alert("UPDATES DISABLED: no 'container-rubric' element!");
+                    alert('UPDATES DISABLED: no \'container-rubric\' element!');
                     return;
                 }
                 // Don't process updates until the page is done loading
@@ -584,7 +615,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     else {
         const container = $('#container-rubric');
         if (container.length === 0) {
-            alert("UPDATES DISABLED: no 'container-rubric' element!");
+            alert('UPDATES DISABLED: no \'container-rubric\' element!');
             return;
         }
         // Don't process updates until the page is done loading

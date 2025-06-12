@@ -1,4 +1,3 @@
-
 /* stylelint-disable selector-class-pattern -- Select2 internal classes */
 .select2-container .select2-selection,
 .select2-container .select2-selection__rendered,
@@ -11,8 +10,10 @@
 }
 
 /* stylelint-disable selector-descendant-combinator-no-non-space -- line too long */
-.select2-container .select2-dropdown .select2-results__options
-.select2-results__option.select2-results__option--selected {
+.select2-container
+    .select2-dropdown
+    .select2-results__options
+    .select2-results__option.select2-results__option--selected {
     background-color: var(--submitty-logo-blue);
 }
 
@@ -23,7 +24,8 @@
     color: var(--standard-dark-gray);
 }
 
+[data-theme="dark"]
 /* stylelint-disable-next-line selector-id-pattern */
-[data-theme="dark"] #select2-time_zone_drop_down-container.select2-selection__rendered {
+#select2-time_zone_drop_down-container.select2-selection__rendered {
     color: var(--text-black);
 }

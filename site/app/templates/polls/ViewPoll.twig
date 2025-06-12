@@ -107,6 +107,9 @@
                 </fieldset>
                 {% if not user_admin and poll.isOpen() %}
                     <button type="submit" data-testid="submit-answer" class="btn btn-primary student-submit">Submit</button>
+                    <script>
+                        initializeStudentSocketClient('polls-{{ poll.getId() }}-student');
+                    </script>
                 {% endif %}
             </form>
             {% if not user_admin and poll.isOpen() and poll.getAllowsCustomResponses() %}
@@ -165,12 +168,19 @@
                     color: [],
                 },
             }];
+
+            // Store the position of each response for incoming websocket updates
+            const responseIndices = {};
+            let response = "";
+            let position = 0;
             const [correctColor, defaultColor] =
             [window.getComputedStyle(document.body).getPropertyValue('--histogram-correct'),
                 window.getComputedStyle(document.body).getPropertyValue('--histogram-default')];
             {% for option in poll.getOptions() %}
-                data[0].x.push("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
-                data[0].y.push({{ response_counts[option.getId()] }});
+                response = String("{{ option.getResponse()|replace({"\n": " ", "\r": " ", "\t": " "})|e('js') }}");
+                responseIndices[response] = position++;
+                data[0].x.push(response);
+                data[0].y.push(Number("{{ response_counts[option.getId()] }}"));
                 data[0].marker.color.push(
                     {{ option.isCorrect() and poll.isReleaseAnswer() ? 'correctColor': 'defaultColor' }}
                 );
@@ -178,7 +188,9 @@
             const title_text = new DOMParser().parseFromString("{{ poll.getName() }}", "text/html");
             const width = get_new_chart_width();
             const layout = {
-                title: title_text.documentElement.textContent,
+                title: {
+                    text: title_text.documentElement.textContent,
+                },
                 paper_bgcolor: $("body").css("--default-white"),
                 plot_bgcolor: $("body").css("--default-white"),
                 font: {
@@ -196,6 +208,16 @@
                 }
                 Plotly.relayout(container, update);
             });
+
+            {% if user_admin and poll.isOpen() %}
+            window.histogram = {
+                data: data,
+                layout: layout,
+                responseIndices: responseIndices
+            }
+           
+            initializeInstructorSocketClient('polls-{{ poll.getId() }}-instructor');
+            {% endif %}
         }
     {% endif %}
 </script>
