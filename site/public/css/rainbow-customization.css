@@ -319,7 +319,6 @@ div:has(.override)
 .input-boxes {
     display: inline-grid;
     grid-template-columns: auto auto; /* two columns */
-    grid-auto-rows: auto;
     grid-gap: 0 0.2em;
 }
 

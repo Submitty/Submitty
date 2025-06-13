@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
-use Error;
 
 /**
  * Class RainbowCustomization
@@ -584,7 +583,7 @@ class RainbowCustomization extends AbstractModel {
      * @return string[]
      */
     public function getOmittedSections(): array {
-       return $this->RCJSON?->getOmittedSections() ?? [];
+        return $this->RCJSON?->getOmittedSections() ?? [];
     }
 
     /**
@@ -649,7 +648,6 @@ class RainbowCustomization extends AbstractModel {
 
         if (isset($form_json->omit_section_from_stats)) {
             foreach ($form_json->omit_section_from_stats as $omit_section) {
-                // echo "Adding omitted section: $omit_section\n";
                 $this->RCJSON->addOmittedSection($omit_section);
             }
         }
@@ -691,7 +689,6 @@ class RainbowCustomization extends AbstractModel {
         }
 
         // Write to customization file
-        // var_dump($this->RCJSON->getOmittedSections());
         $this->RCJSON->saveToJsonFile();
     }
 
