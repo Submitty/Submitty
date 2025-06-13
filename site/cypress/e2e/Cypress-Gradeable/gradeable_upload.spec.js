@@ -143,7 +143,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                     rubric: bad_rubric,
                 },
                 headers: {
@@ -151,6 +151,38 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                 },
             }).then((response) => {
                 expect(response.body.message).to.eql('Rubric component does not have all of the parameters');
+            });
+
+            // Invalid syllabus bucket
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: {
+                    title: 'Testing Json',
+                    instructions_url: '',
+                    id: 'hw-invalid',
+                    type: 'Electronic File',
+                    vcs: {
+                        repository_type: 'submitty-hosted',
+                        vcs_path: 'path/to/vcs',
+                        vcs_subdirectory: 'subdirectory',
+                    },
+                    bulk_upload: false,
+                    team_gradeable: {
+                        team_size_max: 3,
+                        gradeable_teams_read: false,
+                    },
+                    grading_inquiry: {
+                        grade_inquiry_per_component_allowed: false,
+                    },
+                    ta_grading: false,
+                    syllabus_bucket: 'Homework'
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.message).to.eql('An error has occurred: Syllabus bucket must be one of the following: homework, assignment, problem-set, quiz, test, exam, exercise, lecture-exercise, reading, lab, recitation, worksheet, project, participation, note, none (for practice only)');
             });
 
             // No ID, Type, or Title
