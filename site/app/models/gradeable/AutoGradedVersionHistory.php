@@ -19,6 +19,7 @@ use app\models\AbstractModel;
  * @method int getGradeTime()
  * @method string getVcsRevision()
  * @method \DateTime getSubmissionTimestamp()
+ * @method \DateTime getFirstAccessTime()
  */
 class AutoGradedVersionHistory extends AbstractModel {
     /** @prop

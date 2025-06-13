@@ -3644,7 +3644,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      *
      * @param  string  $g_id
      * @param  string  $user_id
-     * @param  integer $registration_section
+     * @param  string $registration_section
      * @param  integer $rotating_section
      * @return string $team_id
      */
