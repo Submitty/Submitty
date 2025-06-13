@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { resultsData, queryError } = defineProps<{
-    resultsData: { [key: string]: number | string | null }[];
-    queryError: { error: boolean; message: string };
+    resultsData: { [key: string]: number | string | null }[] | null;
+    queryError: string | false;
 }>();
 </script>
 
@@ -9,15 +9,15 @@ const { resultsData, queryError } = defineProps<{
   <div>
     <h2>Query Results</h2>
     <div
-      v-if="queryError.error"
+      v-if="queryError"
       id="query-results-error"
       class="red-message"
     >
-      <pre id="query-results-error-message">{{ queryError.message }}</pre>
+      <pre id="query-results-error-message">{{ queryError }}</pre>
     </div>
 
     <table
-      v-if="resultsData.length > 0 && !queryError.error"
+      v-else-if="resultsData && resultsData.length > 0"
       class="table table-striped mobile-table"
     >
       <thead>
@@ -48,7 +48,7 @@ const { resultsData, queryError } = defineProps<{
     </table>
 
     <p
-      v-if="!queryError.error && resultsData.length === 0"
+      v-else-if="!queryError && resultsData && resultsData.length === 0"
     >
       No results found.
     </p>

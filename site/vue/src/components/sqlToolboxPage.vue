@@ -20,19 +20,15 @@ const currentQuery = ref({
     query: '',
 });
 
-function changeError(error: boolean, message: string) {
-    queryError.value.error = error;
-    queryError.value.message = message;
+function changeError(message: string | false) {
+    queryError.value = message;
 }
-function changeData(data: { [key: string]: number | string | null }[]) {
+function changeData(data: { [key: string]: number | string | null }[] | null) {
     resultsData.value = data;
 }
 
-const resultsData = ref<{ [key: string]: number | string | null }[]>([]);
-const queryError = ref({
-    error: false,
-    message: '',
-});
+const resultsData = ref<{ [key: string]: number | string | null }[] | null>(null);
+const queryError = ref<string | false>(false);
 
 </script>
 
@@ -84,7 +80,7 @@ const queryError = ref({
   margin-bottom: 5px;
 }
 #run-sql-btn,
-#download-sql-btn
+#download-query-btn
 {
   margin-top: 5px;
   margin-right: 5px;

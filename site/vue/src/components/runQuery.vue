@@ -4,18 +4,18 @@ const { query } = defineProps<{
     query: string;
 }>();
 const emit = defineEmits<{
-    changeData: [{ [key: string]: number | string | null }[]];
-    changeError: [error: boolean, message: string];
+    changeData: [{ [key: string]: number | string | null }[] | null];
+    changeError: [message: string | false];
 }>();
 const runQuery = async () => {
     const result = await runSqlQuery(query) as SqlQueryResult;
     if (result.status === 'fail') {
-        emit('changeError', true, result.message);
+        emit('changeError', result.message);
         emit('changeData', []);
     }
     else {
         emit('changeData', result.data);
-        emit('changeError', false, '');
+        emit('changeError', false);
     }
 };
 </script>
