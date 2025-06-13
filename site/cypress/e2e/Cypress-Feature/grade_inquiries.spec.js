@@ -70,7 +70,7 @@ describe('Test cases revolving around grade inquiries', () => {
         // student view
         cy.login('beahaf');
         cy.visit(['sample', 'gradeable', gradeableId]);
-        cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 01/01/9998 @ 12:00 AM EST');
+        cy.get('[data-testid="grade-inquiry-container"]').should('contain.text', 'Grade inquiries are due by 9998-01-01 @ 12:00 AM EST');
     });
     it('should test cases regarding abnormal grade inquiry dates', () => {
         cy.login();

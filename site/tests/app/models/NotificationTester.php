@@ -47,7 +47,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
                 'id' => 'test_notification_id',
                 'seen' => false,
                 'component' => 'test_component_view_only',
-                'created_at' => date('n/j g:i A'),
+                'created_at' => date('Y-m-d g:i A'),
                 'elapsed_time' => 59,
                 'metadata' => json_encode([]),
                 'content' => 'test_content_view_only',
@@ -201,7 +201,7 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("5 hours ago", $notification->getNotifyTime());
 
         $notification->setElapsedTime(90000); // 24 hrs 43 mins 20 secs
-        $created_at = date('n/j g:i A');
+        $created_at = date('Y-m-d g:i A');
         $notification->setCreatedAt($created_at);
 
         $this->assertEquals($created_at, $notification->getNotifyTime());
