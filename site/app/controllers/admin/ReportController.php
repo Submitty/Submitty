@@ -840,6 +840,7 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
+    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
     public function setRainbowGradeCustomization(): JsonResponse {
 
         // Extract the value from $_POST
@@ -883,6 +884,7 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
+    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
