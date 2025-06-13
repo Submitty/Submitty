@@ -272,7 +272,7 @@ class ChatroomController extends AbstractController {
                 $display_name = $user->getDisplayFullName();
             }
             else {
-                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+                $display_name = $user->getDisplayAbbreviatedName();
             }
         }
         $msg_array['display_name'] = $display_name;
