@@ -578,14 +578,15 @@ if not args.worker:
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
-                          "submitty/python:latest",
+                          "submitty/python:latest"
                         ],
             "cpp":      [
-                          "submitty/clang:latest",
                           "submitty/autograding-default:latest",
+                          "submitty/clang:latest",
+                          "submitty/gcc:latest"
                         ],
             "notebook": [
-                          "submitty/autograding-default:latest",
+                          "submitty/autograding-default:latest"
                         ]
         }
 
