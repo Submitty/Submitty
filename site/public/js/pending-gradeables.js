@@ -29,10 +29,12 @@ function applySort(sortKey, direction) {
         const bText = rowB.children[colIndex].textContent.trim();
         let cmp = 0;
         if (sortKey === 'course') {
-            const [courseA, gradeableA = ''] = aText.split(':');
-            const [courseB, gradeableB = ''] = bText.split(':');
+            const courseA = rowA.children[0].textContent.trim();
+            const courseB = rowB.children[0].textContent.trim();
             cmp = courseA.localeCompare(courseB);
             if (cmp === 0) {
+                const gradeableA = rowA.children[1].textContent.trim();
+                const gradeableB = rowB.children[1].textContent.trim();
                 cmp = gradeableA.localeCompare(gradeableB);
             }
         }
