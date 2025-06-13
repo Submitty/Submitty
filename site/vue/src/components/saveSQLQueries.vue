@@ -1,0 +1,166 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import Popup from './popup.vue';
+import { buildCourseUrl, displaySuccessMessage, getCsrfToken } from '../../../ts/utils/server';
+
+const data = defineModel<{
+    query_name: string;
+    query: string;
+}>('data', { required: true });
+
+const emit = defineEmits<{
+    add: [id: number, query_name: string, query: string];
+}>();
+
+type ServerResult = {
+    status: string;
+    message: string | null;
+    data: number;
+};
+
+const showPopup = ref(false);
+const error = ref({
+    error: false,
+    message: '',
+});
+
+const displayError = (message: string) => {
+    error.value.error = true;
+    error.value.message = message;
+    setTimeout(() => {
+        error.value.error = false;
+    }, 5000);
+};
+
+const handleToggle = () => {
+    showPopup.value = !showPopup.value;
+};
+
+const handleSave = async () => {
+    const form = new FormData();
+    form.append('csrf_token', getCsrfToken());
+    form.append('query_name', data.value.query_name);
+    form.append('query', data.value.query);
+
+    try {
+        const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries']), {
+            method: 'POST',
+            body: form,
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save query');
+        }
+
+        const result = await response.json() as ServerResult;
+        if (result.status === 'success') {
+            displaySuccessMessage('Query saved successfully!');
+            const insertedId: number = result.data;
+            emit('add', insertedId, data.value.query_name, data.value.query);
+            showPopup.value = false;
+            data.value.query_name = '';
+            data.value.query = '';
+        }
+        else {
+            displayError(result.message ?? 'An unknown error occurred while saving the query. Please try again later.');
+        }
+    }
+    catch (e) {
+        displayError(`An error occurred while saving the query: ${(e as Error).message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
+    }
+};
+</script>
+
+<template>
+  <Popup
+    title="Save Query"
+    :visible="showPopup"
+    savable
+    @toggle="handleToggle"
+    @save="handleSave"
+  >
+    <template #trigger>
+      <button
+        class="btn btn-primary"
+        @click="handleToggle"
+      >
+        Save Query
+      </button>
+    </template>
+
+    <template #default>
+      <Transition name="fade-error">
+        <div
+          v-if="error.error"
+          class="alert alert-danger"
+        >
+          {{ error.message }}
+        </div>
+      </Transition>
+      <div
+        id="form"
+        ref="formElement"
+        class="form-group"
+      >
+        <label
+          id="query-name-label"
+          for="query-name"
+          class="query-label"
+        >Query Name</label>
+        <input
+          id="query-name"
+          v-model="data.query_name"
+          name="query-name"
+          type="text"
+          maxlength="255"
+          placeholder="Enter a name for your query"
+          required
+        />
+
+        <label
+          id="query-text-label"
+          for="query-text"
+          class="query-label"
+        >Query</label>
+        <textarea
+          id="query-text"
+          v-model="data.query"
+          name="query"
+          rows="6"
+          placeholder="Edit your query here"
+          required
+        />
+      </div>
+    </template>
+  </Popup>
+</template>
+
+<style lang="css" scoped>
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+#query-name {
+  width: 100%;
+}
+
+#query-text {
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+}
+
+#query-text-label {
+  margin-top: 10px;
+}
+
+.fade-error-enter-active,
+.fade-error-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-error-enter-from,
+.fade-error-leave-to {
+  opacity: 0;
+}
+</style>
