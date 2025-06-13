@@ -2,30 +2,61 @@
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
 import Popup from './popup.vue';
+export type ColumnFormats = 'bits' | 'json';
 
-const { columns, labels, cookie } = defineProps<{
+const { columns, labels, cookie, forced = [], format = 'bits', buttonWrapped } = defineProps<{
     columns: string[];
     labels: string[];
     cookie: string;
+    forced?: string[];
+    format?: ColumnFormats;
+    buttonWrapped?: boolean;
 }>();
 
 const selected = ref<boolean[]>([]);
 const visible = ref(false);
 
 function loadColumns() {
-    const cookieData = Cookies.get(cookie)?.split('-') || [];
-    selected.value = columns.map((_, i) => cookieData[i] === '1');
+    if (format === 'json') {
+        const cookieData: Record<string, boolean> = JSON.parse(decodeURIComponent(Cookies.get(cookie) ?? encodeURIComponent('{}'))) as Record<string, boolean>;
+        for (const cookieCol of Object.keys(cookieData)) {
+            if (columns.includes(cookieCol)) {
+                selected.value[columns.indexOf(cookieCol)] = cookieData[cookieCol];
+            }
+        }
+        for (const col of columns) {
+            if (cookieData[col] === undefined) {
+                selected.value[columns.indexOf(col)] = true;
+            }
+        }
+        return;
+    }
+    else if (format === 'bits') {
+        const cookieData = Cookies.get(cookie)?.split('-') || Array(columns.length).fill('1');
+        selected.value = columns.map((_, i) => cookieData[i] === '1');
+    }
 }
 function saveColumns() {
-    Cookies.set(
-        cookie,
-        selected.value.map((v) => (v ? 1 : 0)).join('-'),
-        { expires: 365, path: '' },
-    );
+    if (format === 'json') {
+        const cookieData: Record<string, boolean> = {};
+        columns.forEach((col, i) => {
+            cookieData[col] = selected.value[i];
+        });
+        Cookies.set(cookie, JSON.stringify(cookieData), { expires: 365, path: '/' });
+        window.location.reload();
+        return;
+    }
+    else if (format === 'bits') {
+        Cookies.set(
+            cookie,
+            selected.value.map((v) => (v ? 1 : 0)).join('-'),
+            { expires: 365, path: '/' },
+        );
+    }
     window.location.reload();
 }
 function fillAll(val: boolean) {
-    selected.value = selected.value.map(() => val);
+    selected.value = selected.value.map((_, idx) => forced?.includes(columns[idx]) || val);
 }
 
 function toggle() {
@@ -47,7 +78,10 @@ onMounted(loadColumns);
     @save="saveColumns"
   >
     <template #trigger>
-      <div class="btn-wrapper">
+      <div
+        v-if="buttonWrapped"
+        class="btn-wrapper"
+      >
         <a
           id="toggle-columns"
           data-testid="toggle-columns"
@@ -55,6 +89,13 @@ onMounted(loadColumns);
           @click="toggle"
         >Toggle Columns</a>
       </div>
+      <a
+        v-else
+        id="toggle-columns"
+        data-testid="toggle-columns"
+        class="btn btn-primary"
+        @click="toggle"
+      >Toggle Columns</a>
     </template>
     <template #default>
       <p class="toggle-columns-instructions">
@@ -67,11 +108,12 @@ onMounted(loadColumns);
           class="toggle-checkbox-area"
         >
           <input
-            :id="id"
+            :id="`toggle-${id}`"
             v-model="selected[idx]"
             type="checkbox"
             class="toggle-columns-box"
-            :data-testid="id"
+            :disabled="forced?.includes(id)"
+            :data-testid="`toggle-${id}`"
           />
           <label :for="id">{{ labels[idx] }}</label>
         </div>
