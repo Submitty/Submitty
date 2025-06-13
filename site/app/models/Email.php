@@ -10,6 +10,8 @@ use app\libraries\Core;
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
  * @method void     setUserId($uid)
+ * @method void     setEmailAddress(string $email_address)
+ * @method void     setToName(string $to_name)
 
  * @method string   getSubject()
  * @method string   getBody()
@@ -71,7 +73,7 @@ class Email extends AbstractModel {
     //inject course label into subject
     private function formatSubject(string $subject): string {
         $course = $this->core->getConfig()->getCourse();
-        $label = $course ? "[Submitty $course]" : "[Submitty]";
+        $label = ($course !== null) ? "[Submitty $course]" : "[Submitty]";
         return "$label: $subject";
     }
 
