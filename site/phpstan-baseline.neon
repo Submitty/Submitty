@@ -772,11 +772,6 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 3
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
 			path: app/controllers/admin/AdminGradeableController.php
