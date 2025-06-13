@@ -46,6 +46,10 @@
     flex-grow: 1;
 }
 
+.notification-content {
+    flex: 1;
+}
+
 .notification-time {
     font-size: 0.9rem;
     color: var(--standard-medium-dark-gray);

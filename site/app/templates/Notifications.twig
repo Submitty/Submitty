@@ -30,7 +30,7 @@
                     {% else %}
                         <div>&NegativeMediumSpace;</div>
                     {% endif %}
-                    <div>
+                    <div class="notification-content">
                         {% if hasLink %}
                         <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() == "1" ? 1 : 0}}">
                         {% endif %}
