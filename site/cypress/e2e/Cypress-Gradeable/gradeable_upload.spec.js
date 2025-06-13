@@ -176,7 +176,7 @@ describe('Tests cases revolving around gradeable access and submission', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework'
+                    syllabus_bucket: 'Homework',
                 },
                 headers: {
                     Authorization: key,
