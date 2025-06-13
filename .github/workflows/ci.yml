@@ -407,6 +407,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -416,6 +417,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         ports:
           - 5432
 
@@ -502,6 +504,7 @@ jobs:
               echo "submitty_dbuser"              # course db pass
               echo ""                             # timezone
               echo ""                             # default locale
+              echo ""                             # default course materials file upload limit
               echo "http://localhost"             # submitty url
               echo ""                             # vcs url
               echo ""                             # institution name
@@ -648,6 +651,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -814,6 +818,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -891,6 +896,7 @@ jobs:
           POSTGRES_PASSWORD: submitty_dbuser
           POSTGRES_USER: postgres
           TZ: America/New_York
+          PGTZ: America/New_York
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

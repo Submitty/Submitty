@@ -17,6 +17,7 @@ use app\libraries\Utils;
  * @method string getDescription()
  * @method array[] getMessages()
  * @method boolean getPublic()
+ * @method boolean isDisplayAsSequenceDiagram()
  */
 class GradeableAutocheck extends AbstractModel {
     /** @prop
