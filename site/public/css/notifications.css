@@ -6,7 +6,7 @@
 
 #notifications-caption {
     background: var(--alert-background-blue);
-    margin: 0 -30px;
+    margin: 0 -30px 15px;
     padding: 8px 30px;
     display: table-caption;
 }
@@ -37,7 +37,7 @@
 }
 
 .notification-type {
-    margin-right: 0.5em;
+    margin-right: 1em;
 }
 
 .notification-contents {
@@ -46,23 +46,11 @@
     flex-grow: 1;
 }
 
-.notification-content {
-    display: -webkit-box;
-    line-clamp: 3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
-
-.mobile-notification-time {
-    font-size: 12px;
+.notification-time {
+    font-size: 0.9rem;
     color: var(--standard-medium-dark-gray);
     flex: 1 0 90%;
-}
-
-.notification-time {
-    display: none;
+    margin-top: 2px;
 }
 
 .notification-seen {
@@ -87,30 +75,4 @@
 
 .row-spacing {
     padding-top: 20px;
-}
-
-.notification-settings-header {
-    /* stylelint-disable-next-line declaration-no-important */
-    margin-bottom: 0 !important; /* Overrides .content h2 { in server.css */
-}
-
-@media (min-width: 768px) {
-    #notification-header {
-        display: table-row;
-    }
-
-    .notification {
-        display: table-row;
-
-        /* padding: 0; */
-    }
-
-    .notification > * {
-        display: table-cell;
-        padding: 9px;
-    }
-
-    .mobile-notification-time {
-        display: none;
-    }
 }

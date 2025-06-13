@@ -22,12 +22,6 @@
         {% if notifications is empty %}
             <p id="empty-notifications">No notifications.</p>
         {% else %}
-            <div id="notification-header" class="notification">
-                <div>&NegativeMediumSpace;</div> {# Notification type has empty header #}
-                <div>Notification</div>
-                <div>Time</div>
-                <div class="notification-seen">Mark As Seen</div>
-            </div>
             {% for notification in notifications %}
                 {% set hasLink = not notification.hasEmptyMetadata() %}
                 <div class="notification">
@@ -36,22 +30,21 @@
                     {% else %}
                         <div>&NegativeMediumSpace;</div>
                     {% endif %}
-                    {% if hasLink %}
+                    <div>
+                        {% if hasLink %}
                         <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() == "1" ? 1 : 0}}">
-                    {% endif %}
-                    <div class="notification-contents">
-                        <div class="notification-content">
-                            {{ notification.getNotifyContent() }}
-                        </div>
-                        <div class="mobile-notification-time">
+                        {% endif %}
+                            <div class="notification-contents">
+                                <div class="notification-content">
+                                    {{ notification.getNotifyContent() }}
+                                </div>
+                            </div>
+                        {% if hasLink %}
+                        </a>
+                        {% endif %}
+                        <div class="notification-time">
                             {{ notification.getNotifyTime() }}
                         </div>
-                    </div>
-                    {% if hasLink %}
-                        </a>
-                    {% endif %}
-                    <div class="notification-time">
-                        {{ notification.getNotifyTime() }}
                     </div>
                     {% if not notification.isSeen() %}
                         <a class="notification-seen black-btn" href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen" aria-label="Mark as seen">
