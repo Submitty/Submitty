@@ -60,5 +60,5 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
+    metadata = MetaData()
     return db, metadata

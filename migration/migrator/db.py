@@ -1,7 +1,7 @@
 """SQLAlchemy Tables module."""
 
 from pathlib import Path
-from sqlalchemy import Column, create_engine, inspect
+from sqlalchemy import Column, create_engine, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.types import SmallInteger, String, TIMESTAMP
 from sqlalchemy.orm import sessionmaker
@@ -23,13 +23,12 @@ class Database:
         self.DynamicBase = declarative_base(class_registry=dict())
         if 'database_driver' not in params:
             raise RuntimeError('Need to supply a driver')
-        connection_string = Database.get_connection_string(params)
 
+        connection_string = Database.get_connection_string(params)
         self.engine = create_engine(connection_string)
-        self.engine.connect()
+        self.conn = self.engine.connect()
         self.inspector = inspect(self.engine)
-        self.Session = sessionmaker()
-        self.Session.configure(bind=self.engine)
+        self.Session = sessionmaker(self.engine)
         self.session = self.Session()
 
         self.migration_table = get_migration_table(environment, self.DynamicBase)
@@ -79,7 +78,7 @@ class Database:
         :type query: str
         :rtype: sqlalchemy.engine.ResultProxy
         """
-        return self.session.execute(query)
+        return self.session.execute(text(query))
 
     def commit(self):
         """Run commit on the current session."""
@@ -98,11 +97,7 @@ class Database:
         :param table_name: Name of table to check for
         :type table_name: str
         """
-        try:
-            return self.inspector.has_table(table_name)
-        except AttributeError:  # pragma: no cover
-            # To support sqlalchemy < 1.4
-            return self.engine.has_table(table_name)
+        return self.inspector.has_table(table_name)
 
     def table_has_column(self, table, search_column):
         """
