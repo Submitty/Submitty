@@ -658,8 +658,8 @@ if [ ! -d "${clangsrc}" ]; then
 
     mkdir -p ${clangsrc}
 
-    # clone the clang sources, circa Nov. 2018
-    git clone --depth 1 --branch llvmorg-7.1.0 https://github.com/llvm/llvm-project.git ${clangsrc}/source
+    # clone the clang sources, circa Jan. 2023
+    git clone --depth 1 --branch llvmorg-13.0.1 https://github.com/llvm/llvm-project.git ${clangsrc}/source
     cp -R ${clangsrc}/source/llvm ${clangsrc}/llvm
     cp -R ${clangsrc}/source/clang ${clangsrc}/llvm/tools
     cp -R ${clangsrc}/source/clang-tools-extra ${clangsrc}/llvm/tools/clang/tools/
@@ -705,6 +705,7 @@ ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
 en_US
+100
 ${SUBMISSION_URL}
 
 
@@ -860,7 +861,6 @@ ${proxy}
 fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
-su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES

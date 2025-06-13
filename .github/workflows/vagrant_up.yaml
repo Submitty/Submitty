@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: brew install vagrant
+      - run: brew install --cask vagrant
       - name: install virtual box 7.0.20
         run: |
           curl -LO https://download.virtualbox.org/virtualbox/7.0.20/VirtualBox-7.0.20-163906-OSX.dmg

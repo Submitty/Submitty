@@ -7,11 +7,11 @@ namespace tests\app\libraries;
 use app\libraries\GradeableType;
 
 class GradeableTypeTester extends \PHPUnit\Framework\TestCase {
-    public function typeDataProvider(): array {
+    public static function typeDataProvider(): array {
         return [
             [GradeableType::ELECTRONIC_FILE, "Electronic File"],
             [GradeableType::CHECKPOINTS, "Checkpoints"],
-            [GradeableType::NUMERIC_TEXT, "Numeric/Text"]
+            [GradeableType::NUMERIC_TEXT, "Numeric"]
         ];
     }
 
@@ -28,7 +28,7 @@ class GradeableTypeTester extends \PHPUnit\Framework\TestCase {
         GradeableType::typeToString(-1);
     }
 
-    public function stringDataProvider(): array {
+    public static function stringDataProvider(): array {
         return [
             ["Electronic File", GradeableType::ELECTRONIC_FILE],
             ["Checkpoints", GradeableType::CHECKPOINTS],

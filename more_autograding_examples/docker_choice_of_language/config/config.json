@@ -1,0 +1,73 @@
+{
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "assignment_message": "Please submit your code in one of 3 languages. Only submit to a single box",
+    "part_names": ["Rust", "C", "C++"],
+
+    "one_part_only": true,
+
+    "autograding": {
+        "submission_to_compilation": ["**/*.rs", "**/*.c", "**/*.h", "**/*.cpp", "**/*.hpp"]
+    },
+    "testcases": [
+        {
+            "type": "Compilation",
+            "title": "Rust Compilation",
+            "containers": [
+                {
+                    // Rust will use dynamic linking by default, and libraries may not be available in a different image.
+                    "commands": "/usr/local/cargo/bin/rustc part1/*.rs -o a.out -C target-feature=+crt-static",
+                    "container_image": "submitty/rust:latest"
+                }
+            ],
+            "extra_credit": true,
+            "executable_name": "a.out",
+            "points": 1
+        },
+        {
+            "type": "Compilation",
+            "title": "C Compilation",
+            "containers": [
+                {
+                    "commands": "/usr/bin/gcc part2/*.c -o a.out",
+                    "container_image": "submitty/gcc:latest"
+                }
+            ],
+            "extra_credit": true,
+            "executable_name": "a.out",
+            "points": 1
+        },
+        {
+            "type": "Compilation",
+            "title": "C++ Compilation",
+            "containers": [
+                {
+                    "commands": "/usr/bin/clang++ part3/*.cpp -o a.out",
+                    "container_image": "submitty/clang:latest"
+                }
+            ],
+            "extra_credit": true,
+            "executable_name": "a.out",
+            "points": 1
+        },
+        {
+            "title": "Check Output",
+            "details": "Run Program",
+            "containers": [
+                {
+                    "commands": "./a.out",
+                    "container_image": "submitty/autograding-default:latest"
+                }
+            ],
+            "points": 5,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "diff",
+                    "comparison": "byLinebyChar",
+                    "expected_string": "Hello World!\n"
+                }
+            ]
+        }
+    ]
+}

@@ -1,4 +1,10 @@
 {
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/pdflatex:latest"
+    },
+
     // 2 mb maximum submission size
     "max_submission_size" : 2000000,
 

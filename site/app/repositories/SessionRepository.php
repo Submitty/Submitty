@@ -11,7 +11,7 @@ class SessionRepository extends EntityRepository {
      * @return Session|null
      */
     public function getActiveSessionById(string $session_id): ?Session {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb->select('s')
             ->from('app\entities\Session', 's')
             ->where('s.session_id = :session_id')
@@ -26,7 +26,7 @@ class SessionRepository extends EntityRepository {
      * @return Session[]
      */
     public function getAllByUser(string $user_id): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb->select('s')
             ->from('app\entities\Session', 's')
             ->where('s.user_id = :user_id')
@@ -41,7 +41,7 @@ class SessionRepository extends EntityRepository {
      * @param string $session_id
      */
     public function removeUserSessionsExcept(string $user_id, string $session_id): void {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb->delete('app\entities\Session', 's')
             ->where('s.user_id = :user_id')
             ->setParameter('user_id', $user_id)
@@ -54,7 +54,7 @@ class SessionRepository extends EntityRepository {
      * Remove all the expired sessions for all users
      */
     public function removeExpiredSessions(): void {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb = $qb->delete('app\entities\Session', 's')
             ->where('s.session_expires < CURRENT_TIMESTAMP()');
         $qb->getQuery()->execute();

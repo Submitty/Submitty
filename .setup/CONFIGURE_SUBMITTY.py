@@ -205,7 +205,8 @@ defaults = {
     'saml_options': {
         'name': '',
         'username_attribute': ''
-    }
+    },
+    'course_material_file_upload_limit_mb': 100
 }
 
 loaded_defaults = {}
@@ -287,6 +288,9 @@ else:
     print()
 
     DEFAULT_LOCALE = get_input('What default language should the Submitty site use?', 'en_US')
+    print()
+
+    COURSE_MATERIAL_UPLOAD_LIMIT_MB = get_input('What is the maximum file upload size for course materials (in MB)?', defaults['course_material_file_upload_limit_mb'])
     print()
 
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
@@ -565,18 +569,19 @@ if not args.worker:
     if not os.path.isfile(CONTAINERS_JSON):
         container_dict = {
             "default":  [
-                          "submitty/clang:6.0",
                           "submitty/autograding-default:latest",
-                          "submitty/java:11",
-                          "submitty/python:3.6",
-                          "submittyrpi/csci1200:default"
+                          "submitty/python:latest",
+                          "submitty/clang:latest",
+                          "submitty/gcc:latest",
+                          "submitty/java:latest",
+                          "submitty/pdflatex:latest"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
-                          "submitty/python:3.6",
+                          "submitty/python:latest",
                         ],
             "cpp":      [
-                          "submitty/clang:6.0",
+                          "submitty/clang:latest",
                           "submitty/autograding-default:latest",
                         ],
             "notebook": [
@@ -649,6 +654,7 @@ if not args.worker:
     config['timezone'] = TIMEZONE
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
+    config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
 
 config['worker'] = True if args.worker == 1 else False
 

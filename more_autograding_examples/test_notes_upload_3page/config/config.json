@@ -1,4 +1,10 @@
 {
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/pdflatex:latest"
+    },
+
     // 3 mb maximum submission size
     "max_submission_size" : 3000000,
 
@@ -13,6 +19,11 @@
         "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_ADVANCED",
         "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD"
     ],
+
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/pdflatex:latest"
+    },
     
     "autograding" : {
 	"submission_to_compilation" : [ ],

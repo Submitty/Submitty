@@ -617,6 +617,41 @@ $$;
 
 
 --
+-- Name: active_graders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_graders (
+    id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    gc_id integer NOT NULL,
+    ag_user_id character varying(255),
+    ag_team_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT ag_user_team_id_check CHECK (((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_graders_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_graders_id_seq OWNED BY public.active_graders.id;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -898,8 +933,29 @@ CREATE TABLE public.forum_attachments (
     post_id integer NOT NULL,
     file_name character varying NOT NULL,
     version_added integer DEFAULT 1 NOT NULL,
-    version_deleted integer DEFAULT 0 NOT NULL
+    version_deleted integer DEFAULT 0 NOT NULL,
+    id integer NOT NULL
 );
+
+
+--
+-- Name: forum_attachments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.forum_attachments_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: forum_attachments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.forum_attachments_id_seq OWNED BY public.forum_attachments.id;
 
 
 --
@@ -1431,7 +1487,8 @@ CREATE TABLE public.notification_settings (
     team_invite_email boolean DEFAULT true NOT NULL,
     team_joined_email boolean DEFAULT true NOT NULL,
     team_member_submission_email boolean DEFAULT true NOT NULL,
-    self_notification_email boolean DEFAULT false NOT NULL
+    self_notification_email boolean DEFAULT false NOT NULL,
+    self_registration_email boolean DEFAULT true NOT NULL
 );
 
 
@@ -1924,6 +1981,13 @@ CREATE TABLE public.viewed_responses (
 
 
 --
+-- Name: active_graders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('public.active_graders_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1956,6 +2020,13 @@ ALTER TABLE ONLY public.course_materials_access ALTER COLUMN id SET DEFAULT next
 --
 
 ALTER TABLE ONLY public.course_materials_sections ALTER COLUMN id SET DEFAULT nextval('public.course_materials_sections_id_seq'::regclass);
+
+
+--
+-- Name: forum_attachments id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_attachments ALTER COLUMN id SET DEFAULT nextval('public.forum_attachments_id_seq'::regclass);
 
 
 --
@@ -2085,6 +2156,30 @@ ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.thre
 
 
 --
+-- Name: active_graders active_graders_grader_id_gc_id_ag_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_team_id_key UNIQUE (grader_id, gc_id, ag_team_id);
+
+
+--
+-- Name: active_graders active_graders_grader_id_gc_id_ag_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_user_id_key UNIQUE (grader_id, gc_id, ag_user_id);
+
+
+--
+-- Name: active_graders active_graders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: gradeable_teams anon_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2162,6 +2257,14 @@ ALTER TABLE ONLY public.electronic_gradeable_version
 
 ALTER TABLE ONLY public.electronic_gradeable
     ADD CONSTRAINT electronic_gradeable_g_id_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: forum_attachments forum_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.forum_attachments
+    ADD CONSTRAINT forum_attachments_pkey PRIMARY KEY (id);
 
 
 --
@@ -2720,6 +2823,38 @@ CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON publ
 
 
 --
+-- Name: active_graders active_graders_ag_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_ag_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3004,7 +3139,7 @@ ALTER TABLE ONLY public.gradeable_access
 --
 
 ALTER TABLE ONLY public.gradeable_anon
-    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT gradeable_anon_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -3324,7 +3459,7 @@ ALTER TABLE ONLY public.peer_feedback
 --
 
 ALTER TABLE ONLY public.peer_grading_panel
-    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id);
+    ADD CONSTRAINT peer_grading_panel_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.electronic_gradeable(g_id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
