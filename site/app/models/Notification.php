@@ -138,21 +138,6 @@ class Notification extends AbstractModel {
         return $metadata['thread_id'] ?? -1;
     }
 
-    /**
-     * Trim long $message up to 40 character and filter newline
-     *
-     * @param string $message
-     * @return string the trimmed message
-     */
-    public static function textShortner(string $message): string {
-        $max_length = 40;
-        $message = str_replace("\n", " ", $message);
-        if (strlen($message) > $max_length) {
-            $message = substr($message, 0, $max_length - 3) . "...";
-        }
-        return $message;
-    }
-
     public function hasEmptyMetadata(): bool {
         return empty(json_decode($this->getNotifyMetadata()));
     }
