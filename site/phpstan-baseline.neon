@@ -1435,11 +1435,6 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\ReportController\\:\\:generateCustomization\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/ReportController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\ReportController\\:\\:generateGradeSummaries\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/ReportController.php

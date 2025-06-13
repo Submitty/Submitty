@@ -611,9 +611,14 @@ class ReportController extends AbstractController {
         }
     }
 
-
+    /**
+     * Writes to the rainbow grades customization file
+     *
+     * @return array<string, mixed>
+     */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
-    public function writetocustomization(): JsonResponse {
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
+    public function writeToCustomization(): array {
         // Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -621,7 +626,7 @@ class ReportController extends AbstractController {
         if (isset($_POST["json_string"])) {
             try {
                 $customization->processForm();
-                return JsonResponse::getSuccessResponse();
+                return $this->core->getOutput()->renderJsonSuccess();
             }
             catch (\Exception $e) {
                 $msg = 'Error processing form';
@@ -631,32 +636,37 @@ class ReportController extends AbstractController {
             $msg = 'No JSON string provided';
         }
 
-        $this->core->addErrorMessage($msg);
-        return JsonResponse::getErrorResponse($msg);
+        return $this->core->getOutput()->renderJsonError($msg);
     }
 
-
-    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization")]
-    public function generateCustomization() {
+    /**
+     * Generates the rainbow grades customization page or writes to the customization file
+     * based on the existence of the "json_string" request body.
+     *
+     * @return array<string, mixed>|null
+     */
+    #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
+    public function generateCustomization(): array| null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
         if (isset($_POST["json_string"])) {
-            //Handle user input (the form) being submitted
+            // Handle user input (the form) being submitted
             try {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
+                return $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
             }
             catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
-                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+                return $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
             }
             catch (\Exception $e) {
                 //Catches any other exceptions, should be "unexpected" issues
-                $this->core->getOutput()->renderJsonError($e->getMessage());
+                return $this->core->getOutput()->renderJsonError($e->getMessage());
             }
         }
         else {
@@ -707,10 +717,13 @@ class ReportController extends AbstractController {
                 'csrfToken' => $this->core->getCsrfToken(),
             ]);
         }
+
+        return null;
     }
 
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ["POST"])]
     public function executeBuildForm(): JsonResponse {
         // Configure json to go into jobs queue
         $job_json = [
@@ -827,6 +840,7 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
+    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization/manual_or_gui', methods: ['POST'])]
     public function setRainbowGradeCustomization(): JsonResponse {
 
         // Extract the value from $_POST
@@ -870,6 +884,7 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
+    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
