@@ -44,7 +44,7 @@
                 {{ is_pdf_page_student ? 'checked' : '' }} /> <label for="yes_pdf_page_student">Student (student will be asked for page numbers at submission time)</label>
         <br>
         <a target="_blank" href="https://submitty.org/instructor/assignment_preparation/bulk_pdf_upload#redactions">Redactions JSON file format</a>
-        <legend>Upload new redactions JSON file:</legend>
+        <p>Upload new redactions JSON file:</p>
         <input type="file" name="redactions_json" id="redactions_json" accept=".json" onchange="updateRedactionSettings()" />
         <button type="button" id="remove_redactions" onclick="removeRedactions()" class="btn btn-danger">Remove Redactions</button>
     </fieldset>
