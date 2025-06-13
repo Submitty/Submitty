@@ -62,7 +62,7 @@ const queryError = ref<string | false>(false);
           @change-error="changeError"
         />
         <DownloadQuery
-          v-if="resultsData && resultsData.length > 0"
+          v-if="resultsData && resultsData.length > 0 && !queryError"
           id="download-query-btn"
           :data="resultsData"
         />
