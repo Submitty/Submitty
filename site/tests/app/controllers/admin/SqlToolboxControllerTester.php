@@ -14,6 +14,7 @@ use app\libraries\response\JsonResponse;
 use app\views\admin\SqlToolboxView;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use ReflectionClass;
 use tests\BaseUnitTest;
 
@@ -60,6 +61,16 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $prop->setValue($tables[1], 'foo');
         $prop->setAccessible(false);
 
+        $prop = $reflection->getProperty('columns');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[0], new ArrayCollection());
+        $prop->setAccessible(false);
+
+        $prop = $reflection->getProperty('columns');
+        $prop->setAccessible(true);
+        $prop->setValue($tables[1], new ArrayCollection());
+        $prop->setAccessible(false);
+
         /** @var EntityManager&\PHPUnit\Framework\MockObject\MockObject $entity_manager */
         $entity_manager = $this->createMock(EntityManager::class);
         $repository = $this->createMock(EntityRepository::class);
@@ -76,11 +87,16 @@ class SqlToolboxControllerTester extends BaseUnitTest {
 
         $this->core->setCourseEntityManager($entity_manager);
 
+        $table_data = [
+            ['name' => 'bar', 'columns' => []],
+            ['name' => 'foo', 'columns' => []]
+        ];
+
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertSame($response->parameters, [$tables]);
+        $this->assertSame($response->parameters, [$table_data]);
     }
 
     public function testRunQuery(): void {
