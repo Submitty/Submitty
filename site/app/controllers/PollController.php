@@ -136,14 +136,15 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Poll is not available");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
-        
-         if ($this->core->getAccess()->canI("poll.view.histogram", ["poll" => $poll])) {
-              /** @var \app\repositories\poll\OptionRepository */
-              $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
-              $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
-          } else {
-              $response_counts = [];
-          }
+
+        if ($this->core->getAccess()->canI("poll.view.histogram", ["poll" => $poll])) {
+             /** @var \app\repositories\poll\OptionRepository */
+             $option_repo = $this->core->getCourseEntityManager()->getRepository(Option::class);
+             $response_counts = $option_repo->findByPollWithResponseCounts(intval($poll_id));
+        }
+        else {
+            $response_counts = [];
+        }
 
         return new WebResponse(
             PollView::class,
