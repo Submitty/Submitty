@@ -82,6 +82,10 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method DateTimeFormat getDateTimeFormat()
+ * @method string getSystemMessage()
+ * @method string getLatestTag()
+ * @method string getLatestCommit()
  * @method int getCourseMaterialFileUploadLimitMb()
  */
 

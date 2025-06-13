@@ -122,6 +122,14 @@ select {
     background-color: var(--actionable-blue) !important;
 }
 
+.missing-data-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 35px;
+}
+
 .peer-button {
     background-color: var(--standard-plum-purple);
     color: white;
@@ -387,4 +395,13 @@ body::-webkit-scrollbar-track {
 
 .text-table {
     max-width: 25%;
+}
+
+.statistic-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-top: 5px;
+    gap: 5px 15px;
 }
