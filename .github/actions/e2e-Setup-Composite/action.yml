@@ -192,6 +192,17 @@ runs:
         sudo service php${PHP_VER}-fpm restart
         sudo service apache2 restart
       shell: bash
+    
+    - name: Check logs
+      if: failure()
+      run: |
+        sudo apt-get install net-tools
+        netstat -anvp tcp | awk 'NR<3 || /LISTEN/'
+        systemctl status apache2.service --no-pager
+        journalctl -xeu apache2.service --no-pager
+        apache2ctl configtest
+      shell: bash
+
 
     - name: Set up nginx
       run: |
