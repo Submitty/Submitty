@@ -907,11 +907,6 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:getGradeableJson\\(\\) should return array\\{title\\: mixed, type\\: mixed, id\\: mixed, instructions_url\\: mixed, syllabus_bucket\\: mixed, autograding_config_path\\: mixed, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: mixed\\}, \\.\\.\\.\\} but returns array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string\\}\\.$#"
-			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:getValidPathsToConfigDirectories\\(\\) has parameter \\$dir_queue with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
@@ -3074,11 +3069,6 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<app\\\\models\\\\User\\> given\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
-			message: "#^Parameter \\#3 \\$team of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getGradedGradeable\\(\\) expects string\\|null, bool given\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
