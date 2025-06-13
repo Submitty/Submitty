@@ -13,7 +13,7 @@ class EmailRepository extends EntityRepository {
         $result = [];
 
         foreach ($subjects as $subject) {
-            $qb = $this->_em->createQueryBuilder();
+            $qb = $this->getEntityManager()->createQueryBuilder();
             $qb ->select('e')
                 ->from('app\entities\email\EmailEntity', 'e');
             if ($semester && $course) {
@@ -40,7 +40,7 @@ class EmailRepository extends EntityRepository {
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
-        $q = $this->_em->createQuery($dql);
+        $q = $this->getEntityManager()->createQuery($dql);
         $page = 1;
         $count = 0;
         $subject = 0;
@@ -64,7 +64,7 @@ class EmailRepository extends EntityRepository {
         else {
             $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
         }
-        $q = $this->_em->createQuery($dql);
+        $q = $this->getEntityManager()->createQuery($dql);
         $curr_page = 1;
         $count = 0;
         $subject_count = 0;

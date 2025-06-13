@@ -18,6 +18,7 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableAutocheck;
 use app\libraries\Logger;
+use app\models\SimpleStat;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
@@ -692,9 +693,15 @@ class ElectronicGraderController extends AbstractController {
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
-            $manual_average = array_sum($component_averages);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
+            $manual_average = new SimpleStat($this->core, [
+                'avg_score' => $overall_average['manual_avg_score'],
+                'std_dev' => $overall_average['manual_std_dev'],
+                'max' => $overall_average['manual_max_score'],
+                'count' => $overall_average['count']
+            ]);
+            $overall_average = new SimpleStat($this->core, $overall_average);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
             $overall_scores = [];
             $overall_scores = $order->getSortedGradedGradeables();
@@ -982,6 +989,13 @@ class ElectronicGraderController extends AbstractController {
         $sort = isset($_COOKIE['sort']) ? $_COOKIE['sort'] : 'id';
         $direction = isset($_COOKIE['direction']) ? $_COOKIE['direction'] : 'ASC';
 
+
+        //Get grading_details Columns
+        $grading_details_columns = [];
+        if (isset($_COOKIE['grading_details_columns'])) {
+            $grading_details_columns = json_decode($_COOKIE['grading_details_columns'], true);
+        }
+
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
@@ -1080,7 +1094,7 @@ class ElectronicGraderController extends AbstractController {
             }
         }
 
-        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status);
+        $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $grading_details_columns);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();

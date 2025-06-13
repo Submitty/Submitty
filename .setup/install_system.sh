@@ -705,6 +705,7 @@ ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
 en_US
+100
 ${SUBMISSION_URL}
 
 
@@ -860,7 +861,6 @@ ${proxy}
 fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
-su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES

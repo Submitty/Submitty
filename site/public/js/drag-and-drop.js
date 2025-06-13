@@ -1,8 +1,8 @@
 /* exported handleUploadBanner, initializeDropZone, handleEditCourseMaterials, handleUploadCourseMaterials, handleDownloadImages,
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
-            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage */
+            dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
 
 /*
 References:
@@ -493,6 +493,10 @@ function isValidSubmission() {
         return true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(window, 'is_vcs')) {
+        return true;
+    }
+
     return false;
 }
 
@@ -940,7 +944,7 @@ function handleRegrade(version_to_regrade, csrf_token, gradeable_id, user_id, re
                     window.location.reload();
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
@@ -1035,8 +1039,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
-            alert('Not a new submission.');
-            window.location.reload();
+            displayMessage('Duplicate submission detected. No attempts used', 'warning');
             return;
         }
 
@@ -1128,7 +1131,7 @@ function handleSubmission(gradeable_status, remaining_late_days_for_gradeable, c
                         window.location.href = data['data'];
                     }
                     else {
-                        alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                        displayMessage(data['message'], 'error');
                     }
                 }
             }
@@ -1191,7 +1194,7 @@ function handleDownloadImages(csrf_token) {
                     window.location.href = return_url;
                 }
                 else {
-                    alert(`ERROR! Please contact administrator with following error:\n\n${data['message']}`);
+                    displayMessage(data['message'], 'error');
                 }
             }
             catch (e) {
