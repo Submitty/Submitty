@@ -2,24 +2,25 @@
 
 <div id="{{ type == 'manual' ? 'manual-grading-score-histogram' : type == 'total' ? 'total-score-histogram' : type == 'auto' ? 'autograding-score-histogram' }}" class="page-content">
 
-    <br>
-    <input
-        style='width: auto'
-        type='text'
-        id='bucket-size-{{ type }}'
-        name='bucket-val'
-        value=""
-        placeholder="Enter bucket size"
-    />
-
-    <input
-        name="sub-{{ type }}"
-        class="btn btn-primary key_to_click"
-        tabindex="0"
-        id="submit_bucket_{{ type }}"
-        value="Submit Bucket Size for {{ type|capitalize }}"
-        onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
-    />
+    <div class="bucket-size-container">
+        <input
+            class="bucket-size-input"
+            type='text'
+            id='bucket-size-{{ type }}'
+            name='bucket-val'
+            value=""
+            placeholder="Enter bucket size"
+        />
+        <input
+            readonly
+            class="bucket-size-submit-button btn btn-primary key_to_click"
+            tabindex="0"
+            id="submit_bucket_{{ type }}"
+            name="sub-{{ type }}"
+            value="Submit"
+            onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
+        />
+    </div>
 
     <div id="Histogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
 
@@ -58,7 +59,13 @@
             range{{ type }} = max{{ type }}-min{{ type }};
         }
 
-        mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+        if (min{{ type }} != max{{ type }}) {
+            mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+        } else {
+            mode = xValue[0];
+            xBuckets = [String(mode)];
+            yValue = [xValue.length];
+        }
 
         if (max{{ type }}==0 && min{{ type }}==50) {
             min{{ type }}=0;
@@ -105,30 +112,30 @@
             }
         };
 
-        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false});
+        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
     </script>
 
-    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}">
-        <style>
-            .statistic-value {
-                margin-right: 20px;
-            }
-        </style>
-
+    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}" class="statistic-container">
         <script>
-            document.write('<span class="statistic-value"><b>Mean: </b>' +
-                {{ type == 'total' ? overall_average.getAverageScore() 
-                : (type == 'auto' ? autograded_average.getAverageScore() 
-                : (type == 'manual' ? manual_average))
-                }} + '</span>' +
-                '<span class="statistic-value"><b>Mode: </b>' + mode + '</span>' +
-                '<span class="statistic-value"><b>Median: </b>' + median + '</span>' +
-                '<span class="statistic-value"><b>Maximum: </b>' + max{{ type }} + '</span>' +
-                '<span class="statistic-value"><b>Minimum: </b>' + min{{ type }} + '</span>' +
-                '<span class="statistic-value"><b>Standard Deviation: </b>' +
-                {{ type == 'total' ? overall_average.getStandardDeviation()
-                : (type == 'auto' ? autograded_average.getStandardDeviation())
-                }} + '</span>');
+            document.write(
+                '<span>' +
+                    '<b>Mean: </b>' +
+                    {{ type == 'total' ? overall_average != null ? overall_average.getAverageScore() | default(0) : 0
+                    : (type == 'auto' ? autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0
+                    : (type == 'manual' ? manual_average != null ? manual_average.getAverageScore() | default(0) : 0 ))
+                    }} + '</span>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min{{ type }} + '</span>' +
+                    '<span><b>Maximum: </b>' + max{{ type }} + '</span>' +
+                    '<span><b>Range: </b>' + (max{{ type }} - min{{ type }}) + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
+                    {{ type == 'total' ? overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0
+                    : type == 'auto' ? autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0
+                    : manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0
+                    }} +
+                '</span>'
+            );
         </script>
     </div>
     <br />
