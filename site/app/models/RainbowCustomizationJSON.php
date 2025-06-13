@@ -295,12 +295,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Add an omitted section
      *
-     * @param string $label The label of the section to omit
+     * @param string $section_id The section id of the section to omit
      */
-    public function addOmittedSection(string $label): void {
-        if (!in_array($label, $this->omit_section_from_stats, true)) {
-            $this->omit_section_from_stats[] = $label;
-        }
+    public function addOmittedSection(string $section_id): void {
+        $this->omit_section_from_stats[] = $section_id;
     }
 
     /**

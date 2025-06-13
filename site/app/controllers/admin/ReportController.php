@@ -670,6 +670,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->enableMobileViewport();
             $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             // Print the form
+            // var_dump($customization->getOmittedSections());
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 'summaries_url' => $this->core->buildCourseUrl(['reports', 'summaries']),
                 'grade_summaries_last_run' => $this->getGradeSummariesLastRun(),
@@ -690,7 +691,8 @@ class ReportController extends AbstractController {
                 'final_cutoff' => (array) $customization->getFinalCutoff(),
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
-                'sections_and_labels' => $customization->getSectionsAndLabelsAndOmitted(),
+                'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
+                'omit_section_from_statistics' => $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),

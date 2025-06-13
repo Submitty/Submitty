@@ -392,13 +392,15 @@ To remove a curve simply blank all boxes."></i>
                 </div>
                 <p class="rg_info_message">You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default, but it may not be blank.</p>
-                <div class="input-boxes">
-                    {% for section, data in sections_and_labels %}
+                <div class="input-boxes" id="omitted-sections-and-labels">
+                    {% for section, label in sections_and_labels %}
                         <label for="section_and_labels_{{ section }}" class="input-label">{{ section }}</label>
-                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ data.label }}">
-                        <input type="checkbox" id="omit_section_checkbox{{ section }}" name="omit_section" value="{{ data.label }}" data-testid="omit-section-checkbox{{ section }}"
-                               {% if data.isUsed == true %}checked{% endif %}>
-                        <label for="omit_section{{ section }}" class="omit-section-label">{{ "omit from statistics" }}</label>
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" data-testid="section-and-labels-{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                        
+                        <input type="checkbox" data-section="{{ section }}" class="omit_section_from_statistics" id="omit_section_{{ section }}_from_statistics" 
+                                data-testid="omit-section-{{ section }}-from-statistics" name="omit_section_from_statistics" 
+                                {% if section in omit_section_from_statistics %}checked{% endif %}>
+                        <label for="omit_section_{{ section }}_from_statistics" class="omit_section_from_statistics_label input-label">Omit Section From Statistics</label>
                     {% endfor %}
                 </div>
             </div>

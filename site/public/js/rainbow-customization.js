@@ -198,10 +198,10 @@ function getOmittedSections() {
     // Collect sections omitted from stats
     const omit_section_from_stats = [];
 
-    $.each($('input[name=\'omit_section\']:checked'), function () {
-        omit_section_from_stats.push($(this).val());
+    $.each($('input[name=\'omit_section_from_statistics\']:checked'), function () {
+        omit_section_from_stats.push(String($(this).data('section')));
     });
-
+    console.log(omit_section_from_stats);
     return omit_section_from_stats;
 }
 
