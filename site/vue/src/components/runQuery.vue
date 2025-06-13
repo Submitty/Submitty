@@ -4,7 +4,7 @@ const { query } = defineProps<{
     query: string;
 }>();
 const emit = defineEmits<{
-    changeData: [{ [key: string]: number | string | null }[] | null];
+    changeData: [{ [key: string]: number | string | null }[]];
     changeError: [message: string | false];
 }>();
 const runQuery = async () => {

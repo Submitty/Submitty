@@ -23,7 +23,7 @@ const currentQuery = ref({
 function changeError(message: string | false) {
     queryError.value = message;
 }
-function changeData(data: { [key: string]: number | string | null }[] | null) {
+function changeData(data: { [key: string]: number | string | null }[]) {
     resultsData.value = data;
 }
 
@@ -62,6 +62,7 @@ const queryError = ref<string | false>(false);
           @change-error="changeError"
         />
         <DownloadQuery
+          v-if="resultsData && resultsData.length > 0"
           id="download-query-btn"
           :data="resultsData"
         />

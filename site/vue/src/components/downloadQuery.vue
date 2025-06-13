@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { data } = defineProps<{
-    data: { [key: string]: number | string | null }[] | null;
+    data: { [key: string]: number | string | null }[];
 }>();
 
 function downloadCsv() {
@@ -27,7 +27,6 @@ function downloadCsv() {
 
 <template>
   <button
-    v-if="data && data.length"
     id="download-sql-btn"
     class="btn btn-primary"
     @click="downloadCsv"
