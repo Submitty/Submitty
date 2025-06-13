@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .base_testcase import BaseTestCase
-from submitty_jobs import bulk_upload_split, bulk_qr_split
+from submitty_jobs import bulk_upload_split, bulk_qr_split, generate_pdf_images
 from pathlib import Path 
 import os
 import json
@@ -25,6 +25,7 @@ class TestBulkPdfSplit(BaseTestCase):
 
         os.chdir(split_path_dir)
         bulk_upload_split.main(args)
+        generate_pdf_images.main(tgt_filename, str(split_path_dir), [])
 
         self.assertTrue(Path('decoded.json').is_file())
         with open('decoded.json', 'r') as bulk_json:
