@@ -60,8 +60,9 @@
             </fieldset>
         </div>
 
-        <div id="release_date_container" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
-            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ gradeable.getGradeReleasedDate()|date(date_format, timezone_string) }}">
+        <div id="release_date_container" style="margin-bottom: 5px;" class="release_date_date" {{ gradeable.hasReleaseDate() ? '' : 'hidden' }}>
+            {% set release_date = gradeable.getGradeReleasedDate()|date(date_format, timezone_string) %}
+            <input data-testid="release_date" name="grade_released_date" id="date_released" class="date_picker" type="text" value="{{ release_date }}" data-original="{{ release_date }}">
             <label for="date_released">Grades Released Date (grades will be visible to students)</label>
         
             <br />
@@ -71,6 +72,16 @@
                 Note: Released Grades for checkpoint and numeric gradeables are available to students only through Rainbow Grades.
                 {{  rainbow_grades_summary != true ? 'Please visit the Course Settings page to enable Rainbow Grades Summary for students.' : '' }}
             </p>
+            {% endif %}
+
+            {% if electronic and gradeable.isStudentView() and release_date <= "now"|date(date_format, timezone_string) %}
+                <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
+                    Note: Grades released notifications are sent and emailed at the start of every hour for students with complete TA/Manual grades.
+                    <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> notifications have been sent{{ notifications_pending <= 0 ? '.' : ',' }}
+                    {% if notifications_pending > 0 %}
+                    and <span id="notification-pending">{{ notifications_pending }}</span> are awaiting to be sent at the top of the hour.
+                    {% endif %}
+                </p>
             {% endif %}
         </div>
     </div>
