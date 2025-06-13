@@ -42,21 +42,26 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
             imagePages[page_number].save(
                 image_filename, "JPEG", quality=20, optimize=True
             )
+            img = Image.open(image_filename)
+            draw = ImageDraw.Draw(img)
             for redaction in redactions:
                 if redaction.page_number != page_number + 1:
                     continue
-                img = Image.open(image_filename)
-                draw = ImageDraw.Draw(img)
-                draw.rectangle(
-                    [
-                        redaction.coordinates[0] * img.size[0],
-                        redaction.coordinates[1] * img.size[1],
-                        redaction.coordinates[2] * img.size[0],
-                        redaction.coordinates[3] * img.size[1],
-                    ],
-                    fill="black",
-                )
-                img.save(image_filename, "JPEG", quality=20, optimize=True)
+                square_size = 25
+
+                x0 = int(redaction.coordinates[0] * img.size[0])
+                y0 = int(redaction.coordinates[1] * img.size[1])
+                x1 = int(redaction.coordinates[2] * img.size[0])
+                y1 = int(redaction.coordinates[3] * img.size[1])
+
+                for y in range(y0, y1, square_size):
+                    for x in range(x0, x1, square_size):
+                        fill_color = "black" if ((x // square_size + y // square_size) % 2 == 0) else "grey"
+                        draw.rectangle(
+                            [x, y, x + square_size, y + square_size], fill=fill_color
+                        )
+            print(f"Saving image {image_filename}")
+            img.save(image_filename, "JPEG", quality=20, optimize=True)
     except Exception:
         msg = "Failed when splitting pdf " + pdf_file_path
         print(msg)

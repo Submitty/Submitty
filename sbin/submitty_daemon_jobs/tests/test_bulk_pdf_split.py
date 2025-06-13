@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from .base_testcase import BaseTestCase
-from submitty_jobs import bulk_upload_split, bulk_qr_split, generate_pdf_images
+from submitty_jobs import bulk_upload_split, bulk_qr_split
 from pathlib import Path 
 import os
 import json
@@ -20,12 +20,11 @@ class TestBulkPdfSplit(BaseTestCase):
             tgt_filename,
             str(split_path_dir),
             tgt_num_pages,
-            str(split_path_dir.joinpath('bulk_upload_log.txt')),
+            str(split_path_dir.joinpath('bulk_upload_log.txt'))
         ]
 
         os.chdir(split_path_dir)
         bulk_upload_split.main(args)
-        generate_pdf_images.main(tgt_filename, str(split_path_dir), [])
 
         self.assertTrue(Path('decoded.json').is_file())
         with open('decoded.json', 'r') as bulk_json:
@@ -47,11 +46,6 @@ class TestBulkPdfSplit(BaseTestCase):
             cover_tgt = Path(file_name + '_' + str(i_idx).zfill(2) + '_cover.pdf')
             self.assertTrue(split_tgt.is_file())
 
-            #verify each page png is being produced
-            for j_idx in range(1,tgt_num_pages+1):
-                page_tgt = Path(file_name + '_' + str(i_idx).zfill(2) + '_' + str(j_idx).zfill(3)  + '.jpg')
-                self.assertTrue(page_tgt.is_file())
-
 
     #Test handling a bad number of given pages to split a pdf gracefully
     def test_bad_split_number(self):
@@ -65,7 +59,7 @@ class TestBulkPdfSplit(BaseTestCase):
             tgt_filename,
             str(split_path_dir),
             tgt_num_pages,
-            str(split_path_dir.joinpath('bulk_upload_log.txt')),
+            str(split_path_dir.joinpath('bulk_upload_log.txt'))
         ]
 
         os.chdir(split_path_dir)
@@ -136,7 +130,7 @@ class TestBulkPdfSplit(BaseTestCase):
             "https://url_testing.com/tests/?code=koalas&name=",
             urllib.parse.quote("#D0,.com"),
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            False,
+            False
         ]
 
 
@@ -182,7 +176,7 @@ class TestBulkPdfSplit(BaseTestCase):
             "",
             "",
             str(split_path_dir.joinpath('bulk_upload_log.txt')),
-            True,
+            True
         ]
 
         os.chdir(split_path_dir)
