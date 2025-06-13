@@ -17,18 +17,35 @@ use WebSocket;
  * @Enabled("chat")
  */
 class ChatroomController extends AbstractController {
-
+    /**
+     * Send a message over WebSocket.
+     *
+     * @param array{
+     *     type:        string,
+     *     socket:      string,
+     *     id?:         int,
+     *     title?:      string,
+     *     description?:string,
+     *     allow_anon?: bool,
+     *     host_name?:  string,
+     *     base_url?:   string,
+     *     user_id?:    string,
+     *     content?:    string,
+     *     display_name?:string,
+     *     role?:       string,
+     *     timestamp?:  string
+     * } $msg_array
+     */
     private function sendSocketMessage(array $msg_array): void {
-        
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-'. $msg_array['socket'];
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['socket'];
         $msg_array['user_id'] = $this->core->getUser()->getId();
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
-        } catch (WebSocket\ConnectionException $e) {
+        }
+        catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
         }
-        return;
     }
 
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
@@ -50,14 +67,14 @@ class ChatroomController extends AbstractController {
     public function addChatroom(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
         $user = $this->core->getUser();
-        $hostName = $this->core->getUser()->getDisplayFullName();
         $title = $_POST['title'] ?? '';
+        $hostName = $this->core->getUser()->getDisplayFullName();
         $description = $_POST['description'] ?? '';
-        if (empty($title)) {
+        if (trim($title) === '') {
             $this->core->addErrorMessage("Chatroom title cannot be empty");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        $chatroom = new Chatroom($user->getId(), $hostName, $title, $description);
+        $chatroom = new Chatroom($user->getId(), $hostName, $_POST['title'], $description);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
@@ -169,7 +186,7 @@ class ChatroomController extends AbstractController {
         }
         $title = $_POST['title'] ?? '';
         $description = $_POST['description'] ?? '';
-        if (empty($title)) {
+        if (trim($title) === '') {
             $this->core->addErrorMessage("Chatroom title cannot be empty");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
@@ -191,12 +208,12 @@ class ChatroomController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
         $msg_array = [];
-        
+
         if ($chatroom === null) {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        if (!$chatroom->isActive()){
+        if (!$chatroom->isActive()) {
             $msg_array = [];
             $msg_array['type'] = 'chat_open';
             $msg_array['id'] = $chatroom->getId();
@@ -206,7 +223,8 @@ class ChatroomController extends AbstractController {
             $msg_array['host_name'] = $chatroom->getHostName();
             $msg_array['base_url'] = $this->core->buildCourseUrl(['chat']);
             $msg_array['socket'] = "chatrooms";
-        } else {
+        }
+        else {
             $msg_array = [];
             $msg_array['type'] = 'chat_close';
             $msg_array['id'] = $chatroom->getId();
@@ -279,7 +297,7 @@ class ChatroomController extends AbstractController {
         $msg_array['role'] = $user->accessAdmin() ? 'instructor' : 'student';
         $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
-        $message = $this->sendSocketMessage($msg_array);
+        $this->sendSocketMessage($msg_array);
         $message = new Message($msg_array['user_id'], $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();

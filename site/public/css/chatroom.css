@@ -84,7 +84,7 @@
     flex: 1;
     margin-left: 1rem;
     margin-right: 1rem;
-    min-width: none;
+    min-width: 0;
 }
 
 .message-input:focus {

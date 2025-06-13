@@ -121,9 +121,9 @@ function initChatroomListSocketClient() {
                 handleChatOpen(msg);
                 break;
             case 'chat_close':
-                // Remove the chatroom row from the table
-                const row = document.getElementById(`chatroom-row-${msg.id}`);
-                if (row) row.remove();
+                if (document.getElementById(`chatroom-row-${msg.id}`)) {
+                    row.remove();
+                }
                 break;
             default:
                 console.error(msg);
@@ -206,18 +206,19 @@ function showJoinMessage(message) {
 
 function handleChatOpen(msg) {
     const tableBody = document.querySelector('#chatrooms-table tbody');
-    if (!tableBody) return;
-
-    if (document.getElementById(`chatroom-row-${msg.id}`)) return;
-
+    if (!tableBody) {
+        return;
+    }
+    if (document.getElementById(`chatroom-row-${msg.id}`)) {
+        return;
+    }
     const tr = document.createElement('tr');
     tr.id = `chatroom-row-${msg.id}`;
 
-    // Write own twig file for row?
     tr.innerHTML = `
         <td>
             <span class="display-short" title="${msg.title}">
-                ${msg.title.length > 30 ? msg.title.slice(0, 30) + '...' : msg.title}
+                ${msg.title.length > 30 ? `${msg.title.slice(0, 30)}...` : msg.title}
             </span>
         </td>
         <td>
@@ -225,7 +226,7 @@ function handleChatOpen(msg) {
         </td>
         <td>
             <span class="display-short" title="${msg.description}">
-                ${msg.description.length > 45 ? msg.description.slice(0, 45) + '...' : msg.description}
+                ${msg.description.length > 45 ? `${msg.description.slice(0, 45)}...` : msg.description}
             </span>
         </td>
         <td>
