@@ -88,8 +88,8 @@ class Access {
     const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
     const CHECK_PEER_AUTOGRADING         = 1 << 30;
     const CHECK_PEER_SOLUTIONS           = 1 << 31;
-    const REQUIRE_ARG_POLL            = 1 << 32;
-    const POLL_CHECK_HISTOGRAM = 1 << 33;
+    const REQUIRE_ARG_POLL               = 1 << 32;
+    const POLL_CHECK_HISTOGRAM           = 1 << 33;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
