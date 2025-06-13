@@ -24,6 +24,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * @var string[]
      */
+    private array $omit_section_from_stats = [];
+    /**
+     * @var string[]
+     */
     private array $display_benchmark = [];
     /**
      * @var string[]
@@ -224,6 +228,10 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->section = $json->section;
         }
 
+        if (isset($json->omit_section_from_stats)) {
+            $this->omit_section_from_stats = $json->omit_section_from_stats;
+        }
+
         if (isset($json->messages)) {
             $this->messages = $json->messages;
         }
@@ -285,6 +293,15 @@ class RainbowCustomizationJSON extends AbstractModel {
     }
 
     /**
+     * Add an omitted section
+     *
+     * @param string $section_id The section id of the section to omit
+     */
+    public function addOmittedSection(string $section_id): void {
+        $this->omit_section_from_stats[] = $section_id;
+    }
+
+    /**
      * Add a benchmark percent
      *
      * @param string $benchmark The benchmark - this is the key for this json field
@@ -320,6 +337,15 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getSection() {
         return $this->section;
+    }
+
+    /**
+     * Get array of sections omitted from stats
+     *
+     * @return string[]
+     */
+    public function getOmittedSections(): array {
+        return $this->omit_section_from_stats;
     }
 
     /**

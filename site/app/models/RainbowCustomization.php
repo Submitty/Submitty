@@ -577,6 +577,14 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+    /**
+     * Get omit sections from stats from json file if there is any
+     *
+     * @return string[]
+     */
+    public function getOmittedSections(): array {
+        return $this->RCJSON?->getOmittedSections() ?? [];
+    }
 
     /**
      * Get plagiarism from json file if there is any
@@ -635,6 +643,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
+            }
+        }
+
+        if (isset($form_json->omit_section_from_stats)) {
+            foreach ($form_json->omit_section_from_stats as $omit_section) {
+                $this->RCJSON->addOmittedSection($omit_section);
             }
         }
 

@@ -322,6 +322,12 @@ div:has(.override)
     grid-gap: 0 0.2em;
 }
 
+#omitted-sections-and-labels {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto; /* four columns */
+    grid-gap: 0 0.2em;
+}
+
 .input-label {
     padding: 4px 6px;
 }
