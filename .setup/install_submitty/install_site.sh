@@ -102,6 +102,11 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
 fi
 
+# Delete all vue code to prevent deleted vue files from being rendered
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
+fi
+
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
