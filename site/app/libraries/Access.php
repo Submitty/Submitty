@@ -633,10 +633,8 @@ class Access {
                 // Polls are not visible to students or graders
                 return false;
             }
-            if (self::checkBits($checks, self::POLL_CHECK_HISTOGRAM)) {
-                if (!$poll->isHistogramAvailable() && $group !== User::GROUP_INSTRUCTOR) {
-                    return false;
-                }
+            if (self::checkBits($checks, self::POLL_CHECK_HISTOGRAM) && !$poll->isHistogramAvailable() && $group !== User::GROUP_INSTRUCTOR) {
+                return false;
             }
         }
 
