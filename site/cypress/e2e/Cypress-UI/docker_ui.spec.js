@@ -76,7 +76,7 @@ describe('Docker UI Test', () => {
 
     it('Should filter images with tags', () => {
         // This tag has no images
-        cy.get("button[data-capability='et-cetera']")
+        cy.get('button[data-capability=\'et-cetera\']')
             .click();
         cy.get('.image-row')
             .should('not.be.visible');
