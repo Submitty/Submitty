@@ -1,0 +1,162 @@
+{
+  "autograding" : {
+        "submission_to_runner" : [  "*.ipynb", "*.png" ],
+        "work_to_details" : [ "**/*.ipynb", "**/*.png" ]
+    },
+  "autograding_method": "docker",
+  "resource_limits" : {
+    "RLIMIT_NPROC" : 32
+  },
+  "container_options": {
+    "container_image": "submitty/qiskit:latest"
+  },
+  "testcases": [
+    {
+      "title": "Executes successfully: example_executed.ipynb",
+      "command": "python3 grader.py example.ipynb",
+      "points": 1,
+      "validation": [
+        {
+          "method": "fileExists",
+          "actual_file": "example_executed.ipynb",
+          "show_actual" : "always",
+          "show_message" : "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "STDOUT.txt",
+          "destination" : "./"
+        }
+      ], 
+      "title": "STDOUT",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "STDOUT.txt",
+          "expected_string" : "hello world!"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "one_submitted.png",
+          "destination" : "./"
+        }
+      ], 
+      "title": "One",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "one_submitted.png",
+          "expected_file": "one.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".1",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "two_submitted.png",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Two",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "two_submitted.png",
+          "expected_file": "two.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".3",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "graph_submitted.png",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Graph",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "graph_submitted.png",
+          "expected_file": "graph.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".1",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "circuit_submitted.png",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Circuit",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "circuit_submitted.png",
+          "expected_file": "circuit.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".2",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "histogram_submitted.png",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Histogram",
+      "points": 1,
+      "validation": [
+        {
+          "actual_file": "histogram_submitted.png",
+          "expected_file": "histogram.png",
+          "method": "ImageDiff",
+          "acceptable_threshold": ".1",
+          "show_difference_image" : "always",
+          "show_actual": "always",
+          "show_expected": "always"
+        }
+      ]
+    }
+  ]
+}
