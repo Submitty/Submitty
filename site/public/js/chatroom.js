@@ -96,15 +96,40 @@ function socketChatMessageHandler(msg) {
 function initChatroomSocketClient(chatroomId) {
     window.socketClient = new WebSocketClient();
     window.socketClient.onmessage = (msg) => {
+        console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_message':
                 socketChatMessageHandler(msg);
+                break;
+            case 'chat_close':
+                window.alert('Chatroom has been closed by the instructor.');
+                window.location.href = buildCourseUrl(['chat']);
                 break;
             default:
                 console.error(msg);
         }
     };
     window.socketClient.open(`chatroom_${chatroomId}`);
+}
+
+function initChatroomListSocketClient() {
+    window.chatroomListSocketClient = new WebSocketClient();
+    window.chatroomListSocketClient.onmessage = (msg) => {
+        console.log('Received message from chatroom socket:', msg.type, msg);
+        switch (msg.type) {
+            case 'chat_open':
+                handleChatOpen(msg);
+                break;
+            case 'chat_close':
+                // Remove the chatroom row from the table
+                const row = document.getElementById(`chatroom-row-${msg.id}`);
+                if (row) row.remove();
+                break;
+            default:
+                console.error(msg);
+        }
+    };
+    window.chatroomListSocketClient.open('chatrooms');
 }
 
 function newChatroomForm() {
@@ -179,6 +204,39 @@ function showJoinMessage(message) {
     }, 3000);
 }
 
+function handleChatOpen(msg) {
+    const tableBody = document.querySelector('#chatrooms-table tbody');
+    if (!tableBody) return;
+
+    if (document.getElementById(`chatroom-row-${msg.id}`)) return;
+
+    const tr = document.createElement('tr');
+    tr.id = `chatroom-row-${msg.id}`;
+
+    // Write own twig file for row?
+    tr.innerHTML = `
+        <td>
+            <span class="display-short" title="${msg.title}">
+                ${msg.title.length > 30 ? msg.title.slice(0, 30) + '...' : msg.title}
+            </span>
+        </td>
+        <td>
+            ${msg.host_name}
+        </td>
+        <td>
+            <span class="display-short" title="${msg.description}">
+                ${msg.description.length > 45 ? msg.description.slice(0, 45) + '...' : msg.description}
+            </span>
+        </td>
+        <td>
+            <a href="${msg.base_url}/${msg.id}" class="btn btn-primary">Join</a>
+            ${msg.allow_anon ? `<i> or </i><a href="${msg.base_url}/${msg.id}/anonymous" class="btn btn-default">Join As Anon.</a>` : ''}
+        </td>
+    `;
+
+    tableBody.appendChild(tr);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
@@ -215,5 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             messageInput.value = '';
         });
+    }
+    const chatroomsTable = document.getElementById('chatrooms-table');
+    if (chatroomsTable) {
+        initChatroomListSocketClient();
     }
 });
