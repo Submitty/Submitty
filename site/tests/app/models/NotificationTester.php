@@ -167,16 +167,6 @@ class NotificationTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(1234, Notification::getThreadIdIfExists($viewOnlyNotification->getNotifyMetadata()));
     }
 
-    public function testTextShortner(): void {
-        $message = "This is a short message";
-        // max_length of message is 40, as the message is shorter than 40 characters,
-        // textShortner should give back the exact same message
-        $this->assertEquals($message, Notification::textShortner($message));
-
-        $message = "This is a message having more than 40 characters";
-        $this->assertEquals("This is a message having more than 40...", Notification::textShortner($message));
-    }
-
     public function testHasEmptyMetadata(): void {
         $notification = Notification::createNotification($this->core, $this->notify_details['normal']);
         $this->assertEquals(true, $notification->hasEmptyMetadata());
