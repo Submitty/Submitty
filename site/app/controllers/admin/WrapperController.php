@@ -13,8 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class WrapperController
  * @package app\controllers\admin
- * @AccessControl(permission="admin.wrapper")
  */
+#[AccessControl(permission: "admin.wrapper")]
 class WrapperController extends AbstractController {
     const WRAPPER_FILES = [
         'override.css',

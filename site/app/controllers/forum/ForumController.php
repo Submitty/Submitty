@@ -211,9 +211,7 @@ class ForumController extends AbstractController {
         return false;
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/new", methods: ["POST"])]
     public function addNewCategory($category = []) {
         $result = [];
@@ -253,9 +251,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/delete", methods: ["POST"])]
     public function deleteCategory() {
         if (!empty($_POST["deleteCategory"])) {
@@ -280,9 +276,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/edit", methods: ["POST"])]
     public function editCategory() {
         $category_id = $_POST["category_id"];
@@ -322,9 +316,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
         $rows = $this->core->getQueries()->getCategories();
@@ -349,9 +341,7 @@ class ForumController extends AbstractController {
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
-    /**
-     * @AccessControl(permission="forum.publish")
-     */
+    #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["POST"])]
     public function publishThread() {
         $markdown = !empty($_POST['markdown_status']);
@@ -466,9 +456,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_announcement")
-     */
+    #[AccessControl(permission: "forum.modify_announcement")]
     #[Route("/courses/{_semester}/{_course}/forum/make_announcement", methods: ["POST"])]
     public function makeAnnouncement(): JsonResponse {
         if (!isset($_POST['id'])) {
@@ -511,9 +499,7 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
-    /**
-     * @AccessControl(permission="forum.publish")
-     */
+    #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/new", methods: ["POST"])]
     public function publishPost() {
         $current_user_id = $this->core->getUser()->getId();
@@ -664,9 +650,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_announcement")
-     */
+    #[AccessControl(permission: "forum.modify_announcement")]
     #[Route("/courses/{_semester}/{_course}/forum/announcements", methods: ["POST"])]
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
@@ -882,9 +866,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/threads/merge", methods: ["POST"])]
     public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
@@ -930,9 +912,7 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/split", methods: ["POST"])]
     public function splitThread() {
         $title = $_POST["split_post_input"];
@@ -1264,17 +1244,13 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
-    /**
-     * @AccessControl(permission="forum.view_modify_category")
-     */
+    #[AccessControl(permission: "forum.view_modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories", methods: ["GET"])]
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/splitinfo", methods: ["POST"])]
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
@@ -1291,9 +1267,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/history", methods: ["POST"])]
     public function getHistory() {
         $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
