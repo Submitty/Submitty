@@ -1,4 +1,4 @@
-/* eslint no-undef: 'off' */
+/* eslint no-undef: "off" */
 
 const eventLS = {
     open: 'bannerOpen',
