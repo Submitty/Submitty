@@ -26,7 +26,7 @@
                               onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
                               action="{{ change_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                            <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+                            <input type="submit" data-testid="version-change-btn" id="version_change" class="btn btn-primary" value="Grade This Version">
                         </form>
                     {% endif %}
                 {% endif %}
