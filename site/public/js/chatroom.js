@@ -120,11 +120,13 @@ function initChatroomListSocketClient() {
             case 'chat_open':
                 handleChatOpen(msg);
                 break;
-            case 'chat_close':
-                if (document.getElementById(`chatroom-row-${msg.id}`)) {
+            case 'chat_close': {
+                const row = document.getElementById(`chatroom-row-${msg.id}`);
+                if (row) {
                     row.remove();
                 }
                 break;
+            }
             default:
                 console.error(msg);
         }
