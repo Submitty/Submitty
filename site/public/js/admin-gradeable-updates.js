@@ -905,7 +905,7 @@ function loadGradeableEditor(g_id, file_path) {
         },
         success: function (data) {
             try {
-                let json = JSON.parse(data);
+                const json = JSON.parse(data);
                 if (json.status === 'fail') {
                     displayErrorMessage(json['message']);
                     return;
