@@ -2624,7 +2624,8 @@ class Gradeable extends AbstractModel {
                 } catch (DuplicateKeyException $e) {
                     return '\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.($e->getDetails()['line'] - $line_diff);
                 } catch (ParsingException $e) {
-                    return 'Invalid JSON in '.$path.': '.$e->getMessage();
+                    $message = $e->getDetails()['line'] ? preg_replace('/on line \d+/', 'on line ' . ($e->getDetails()['line'] - $line_diff), $e->getMessage()) : $e->getMessage();
+                    return 'Invalid JSON in '.$path.': '.$message;
                 }
             }
             $file_iter->next();
