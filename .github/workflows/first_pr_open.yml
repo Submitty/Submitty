@@ -7,7 +7,9 @@ jobs:
   firstPrReply:
     name: First PR Open
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout main repository
@@ -21,7 +23,7 @@ jobs:
           echo "first_pr=$FIRST_PR" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.event.comment.user.login }}
+          USERNAME: ${{ github.event.pull_request.user.login }}
 
       - name: Check for existing bot comments
         id: check-comments
@@ -31,7 +33,7 @@ jobs:
           echo "bot_comment_exists=$BOT_COMMENT_EXISTS" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.event.comment.user.login }}
+          USERNAME: ${{ github.event.pull_request.user.login }}
 
       - name: First PR Open
         if: env.bot_comment_exists == 'false' && env.first_pr == 'true'
@@ -39,5 +41,5 @@ jobs:
           gh pr comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
         env:
           PULL_REQUEST: ${{ github.event.pull_request.number }}
-          USERNAME: ${{ github.event.comment.user.login }}
+          USERNAME: ${{ github.event.pull_request.user.login }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
