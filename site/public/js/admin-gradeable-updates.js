@@ -403,7 +403,6 @@ function ajaxCheckBuildStatus() {
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
-            console.log(response);
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
@@ -579,12 +578,15 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
                     data: p_values,
                     success: function (response) {
-                        if (response?.data?.warnings?.autograding_config !== undefined) {
-                            displayWarningMessage(response.data.warnings.autograding_config);
-                        }
+                        console.log(response);
                         if (Array.isArray(response['data'])) {
                             if (response['data'].includes('rebuild_queued')) {
                                 ajaxCheckBuildStatus(gradeable_id, 'unknown');
+                            }
+                            for (const item of response['data']) {
+                                if (typeof item === "string" && item.includes("Warning")) {
+                                    displayWarningMessage(item.split("Warning:")[1].trim());
+                                }
                             }
                         }
                         setGradeableUpdateComplete();
@@ -632,12 +634,14 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
             data: p_values,
             success: function (response) {
-                if (response?.data?.warnings?.autograding_config !== undefined) {
-                    displayWarningMessage(response.data.warnings.autograding_config);
-                }
                 if (Array.isArray(response['data'])) {
                     if (response['data'].includes('rebuild_queued')) {
                         ajaxCheckBuildStatus(gradeable_id, 'unknown');
+                    }
+                    for (const item of response['data']) {
+                        if (typeof item === "string" && item.includes("Warning")) {
+                            displayWarningMessage(item.split("Warning:")[1].trim());
+                        }
                     }
                 }
                 setGradeableUpdateComplete();
