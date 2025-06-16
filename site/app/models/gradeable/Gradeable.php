@@ -87,7 +87,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
- * @method string  getDiscussionThreadId()
+ * @method string getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveGradeInquiriesCount()
  * @method void setHasDueDate($has_due_date)
