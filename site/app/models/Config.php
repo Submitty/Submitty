@@ -357,8 +357,9 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'MDY', and configured as a property of the Config class
-        // Eventually this should be moved to the User class and configured on a per-user basis
+        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
+        // It is configured as a property of the Config class
+        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
         $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
 
         if ($this->submitty_install_path) {
