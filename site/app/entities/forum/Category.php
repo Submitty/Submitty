@@ -62,7 +62,8 @@ class Category {
         try {
             // Strip time from both for pure date comparison
             $visibleDate = (new \DateTimeImmutable($this->visible_date))->setTime(0, 0);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return -1;
         }
 
