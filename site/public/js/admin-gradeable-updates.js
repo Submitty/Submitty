@@ -880,8 +880,6 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
-let savedConfig;
-
 // Register beforeunload listener once
 window.addEventListener('beforeunload', (event) => {
     const isEdited = $('#gradeable-config-edit').data('edited');
@@ -892,6 +890,11 @@ window.addEventListener('beforeunload', (event) => {
 });
 
 let originalConfigContent = null;
+
+// When the text editor opens, the user shouldn't have to manually scroll to see the contents
+function scrollToBottom() {
+    window.scrollTo({ top: 800, left: 0, behavior: 'smooth' });
+}
 
 // When you load the editor
 function loadGradeableEditor(g_id, file_path) {
@@ -929,6 +932,7 @@ function loadGradeableEditor(g_id, file_path) {
 
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
+                scrollToBottom();
             }
             catch {
                 displayErrorMessage('Error parsing data. Please try again');
@@ -942,6 +946,7 @@ function toggleGradeableConfigEdit() {
     const editorButton = document.getElementById('open-config-editor');
     if (editorButton.innerHTML === 'Open Editor') {
         editorButton.innerHTML = 'Close Editor';
+        scrollToBottom();
     }
     else {
         editorButton.innerHTML = 'Open Editor';

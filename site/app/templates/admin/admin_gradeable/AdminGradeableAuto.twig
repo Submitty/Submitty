@@ -119,7 +119,7 @@
                 {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
             </ul>
             <div id="gradeable-config-edit-bar">
-                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration"></textarea>
+                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
                 <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
                 <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
             </div>
