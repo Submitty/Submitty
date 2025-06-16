@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
 
 let updateInProgressCount = 0;
@@ -403,6 +403,7 @@ function ajaxCheckBuildStatus() {
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
+            console.log(response);
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
                 $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
@@ -578,6 +579,9 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
                     data: p_values,
                     success: function (response) {
+                        if (response?.data?.warnings?.autograding_config !== undefined) {
+                            displayWarningMessage(response.data.warnings.autograding_config);
+                        }
                         if (Array.isArray(response['data'])) {
                             if (response['data'].includes('rebuild_queued')) {
                                 ajaxCheckBuildStatus(gradeable_id, 'unknown');
@@ -628,6 +632,9 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
             data: p_values,
             success: function (response) {
+                if (response?.data?.warnings?.autograding_config !== undefined) {
+                    displayWarningMessage(response.data.warnings.autograding_config);
+                }
                 if (Array.isArray(response['data'])) {
                     if (response['data'].includes('rebuild_queued')) {
                         ajaxCheckBuildStatus(gradeable_id, 'unknown');

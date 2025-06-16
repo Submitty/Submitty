@@ -2595,19 +2595,22 @@ class Gradeable extends AbstractModel {
      * Validates the autograding config for the gradeable, warning instructors of
      * any issues found, such as duplicate keys or invalid JSON syntax.
      *
-     * @return void
+     * @param string|null $target_dir The directory to validate, defaults to the gradeable's autograding config path.
+     * @throws \Exception If the config is invalid.
+     * @return string|null The error message if the config is invalid, null otherwise.
      */
-    public function validateAutogradingConfig(): void {
-        if (!$this->hasAutogradingConfig()) {
-            return;
+    public function validateAutogradingConfig(?string $target_dir): ?string {
+        $dir = $target_dir ?? $this->getAutogradingConfigPath();
+        if (!$this->hasAutogradingConfig() || !is_dir($dir)) {
+            return null;
         }
-        $file_iter = new \RecursiveDirectoryIterator($this->getAutogradingConfigPath(), \RecursiveDirectoryIterator::SKIP_DOTS);
+        $file_iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
 
         while ($file_iter->valid()) {
             // Validate any config.json files within the autograding config directory
-            if ($file_iter->current()->getFilename() == 'config.json') {
+            if ($file_iter->current()->getFilename() === 'config.json') {
                 $json_parser = new JsonParser();
-                $path = $file_iter->current()->getPathName();
+                $path = $file_iter->current()->getPathname();
                 $json = file_get_contents($path);
 
                 try {
@@ -2617,12 +2620,13 @@ class Gradeable extends AbstractModel {
                     ], '', $json);
                     $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
                 } catch (DuplicateKeyException $e) {
-                    $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.$e->getDetails()['line']);
+                    return '\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.$e->getDetails()['line'];
                 } catch (ParsingException $e) {
-                    $this->core->addNoticeMessage('Invalid JSON in '.$path.': '.$e->getMessage());
+                    return 'Invalid JSON in '.$path.': '.$e->getMessage();
                 }
             }
             $file_iter->next();
         }
+        return null;
     }
 }

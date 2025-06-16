@@ -16,9 +16,6 @@ use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-use Seld\JsonLint\JsonParser;
-use Seld\JsonLint\ParsingException;
-use Seld\JsonLint\DuplicateKeyException;
 
 /**
  * Class AdminGradeableController
@@ -535,7 +532,6 @@ class AdminGradeableController extends AbstractController {
                 $gradeable_max_points[$a_gradeable->getId()] = $auto_config->getTotalNonHiddenNonExtraCredit();
             }
         }
-        $gradeable->validateAutogradingConfig();
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
@@ -1422,6 +1418,13 @@ class AdminGradeableController extends AbstractController {
         unset($_POST['csrf_token']);
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
+            if (isset($_POST['autograding_config_path'])) {
+                $invalid_config_message = $gradeable->validateAutogradingConfig($_POST['autograding_config_path']);
+
+                if ($invalid_config_message !== null) {
+                    $response_props['warnings']['autograding_config'] = $invalid_config_message;
+                }
+            }
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);
         }
