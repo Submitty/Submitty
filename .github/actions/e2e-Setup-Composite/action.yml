@@ -218,9 +218,9 @@ runs:
 
     - name: Restart web services
       run: |
+        sudo service nginx restart
         sudo service php${PHP_VER}-fpm restart
         sudo service apache2 restart
-        sudo service nginx restart
       shell: bash
 
     - name: Check logs
