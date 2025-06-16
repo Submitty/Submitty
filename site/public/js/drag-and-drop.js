@@ -493,6 +493,10 @@ function isValidSubmission() {
         return true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(window, 'is_vcs')) {
+        return true;
+    }
+
     return false;
 }
 

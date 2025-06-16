@@ -3,7 +3,6 @@
 namespace tests\phpstan;
 
 use PHPStan\Reflection\ClassReflection;
-use PHPStan\Reflection\Dummy\DummyMethodReflection;
 use PHPStan\Reflection\MethodReflection;
 use PHPStan\Reflection\MethodsClassReflectionExtension;
 
@@ -23,6 +22,6 @@ class ModelClassExtension implements MethodsClassReflectionExtension {
     }
 
     public function getMethod(ClassReflection $reflection, string $method_name): MethodReflection {
-        return new DummyMethodReflection($method_name);
+        return new SubmittyMagicMethodReflection($method_name, $reflection);
     }
 }
