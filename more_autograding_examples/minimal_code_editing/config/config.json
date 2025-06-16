@@ -1,9 +1,14 @@
 {
-	"required_capabilities": "cpp",
-
-    "autograding" : {
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/clang:latest"
+    },
+    
+    "autograding": {
         "submission_to_runner" : [ "*.cpp" ]
     },
+
     "testcases" : 
     [
         // *************** COMPILATION *****************

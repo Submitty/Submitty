@@ -186,7 +186,7 @@ class DatabaseQueries {
         $this->course_db->query("
         WITH
         A AS
-        (SELECT registration_section, user_id, COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) as user_givenname, COALESCE(NULLIF(user_preferred_familyname,''), user_familyname) as user_familyname
+        (SELECT registration_section, user_id, COALESCE(user_preferred_givenname, user_givenname) as user_givenname, COALESCE(user_preferred_familyname, user_familyname) as user_familyname
         FROM users
         ORDER BY registration_section, user_familyname, user_givenname, user_id),
         B AS
@@ -1252,7 +1252,17 @@ WHERE term=? AND course=? AND user_id=?",
         return count($this->course_db->rows()) > 0 && $this->course_db->row()['autograding_complete'] === true;
     }
 
-    protected function createParameterList($len) {
+    /**
+     * Create a string that consists placeholder parameters (?) enclosed in parentheses.
+     * These placeholders will then be used for parameter binding when executing the SQL query.
+     * When $len is zero, this function will return '(NULL)' so that it won't break SQL syntax.
+     *
+     * @param integer $len the number of placeholder parameters.
+     */
+    protected function createParameterList(int $len): string {
+        if ($len < 1) {
+            return '(NULL)';
+        }
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
@@ -2614,7 +2624,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         $this->course_db->query(
             "
-SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
+SELECT round(AVG(g_score),2) AS manual_avg_score, round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS manual_std_dev, round(stddev_pop(g_score + autograding),2) AS std_dev, MAX(g_score) AS manual_max_score, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
     SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
       SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
@@ -2652,7 +2662,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         if (count($this->course_db->rows()) == 0) {
             return;
         }
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
+        return $this->course_db->rows()[0];
     }
 
     public function getNumUsersWhoViewedGradeBySections($gradeable, $sections, string $null_section) {
@@ -3042,8 +3052,8 @@ ORDER BY g.sections_rotating_id, g.user_id",
     public function getGradersByUserType() {
         $this->course_db->query(
             "SELECT
-                COALESCE(NULLIF(user_preferred_givenname, ''), user_givenname) AS user_givenname,
-                COALESCE(NULLIF(user_preferred_familyname, ''), user_familyname) AS user_familyname,
+                COALESCE(user_preferred_givenname, user_givenname) AS user_givenname,
+                COALESCE(user_preferred_familyname, user_familyname) AS user_familyname,
                 user_id,
                 user_group
             FROM
@@ -3630,7 +3640,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      *
      * @param  string  $g_id
      * @param  string  $user_id
-     * @param  integer $registration_section
+     * @param  string $registration_section
      * @param  integer $rotating_section
      * @return string $team_id
      */
@@ -4752,8 +4762,8 @@ SQL;
     public function getSelfRegistrationCourses(string $user_id): array {
         $query = <<<SQL
 SELECT c.*, t.name AS term_name FROM courses c, terms t
-WHERE c.self_registration_type > ? AND c.status = ? and c.course NOT IN (
-    SELECT course FROM courses_users WHERE user_id = ? and term = t.term_id
+WHERE c.self_registration_type > ? AND c.status = ? AND  c.course NOT IN (
+    SELECT course FROM courses_users WHERE user_id = ? AND (registration_section IS NOT NULL OR user_group <> 4) AND term = t.term_id
 ) AND c.term = t.term_id ORDER BY t.term_id ASC
 SQL;
         $this->submitty_db->query($query, [ConfigurationController::NO_SELF_REGISTER, Course::ACTIVE_STATUS, $user_id]);
@@ -5199,6 +5209,7 @@ AND gc_id IN (
             'team_invite_email',
             'team_joined_email',
             'team_member_submission_email',
+            'self_registration_email',
             'self_notification_email',
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
@@ -7343,10 +7354,14 @@ AND gc_id IN (
      */
     public function isThreadLocked(int $thread_id): bool {
         $this->course_db->query('SELECT lock_thread_date FROM threads WHERE id = ?', [$thread_id]);
+        $row = $this->course_db->row();
+        $lock_date = $row['lock_thread_date'] ?? null;
         if (empty($this->course_db->row()['lock_thread_date'])) {
             return false;
         }
-        return $this->course_db->row()['lock_thread_date'] < date("Y-m-d H:i:S");
+        $current_date = new \DateTime();
+        $lock_date_time = new \DateTime($lock_date);
+        return $lock_date_time < $current_date;
     }
 
     /**
@@ -8320,6 +8335,9 @@ WHERE current_state IN
 
               /* Grade inquiry data */
              rr.array_grade_inquiries,
+             gc.ag_graders AS ag_graders,
+             gc.ag_timestamps AS ag_timestamps,
+             gc.ag_graders_names AS ag_graders_names,
 
               {$submitter_data_inject}
 
@@ -8341,6 +8359,27 @@ WHERE current_state IN
                 SELECT *
                 FROM gradeable_data
               ) AS gd ON gd.g_id=g.g_id AND gd.gd_{$submitter_type}={$submitter_type_ext}
+
+              LEFT JOIN LATERAL (
+                SELECT
+                  gc.g_id,
+                  json_object_agg(gc.gc_id, graders) as ag_graders,
+                  json_object_agg(gc.gc_id, graders_names) as ag_graders_names,
+                  json_object_agg(gc.gc_id, timestamps) as ag_timestamps
+                FROM gradeable_component gc
+                LEFT JOIN (
+                  SELECT
+                    ag_{$submitter_type},
+                    gc_id,
+                    json_agg(grader_id) AS graders,
+                    json_agg(COALESCE(NULLIF(user_preferred_givenname,''), user_givenname) || ' ' || substr(COALESCE(NULLIF(user_preferred_familyname,''), user_familyname), 1, 1) || '.') AS graders_names,
+                    json_agg(timestamp) AS timestamps
+                  FROM active_graders
+                  LEFT JOIN users ON active_graders.grader_id = users.user_id
+                  GROUP BY ag_{$submitter_type} , gc_id
+                ) as ag on ag.gc_id = gc.gc_id AND ag.ag_{$submitter_type}={$submitter_type_ext}
+                GROUP BY gc.g_id
+              ) AS gc ON gc.g_id = g.g_id
 
               LEFT JOIN (
                 SELECT
@@ -8526,7 +8565,10 @@ WHERE current_state IN
                 [
                     'late_day_exceptions' => $late_day_exceptions,
                     'reasons_for_exceptions' => $reasons_for_exceptions
-                ]
+                ],
+                json_decode($row['ag_graders'], true),
+                json_decode($row['ag_timestamps'], true),
+                json_decode($row['ag_graders_names'], true)
             );
             $ta_graded_gradeable = null;
             $auto_graded_gradeable = null;
@@ -8770,7 +8812,7 @@ WHERE current_state IN
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
                  ns.self_notification,
-                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
@@ -9135,9 +9177,9 @@ SELECT    leaderboard.*,
           user_group,
           anonymous_leaderboard,
           Concat(
-              COALESCE (NULLIF(user_preferred_givenname, ''), user_givenname),
+              COALESCE (user_preferred_givenname, user_givenname),
               ' ',
-              COALESCE (NULLIF(user_preferred_familyname, ''), user_familyname)
+              COALESCE (user_preferred_familyname, user_familyname)
           ) as name
 FROM (
                    SELECT     Round(Cast(Sum(elapsed_time) AS NUMERIC), 1) AS time,
@@ -9288,6 +9330,36 @@ ORDER BY
         return $this->rowsToArray($this->submitty_db->rows());
     }
 
+    /**
+     * Adds a component grader to the active_graders table
+     */
+    public function addComponentGrader(Component $component, bool $isTeam, string $grader_id, string $graded_id): void {
+        $this->course_db->query("
+            INSERT INTO active_graders (gc_id, grader_id, ag_user_id, ag_team_id, timestamp)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+        ", [
+            $component->getId(),
+            $grader_id,
+            $isTeam ? null : $graded_id,
+            $isTeam ? $graded_id : null,
+            $this->core->getDateTimeNow(),
+        ]);
+    }
+
+    /**
+     * Removes a component grader to the active_graders table
+     */
+    public function removeComponentGrader(Component $component, string $grader_id, string $graded_id): void {
+            $this->course_db->query("
+            DELETE FROM active_graders
+            WHERE gc_id = ? AND grader_id = ? AND (ag_user_id = ? OR ag_team_id = ?)
+            ", [
+            $component->getId(),
+            $grader_id,
+            $graded_id,
+            $graded_id,
+            ]);
+    }
     /**
      * @param string $image the full name of the image to get
      * @return string|false the user id of the image's owner or false if the image is not in the db

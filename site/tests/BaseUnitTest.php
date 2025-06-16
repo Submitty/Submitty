@@ -65,7 +65,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
+        if (isset($config_values['base_url'])) {
+            $config->method('getBaseUrl')->willReturn($config_values['base_url']);
+        }
+
         $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
+        $config->method('getCourseMaterialFileUploadLimitMb')->willReturn($config_values['course_material_file_upload_limit_mb'] ?? 100);
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
         DateUtils::setTimezone($config->getTimezone());
@@ -157,7 +162,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         /** @var Output&\PHPUnit\Framework\MockObject\MockObject $output */
         $output = $this->getMockBuilder(Output::class)
             ->setConstructorArgs([$core])
-            ->setMethods(['addBreadcrumb'])
+            ->onlyMethods(['addBreadcrumb'])
             ->getMock();
         $output->method('addBreadcrumb')->willReturn(true);
         $output->disableRender();
@@ -192,20 +197,26 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
             /** @noinspection PhpUnhandledExceptionInspection */
             $reflection = new \ReflectionClass($class);
-            $methods = [];
+            $magic_methods = [];
+            $real_methods = [];
             $matches = [];
             preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
             foreach ($matches[1] as $match) {
                 if (strlen($match) > 0) {
-                    $methods[] = $match;
+                    $magic_methods[] = $match;
                 }
             }
             foreach ($reflection->getMethods() as $method) {
                 if (!str_starts_with($method->getName(), "__")) {
-                    $methods[] = $method->getName();
+                    $real_methods[] = $method->getName();
                 }
             }
-            $builder->setMethods(array_unique($methods));
+            if (count($real_methods) > 0) {
+                $builder->onlyMethods(array_unique($real_methods));
+            }
+            if (count($magic_methods) > 0) {
+                $builder->addMethods(array_unique($magic_methods));
+            }
             static::$mock_builders[$class] = $builder;
         }
         return static::$mock_builders[$class]->getMock();

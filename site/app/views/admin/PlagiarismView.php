@@ -41,7 +41,7 @@ class PlagiarismView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
         $this->core->getOutput()->addInternalJs('plagiarism.js');
-        $this->core->getOutput()->addInternalJs('resizable-panels.js');
+        $this->core->getOutput()->addInternalModuleJs('resizable-panels.js');
         $this->core->getOutput()->addInternalCss('plagiarism.css');
         $this->core->getOutput()->addInternalCss('scrollable-sidebar.css');
         $this->core->getOutput()->enableMobileViewport();
