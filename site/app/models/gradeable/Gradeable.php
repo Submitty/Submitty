@@ -2621,11 +2621,14 @@ class Gradeable extends AbstractModel {
                     $new_lines = substr_count($content, "\n");
                     $line_diff = $original_lines - $new_lines;
                     $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
-                } catch (DuplicateKeyException $e) {
-                    return '\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.($e->getDetails()['line'] - $line_diff);
-                } catch (ParsingException $e) {
-                    $message = $e->getDetails()['line'] ? preg_replace('/on line \d+/', 'on line ' . ($e->getDetails()['line'] - $line_diff), $e->getMessage()) : $e->getMessage();
-                    return 'Invalid JSON in '.$path.': '.$message;
+                }
+                catch (DuplicateKeyException $e) {
+                    return '\'' . $e->getDetails()['key'] . '\' is a duplicate key in ' . $path . ' at line ' . ($e->getDetails()['line'] - $line_diff);
+                }
+                catch (ParsingException $e) {
+                    $message = isset($e->getDetails()['line']) ?
+                        preg_replace('/on line \d+/', 'on line ' . ($e->getDetails()['line'] - $line_diff), $e->getMessage()) : $e->getMessage();
+                    return 'Invalid JSON in ' . $path . ': ' . $message;
                 }
             }
             $file_iter->next();
