@@ -192,7 +192,7 @@ runs:
         sudo service php${PHP_VER}-fpm restart
         sudo service apache2 restart
       shell: bash
-    
+
     - name: Check logs
       if: failure()
       run: |
