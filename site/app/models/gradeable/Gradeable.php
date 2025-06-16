@@ -2606,20 +2606,21 @@ class Gradeable extends AbstractModel {
         $file_iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
 
         while ($file_iter->valid()) {
-            // Validate any config.json files within the autograding config directory
+            // Validate any config.json files within the given autograding config directory
             if ($file_iter->current()->getFilename() === 'config.json') {
-                $json_parser = new JsonParser();
                 $path = $file_iter->current()->getPathname();
+                $json_parser = new JsonParser();
                 $json = file_get_contents($path);
+                // Remove line and block-based comments from the JSON and calculate the line difference
+                $content = preg_replace([
+                    '#//.*$#m',      // remove // comments at end of the line
+                    '#/\*.*?\*/#s'   // remove /* ... */ block comments
+                ], '', $json);
                 $original_lines = substr_count($json, "\n");
+                $new_lines = substr_count($content, "\n");
+                $line_diff = $original_lines - $new_lines;
 
                 try {
-                    $content = preg_replace([
-                        '#//.*$#m',      // remove // comments at end of the line
-                        '#/\*.*?\*/#s'   // remove /* ... */ block comments
-                    ], '', $json);
-                    $new_lines = substr_count($content, "\n");
-                    $line_diff = $original_lines - $new_lines;
                     $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
                 }
                 catch (DuplicateKeyException $e) {
