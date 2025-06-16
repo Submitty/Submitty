@@ -2611,6 +2611,7 @@ class Gradeable extends AbstractModel {
                 $path = $file_iter->current()->getPathname();
                 $json_parser = new JsonParser();
                 $json = file_get_contents($path);
+
                 // Remove line and block-based comments from the JSON and calculate the line difference
                 $content = Utils::stripComments($json);
                 $original_lines = substr_count($json, "\n");
