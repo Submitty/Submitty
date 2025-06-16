@@ -198,6 +198,7 @@ runs:
       run: |
         sudo apt-get install net-tools
         netstat -anvp tcp | awk 'NR<3 || /LISTEN/'
+        sudo lsof -i :80
         systemctl status apache2.service --no-pager
         journalctl -xeu apache2.service --no-pager
         apache2ctl configtest
