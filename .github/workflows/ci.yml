@@ -937,7 +937,7 @@ jobs:
       - name: Get API key
         shell: bash
         run: |
-          echo 'RESPONSE=(curl -s -X POST http://localhost:1511/api/token -H "Content-Type: application/x-www-form-urlencoded" -d "user_id=instructor&password=instructor")' >> $GITHUB_ENV'
+          echo 'RESPONSE=(curl -s -X POST http://localhost:1511/api/token -H "Content-Type: application/x-www-form-urlencoded" -d "user_id=instructor&password=instructor")' >> $GITHUB_ENV
       
       - name: Create Homework
         shell: bash
