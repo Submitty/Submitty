@@ -1422,7 +1422,7 @@ class AdminGradeableController extends AbstractController {
                 $invalid_config_message = $gradeable->validateAutogradingConfig($_POST['autograding_config_path']);
 
                 if ($invalid_config_message !== null) {
-                    array_push($response_props, 'Warning:'.$invalid_config_message);
+                    array_push($response_props, 'Warning:' . $invalid_config_message);
                 }
             }
             // Finally, send the requester back the information

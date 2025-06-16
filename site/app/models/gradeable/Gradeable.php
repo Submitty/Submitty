@@ -2611,15 +2611,18 @@ class Gradeable extends AbstractModel {
                 $json_parser = new JsonParser();
                 $path = $file_iter->current()->getPathname();
                 $json = file_get_contents($path);
+                $original_lines = substr_count($json, "\n");
 
                 try {
                     $content = preg_replace([
                         '#//.*$#m',      // remove // comments at end of the line
                         '#/\*.*?\*/#s'   // remove /* ... */ block comments
                     ], '', $json);
+                    $new_lines = substr_count($content, "\n");
+                    $line_diff = $original_lines - $new_lines;
                     $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
                 } catch (DuplicateKeyException $e) {
-                    return '\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.$e->getDetails()['line'];
+                    return '\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.($e->getDetails()['line'] - $line_diff);
                 } catch (ParsingException $e) {
                     return 'Invalid JSON in '.$path.': '.$e->getMessage();
                 }

@@ -115,6 +115,20 @@ function updateGradeableErrorCallback(message, response_data) {
     updateErrorMessage();
 }
 
+function parseUpdateGradeableResponseArray(response, gradeable_id) {
+    // Trigger periodic checks for latest build status
+    if (response.includes('rebuild_queued')) {
+        ajaxCheckBuildStatus(gradeable_id, 'unknown');
+    }
+
+    // Display potential warnings
+    for (const item of response) {
+        if (typeof item === 'string' && item.includes('Warning')) {
+            displayWarningMessage(item.split('Warning:')[1].trim());
+        }
+    }
+}
+
 function updateDueDate() {
     const cont = $('#due_date_container');
     const cont1 = $('#late_days_options_container');
@@ -579,14 +593,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     data: p_values,
                     success: function (response) {
                         if (Array.isArray(response['data'])) {
-                            if (response['data'].includes('rebuild_queued')) {
-                                ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                            }
-                            for (const item of response['data']) {
-                                if (typeof item === "string" && item.includes("Warning")) {
-                                    displayWarningMessage(item.split("Warning:")[1].trim());
-                                }
-                            }
+                            parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                         }
                         setGradeableUpdateComplete();
                         if (response.status === 'success') {
@@ -634,14 +641,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             data: p_values,
             success: function (response) {
                 if (Array.isArray(response['data'])) {
-                    if (response['data'].includes('rebuild_queued')) {
-                        ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                    }
-                    for (const item of response['data']) {
-                        if (typeof item === "string" && item.includes("Warning")) {
-                            displayWarningMessage(item.split("Warning:")[1].trim());
-                        }
-                    }
+                    parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                 }
                 setGradeableUpdateComplete();
                 if (response.status === 'success') {
