@@ -41,14 +41,17 @@ with open(submitty_creds_file, 'r') as file:
 if 'token' not in creds or not creds['token']:
     raise Exception('Unable to read credentials from submitty_admin.json')
 
+
 # Rainbow Grades GUI Customization Parsing Functions (see /site/public/js/rainbow-customization.js)
 def get_display(soup):
     """Collects the values of checked 'display' checkboxes."""
     return [element['value'] for element in soup.select('input[name="display"]:checked')]
 
+
 def get_display_benchmark(soup):
     """Collects the values of checked 'display_benchmarks' checkboxes."""
     return [element['value'] for element in soup.select('input[name="display_benchmarks"]:checked')]
+
 
 def get_selected_curve_benchmarks(soup):
     """Determines which curve-related benchmarks are selected."""
@@ -56,6 +59,7 @@ def get_selected_curve_benchmarks(soup):
     benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d']
 
     return [elem for elem in all_selected if elem in benchmarks_with_input_fields]
+
 
 def get_benchmark_percent(soup):
     """Collects benchmark percents for the selected curve benchmarks."""
@@ -75,6 +79,7 @@ def get_benchmark_percent(soup):
                 raise ValueError("Benchmark percent input must be a floating point number.")
 
     return benchmark_percent
+
 
 def get_final_cutoff_percent(soup):
     """Collects the final grade cutoff percentages."""
@@ -106,6 +111,7 @@ def get_section(soup):
         sections[section] = label
 
     return sections
+
 
 def get_gradeable_buckets(soup):
     """Collects data for all visible gradeable buckets."""
@@ -152,6 +158,7 @@ def get_gradeable_buckets(soup):
 
     return gradeables
 
+
 def get_table_data(soup, table_name):
     """Extracts data from the plagiarism, manual grade, or performance warnings tables."""
     data = []
@@ -181,7 +188,7 @@ def get_table_data(soup, table_name):
                 'penalty': float(third_input)
             })
         elif table_name == 'manualGrade':
-             data.append({
+            data.append({
                 'user': first_input,
                 'grade': second_input,
                 'note': third_input
@@ -195,11 +202,13 @@ def get_table_data(soup, table_name):
 
     return data
 
+
 def get_messages(soup):
     """Extracts custom messages from the textarea."""
     textarea = soup.select_one('#cust_messages_textarea')
 
     return [textarea.text.strip()] if textarea and textarea.text.strip() else []
+
 
 def build_json(html_string):
     """
@@ -222,6 +231,7 @@ def build_json(html_string):
 
     return json.dumps(data, indent=4)
 
+
 def main():
     """Automatically call Generate Grade Summaries API."""
     parser = argparse.ArgumentParser(
@@ -237,12 +247,6 @@ def main():
 
     # Save Rainbow Grades GUI Customization
     try:
-        customization_file = os.path.join(data_dir, 'courses', semester, course, 'rainbow_grades', 'customization.json')
-        if not os.path.exists(customization_file):
-            raise Exception('Unable to locate customization.json file')
-        with open(customization_file, 'r') as file:
-            customization_data = json.load(file)
-
         # Load the GUI customization page via server-side rendering
         load_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
@@ -293,9 +297,8 @@ def main():
         )
 
         if (select_response.status_code == 200 and
-            build_form_response.status_code == 200 and
-            rainbow_grades_status_response.status_code == 200
-        ):
+                build_form_response.status_code == 200 and
+                rainbow_grades_status_response.status_code == 200):
             print("Successfully completed the Rainbow Grades GUI build process for {}.{}".format(
                 semester, course
             ))
