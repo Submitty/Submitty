@@ -628,7 +628,7 @@ if not args.worker:
 ##############################################################################
 # Write submitty json
 user_id_requirements = {
-    "all": True,
+    "any_user_id": True,
     "require_name": False,
     "min_length": 6,
     "max_length": 25,

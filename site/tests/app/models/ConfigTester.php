@@ -98,7 +98,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "duck_special_effects" => false,
             "default_locale" => "default",
             "user_id_requirements" => [
-                "all" => true,
+                "any_user_id" => true,
                 "require_name" => false,
                 "min_length" => 6,
                 "max_length" => 25,
@@ -354,7 +354,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => 'Some system message',
             'user_create_account' => false,
             "user_id_requirements" => [
-                "all" => true,
+                "any_user_id" => true,
                 "require_name" => false,
                 "min_length" => 6,
                 "max_length" => 25,

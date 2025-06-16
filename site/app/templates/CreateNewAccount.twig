@@ -8,18 +8,21 @@
         </a> </h1>
     </div>
 
-    <form action="{{ signup_url }}" method="post" id="login">
-        <div class="display-box"><p style="display:block">Email <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="email">Show Requirements</button></p></p>
+    <form action="{{ signup_url }}" method="post">
+        <div class="display-box">
+            <p style="display:block">Email <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="email">Show Requirements</button></p>
             <div class="hidden-helper" id="email-helper">
                 Accepted Email Extensions:<br/>
-                {% for email in requirements['accepted_emails'] %}
-                    @{{ email }}<br/>
-                {% endfor %}
+                <ul>
+                    {% for email in requirements['accepted_emails'] %}
+                        <li>@{{ email }}<br/></li>
+                    {% endfor %}
+                </ul>
             </div>
             <input type="text" name="email" required data-testid="email" />
         </div>
         <div class="display-box">
-            <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>
+            <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>  
             <div class="hidden-helper" id="userid-helper">
                 UserID Requirements:<br/>
                 {% if user_id_reqs["any_user_id"] == true %}
@@ -45,32 +48,33 @@
                     {% endif %}
                 {% endif %}
             </div>
-            <input type="text" name="user_id" data-testid="user-id" required />
+                <input type="text" name="user_id" data-testid="user-id" required />
         </div>
         <div class="display-box">
             Given Name
             <input type="text" name="given_name" data-testid="given-name" required />
         </div>
-        <label>
+        <div class="display-box">
             Family Name
             <input type="text" name="family_name" data-testid="family-name" required />
-        </label>
+        </div>
         <div class="display-box">
-           <p style="display:block">Password <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="password">Show Requirements</button></p>
+            <p style="display:block">Password <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="password">Show Requirements</button></p>
             <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/> 
-                1 Capital Letter<br/>
-                1 Lowercase Letter<br/>
-                1 Number<br/>
-                1 Special Character<br/>
-                12 Characters<br/>
+                <ul>
+                    <li> 1 Capital Letter </li>
+                    <li> 1 Lowercase Letter </li>
+                    <li> 1 Number </li>
+                    <li> 1 Special Character </li>
+                    <li> 12 Characters </li>
             </div>
             <input type="password" name="password" data-testid="password" required id="password-input" />
         </div>
-        <label>
+        <div class="display-box">
             Re-Enter Password
             <input type="password" name="confirm_password" data-testid="confirm-password" required id="confirm-password-input" onblur="checkPasswordsMatch()" />
-        </label>
+        </div>
         <input type="submit" name="signup" value="Sign Up" class="btn btn-primary" data-testid="sign-up-button" />
     </form>
 </div>

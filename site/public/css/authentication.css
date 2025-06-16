@@ -63,15 +63,19 @@
     width: 100%;
 }
 
+.display-box {
+    margin-bottom: 1em;
+}
+
 .requirements-button {
     display: inline-block;
     font-weight: 400;
     color: var(--standard-medium-dark-gray);
     text-align: center;
-    vertical-align: middle;
+    vertical-align: text-top;
     background-color: transparent;
     border: 1px solid;
-    padding: 0.3rem;
+    padding: 0.2rem;
     font-size: x-small;
     line-height: 1;
     border-radius: 0.25rem;
