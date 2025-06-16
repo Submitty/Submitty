@@ -95,46 +95,50 @@
                 {% endif %}
 
                 <script>
-                    const config_{{ num_codeboxes }} = {};
+                    $(()=> {
+                        setTimeout(()=>{
+                            const config_{{ num_codeboxes }} = {};
 
-                    var theme = localStorage.getItem("theme");
-                    if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
-                        theme = "dark";
-                    }
-                    config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
+                            var theme = localStorage.getItem("theme");
+                            if(theme == null && window.matchMedia("(prefers-color-scheme: dark)").matches){
+                                theme = "dark";
+                            }
+                            config_{{ num_codeboxes }}.theme = (theme == null || theme === "light") ? "eclipse" : "monokai";
 
-                    {% if cell.programming_language is defined and cell.programming_language != '' %}
-                      config_{{ num_codeboxes }}.lineNumbers = true;
-                      config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
-                    {% endif %}
+                            {% if cell.programming_language is defined and cell.programming_language != '' %}
+                              config_{{ num_codeboxes }}.lineNumbers = true;
+                              config_{{ num_codeboxes }}.mode = '{{ cell.codemirror_mode }}';
+                            {% endif %}
 
-                    {% if cell.programming_language is defined %}
-                      if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
-                          config_{{ num_codeboxes }}.lineWrapping = true;
-                      }
-                    {% endif %}
+                            {% if cell.programming_language is defined %}
+                              if('{{ cell.programming_language }}' === '' && {{ cell.rows }} > 0) {
+                                  config_{{ num_codeboxes }}.lineWrapping = true;
+                              }
+                            {% endif %}
 
-                    if ({{ cell.rows }} > 0) {
-                        var show_accessbility_message = {{ is_grader_view ? "false" : "true" }}
-                        var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
-                        editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
-                        $('#codebox_{{ num_codeboxes }}').addClass("large-mirror");
-                    }
-                    else {
-                        var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
-                        $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
-                    }
+                            if ({{ cell.rows }} > 0) {
+                                var show_accessbility_message = {{ is_grader_view ? "false" : "true" }}
+                                var editor_{{ num_codeboxes }} = getLargeCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
+                                editor_{{ num_codeboxes }}.setSize(null, rowsToPixels({{ cell.rows }}));
+                                $('#codebox_{{ num_codeboxes }}').addClass("large-mirror");
+                            }
+                            else {
+                                var editor_{{ num_codeboxes }} = getSmallCodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"), config_{{ num_codeboxes }}, show_accessbility_message);
+                                $('#codebox_{{ num_codeboxes }}').addClass("small-mirror");
+                            }
 
-                    {# Populate codebox and set state of buttons initially #}
-                    {% if highest_version == 0 %}
-                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
-                    {% else %}
-                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
-                    {% endif %}
+                            {# Populate codebox and set state of buttons initially #}
+                            {% if highest_version == 0 %}
+                                setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                            {% else %}
+                                setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
+                                document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                            {% endif %}
+                        });
+                    });
                 </script>
                 {% set num_codeboxes = num_codeboxes + 1 %}
 
