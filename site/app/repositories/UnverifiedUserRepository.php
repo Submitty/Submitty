@@ -10,7 +10,7 @@ class UnverifiedUserRepository extends EntityRepository {
      * @return UnverifiedUserEntity[]
      */
     public function getUnverifiedUsers(string $user_id, string $email): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         return $qb->select('u')
             ->from('app\entities\UnverifiedUserEntity', 'u')
             ->where('u.user_email = :email')
