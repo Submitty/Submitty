@@ -1322,6 +1322,14 @@ function setMultiPanelModeVisiblities() {
             $(`#${panel.str}`).toggle(true);
             $(panel.icon).toggleClass('icon-selected', true);
             $(id_str).toggleClass('active', true);
+
+            // display notebook elements if we have it
+            $(`#${panel.str}`)
+                .find('.CodeMirror')
+                .each(function () {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                    (this as any).CodeMirror?.refresh();
+                });
         }
         else {
             $(`#${panel.str}`).toggle(false);
@@ -1348,6 +1356,8 @@ function setPanelsVisibilities(
             $(`#${panel.str}`).toggle(eleVisibility);
             $(panel.icon).toggleClass('icon-selected', eleVisibility);
             $(id_str).toggleClass('active', eleVisibility);
+
+            // display notebook elements if we have it
             $(`#${panel.str}`)
                 .find('.CodeMirror')
                 .each(function () {
