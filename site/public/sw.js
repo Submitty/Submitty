@@ -17,3 +17,7 @@ self.addEventListener('fetch', (fetchEvent) => {
         }),
     );
 });
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
