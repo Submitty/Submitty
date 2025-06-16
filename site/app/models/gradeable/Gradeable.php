@@ -13,6 +13,9 @@ use app\models\AbstractModel;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
+use Seld\JsonLint\JsonParser;
+use Seld\JsonLint\ParsingException;
+use Seld\JsonLint\DuplicateKeyException;
 use app\controllers\admin\AdminGradeableController;
 
 /**
@@ -2586,5 +2589,39 @@ class Gradeable extends AbstractModel {
             return false;
         }
         return !empty($autograding_config->getLeaderboards());
+    }
+
+    /**
+     * Validates the autograding config for the gradeable, adding notices for any issues found.
+     *
+     * @return void
+     */
+    public function validateAutogradingConfig(): void {
+        if (!$this->hasAutogradingConfig()) {
+            return;
+        }
+        $file_iter = new \RecursiveDirectoryIterator($this->getAutogradingConfigPath(), \RecursiveDirectoryIterator::SKIP_DOTS);
+
+        while ($file_iter->valid()) {
+            // Validate any config.json files within the autograding config directory
+        if ($file_iter->current()->getFilename() == 'config.json') {
+                $json_parser = new JsonParser();
+                $path = $file_iter->current()->getPathName();
+                $json = file_get_contents($path);
+
+                try {
+                    $content = preg_replace([
+                        '#//.*$#m',      // remove // comments at end of the line
+                        '#/\*.*?\*/#s'   // remove /* ... */ block comments
+                    ], '', $json);
+                    $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
+                } catch (DuplicateKeyException $e) {
+                    $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in '.$path.' at line '.$e->getDetails()['line']);
+                } catch (ParsingException $e) {
+                    $this->core->addNoticeMessage('Invalid JSON in '.$path.': '.$e->getMessage());
+                }
+            }
+            $file_iter->next();
+        }
     }
 }

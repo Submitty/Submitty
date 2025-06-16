@@ -60,6 +60,15 @@ class AutogradingConfigController extends AbstractController {
     public function uploadConfig($g_id = ''): MultiResponse {
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+
+        if ($gradeable === null) {
+            return new MultiResponse(
+                JsonResponse::getErrorResponse('Gradeable not found'),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
@@ -115,38 +124,7 @@ class AutogradingConfigController extends AbstractController {
                 );
             }
         }
-
-        try {
-            $file_iter = new \RecursiveDirectoryIterator($target_dir, \RecursiveDirectoryIterator::SKIP_DOTS);
-
-            while ($file_iter->valid()) {
-                if ($file_iter->current()->getFilename() == 'config.json') {
-                    $json_parser = new JsonParser();
-                    $json = file_get_contents($file_iter->current()->getPathName());
-
-                    // Warn instructors for duplicate keys in config.json
-                    try {
-                        // Remove // and /* */ comments as many config files contain them (invalid JSON)
-                        $content = preg_replace('!//.*!', '', $json);
-                        $content = preg_replace('!/\\*.*?\\*/!s', '', $content);
-
-                        $json_parser->parse($content, JsonParser::DETECT_KEY_CONFLICTS);
-                    } catch (DuplicateKeyException $e) {
-                        $this->core->addNoticeMessage('\''.$e->getDetails()['key'].'\' is a duplicate key in config.json at line '.$e->getDetails()['line']);
-                    } catch (ParsingException $e) { } // Ignore as the original JSON content will be parsed in the next block
-
-                    // Warn instructors about invalid JSON content
-                    try {
-                        $json_parser->parse($json);
-                    } catch (ParsingException $e) {
-                        $this->core->addNoticeMessage('Invalid JSON in config.json: '.$e->getMessage());
-                    }
-                }
-                $file_iter->next();
-            }
-        }
-        catch (\Exception $e) { } // Ignore for now (testing)
-
+        $gradeable->validateAutogradingConfig();
         $msg = 'Gradeable config uploaded';
         $this->core->addSuccessMessage($msg);
         return new MultiResponse(
