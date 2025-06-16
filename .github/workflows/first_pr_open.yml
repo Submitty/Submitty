@@ -19,7 +19,8 @@ jobs:
         id: check-first-pr
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
-          FIRST_PR=$(gh pr list --author "$USERNAME" --state all --limit 2 | wc -l | xargs -I {} test {} -eq 1 && echo "true" || echo "false")
+          SIX_MONTHS_AGO=$(date -d '1 second ago' +%Y-%m-%d)
+          FIRST_PR=$(gh pr list --author "$USERNAME" --state all --search "created:>$SIX_MONTHS_AGO" --limit 1 | wc -l | xargs -I {} test {} -eq 1 && echo "false" || echo "true")
           echo "first_pr=$FIRST_PR" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +39,12 @@ jobs:
       - name: First PR Open
         if: env.bot_comment_exists == 'false' && env.first_pr == 'true'
         run: |
-          gh pr comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md)"
+          JSON=$(gh pr view "$PULL_REQUEST" --json headRepository,headRepositoryOwner,headRefName)
+          AUTHOR=$(jq -r '.headRepositoryOwner.login' <<< $JSON)
+          REPO=$(jq -r '.headRepository.name' <<< $JSON)
+          BRANCH=$(jq -r '.headRefName' <<< $JSON)
+          LINK="https://github.com/$AUTHOR/$REPO/actions/workflows/ci.yml?query=branch%3A$BRANCH"
+          gh pr comment "$PULL_REQUEST" --body "Hi @$USERNAME,"$'\n\n'"$(cat .github/FIRST_PR_OPEN.md | sed "s|CI_URL|$LINK|")"
         env:
           PULL_REQUEST: ${{ github.event.pull_request.number }}
           USERNAME: ${{ github.event.pull_request.user.login }}
