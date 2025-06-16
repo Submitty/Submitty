@@ -28,6 +28,9 @@
 #include <vector>
 #include <string>
 
+
+#define DEFAULT_ALLOW_LOGIC 1
+
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
 #define ALLOW_SYSCALL(name, which_category)  allow_syscall(sc,SCMP_SYS(name),#name,execute_logfile, which_category,categories)
@@ -55,16 +58,29 @@ inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &sy
 void process_allow_system_calls(scmp_filter_ctx sc, std::ofstream &execute_logfile) {
   for (std::map<int,std::pair<std::string,bool> >::iterator itr = allowed_system_calls.begin(); itr != allowed_system_calls.end(); itr++) {
     if (itr->second.second == false) {
-      execute_logfile << "              DISALLOWED " << itr->first << " " << itr->second.first << std::endl;
+      //execute_logfile << "              DISALLOWED " << itr->first << " " << itr->second.first << std::endl;
+#if DEFAULT_ALLOW_LOGIC
+      int res = seccomp_rule_add(sc, SCMP_ACT_KILL, itr->first, 0);
+      if (res < 0) {
+        //execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << itr->first << std::endl;
+      }
+#else
+      // do nothing - disallowed by default
+#endif
+
     } else {
+#if DEFAULT_ALLOW_LOGIC
+      // do nothing - allowed by default
+#else
       int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, itr->first, 0);
       if (res < 0) {
-        execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << itr->first << std::endl;
+        //execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << itr->first << std::endl;
       }
-      execute_logfile << "allowed                  " << itr->first << " " << itr->second.first << std::endl;
+#endif
+      //execute_logfile << "allowed                  " << itr->first << " " << itr->second.first << std::endl;
     }
   }
-  execute_logfile << std::endl;
+  //execute_logfile << std::endl;
 }
 
 void scan_allowed_system_calls(scmp_filter_ctx sc, std::ofstream &execute_logfile) {
@@ -259,7 +275,11 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
                            const nlohmann::json &whole_config, const nlohmann::json &test_case_config) {
  
   int res;
+#if DEFAULT_ALLOW_LOGIC
+  scmp_filter_ctx sc = seccomp_init(SCMP_ACT_ALLOW);
+#else
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
+#endif
   //scmp_filter_ctx sc = seccomp_init(SCMP_ACT_LOG);
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
   if (seccomp_arch_native() != target_arch) {
@@ -313,7 +333,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     "COMMUNICATIONS_AND_NETWORKING_KILL",
     "UNKNOWN",
     "UNKNOWN_MODULE",
-    "UNKNOWN_REMAP_PAGES"
+    "UNKNOWN_REMAP_PAGES",
+    "CUSTOM_SYSTEM_CALLS"
   };
 
   std::set<std::string> forbidden_categories = {
@@ -366,7 +387,7 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
 
   allow_system_calls(sc,categories,execute_logfile);
   process_allow_system_calls(sc,execute_logfile);
-  scan_allowed_system_calls(sc,execute_logfile);
+  //scan_allowed_system_calls(sc,execute_logfile);
   
   if (seccomp_load(sc) < 0)
     return 1; // failure
