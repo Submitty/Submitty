@@ -2596,7 +2596,6 @@ class Gradeable extends AbstractModel {
      * any issues found, such as duplicate keys or invalid JSON syntax.
      *
      * @param string|null $target_dir The directory to validate, defaults to the gradeable's autograding config path.
-     * @throws \Exception If the config is invalid.
      * @return string|null The error message if the config is invalid, null otherwise.
      */
     public function validateAutogradingConfig(?string $target_dir): ?string {

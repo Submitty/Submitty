@@ -578,7 +578,6 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
                     data: p_values,
                     success: function (response) {
-                        console.log(response);
                         if (Array.isArray(response['data'])) {
                             if (response['data'].includes('rebuild_queued')) {
                                 ajaxCheckBuildStatus(gradeable_id, 'unknown');
