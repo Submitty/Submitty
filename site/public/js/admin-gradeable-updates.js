@@ -116,12 +116,12 @@ function updateGradeableErrorCallback(message, response_data) {
 }
 
 function parseUpdateGradeableResponseArray(response, gradeable_id) {
-    // Trigger periodic checks for latest build status
+    // Trigger periodic checks for latest rebuild status
     if (response.includes('rebuild_queued')) {
         ajaxCheckBuildStatus(gradeable_id, 'unknown');
     }
 
-    // Display potential warnings
+    // Display potential server-side warnings
     for (const item of response) {
         if (typeof item === 'string' && item.includes('Warning')) {
             displayWarningMessage(item.split('Warning:')[1].trim());

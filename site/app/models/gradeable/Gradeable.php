@@ -2612,10 +2612,7 @@ class Gradeable extends AbstractModel {
                 $json_parser = new JsonParser();
                 $json = file_get_contents($path);
                 // Remove line and block-based comments from the JSON and calculate the line difference
-                $content = preg_replace([
-                    '#//.*$#m',      // remove // comments at end of the line
-                    '#/\*.*?\*/#s'   // remove /* ... */ block comments
-                ], '', $json);
+                $content = Utils::stripComments($json);
                 $original_lines = substr_count($json, "\n");
                 $new_lines = substr_count($content, "\n");
                 $line_diff = $original_lines - $new_lines;
