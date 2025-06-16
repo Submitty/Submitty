@@ -15,7 +15,7 @@
     {% set all_categories_future = true %}
 
     {% for category in categories %}
-        {% if category.visibleDate is null or category.diff > 0 %}
+        {% if category.visibleDate is null or category.diff >= 0 %}
             {% set all_categories_future = false %}
         {% endif %}
     {% endfor %}

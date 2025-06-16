@@ -58,14 +58,18 @@ class Category {
         if ($this->visible_date === null) {
             return 0;
         }
+
         try {
-            $visibleDate = new \DateTimeImmutable($this->visible_date);
-        }
-        catch (\Exception $e) {
+            // Strip time from both for pure date comparison
+            $visibleDate = (new \DateTimeImmutable($this->visible_date))->setTime(0, 0);
+        } catch (\Exception $e) {
             return -1;
         }
-        $now = new \DateTimeImmutable();
+
+        $now = (new \DateTimeImmutable())->setTime(0, 0);
         $interval = $visibleDate->diff($now);
-        return (int) (($visibleDate > $now ? -1 : 1) * ($interval->days * 24) + $interval->h);
+
+        // Positive for past/today, negative for future
+        return $visibleDate > $now ? -$interval->days : $interval->days;
     }
 }
