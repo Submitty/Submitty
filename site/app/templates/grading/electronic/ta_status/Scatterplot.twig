@@ -1,18 +1,21 @@
 <div id="scatterplot" class="page-content">
-    <div>
-        <label for="x-axis-selector">Select X-Axis:</label>
-        <select id="x-axis-selector">
-            <option value="runtime">Cumulative Autograding Runtime</option>
-            <option value="memory">Maximum Autograding Memory</option>
-            <option value="scores">Autograding Total Score</option>
-        </select>
-
-        <label for="y-axis-selector">Select Y-Axis:</label>
-        <select id="y-axis-selector">
-            <option value="runtime">Cumulative Autograding Runtime</option>
-            <option value="memory">Maximum Autograding Memory</option>
-            <option value="scores">Autograding Total Score</option>
-        </select>
+    <div class="scatterplot-type-container">
+        <div>
+            <label for="x-axis-selector">Select X-Axis:</label>
+            <select id="x-axis-selector">
+                <option value="runtime">Cumulative Autograding Runtime</option>
+                <option value="memory">Maximum Autograding Memory</option>
+                <option value="scores">Autograding Total Score</option>
+            </select>
+        </div>
+        <div>
+            <label for="y-axis-selector">Select Y-Axis:</label>
+            <select id="y-axis-selector">
+                <option value="runtime">Cumulative Autograding Runtime</option>
+                <option value="memory">Maximum Autograding Memory</option>
+                <option value="scores">Autograding Total Score</option>
+            </select>
+        </div>
     </div>
     <div id="Scatterplot5"></div>
     <script>
@@ -115,13 +118,19 @@
             var data = [trace1, trace2, trace3];
 
             var layout = {
-                title: `${xLabel} vs. ${yLabel}`,
+                title: {
+                    text: `${xLabel} vs. ${yLabel}`
+                },
                 barmode: 'overlay',
                 xaxis: {
-                    title: xLabel
+                    title: {
+                        text: xLabel
+                    }
                 },
                 yaxis: {
-                    title: yLabel
+                    title: {
+                        text: yLabel
+                    }
                 },
                 font: {
                     family: '"Source Sans Pro", sans-serif',
@@ -157,7 +166,7 @@
         updatePlot(getDataArray(initialX), getDataArray(initialY), labels[initialX], labels[initialY]);
     </script>
 
-    <div id="SmallScatterplot4">
+    <div id="SmallScatterplot4" class="scatterplot-statistics">
         <script>
             function truncateToThreeDecimals(num) {
                 return Math.floor(num * 1000) / 1000;

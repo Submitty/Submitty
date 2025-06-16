@@ -162,16 +162,6 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
-			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
 			message: "#^Only booleans are allowed in \\|\\|, int given on the left side\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
@@ -754,11 +744,6 @@ parameters:
 			path: app/controllers/SelfRejoinController.php
 
 		-
-			message: "#^Strict comparison using \\!\\=\\= between bool and null will always evaluate to true\\.$#"
-			count: 1
-			path: app/controllers/SelfRejoinController.php
-
-		-
 			message: """
 				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return RedirectResponse directly$#
@@ -918,6 +903,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:genBlankComponent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:getGradeableJson\\(\\) should return array\\{title\\: mixed, type\\: mixed, id\\: mixed, instructions_url\\: mixed, syllabus_bucket\\: mixed, autograding_config_path\\: mixed, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: mixed\\}, \\.\\.\\.\\} but returns array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string\\}\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1180,7 +1170,7 @@ parameters:
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
 			"""
-			count: 10
+			count: 9
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -1928,21 +1918,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getSplitPostInfo\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has parameter \\$output with no type specified\\.$#"
-			count: 1
-			path: app/controllers/forum/ForumController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\forum\\\\ForumController\\:\\:getThreadContent\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/forum/ForumController.php
 
@@ -2993,11 +2968,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\student\\\\SubmissionController\\:\\:checkRefresh\\(\\) has parameter \\$gradeable_id with no type specified\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -3104,6 +3074,11 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<app\\\\models\\\\User\\> given\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#3 \\$team of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getGradedGradeable\\(\\) expects string\\|null, bool given\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -5182,16 +5157,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createNewTerm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createParameterList\\(\\) has parameter \\$len with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7803,7 +7768,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
+			count: 1
 			path: app/libraries/socket/Server.php
 
 		-
@@ -7828,11 +7793,6 @@ parameters:
 
 		-
 			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$sessions type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/socket/Server.php
-
-		-
-			message: "#^Property app\\\\libraries\\\\socket\\\\Server\\:\\:\\$users type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/libraries/socket/Server.php
 
@@ -8198,6 +8158,16 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:sort\\(\\) has parameter \\$type with no type specified\\.$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Parameter \\#1 \\$string1 of function strcmp expects string, int given\\.$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Parameter \\#2 \\$string2 of function strcmp expects string, int given\\.$#"
 			count: 1
 			path: app/models/GradingOrder.php
 
@@ -9707,26 +9677,6 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$default \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$lower_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$max_value \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\Component\\:\\:\\$upper_clamp \\(int\\) does not accept float\\.$#"
-			count: 1
-			path: app/models/gradeable/Component.php
-
-		-
 			message: "#^Strict comparison using \\=\\=\\= between app\\\\models\\\\gradeable\\\\Gradeable and null will always evaluate to false\\.$#"
 			count: 1
 			path: app/models/gradeable/Component.php
@@ -10172,6 +10122,21 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadGradedComponentsCountByGradingSections\\(\\) expects int, string given\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadTeamSubmissionsByGradingSection\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadUserSubmissionsByGradingSection\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
@@ -10358,11 +10323,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedComponent.php
-
-		-
-			message: "#^Property app\\\\models\\\\gradeable\\\\GradedComponent\\:\\:\\$component_id \\(string\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
@@ -10572,7 +10532,7 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
-			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:createEventInfo\\(\\) should return array\\<string, int\\> but returns array\\<string, mixed\\>\\.$#"
+			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:createEventInfo\\(\\) should return array\\<string, int\\> but returns array\\<string, app\\\\models\\\\gradeable\\\\GradedGradeable\\|int\\|string\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -11162,11 +11122,6 @@ parameters:
 			path: app/views/ErrorView.php
 
 		-
-			message: "#^Method app\\\\views\\\\ErrorView\\:\\:unbuiltGradeable\\(\\) has parameter \\$gradeable_title with no type specified\\.$#"
-			count: 1
-			path: app/views/ErrorView.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/views/GlobalView.php
@@ -11565,26 +11520,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\admin\\\\ConfigurationView\\:\\:viewConfig\\(\\) has parameter \\$submitty_admin_user with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/views/admin/ConfigurationView.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 5
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\DockerView\\:\\:displayDockerPage\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\DockerView\\:\\:displayDockerPage\\(\\) has parameter \\$docker_data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
-
-		-
-			message: "#^Parameter \\#2 \\$bytes of static method app\\\\libraries\\\\Utils\\:\\:formatBytes\\(\\) expects int, string given\\.$#"
-			count: 1
-			path: app/views/admin/DockerView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\EmailRoomSeatingView\\:\\:displayPage\\(\\) has no return type specified\\.$#"
@@ -12172,47 +12107,7 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_ids with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$anon_mode with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$direction with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$graders with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$inquiry_status with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$overrides with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$past_grade_start_date with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$sort with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:detailsPage\\(\\) has parameter \\$view_all with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
