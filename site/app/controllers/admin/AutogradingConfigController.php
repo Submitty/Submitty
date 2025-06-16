@@ -10,10 +10,6 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Seld\JsonLint\JsonParser;
-use Seld\JsonLint\DuplicateKeyException;
-use Seld\JsonLint\ParsingException;
-
 
 /**
  * Class AutogradingConfigController

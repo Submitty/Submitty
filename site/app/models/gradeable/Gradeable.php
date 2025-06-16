@@ -2592,7 +2592,8 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Validates the autograding config for the gradeable, adding notices for any issues found.
+     * Validates the autograding config for the gradeable, warning instructors of
+     * any issues found, such as duplicate keys or invalid JSON syntax.
      *
      * @return void
      */
@@ -2604,7 +2605,7 @@ class Gradeable extends AbstractModel {
 
         while ($file_iter->valid()) {
             // Validate any config.json files within the autograding config directory
-        if ($file_iter->current()->getFilename() == 'config.json') {
+            if ($file_iter->current()->getFilename() == 'config.json') {
                 $json_parser = new JsonParser();
                 $path = $file_iter->current()->getPathName();
                 $json = file_get_contents($path);
