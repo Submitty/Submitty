@@ -20,3 +20,9 @@
 .error-content {
     padding-bottom: 8px;
 }
+
+.auto-results-queue-msg {
+    padding: 5px 12px;
+    margin-top: 10px;
+    font-size: 15px;
+}
