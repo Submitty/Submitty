@@ -131,7 +131,6 @@ runs:
         sudo apt-get install libapache2-mod-authnz-external
         sudo apt-get install libapache2-mod-authz-unixgroup
         sudo apt-get install libapache2-mod-wsgi-py3
-        sudo apt-get install nginx
         sudo apt-get install php${PHP_VER}-fpm
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
@@ -189,22 +188,13 @@ runs:
         sudo a2ensite submitty
         sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         sudo apache2ctl -t
+        sudo service php${PHP_VER}-fpm restart
+        sudo service apache2 restart
       shell: bash
-
-    - name: Check logs
-      if: failure()
-      run: |
-        sudo apt-get install net-tools
-        netstat -anvp tcp | awk 'NR<3 || /LISTEN/'
-        sudo lsof -i :80
-        systemctl status apache2.service --no-pager
-        journalctl -xeu apache2.service --no-pager
-        apache2ctl configtest
-      shell: bash
-
 
     - name: Set up nginx
       run: |
+        sudo apt-get install nginx
         cd $SUBMITTY_REPOSITORY
         sudo mkdir /etc/systemd/system/nginx.service.d
         sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
@@ -214,24 +204,7 @@ runs:
         sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
         sudo chmod 644 /etc/nginx/sites-available/submitty.conf
         sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
-      shell: bash
-
-    - name: Restart web services
-      run: |
         sudo service nginx restart
-        sudo service php${PHP_VER}-fpm restart
-        sudo service apache2 restart
-      shell: bash
-
-    - name: Check logs
-      if: failure()
-      run: |
-        sudo apt-get install net-tools
-        netstat -anvp tcp | awk 'NR<3 || /LISTEN/'
-        sudo lsof -i :80
-        systemctl status apache2.service --no-pager
-        journalctl -xeu apache2.service --no-pager
-        apache2ctl configtest
       shell: bash
 
     - name: Run git tests
