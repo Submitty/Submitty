@@ -163,18 +163,21 @@ def get_gradeable_buckets(soup):
                 percent_input = percent_div.find('input')
 
                 gradeable['max'] = float(max_score_input['data-max-score'])
-                gradeable['percent'] = float(percent_input['value']) / 100.0
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
+
+                if 'style' in percent_input.attrs:
+                    gradeable['percent'] = float(percent_input['value']) / 100.0
 
             gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
             # Get per-gradeable curve data
             curve_points_selected = get_selected_curve_benchmarks(soup)
-            for input in children[2].select('.gradeable-li-curve input'):
-                benchmark = str(input['data-benchmark'])
+            for child in children:
+                if child.name == 'input' and 'data-benchmark' in child.attrs:
+                    benchmark = str(child['data-benchmark'])
 
-                if benchmark in curve_points_selected and input.get('value') and 'curve' not in gradeable:
-                    gradeable['curve'] = [float(input['value'])]
+                    if benchmark in curve_points_selected and child.get('value') and 'curve' not in gradeable:
+                        gradeable['curve'] = [float(child['value'])]
 
             # Validate the set of per-gradeable curve value
             if 'curve' in gradeable:
