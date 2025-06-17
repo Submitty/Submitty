@@ -54,7 +54,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@cypress/skip-test": "^2.6.1",
     "@stylistic/eslint-plugin": "^4.4.0",
-    "@tsconfig/node20": "^20.1.5",
+    "@tsconfig/node20": "^20.1.6",
     "@types/jest": "^29.5.14",
     "@types/jquery": "^3.5.32",
     "@types/jquery.are-you-sure": "^0.0.34",
