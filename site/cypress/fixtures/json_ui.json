@@ -16,7 +16,7 @@
   "grading_inquiry": true,
   "grade_inquiry_per_component_allowed": false,
   "ta_grading": true,
-  "syllabus_bucket": "Homework",
+  "syllabus_bucket": "homework",
   "dates": {
     "ta_view_start_date": "2024-1-11 23:59:59.00",
     "submission_open_date": "2024-1-15 23:59:59.00",

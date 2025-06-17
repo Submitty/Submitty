@@ -111,21 +111,21 @@
 	{% if thread_exists %}
 		<style>
 			{% for category in categories %}
-				{{ "#categoryid_" ~ category.category_id }}.filter-inactive{
+				{{ "#categoryid_" ~ category.id }}.filter-inactive{
 					color: {{ category.color }};
 					border: 1px solid {{ category.color }}
 				}
 
-				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+				{{ "#categoryid_" ~ category.id }}.filter-active{
 					background-color: {{ category.color }}
 				}
 
-				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-inactive{
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.id }}.filter-inactive{
 					color: white;
 					border: 1px solid {{ category.color }}
 				}
 
-				[data-theme ="dark"] {{ "#categoryid_" ~ category.category_id }}.filter-active{
+				[data-theme ="dark"] {{ "#categoryid_" ~ category.id }}.filter-active{
 					background-color: {{ category.color }}
 				}
 			{% endfor %}
@@ -134,8 +134,8 @@
 			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
 			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
 				{% for category in categories %}
-					{% if category.visible_date is null or category.diff > 0 %}
-						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" data-cat_id="{{ category.category_id }}" data-btn-selected="false">{{ category.category_desc }}</button>
+					{% if category.visibleDate is null or category.diff >= 0 %}
+						<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.id }}" data-cat_id="{{ category.id }}" data-btn-selected="false">{{ category.description }}</button>
 					{% endif %}
 				{% endfor %}
 			</div>
