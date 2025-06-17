@@ -188,10 +188,7 @@ function deleteChatroomForm(chatroom_id, chatroom_name, base_url) {
 
 function toggle_chatroom(chatroomId, active) {
     const form = document.getElementById(`chatroom_toggle_form_${chatroomId}`);
-    if (active && confirm('This will terminate this chatroom session. Are you sure?')) {
-        form.submit();
-    }
-    else {
+    if (!active || confirm('This will close the chatroom. Are you sure?')) {
         form.submit();
     }
 }
