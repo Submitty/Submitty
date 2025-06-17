@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace app\entities\chat;
 
-use app\repositories\chat\ChatroomRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ChatroomRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: "chatrooms")]
 class Chatroom {
     #[ORM\Id]
