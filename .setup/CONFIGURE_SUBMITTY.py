@@ -575,14 +575,10 @@ if not args.worker:
                           "submitty/gcc:latest",
                           "submitty/rust:latest",
                           "submitty/java:latest",
-                          "submitty/pdflatex:latest",
-                          "submitty/haskell:8.8.4",
-                          "submitty/prolog:8",
-                          "submitty/verilog:latest"
+                          "submitty/pdflatex:latest"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
-                          "submitty/qiskit:qiskit",
                           "submitty/python:latest"
                         ],
             "cpp":      [
