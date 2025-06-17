@@ -72,7 +72,7 @@ class ChatroomView extends AbstractView {
         }
         else {
             if (!$user->accessAdmin()) {
-                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+                $display_name = $user->getDisplayAbbreviatedName();
             }
         }
 
