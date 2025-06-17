@@ -64,7 +64,7 @@ function updateSortIcons(activeKey, direction) {
 }
 
 // Keeps the specified sort on reload
-window.addEventListener('DOMContentLoaded', () => {
+$(() => {
     const savedSort = Cookies.get('pending_gradeable_table_key');
     const savedDirection = Cookies.get('pending_gradeable_table_direction') || 'ASC';
     if (savedSort) {
