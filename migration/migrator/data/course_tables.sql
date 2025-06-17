@@ -781,7 +781,6 @@ ALTER SEQUENCE public.chatroom_messages_id_seq OWNED BY public.chatroom_messages
 CREATE TABLE public.chatrooms (
     id integer NOT NULL,
     host_id character varying NOT NULL,
-    host_name character varying,
     title text NOT NULL,
     description text,
     is_active boolean DEFAULT false NOT NULL,
