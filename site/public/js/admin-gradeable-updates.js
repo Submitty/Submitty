@@ -971,6 +971,8 @@ function toggleGradeableConfigEdit() {
 function cancelGradeableConfigEdit() {
     $('#gradeable-config-edit-bar').hide();
     $('#gradeable-config-edit').data('edited', false);
+    current_g_id = null;
+    current_file_path = null;
 }
 
 function saveGradeableConfigEdit(g_id) {
