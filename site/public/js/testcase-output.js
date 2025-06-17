@@ -127,7 +127,6 @@ function CheckStatesOfAllTestCases(num_test_cases, are_test_cases_expanded) {
  * @param {bool} check_all_test_cases_states - should the states of all test cases be checked to
  *                                             set the state the Expand/Collapse All Toggles
  */
-// eslint-disable-next-line no-unused-vars
 function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_cases, version = '', check_all_test_cases_states = true) {
     const orig_div_name = div_name;
     div_name = `#${div_name}`;
@@ -219,7 +218,6 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
  * @param {string} who_id - ID of the submitter
  * @param {number} version - submission version
  */
-// eslint-disable-next-line no-unused-vars
 function loadAllTestCaseOutput(div_name, expand_all, num_test_cases, gradeable_id, who_id, version = '') {
     // Check if toggle should not be interacted with
     if ($(`#${div_name}`).css('cursor') === 'default') {

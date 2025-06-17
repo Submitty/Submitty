@@ -1,11 +1,17 @@
 {% import 'functions/Badge.twig' as Badge %}
 
-{% if in_queue %}
-    <p class="red-message" id="auto-results-queue-msg">
-        This submission is currently in the autograding queue at position {{ queue_pos }} of {{ queue_total }}.
-    </p>
+{% if in_queue or in_progress_grading %}
+    {% if in_progress_grading %}
+        <p class="red-message auto-results-queue-msg">
+            This submission is currently being graded.
+        </p>
+    {% else %}
+        <p class="red-message auto-results-queue-msg">
+            This submission is currently in the queue to be graded. Your submission is number {{ queue_pos }} out of {{ queue_total }}.
+        </p>
+    {% endif %}
     <script>
-        checkRefreshPage("{{ check_refresh_submission_url|e('js') }}")
+        checkRefreshPage("{{ check_refresh_submission_url|e('js') }}", "{{ submitter_id }}");
     </script>
 {% endif %}
 
@@ -27,7 +33,26 @@
     {% if num_visible_testcases > 0 %}
         {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
 
-
+        {% if docker_error %}
+            <div style="background-color: var(--standard-light-red);">
+                <div class="error-container">
+                    <p class="error-header">Docker Image not present on machine. Please contact your instructor about this.</p>
+                    {% if docker_error_data is not null %}
+                        <p class="error-details">Error Details:</p>
+                        <ul class="error-listing">
+                            {% for error in docker_error_data %}
+                                <li class="error-content">
+                                    <strong>Image:</strong> {{ error.image }}<br>
+                                    <strong>Machine:</strong> {{ error.machine }}<br>
+                                    <strong>Error:</strong> {{ error.error }}<br>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
         <div class="box submission-page-total-header key_to_click" tabindex="0"
             {% if nonhidden_earned >= nonhidden_max and nonhidden_max > 0 %}
                 onclick="addConfetti();"

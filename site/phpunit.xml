@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" convertDeprecationsToExceptions="true" bootstrap="./tests/bootstrap.php" colors="true" verbose="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" convertDeprecationsToExceptions="true" bootstrap="./tests/bootstrap.php" colors="true" verbose="true">
   <coverage processUncoveredFiles="true">
     <include>
       <directory suffix=".php">./app</directory>
@@ -19,6 +19,7 @@
     </testsuite>
     <testsuite name="phpstan extension">
       <directory suffix="Tester.php">./tests/phpstan</directory>
+      <exclude>./tests/phpstan/DoctrineExtensionTester.php</exclude>
     </testsuite>
   </testsuites>
   <logging/>

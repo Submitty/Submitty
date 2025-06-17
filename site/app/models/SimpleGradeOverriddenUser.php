@@ -4,6 +4,13 @@ namespace app\models;
 
 use app\libraries\Core;
 
+/**
+ * @method string getId()
+ * @method string getDisplayedGivenName()
+ * @method string getDisplayedFamilyName()
+ * @method integer getMarks()
+ * @method string getComment()
+ */
 class SimpleGradeOverriddenUser extends AbstractModel {
     /** @prop
      * @var bool Is this user actually loaded (else you cannot access the other member variables) */
