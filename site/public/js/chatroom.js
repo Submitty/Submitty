@@ -214,25 +214,47 @@ function handleChatOpen(msg) {
     const tr = document.createElement('tr');
     tr.id = `chatroom-row-${msg.id}`;
 
-    tr.innerHTML = `
-        <td>
-            <span class="display-short" title="${msg.title}">
-                ${msg.title.length > 30 ? `${msg.title.slice(0, 30)}...` : msg.title}
-            </span>
-        </td>
-        <td>
-            ${msg.host_name}
-        </td>
-        <td>
-            <span class="display-short" title="${msg.description}">
-                ${msg.description.length > 45 ? `${msg.description.slice(0, 45)}...` : msg.description}
-            </span>
-        </td>
-        <td>
-            <a href="${msg.base_url}/${msg.id}" class="btn btn-primary">Join</a>
-            ${msg.allow_anon ? `<i> or </i><a href="${msg.base_url}/${msg.id}/anonymous" class="btn btn-default">Join As Anon.</a>` : ''}
-        </td>
-    `;
+    const tdTitle = document.createElement('td');
+    const spanTitle = document.createElement('span');
+    spanTitle.className = 'display-short';
+    spanTitle.title = msg.title;
+    spanTitle.textContent = msg.title.length > 30 ? `${msg.title.slice(0, 30)}...` : msg.title;
+    tdTitle.appendChild(spanTitle);
+    tr.appendChild(tdTitle);
+
+    const tdHostName = document.createElement('td');
+    tdHostName.textContent = msg.host_name;
+    tr.appendChild(tdHostName);
+
+    const tdDescription = document.createElement('td');
+    const spanDescription = document.createElement('span');
+    spanDescription.className = 'display-short';
+    spanDescription.title = msg.description;
+    spanDescription.textContent = msg.description.length > 45 ? `${msg.description.slice(0, 45)}...` : msg.description;
+    tdDescription.appendChild(spanDescription);
+    tr.appendChild(tdDescription);
+
+    const tdLinks = document.createElement('td');
+    const joinLink = document.createElement('a');
+    joinLink.href = `${msg.base_url}/${msg.id}`;
+    joinLink.className = 'btn btn-primary';
+    joinLink.textContent = 'Join';
+    tdLinks.appendChild(joinLink);
+
+    if (msg.allow_anon) {
+        tdLinks.appendChild(document.createTextNode(' '));
+        const iTag = document.createElement('i');
+        iTag.textContent = 'or';
+        tdLinks.appendChild(iTag);
+        tdLinks.appendChild(document.createTextNode(' '));
+
+        const anonJoinLink = document.createElement('a');
+        anonJoinLink.href = `${msg.base_url}/${msg.id}/anonymous`;
+        anonJoinLink.className = 'btn btn-default';
+        anonJoinLink.textContent = 'Join As Anon.';
+        tdLinks.appendChild(anonJoinLink);
+    }
+    tr.appendChild(tdLinks);
 
     tableBody.appendChild(tr);
 }
