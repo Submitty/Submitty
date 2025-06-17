@@ -910,7 +910,7 @@ function adjustGradingPanelHeader() {
 }
 
 function readCookies() {
-    const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') || '';
+    const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
 
     const autoscroll = window.Cookies.get('autoscroll') || '';
     const opened_mark = window.Cookies.get('opened_mark') || '';

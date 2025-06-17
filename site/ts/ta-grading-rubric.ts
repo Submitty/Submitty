@@ -1005,7 +1005,6 @@ function updateEditModeEnabled() {
  * @return {boolean}
  */
 export function isSilentEditModeEnabled() {
-    // noinspection JSValidateTypes
     return $('#silent-edit-id').is(':checked');
 }
 
