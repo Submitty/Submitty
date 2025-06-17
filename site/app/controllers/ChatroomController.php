@@ -49,7 +49,7 @@ class ChatroomController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
-    public function showChatroomssPage(): WebResponse {
+    public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatrooms = $repo->findBy([], ['id' => 'ASC']);
 
