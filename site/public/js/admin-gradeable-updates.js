@@ -901,7 +901,7 @@ let current_file_path = null;
 
 function updateGradeableEditor(g_id, file_path) {
     // If no file has been selected yet or it is not the currently selected one
-    if ((current_g_id == null && current_file_path == null) || (current_g_id !== g_id || current_file_path !== file_path)) {
+    if ((current_g_id === null && current_file_path === null) || (current_g_id !== g_id || current_file_path !== file_path)) {
         current_g_id = g_id;
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
