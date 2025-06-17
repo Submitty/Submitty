@@ -227,8 +227,6 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
             // Now that we've successfully submitted the form, clear autosave data
             // eslint-disable-next-line no-undef
             cancelDeferredSave(autosaveKeyFor(form));
-            // clear the form as the submission was successful
-            clearCreateThreadAutosave();
             clearReplyBoxAutosave(form);
 
             window.location.href = json['data']['next_page'];

@@ -49,6 +49,10 @@
 
 <script>
     $( document ).ready(function() {
+        $("#thread_form").submit(() => {
+            cancelDeferredSave(CREATE_THREAD_DEFER_KEY);
+            clearCreateThreadAutosave();
+        });
         $("#thread_form").submit(createThread);
         $("form").areYouSure();
 

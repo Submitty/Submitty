@@ -69,8 +69,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="reply_box_1"]').type('My pronouns is');
         cy.get('.cat-buttons').contains('Question').click();
         cy.get('[data-testid="forum-publish-thread"]').click();
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(1000);
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test pronouns display');
         cy.get('[data-testid="post-user-pronouns"]').should('contain', 'They/Them');
 
@@ -93,8 +91,6 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="reply_box_1"]').type('My pronouns is');
         cy.get('.cat-buttons').contains('Question').click();
         cy.get('[data-testid="thread-anon-checkbox"]').click();
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(1000);
         cy.get('[data-testid="forum-publish-thread"]').click();
         cy.get('[data-testid="create-post-head"]').should('contain', 'Test Anonymous thread, should not show pronouns');
         cy.get('[data-testid="post-user-id"]').should('contain', 'Anonymous');
