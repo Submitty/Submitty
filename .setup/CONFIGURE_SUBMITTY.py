@@ -573,11 +573,14 @@ if not args.worker:
                           "submitty/python:latest",
                           "submitty/clang:latest",
                           "submitty/gcc:latest",
+                          "submitty/rust:latest",
                           "submitty/java:latest",
-                          "submitty/pdflatex:latest"
+                          "submitty/pdflatex:latest",
+                          "submitty/haskell:8.8.4"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
+                          "submitty/qiskit:qiskit",
                           "submitty/python:latest"
                         ],
             "cpp":      [
