@@ -63,5 +63,6 @@ describe('Test course should exist', () => {
         checkGradeable('verilog_hello_world');
         checkGradeable('rust_hello_world');
         checkGradeable('docker_choice_of_language');
+        checkGradeable('test_word_upload');
     });
 });
