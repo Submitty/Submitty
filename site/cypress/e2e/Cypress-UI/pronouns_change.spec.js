@@ -37,7 +37,7 @@ describe('Tests cases abut changing user pronouns', () => {
         cy.get('[data-testid="pronouns-val"]').should('contain', ' ');
         cy.get('[data-testid="display-pronouns-val"]').should('contain', 'False');
     });
-    
+
     it('Verifies changed pronouns as instructor in Manage Students', () => {
         cy.visit(['sample', 'users']);
         cy.login('instructor');
