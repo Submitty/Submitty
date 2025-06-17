@@ -131,6 +131,7 @@ def get_section(soup):
 def get_gradeable_buckets(soup):
     """Collects data for all visible gradeable buckets."""
     gradeables = []
+    gradeable_percents = set()
 
     for bucket_div in soup.select('.bucket_detail_div'):
         bucket = {}
@@ -150,11 +151,11 @@ def get_gradeable_buckets(soup):
 
         # Extract details for each gradeable within the bucket
         ids = []
+        
         for li in bucket_div.select(f'#gradeables-list-{bucket_type} .gradeable-li'):
             gradeable = {}
-            children = list(li.children)
-            # children[0] represents <div id="gradeable-pts-div-*">
-            # children[1] represents <div id="gradeable-percents-div-*">
+            gradeable['id'] = li.select_one('.gradeable-id').text.strip()
+
             max_score_div = li.select_one('div[id^="gradeable-pts-div-"]')
             percent_div = li.select_one('div[id^="gradeable-percents-div-"]')
 
@@ -165,19 +166,25 @@ def get_gradeable_buckets(soup):
                 gradeable['max'] = float(max_score_input['data-max-score'])
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
 
-                if 'style' in percent_input.attrs:
-                    gradeable['percent'] = float(percent_input['value']) / 100.0
+                per_gradeable_percents_checkboxes = soup.select('input[id^="per-gradeable-percents-checkbox-"]')
 
-            gradeable['id'] = li.select_one('.gradeable-id').text.strip()
+                for per_gradeable_percents_checkbox in per_gradeable_percents_checkboxes:
+                    if per_gradeable_percents_checkbox.get('checked'):
+                        gradeable_percents.add(gradeable['id'])
+
+                if gradeable['id'] in gradeable_percents and str(percent_input['value']).isnumeric():
+                    gradeable['percent'] = float(percent_input['value']) / 100.0
 
             # Get per-gradeable curve data
             curve_points_selected = get_selected_curve_benchmarks(soup)
-            for child in children:
-                if child.name == 'input' and 'data-benchmark' in child.attrs:
-                    benchmark = str(child['data-benchmark'])
+            for curve_input in li.select('.gradeable-li-curve input'):
+                benchmark = str(curve_input['data-benchmark'])
 
-                    if benchmark in curve_points_selected and child.get('value') and 'curve' not in gradeable:
-                        gradeable['curve'] = [float(child['value'])]
+                if benchmark in curve_points_selected and curve_input.get('value'):
+                    if 'curve' not in gradeable:
+                        gradeable['curve'] = []
+
+                    gradeable['curve'].append(float(curve_input['value']))
 
             # Validate the set of per-gradeable curve value
             if 'curve' in gradeable:
@@ -251,7 +258,7 @@ def get_table_data(soup, table_name):
         elif table_name == 'performanceWarnings':
             data.append({
                 'msg': first_input,
-                'ids': second_input.split(','),
+                'ids': [id.strip() for id in second_input.split(',')],
                 'value': float(third_input)
             })
 
@@ -312,6 +319,7 @@ def main():
 
         # Save the most up-to-date GUI customization by building a JSON representation from the HTML elements
         json_string = build_json(load_response.text)
+        print(json_string)
         save_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
                 base_url, semester, course
