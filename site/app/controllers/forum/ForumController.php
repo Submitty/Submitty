@@ -162,15 +162,16 @@ class ForumController extends AbstractController {
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         if (is_array($inputCategoriesIds)) {
             if (count($inputCategoriesIds) < 1) {
                 return false;
             }
             foreach ($inputCategoriesIds as $category_id) {
                 $match_found = false;
-                foreach ($rows as $index => $values) {
-                    if ($values["category_id"] === $category_id) {
+                foreach ($categories as $category) {
+                    if ($category->getId() === $category_id) {
                         $match_found = true;
                         break;
                     }
@@ -186,8 +187,8 @@ class ForumController extends AbstractController {
             }
             foreach ($inputCategoriesName as $category_name) {
                 $match_found = false;
-                foreach ($rows as $index => $values) {
-                    if ($values["category_desc"] === $category_name) {
+                foreach ($categories as $category) {
+                    if ($category->getDescription() === $category_name) {
                         $match_found = true;
                         break;
                     }
@@ -202,9 +203,10 @@ class ForumController extends AbstractController {
 
     private function isCategoryDeletionGood($category_id) {
         // Check if not the last category which exists
-        $rows = $this->core->getQueries()->getCategories();
-        foreach ($rows as $index => $values) {
-            if (((int) $values["category_id"]) !== $category_id) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
+        foreach ($categories as $category) {
+            if ($category->getId() !== $category_id) {
                 return true;
             }
         }
@@ -327,11 +329,12 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
 
         $current_order = [];
-        foreach ($rows as $row) {
-            $current_order[] = (int) $row['category_id'];
+        foreach ($categories as $category) {
+            $current_order[] = $category->getId();
         }
         $new_order = [];
         foreach ($_POST['categorylistitem'] as $item) {
@@ -1257,7 +1260,8 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
-        if (empty($this->core->getQueries()->getCategories())) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        if (count($repo->getCategories()) === 0) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
@@ -1279,14 +1283,22 @@ class ForumController extends AbstractController {
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
-        $result["all_categories_list"] = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $result["all_categories_list"] = $repo->getCategories();
+        $thread_repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
+            $thread = $thread_repo->getThreadDetail($post['thread_id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
+                return $x->getId();
+            })->toArray();
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
+            $thread = $thread_repo->getThreadDetail($result['id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
+                return $x->getId();
+            })->toArray();
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
