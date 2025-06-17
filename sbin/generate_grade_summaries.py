@@ -155,12 +155,17 @@ def get_gradeable_buckets(soup):
             children = list(li.children)
             # children[0] represents <div id="gradeable-pts-div-*">
             # children[1] represents <div id="gradeable-percents-div-*">
-            max_score_input = children[0].select_one('.max-score')
-            percent_input = list(children[1].children)[0]
+            max_score_div = li.select_one('div[id^="gradeable-pts-div-"]')
+            percent_div = li.select_one('div[id^="gradeable-percents-div-"]')
 
-            gradeable['max'] = float(max_score_input['data-max-score'])
-            gradeable['percent'] = float(percent_input['value']) / 100.0
-            gradeable['release_date'] = max_score_input['data-grade-release-date']
+            if max_score_div and percent_div:
+                max_score_input = max_score_div.select_one('.max-score')
+                percent_input = percent_div.find('input')
+
+                gradeable['max'] = float(max_score_input['data-max-score'])
+                gradeable['percent'] = float(percent_input['value']) / 100.0
+                gradeable['release_date'] = max_score_input['data-grade-release-date']
+
             gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
             # Get per-gradeable curve data
@@ -170,6 +175,7 @@ def get_gradeable_buckets(soup):
 
                 if benchmark in curve_points_selected and input.get('value') and 'curve' not in gradeable:
                     gradeable['curve'] = [float(input['value'])]
+
             # Validate the set of per-gradeable curve value
             if 'curve' in gradeable:
                 if len(gradeable['curve']) != len(curve_points_selected):
@@ -242,7 +248,7 @@ def get_table_data(soup, table_name):
         elif table_name == 'performanceWarnings':
             data.append({
                 'msg': first_input,
-                'ids': [id.strip() for id in second_input.split(',')],
+                'ids': second_input.split(','),
                 'value': float(third_input)
             })
 
