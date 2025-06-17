@@ -544,6 +544,10 @@ SQL;
         );
     }
 
+    /**
+     * @param string $thread_id Id of thread.
+     * @return int[]
+     */
     public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
         $categories_list = [];
@@ -1028,6 +1032,26 @@ SQL;
             }
         }
         return $return;
+    }
+
+    /**
+     * @param User   $user
+     * @param string $semester
+     * @param string $course
+     */
+    public function unregisterCourseUser(User $user, $semester, $course): void {
+        $this->submitty_db->query(
+            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+            [$user->getId(), $semester, $course]
+        );
+
+        $this->course_db->query(
+            "UPDATE users SET 
+                rotating_section = NULL,
+                registration_type = NULL
+            WHERE user_id = ?",
+            [$user->getId()]
+        );
     }
 
     /**
@@ -5007,11 +5031,6 @@ AND gc_id IN (
             $this->course_db->query("UPDATE categories_list SET rank = ? WHERE category_id = ?", [$rank, $id]);
         }
         $this->course_db->commit();
-    }
-
-    public function getCategories() {
-        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
-        return $this->course_db->rows();
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {

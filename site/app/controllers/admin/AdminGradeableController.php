@@ -78,7 +78,7 @@ class AdminGradeableController extends AbstractController {
             'external_repo' => '',
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
-            'syllabus_bucket' => 'Homework',
+            'syllabus_bucket' => 'homework',
             'autograding_config_path' => ''
         ];
 
@@ -152,7 +152,7 @@ class AdminGradeableController extends AbstractController {
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
-        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page
@@ -630,7 +630,7 @@ class AdminGradeableController extends AbstractController {
             $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
             $grading_assignment_for_grader = $tmp[$gradeable_id];
             foreach ($grading_assignment_for_grader as $i => $student_id) {
-                if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
+                if (!in_array($student_id, json_decode($_POST['curr_student_ids']), true)) {
                     $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
@@ -1209,6 +1209,10 @@ class AdminGradeableController extends AbstractController {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
         }
 
+        if (!in_array($details['syllabus_bucket'], self::syllabus_buckets, true)) {
+            throw new \InvalidArgumentException('Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets));
+        }
+
         $repo_name = '';
         $subdir = '';
         $using_subdirectory = false;
@@ -1504,11 +1508,11 @@ class AdminGradeableController extends AbstractController {
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
             // Convert boolean values into booleans
-            if (in_array($prop, $boolean_properties)) {
+            if (in_array($prop, $boolean_properties, true)) {
                 $post_val = $post_val === 'true';
             }
 
-            if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
+            if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
                 continue;
             }
@@ -1568,6 +1572,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets, true)) {
+                $errors['syllabus_bucket'] = 'Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets);
             }
 
             // Try to set the property
