@@ -30,9 +30,9 @@
                         <tr>
                             <td>{{ id|split('_')|slice(0, 2)|join(' ') }}</td>
                             <td>{{ gradeable.title }}</td>
-                            <td>{{ (gradeable.submission != '') ? gradeable.submission|date('m/d/Y @ h:i A T') : '' }}</td>
-                            <td>{{ gradeable.grading_open|date('m/d/Y @ h:i A T') }}</td>
-                            <td>{{ gradeable.grading_due|date('m/d/Y @ h:i A T') }}</td>
+                            <td>{{ (gradeable.submission != '') ? gradeable.submission|date('Y-m-d @ h:i A T') : '' }}</td>
+                            <td>{{ gradeable.grading_open|date('Y-m-d @ h:i A T') }}</td>
+                            <td>{{ gradeable.grading_due|date('Y-m-d @ h:i A T') }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

@@ -543,6 +543,10 @@ SQL;
         );
     }
 
+    /**
+     * @param string $thread_id Id of thread.
+     * @return int[]
+     */
     public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
         $categories_list = [];
@@ -5006,11 +5010,6 @@ AND gc_id IN (
             $this->course_db->query("UPDATE categories_list SET rank = ? WHERE category_id = ?", [$rank, $id]);
         }
         $this->course_db->commit();
-    }
-
-    public function getCategories() {
-        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
-        return $this->course_db->rows();
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
