@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2325d46138eeda21edc1f019ffe2fdc3",
+    "content-hash": "10e974010053e03d17f16d4a260e961f",
     "packages": [
         {
             "name": "brick/math",
@@ -5880,16 +5880,16 @@
         },
         {
             "name": "php-mock/php-mock-integration",
-            "version": "2.4.0",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-integration.git",
-                "reference": "0ea2fb4b69598eed8a300271f8e8117b143c7b2c"
+                "reference": "8ceb860f343a143af604efeb66a7a124381cc52e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-integration/zipball/0ea2fb4b69598eed8a300271f8e8117b143c7b2c",
-                "reference": "0ea2fb4b69598eed8a300271f8e8117b143c7b2c",
+                "url": "https://api.github.com/repos/php-mock/php-mock-integration/zipball/8ceb860f343a143af604efeb66a7a124381cc52e",
+                "reference": "8ceb860f343a143af604efeb66a7a124381cc52e",
                 "shasum": ""
             },
             "require": {
@@ -5931,7 +5931,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mock/php-mock-integration/issues",
-                "source": "https://github.com/php-mock/php-mock-integration/tree/2.4.0"
+                "source": "https://github.com/php-mock/php-mock-integration/tree/3.0.0"
             },
             "funding": [
                 {
@@ -5939,26 +5939,26 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-02-24T14:51:05+00:00"
+            "time": "2025-03-08T19:22:38+00:00"
         },
         {
             "name": "php-mock/php-mock-phpunit",
-            "version": "2.9.0",
+            "version": "2.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-phpunit.git",
-                "reference": "3dabfd474d43da4d1d2fee5260c634457c5da344"
+                "reference": "498e5e25ee7824570332581304c2bb7e37d75e80"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/3dabfd474d43da4d1d2fee5260c634457c5da344",
-                "reference": "3dabfd474d43da4d1d2fee5260c634457c5da344",
+                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/498e5e25ee7824570332581304c2bb7e37d75e80",
+                "reference": "498e5e25ee7824570332581304c2bb7e37d75e80",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7",
-                "php-mock/php-mock-integration": "^2.2.1",
-                "phpunit/phpunit": "^6 || ^7 || ^8 || ^9 || ^10.0.17"
+                "php-mock/php-mock-integration": "^3.0",
+                "phpunit/phpunit": "^6 || ^7 || ^8 || ^9 || ^10.0.17 || ^11 || ^12.0.9"
             },
             "require-dev": {
                 "mockery/mockery": "^1.3.6"
@@ -5999,7 +5999,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-mock/php-mock-phpunit/issues",
-                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.9.0"
+                "source": "https://github.com/php-mock/php-mock-phpunit/tree/2.13.0"
             },
             "funding": [
                 {
@@ -6007,7 +6007,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-12-01T21:50:22+00:00"
+            "time": "2025-03-19T20:58:51+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
