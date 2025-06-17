@@ -326,20 +326,9 @@ class BulkUpload(CourseJob):
 
         try:
             if is_qr:
-                bulk_qr_split.main(
-                    [
-                        filename,
-                        split_path,
-                        qr_prefix,
-                        qr_suffix,
-                        log_file_path,
-                        use_ocr,
-                    ]
-                )
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path, use_ocr])
             else:
-                bulk_upload_split.main(
-                    [filename, split_path, num, log_file_path]
-                )
+                bulk_upload_split.main([filename, split_path, num, log_file_path])
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
             print(msg)

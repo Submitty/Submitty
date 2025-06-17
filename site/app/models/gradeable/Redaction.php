@@ -21,23 +21,20 @@ use app\libraries\Core;
  */
 class Redaction extends AbstractModel implements \JsonSerializable {
     /** @prop
-     * @var int The id of the redaction */
-    protected $id = -1;
-    /** @prop
      * @var int The page number of the redaction */
-    protected $page_number = -1;
+    protected $page_number;
     /** @prop
      * @var float The x1 coordinate of the redaction */
-    protected $x1 = -1;
+    protected $x1;
     /** @prop
      * @var float The y1 coordinate of the redaction */
-    protected $y1 = -1;
+    protected $y1;
     /** @prop
      * @var float The x2 coordinate of the redaction */
-    protected $x2 = -1;
+    protected $x2;
     /** @prop
      * @var float The y2 coordinate of the redaction */
-    protected $y2 = -1;
+    protected $y2;
 
     public function __construct(Core $core, int $page_number, float $x1, float $y1, float $x2, float $y2) {
         parent::__construct($core);

@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 use app\models\gradeable\AutoGradedTestcase;
+use SebastianBergmann\CodeUnit\FileUnit;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
@@ -461,7 +462,8 @@ class SubmissionController extends AbstractController {
                     "use_ocr"   => $use_ocr,
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . $uploaded_file["name"][$i] . ".json");
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT))) {
@@ -487,7 +489,8 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false,
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json");
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
@@ -830,7 +833,8 @@ class SubmissionController extends AbstractController {
             "output_dir" => str_replace("submissions", "results", $version_path),
         ];
 
-        $generate_images_job  = "/var/local/submitty/daemon_job_queue/generate_images_" . $who_id . "_" . $new_version . ".json";
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $generate_images_job  = FileUtils::joinPaths($daemon_job_queue_path, "generate_images_" . $who_id . "_" . $new_version . ".json");
 
         //add new job to queue
         if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
