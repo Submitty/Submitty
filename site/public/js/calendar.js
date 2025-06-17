@@ -445,7 +445,7 @@ function generateDayCell(year, month, day, curr_view_month, view_mode, view_seme
         else if (month <= 0) {
             month = month + 12;
         }
-        span.textContent = `${month}/${day}`;
+        span.textContent = `${month}-${day}`;
     }
     div.appendChild(span);
     content.appendChild(div);
