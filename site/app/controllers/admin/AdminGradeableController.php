@@ -1418,13 +1418,6 @@ class AdminGradeableController extends AbstractController {
         unset($_POST['csrf_token']);
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
-            if (isset($_POST['autograding_config_path'])) {
-                $invalid_config_message = $gradeable->validateAutogradingConfig($_POST['autograding_config_path']);
-
-                if ($invalid_config_message !== null) {
-                    array_push($response_props, 'Warning:' . $invalid_config_message);
-                }
-            }
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);
         }
