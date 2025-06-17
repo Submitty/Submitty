@@ -569,14 +569,24 @@ class FileUtils {
         $validator = function ($file) {
             $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
             $name = $file['name'];
+
+            //if the error flag is set for this file, no guarantee tmp_name points to a valid file, exit early
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                return [
+                    'name' => $name,
+                    'type' => null,
+                    'error' => ErrorMessages::uploadErrors($file['error']),
+                    'size' => $file['size'] ?? 0, //this may or may not be set as well
+                    'is_zip' => false,            //unknown at this point also
+                    'success' => false,
+                ];
+            }
+
             $tmp_name = $file['tmp_name'];
 
             $type = mime_content_type($tmp_name);
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($file['error']);
-            }
 
             //check if its a zip file
             $is_zip = $type === 'application/zip';

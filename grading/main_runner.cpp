@@ -86,6 +86,7 @@ void executeSetOfCommands(std::vector<std::string> setOfCommands,
                             testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json()),
                             config_json,
+                            testcase.get_test_case_config(),
                             windowed,
                             display_variable,
                             testcase.has_timestamped_stdout());

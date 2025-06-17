@@ -51,6 +51,7 @@
 }
 
 #gradeable-submission-cont #submit {
+    /* stylelint-disable-next-line declaration-no-important */
     color: white !important;
 }
 
@@ -80,6 +81,16 @@
 /* stylelint-disable-next-line no-descending-specificity */
 .submission-details .flex-row > span:nth-child(2) {
     text-align: right;
+}
+
+.disable-submit {
+    box-shadow: none;
+    opacity: 0.4;
+    cursor: default;
+}
+
+.disable-submit:hover {
+    background-color: var(--good-green);
 }
 
 #gradeable-info h1 {

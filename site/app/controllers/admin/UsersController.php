@@ -354,12 +354,12 @@ class UsersController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalGivenName(trim($_POST['user_givenname']));
-        if (isset($_POST['user_preferred_givenname'])) {
+        if (isset($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
             $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
         $user->setLegalFamilyName(trim($_POST['user_familyname']));
-        if (isset($_POST['user_preferred_familyname'])) {
+        if (isset($_POST['user_preferred_familyname']) && trim($_POST['user_preferred_familyname']) !== "") {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
 
@@ -1204,7 +1204,7 @@ class UsersController extends AbstractController {
             if (count($row) === 1) {
                 $user = $this->core->getQueries()->getUserById($row[0]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
                 $user_registration_type = $list_type === 'classlist' ? 'graded' : 'staff';
                 $user->setRegistrationType($user_registration_type);
@@ -1253,7 +1253,7 @@ class UsersController extends AbstractController {
             //Update registration section (student) or group (grader)
             if (count($row) === 1) {
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
             }
             else {

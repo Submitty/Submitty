@@ -79,6 +79,11 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method DateTimeFormat getDateTimeFormat()
+ * @method string getSystemMessage()
+ * @method string getLatestTag()
+ * @method string getLatestCommit()
+ * @method int getCourseMaterialFileUploadLimitMb()
  */
 
 class Config extends AbstractModel {
@@ -151,6 +156,11 @@ class Config extends AbstractModel {
     /** @prop
      * @var string */
     protected $default_locale = 'en_US';
+    /**
+     * Maximum file upload size for course materials (in MB)
+     * @prop
+     */
+    protected int $course_material_file_upload_limit_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
@@ -351,9 +361,10 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'MDY', and configured as a property of the Config class
-        // Eventually this should be moved to the User class and configured on a per-user basis
-        $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
+        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
+        // It is configured as a property of the Config class
+        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
+        $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
 
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
@@ -467,6 +478,9 @@ class Config extends AbstractModel {
         else {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
+
+        // Default to 100 MB if not set
+        $this->course_material_file_upload_limit_mb = (int) ($submitty_json['course_material_file_upload_limit_mb'] ?? 100);
 
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];

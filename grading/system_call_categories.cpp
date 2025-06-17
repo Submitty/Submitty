@@ -9,7 +9,7 @@
 //
 // ================================================================================
 
-void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories) {
+void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categories, std::ofstream &execute_logfile) {
 
   // ================================================================================
 

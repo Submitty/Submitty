@@ -19,9 +19,9 @@
 .collapse-icon {
     position: absolute;
     transform: translate(50%, -50%);
-    font-size: 1rem;
-    top: 33%;
-    left: 0;
+    font-size: 30px;
+    top: 50%;
+    left: 3%;
 }
 
 .collapse-icon {
@@ -88,6 +88,7 @@
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .expand-icon,
 .collapse-icon {
     display: inline;
@@ -95,6 +96,7 @@
 
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .collapse-icon,
+/* stylelint-disable-next-line no-descending-specificity */
 .expand-icon {
     display: none;
 }
@@ -126,6 +128,7 @@
     /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
 
@@ -145,7 +148,9 @@
         color: var(--default-white);
     }
 
-    #details-table .details-content td:nth-of-type(1) { display: none; }
+    #details-table .details-content td:nth-of-type(1) {
+        display: none;
+    }
 
     /*
         The content for the ':before' will be added through details.js
@@ -222,13 +227,6 @@
         padding: 0 25px;
     }
 
-    .expand-icon,
-    .collapse-icon {
-        font-size: 30px;
-        top: 50%;
-        left: 3%;
-    }
-
     .collapse-icon {
         left: 4%;
     }
@@ -256,13 +254,13 @@
     .details-action-box > * {
         margin-top: 0;
     }
-    
+
     .markers-container {
         display: flex;
         grid-template-columns: 60% 40%;
         gap: 10px;
     }
-    
+
     #details-legend {
         width: unset;
     }
@@ -272,6 +270,11 @@
         justify-content: space-between;
         align-items: flex-end;
     }
+
+    .action-btn-cont {
+        margin: 0;
+        width: unset;
+    }
 }
 
 @media (min-width: 951px) {
@@ -280,6 +283,7 @@
     }
 
     #details-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 
@@ -287,14 +291,19 @@
         width: 100%;
     }
 
-    #details-table td:nth-of-type(1) { display: table-cell; }
+    #details-table td:nth-of-type(1) {
+        display: table-cell;
+    }
 
     #details-table .details-info-header {
         cursor: pointer;
         position: relative;
     }
 
-    #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
+    #details-table
+        .details-info-header:not(.panel-head-active)
+        tr:last-of-type
+        > td {
         border-bottom: 1px solid var(--standard-hover-light-gray);
     }
 }
