@@ -654,7 +654,6 @@ function setupSimpleGrading(action) {
             Cookies.set('filter_student', true);
         }
         else {
-            console.log(this.checked);
             $('.simple-grade-withdrawn').css('display', 'contents');
             Cookies.set('filter_student', false);
         }

@@ -195,6 +195,7 @@ function change_anon() {
     Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
     if (Cookies.get(`anon_mode_${gradeable_id}`) === undefined) {
         Cookies.set(`anon_mode_${gradeable_id}`, 'off');
+        anon_status.prop('checked', false);
     }
     else if (Cookies.get(`anon_mode_${gradeable_id}`) === 'off') {
         anon_status.prop('checked', false);
