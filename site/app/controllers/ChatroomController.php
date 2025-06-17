@@ -85,11 +85,10 @@ class ChatroomController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }
 
-    /**
-     * @return RedirectResponse|WebResponse
-     */
-    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
-    public function getChatroom(string $chatroom_id): WebResponse|RedirectResponse {
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/{anonymous_route_segment?}", methods: ["GET"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    public function getChatroom(string $chatroom_id, ?string $anonymous_route_segment = null): WebResponse|RedirectResponse {
+        $isAnonymous = ($anonymous_route_segment === 'anonymous');
+
         if (!is_numeric($chatroom_id)) {
             $this->core->addErrorMessage("Invalid chatroom ID");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
@@ -103,36 +102,8 @@ class ChatroomController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
-        if (!$chatroom->isActive() && !$this->core->getUser()->accessAdmin()) {
-            $this->core->addErrorMessage("Chatroom not enabled");
-            return new RedirectResponse(
-                $this->core->buildCourseUrl(['chat'])
-            );
-        }
-        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = false;
-
-        return new WebResponse(
-            'Chatroom',
-            'showChatroom',
-            $chatroom,
-        );
-    }
-
-    /**
-     * @return RedirectResponse|WebResponse
-     */
-    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/anonymous", methods: ["GET"], requirements: ["chatroom_id" => "\d+"])]
-    public function getChatroomAnon(string $chatroom_id): WebResponse|RedirectResponse {
-        if (!is_numeric($chatroom_id)) {
-            $this->core->addErrorMessage("Invalid Chatroom ID");
-            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
-        }
-
-        $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
-        $chatroom = $repo->find($chatroom_id);
-
-        if ($chatroom === null) {
-            $this->core->addErrorMessage("Chatroom not found");
+        if ($isAnonymous && $chatroom->isAllowAnon() !== $isAnonymous) {
+            $this->core->addErrorMessage("Chatroom does not allow anonymous users");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
 
@@ -142,13 +113,12 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
-        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = true;
-
+        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = $isAnonymous;
         return new WebResponse(
             'Chatroom',
             'showChatroom',
             $chatroom,
-            true,
+            $isAnonymous
         );
     }
 
