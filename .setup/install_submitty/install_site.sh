@@ -264,6 +264,7 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error --no-save"
 
     VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
+    MJS_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
     chown -R ${PHP_USER}:${PHP_USER} ${NODE_FOLDER}
 
@@ -331,12 +332,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     mkdir ${VENDOR_FOLDER}/luxon
     cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
-    mkdir ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
-    cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+    mkdir ${VENDOR_FOLDER}/pdfjs-dist
+    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.mjs ${VENDOR_FOLDER}/pdfjs-dist
+    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.mjs ${VENDOR_FOLDER}/pdfjs-dist
+    cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs-dist
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
     cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly

@@ -1,3 +1,4 @@
+import * as pdfjsLibModule from '../vendor/pdfjs-dist/pdf.min.mjs';
 /* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
@@ -23,7 +24,8 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
+const pdfjsLib = pdfjsLibModule;
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs-dist/pdf.worker.min.mjs';
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -90,7 +92,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                 }
                 pdfjsLib.getDocument({
                     data: pdfData,
-                    cMapUrl: '../../vendor/pdfjs/cmaps/',
+                    cMapUrl: '../../vendor/pdfjs-dist/cmaps/',
                     cMapPacked: true,
                 }).promise.then((pdf) => {
                     const doc = new jspdf.jsPDF('p', 'mm');
@@ -249,7 +251,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 }
                 pdfjsLib.getDocument({
                     data: pdfData,
-                    cMapUrl: '../../vendor/pdfjs/cmaps/',
+                    cMapUrl: '../../vendor/pdfjs-dist/cmaps/',
                     cMapPacked: true,
                 }).promise.then((pdf) => {
                     window.RENDER_OPTIONS.pdfDocument = pdf;
