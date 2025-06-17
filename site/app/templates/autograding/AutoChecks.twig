@@ -114,7 +114,7 @@
             {% elseif element.type == "sequence_diagram" %}
               <div class="mermaid" id="div_{{ index }}_{{ check_index }}">
                 sequenceDiagram
-                {{ element.src | escape }}
+                {{ element.src |escape }}
               </div>
               <script>
                 // Unfortunately, mermaid takes in manual css changes as a string by default.
@@ -126,9 +126,7 @@
                 };
                 mermaid.initialize(config);
                 $( document ).ready(function() {
-                    mermaid.run({
-                      nodes: [document.querySelector("#div_{{ index }}_{{ check_index }}")],
-                    });
+                    mermaid.init( { "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");
                 });
               </script>
             {% endif %}
