@@ -2760,7 +2760,7 @@ class Gradeable extends AbstractModel {
         if (is_string($discussion_thread_id) && is_array(json_decode($discussion_thread_id, true))) {
             $discussion_thread_id = json_decode($discussion_thread_id, true);
         }
-        $this->discussion_thread_id = array_map('intval', (array)$discussion_thread_id);
+        $this->discussion_thread_id = array_map('intval', (array) $discussion_thread_id);
     }
 
     public function getActiveGradeInquiriesCount(): int {

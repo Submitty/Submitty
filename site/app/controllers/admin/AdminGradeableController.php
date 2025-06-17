@@ -243,7 +243,7 @@ class AdminGradeableController extends AbstractController {
      *     grade_inquiries?: boolean,
      *     grade_inquiries_per_component?: boolean,
      *     discussion_based?: boolean,
-     *     discussion_thread_id?: string,
+     *     discussion_thread_id?: int[],
      *     vcs?: array{
      *         repository_type?: string|mixed,
      *         vcs_path?: string|mixed,
