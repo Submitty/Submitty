@@ -151,7 +151,11 @@ def get_gradeable_buckets(soup):
 
         # Extract details for each gradeable within the bucket
         ids = []
-        
+
+        # Account for per-gradeable percents
+        percents_checkbox = bucket_div.select_one(f'#per-gradeable-percents-checkbox-{bucket_type}')
+        is_percent_enabled_for_this_bucket = percents_checkbox is not None and percents_checkbox.has_attr('checked')
+
         for li in bucket_div.select(f'#gradeables-list-{bucket_type} .gradeable-li'):
             gradeable = {}
             gradeable['id'] = li.select_one('.gradeable-id').text.strip()
@@ -166,14 +170,14 @@ def get_gradeable_buckets(soup):
                 gradeable['max'] = float(max_score_input['data-max-score'])
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
 
-                per_gradeable_percents_checkboxes = soup.select('input[id^="per-gradeable-percents-checkbox-"]')
-
-                for per_gradeable_percents_checkbox in per_gradeable_percents_checkboxes:
-                    if per_gradeable_percents_checkbox.get('checked'):
-                        gradeable_percents.add(gradeable['id'])
-
-                if gradeable['id'] in gradeable_percents and str(percent_input['value']).isnumeric():
-                    gradeable['percent'] = float(percent_input['value']) / 100.0
+                if is_percent_enabled_for_this_bucket:
+                    value = percent_input.get('value', '').strip()
+                    if value:
+                        try:
+                            gradeable['percent'] = float(value) / 100.0
+                        except (ValueError, TypeError):
+                            # Ignore invalid values
+                            pass
 
             # Get per-gradeable curve data
             curve_points_selected = get_selected_curve_benchmarks(soup)
