@@ -260,26 +260,39 @@ void ConfirmCapabilityExists(nlohmann::json &whole_config) {
   }
   else {
     std::cout << "ERROR: autograding_workers.json does not exist!" << std::endl;
-    std::cerr << "ERROR: autograding_workers.json does not exist!" << std::endl;
     exit(1);
   }
 
   // Get the required capability and list of capabilities
   std::string required_capability = whole_config["required_capabilities"];
-  nlohmann::json capabilities_list = workers_json["primary"]["capabilities"];
+  
+  bool capability_exists = false;
+  std::string message;
 
-  // Confirm the required capability is in the list of capabilities
-  if (std::find(capabilities_list.begin(), capabilities_list.end(), required_capability) == capabilities_list.end()) {
-    std::string message = "ERROR: The required capability '" + required_capability + "' does not exist.\n"
-      + "  The following capabilities exist in this network:\n";
-    
-    // Print out all available capabilities if the requested required capability does not exist
+  // Loop through all workers and check if they have the required capability
+  for (nlohmann::json::iterator worker_it = workers_json.begin(); worker_it != workers_json.end(); worker_it++) {
+    std::string worker_name = worker_it.key();
+    nlohmann::json capabilities_list = worker_it.value()["capabilities"];
+
+    // Break if at least one worker has the required capability
+    if (std::find(capabilities_list.begin(), capabilities_list.end(), required_capability) != capabilities_list.end()) {
+      capability_exists = true;
+      break;
+    }
+
+    // Append all available capabilities if the requested required capability does not exist
+    message.append("  Worker '" + worker_name + "' capabilities:\n");
     for (typename nlohmann::json::iterator capability = capabilities_list.begin(); capability != capabilities_list.end(); capability++) {
       std::string capability_str = capability.value();
       message.append("    " + capability_str + "\n");
     }
-    std::cout << message << std::endl;
-    std::cerr << message << std::endl;
+  }
+
+  // Print error message and exit if the required capability does not exist
+  if (!capability_exists) {
+    std::cout << "ERROR: The required capability '" << required_capability << "' does not exist for any worker.\n"
+        << "The following capabilities were found:\n" << message << std::endl;
+
     exit(1);
   }
 }
@@ -297,7 +310,6 @@ void ConfirmCapabilityHasImages(nlohmann::json &testcases, nlohmann::json &whole
   }
   else {
     std::cout << "ERROR: autograding_containers.json does not exist!" << std::endl;
-    std::cerr << "ERROR: autograding_containers.json does not exist!" << std::endl;
     exit(1);
   }
 
@@ -336,7 +348,6 @@ void ConfirmCapabilityHasImages(nlohmann::json &testcases, nlohmann::json &whole
         message.append("    " + image_str + "\n");
       }
       std::cout << message << std::endl;
-      std::cerr << message << std::endl;
       exit(1);
     }
   }
