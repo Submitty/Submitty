@@ -42,7 +42,7 @@ class LeaderboardController extends AbstractController {
         }
 
         $leaderboards = $autogradingConfig->getLeaderboards();
-        if (!$leaderboards) {
+        if (count($leaderboards) === 0) {
             $this->core->addErrorMessage("No leaderboards exist for this gradeable");
             return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
         }
