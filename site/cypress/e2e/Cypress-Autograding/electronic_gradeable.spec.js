@@ -6,7 +6,7 @@ const switchVersion = (versionNumber) => {
     cy.get('[data-testid="submission-version-select"').find('option:selected').then((selectedOption) => {
         const currentVersion = selectedOption.val();
         if (currentVersion !== versionNumber) {
-            cy.get('[data-testid="submission-version-select"').select(versionNumber);
+            cy.get('[data-testid="submission-version-select"]').select(String(versionNumber));
         }
     });
 };
@@ -55,7 +55,7 @@ const submitGradeable = (versionNumber) => {
  * @param {number[]} fullScores the max scores for the gradeables
  */
 const checkNonHiddenResults = (versionNumber, expectedScores, fullScores) => {
-    // switchVersion(versionNumber);
+    switchVersion(versionNumber);
 
     expect(expectedScores.length).to.eq(fullScores.length);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
@@ -81,16 +81,18 @@ describe('Test the development course gradeables', () => {
 
         // use 'let' later for multiple gradeables
         const gradeable = 'cpp_cats';
-        // submits and checks the all correct files
+        // submits the all correct files
         newSubmission(gradeable);
         submitFiles(constructFileName(gradeable, 'allCorrect.zip'), 1, true);
         submitGradeable(1);
-        checkNonHiddenResults(1, fullScores, fullScores);
 
         // submits the half incorrect files
         newSubmission(gradeable);
         submitFiles(constructFileName(gradeable, 'extraLinesAtEnd.zip'), 1, true);
         submitGradeable(2);
+
+        // check both results
+        checkNonHiddenResults(1, fullScores, fullScores);
         checkNonHiddenResults(2, [2, 3, 2, 2, 2, 2, 0], fullScores);
     });
 });
