@@ -56,7 +56,7 @@ def get_display_benchmark(soup):
 def get_selected_curve_benchmarks(soup):
     """Determines which curve-related benchmarks are selected."""
     all_selected = get_display_benchmark(soup)
-    benchmarks_with_input_fields = ['lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d']
+    benchmarks_with_input_fields = {'lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'}
 
     return [elem for elem in all_selected if elem in benchmarks_with_input_fields]
 
@@ -67,7 +67,7 @@ def get_benchmark_percent(soup):
     selected_benchmarks = get_selected_curve_benchmarks(soup)
 
     for element in soup.select('.benchmark_percent_input'):
-        benchmark = element['data-benchmark']
+        benchmark = str(element['data-benchmark'])
 
         if benchmark in selected_benchmarks:
             if not element.get('value'):
@@ -83,11 +83,26 @@ def get_benchmark_percent(soup):
 
 def get_final_cutoff_percent(soup):
     """Collects the final grade cutoff percentages."""
+    # Default final grade cutoff percentages
+    if not soup.select_one('input[value="final_grade"]:checked'):
+        return {
+            'A': 93.0,
+            'A-': 90.0,
+            'B+': 87.0,
+            'B': 83.0,
+            'B-': 80.0,
+            'C+': 77.0,
+            'C': 73.0,
+            'C-': 70.0,
+            'D+': 67.0,
+            'D': 60.0,
+        }
+
     final_cutoff = {}
     allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D']
 
     for element in soup.select('.final_cutoff_input'):
-        letter_grade = element['data-benchmark']
+        letter_grade = str(element['data-benchmark'])
 
         if letter_grade in allowed_grades_excluding_f:
             if not element.get('value'):
@@ -106,7 +121,7 @@ def get_section(soup):
     sections = {}
 
     for element in soup.select('.sections_and_labels'):
-        section = element['data-section']
+        section = str(element['data-section'])
         label = element['value']
         sections[section] = label
 
@@ -137,16 +152,43 @@ def get_gradeable_buckets(soup):
         ids = []
         for li in bucket_div.select(f'#gradeables-list-{bucket_type} .gradeable-li'):
             gradeable = {}
-            max_score_input = li.select_one('.max-score')
-            percent_input = li.select_one('div[id^="gradeable-percents-div-"] input')
+            children = list(li.children)
+            # children[0] represents <div id="gradeable-pts-div-*">
+            # children[1] represents <div id="gradeable-percents-div-*">
+            max_score_input = children[0].select_one('.max-score')
+            percent_input = list(children[1].children)[0]
 
             gradeable['max'] = float(max_score_input['data-max-score'])
+            gradeable['percent'] = float(percent_input['value']) / 100.0
             gradeable['release_date'] = max_score_input['data-grade-release-date']
             gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
-            # Only include percent if the input is visible
-            if 'style' in percent_input.attrs:
-                gradeable['percent'] = float(percent_input['value']) / 100.0
+            # Get per-gradeable curve data
+            curve_points_selected = get_selected_curve_benchmarks(soup)
+            for input in children[2].select('.gradeable-li-curve input'):
+                benchmark = str(input['data-benchmark'])
+
+                if benchmark in curve_points_selected and input.get('value') and 'curve' not in gradeable:
+                    gradeable['curve'] = [float(input['value'])]
+            # Validate the set of per-gradeable curve value
+            if 'curve' in gradeable:
+                if len(gradeable['curve']) != len(curve_points_selected):
+                    raise ValueError(f"To adjust the curve for gradeable {gradeable['id']} you must enter a value in each box")
+
+                previous = gradeable['max']
+                for elem in gradeable['curve']:
+                    try:
+                        elem = float(elem)
+                    except ValueError:
+                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be floating point values")
+
+                    if elem < 0:
+                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be greater than or equal to 0")
+
+                    if elem > previous:
+                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input")
+
+                    previous = elem
 
             ids.append(gradeable)
 
@@ -161,6 +203,10 @@ def get_gradeable_buckets(soup):
 
 def get_table_data(soup, table_name):
     """Extracts data from the plagiarism, manual grade, or performance warnings tables."""
+    tables = {'plagiarism', 'manualGrade', 'performanceWarnings'}
+    if table_name not in tables:
+        return []
+
     data = []
     table_map = {
         'plagiarism': 'plagiarism-table-body',
@@ -196,7 +242,7 @@ def get_table_data(soup, table_name):
         elif table_name == 'performanceWarnings':
             data.append({
                 'msg': first_input,
-                'ids': [g.strip() for g in second_input.split(',')],
+                'ids': [id.strip() for id in second_input.split(',')],
                 'value': float(third_input)
             })
 
