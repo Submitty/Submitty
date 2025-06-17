@@ -1687,7 +1687,7 @@ function refreshCategories() {
         order.forEach((category) => {
             const category_visible_date = category[4];
             const category_diff = category[3];
-            if (category_visible_date === '' || category_diff > 0) {
+            if (category_visible_date === '' || category_diff >= 0) {
                 const category_id = category[0];
                 const category_desc = category[1];
                 const category_color = category[2];
