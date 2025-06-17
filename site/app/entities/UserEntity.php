@@ -135,6 +135,7 @@ class UserEntity {
         $out = [];
         $out["given_name"] = $this->user_preferred_givenname ?? $this->user_givenname;
         $out["family_name"] = $this->user_preferred_familyname ?? $this->user_familyname;
+        $out["full_name"] = $out["given_name"] . ' ' . $out["family_name"];
         $out["user_email"] = $this->user_email;
         $out["pronouns"] = $this->user_pronouns;
         $out["display_pronouns"] = $this->display_pronouns;

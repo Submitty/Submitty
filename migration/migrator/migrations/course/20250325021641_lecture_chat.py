@@ -21,7 +21,6 @@ def up(config, database, semester, course):
         CREATE TABLE IF NOT EXISTS chatrooms (
             id SERIAL PRIMARY KEY,
             host_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-            host_name character varying,
             title text NOT NULL,
             description text,
             is_active BOOLEAN DEFAULT false NOT NULL,

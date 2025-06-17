@@ -7,6 +7,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\entities\chat\Chatroom;
 use app\entities\chat\Message;
+use app\entities\UserEntity;
 use app\libraries\routers\AccessControl;
 use app\libraries\routers\Enabled;
 use Symfony\Component\Routing\Annotation\Route;
@@ -68,13 +69,20 @@ class ChatroomController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $user = $this->core->getUser();
         $title = $_POST['title'] ?? '';
-        $hostName = $this->core->getUser()->getDisplayFullName();
         $description = $_POST['description'] ?? '';
+
+        $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
+
+        if (!$userEntity) {
+            $this->core->addErrorMessage("Host user could not be found.");
+            return new RedirectResponse($this->core->buildCourseUrl(['chat']));
+        }
+
         if (trim($title) === '') {
             $this->core->addErrorMessage("Chatroom title cannot be empty");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
-        $chatroom = new Chatroom($user->getId(), $hostName, $_POST['title'], $description);
+        $chatroom = new Chatroom($userEntity, $title, $description);
         if (!isset($_POST['allow-anon'])) {
             $chatroom->setAllowAnon(false);
         }
@@ -252,7 +260,7 @@ class ChatroomController extends AbstractController {
         $msg_array['type'] = 'chat_message';
         $msg_array['user_id'] = $user->getId();
         $display_name = '';
-        if ($chatroom->isAllowAnon() && $_SESSION[$boolKey] === true) {
+        if ($chatroom->isAllowAnon() && isset($_SESSION[$boolKey]) && $_SESSION[$boolKey] === true) {
             $display_name = $_SESSION[$sessKey];
         }
         else {

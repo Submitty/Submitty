@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app\entities\chat;
 
+use app\entities\UserEntity;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
@@ -17,11 +18,9 @@ class Chatroom {
     #[ORM\GeneratedValue]
     private int $id;
 
-    #[ORM\Column(type: Types::STRING)]
-    private string $host_id;
-
-    #[ORM\Column(type: Types::STRING)]
-    private string $host_name;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class)]
+    #[ORM\JoinColumn(name: "host_id", referencedColumnName: "user_id", nullable: false)]
+    private UserEntity $host;
 
     #[ORM\Column(type: Types::STRING)]
     private string $title;
@@ -41,9 +40,8 @@ class Chatroom {
     #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class)]
     private Collection $messages;
 
-    public function __construct(string $hostId, string $hostName, string $title, string $description) {
-        $this->setHostId($hostId);
-        $this->setHostName($hostName);
+    public function __construct(UserEntity $host, string $title, string $description) {
+        $this->host = $host;
         $this->setTitle($title);
         $this->setDescription($description);
         $this->messages = new ArrayCollection();
@@ -55,20 +53,16 @@ class Chatroom {
         return $this->id;
     }
 
-    public function setHostId(string $hostId): void {
-        $this->host_id = $hostId;
+    public function getHost(): UserEntity {
+        return $this->host;
     }
 
     public function getHostId(): string {
-        return $this->host_id;
-    }
-
-    public function setHostName(string $hostName): void {
-        $this->host_name = $hostName;
+        return $this->host->getId();
     }
 
     public function getHostName(): string {
-        return $this->host_name;
+        return $this->host->getDisplayInfo()['full_name'];
     }
 
     public function getTitle(): string {
