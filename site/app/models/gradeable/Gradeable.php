@@ -230,8 +230,8 @@ class Gradeable extends AbstractModel {
      * @var bool does this assignment have a discussion component*/
     protected $discussion_based = false;
     /** @prop
-     * @var string thread id for corresponding to discussion forum thread*/
-    protected $discussion_thread_id = '';
+     * @var int[] thread id for corresponding to discussion forum thread*/
+    protected $discussion_thread_id = [];
     /** @prop
      * @var ?string are a list of hidden files and the lowest_access_group that can see those files */
     protected $hidden_files = "";
@@ -331,7 +331,7 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
             $this->setGradeInquiryAllowedInternal($details['grade_inquiry_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
-            $this->setDiscussionBased((bool) $details['discussion_based']);
+            $this->setDiscussionBased($details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
             $this->setAllowCustomMarks($details['allow_custom_marks']);
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
@@ -897,8 +897,7 @@ class Gradeable extends AbstractModel {
     }
 
     public function getStringThreadIds() {
-        return $this->isDiscussionBased() && is_array(json_decode($this->getDiscussionThreadId()))
-            ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+        return $this->isDiscussionBased() ? implode(',', $this->getDiscussionThreadId()) : '';
     }
 
     /**
@@ -2744,12 +2743,24 @@ class Gradeable extends AbstractModel {
         $this->discussion_based = $discussion_based;
     }
 
-    public function getDiscussionThreadId(): string {
+    /**
+     * Gets the discussion thread id for this gradeable
+     * @return array<int>
+     */
+    public function getDiscussionThreadId(): array {
         return $this->discussion_thread_id;
     }
 
-    public function setDiscussionThreadId(string $discussion_thread_id): void {
-        $this->discussion_thread_id = $discussion_thread_id;
+    /**
+     * Sets the discussion thread id for this gradeable
+     * @param array<string>|array<int>|int|string $discussion_thread_id
+     */
+    public function setDiscussionThreadId($discussion_thread_id): void {
+        # If $discussion_thread_id is json encoded, decode it
+        if (is_string($discussion_thread_id) && is_array(json_decode($discussion_thread_id, true))) {
+            $discussion_thread_id = json_decode($discussion_thread_id, true);
+        }
+        $this->discussion_thread_id = array_map('intval', (array)$discussion_thread_id);
     }
 
     public function getActiveGradeInquiriesCount(): int {

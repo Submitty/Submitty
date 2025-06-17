@@ -1547,10 +1547,7 @@ class AdminGradeableController extends AbstractController {
                         break;
                     }
                 }
-                if (count($errors) == 0) {
-                    $post_val = json_encode($post_val);
-                }
-                else {
+                if (count($errors) !== 0) {
                     continue;
                 }
             }
