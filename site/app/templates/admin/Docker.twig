@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
 
@@ -86,20 +88,21 @@
         </div>
     {% endif %}
 
-    <table class="table table-striped docker-table mobile-table">
+    <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                <th>Image Name</th>
+                {{ self.sortable_header('Image Name', 'name') }}
                 <th>Owner</th>
                 <th>Id</th>
-                <th>Size</th>
+                {{ self.sortable_header('Size', 'size') }}
                 <th>Tag</th>
-                <th>Created</th>
+                {{ self.sortable_header('Created', 'created') }}
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
                 <th>Remove</th>
             </tr>
         </thead>
+
         <tbody>
         {% for image in docker_images %}
             {% set full = image.primary_name | split(":") %}
@@ -107,7 +110,7 @@
             {% set tag = full[1] %}
 
             <tr class="image-row" >
-                <td>{{ name }}</th>
+                <td>{{ name }}</td>
                 <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
                 <td>{{ image.id | trim("sha256:")}}</td>
                 <td>{{ image.size_mb }}</td>
@@ -178,3 +181,15 @@
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
+
+{% macro sortable_header(title, sort_key) %}
+    <th>
+        <a href="#"
+        onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
+        class="sortable-header"
+        data-sort-key="{{ sort_key }}">
+            {{ title }}
+            <i class="fa fa-sort"></i>
+        </a>
+    </th>
+{% endmacro %}
