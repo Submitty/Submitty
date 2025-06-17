@@ -113,7 +113,6 @@ class DockerInterfaceController extends AbstractController {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $return_str = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $code_success = !$http_code == 200;
         if (curl_errno($ch) || $http_code !== 200) {
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
@@ -232,7 +231,7 @@ class DockerInterfaceController extends AbstractController {
             "config",
             "autograding_containers.json"
         );
-        $json = json_decode(file_get_contents($jsonFilePath), true);
+        $json = FileUtils::readJsonFile($jsonFilePath);
 
         foreach ($json as $capability_key => $capability) {
             if (($key = array_search($image, $capability, true)) !== false) {
