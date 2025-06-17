@@ -1,7 +1,22 @@
 import { getCurrentSemester } from '../../support/utils';
 import { getApiKey } from '../../support/utils';
-describe('Tests cases revolving around gradeable access and submition', () => {
+import { gradeable_json, rubric, bad_rubric } from '../../support/api_testing_json';
+describe('Tests cases revolving around gradeable access and submission', () => {
     it('Should upload file, submit, view gradeable', () => {
+        // // API
+        getApiKey('instructor', 'instructor').then((key) => {
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: gradeable_json,
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.status).to.eql('success');
+            });
+        });
+
         cy.login('instructor');
 
         const testfile1 = 'cypress/fixtures/json_ui.json';
@@ -21,6 +36,22 @@ describe('Tests cases revolving around gradeable access and submition', () => {
         cy.get('[data-testid="submission-open-date"]').should('have.value', '2024-01-15 23:59:59');
         cy.get('[data-testid="submission-due-date"]').should('have.value', '2024-02-15 23:59:59');
         cy.get('[data-testid="release_date"]').should('have.value', '2024-03-15 23:59:59');
+
+        cy.visit(['sample', 'gradeable', 'api_testing', 'update']);
+        cy.get('body').should('contain.text', 'Edit Gradeable');
+        cy.get('[data-testid="download-gradeable-btn"]').click();
+
+        cy.readFile('cypress/downloads/api_testing.json').then((test_json) => {
+            expect(test_json.title).to.eql('API Testing');
+            expect(test_json.type).to.eql('Electronic File');
+            expect(test_json.id).to.eql('api_testing');
+            expect(test_json.instructions_url).to.eql('');
+            expect(test_json.syllabus_bucket).to.eql('homework');
+            expect(test_json.bulk_upload).to.eql(false);
+            expect(test_json.ta_grading).to.eql(true);
+            expect(test_json.grade_inquiries).to.eql(true);
+            expect(test_json.rubric).to.eql(rubric);
+        });
     });
 
     it('Should get error JSON responses', () => {
@@ -48,13 +79,13 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                 },
                 headers: {
                     Authorization: key,
                 },
             }).then((response) => {
-                expect(response.body.message).to.eql('Gradeable already exists');
+                expect(response.body.message).to.eql('An error has occurred: Gradeable already exists');
             });
 
             // Invalid type error message
@@ -80,13 +111,78 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
+                    syllabus_bucket: 'homework',
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.message).to.eql('An error has occurred: Invalid type');
+            });
+
+            // Invalid rubric error message
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: {
+                    title: 'Testing Json',
+                    instructions_url: '',
+                    id: 'hw-invalid',
+                    type: 'Electronic File',
+                    vcs: {
+                        repository_type: 'submitty-hosted',
+                        vcs_path: 'path/to/vcs',
+                        vcs_subdirectory: 'subdirectory',
+                    },
+                    bulk_upload: false,
+                    team_gradeable: {
+                        team_size_max: 3,
+                        gradeable_teams_read: false,
+                    },
+                    grading_inquiry: {
+                        grade_inquiry_per_component_allowed: false,
+                    },
+                    ta_grading: false,
+                    syllabus_bucket: 'homework',
+                    rubric: bad_rubric,
+                },
+                headers: {
+                    Authorization: key,
+                },
+            }).then((response) => {
+                expect(response.body.message).to.eql('Rubric component does not have all of the parameters');
+            });
+
+            // Invalid syllabus bucket
+            cy.request({
+                method: 'POST',
+                url: `${Cypress.config('baseUrl')}/api/${getCurrentSemester()}/sample/upload`,
+                body: {
+                    title: 'Testing Json',
+                    instructions_url: '',
+                    id: 'hw-invalid',
+                    type: 'Electronic File',
+                    vcs: {
+                        repository_type: 'submitty-hosted',
+                        vcs_path: 'path/to/vcs',
+                        vcs_subdirectory: 'subdirectory',
+                    },
+                    bulk_upload: false,
+                    team_gradeable: {
+                        team_size_max: 3,
+                        gradeable_teams_read: false,
+                    },
+                    grading_inquiry: {
+                        grade_inquiry_per_component_allowed: false,
+                    },
+                    ta_grading: false,
                     syllabus_bucket: 'Homework',
                 },
                 headers: {
                     Authorization: key,
                 },
             }).then((response) => {
-                expect(response.body.message).to.eql('Invalid type');
+                expect(response.body.message).to.eql('An error has occurred: Syllabus bucket must be one of the following: homework, assignment, problem-set, quiz, test, exam, exercise, lecture-exercise, reading, lab, recitation, worksheet, project, participation, note, none (for practice only)');
             });
 
             // No ID, Type, or Title
@@ -110,7 +206,7 @@ describe('Tests cases revolving around gradeable access and submition', () => {
                         grade_inquiry_per_component_allowed: false,
                     },
                     ta_grading: false,
-                    syllabus_bucket: 'Homework',
+                    syllabus_bucket: 'homework',
                 },
                 headers: {
                     Authorization: key,

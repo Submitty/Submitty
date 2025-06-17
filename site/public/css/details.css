@@ -19,9 +19,9 @@
 .collapse-icon {
     position: absolute;
     transform: translate(50%, -50%);
-    font-size: 1rem;
-    top: 33%;
-    left: 0;
+    font-size: 30px;
+    top: 50%;
+    left: 3%;
 }
 
 .collapse-icon {
@@ -88,6 +88,7 @@
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .expand-icon,
 .collapse-icon {
     display: inline;
@@ -95,6 +96,7 @@
 
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .collapse-icon,
+/* stylelint-disable-next-line no-descending-specificity */
 .expand-icon {
     display: none;
 }
@@ -126,6 +128,7 @@
     /* stylelint-disable-next-line no-descending-specificity */
     #details-table tr {
         margin-top: 1em;
+        /* stylelint-disable-next-line declaration-no-important */
         background: none !important;
     }
 
@@ -224,13 +227,6 @@
         padding: 0 25px;
     }
 
-    .expand-icon,
-    .collapse-icon {
-        font-size: 30px;
-        top: 50%;
-        left: 3%;
-    }
-
     .collapse-icon {
         left: 4%;
     }
@@ -274,6 +270,11 @@
         justify-content: space-between;
         align-items: flex-end;
     }
+
+    .action-btn-cont {
+        margin: 0;
+        width: unset;
+    }
 }
 
 @media (min-width: 951px) {
@@ -282,6 +283,7 @@
     }
 
     #details-table td::before {
+        /* stylelint-disable-next-line declaration-no-important */
         content: none !important;
     }
 

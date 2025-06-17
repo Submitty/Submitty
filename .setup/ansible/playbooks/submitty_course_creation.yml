@@ -16,6 +16,27 @@
         submitty_term_creation_start_date: 01/01/2024
         submitty_term_creation_end_date: 06/07/2024
 
+    - name: Add instructor Quinn
+      ansible.builtin.include_role:
+        name: submitty_add_user
+      vars:
+        submitty_add_user_username: instructor
+        submitty_add_user_firstname: instructor
+        submitty_add_user_lastname: Quinn
+        submitty_add_user_email: email
+        submitty_add_user_password: instructor
+
+    # This user is the github actions runner, delete if using on production.
+    - name: Add instructor runner
+      ansible.builtin.include_role:
+        name: submitty_add_user
+      vars:
+        submitty_add_user_username: runner
+        submitty_add_user_firstname: runner
+        submitty_add_user_lastname: runner
+        submitty_add_user_email: runner
+        submitty_add_user_password: runner
+
     - name: Course Creation
       ansible.builtin.include_role:
         name: submitty_course_creation
@@ -38,7 +59,7 @@
         submitty_course_add_instructor_firstname: firstname
         submitty_course_add_instructor_lastname: lastname
         submitty_course_add_instructor_email: email
-        submitty_course_add_instructor_password: password
+        submitty_course_add_instructor_password: instructor2
 
     - name: Add Users
       ansible.builtin.include_role:
@@ -56,16 +77,16 @@
           firstname: firstname
           lastname: lastname
           email: email
-          password: password
-        - username: bitddle
+          password: aphacker
+        - username: bitdiddle
           firstname: firstname
           lastname: lastname
           email: email
-          password: password
+          password: bitdiddle
         - username: adamsg
           firstname: firstname
           lastname: lastname
           email: email
-          password: password
+          password: adamsg
       loop_control:
         loop_var: user

@@ -102,6 +102,11 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
 fi
 
+# Delete all vue code to prevent deleted vue files from being rendered
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
+fi
+
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
@@ -379,7 +384,6 @@ echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
-chmod a+x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
@@ -389,7 +393,6 @@ chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-chmod a-x ${NODE_FOLDER}/vite/node_modules/esbuild/bin/esbuild
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
