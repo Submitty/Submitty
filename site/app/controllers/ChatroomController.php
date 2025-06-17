@@ -73,7 +73,7 @@ class ChatroomController extends AbstractController {
 
         $userEntity = $em->getRepository(UserEntity::class)->find($user->getId());
 
-        if (!$userEntity) {
+        if (!isset($userEntity)) {
             $this->core->addErrorMessage("Host user could not be found.");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
@@ -158,7 +158,7 @@ class ChatroomController extends AbstractController {
         $em = $this->core->getCourseEntityManager();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
 
-        if (!$chatroom) {
+        if (!isset($chatroom)) {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
