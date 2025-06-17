@@ -31,6 +31,7 @@ const newSubmission = (gradeableName) => {
  * Uploads a file and compares the results with expected scores.
  * @param {string} fileUploadName the fixture to upload
  * @param {number} bucket the bucket to submit to. Default gradeables has buckets starting from 1
+ * @param {boolean} firstFile checks the bucket for no files if it is the first file being uploaded
  */
 const submitFiles = (fileUploadName, bucket, firstFile = false) => {
     if (firstFile) {
@@ -70,7 +71,7 @@ const checkNonHiddenResults = (versionNumber, expectedScores, fullScores) => {
 };
 
 const constructFileName = (gradeable, fileName) => {
-    const baseFolder = 'more_autograding_examples';
+    const baseFolder = 'copy_of_more_autograding_examples';
     return `${baseFolder}/${gradeable}/submissions/${fileName}`;
 };
 
