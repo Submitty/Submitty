@@ -764,6 +764,9 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
+      - name: Switch to LDAP auth
+        run: sudo sed -ie "s/Database/Ldap/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
       - name: Run cypress e2e login tests with LDAP auth
         uses: cypress-io/github-action@v6
         with:
