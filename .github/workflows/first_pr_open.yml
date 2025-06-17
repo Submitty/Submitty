@@ -19,8 +19,8 @@ jobs:
         id: check-first-pr
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
-          SIX_MONTHS_AGO=$(date -d '1 second ago' +%Y-%m-%d)
-          FIRST_PR=$(gh pr list --author "$USERNAME" --state all --search "created:>$SIX_MONTHS_AGO" --limit 1 | wc -l | xargs -I {} test {} -eq 1 && echo "false" || echo "true")
+          SIX_MONTHS_AGO=$(date -d '6 months ago' +%Y-%m-%d)
+          FIRST_PR=$(gh pr list --author "$USERNAME" --state all --search "created:>=$SIX_MONTHS_AGO" --limit 1 | wc -l | xargs -I {} test {} -eq 1 && echo "false" || echo "true")
           echo "first_pr=$FIRST_PR" >> $GITHUB_ENV
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
