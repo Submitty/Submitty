@@ -81,3 +81,7 @@
     border-radius: 0.25rem;
     cursor: pointer;
 }
+
+.requirements-list {
+    margin-left: 15px;
+}

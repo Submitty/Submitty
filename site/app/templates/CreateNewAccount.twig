@@ -13,7 +13,7 @@
             <p style="display:block">Email <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="email">Show Requirements</button></p>
             <div class="hidden-helper" id="email-helper">
                 Accepted Email Extensions:<br/>
-                <ul>
+                <ul class="requirements-list">
                     {% for email in requirements['accepted_emails'] %}
                         <li>@{{ email }}<br/></li>
                     {% endfor %}
@@ -25,28 +25,31 @@
             <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>  
             <div class="hidden-helper" id="userid-helper">
                 UserID Requirements:<br/>
+                <ul class="requirements-list">
                 {% if user_id_reqs["any_user_id"] == true %}
-                * Must be greater than {{ user_id_reqs["min_length"] }} 
+                <li> Must be greater than {{ user_id_reqs["min_length"] }} 
                     characters, and less than
                     {{ user_id_reqs["max_length"] }}
-                    characters in length 
+                    characters in length </li>
                 {% elseif user_id_reqs['require_name'] == true %}
-                    * Must be
+                    <li> Must be
                     {{ name_reqs['given_first'] ? 
                     (name_reqs['given_name'] ~ ' characters of your given name followed by ') : 
                     (name_reqs['family_name'] ~ ' characters of your family name followed by' )}}
                     {{ name_reqs['given_first'] ? 
                     (name_reqs['family_name'] ~ ' characters of your family name') : 
                     (name_reqs['given_name'] ~ ' characters of your given name' )}}
+                    </li>
                 {% elseif user_id_reqs['require_email'] == true %}
                     {% if user_id_reqs['whole_email'] %} 
-                        * Must be the whole email
+                        <li> Must be the whole email </li>
                     {% elseif user_id_reqs['whole_prefix'] %}
-                        * Must be the email prefix (i.e. user given user@example.com)
+                        <li> Must be the email prefix (i.e. user given user@example.com) </li>
                     {% else %}
-                        * Must equal the first {{ user_id_reqs['prefix_count'] }} characters of your email
+                        <li> Must equal the first {{ user_id_reqs['prefix_count'] }} characters of your email </li>
                     {% endif %}
                 {% endif %}
+                </ul>
             </div>
                 <input type="text" name="user_id" data-testid="user-id" required />
         </div>
@@ -62,7 +65,7 @@
             <p style="display:block">Password <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="password">Show Requirements</button></p>
             <div class="hidden-helper" id="password-helper">
                 Password Requires at least:<br/> 
-                <ul>
+                <ul class="requirements-list">
                     <li> 1 Capital Letter </li>
                     <li> 1 Lowercase Letter </li>
                     <li> 1 Number </li>
