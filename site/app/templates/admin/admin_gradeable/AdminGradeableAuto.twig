@@ -255,7 +255,7 @@
                 </ul>
             {% else %}
                 <span class="fas fa-file"></span>
-                <a class="key_to_click" onclick="loadGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+                <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
             {% endif %}
         </li>
     {% endfor %}

@@ -406,7 +406,6 @@ body::-webkit-scrollbar-track {
 
 #gradeable-config-edit-bar {
     display: none;
-    overflow: hidden;
 }
 
 .warning-banner {
