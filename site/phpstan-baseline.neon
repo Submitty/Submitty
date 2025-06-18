@@ -12097,21 +12097,6 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:renderDiscussionForum\\(\\) has parameter \\$isTeam with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:renderDiscussionForum\\(\\) has parameter \\$submitter with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
-			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:renderDiscussionForum\\(\\) has parameter \\$threadIds with no type specified\\.$#"
-			count: 1
-			path: app/views/grading/ElectronicGraderView.php
-
-		-
 			message: "#^Method app\\\\views\\\\grading\\\\ElectronicGraderView\\:\\:renderNavigationBar\\(\\) has parameter \\$anon_mode with no type specified\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php

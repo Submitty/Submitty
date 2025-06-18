@@ -170,7 +170,7 @@ class Gradeable extends AbstractModel {
      * @var bool If this gradeable has a due date or not */
     protected $has_due_date = true;
     /** @prop
-     * @var ?bool If this gradeable has a grade release date or not */
+     * @var bool If this gradeable has a grade release date or not */
     protected $has_release_date = true;
     /** @prop
      * @var ?int The amount of time given to a default student to complete assignment */
@@ -2188,7 +2188,7 @@ class Gradeable extends AbstractModel {
      * @throws \Exception If creating directories for the team fails, or writing team history fails
      *  Note: The team in the database may have already been created if an exception is thrown
      */
-    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1, string $team_name = null) {
+    public function createTeam(User $leader, array $members, string $registration_section = '', int $rotating_section = -1, ?string $team_name = null) {
         $all_members = $members;
         $all_members[] = $leader;
 
@@ -2259,7 +2259,7 @@ class Gradeable extends AbstractModel {
         }
     }
 
-    public function getRepositoryPath(User $user, Team $team = null) {
+    public function getRepositoryPath(User $user, ?Team $team = null) {
         if (strpos($this->getVcsPartialPath(), '://') !== false || substr($this->getVcsPartialPath(), 0, 1) === '/') {
             $vcs_path = $this->getVcsPartialPath();
         }
@@ -2513,6 +2513,7 @@ class Gradeable extends AbstractModel {
 
     public function setInstructionsUrl(string $url): void {
         $this->instructions_url = $url;
+        $this->modified = true;
     }
 
     public function getType(): int {
@@ -2525,6 +2526,7 @@ class Gradeable extends AbstractModel {
 
     public function setGraderAssignmentMethod(int $method): void {
         $this->grader_assignment_method = $method;
+        $this->modified = true;
     }
 
     public function getTaViewStartDate(): ?\DateTime {
@@ -2561,6 +2563,7 @@ class Gradeable extends AbstractModel {
 
     public function setSyllabusBucket(string $bucket): void {
         $this->syllabus_bucket = $bucket;
+        $this->modified = true;
     }
 
     public function getTaInstructions(): string {
@@ -2569,6 +2572,7 @@ class Gradeable extends AbstractModel {
 
     public function setTaInstructions(string $instructions): void {
         $this->ta_instructions = $instructions;
+        $this->modified = true;
     }
 
     public function getAutogradingConfigPath(): string {
@@ -2581,6 +2585,7 @@ class Gradeable extends AbstractModel {
 
     public function setVcs(bool $use_vcs): void {
         $this->vcs = $use_vcs;
+        $this->modified = true;
     }
 
     public function getVcsSubdirectory(): string {
@@ -2589,10 +2594,12 @@ class Gradeable extends AbstractModel {
 
     public function setVcsSubdirectory(string $subdirectory): void {
         $this->vcs_subdirectory = $subdirectory;
+        $this->modified = true;
     }
 
     public function setUsingSubdirectory(bool $using_subdirectory): void {
         $this->using_subdirectory = $using_subdirectory;
+        $this->modified = true;
     }
 
     public function isUsingSubdirectory(): bool {
@@ -2601,6 +2608,7 @@ class Gradeable extends AbstractModel {
 
     public function setVcsPartialPath(string $vcs_partial_path): void {
         $this->vcs_partial_path = $vcs_partial_path;
+        $this->modified = true;
     }
 
     public function getVcsPartialPath(): string {
@@ -2613,6 +2621,7 @@ class Gradeable extends AbstractModel {
 
     public function setVcsHostType(int $host_type): void {
         $this->vcs_host_type = $host_type;
+        $this->modified = true;
     }
 
     public function isTeamAssignment(): bool {
@@ -2637,6 +2646,7 @@ class Gradeable extends AbstractModel {
 
     public function setStudentView(bool $can_student_view): void {
         $this->student_view = $can_student_view;
+        $this->modified = true;
     }
 
     public function isStudentViewAfterGrades(): bool {
@@ -2645,6 +2655,7 @@ class Gradeable extends AbstractModel {
 
     public function setStudentViewAfterGrades(bool $can_student_view_after_grades): void {
         $this->student_view_after_grades = $can_student_view_after_grades;
+        $this->modified = true;
     }
 
     public function isStudentSubmit(): bool {
@@ -2653,10 +2664,12 @@ class Gradeable extends AbstractModel {
 
     public function setStudentSubmit(bool $can_student_submit): void {
         $this->student_submit = $can_student_submit;
+        $this->modified = true;
     }
 
     public function setStudentDownload(bool $can_student_download): void {
         $this->student_download = $can_student_download;
+        $this->modified = true;
     }
 
     public function getPeerGradeSet(): int {
@@ -2665,6 +2678,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerGradeSet(int $grade_set): void {
         $this->peer_grade_set = $grade_set;
+        $this->modified = true;
     }
 
     public function getSubmissionOpenDate(): ?\DateTime {
@@ -2685,6 +2699,7 @@ class Gradeable extends AbstractModel {
 
     public function setLateSubmissionAllowed(bool $allow_late_submission): void {
         $this->late_submission_allowed = $allow_late_submission;
+        $this->modified = true;
     }
 
     public function getPrecision(): float {
@@ -2701,6 +2716,7 @@ class Gradeable extends AbstractModel {
 
     public function setAllowedMinutes(?int $minutes): void {
         $this->allowed_minutes = $minutes;
+        $this->modified = true;
     }
 
     public function getDependsOn(): ?string {
@@ -2709,6 +2725,7 @@ class Gradeable extends AbstractModel {
 
     public function setDependsOn(?string $depends_on): void {
         $this->depends_on = $depends_on;
+        $this->modified = true;
     }
 
     public function getDependsOnPoints(): ?int {
@@ -2717,10 +2734,12 @@ class Gradeable extends AbstractModel {
 
     public function setDependsOnPoints(?int $depends_on_points): void {
         $this->depends_on_points = $depends_on_points;
+        $this->modified = true;
     }
 
     public function setAnyManualGrades(bool $any_manual_grades): void {
         $this->any_manual_grades = $any_manual_grades;
+        $this->modified = true;
     }
 
     public function isGradeInquiryAllowed(): bool {
@@ -2733,6 +2752,7 @@ class Gradeable extends AbstractModel {
 
     public function setGradeInquiryPerComponentAllowed(bool $is_grade_inquiry_per_component): void {
         $this->grade_inquiry_per_component_allowed = $is_grade_inquiry_per_component;
+        $this->modified = true;
     }
 
     public function isDiscussionBased(): bool {
@@ -2741,6 +2761,7 @@ class Gradeable extends AbstractModel {
 
     public function setDiscussionBased(bool $discussion_based): void {
         $this->discussion_based = $discussion_based;
+        $this->modified = true;
     }
 
     /**
@@ -2761,6 +2782,7 @@ class Gradeable extends AbstractModel {
             $discussion_thread_id = json_decode($discussion_thread_id, true);
         }
         $this->discussion_thread_id = array_map('intval', (array) $discussion_thread_id);
+        $this->modified = true;
     }
 
     public function getActiveGradeInquiriesCount(): int {
@@ -2769,10 +2791,12 @@ class Gradeable extends AbstractModel {
 
     public function setHasDueDate(bool $has_due_date): void {
         $this->has_due_date = $has_due_date;
+        $this->modified = true;
     }
 
     public function setHasReleaseDate(bool $has_release_date): void {
         $this->has_release_date = $has_release_date;
+        $this->modified = true;
     }
 
     /**
@@ -2789,10 +2813,12 @@ class Gradeable extends AbstractModel {
 
     public function setHiddenFiles(?string $hidden_files): void {
         $this->hidden_files = $hidden_files;
+        $this->modified = true;
     }
 
     public function setLimitedAccessBlind(?int $limited_access_blind): void {
         $this->limited_access_blind = $limited_access_blind;
+        $this->modified = true;
     }
 
     public function getLimitedAccessBlind(): ?int {
@@ -2801,6 +2827,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerBlind(?int $peer_blind): void {
         $this->peer_blind = $peer_blind;
+        $this->modified = true;
     }
 
     public function getPeerBlind(): ?int {
@@ -2809,6 +2836,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerAutograding(bool $peer_autograding): void {
         $this->peer_autograding = $peer_autograding;
+        $this->modified = true;
     }
 
     public function getPeerAutograding(): bool {
@@ -2817,6 +2845,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerRubric(bool $peer_rubric): void {
         $this->peer_rubric = $peer_rubric;
+        $this->modified = true;
     }
 
     public function getPeerRubric(): bool {
@@ -2825,6 +2854,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerFiles(bool $peer_files): void {
         $this->peer_files = $peer_files;
+        $this->modified = true;
     }
 
     public function getPeerFiles(): bool {
@@ -2833,6 +2863,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerSolutions(bool $peer_solutions): void {
         $this->peer_solutions = $peer_solutions;
+        $this->modified = true;
     }
 
     public function getPeerSolutions(): bool {
@@ -2841,6 +2872,7 @@ class Gradeable extends AbstractModel {
 
     public function setPeerDiscussion(bool $peer_discussion): void {
         $this->peer_discussion = $peer_discussion;
+        $this->modified = true;
     }
 
     public function getPeerDiscussion(): bool {
@@ -2849,6 +2881,7 @@ class Gradeable extends AbstractModel {
 
     public function setInstructorBlind(?int $instructor_blind): void {
         $this->instructor_blind = $instructor_blind;
+        $this->modified = true;
     }
 
     public function getInstructorBlind(): ?int {
@@ -2861,5 +2894,6 @@ class Gradeable extends AbstractModel {
 
     public function setAllowCustomMarks(bool $allow_custom_marks): void {
         $this->allow_custom_marks = $allow_custom_marks;
+        $this->modified = true;
     }
 }
