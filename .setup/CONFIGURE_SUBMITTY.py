@@ -339,7 +339,7 @@ else:
         'uid': default_auth_options.get('uid', ''),
         'bind_dn': default_auth_options.get('bind_dn', '')
     }
-
+    USER_CREATE_ACCOUNT = False
     if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
         user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
         USER_CREATE_ACCOUNT = user_create_account.lower() in ['yes', 'y']
@@ -454,8 +454,7 @@ else:
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
-    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
-        config['user_create_account'] = USER_CREATE_ACCOUNT
+    config['user_create_account'] = USER_CREATE_ACCOUNT
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
@@ -670,10 +669,9 @@ if not args.worker:
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
     config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
-    if AUTHENTICATION_METHOD == 'DatabaseAuthentication': 
-        config['user_create_account'] = USER_CREATE_ACCOUNT
-        config['accepted_emails'] = accepted_emails
-        config['user_id_requirements'] = user_id_requirements
+    config['user_create_account'] = USER_CREATE_ACCOUNT
+    config['accepted_emails'] = accepted_emails
+    config['user_id_requirements'] = user_id_requirements
     
 config['worker'] = True if args.worker == 1 else False
 

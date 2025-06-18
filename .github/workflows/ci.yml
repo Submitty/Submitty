@@ -749,13 +749,6 @@ jobs:
           name: Submitty-JSONs
           path: /usr/local/submitty/config/submitty.json
 
-      - name: Switch to debug mode
-        run: |
-          sudo sh -c "jq '.debugging_enabled = false' /usr/local/submitty/config/submitty.json > /usr/local/submitty/config/submitty.json.tmp
-          cp /usr/local/submitty/config/submitty.json.tmp /usr/local/submitty/config/submitty.json"
-          sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty.json"
-
-
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
         with:
