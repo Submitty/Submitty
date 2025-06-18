@@ -18,7 +18,7 @@ class Chatroom {
     #[ORM\GeneratedValue]
     private int $id;
 
-    #[ORM\ManyToOne(targetEntity: UserEntity::class)]
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, fetch: "EAGER")]
     #[ORM\JoinColumn(name: "host_id", referencedColumnName: "user_id", nullable: false)]
     private UserEntity $host;
 
