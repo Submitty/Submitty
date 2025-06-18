@@ -981,9 +981,11 @@ fi
 #############################################################################
 
 # Restart docker if not in CI
-echo -n "restarting docker..."
-systemctl restart docker
-echo "done"
+if [[ "$CI" -ne "0" ]] ; then
+    echo -n "restarting docker..."
+    systemctl restart docker
+    echo "done"
+fi
 
 # Restart php-fpm and apache
 if [ "${WORKER}" == 0 ]; then
