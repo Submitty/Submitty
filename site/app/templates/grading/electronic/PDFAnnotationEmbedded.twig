@@ -2,11 +2,7 @@
     <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
 {% endfor %}
 {% for script in localjs %}
-    {% if script ends with '.mjs' %}
-        <script type="module" src="{{ script }}"></script>
-    {% else %}
-        <script src="{{ script }}"></script>
-    {% endif %}
+    <script src="{{ script }}"></script>
 {% endfor %}
 <div id="content-wrapper">
     <div id="grading-pdf-repair" hidden>

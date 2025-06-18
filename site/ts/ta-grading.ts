@@ -23,9 +23,6 @@ import {
     toggleComponent,
 } from './ta-grading-rubric';
 
-declare const PDFAnnotate: any;
-
-
 declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
@@ -1268,24 +1265,6 @@ function resetSinglePanelLayout() {
     // passing forceVisible = true, otherwise this method will just toggle it and it will get hidden
     window.taLayoutDet.isFullLeftColumnMode = false;
     setPanelsVisibilities(window.taLayoutDet.currentOpenPanel!, true);
-}
-
-function loadPDFToolbar() {
-    const penSizeElem = document.getElementById('pen_size_selector') as HTMLInputElement | null;
-    const colorElem = document.getElementById('color_selector') as HTMLElement | null;
-    const textSizeElem = document.getElementById('text_size_selector') as HTMLInputElement | null;
-
-    if (penSizeElem && colorElem && textSizeElem) {
-        const init_pen_size = penSizeElem.value;
-        const init_color = colorElem.style.backgroundColor;
-        localStorage.setItem('pen/size', init_pen_size);
-        localStorage.setItem('main_color', init_color);
-        PDFAnnotate.UI.setPen(init_pen_size, init_color);
-
-        const init_text_size = textSizeElem.value;
-        localStorage.setItem('text/size', init_text_size);
-        PDFAnnotate.UI.setText(init_text_size, init_color);
-    }
 }
 
 function checkForTwoPanelLayoutChange(

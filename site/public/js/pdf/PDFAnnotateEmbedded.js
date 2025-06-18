@@ -1,3 +1,4 @@
+import * as pdfjsLibModule from '../vendor/pdfjs-dist/pdf.min.mjs';
 /* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
@@ -23,7 +24,7 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib = window.pdfjsLib;
+const pdfjsLib = pdfjsLibModule;
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs-dist/pdf.worker.min.mjs';
 
 function buildCourseUrl(parts = []) {
@@ -526,10 +527,3 @@ function repairPDF() {
 function saveFile() {
     $('#save-pdf-btn').click();
 }
-
-window.render_student = render_student;
-window.download_student = download_student;
-window.loadPDFToolbar = loadPDFToolbar;
-window.loadAllAnnotations = loadAllAnnotations;
-window.loadGraderAnnotations = loadGraderAnnotations;
-window.toggleOtherAnnotations = toggleOtherAnnotations;
