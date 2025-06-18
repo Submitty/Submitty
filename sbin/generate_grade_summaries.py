@@ -345,7 +345,6 @@ def load_and_save_gui_customization(semester, course, token):
 
     # Save the most up-to-date GUI customization to the server
     json_string = build_json(load_response.text)
-    print(json_string)
     save_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
             base_url, semester, course
