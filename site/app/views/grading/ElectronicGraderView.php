@@ -1518,8 +1518,9 @@ HTML;
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs-dist', 'pdf.min.mjs'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs-dist', 'pdf.worker.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
