@@ -1,4 +1,3 @@
-import * as pdfjsLibModule from '../vendor/pdfjs-dist/pdf.min.mjs';
 /* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
@@ -24,7 +23,7 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
