@@ -42,7 +42,7 @@ if 'token' not in creds or not creds['token']:
     raise Exception('Unable to read credentials from submitty_admin.json')
 
 
-# Rainbow Grades GUI Customization Parsing Functions (see /site/public/js/rainbow-customization.js)
+# Rainbow Grades GUI Customization HTML parsing functions (see /site/public/js/rainbow-customization.js)
 def get_display(soup):
     """Collects the values of checked 'display' checkboxes."""
     return [element['value'] for element in soup.select('input[name="display"]:checked')]
@@ -99,6 +99,7 @@ def get_final_cutoff_percent(soup):
             'D+': 67.0,
             'D': 60.0,
         }
+
     # Collect benchmark percents
     final_cutoff = {}
     allowed_grades_excluding_f = {'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'}
@@ -135,15 +136,15 @@ def get_section(soup):
 def get_gradeable_buckets(soup):
     """Collects data for all visible gradeable buckets."""
     gradeables = []
+    used_buckets = set()
     buckets_used_list = soup.select_one('#buckets_used_list')
 
     if not buckets_used_list:
         # No buckets are applied for the given course
         return []
 
-    used_buckets = set()
-    for li in buckets_used_list.select('li'):
-        # Parse the bucket name from the innerText (i.e., % Homework (29 items))
+    for li in buckets_used_list.select('.ui-sortable-handle'):
+        # Parse the bucket name from the inner text (i.e., '% Homework (29 items)')
         bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip()
         used_buckets.add(bucket_name)
 
@@ -232,10 +233,6 @@ def get_gradeable_buckets(soup):
         # Add the gradeables to the bucket
         bucket['ids'] = ids
 
-        if not (bucket['count'] == 0 and bucket['remove_lowest'] == 0 and bucket['percent'] == 0 and len(ids) == 0):
-            # Ignore unused buckets (set to display: none on the client side)
-            gradeables.append(bucket)
-
     return gradeables
 
 
@@ -313,7 +310,16 @@ def build_json(html_string):
         'manual_grade': get_table_data(soup, 'manualGrade'),
         'warning': get_table_data(soup, 'performanceWarnings')
     }
+
     return json.dumps(data, indent=4)
+
+
+def get_error_message(response):
+    """Extracts the error message from the response."""
+    if 'application/json' in response.headers.get('Content-Type', ''):
+        return response.json()['message']
+    else:
+        return response.text
 
 
 def load_and_save_gui_customization(semester, course, token):
@@ -331,9 +337,8 @@ def load_and_save_gui_customization(semester, course, token):
             semester, course
         ))
     else:
-        message = load_response.json()['message'] if load_response.json()['message'] else load_response.text
         print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{} - {}".format(
-            semester, course, message
+            semester, course, get_error_message(load_response)
         ), file=stderr)
         exit(-1)
 
@@ -352,9 +357,8 @@ def load_and_save_gui_customization(semester, course, token):
             semester, course
         ))
     else:
-        message = save_response.json()['message'] if save_response.json()['message'] else save_response.text
         print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
-            semester, course, message
+            semester, course, get_error_message(save_response)
         ), file=stderr)
         exit(-1)
 
@@ -378,7 +382,7 @@ def generate_grade_summaries(semester, course, token):
                 ))
             else:
                 print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
-                    semester, course, grade_generation_response["message"]
+                    semester, course, get_error_message(grade_generation_response)
                 ), file=stderr)
         else:
             print("ERROR: Submitty Service Unavailable.", file=stderr)
@@ -415,10 +419,10 @@ def main():
         )
 
         if select_response.status_code == 200 and select_response.json()['status'] == 'success':
-            # Implies the GUI customization is being used for the given course
+            # Successful response implies the GUI customization is being applied for the given course
             load_and_save_gui_customization(semester, course, token)
     except Exception as gui_exception:
-        print("ERROR: Failed to fetch or save GUI customization options for {}.{} - {}".format(
+        print("ERROR: Failed to load or save GUI customization for {}.{} - {}".format(
             semester, course, gui_exception
         ), file=stderr)
         exit(-1)
