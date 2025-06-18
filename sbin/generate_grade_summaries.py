@@ -131,7 +131,6 @@ def get_section(soup):
 def get_gradeable_buckets(soup):
     """Collects data for all visible gradeable buckets."""
     gradeables = []
-    gradeable_percents = set()
 
     for bucket_div in soup.select('.bucket_detail_div'):
         bucket = {}
