@@ -68,6 +68,10 @@
     "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/tsconfig": "^0.7.0",
     "babel-jest": "^29.7.0",
+    "@rollup/plugin-babel": "^6.0.4",
+    "rollup": "^4.21.2",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "cypress": "^14.4.0",
     "cypress-browser-permissions": "^1.1.0",
     "cypress-file-upload": "^5.0.8",
@@ -99,6 +103,6 @@
     "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
-    "build": "tsc -p . && node .build.js && vite build vue"
+    "build": "rollup -c && tsc -p . && node .build.js && vite build vue"
   }
 }
