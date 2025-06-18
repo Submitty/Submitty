@@ -1,13 +1,14 @@
 /**
- * switches versions if we are not on the version number we want
- * @param {number} versionNumber
+ * switches versions if we are not on the version number we want. Null means that we return the latest version
+ * @param {number|null} versionNumber
  */
-const switchVersion = (versionNumber) => {
-    cy.get('[data-testid="submission-version-select"').find('option:selected').then((selectedOption) => {
-        const currentVersion = selectedOption.val();
-        if (currentVersion !== versionNumber) {
+const switchOrFindVersion = (versionNumber) => {
+    return cy.get('[data-testid="submission-version-select"]').find('option:selected').then((selectedOption) => {
+        const currentVersion = parseInt(selectedOption.val());
+        if (versionNumber !== null && currentVersion !== versionNumber) {
             cy.get('[data-testid="submission-version-select"]').select(String(versionNumber));
         }
+        return cy.wrap(currentVersion);
     });
 };
 
@@ -56,9 +57,10 @@ const submitGradeable = (versionNumber) => {
  * @param {number[]} fullScores the max scores for the gradeables
  */
 const checkNonHiddenResults = (versionNumber, expectedScores, fullScores) => {
-    switchVersion(versionNumber);
-
+    switchOrFindVersion(versionNumber);
     expect(expectedScores.length).to.eq(fullScores.length);
+    // after 20 submissions we start having penalties
+    expect(versionNumber).to.be.lessThan(20);
     const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
     const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
 
@@ -77,23 +79,27 @@ const constructFileName = (gradeable, fileName) => {
 
 describe('Test the development course gradeables', () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
-        const fullScores = [2, 3, 4, 4, 4, 4, 4];
-        cy.login('instructor');
+        cy.login('student');
 
         // use 'let' later for multiple gradeables
-        const gradeable = 'cpp_cats';
-        // submits the all correct files
-        newSubmission(gradeable);
-        submitFiles(constructFileName(gradeable, 'allCorrect.zip'), 1, true);
-        submitGradeable(1);
+        const cpp_cats = 'cpp_cats';
+        const cpp_cats_full_score = [2, 3, 4, 4, 4, 4, 4];
 
-        // submits the half incorrect files
-        newSubmission(gradeable);
-        submitFiles(constructFileName(gradeable, 'extraLinesAtEnd.zip'), 1, true);
-        submitGradeable(2);
+        // Grab the current version, and then submit and check the gradeable
+        cy.visit(['development', 'gradeable', cpp_cats]);
+        switchOrFindVersion(null).then((startingVersion) => {
+            newSubmission(cpp_cats);
+            submitFiles(constructFileName(cpp_cats, 'allCorrect.zip'), 1, true);
+            submitGradeable(startingVersion + 1);
 
-        // check both results
-        checkNonHiddenResults(1, fullScores, fullScores);
-        checkNonHiddenResults(2, [2, 3, 2, 2, 2, 2, 0], fullScores);
+            // submits the half incorrect files
+            newSubmission(cpp_cats);
+            submitFiles(constructFileName(cpp_cats, 'extraLinesAtEnd.zip'), 1, true);
+            submitGradeable(startingVersion + 2);
+
+            // check both results
+            checkNonHiddenResults(startingVersion + 1, cpp_cats_full_score, cpp_cats_full_score);
+            checkNonHiddenResults(startingVersion + 2, [2, 3, 2, 2, 2, 2, 0], cpp_cats_full_score);
+        });
     });
 });
