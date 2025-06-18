@@ -173,7 +173,6 @@ def get_gradeable_buckets(soup):
 
         for li in bucket_div.select(f'#gradeables-list-{bucket_type} .gradeable-li'):
             gradeable = {}
-            gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
             points_div = li.select_one('div[id^="gradeable-pts-div-"]')
             percent_div = li.select_one('div[id^="gradeable-percents-div-"]')
@@ -183,7 +182,6 @@ def get_gradeable_buckets(soup):
                 percent_input = percent_div.find('input')
 
                 gradeable['max'] = float(max_score_input['data-max-score'])
-                gradeable['release_date'] = max_score_input['data-grade-release-date']
 
                 if is_percent_enabled_for_this_bucket:
                     # Extract the percent value from the input box with default value of ''
@@ -194,6 +192,9 @@ def get_gradeable_buckets(soup):
                     except (ValueError, TypeError):
                         # Ignore invalid percent values for simplicity
                         pass
+
+                gradeable['release_date'] = max_score_input['data-grade-release-date']
+                gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
             # Get per-gradeable curve data
             curve_points_selected = get_selected_curve_benchmarks(soup)
@@ -330,6 +331,25 @@ def main():
 
     # Save Rainbow Grades GUI Customization
     try:
+        # Select the GUI customization option to save changes based on the load response
+        select_response = requests.post(
+            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
+                base_url, semester, course
+            ),
+            headers={'Authorization': token},
+            data={
+                "selected_value": "gui",
+                "source": "submitty_daemon"
+            }
+        )
+
+        if select_response.status_code != 200 or select_response.json()['status'] != 'success':
+            message = select_response.json()['message'] if select_response.json()['message'] else select_response.text
+            print("ERROR: Failed to select GUI customization for {}.{} - {}".format(
+                semester, course, message
+            ), file=stderr)
+            exit(-1)
+
         # Load the GUI customization page via server-side rendering for data parsing
         load_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
@@ -337,18 +357,20 @@ def main():
             ),
             headers={'Authorization': token},
         )
-        json_string = build_json(load_response.text)
 
-        # Select the GUI customization option to save changes based on the load response
-        select_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-            data={"selected_value": "gui"}
-        )
+        if load_response.status_code == 200 and "rg_web_ui" in load_response.text:
+            print("Successfully loaded Rainbow Grades GUI customization for {}.{}".format(
+                semester, course
+            ))
+        else:
+            message = load_response.json()['message'] if load_response.json()['message'] else load_response.text
+            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{} - {}".format(
+                semester, course, message
+            ), file=stderr)
+            exit(-1)
 
         # Save the most up-to-date GUI customization to the server
+        json_string = build_json(load_response.text)
         save_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
                 base_url, semester, course
@@ -357,13 +379,14 @@ def main():
             data={"json_string": json_string}
         )
 
-        if load_response.status_code == 200 and select_response.status_code == 200 and save_response.status_code == 200:
+        if save_response.status_code == 200 and save_response.json()['status'] == 'success':
             print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
                 semester, course
             ))
         else:
+            message = save_response.json()['message'] if save_response.json()['message'] else save_response.text
             print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
-                semester, course, save_response.text
+                semester, course, message
             ), file=stderr)
             exit(-1)
     except Exception as save_load_exception:

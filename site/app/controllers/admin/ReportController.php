@@ -646,6 +646,7 @@ class ReportController extends AbstractController {
      * @return array<string, mixed>|null
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
     public function generateCustomization(): array| null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -851,6 +852,22 @@ class ReportController extends AbstractController {
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
+
+        if (isset($_POST['source']) && $_POST['source'] === 'submitty_daemon') {
+            // Compare the customization.json and gui_customization.json to ensure instructors are using the GUI interface
+            $gui_customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+
+            if (file_exists($customization_dest) && file_exists($gui_customization_dest)) {
+                $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
+                $gui_customization_json = json_encode(json_decode(file_get_contents($gui_customization_dest), true), JSON_PRETTY_PRINT);
+
+                if ($customization_json !== $gui_customization_json) {
+                    // Manual customizations must be applied given the difference between the two files
+                    $msg = 'Manual customizations are currently applied. Please remove them before applying the GUI customizations.';
+                    return JsonResponse::getErrorResponse($msg);
+                }
+            }
+        }
 
         // Determine the source file based on the selected value
         switch ($selectedValue) {
