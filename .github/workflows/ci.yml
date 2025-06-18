@@ -747,7 +747,7 @@ jobs:
         run: |
           sudo sh -c "jq '.user_create_account = true' /usr/local/submitty/config/submitty.json > /usr/local/submitty/config/submitty.json.tmp"
           sudo cp /usr/local/submitty/config/submitty.json.tmp /usr/local/submitty/config/submitty.json
-          sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty.json"
+          sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty.json
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
