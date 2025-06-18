@@ -144,6 +144,11 @@ runs:
         cd $SUBMITTY_REPOSITORY
         sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
       shell: bash
+    
+    - name: Pass in the CI Flags
+      run: |
+        echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
+      shell: bash
 
     - name: Configure Test suite
       run: |
