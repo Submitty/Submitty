@@ -233,8 +233,8 @@ class Gradeable extends AbstractModel {
      * @var int[] thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = [];
     /** @prop
-     * @var ?string are a list of hidden files and the lowest_access_group that can see those files */
-    protected $hidden_files = "";
+     * @var string[] are a list of hidden files and the lowest_access_group that can see those files */
+    protected $hidden_files = [];
     /** @prop
      * @var ?int will limited access graders grade the gradeable blindly*/
     protected $limited_access_blind = 1;
@@ -337,8 +337,8 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
-            if (array_key_exists('hidden_files', $details)) {
-                $this->setHiddenFiles($details['hidden_files']);
+            if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
+                $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }
         }
 
@@ -898,6 +898,13 @@ class Gradeable extends AbstractModel {
 
     public function getStringThreadIds() {
         return $this->isDiscussionBased() ? implode(',', $this->getDiscussionThreadId()) : '';
+    }
+
+    public function getStringHiddenFiles(): ?string {
+        if (count($this->hidden_files) === 0) {
+            return null;
+        }
+        return implode(',', $this->hidden_files);
     }
 
     /**
@@ -2807,11 +2814,19 @@ class Gradeable extends AbstractModel {
         return $this->peer_grading_pairs;
     }
 
-    public function getHiddenFiles(): ?string {
+    /**
+     * Gets the hidden files for this gradeable
+     * @return array<string>
+     */
+    public function getHiddenFiles(): array {
         return $this->hidden_files;
     }
 
-    public function setHiddenFiles(?string $hidden_files): void {
+    /**
+     * Sets the hidden files for this gradeable
+     * @param array<string> $hidden_files
+     */
+    public function setHiddenFiles(array $hidden_files): void {
         $this->hidden_files = $hidden_files;
         $this->modified = true;
     }

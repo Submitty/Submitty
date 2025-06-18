@@ -11,6 +11,7 @@ use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\GradeInquiry;
+use app\models\gradeable\Submitter;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -1377,15 +1378,17 @@ HTML;
         ]);
     }
 
-    public function renderDiscussionForum($threadIds, $submitter, $isTeam = false) {
+    /**
+     * Render the discussion forum panel
+     * @param int[] $threadIds
+     * @param Submitter $submitter
+     * @param bool $isTeam
+     */
+    public function renderDiscussionForum(array $threadIds, Submitter $submitter, bool $isTeam = false) {
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
 
-        //Empty thread input
-        if ($threadIds === "{}") {
-            $threadIds = [];
-        }
         $id = '';
         $submitters = [];
         if ($isTeam) {
@@ -1463,12 +1466,10 @@ HTML;
             if ($new_files) {
                 foreach ($new_files as $file) {
                     $skipping = false;
-                    if ($hidden_files !== null) {
-                        foreach (explode(",", $hidden_files) as $file_regex) {
-                            $file_regex = trim($file_regex);
-                            if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
-                                $skipping = true;
-                            }
+                    foreach ($hidden_files as $file_regex) {
+                        $file_regex = trim($file_regex);
+                        if (fnmatch($file_regex, $file["name"]) && $this->core->getUser()->getGroup() > 3) {
+                            $skipping = true;
                         }
                     }
                     if (!$skipping) {

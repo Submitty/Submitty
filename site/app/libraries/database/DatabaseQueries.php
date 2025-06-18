@@ -6641,7 +6641,7 @@ AND gc_id IN (
                 $gradeable->isGradeInquiryPerComponentAllowed(),
                 json_encode($gradeable->getDiscussionThreadId()),
                 $gradeable->isDiscussionBased(),
-                $gradeable->getHiddenFiles(),
+                $gradeable->getStringHiddenFiles(),
                 $gradeable->getDependsOn(),
                 $gradeable->getDependsOnPoints()
             ];
@@ -6828,7 +6828,7 @@ AND gc_id IN (
                     $gradeable->isGradeInquiryPerComponentAllowed(),
                     json_encode($gradeable->getDiscussionThreadId()),
                     $gradeable->isDiscussionBased(),
-                    $gradeable->getHiddenFiles(),
+                    $gradeable->getStringHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
                     $gradeable->getId()
