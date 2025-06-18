@@ -79,9 +79,8 @@ const constructFileName = (gradeable, fileName) => {
 
 describe('Test the development course gradeables', () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
-        cy.login('student');
+        cy.login('instructor');
 
-        // use 'let' later for multiple gradeables
         const cpp_cats = 'cpp_cats';
         const cpp_cats_full_score = [2, 3, 4, 4, 4, 4, 4];
 
