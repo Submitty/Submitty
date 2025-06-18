@@ -143,7 +143,7 @@ def get_gradeable_buckets(soup):
         # No buckets are applied for the given course
         return []
 
-    for li in buckets_used_list.select('.ui-sortable-handle'):
+    for li in buckets_used_list.select('li'):
         # Parse the bucket name from the inner text (i.e., '% Homework (29 items)')
         bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip()
         used_buckets.add(bucket_name)
@@ -232,6 +232,7 @@ def get_gradeable_buckets(soup):
 
         # Add the gradeables to the bucket
         bucket['ids'] = ids
+        gradeables.append(bucket)
 
     return gradeables
 
@@ -344,6 +345,7 @@ def load_and_save_gui_customization(semester, course, token):
 
     # Save the most up-to-date GUI customization to the server
     json_string = build_json(load_response.text)
+    print(json_string)
     save_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
             base_url, semester, course
