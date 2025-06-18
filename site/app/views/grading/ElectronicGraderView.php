@@ -855,7 +855,7 @@ HTML;
                 }
             }
             elseif (count($grader_registration_sections) === 0) {
-                $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
+                $message = 'Notice: You are not assigned to grade any students for this gradeable. Untoggle "Only Assigned Sections" to see the whole class.';
                 $message_warning = true;
             }
         }

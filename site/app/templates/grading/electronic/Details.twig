@@ -37,20 +37,20 @@
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
                 <label class="column-wrapper" id="view-your-sections" data-testid="view-your-sections"> Only Assigned Sections
-                    <input type="checkbox" data-testid="view-sections">
+                    <input type="checkbox" data-testid="view-sections" onchange="changeSections()">
                 </label>
                 {% endif %}
                 <label class="column-wrapper" id="random-default-order" data-testid="random-default-order"> Randomize Order
-                    <input type="checkbox" data-testid="random-default-order">
+                    <input type="checkbox" data-testid="random-default-order" onchange="changeSortOrder()">
                 </label>
                 {% if toggle_anon_button %}
                 <label class="column-wrapper" id="toggle-anon-button" data-testid="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
-                    <input type="checkbox" data-testid="toggle-anon-button">
+                    <input type="checkbox" data-testid="toggle-anon-button" onchange="changeAnon()">
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
                 <label class="column-wrapper" id="toggle-grade-inquiry" data-testid="toggle-grade-inquiry"> Only Grade Inquiry
-                    <input type="checkbox" data-testid="toggle-grade-inquiry">
+                    <input type="checkbox" data-testid="toggle-grade-inquiry" onchange="changeInquiry()">
                 </label>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() and is_instructor %}
@@ -783,21 +783,51 @@
     {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
         filter_withdrawn_update();
     {% endif %}
-    
-    {% if grade_inquiry_only_button %}
+
+   {% if grade_inquiry_only_button %}
         inquiry_update();
     {% endif %}
-
-    {% if show_all_sections_button %}
-        switch_view();
-    {% endif %}
-
-    {% if toggle_anon_button %}
-        change_anon();
-    {% endif %}
-
-    changeSortOrder();
     
+    function changeSections() {
+        const status = {{ view_all ? 1 : 0 }};
+        if (status) {
+            Cookies.set('view', 'assigned', { path: '/' });
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
+        } else {
+            Cookies.set('view', 'all', { path: '/' });
+            localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
+        }
+        location.reload();
+    }
+
+    function changeAnon(gradeable_id) {
+        Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
+        const status = {{ anon_mode ? 1 : 0}};
+        if (status) {
+            Cookies.set(`anon_mode_${gradeable_id}`, 'off');
+        }
+        else {
+            Cookies.set(`anon_mode_${gradeable_id}`, 'on');
+        }
+        location.reload();
+    }
+
+    function changeInquiry() {
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
+    }
+
+    
+    function changeSortOrder() {
+        if ({{ sort == 'random' ? "true" : "false" }}) {
+            Cookies.set('sort', 'id');
+        }
+        else {
+            Cookies.set('sort', 'random');
+        }
+        location.reload();
+    }
+
     function sortTableByColumn(sort_type = 'id', direction) {
         Cookies.set('sort', sort_type);
         Cookies.set('direction', direction);
