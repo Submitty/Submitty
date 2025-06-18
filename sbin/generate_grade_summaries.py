@@ -70,10 +70,12 @@ def get_benchmark_percent(soup):
         benchmark = str(element['data-benchmark'])
 
         if benchmark in selected_benchmarks:
+            # Verify the percent is a valid number
             if not element.get('value'):
                 raise ValueError("All benchmark percents must have a value before saving.")
 
             try:
+                # Add to sections
                 benchmark_percent[benchmark] = float(element['value'])
             except ValueError:
                 raise ValueError("Benchmark percent input must be a floating point number.")
@@ -83,7 +85,7 @@ def get_benchmark_percent(soup):
 
 def get_final_cutoff_percent(soup):
     """Collects the final grade cutoff percentages."""
-    # Default final grade cutoff percentages
+    # Default final grade cutoff percentages if final_grade is not checked
     if not soup.select_one('input[value="final_grade"]:checked'):
         return {
             'A': 93.0,
@@ -97,18 +99,20 @@ def get_final_cutoff_percent(soup):
             'D+': 67.0,
             'D': 60.0,
         }
-
+    # Collect benchmark percents
     final_cutoff = {}
-    allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D']
+    allowed_grades_excluding_f = {'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'}
 
     for element in soup.select('.final_cutoff_input'):
         letter_grade = str(element['data-benchmark'])
 
         if letter_grade in allowed_grades_excluding_f:
+            # Verify the percent is a valid number
             if not element.get('value'):
                 raise ValueError("All final cutoffs must have a value before saving.")
 
             try:
+                # Add to sections
                 final_cutoff[letter_grade] = float(element['value'])
             except ValueError:
                 raise ValueError("Final cutoff input must be a floating point number.")
@@ -131,6 +135,17 @@ def get_section(soup):
 def get_gradeable_buckets(soup):
     """Collects data for all visible gradeable buckets."""
     gradeables = []
+    buckets_used_list = soup.select_one('#buckets_used_list')
+
+    if not buckets_used_list:
+        # No buckets are applied for the given course
+        return []
+
+    used_buckets = set()
+    for li in buckets_used_list.select('li'):
+        # Parse the bucket name from the innerText (i.e., % Homework (29 items))
+        bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip()
+        used_buckets.add(bucket_name)
 
     for bucket_div in soup.select('.bucket_detail_div'):
         bucket = {}
@@ -140,6 +155,7 @@ def get_gradeable_buckets(soup):
         if not type_header:
             continue
 
+        # Extract bucket type from the h3 tag
         bucket_type = type_header.text.lower()
         bucket['type'] = bucket_type
 
@@ -148,10 +164,10 @@ def get_gradeable_buckets(soup):
         bucket['remove_lowest'] = int(soup.select_one(f'#config-remove_lowest-{bucket_type}')['value'])
         bucket['percent'] = float(soup.select_one(f'#percent-{bucket_type}')['value']) / 100.0
 
-        # Extract details for each gradeable within the bucket
+        # Extract each independent gradeable in the bucket
         ids = []
 
-        # Account for per-gradeable percents
+        # Account for per-gradeable percents for the given bucket
         percents_checkbox = bucket_div.select_one(f'#per-gradeable-percents-checkbox-{bucket_type}')
         is_percent_enabled_for_this_bucket = percents_checkbox is not None and percents_checkbox.has_attr('checked')
 
@@ -159,24 +175,25 @@ def get_gradeable_buckets(soup):
             gradeable = {}
             gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
-            max_score_div = li.select_one('div[id^="gradeable-pts-div-"]')
+            points_div = li.select_one('div[id^="gradeable-pts-div-"]')
             percent_div = li.select_one('div[id^="gradeable-percents-div-"]')
 
-            if max_score_div and percent_div:
-                max_score_input = max_score_div.select_one('.max-score')
+            if points_div and percent_div:
+                max_score_input = points_div.select_one('.max-score')
                 percent_input = percent_div.find('input')
 
                 gradeable['max'] = float(max_score_input['data-max-score'])
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
 
                 if is_percent_enabled_for_this_bucket:
+                    # Extract the percent value from the input box with default value of ''
                     value = percent_input.get('value', '').strip()
-                    if value:
-                        try:
-                            gradeable['percent'] = float(value) / 100.0
-                        except (ValueError, TypeError):
-                            # Ignore invalid values
-                            pass
+
+                    try:
+                        gradeable['percent'] = float(value) / 100.0
+                    except (ValueError, TypeError):
+                        # Ignore invalid percent values for simplicity
+                        pass
 
             # Get per-gradeable curve data
             curve_points_selected = get_selected_curve_benchmarks(soup)
@@ -211,10 +228,11 @@ def get_gradeable_buckets(soup):
 
             ids.append(gradeable)
 
+        # Add the gradeables to the bucket
         bucket['ids'] = ids
 
         if not (bucket['count'] == 0 and bucket['remove_lowest'] == 0 and bucket['percent'] == 0 and len(ids) == 0):
-            # Ignore unused buckets
+            # Ignore unused buckets (set to display: none on the client side)
             gradeables.append(bucket)
 
     return gradeables
@@ -240,8 +258,8 @@ def get_table_data(soup, table_name):
     if not table_body:
         return []
 
-    for row in table_body.find_all('tr'):
-        cells = row.find_all('td')
+    for row in table_body.select('tr'):
+        cells = row.select('td')
         first_input = cells[0].text.strip()
         second_input = cells[1].text.strip()
         third_input = cells[2].text.strip()
@@ -261,6 +279,7 @@ def get_table_data(soup, table_name):
         elif table_name == 'performanceWarnings':
             data.append({
                 'msg': first_input,
+                # Trim each gradeable ID to account for potential HTML whitespace
                 'ids': [id.strip() for id in second_input.split(',')],
                 'value': float(third_input)
             })
@@ -293,7 +312,6 @@ def build_json(html_string):
         'manual_grade': get_table_data(soup, 'manualGrade'),
         'warning': get_table_data(soup, 'performanceWarnings')
     }
-
     return json.dumps(data, indent=4)
 
 
@@ -322,7 +340,6 @@ def main():
 
         # Save the most up-to-date GUI customization by building a JSON representation from the HTML elements
         json_string = build_json(load_response.text)
-        print(json_string)
         save_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
                 base_url, semester, course
