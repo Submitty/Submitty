@@ -855,15 +855,15 @@ class ReportController extends AbstractController {
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
 
         if (isset($_POST['source']) && $_POST['source'] === 'submitty_daemon') {
-            // Compare the customization.json and gui_customization.json to ensure instructors are using the GUI interface
-            $gui_customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+            // Compare the customization.json and manual_customization.json to ensure instructors are using the GUI interface
+            $manual_customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
 
-            if (file_exists($customization_dest) && file_exists($gui_customization_dest)) {
+            if (file_exists($customization_dest) && file_exists($manual_customization_dest)) {
                 $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
-                $gui_customization_json = json_encode(json_decode(file_get_contents($gui_customization_dest), true), JSON_PRETTY_PRINT);
+                $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
 
-                if ($customization_json !== $gui_customization_json) {
-                    // Manual customizations must be applied given the difference between the two files
+                if ($customization_json === $manual_customization_json) {
+                    // Manual customizations must be applied given the file contents are the same
                     $msg = 'Manual customizations are currently applied. Please remove them before applying the GUI customizations.';
                     return JsonResponse::getErrorResponse($msg);
                 }
