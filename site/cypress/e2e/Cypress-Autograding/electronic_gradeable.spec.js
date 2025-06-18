@@ -7,7 +7,7 @@ const switchOrFindVersion = (versionNumber) => {
         if ($content.find('[data-testid="no-submissions-box"]').length > 0) {
             return cy.wrap(0);
         }
-        return cy.get('[data-testid="submission-version-select"]').find('option:selected').then((selectedOption) => {
+        return cy.wrap($content).get('[data-testid="submission-version-select"]').find('option:selected').then((selectedOption) => {
             const currentVersion = parseInt(selectedOption.val());
             // There should a submission for this version already
             if (versionNumber !== null && currentVersion !== versionNumber) {
@@ -85,7 +85,7 @@ const constructFileName = (gradeable, fileName) => {
 
 describe('Test the development course gradeables', () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
-        cy.login('instructor');
+        cy.login('student');
 
         const cpp_cats = 'cpp_cats';
         const cpp_cats_full_score = [2, 3, 4, 4, 4, 4, 4];
