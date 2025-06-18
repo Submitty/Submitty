@@ -334,7 +334,7 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
 
-    
+
 
 
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
@@ -372,7 +372,7 @@ class CourseMaterialsController extends AbstractController {
         /** @var CourseMaterial $course_material */
         $course_material = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
             ->findOneBy(['id' => $id]);
-        if ($course_material == null) {
+        if ($course_material === null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
@@ -387,7 +387,7 @@ class CourseMaterialsController extends AbstractController {
                 || isset($_POST['hide_from_students'])
                 || isset($_POST['release_time']))
                 && isset($_POST['folder_update'])
-                && $_POST['folder_update'] == 'true'
+                && $_POST['folder_update'] === 'true'
             ) {
                 $course_materials = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)
                     ->findAll();
@@ -402,7 +402,7 @@ class CourseMaterialsController extends AbstractController {
         $this->handleSectionLock($course_material, $_POST);
 
 
-        $this->updateCourseMaterial($course_material, $_POST['hide_from_students'], $_POST['sort_priority'], $_POST['release_time']);
+        $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
 
 
         $course_material->setLastEditBy($this->core->getUser()->getId());
@@ -426,7 +426,7 @@ class CourseMaterialsController extends AbstractController {
                 $file_name = basename($new_path);
             }
 
-            
+
             if ($path !== $new_path) {
                 if (!FileUtils::ValidPath($new_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
@@ -536,7 +536,6 @@ class CourseMaterialsController extends AbstractController {
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
             $expand_zip = $_POST['expand_zip'];
-
         }
 
 
@@ -545,7 +544,7 @@ class CourseMaterialsController extends AbstractController {
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $details['path'][0] = $this->getRequestedPath($upload_path, $_POST['requested_path']);
-
+        $requested_path = $details['path'][0];
         //------------------------------------------------------
 
 
@@ -671,7 +670,7 @@ class CourseMaterialsController extends AbstractController {
 
                         $is_zip_file = false;
 
-                        if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                        if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) === "application/zip") {
                             if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                                 return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
                             }
@@ -679,7 +678,7 @@ class CourseMaterialsController extends AbstractController {
                         }
                         //cannot check if there are duplicates inside zip file, will overwrite
                         //it is convenient for bulk uploads
-                        if ($expand_zip == 'on' && $is_zip_file === true) {
+                        if ($expand_zip === 'on' && $is_zip_file === true) {
                             //get the file names inside the zip to write to the JSON file
 
                             $zip = new \ZipArchive();
@@ -790,7 +789,7 @@ class CourseMaterialsController extends AbstractController {
                 $cm = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class)->findOneBy(
                     ['path' => $dir]
                 );
-                if ($cm == null && !in_array($dir, $new_paths)) {
+                if ($cm === null && !in_array($dir, $new_paths)) {
                     $details['type'][$i] = CourseMaterial::DIR;
                     $details['path'][$i] = $dir;
                     $i--;
@@ -814,7 +813,7 @@ class CourseMaterialsController extends AbstractController {
                 last_edit_date: null
             );
             $this->handleSectionLock($course_material, $_POST);
-            $this->updateCourseMaterial($course_material, $_POST['hide_from_students'], $_POST['sort_priority'], $_POST['release_time']);
+            $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
 
             $this->core->getCourseEntityManager()->persist($course_material);
         }
@@ -868,75 +867,86 @@ class CourseMaterialsController extends AbstractController {
         return true;
     }
 
-    private function updateCourseMaterial($course_material, $hide_from_students, $sort_priority, $release_time = null) {
+    private function updateCourseMaterial(CourseMaterial $course_material, ?string $hide_from_students, ?string $sort_priority, ?string $release_time = null): void {
         // Update visibility
         if (isset($hide_from_students)) {
-            $course_material->setHiddenFromStudents($hide_from_students == 'on');
+            $course_material->setHiddenFromStudents($hide_from_students === 'on');
         }
-    
+
         // Update sorting priority
         if (isset($sort_priority)) {
-            $course_material->setPriority($sort_priority);
+            $course_material->setPriority((float) $sort_priority);
         }
-    
+
         // Update release time if provided
-        if (isset($release_time) && $release_time != '') {
+        if (isset($release_time) && $release_time !== '') {
             $date_time = DateUtils::parseDateTime($release_time, $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
         }
     }
-    
-    
-    private function handleSectionLock($course_material, $post_data) {
+
+    /**
+     * @param array<string, mixed> $post_data
+     * @return JsonResponse|array{
+     * 'section_lock': bool,
+     * 'sections': array<int, string>|null
+     * }
+     */
+    private function handleSectionLock(CourseMaterial $course_material, array $post_data): JsonResponse|array {
         // Default section lock to false
-        $sections_lock = isset($post_data['sections_lock']) && $post_data['sections_lock'] == "true";
+        $sections_lock = isset($post_data['sections_lock']) && $post_data['sections_lock'] === "true";
         $details = ['section_lock' => $sections_lock];
-    
+
         // Handle sections if section lock is enabled
         if ($sections_lock) {
             // Handle sections from POST data
             if (isset($post_data['sections'])) {
                 $sections = explode(",", $post_data['sections']);
-                
+
                 // If no sections are selected
                 if (empty($sections[0])) {
                     return JsonResponse::getErrorResponse("Select at least one section");
                 }
-                
+
                 // Populate details with exploded sections
                 $details['sections'] = $sections;
-    
+
                 // Handle section addition and removal
                 $keep_ids = $sections;
                 $partial_sections = isset($post_data['partial_sections']) ? explode(",", $post_data['partial_sections']) : [];
-    
+
                 // Add new sections to course material
                 foreach ($sections as $section) {
                     if (!$this->sectionExists($course_material, $section)) {
                         $course_material->addSection(new CourseMaterialSection($section, $course_material));
                     }
                 }
-    
+
                 // Remove sections that are no longer valid
                 foreach ($course_material->getSections() as $section) {
                     if (!in_array($section->getSectionId(), $keep_ids) && !in_array($section->getSectionId(), $partial_sections)) {
                         $course_material->removeSection($section);
                     }
                 }
-            } else {
+            }
+            else {
                 $details['sections'] = null;
             }
-        } else {
+        }
+        else {
             // If section lock is disabled, clear all sections
             $course_material->getSections()->clear();
             $details['sections'] = null;
         }
-    
+
         return $details;
     }
-    
+
     // Helper function to check if a section exists
-    private function sectionExists($course_material, $section_id) {
+    /**
+     * @return bool
+     */
+    private function sectionExists(CourseMaterial $course_material, string $section_id) {
         foreach ($course_material->getSections() as $course_section) {
             if ($course_section->getSectionId() === $section_id) {
                 return true;
@@ -945,9 +955,12 @@ class CourseMaterialsController extends AbstractController {
         return false;
     }
 
-    private function getRequestedPath($upload_path, $post_requested_path) {
+    /**
+     * @return string|JsonResponse
+     */
+    private function getRequestedPath(string $upload_path, string|null $post_requested_path) {
         $requested_path = "";
-        if (!empty(post_requested_path)) {
+        if (isset($post_requested_path) && $post_requested_path !== "") {
             $requested_path = $post_requested_path;
             $tmp_path = $upload_path . "/" . $requested_path;
             $dirs = explode("/", $tmp_path);
@@ -959,6 +972,4 @@ class CourseMaterialsController extends AbstractController {
         }
         return $requested_path;
     }
-    
-
 }
