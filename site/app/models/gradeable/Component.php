@@ -527,6 +527,7 @@ class Component extends AbstractModel {
 
     public function setTitle(string $title): void {
         $this->title = $title;
+        $this->modified = true;
     }
 
     public function getTaComment(): string {
@@ -535,6 +536,7 @@ class Component extends AbstractModel {
 
     public function setTaComment(string $ta_comment): void {
         $this->ta_comment = $ta_comment;
+        $this->modified = true;
     }
 
     public function getStudentComment(): string {
@@ -543,6 +545,7 @@ class Component extends AbstractModel {
 
     public function setStudentComment(string $student_comment): void {
         $this->student_comment = $student_comment;
+        $this->modified = true;
     }
 
     public function getLowerClamp(): float {
@@ -567,6 +570,7 @@ class Component extends AbstractModel {
 
     public function setText(bool $is_text): void {
         $this->text = $is_text;
+        $this->modified = true;
     }
 
     public function isPeerComponent(): bool {
@@ -575,6 +579,7 @@ class Component extends AbstractModel {
 
     public function setPeerComponent(bool $is_peer_component): void {
         $this->peer_component = $is_peer_component;
+        $this->modified = true;
     }
 
     public function getOrder(): int {
@@ -583,6 +588,7 @@ class Component extends AbstractModel {
 
     public function setOrder(int $order): void {
         $this->order = $order;
+        $this->modified = true;
     }
 
     public function getPage(): int {
@@ -591,6 +597,7 @@ class Component extends AbstractModel {
 
     public function setIsItempoolLinked(bool $is_linked): void {
         $this->is_itempool_linked = $is_linked;
+        $this->modified = true;
     }
 
     public function getIsItempoolLinked(): bool {
@@ -599,6 +606,7 @@ class Component extends AbstractModel {
 
     public function setItempool(string $itempool_name): void {
         $this->itempool = $itempool_name;
+        $this->modified = true;
     }
 
     public function getItempool(): string {
