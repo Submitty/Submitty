@@ -57,25 +57,21 @@ describe('Docker UI Test', () => {
         // NOTE: Will currently always be Error. Fix sysinfo logging to fix this.
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('[data-testid="docker_version"]')
+            return cy.get('[data-testid="docker-version"]')
                 .invoke('text')
                 .then((text) => {
                     return text !== 'Error';
                 });
         }, 10000);
         // Updated time should not be "Unknown"
-        /**
-        cy.get('[data-testid="systemwide_info"]')
+        cy.get('[data-testid="systemwide-info"]')
             .should('not.contain.text', 'Unknown');
-        */
         // Updated OS info should not be empty
-        cy.get('[data-testid="system_info"]')
+        cy.get('[data-testid="system-info"]')
             .should('not.be.empty');
         // Updated docker version should not be "Error"
-        /**
-        cy.get('[data-testid="docker_version"]')
+        cy.get('[data-testid="docker-version"]')
             .should('not.contain.text', 'Error');
-        */
     });
 
     it('Should filter images with tags', () => {
@@ -164,6 +160,8 @@ describe('Docker UI Test', () => {
             + 'already exists in capability cpp');
     });
 
+    // NOTE: Can be refactored later to speed up the Cypress test since
+    //       we need to wait for the system to install the image
     it('Should add new image and remove it', () => {
         cy.reload();
         // Add a new image
@@ -172,22 +170,36 @@ describe('Docker UI Test', () => {
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
-            .type('submitty/python:2.7');
+            .type('submitty/prolog:8');
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
         cy.get('.alert-success')
-            .should('have.text', 'submitty/python:2.7 found on DockerHub'
+            .should('have.text', 'submitty/prolog:8 found on DockerHub'
             + ' and queued to be added!');
 
-        cy.reload();
+        // Allow the system to install the image and update UI
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('body').then(($body) => {
+                const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
+                return exists;
+            });
+        }, 10000, 500);
+
+        // Check if the image can be removed
+        cy.get('[data-image-id="submitty/prolog:8"]')
+            .should('contain.text', 'Remove');
+
         // Remove the image
-        cy.get('[data-image-id="submitty/python:2.7"]')
-            .should('be.visible', { timeout: 10000 })
+        cy.get('[data-image-id="submitty/prolog:8"]')
+            .should('be.visible')
             .click();
+
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
-        cy.get('[data-image-id="submitty/python:2.7"]')
+
+        cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
     });
 });

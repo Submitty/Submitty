@@ -30,7 +30,7 @@
 
 .docker-table th,
 .machine-table th {
-    text-align: left;
+    text-align: center;
 }
 
 .docker-table td,

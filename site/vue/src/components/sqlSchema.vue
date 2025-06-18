@@ -31,22 +31,22 @@ function toggle(event: MouseEvent) {
       hidden
     >
       <p>Click on each table to see columns</p>
-      <ul style="margin-left: 30px;">
+      <ul class="columns-list">
         <li
           v-for="row in data"
           :key="row.name"
         >
-          <button
+          <a
             class="sql-database-table"
             @click="toggle"
           >
             {{ row.name }}
-          </button>
+          </a>
           <div
             class="sql-database-columns"
             hidden
           >
-            <ul style="margin-left: 15px">
+            <ul class="columns-list">
               <li
                 v-for="column in row.columns"
                 :key="column.name"
@@ -60,3 +60,13 @@ function toggle(event: MouseEvent) {
     </div>
   </div>
 </template>
+
+<style scoped>
+#query-results-table {
+  overflow-x: auto;
+}
+
+.columns-list {
+  margin-left: 15px
+}
+</style>

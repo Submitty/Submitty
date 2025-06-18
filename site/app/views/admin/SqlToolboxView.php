@@ -12,9 +12,8 @@ class SqlToolboxView extends AbstractView {
      * @param array<string> $user_queries
      */
     public function showToolbox(array $sql_structure_data, array $user_queries): string {
-        $this->output->addInternalCss('sql-toolbox.css');
+        $this->output->addInternalModuleJs('sql-toolbox.js');
         $this->output->addInternalCss('table.css');
-
         $this->output->addBreadcrumb('SQL Toolbox');
 
         return $this->output->renderTwigTemplate("Vue.twig", [

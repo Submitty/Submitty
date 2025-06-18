@@ -136,7 +136,7 @@ const handleDeletion = async (id: number) => {
 
 <style lang="css" scoped>
 #saved-queries-btn {
-  margin-top: 10px;
+  margin-top: 5px;
   margin-bottom: 5px;
 }
 .td-wrap-element {

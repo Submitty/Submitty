@@ -8,6 +8,8 @@
         "compilation_to_runner": ["a.i", "a.out"]
     },
 
+    "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
+
     "grading_parameters": {
         "TOTAL_POINTS": 100,
         "AUTO_POINTS": 100,

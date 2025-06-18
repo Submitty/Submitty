@@ -55,6 +55,8 @@ class Gradeable(object):
         self.min_grading_group = 3
         self.grading_rotating = []
         self.submissions = []
+        self.depends_on = None
+        self.depends_on_points = None
         self.max_random_submissions = None
         self.max_individual_submissions = 3
         self.team_assignment = False
@@ -162,29 +164,36 @@ class Gradeable(object):
         if "grading_rotating" in gradeable:
             self.grading_rotating = gradeable["grading_rotating"]
 
-        self.ta_view_date = dateutils.parse_datetime(gradeable["g_ta_view_start_date"])
-        self.grade_start_date = dateutils.parse_datetime(
-            gradeable["g_grade_start_date"]
+        # these dates corresponds with the manually set dates
+        time_start = "1900-01-01"
+        time_end = "9998-01-01"
+        self.ta_view_date = dateutils.parse_datetime(
+            gradeable["g_ta_view_start_date"] if "g_ta_view_start_date" in gradeable else time_start
         )
-        self.grade_due_date = dateutils.parse_datetime(gradeable["g_grade_due_date"])
+        self.grade_start_date = dateutils.parse_datetime(
+            gradeable["g_grade_start_date"] if "g_grade_start_date" in gradeable else time_end
+        )
+        self.grade_due_date = dateutils.parse_datetime(
+            gradeable["g_grade_due_date"] if "g_grade_due_date" in gradeable else time_end
+        )
         self.grade_released_date = dateutils.parse_datetime(
-            gradeable["g_grade_released_date"]
+            gradeable["g_grade_released_date"] if "g_grade_released_date" in gradeable else time_end
         )
         if self.type == 0:
             self.submission_open_date = dateutils.parse_datetime(
-                gradeable["eg_submission_open_date"]
+                gradeable["eg_submission_open_date"] if "eg_submission_open_date" in gradeable else time_start
             )
             self.submission_due_date = dateutils.parse_datetime(
-                gradeable["eg_submission_due_date"]
+                gradeable["eg_submission_due_date"] if "eg_submission_due_date" in gradeable else time_end
             )
             self.team_lock_date = dateutils.parse_datetime(
-                gradeable["eg_submission_due_date"]
+                gradeable["eg_team_lock_date"] if "eg_team_lock_date" in gradeable else self.submission_due_date
             )
             self.grade_inquiry_start_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_start_date"]
+                gradeable["eg_grade_inquiry_start_date"] if "eg_grade_inquiry_start_date" in gradeable else time_end
             )
             self.grade_inquiry_due_date = dateutils.parse_datetime(
-                gradeable["eg_grade_inquiry_due_date"]
+                gradeable["eg_grade_inquiry_due_date"] if "eg_grade_inquiry_due_date" in gradeable else time_end
             )
             self.student_view = True
             self.student_view_after_grades = False
@@ -216,10 +225,10 @@ class Gradeable(object):
                 self.team_assignment = gradeable["eg_team_assignment"] is True
             if "eg_max_team_size" in gradeable:
                 self.max_team_size = gradeable["eg_max_team_size"]
-            if "eg_team_lock_date" in gradeable:
-                self.team_lock_date = dateutils.parse_datetime(
-                    gradeable["eg_team_lock_date"]
-                )
+            if "eg_depends_on" in gradeable:
+                self.depends_on = gradeable["eg_depends_on"]
+            if "eg_depends_on_points" in gradeable:
+                self.depends_on_points = gradeable["eg_depends_on_points"]
             if "eg_annotated_pdf" in gradeable:
                 self.annotated_pdf = gradeable["eg_annotated_pdf"] is True
                 self.annotation_path = os.path.join(
@@ -248,17 +257,17 @@ class Gradeable(object):
                     self.config_path = tutorial_path
                 else:
                     self.config_path = None
-            assert self.ta_view_date < self.submission_open_date
+            assert self.ta_view_date <= self.submission_open_date
             assert self.has_due_date is False or (
-                self.submission_open_date < self.submission_due_date
+                self.submission_open_date <= self.submission_due_date
             )
             assert self.has_due_date is False or (
-                self.submission_due_date < self.grade_start_date
+                self.submission_due_date <= self.grade_start_date
             )
             assert self.has_release_date is False or (
                 self.grade_released_date <= self.grade_inquiry_start_date
             )
-            assert self.grade_inquiry_start_date < self.grade_inquiry_due_date
+            assert self.grade_inquiry_start_date <= self.grade_inquiry_due_date
             if self.gradeable_config is not None:
                 if self.sample_path is not None:
                     if os.path.isfile(
@@ -288,8 +297,8 @@ class Gradeable(object):
                     )
                     # Ensure we're not sensitive to directory traversal order
                     self.annotations.sort()
-        assert self.ta_view_date < self.grade_start_date
-        assert self.grade_start_date < self.grade_due_date
+        assert self.ta_view_date <= self.grade_start_date
+        assert self.grade_start_date <= self.grade_due_date
         assert (
             self.has_release_date is False
             or self.grade_due_date <= self.grade_released_date
@@ -389,6 +398,8 @@ class Gradeable(object):
                 eg_peer_grading=self.peer_grading,
                 eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
                 eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
+                eg_depends_on=self.depends_on,
+                eg_depends_on_points=self.depends_on_points
             )
 
         for component in self.components:

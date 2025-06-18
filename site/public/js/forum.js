@@ -852,12 +852,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const anon = json.anon;
             const change_anon = json.change_anon;
             const user_id = escapeSpecialChars(json.user);
-            const validIsoString = json.post_time.replace(' ', 'T');
-            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
-            if (!time.isValid) {
-                // Timezone suffix ":00" might be missing
-                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
-            }
+            const time = DateTime.fromISO(json.post_time, { zone: 'local' });
             const categories_ids = json.categories_ids;
             const date = time.toLocaleString(DateTime.DATE_SHORT);
             const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
@@ -899,8 +894,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 const thread_title = json.title;
                 const thread_lock_date = json.lock_thread_date;
                 const thread_status = json.thread_status;
-                let expiration = json.expiration.replace('-', '/');
-                expiration = expiration.replace('-', '/');
+                const expiration = json.expiration;
                 $('#title').prop('disabled', false);
                 $('.edit_thread').show();
                 $('#label_lock_thread').show();
@@ -910,7 +904,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                     $('#pin-expiration-date').show();
                 }
-                $('#expirationDate').val(json.expiration);
+                $('#expirationDate').val(expiration);
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
@@ -1691,7 +1685,7 @@ function refreshCategories() {
         order.forEach((category) => {
             const category_visible_date = category[4];
             const category_diff = category[3];
-            if (category_visible_date === '' || category_diff > 0) {
+            if (category_visible_date === '' || category_diff >= 0) {
                 const category_id = category[0];
                 const category_desc = category[1];
                 const category_color = category[2];

@@ -1,46 +1,21 @@
 <script setup lang="ts">
-import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
-
+import { runSqlQuery, type SqlQueryResult } from '../../../ts/sql-toolbox';
 const { query } = defineProps<{
     query: string;
 }>();
-
 const emit = defineEmits<{
     changeData: [{ [key: string]: number | string | null }[]];
-    changeError: [error: boolean, message: string];
+    changeError: [message: string | false];
 }>();
-
-type ServerResult = {
-    status: string;
-    message: string | null;
-    data: { [key: string]: number | string | null }[];
-};
-
 const runQuery = async () => {
-    emit('changeError', false, '');
-    emit('changeData', []);
-    const form = new FormData();
-    form.append('csrf_token', getCsrfToken());
-    form.append('sql', query);
-
-    try {
-        const response = await fetch(buildCourseUrl(['sql_toolbox']), {
-            method: 'POST',
-            body: form,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to run query.');
-        }
-
-        const result = await response.json() as ServerResult;
-        if (result.status !== 'success') {
-            throw new Error(result.message || 'Unknown error occurred.');
-        }
-        emit('changeData', result.data);
+    const result = await runSqlQuery(query) as SqlQueryResult;
+    if (result.status === 'fail') {
+        emit('changeError', result.message);
+        emit('changeData', []);
     }
-    catch (e) {
-        emit('changeError', true, (e as Error).message || 'An error occurred while running the query.');
+    else {
+        emit('changeData', result.data);
+        emit('changeError', false);
     }
 };
 </script>

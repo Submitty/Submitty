@@ -27,10 +27,9 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
- * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
- * @method void setDisplayNameOrder()
+ * @method void setDisplayNameOrder(string $display_name_order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -42,6 +41,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string setRegistrationSubsection(string $subsection)
  * @method string getCourseSectionId()
  * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
@@ -54,6 +54,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
+ * @method string getTimeZone()
+ * @method string getDisplayImageState()
+ * @method bool getEnforceSingleSession()
+ * @method string getRegistrationSubsection()
  */
 class User extends AbstractModel {
     /**

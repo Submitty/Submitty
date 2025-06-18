@@ -81,6 +81,7 @@ const handleSave = async () => {
   >
     <template #trigger>
       <button
+        id="save-query-btn"
         class="btn btn-primary"
         @click="handleToggle"
       >

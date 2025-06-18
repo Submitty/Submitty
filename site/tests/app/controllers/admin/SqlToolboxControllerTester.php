@@ -103,14 +103,8 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->core->setCourseEntityManager($entity_manager);
 
         $table_data = [
-            [
-                'name' => 'bar',
-                'columns' => []
-            ],
-            [
-                'name' => 'foo',
-                'columns' => []
-            ]
+            ['name' => 'bar', 'columns' => []],
+            ['name' => 'foo', 'columns' => []]
         ];
 
         $response = $this->controller->showToolbox();
@@ -144,7 +138,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame($expected, $response->json);
     }
 
-    public function invalidQueryDataProvider(): array {
+    public static function invalidQueryDataProvider(): array {
         return [
             ['INSERT INTO foo VALUES (1)'],
             ['UPDATE foo SET bar=1 WHERE baz=2'],
