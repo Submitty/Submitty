@@ -45,7 +45,8 @@ function sendMessage(chatroomId, userId, displayName, role, content) {
 }
 
 function appendMessage(displayName, role, ts, content) {
-    const timestamp = ts || new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+    const dt = new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+    const timestamp = ts || dt;
 
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
