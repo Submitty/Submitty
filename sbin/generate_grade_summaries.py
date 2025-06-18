@@ -357,18 +357,7 @@ def load_and_save_gui_customization(semester, course, token):
         data={"json_string": json_string}
     )
 
-    # Finalize the build process by submitting the build_form API call
-    build_response = requests.post(
-        '{}/api/courses/{}/{}/reports/build_form'.format(
-            base_url, semester, course
-        ),
-        headers={'Authorization': token}
-    )
-
-    if (
-        save_response.status_code == 200 and save_response.json()['status'] == 'success' and
-        build_response.status_code == 200 and build_response.json()['status'] == 'success'
-    ):
+    if save_response.status_code == 200 and save_response.json()['status'] == 'success':
         print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
             semester, course
         ))
@@ -377,6 +366,35 @@ def load_and_save_gui_customization(semester, course, token):
             semester, course, get_error_message(save_response)
         ), file=stderr)
         exit(-1)
+
+    # Finalize the build process by submitting the build_form API call
+    build_response = requests.post(
+        '{}/api/courses/{}/{}/reports/build_form'.format(
+            base_url, semester, course
+        ),
+        headers={'Authorization': token}
+    )
+
+    if build_response.status_code == 200 and build_response.json()['status'] == 'success':
+        print("Successfully submitted the Rainbow Grades build process for {}.{}".format(
+            semester, course
+        ))
+    else:
+        print("ERROR: Failed to submit the Rainbow Grades build process for {}.{} - {}".format(
+            semester, course, get_error_message(build_response)
+        ), file=stderr)
+        exit(-1)
+
+    # Remain blocked until the build process is complete
+    requests.post(
+        '{}/api/courses/{}/{}/reports/rainbow_grades_status'.format(
+            base_url, semester, course
+        ),
+        headers={'Authorization': token}
+    )
+    print("Successfully completed the Rainbow Grades build process for {}.{}".format(
+        semester, course
+    ))
 
 
 def generate_grade_summaries(semester, course, token):
@@ -434,9 +452,23 @@ def main():
             }
         )
 
-        if select_response.status_code == 200 and select_response.json()['status'] == 'success':
-            # Successful response implies the GUI customization is being applied for the given course
-            load_and_save_gui_customization(semester, course, token)
+        if select_response.status_code == 200:
+            status = select_response.json()['status']
+
+            if status == 'success':
+                # Successful response implies the GUI customization is being applied for the given course
+                load_and_save_gui_customization(semester, course, token)
+            else:
+                message = select_response.json()['message']
+
+                if message == 'Manual customizations are currently applied.':
+                    # Manual customizations are currently applied, so we can proceed with the grade summaries
+                    pass
+                else:
+                    print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
+                        semester, course, message
+                    ), file=stderr)
+                    exit(-1)
     except Exception as gui_exception:
         print("ERROR: Failed to load or save GUI customization for {}.{} - {}".format(
             semester, course, gui_exception

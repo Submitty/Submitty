@@ -852,7 +852,18 @@ class ReportController extends AbstractController {
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
+
+        if (!is_dir($rainbow_grades_dir)) {
+            $msg = 'Rainbow Grades directory not found';
+            return JsonResponse::getErrorResponse($msg);
+        }
+
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
+
+        if (!is_file($customization_dest)) {
+            $msg = 'Customization file not found';
+            return JsonResponse::getErrorResponse($msg);
+        }
 
         if (isset($_POST['source']) && $_POST['source'] === 'submitty_daemon') {
             // Compare the customization.json and manual_customization.json to ensure instructors are using the GUI interface
@@ -864,7 +875,7 @@ class ReportController extends AbstractController {
 
                 if ($customization_json === $manual_customization_json) {
                     // Manual customizations must be applied given the file contents are the same
-                    $msg = 'Manual customizations are currently applied. Please remove them before applying the GUI customizations.';
+                    $msg = 'Manual customizations are currently applied.';
                     return JsonResponse::getErrorResponse($msg);
                 }
             }
@@ -900,6 +911,7 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
+    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
