@@ -3,12 +3,18 @@
  * @param {number|null} versionNumber
  */
 const switchOrFindVersion = (versionNumber) => {
-    return cy.get('[data-testid="submission-version-select"]').find('option:selected').then((selectedOption) => {
-        const currentVersion = parseInt(selectedOption.val());
-        if (versionNumber !== null && currentVersion !== versionNumber) {
-            cy.get('[data-testid="submission-version-select"]').select(String(versionNumber));
+    return cy.get('[data-testid="content-main"]').then(($content) => {
+        if ($content.find('[data-testid="no-submissions-box"]').length > 0) {
+            return cy.wrap(0);
         }
-        return cy.wrap(currentVersion);
+        return cy.get('[data-testid="submission-version-select"]').find('option:selected').then((selectedOption) => {
+            const currentVersion = parseInt(selectedOption.val());
+            // There should a submission for this version already
+            if (versionNumber !== null && currentVersion !== versionNumber) {
+                cy.get('[data-testid="submission-version-select"]').select(String(versionNumber));
+            }
+            return cy.wrap(currentVersion);
+        });
     });
 };
 
