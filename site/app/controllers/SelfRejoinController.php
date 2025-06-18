@@ -136,7 +136,7 @@ class SelfRejoinController extends AbstractController {
             }
         }
 
-        $term_start_date = $this->core->getQueries()->getTermStartDate($term, $user);
+        $term_start_date = TermManager::getTermStartDate($this->core, $term, $user);
         // If today is within first two weeks of term, can re-add self.
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;

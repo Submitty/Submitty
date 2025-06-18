@@ -6,6 +6,7 @@ use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
+use app\libraries\TermManager;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -280,7 +281,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllTerms(),
+                TermManager::getAllTermNames($this->core),
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -338,7 +339,7 @@ class HomePageController extends AbstractController {
             $start_date = $_POST['start_date'];
             $end_date = $_POST['end_date'];
 
-            $terms = $this->core->getQueries()->getAllTerms();
+            $terms = TermManager::getAllTermNames($this->core);
             if (in_array($term_id, $terms)) {
                 $this->core->addErrorMessage("Term id already exists.");
             }
@@ -346,7 +347,7 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("End date should be after Start date.");
             }
             else {
-                $this->core->getQueries()->createNewTerm($term_id, $term_name, $start_date, $end_date);
+                TermManager::createNewTerm($this->core, $term_id, $term_name, $start_date, $end_date);
                 $this->core->addSuccessMessage("Term added successfully.");
             }
             $url = $this->core->buildUrl(['home', 'courses', 'new']);
