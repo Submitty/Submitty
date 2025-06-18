@@ -330,16 +330,25 @@ def main():
 
     # Save Rainbow Grades GUI Customization
     try:
-        # Load the GUI customization page via server-side rendering
+        # Load the GUI customization page via server-side rendering for data parsing
         load_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
                 base_url, semester, course
             ),
             headers={'Authorization': token},
         )
-
-        # Save the most up-to-date GUI customization by building a JSON representation from the HTML elements
         json_string = build_json(load_response.text)
+
+        # Select the GUI customization option to save changes based on the load response
+        select_response = requests.post(
+            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
+                base_url, semester, course
+            ),
+            headers={'Authorization': token},
+            data={"selected_value": "gui"}
+        )
+
+        # Save the most up-to-date GUI customization to the server
         save_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
                 base_url, semester, course
@@ -348,46 +357,13 @@ def main():
             data={"json_string": json_string}
         )
 
-        if load_response.status_code == 200 and save_response.status_code == 200:
+        if load_response.status_code == 200 and select_response.status_code == 200 and save_response.status_code == 200:
             print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
                 semester, course
             ))
         else:
             print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
                 semester, course, save_response.text
-            ), file=stderr)
-            exit(-1)
-
-        # Simulate the Rainbow Grades GUI build process to update the customization.json file
-        select_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-            data={"selected_value": "gui"}
-        )
-        build_form_response = requests.post(
-            '{}/api/courses/{}/{}/reports/build_form'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token}
-        )
-        rainbow_grades_status_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_status'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token}
-        )
-
-        if (select_response.status_code == 200 and
-                build_form_response.status_code == 200 and
-                rainbow_grades_status_response.status_code == 200):
-            print("Successfully completed the Rainbow Grades GUI build process for {}.{}".format(
-                semester, course
-            ))
-        else:
-            print("ERROR: Failed to complete the Rainbow Grades GUI build process for {}.{}".format(
-                semester, course
             ), file=stderr)
             exit(-1)
     except Exception as save_load_exception:

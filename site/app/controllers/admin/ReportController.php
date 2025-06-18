@@ -646,7 +646,6 @@ class ReportController extends AbstractController {
      * @return array<string, mixed>|null
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
-    #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
     public function generateCustomization(): array| null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
@@ -723,7 +722,6 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
-    #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ["POST"])]
     public function executeBuildForm(): JsonResponse {
         // Configure json to go into jobs queue
         $job_json = [
@@ -884,7 +882,6 @@ class ReportController extends AbstractController {
 
 
     #[Route('/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
-    #[Route('/api/courses/{_semester}/{_course}/reports/rainbow_grades_status', methods: ['POST'])]
     public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
