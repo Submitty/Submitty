@@ -1,24 +1,21 @@
 <?php
 
-namespace app\repositories;
+namespace app\libraries;
 
-use app\entities\Session;
-use Doctrine\ORM\EntityRepository;
+use app\entities\CourseEntity;
+use app\repositories\CourseEntityRepository;
+use DateInterval;
+use DateTime;
 
-class CourseEntityRepository extends EntityRepository {
 
-    public function getCourseInfo(string $course_id, string $term_id): array {
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb = $qb->select('course')
-            ->from('app\entities\CourseEntity', 'course')
-            ->where('course.course = :course_id')
-            ->setParameter('course_id', $course_id)
-            ->andWhere('course.term = :term_id')
-            ->setParameter('term_id', $term_id);
-        $result = $qb->getQuery()->execute();
-        return $result->getCourseInfo();
+class CourseEntityManager {
+    public function getCourseInfo(string $course_id, string $term_id) {
+        $em = $this->core->getSubmittyEntityManager();
+        /** @var CourseEntityRepository $repo */
+        $course = $em->getRepository(CourseEntity::class);
+        return $repo->getCourseInfo($course_id, $term_id);
     }
-
+    
     /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
@@ -56,9 +53,7 @@ INNER JOIN terms t ON u.term=t.term_id
 WHERE u.user_id=? {$include_archived} AND {$force_nonnull} (u.registration_section IS NOT NULL OR u.user_group<>4)
 ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
 SQL;
-        $data = $em->getConnection()->executeQuery($sql, [
-            'user_id' => $user_id,
-        ])->fetchAllAssociative();
+        $this->submitty_db->query($query, [$user_id]);
         $return = [];
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);
