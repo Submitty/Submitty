@@ -41,10 +41,6 @@ CI=0
 if [ -f "${THIS_DIR}/../.github_actions_ci_flag" ]; then
     CI=1
 fi
-echo $VAGRANT
-echo $UTM
-echo $CI
-exit 1;
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${CONF_DIR}/submitty.json")
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' "${CONF_DIR}/submitty.json")
