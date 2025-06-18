@@ -161,3 +161,81 @@ $(document).ready(() => {
     $('#add-field').on('input', addFieldOnChange);
     $('#add-field').trigger('input');
 });
+
+function sortTableByColumn(sortKey) {
+    const currentSort = Cookies.get('docker_table_key');
+    const currentDirection = Cookies.get('docker_table_direction') || 'ASC';
+
+    let newDirection;
+    if (currentSort === sortKey) {
+        newDirection = (currentDirection === 'ASC' ? 'DESC' : 'ASC');
+    }
+    else {
+        newDirection = 'ASC';
+    }
+
+    Cookies.set('docker_table_key', sortKey, { path: '/admin/docker' });
+    Cookies.set('docker_table_direction', newDirection, { path: '/admin/docker' });
+
+    applySort(sortKey, newDirection);
+    updateSortIcons(sortKey, newDirection);
+}
+
+function applySort(sortKey, direction) {
+    const table = document.getElementById('docker-table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const colMap = { name: 0, size: 3, created: 5 };
+    const colIndex = colMap[sortKey];
+
+    rows.sort((rowA, rowB) => {
+        const aText = rowA.children[colIndex].textContent.trim();
+        const bText = rowB.children[colIndex].textContent.trim();
+        let cmp = 0;
+        if (sortKey === 'name') {
+            const [nameA, tagA = ''] = aText.split(':');
+            const [nameB, tagB = ''] = bText.split(':');
+            cmp = nameA.localeCompare(nameB);
+            if (cmp === 0) {
+                cmp = tagA.localeCompare(tagB);
+            }
+        }
+        else if (sortKey === 'size') {
+            const valA = parseFloat(aText.replace('MB', ''));
+            const valB = parseFloat(bText.replace('MB', ''));
+            cmp = valA - valB;
+        }
+        else if (sortKey === 'created') {
+            const dateA = new Date(aText);
+            const dateB = new Date(bText);
+            cmp = dateA - dateB;
+        }
+        return direction === 'ASC' ? cmp : -cmp;
+    });
+    rows.forEach((row) => tbody.appendChild(row));
+}
+
+function updateSortIcons(activeKey, direction) {
+    document.querySelectorAll('.sortable-header').forEach((link) => {
+        const icon = link.querySelector('i');
+        const key = link.dataset.sortKey;
+
+        icon.classList.remove('fa-sort-up', 'fa-sort-down');
+        icon.classList.add('fa-sort');
+
+        if (key === activeKey) {
+            icon.classList.remove('fa-sort');
+            icon.classList.add(direction === 'ASC' ? 'fa-sort-up' : 'fa-sort-down');
+        }
+    });
+}
+
+// Keeps the specified sort on reload
+window.addEventListener('DOMContentLoaded', () => {
+    const savedSort = Cookies.get('docker_table_key');
+    const savedDirection = Cookies.get('docker_table_direction') || 'ASC';
+    if (savedSort) {
+        applySort(savedSort, savedDirection);
+        updateSortIcons(savedSort, savedDirection);
+    }
+});

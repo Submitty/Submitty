@@ -543,6 +543,10 @@ SQL;
         );
     }
 
+    /**
+     * @param string $thread_id Id of thread.
+     * @return int[]
+     */
     public function getCategoriesIdForThread($thread_id) {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", [$thread_id]);
         $categories_list = [];
@@ -1027,6 +1031,26 @@ SQL;
             }
         }
         return $return;
+    }
+
+    /**
+     * @param User   $user
+     * @param string $semester
+     * @param string $course
+     */
+    public function unregisterCourseUser(User $user, $semester, $course): void {
+        $this->submitty_db->query(
+            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+            [$user->getId(), $semester, $course]
+        );
+
+        $this->course_db->query(
+            "UPDATE users SET 
+                rotating_section = NULL,
+                registration_type = NULL
+            WHERE user_id = ?",
+            [$user->getId()]
+        );
     }
 
     /**
@@ -2624,7 +2648,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
 
         $this->course_db->query(
             "
-SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
+SELECT round(AVG(g_score),2) AS manual_avg_score, round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS manual_std_dev, round(stddev_pop(g_score + autograding),2) AS std_dev, MAX(g_score) AS manual_max_score, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
     SELECT gd_id, SUM(comp_score) AS g_score, SUM(gc_max_value) AS max, COUNT(comp.*), autograding FROM(
       SELECT  gd_id, gc_title, gc_max_value, gc_is_peer, gc_order, autograding,
@@ -2662,7 +2686,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         if (count($this->course_db->rows()) == 0) {
             return;
         }
-        return new SimpleStat($this->core, $this->course_db->rows()[0]);
+        return $this->course_db->rows()[0];
     }
 
     public function getNumUsersWhoViewedGradeBySections($gradeable, $sections, string $null_section) {
@@ -3640,7 +3664,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      *
      * @param  string  $g_id
      * @param  string  $user_id
-     * @param  integer $registration_section
+     * @param  string $registration_section
      * @param  integer $rotating_section
      * @return string $team_id
      */
@@ -5006,11 +5030,6 @@ AND gc_id IN (
             $this->course_db->query("UPDATE categories_list SET rank = ? WHERE category_id = ?", [$rank, $id]);
         }
         $this->course_db->commit();
-    }
-
-    public function getCategories() {
-        $this->course_db->query("SELECT *, extract(hours from now() - visible_date) as diff from categories_list ORDER BY rank ASC NULLS LAST, category_id");
-        return $this->course_db->rows();
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
