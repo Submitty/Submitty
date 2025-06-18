@@ -524,6 +524,7 @@ if [ "${WORKER}" == 0 ]; then
     # copy the files from the repo
     rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
 
+    # copy more_autograding_examples in order to make cypress autograding work
     if [ "${VAGRANT}" == 1 ]; then 
         rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
     fi
