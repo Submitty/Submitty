@@ -316,8 +316,80 @@ def build_json(html_string):
     return json.dumps(data, indent=4)
 
 
+def load_and_save_gui_customization(semester, course, token):
+    """Loads and saves the GUI customization for the given course."""
+    # Load the GUI customization page via server-side rendering for data parsing
+    load_response = requests.post(
+        '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
+            base_url, semester, course
+        ),
+        headers={'Authorization': token},
+    )
+
+    if load_response.status_code == 200 and "rg_web_ui" in load_response.text:
+        print("Successfully loaded Rainbow Grades GUI customization for {}.{}".format(
+            semester, course
+        ))
+    else:
+        message = load_response.json()['message'] if load_response.json()['message'] else load_response.text
+        print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{} - {}".format(
+            semester, course, message
+        ), file=stderr)
+        exit(-1)
+
+    # Save the most up-to-date GUI customization to the server
+    json_string = build_json(load_response.text)
+    save_response = requests.post(
+        '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
+            base_url, semester, course
+        ),
+        headers={'Authorization': token},
+        data={"json_string": json_string}
+    )
+
+    if save_response.status_code == 200 and save_response.json()['status'] == 'success':
+        print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
+            semester, course
+        ))
+    else:
+        message = save_response.json()['message'] if save_response.json()['message'] else save_response.text
+        print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
+            semester, course, message
+        ), file=stderr)
+        exit(-1)
+
+
+def generate_grade_summaries(semester, course, token):
+    """Generates grade summaries for the given course."""
+    try:
+        grade_generation_response = requests.post(
+            '{}/api/courses/{}/{}/reports/summaries'.format(
+                base_url, semester, course
+            ),
+            headers={'Authorization': token}
+        )
+
+        if grade_generation_response.status_code == 200:
+            grade_generation_response = grade_generation_response.json()
+
+            if grade_generation_response["status"] == 'success':
+                print("Successfully generated grade summaries for {}.{}".format(
+                    semester, course
+                ))
+            else:
+                print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
+                    semester, course, grade_generation_response["message"]
+                ), file=stderr)
+        else:
+            print("ERROR: Submitty Service Unavailable.", file=stderr)
+    except Exception as grade_generation_exception:
+        print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
+            semester, course, grade_generation_exception
+        ), file=stderr)
+        exit(-1)
+
+
 def main():
-    """Automatically call Generate Grade Summaries API."""
     parser = argparse.ArgumentParser(
         description='Automatically call API endpoints to save/load GUI customizations and generate Grade Summaries.'
     )
@@ -329,9 +401,8 @@ def main():
     course = args.course
     token = creds['token']
 
-    # Save Rainbow Grades GUI Customization
     try:
-        # Select the GUI customization option to save changes based on the load response
+        # Try to select the GUI customization option to save changes based on the existing customization files
         select_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
                 base_url, semester, course
@@ -343,84 +414,17 @@ def main():
             }
         )
 
-        if select_response.status_code != 200 or select_response.json()['status'] != 'success':
-            message = select_response.json()['message'] if select_response.json()['message'] else select_response.text
-            print("ERROR: Failed to select GUI customization for {}.{} - {}".format(
-                semester, course, message
-            ), file=stderr)
-            exit(-1)
-
-        # Load the GUI customization page via server-side rendering for data parsing
-        load_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-        )
-
-        if load_response.status_code == 200 and "rg_web_ui" in load_response.text:
-            print("Successfully loaded Rainbow Grades GUI customization for {}.{}".format(
-                semester, course
-            ))
-        else:
-            message = load_response.json()['message'] if load_response.json()['message'] else load_response.text
-            print("ERROR: Failed to load Rainbow Grades GUI customization for {}.{} - {}".format(
-                semester, course, message
-            ), file=stderr)
-            exit(-1)
-
-        # Save the most up-to-date GUI customization to the server
-        json_string = build_json(load_response.text)
-        save_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-            data={"json_string": json_string}
-        )
-
-        if save_response.status_code == 200 and save_response.json()['status'] == 'success':
-            print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
-                semester, course
-            ))
-        else:
-            message = save_response.json()['message'] if save_response.json()['message'] else save_response.text
-            print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
-                semester, course, message
-            ), file=stderr)
-            exit(-1)
-    except Exception as save_load_exception:
-        print("ERROR: Failed to save or load Rainbow Grades GUI customization for {}.{} - {}".format(
-            semester, course, save_load_exception
+        if select_response.status_code == 200 and select_response.json()['status'] == 'success':
+            # Implies the GUI customization is being used for the given course
+            load_and_save_gui_customization(semester, course, token)
+    except Exception as gui_exception:
+        print("ERROR: Failed to fetch or save GUI customization options for {}.{} - {}".format(
+            semester, course, gui_exception
         ), file=stderr)
         exit(-1)
 
     # Generate Rainbow Grades Grade Summaries
-    try:
-        grade_generation_response = requests.post(
-            '{}/api/courses/{}/{}/reports/summaries'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token}
-        )
-    except Exception as grade_generation_exception:
-        print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
-            semester, course, grade_generation_exception
-        ), file=stderr)
-        exit(-1)
-
-    if grade_generation_response.status_code == 200:
-        grade_generation_response = grade_generation_response.json()
-        if grade_generation_response["status"] == 'success':
-            print("Successfully generated grade summaries for {}.{}".format(
-                semester, course
-            ))
-        else:
-            print("ERROR: Failed to generate grade summaries for {}.{} - {}".format(
-                semester, course, grade_generation_response["message"]
-            ), file=stderr)
-    else:
-        print("ERROR: Submitty Service Unavailable.", file=stderr)
+    generate_grade_summaries(semester, course, token)
 
 
 if __name__ == "__main__":
