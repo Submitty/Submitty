@@ -62,7 +62,7 @@ class Chatroom {
     }
 
     public function getHostName(): string {
-        return $this->host->getDisplayInfo()['full_name'];
+        return $this->host->getDisplayFullName();
     }
 
     public function getTitle(): string {
