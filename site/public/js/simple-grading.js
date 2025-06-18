@@ -642,7 +642,7 @@ function setupSimpleGrading(action) {
         setupNumericTextCells();
     }
     const filterWithdrawnCheckbox = $('#filter-withdrawn');
-    if (Cookies.get('filter_student') === 'false') {
+    if (Cookies.get('filter_withdrawn_student') === 'false') {
         $('.simple-grade-withdrawn').css('display', 'contents');
         filterWithdrawnCheckbox.prop('checked', false);
     }
@@ -651,11 +651,11 @@ function setupSimpleGrading(action) {
     filterWithdrawnCheckbox.on('change', function () {
         if (this.checked) {
             $('.simple-grade-withdrawn').css('display', 'none');
-            Cookies.set('filter_student', true);
+            Cookies.set('filter_withdrawn_student', true);
         }
         else {
             $('.simple-grade-withdrawn').css('display', 'contents');
-            Cookies.set('filter_student', false);
+            Cookies.set('filter_withdrawn_student', false);
         }
     });
 

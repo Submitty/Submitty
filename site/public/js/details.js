@@ -1,6 +1,5 @@
 /* global courseUrl, showPopup */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update filter_withdrawn_update */
-
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -111,53 +110,56 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function filter_withdrawn_update() {
-    // set up, by default this will hide withdrawned student
-    const filterWithdrawnCheckbox = $('[data-testid="toggle-filter-withdrawn"]');
-    if (Cookies.get('filter_student') === undefined) {
-        $('[data-student="electronic-grade-withdrawn"]').hide();
-        filterWithdrawnCheckbox.prop('checked', true);
-    }
-    else if (Cookies.get('filter_student') === 'false') {
-        $('[data-student="electronic-grade-withdrawn"]').show();
-        filterWithdrawnCheckbox.prop('checked', false);
-    }
-    else {
-        $('[data-student="electronic-grade-withdrawn"]').hide();
-        filterWithdrawnCheckbox.prop('checked', true);
-    }
-
-    // filter students who withdrew from this course
-    filterWithdrawnCheckbox.on('change', () => {
-        if (Cookies.get('filter_student') === 'false') {
-            $('[data-student="electronic-grade-withdrawn"]').hide();
-            Cookies.set('filter_student', true);
-        }
-        else {
-            $('[data-student="electronic-grade-withdrawn"]').show();
-            Cookies.set('filter_student', false);
-        }
-    });
-}
-
 function inquiry_update() {
-    const check_inquiry = $('[data-testid="toggle-grade-inquiry"]');
+    const button = document.getElementById('inquiryButton');
     const status = Cookies.get('inquiry_status');
+
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').hide();
-                check_inquiry.prop('checked', true);
+                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
             }
         });
+        button.textContent = 'Grade Inquiry Only: On';
     }
-    check_inquiry.on('change', () => {
-        if (status === 'on') {
-            Cookies.set('inquiry_status', 'off');
-        }
-        else {
-            Cookies.set('inquiry_status', 'on');
-        }
+    else {
+        $('.grade-button').each(function () {
+            $(this).closest('.grade-table').show(); // show all gradeable items
+        });
+        button.textContent = 'Grade Inquiry Only: Off';
+    }
+}
+
+function filter_withdrawn_update() {
+    const filterButton = document.getElementById('filter-withdrawn-button');
+    const filter_status = Cookies.get('filter_withdrawn_student');
+    const inquiry_status = Cookies.get('inquiry_status');
+
+    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
+
+    const shouldHideAll = (filter_status === undefined || filter_status === 'true');
+    const inquiryMode = (inquiry_status === 'on');
+
+    if (shouldHideAll) {
+        withdrawnElements.hide();
+        filterButton.textContent = 'Show Withdrawn Students';
+        Cookies.set('filter_withdrawn_student', 'true');
+    } else {
+        withdrawnElements.each(function () {
+            const hasInquiry = typeof $(this).find('.grade-button').attr('data-grade-inquiry') !== 'undefined';
+            if (inquiryMode && !hasInquiry) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+        });
+        filterButton.textContent = 'Hide Withdrawn Students';
+        Cookies.set('filter_withdrawn_student', 'false');
+    }
+
+    filterButton.addEventListener('click', () => {
+        const currentlyHidden = Cookies.get('filter_withdrawn_student') === 'true';
+        Cookies.set('filter_withdrawn_student', currentlyHidden ? 'false' : 'true');
         location.reload();
     });
 }

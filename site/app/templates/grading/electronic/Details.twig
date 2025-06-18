@@ -5,7 +5,7 @@
         If nothing to grade, Instructor will see all sections
     #}
     <div class="details-header-row">
-    <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
+        <h1>Grade Details for {{ gradeable.getTitle() }}</h1>
         <div class="markers-container">
             <ul id="details-legend">
                 <li>
@@ -34,29 +34,31 @@
                 </li>
             </ul>
 
-            <div class="row-wrapper">
+            <div class="action-btn-cont">
                 {% if show_all_sections_button %}
-                <label class="column-wrapper" id="view-your-sections" data-testid="view-your-sections"> Only Assigned Sections
-                    <input type="checkbox" data-testid="view-sections" onchange="changeSections()">
-                </label>
+                <button class="btn btn-default" data-testid="view-sections" onclick="changeSections()">
+                    {{ view_all ? "View Your Sections" : "View All" }}
+                </button>
                 {% endif %}
-                <label class="column-wrapper" id="random-default-order" data-testid="random-default-order"> Randomize Order
-                    <input type="checkbox" data-testid="random-default-order" onchange="changeSortOrder()">
-                </label>
+                <button class="btn btn-default" data-testid="random-default-order"
+                   onclick="changeSortOrder()">
+                    {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
+                </button>
                 {% if toggle_anon_button %}
-                <label class="column-wrapper" id="toggle-anon-button" data-testid="toggle-anon-button" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
-                    <input type="checkbox" data-testid="toggle-anon-button" onchange="changeAnon()">
-                </label>
+                <button class="btn btn-default" id="toggle-anon-button" data-testid="toggle-anon-button"
+                    onclick="changeAnon('{{ gradeable.getId() }}')">
+                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
+                </button>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <label class="column-wrapper" id="toggle-grade-inquiry" data-testid="toggle-grade-inquiry"> Only Grade Inquiry
-                    <input type="checkbox" data-testid="toggle-grade-inquiry" onchange="changeInquiry()">
-                </label>
+                <button class="btn btn-default" id="inquiryButton" data-testid="toggle-grade-inquiry" onclick="change_inquiry()">
+                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
+                </button>
                 {% endif %}
                 {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() and is_instructor %}
-                <label class="column-wrapper" id="toggle-filter-withdrawn" data-testid="toggle-filter-withdrawn"> Hide Withdrawn Students
-                    <input type="checkbox" data-testid="toggle-filter-withdrawn">
-                </label>
+                <button class="btn btn-default" id="filter-withdrawn-button" data-testid="toggle-filter-withdrawn">
+                    {{ filter_withdrawn_student ? "Show Withdrawn Students" : "Hide Withdrawn Students" }}
+                </button>
                 {% endif %}
             </div>
         </div>
@@ -780,13 +782,18 @@
 
 {# /Column functions #}
 <script>
+    {% if grade_inquiry_only_button %}
+        inquiry_update();
+    {% endif %}
+
     {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
         filter_withdrawn_update();
     {% endif %}
 
-   {% if grade_inquiry_only_button %}
-        inquiry_update();
-    {% endif %}
+    function change_inquiry() {
+        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
+        location.reload();
+    }
     
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
@@ -812,12 +819,6 @@
         location.reload();
     }
 
-    function changeInquiry() {
-        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
-        location.reload();
-    }
-
-    
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
             Cookies.set('sort', 'id');
