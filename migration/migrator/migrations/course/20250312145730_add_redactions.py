@@ -22,7 +22,7 @@ def up(config, database, semester, course):
                      x1 float NOT NULL,
                      x2 float NOT NULL,
                      y1 float NOT NULL,
-                     y2 float NOT NULL,
+                     y2 float NOT NULL
                      )
     """)
 

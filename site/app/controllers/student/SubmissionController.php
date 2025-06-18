@@ -24,7 +24,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\models\notebook\SubmissionCodeBox;
 use app\models\notebook\SubmissionMultipleChoice;
 use app\models\gradeable\AutoGradedTestcase;
-use SebastianBergmann\CodeUnit\FileUnit;
 
 class SubmissionController extends AbstractController {
     private $upload_details = [
