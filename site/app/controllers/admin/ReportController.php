@@ -723,6 +723,7 @@ class ReportController extends AbstractController {
 
 
     #[Route("/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/build_form", methods: ['POST'])]
     public function executeBuildForm(): JsonResponse {
         // Configure json to go into jobs queue
         $job_json = [

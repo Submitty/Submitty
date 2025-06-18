@@ -357,7 +357,18 @@ def load_and_save_gui_customization(semester, course, token):
         data={"json_string": json_string}
     )
 
-    if save_response.status_code == 200 and save_response.json()['status'] == 'success':
+    # Finalize the build process by submitting the build_form API call
+    build_response = requests.post(
+        '{}/api/courses/{}/{}/reports/build_form'.format(
+            base_url, semester, course
+        ),
+        headers={'Authorization': token}
+    )
+
+    if (
+        save_response.status_code == 200 and save_response.json()['status'] == 'success' and
+        build_response.status_code == 200 and build_response.json()['status'] == 'success'
+    ):
         print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
             semester, course
         ))
