@@ -24,7 +24,8 @@ def up(config, database, semester, course):
             title text NOT NULL,
             description text,
             is_active BOOLEAN DEFAULT false NOT NULL,
-            allow_anon BOOLEAN DEFAULT true NOT NULL
+            allow_anon BOOLEAN DEFAULT true NOT NULL,
+            session_started_at timestamp with time zone DEFAULT NULL
         );
 
         CREATE TABLE IF NOT EXISTS chatroom_messages (

@@ -121,7 +121,6 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
-        $_SESSION["anon_name_chatroom_{$chatroom_id}_bool"] = $isAnonymous;
         return new WebResponse(
             'Chatroom',
             'showChatroom',
@@ -144,7 +143,6 @@ class ChatroomController extends AbstractController {
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
-        unset($_SESSION["anon_name_chatroom_{$chatroom_id}"]);
         $em->remove($chatroom);
         $em->flush();
         return JsonResponse::getSuccessResponse();
@@ -213,6 +211,7 @@ class ChatroomController extends AbstractController {
             $this->sendSocketMessage($indiv_msg_array);
         }
         $this->sendSocketMessage($msg_array);
+        $chatroom->setSessionStartedAt($chatroom->isActive() ? null : new \DateTime("now"));
         $chatroom->toggleActiveStatus();
 
         $em->flush();
@@ -239,8 +238,9 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($formattedMessages);
     }
 
-    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
-    public function addMessage(string $chatroom_id): JsonResponse {
+    #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send/{anonymous_route_segment?}", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
+    public function addMessage(string $chatroom_id, ?string $anonymous_route_segment = null,): JsonResponse {
+        $isAnonymous = ($anonymous_route_segment === 'anonymous');
         $em = $this->core->getCourseEntityManager();
         $user = $this->core->getUser();
         $chatroom = $em->getRepository(Chatroom::class)->find($chatroom_id);
@@ -253,15 +253,13 @@ class ChatroomController extends AbstractController {
         if (strcmp($_POST['content'], "") === 0) {
             return JsonResponse::getFailResponse("Can't send blank message");
         }
-        $sessKey = "anon_name_chatroom_{$chatroom_id}";
-        $boolKey = "anon_name_chatroom_{$chatroom_id}_bool";
         $msg_array = [];
         $msg_array['content'] = $_POST['content'];
         $msg_array['type'] = 'chat_message';
         $msg_array['user_id'] = $user->getId();
         $display_name = '';
-        if ($chatroom->isAllowAnon() && isset($_SESSION[$boolKey]) && $_SESSION[$boolKey] === true) {
-            $display_name = $_SESSION[$sessKey];
+        if ($chatroom->isAllowAnon() && $isAnonymous) {
+            $display_name = $chatroom->calcAnonName($user->getId());
         }
         else {
             if ($user->accessAdmin()) {

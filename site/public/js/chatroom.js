@@ -20,9 +20,10 @@ function fetchMessages(chatroomId) {
     });
 }
 
-function sendMessage(chatroomId, userId, displayName, role, content) {
+function sendMessage(chatroomId, userId, displayName, role, content, isAnonymous = false) {
+    const toBuild = isAnonymous ? ['chat', chatroomId, 'send', 'anonymous'] : ['chat', chatroomId, 'send'];
     $.ajax({
-        url: buildCourseUrl(['chat', chatroomId, 'send']),
+        url: buildCourseUrl(toBuild),
         type: 'POST',
         data: {
             csrf_token: csrfToken,
@@ -292,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const role = user_admin ? 'instructor' : 'student';
-            sendMessage(chatroomId, userId, displayName, role, messageContent);
+            sendMessage(chatroomId, userId, displayName, role, messageContent, isAnonymous);
 
             messageInput.value = '';
         });
