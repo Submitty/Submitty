@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace app\entities;
 
-use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
-
 use app\repositories\TermRepository;
+
 /**
  * Doctrine entity for Terms, not much used but used for other queries.
  */

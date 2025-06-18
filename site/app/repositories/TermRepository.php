@@ -31,11 +31,11 @@ class TermRepository extends EntityRepository {
     public function createNewTerm(string $term_id, string $term_name, string $start_date, string $end_date): void {
         $em = $this->getEntityManager();
         $term = new Term(
-                $term_id,
-                $term_name,
-                $start_date,
-                $end_date,
-            );
+            $term_id,
+            $term_name,
+            $start_date,
+            $end_date,
+        );
         $em->persist($term);
         $em->flush();
     }

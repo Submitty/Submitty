@@ -5,9 +5,9 @@ namespace app\libraries;
 use app\entities\Term;
 use app\repositories\TermRepository;
 use app\models\User;
+
 /**
  * Class TermManager
- *
  */
 class TermManager {
     public static function getTermStartDate(Core $core, string $term_id, User $user): string {
