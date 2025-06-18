@@ -38,16 +38,4 @@ class Term {
         $this->start_date = $start_date;
         $this->end_date = $end_date;
     }
-
-    public function getStartDate(): string {
-        return $this->start_date;
-    }
-
-    public function getName(): string {
-        return $this->name;
-    }
-
-    public function getEndDate(): string {
-        return $this->end_date;
-    }
 }
