@@ -127,6 +127,9 @@ class UserEntity {
         return $this->user_preferred_familyname ?? $this->user_familyname;
     }
 
+    /**
+     * @return string
+     */
     public function getDisplayFullName() {
         return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
     }
