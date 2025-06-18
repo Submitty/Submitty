@@ -145,7 +145,7 @@ def get_gradeable_buckets(soup):
 
     for li in buckets_used_list.select('li'):
         # Parse the bucket name from the inner text (i.e., '% Homework (29 items)')
-        bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip()
+        bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip().lower()
         used_buckets.add(bucket_name)
 
     for bucket_div in soup.select('.bucket_detail_div'):
@@ -159,6 +159,10 @@ def get_gradeable_buckets(soup):
         # Extract bucket type from the h3 tag
         bucket_type = type_header.text.lower()
         bucket['type'] = bucket_type
+
+        if bucket_type not in used_buckets:
+            # Ignore unassigned buckets
+            continue
 
         # Extract count, remove_lowest, and percent
         bucket['count'] = int(soup.select_one(f'#config-count-{bucket_type}')['value'])
