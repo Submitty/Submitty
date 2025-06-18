@@ -24,7 +24,7 @@
         <div class="display-box">
             <p style="display:block">User ID <button class="requirements-button" type="button" onclick="showRequirements(this.id)" id="userid">Show Requirements</button></p>  
             <div class="hidden-helper" id="userid-helper">
-                UserID Requirements:<br/>
+                User ID Requirements:<br/>
                 <ul class="requirements-list">
                 {% if user_id_reqs["any_user_id"] == true %}
                 <li> Must be greater than {{ user_id_reqs["min_length"] }} 

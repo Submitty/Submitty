@@ -743,11 +743,11 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: Submitty-JSONs
-          path: /usr/local/submitty/config/submitty.json
+      - name: Switch to debug mode, and enable self account creation
+        run: |
+          sudo sh -c "jq '.user_create_account = true' /usr/local/submitty/config/submitty.json > /usr/local/submitty/config/submitty.json.tmp
+          cp /usr/local/submitty/config/submitty.json.tmp /usr/local/submitty/config/submitty.json"
+          sudo chown root:submitty_daemonphp /usr/local/submitty/config/submitty.json"
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
