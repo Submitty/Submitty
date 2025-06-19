@@ -112,7 +112,7 @@
     </div>
 
     <div class="raw-config-info">
-        <div class="option-title raw-config-info-header">Manual Configuration:</div>
+        <div class="option-title raw-config-info-header">Edit Uploaded Configuration:</div>
         <p class="not-available-message" id="editor-not-available">Not available for provided configurations.</p>
         <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
         <div id="gradeable-config-structure">
@@ -157,8 +157,8 @@
     registerSelect2Widget("autograding_config_selector");
     
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
-    const DEFAULT_CONFIG_PATHS = {{ default_config_paths|json_encode|raw }};
-    const DEFAULT_CONFIG_PATH_VALUES = DEFAULT_CONFIG_PATHS.map(pair => pair[1]);
+    const ALL_NONUPLOADED_CONFIG_PATHS = {{ all_nonuploaded_config_paths|json_encode|raw }};
+    const NONUPLOADED_CONFIG_VALUES = ALL_NONUPLOADED_CONFIG_PATHS.map(pair => pair[1]);
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
