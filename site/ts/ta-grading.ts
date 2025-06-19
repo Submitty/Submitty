@@ -761,7 +761,7 @@ function initializeTaLayout() {
             setPanelsVisibilities(taLayoutDet.currentOpenPanel);
         }
     }
-    if (taLayoutDet.isFullScreenMode) {
+    if (taLayoutDet.isFullScreenMode && document.getElementById('grading-panel-header') !== null) {
         toggleFullScreenMode();
     }
     updateLayoutDimensions();
