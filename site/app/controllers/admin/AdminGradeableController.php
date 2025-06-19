@@ -587,6 +587,7 @@ class AdminGradeableController extends AbstractController {
             'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
+            'default_config_paths' => $default_config_paths,
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 

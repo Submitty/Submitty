@@ -88,7 +88,7 @@
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
-                <select name="autograding_config_path" id="autograding_config_selector">
+                <select name="autograding_config_path" id="autograding_config_selector" onchange="configSelectorChange()">
                     <option>{{ gradeable.getAutogradingConfigPath() }}</option>
                     {% for path in all_config_paths %}
                         <option value={{path.1}}>{{path.0}}</option>
@@ -113,6 +113,7 @@
 
     <div class="raw-config-info">
         <div class="option-title raw-config-info-header">Manual Configuration:</div>
+        <p class="not-available-message" id="editor-not-available">Not available for provided configurations.</p>
         <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
         <div id="gradeable-config-structure">
             <ul class="config-folder-view">
@@ -156,6 +157,8 @@
     registerSelect2Widget("autograding_config_selector");
     
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
+    const DEFAULT_CONFIG_PATHS = {{ default_config_paths|json_encode|raw }};
+    const DEFAULT_CONFIG_PATH_VALUES = DEFAULT_CONFIG_PATHS.map(pair => pair[1]);
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
