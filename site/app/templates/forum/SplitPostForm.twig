@@ -15,9 +15,9 @@
     <fieldset>
         <legend>Categories of new thread: </legend>
         {% for category in categories %}
-            <a class="btn cat-buttons" data-color="{{ category.color }}" style="border-color: {{ category.color }}; background-color: #FFFFFF; color: {{ category.color }};" id="split_post_category_{{ category.category_id }}">
-                {{ category.category_desc }}
-                <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+            <a class="btn cat-buttons" data-color="{{ category.color }}" style="border-color: {{ category.color }}; background-color: #FFFFFF; color: {{ category.color }};" id="split_post_category_{{ category.id }}">
+                {{ category.description }}
+                <input type="checkbox" name="cat[]" value="{{ category.id }}" aria-label="Category {{ category.description }}">
             </a>
         {% endfor %}
     </fieldset>
