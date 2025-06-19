@@ -11,7 +11,13 @@ self.addEventListener('install', (installEvent) => {
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+    if (self.clients && typeof self.clients.claim === 'function') {
+        // Wait until all clients are controlled by this service worker
+        event.waitUntil(self.clients.claim());
+    } else {
+        // Resolve immediately if clients.claim is not available, such as in Cypress environments
+        event.waitUntil(Promise.resolve());
+    }
 });
 
 self.addEventListener('fetch', (fetchEvent) => {
