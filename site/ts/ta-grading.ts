@@ -1,10 +1,9 @@
 import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
 import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta-grading-keymap';
+import { gotoNextStudent, gotoPrevStudent } from './ta-grading-navigation';
 import {
-    closeAllComponents,
     closeComponent,
-    ComponentGradeInfo,
     CUSTOM_MARK_ID,
     getAnonId,
     getComponentIdByOrder,
@@ -25,42 +24,7 @@ import {
 declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
-        reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
-        showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
-        onAddNewMark(me: HTMLElement): Promise<void>;
-        onRestoreMark(me: HTMLElement): void;
-        onDeleteMark(me: HTMLElement): void;
-        onDeleteComponent(me: HTMLElement): Promise<void>;
-        importComponentsFromFile(me: HTMLElement): Promise<void>;
-        onAddComponent(peer: boolean): Promise<void>;
-        onMarkPointsChange(me: HTMLElement): Promise<void>;
-        onGetMarkStats(me: HTMLElement): Promise<void>;
-        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
-        onCancelEditRubricComponent(me: HTMLElement): void;
-        onChangeOverallComment(me: HTMLElement): Promise<void>;
-        onCancelComponent(me: HTMLElement): Promise<void>;
-        onCustomMarkChange(me: HTMLElement): Promise<void>;
-        onToggleMark(me: HTMLElement): Promise<void>;
-        onToggleCustomMark(me: HTMLElement): Promise<void>;
-        onVerifyAll(me: HTMLElement): Promise<void>;
-        onVerifyComponent(me: HTMLElement): Promise<void>;
-        onClickCountUp(me: HTMLElement): void;
-        onClickCountDown(me: HTMLElement): void;
-        onComponentPointsChange(me: HTMLElement): Promise<void>;
-        onComponentTitleChange(me: HTMLElement): void;
-        onComponentPageNumberChange(me: HTMLElement): void;
-        onMarkPublishChange(me: HTMLElement): void;
-        setPdfPageAssignment(page: number): Promise<void>;
-        reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void>;
-        open_overall_comment_tab(user: string): void;
-        updateAllComponentVersions(): Promise<void>;
-        showSettings(): void;
-        restoreAllHotkeys(): void;
-        removeAllHotkeys(): void;
-        remapHotkey(i: number): void;
-        remapUnset(i: number): void;
         updateThePanelsElements(panelsAvailabilityObj: Record<PanelElement, boolean>): void;
-        gotoMainPage(): void;
         changePanelsLayout (panelsCount: string | number, isLeftTaller: boolean, twoOnRight: boolean): void;
         exchangeTwoPanels(): void;
         openAll (click_class: string, class_modifier: string): void;
@@ -71,30 +35,13 @@ declare global {
         collapseFile (panel: string): void;
         uploadAttachment(): void;
         togglePanelSelectorModal: (show: boolean) => void;
-        closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
-        reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
         openFrame(html_file: string, url_file: string, num: string, pdf_full_panel: boolean, panel: string): void;
-        gotoPrevStudent(): void;
-        gotoNextStudent(): void;
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
-        getGradeableId(): string | undefined;
-        canVerifyGraders(): boolean;
-        isItempoolAvailable(): string;
-        getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
-        toggleCustomMark(component_id: number): Promise<void>;
-        onToggleEditMode(): Promise<void>;
-        addComponent(peer: boolean): Promise<string | undefined>;
-        deleteComponent(component_id: number): Promise<string | undefined>;
-        addNewMark(component_id: number): Promise<void>;
-
-        PDF_PAGE_NONE: number;
-        PDF_PAGE_STUDENT: number;
-        PDF_PAGE_INSTRUCTOR: number;
     }
     interface JQueryStatic {
         active: number;
@@ -111,7 +58,7 @@ const MOBILE_WIDTH = 540;
 let isMobileView = false;
 
 // Panel elements info to be used for layout designs
-export type PanelElement =
+type PanelElement =
     | 'autograding_results'
     | 'grading_rubric'
     | 'submission_browser'
@@ -1021,199 +968,6 @@ window.updateCookies = function () {
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 
-// -----------------------------------------------------------------------------
-// Student navigation
-
-function waitForAllAjaxToComplete(callback: { (): void; (): void; (): void; (): void }) {
-    const checkAjax = () => {
-        if ($.active > 0) {
-            setTimeout(checkAjax, 100);
-        }
-        else {
-            callback();
-        }
-    };
-    checkAjax();
-}
-
-window.gotoMainPage = function () {
-    const window_location = $('#main-page')[0].dataset.href!;
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, go to main page anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-};
-
-function gotoPrevStudent() {
-    let filter;
-    const navigate_assigned_students_only
-        = localStorage.getItem(
-            'general-setting-navigate-assigned-students-only',
-        ) !== 'false';
-
-    const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
-    const selector = '#prev-student';
-    let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
-
-    switch (filter) {
-        case 'ungraded':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'itempool':
-            window_location += `&component_id=${getFirstOpenComponentId(true)}`;
-            break;
-        case 'ungraded-itempool':
-            // TODO: ???
-            // eslint-disable-next-line no-var
-            var component_id = getFirstOpenComponentId(true);
-            if (component_id === NO_COMPONENT_ID) {
-                component_id = getFirstOpenComponentId();
-            }
-            break;
-        case 'inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'active-inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-    }
-
-    if (!navigate_assigned_students_only) {
-        window_location += '&navigate_assigned_students_only=false';
-    }
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, change student anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-}
-window.gotoPrevStudent = gotoPrevStudent;
-
-function gotoNextStudent() {
-    let filter;
-    const navigate_assigned_students_only
-        = localStorage.getItem(
-            'general-setting-navigate-assigned-students-only',
-        ) !== 'false';
-
-    const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
-    const selector = '#next-student';
-    let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
-
-    switch (filter) {
-        case 'ungraded':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'itempool':
-            window_location += `&component_id=${getFirstOpenComponentId(true)}`;
-            break;
-        case 'ungraded-itempool':
-            // TODO: ???
-            // eslint-disable-next-line no-var
-            var component_id = getFirstOpenComponentId(true);
-            if (component_id === NO_COMPONENT_ID) {
-                component_id = getFirstOpenComponentId();
-            }
-            break;
-        case 'inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'active-inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-    }
-
-    if (!navigate_assigned_students_only) {
-        window_location += '&navigate_assigned_students_only=false';
-    }
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, change student anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-}
-window.gotoNextStudent = gotoNextStudent;
 // Navigate to the prev / next student buttons
 registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
     gotoPrevStudent();
@@ -2171,7 +1925,7 @@ function openFrame(
 }
 window.openFrame = openFrame;
 
-export type FileFullPanelOptions = keyof typeof fileFullPanelOptions;
+type FileFullPanelOptions = keyof typeof fileFullPanelOptions;
 const fileFullPanelOptions = {
     submission: {
         // Main viewer (submission panel)
