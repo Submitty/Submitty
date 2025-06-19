@@ -231,8 +231,13 @@ $(() => {
 
     window.addEventListener('resize', () => {
         const name_div = $('#grading-panel-student-name');
+        const panel_div = $('.panels-container');
+        if (name_div.length === 0 || panel_div.length === 0) {
+            // Ignore undefined panel elements on specific pages, such as the edit gradeable page
+            return;
+        }
         // have to calculate the height since the item is positioned absolutely
-        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
+        const height = panel_div[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
         const padding_bottom = 12;
         name_div.css('height', height - padding_bottom);
         name_div.show();
