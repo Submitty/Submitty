@@ -973,7 +973,7 @@ function updateEditorButtonStyle() {
     }
     else {
         editorButton.style.display = 'inline-block';
-        availableMessage.style.display = "none";
+        availableMessage.style.display = 'none';
     }
 }
 
