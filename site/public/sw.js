@@ -14,7 +14,8 @@ self.addEventListener('activate', (event) => {
     if (self.clients && typeof self.clients.claim === 'function') {
         // Wait until all clients are controlled by this service worker
         event.waitUntil(self.clients.claim());
-    } else {
+    }
+    else {
         // Resolve immediately if clients.claim is not available, such as in Cypress environments
         event.waitUntil(Promise.resolve());
     }
