@@ -1,4 +1,4 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, displaySuccessMessage, displayWarningMessage, gradeable_max_autograder_points,
+/* global csrfToken, buildCourseUrl, DEFAULT_CONFIG_PATH_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
@@ -958,26 +958,26 @@ function configSelectorChange() {
 }
 
 function isUsingDefaultConfig() {
-    const selector = document.getElementById("autograding_config_selector");
+    const selector = document.getElementById('autograding_config_selector');
     const selectedPath = selector.value;
     return DEFAULT_CONFIG_PATH_VALUES.includes(selectedPath);
 }
 
 function updateEditorButtonStyle() {
-    const availableMessage = document.getElementById("editor-not-available");
-    const editorButton = document.getElementById("open-config-editor");
+    const availableMessage = document.getElementById('editor-not-available');
+    const editorButton = document.getElementById('open-config-editor');
 
     if (isUsingDefaultConfig()) {
-        editorButton.style.display = "none";
-        availableMessage.style.display = "block";
+        editorButton.style.display = 'none';
+        availableMessage.style.display = 'block';
     }
     else {
-        editorButton.style.display = "inline-block";
+        editorButton.style.display = 'inline-block';
         availableMessage.style.display = "none";
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
     updateEditorButtonStyle();
 });
 
