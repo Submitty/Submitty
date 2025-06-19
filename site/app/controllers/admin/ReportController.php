@@ -728,6 +728,7 @@ class ReportController extends AbstractController {
         // Configure json to go into jobs queue
         $job_json = [
             'job' => 'RunAutoRainbowGrades',
+            'source' => isset($_POST['source']) ? $_POST['source'] : 'submitty_gui',
             'semester' => $this->core->getConfig()->getTerm(),
             'course' => $this->core->getConfig()->getCourse(),
         ];

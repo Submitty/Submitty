@@ -3,7 +3,7 @@
 Script to trigger the generate grade summaries.
 
 Usage:
-./generate_grade_summaries.py <semester> <course>
+./generate_grade_summaries.py <semester> <course> <source>
 """
 
 import argparse
@@ -372,7 +372,10 @@ def load_and_save_gui_customization(semester, course, token):
         '{}/api/courses/{}/{}/reports/build_form'.format(
             base_url, semester, course
         ),
-        headers={'Authorization': token}
+        headers={
+            'Authorization': token,
+            'source': 'submitty_daemon'
+        }
     )
 
     if build_response.status_code == 200 and build_response.json()['status'] == 'success':
@@ -395,6 +398,45 @@ def load_and_save_gui_customization(semester, course, token):
     print("Successfully completed the Rainbow Grades build process for {}.{}".format(
         semester, course
     ))
+
+
+def save_and_build_rainbow_grades(semester, course, token):
+    """Loads and saves the GUI customization for the given course."""
+    try:
+        # Try to select the GUI customization option to save changes based on the existing customization files
+        select_response = requests.post(
+            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
+                base_url, semester, course
+            ),
+            headers={'Authorization': token},
+            data={
+                "selected_value": "gui",
+                "source": "submitty_daemon"
+            }
+        )
+
+        if select_response.status_code == 200:
+            status = select_response.json()['status']
+
+            if status == 'success':
+                # Successful response implies the GUI customization is being applied for the given course
+                load_and_save_gui_customization(semester, course, token)
+            else:
+                message = select_response.json()['message']
+
+                if message == 'Manual customizations are currently applied.':
+                    # Manual customizations are currently applied, so we can proceed with the grade summaries
+                    pass
+                else:
+                    print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
+                        semester, course, message
+                    ), file=stderr)
+                    exit(-1)
+    except Exception as gui_exception:
+        print("ERROR: Failed to load or save GUI customization for {}.{} - {}".format(
+            semester, course, gui_exception
+        ), file=stderr)
+        exit(-1)
 
 
 def generate_grade_summaries(semester, course, token):
@@ -433,49 +475,19 @@ def main():
     )
     parser.add_argument('semester')
     parser.add_argument('course')
+    parser.add_argument('source')
     args = parser.parse_args()
 
     semester = args.semester
     course = args.course
     token = creds['token']
+    source = args.source
 
-    try:
-        # Try to select the GUI customization option to save changes based on the existing customization files
-        select_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-            data={
-                "selected_value": "gui",
-                "source": "submitty_daemon"
-            }
-        )
+    if source == 'submitty_daemon':
+        # Only save and build Rainbow Grades if the source is submitty_daemon
+        save_and_build_rainbow_grades(semester, course, token)
 
-        if select_response.status_code == 200:
-            status = select_response.json()['status']
-
-            if status == 'success':
-                # Successful response implies the GUI customization is being applied for the given course
-                load_and_save_gui_customization(semester, course, token)
-            else:
-                message = select_response.json()['message']
-
-                if message == 'Manual customizations are currently applied.':
-                    # Manual customizations are currently applied, so we can proceed with the grade summaries
-                    pass
-                else:
-                    print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
-                        semester, course, message
-                    ), file=stderr)
-                    exit(-1)
-    except Exception as gui_exception:
-        print("ERROR: Failed to load or save GUI customization for {}.{} - {}".format(
-            semester, course, gui_exception
-        ), file=stderr)
-        exit(-1)
-
-    # Generate Rainbow Grades Grade Summaries
+    # Always generate Rainbow Grades Grade Summaries
     generate_grade_summaries(semester, course, token)
 
 
