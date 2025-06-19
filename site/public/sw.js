@@ -11,7 +11,7 @@ self.addEventListener('install', (installEvent) => {
 });
 
 self.addEventListener('activate', (event) => {
-    if (self.clients && typeof self.clients.claim === 'function') {
+    if (typeof self.clients === 'object' && typeof self.clients.claim === 'function') {
         // Wait until all clients are controlled by this service worker
         event.waitUntil(self.clients.claim());
     }
