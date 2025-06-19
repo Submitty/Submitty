@@ -701,7 +701,8 @@ gradeables:
           - gcm_note: Question 1 Mark 1
             gcm_points: -5
     eg_max_random_submissions: 0
-  - gradeable_config: test_word_upload
+
+  - gradeable_config: upload_word_docx
     components:
       - gc_lower_clamp: 0
         gc_default: 5
