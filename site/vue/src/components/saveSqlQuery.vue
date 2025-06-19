@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Popup from './popup.vue';
-import { buildCourseUrl, displaySuccessMessage, getCsrfToken } from '../../../ts/utils/server';
+import { displaySuccessMessage } from '../../../ts/utils/server';
+import { saveSqlQuery, type ServerResponse } from '../../../ts/sql-toolbox';
 
 const data = defineModel<{
     query_name: string;
@@ -9,14 +10,8 @@ const data = defineModel<{
 }>('data', { required: true });
 
 const emit = defineEmits<{
-    add: [id: number, query_name: string, query: string];
+    addSavedQuery: [id: number, query_name: string, query: string];
 }>();
-
-type ServerResult = {
-    status: string;
-    message: string | null;
-    data: number;
-};
 
 const showPopup = ref(false);
 const error = ref({
@@ -37,36 +32,18 @@ const handleToggle = () => {
 };
 
 const handleSave = async () => {
-    const form = new FormData();
-    form.append('csrf_token', getCsrfToken());
-    form.append('query_name', data.value.query_name);
-    form.append('query', data.value.query);
+    const response = await saveSqlQuery(data.value.query_name, data.value.query) as ServerResponse<number>;
 
-    try {
-        const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries']), {
-            method: 'POST',
-            body: form,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save query');
-        }
-
-        const result = await response.json() as ServerResult;
-        if (result.status === 'success') {
-            displaySuccessMessage('Query saved successfully!');
-            const insertedId: number = result.data;
-            emit('add', insertedId, data.value.query_name, data.value.query);
-            showPopup.value = false;
-            data.value.query_name = '';
-            data.value.query = '';
-        }
-        else {
-            displayError(result.message ?? 'An unknown error occurred while saving the query. Please try again later.');
-        }
+    if (response.status === 'success') {
+        displaySuccessMessage('Query saved successfully!');
+        const insertedId: number = response.data;
+        emit('addSavedQuery', insertedId, data.value.query_name, data.value.query);
+        showPopup.value = false;
+        data.value.query_name = '';
+        data.value.query = '';
     }
-    catch (e) {
-        displayError(`An error occurred while saving the query: ${(e as Error).message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
+    else {
+        displayError(`An error occurred while saving the query: ${response.message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
     }
 };
 </script>
@@ -137,6 +114,12 @@ const handleSave = async () => {
 </template>
 
 <style lang="css" scoped>
+#save-query-btn
+{
+  margin-top: 5px;
+  margin-right: 5px;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

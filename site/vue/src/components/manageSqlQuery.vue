@@ -1,23 +1,17 @@
 <script setup lang="ts">
 import Popup from './popup.vue';
-import { buildCourseUrl, getCsrfToken, displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
+import { displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
 import { ref } from 'vue';
-import type { QueryListEntry } from '../../../ts/sql-toolbox';
+import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '../../../ts/sql-toolbox';
 
 const { queries } = defineProps<{
     queries: QueryListEntry[];
 }>();
 
 const emit = defineEmits<{
-    delete: [id: number];
-    addToQuery: [query: string];
+    deleteSavedQuery: [id: number];
+    addCurrentQuery: [query: string];
 }>();
-
-interface ServerResult {
-    status: string;
-    message: string | null;
-    data: { [key: string]: number | string | null }[];
-}
 
 const showPopup = ref(false);
 
@@ -28,7 +22,8 @@ const handleToggle = () => {
 const addQuery = (id: number) => {
     const query = queries.find((q) => q.id === id);
     if (query) {
-        emit('addToQuery', query.query);
+        emit('addCurrentQuery', query.query);
+        showPopup.value = false;
     }
 };
 
@@ -37,32 +32,15 @@ const handleDeletion = async (id: number) => {
         return;
     }
 
-    const form = new FormData();
-    form.append('csrf_token', getCsrfToken());
-    form.append('query_id', id.toString());
+    const response = await deleteSqlQuery(id) as ServerResponse<string>;
 
-    try {
-        const response = await fetch(buildCourseUrl(['sql_toolbox', 'queries', 'delete']), {
-            method: 'POST',
-            body: form,
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to delete query.');
-        }
-
-        const json = await response.json() as ServerResult;
-        if (json.status === 'fail') {
-            throw new Error(json.message ?? 'Failed to delete query.');
-        }
-
-        // remove the query from the main ref
-        emit('delete', id);
+    if (response.status === 'success') {
+        emit('deleteSavedQuery', id);
         displaySuccessMessage('Query deleted successfully!');
     }
-    catch (e) {
-        console.error('Error deleting query:', e);
-        displayErrorMessage(`Error deleting query: ${(e as Error).message ?? 'An unknown error occurred while saving the query. Please try again later.'}`);
+    else {
+        console.error('Error deleting query:', response.message);
+        displayErrorMessage(`Error deleting query: ${response.message}`);
     }
 };
 
@@ -70,7 +48,7 @@ const handleDeletion = async (id: number) => {
 
 <template>
   <Popup
-    title="Add a Saved Query"
+    title="Add or Delete a Saved Query"
     :visible="showPopup"
     @toggle="handleToggle"
   >
@@ -80,7 +58,7 @@ const handleDeletion = async (id: number) => {
         class="btn btn-primary"
         @click="handleToggle"
       >
-        Saved Queries
+        Manage Saved Queries
       </button>
     </template>
 
@@ -140,7 +118,6 @@ const handleDeletion = async (id: number) => {
   margin-bottom: 5px;
 }
 .td-wrap-element {
-  width: 50%;
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;

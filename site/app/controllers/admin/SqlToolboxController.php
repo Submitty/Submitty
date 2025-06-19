@@ -78,12 +78,6 @@ class SqlToolboxController extends AbstractController {
         }
     }
 
-    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["GET"])]
-    public function getSavedQuery(): JsonResponse {
-        $user_id = $this->core->getUser()->getId();
-        return JsonResponse::getSuccessResponse($this->core->getQueries()->getInstructorQueries($user_id));
-    }
-
     #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["POST"])]
     public function saveQuery(): JsonResponse {
         $user_id = $this->core->getUser()->getId();
