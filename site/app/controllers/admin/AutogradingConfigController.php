@@ -120,12 +120,6 @@ class AutogradingConfigController extends AbstractController {
                 );
             }
         }
-
-        $invalid_config_message = $gradeable->validateAutogradingConfig($target_dir);
-        if ($invalid_config_message !== null) {
-            $this->core->addNoticeMessage($invalid_config_message);
-        }
-
         $msg = 'Gradeable config uploaded';
         $this->core->addSuccessMessage($msg);
         return new MultiResponse(
