@@ -523,7 +523,7 @@ input[type="button"].btn-block {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 .alert,

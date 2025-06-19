@@ -12,7 +12,7 @@ duplicate_keys = []
 def detect_duplicate_keys(list_of_pairs):
     """https://gist.github.com/htv2012/ad8c19ac43e128aa7ee1"""
     key_count = collections.Counter(k for k, _ in list_of_pairs)
-    duplicates = ', '.join(k for k, v in key_count.items() if v > 1)
+    duplicates = ', '.join(f'\'{k}\'' for k, v in key_count.items() if v > 1)
 
     if len(duplicates) != 0:
         duplicate_keys.append(duplicates)
