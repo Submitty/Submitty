@@ -570,6 +570,7 @@ if not args.worker:
         container_dict = {
             "default": [
                           "submitty/autograding-default:latest",
+                          "submitty/libreoffice-writer:latest",
                           "submitty/python:latest",
                           "submitty/clang:latest",
                           "submitty/gcc:latest",
