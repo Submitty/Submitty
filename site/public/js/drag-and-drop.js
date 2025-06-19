@@ -414,7 +414,9 @@ function addLabel(filename, filesize, part, previous) {
     const fileTrashElement = document.createElement('td');
     fileTrashElement.setAttribute('class', 'file-trash');
 
+    // eslint-disable-next-line no-unsanitized/property
     fileDataElement.innerHTML = filename;
+    // eslint-disable-next-line no-unsanitized/property
     fileTrashElement.innerHTML = `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
 
     uploadRowElement.appendChild(fileDataElement);

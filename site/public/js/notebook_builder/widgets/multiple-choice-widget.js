@@ -70,6 +70,7 @@ class MultipleChoiceWidget extends Widget {
     getMultipleChoice() {
         const table = document.createElement('div');
         table.classList.add('mc-table');
+        // eslint-disable-next-line no-unsanitized/property
         table.innerHTML = this.getMultipleChoiceTemplate();
 
         const insertOption = (value, description) => {
@@ -135,6 +136,7 @@ class MultipleChoiceWidget extends Widget {
         const mc_option = document.createElement('div');
         mc_option.classList.add('mc-entered-option');
         mc_option.classList.add('mc-row');
+        // eslint-disable-next-line no-unsanitized/property
         mc_option.innerHTML = this.getMultipleChoiceOptionTemplate(value, description);
 
         // Handle when an up, down, or remove mc option button is clicked

@@ -62,6 +62,7 @@ class ItemWidget extends Widget {
     update(interactive_area) {
         this.commitState();
 
+        // eslint-disable-next-line no-unsanitized/property
         interactive_area.innerHTML = this.getUpdatedTemplate();
 
         const from_pool_div = interactive_area.querySelector('.from-pool-div');
@@ -121,6 +122,7 @@ class ItemWidget extends Widget {
      */
     block() {
         this.commitState();
+        // eslint-disable-next-line no-unsanitized/property
         this.dom_pointer.querySelector('.interactive-container').innerHTML = this.getBlockedTemplate();
     }
 

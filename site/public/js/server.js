@@ -215,6 +215,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
 
         const emElement = document.createElement('em');
+        // eslint-disable-next-line no-unsanitized/property
         emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}${num_links_txt}`;
 
         cm_message.appendChild(emElement);
@@ -483,6 +484,7 @@ function editFilePathRecommendations() {
         }
 
         options[i].value = newOption;
+        // eslint-disable-next-line no-unsanitized/property
         options[i].innerHTML = newOption;
     }
     registerSelect2Widget('new-file-name', 'material-edit-form');
@@ -1007,6 +1009,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'black';
             new_element.style.fontStyle = 'normal';
         }
+        // eslint-disable-next-line no-unsanitized/property
         new_element.innerHTML = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
@@ -1016,6 +1019,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'grey';
             new_element.style.fontStyle = 'italic';
         }
+        // eslint-disable-next-line no-unsanitized/property
         new_element.innerHTML = user;
         icon.className = 'fas fa-eye-slash';
         icon.title = 'Hide full user information';
@@ -1201,6 +1205,7 @@ function openPopUp(css, title, count, testcase_num, side) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${css}" />`;
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open('', '_blank', 'status=1,width=750,height=500');
+    // eslint-disable-next-line no-unsanitized/method
     my_window.document.write(elem_html);
     my_window.document.close();
     my_window.focus();
@@ -1778,6 +1783,7 @@ function flagUserImage(user_id, flag) {
                 // Change icon
                 const a = image_container.querySelector('a');
                 a.href = data.href;
+                // eslint-disable-next-line no-unsanitized/property
                 a.innerHTML = data.icon_html;
 
                 displaySuccessMessage(success_message);

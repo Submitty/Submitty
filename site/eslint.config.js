@@ -9,6 +9,7 @@ const tseslint = require('typescript-eslint');
 // @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
 const vuelint = require('eslint-plugin-vue');
+const noUnsanitized = require('eslint-plugin-no-unsanitized');
 
 module.exports = tseslint.config(
     {
@@ -25,7 +26,7 @@ module.exports = tseslint.config(
     },
     {
         name: 'Base options for all files',
-        extends: [eslint.configs.recommended],
+        extends: [eslint.configs.recommended, noUnsanitized.configs.recommended],
         languageOptions: {
             globals: {
                 ...globals.jquery,

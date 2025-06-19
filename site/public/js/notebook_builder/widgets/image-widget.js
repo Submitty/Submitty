@@ -18,6 +18,7 @@ class ImageWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
+        // eslint-disable-next-line no-unsanitized/property
         interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
 
         if (this.state.image) {

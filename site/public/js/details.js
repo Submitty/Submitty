@@ -37,6 +37,7 @@ $(document).ready(() => {
         if (idx) {
             // the content to be added is inside this data attr
             content = $(this).data('col-title');
+            // eslint-disable-next-line no-unsanitized/property
             style.innerHTML += `
               #details-table td:nth-of-type(${idx + 1}):before {
                   content: "${content}";

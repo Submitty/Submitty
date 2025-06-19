@@ -76,6 +76,7 @@ function confirmExtension(option) {
 function extensionPopup(json) {
     $('.popup-form').css('display', 'none');
     const form = $('#more_extension_popup');
+    // eslint-disable-next-line no-unsanitized/property
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
     $('#team-extension-cancel').focus();

@@ -19,6 +19,7 @@ class ItempoolWidget extends Widget {
 
         // Modify default heading area
         const item_name_div = document.createElement('div');
+        // eslint-disable-next-line no-unsanitized/property
         item_name_div.innerHTML = this.getTemplate();
 
         const heading_area = container.querySelector('.heading-container');

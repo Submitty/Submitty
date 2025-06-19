@@ -13,6 +13,7 @@ class FormOptionsWidget extends Widget {
         const heading_container = this.getHeadingContainer('Form Options');
 
         const interactive_container = this.getInteractiveContainer();
+        // eslint-disable-next-line no-unsanitized/property
         interactive_container.innerHTML = this.getFormOptionsTemplate();
 
         const container = document.createElement('div');
@@ -113,6 +114,7 @@ class FormOptionsWidget extends Widget {
     appendStatusMessage(message) {
         const status_div = document.querySelector('.form-options-widget .status');
         const p = document.createElement('p');
+        // eslint-disable-next-line no-unsanitized/property
         p.innerHTML = message;
         status_div.appendChild(p);
     }

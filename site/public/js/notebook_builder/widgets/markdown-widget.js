@@ -22,6 +22,7 @@ class MarkdownWidget extends Widget {
         const label = document.createElement('label');
         label.setAttribute('for', `notebook-builder-markdown-${NUM_MARKDOWN}`);
         label.style.display = 'none';
+        // eslint-disable-next-line no-unsanitized/property
         label.innerHTML = `Markdown Input #${NUM_MARKDOWN}`;
 
         // Setup interactive area
