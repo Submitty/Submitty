@@ -71,7 +71,6 @@ function updateTable() {
 
                 // Update Grading Monitor table
                 table = document.getElementById('autograding-status-table');
-                console.log(json);
                 const new_row = table.insertRow(3);
                 let new_cell = new_row.insertCell();
                 new_cell.innerText = json.time;
