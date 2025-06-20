@@ -15,12 +15,12 @@
                     </div>
                 </div>
 
-                <table class='table table-striped table-bordered persist-area' style='text-align: left'>
+                <table class='table table-striped table-bordered persist-area' style='text-align: left' id="pending-gradeable-table">
                     <thead>
                         <tr>
-                            <th>Course</th>
+                            {{ self.sortable_header('Course', 'course') }}
                             <th>Gradeable</th>
-                            <th>Submission Closes</th>
+                            {{ self.sortable_header('Submission Closes', 'close_date') }}
                             <th>Grading Opens</th>
                             <th>Grading Closes</th>
                         </tr>
@@ -46,3 +46,16 @@
         </div>
     {% endif %}
 </div>
+
+{% macro sortable_header(title, sort_key) %}
+    <th>
+        <a href="#"
+        onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
+        class="sortable-header"
+        data-sort-key="{{ sort_key }}">
+            {{ title }}
+            <i class="fa fa-sort"></i>
+        </a>
+    </th>
+{% endmacro %}
+
