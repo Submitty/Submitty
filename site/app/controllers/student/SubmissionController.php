@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\User;
@@ -829,6 +830,15 @@ class SubmissionController extends AbstractController {
         $generate_images_data = [
             "job"       => "GeneratePdfImages",
             "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
+            "redactions" => array_map(
+                function (Redaction $redaction) {
+                    return [
+                        'page_number' => $redaction->getPageNumber(),
+                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
+                    ];
+                },
+                $gradeable->getRedactions()
+            ),
             "output_dir" => str_replace("submissions", "results", $version_path),
         ];
 
