@@ -1,7 +1,7 @@
 {
   "autograding" : {
         "submission_to_runner" : [  "*.ipynb", "*.png" ],
-        "work_to_details" : [ "**/*.ipynb", "**/*.png" ]
+        "work_to_details" : [ "**/*.ipynb", "**/*.png", "**/*.txt", "**/*.err" ]
     },
   "autograding_method": "docker",
   "resource_limits" : {
@@ -12,13 +12,13 @@
   },
   "testcases": [
     {
-      "title": "Executes successfully: example_executed.ipynb",
-      "command": "python3 grader.py example.ipynb",
+      "title": "Executes successfully",
+      "command": "python3 grader.py",
       "points": 1,
       "validation": [
         {
           "method": "fileExists",
-          "actual_file": "example_executed.ipynb",
+          "actual_file": "executed.ipynb",
           "show_actual" : "always",
           "show_message" : "always"
         }
@@ -29,7 +29,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "STDOUT.txt",
+          "source" : "cell0.txt",
           "destination" : "./"
         }
       ], 
@@ -38,7 +38,7 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "STDOUT.txt",
+          "actual_file": "cell0.txt",
           "expected_string" : "hello world!"
         }
       ]
@@ -48,7 +48,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "one_submitted.png",
+          "source" : "cell1.png",
           "destination" : "./"
         }
       ], 
@@ -56,7 +56,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "one_submitted.png",
+          "actual_file": "cell1.png",
           "expected_file": "one.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
@@ -71,7 +71,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "two_submitted.png",
+          "source" : "cell2.png",
           "destination" : "./"
         }
       ], 
@@ -79,7 +79,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "two_submitted.png",
+          "actual_file": "cell2.png",
           "expected_file": "two.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".3",
@@ -94,7 +94,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "graph_submitted.png",
+          "source" : "cell3.png",
           "destination" : "./"
         }
       ], 
@@ -102,7 +102,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "graph_submitted.png",
+          "actual_file": "cell3.png",
           "expected_file": "graph.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
@@ -117,7 +117,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "circuit_submitted.png",
+          "source" : "cell4.png",
           "destination" : "./"
         }
       ], 
@@ -125,7 +125,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "circuit_submitted.png",
+          "actual_file": "cell4.png",
           "expected_file": "circuit.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".2",
@@ -140,7 +140,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "histogram_submitted.png",
+          "source" : "cell5.png",
           "destination" : "./"
         }
       ], 
@@ -148,7 +148,7 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "histogram_submitted.png",
+          "actual_file": "cell5.png",
           "expected_file": "histogram.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
