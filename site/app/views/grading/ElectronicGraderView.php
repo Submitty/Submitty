@@ -1019,11 +1019,7 @@ HTML;
             $limimted_access_blind = true;
             $isStudentInfoPanel = false;
         }
-
-        if (stripos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Cypress') === false) {
-            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
-        }
-
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         $this->core->getOutput()->enableMobileViewport();
 
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);

@@ -1032,9 +1032,8 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        if (stripos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Cypress') === false) {
-            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
-        }
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+
 
         // Get the number of visible testcases (needed to see if there is autograding)
         $num_visible_testcases = 0;
