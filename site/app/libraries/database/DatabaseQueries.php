@@ -5221,6 +5221,7 @@ AND gc_id IN (
             'team_joined_email',
             'team_member_submission',
             'self_notification',
+            'all_released_grades',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -5231,6 +5232,7 @@ AND gc_id IN (
             'team_member_submission_email',
             'self_registration_email',
             'self_notification_email',
+            'all_released_grades_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -5781,6 +5783,99 @@ AND gc_id IN (
         ", [$gradeable->getId()]);
     }
 
+    /**
+     * Get pending gradeable notifications for a given gradeable id
+     *
+     * @param string $g_id the gradeable id to get notifications for
+     * @return int
+     */
+    public function getPendingGradeableNotifications($g_id): int {
+        /*
+        TODO: This query is a variation of a similar query found within `/sbin/send_notification.py`.
+        ElectronicGraderController.showStatus() and ElectronicGraderView.statusPage() should be refactored
+        to ensure the gradeable status data is accessible to other application components, such as
+        AdminGradeableController for modularity.
+        */
+        $this->course_db->query(
+            "
+            WITH gradeables AS (
+                SELECT DISTINCT
+                    g.g_id AS g_id,
+                    g.g_title AS g_title,
+                    t.team_id AS team_id,
+                    COALESCE(egv.user_id, t.user_id) AS user_id,
+                    eg.eg_use_ta_grading AS eg_use_ta_grading,
+                    egd.autograding_complete AS autograding_complete,
+                    gc.gc_id AS component,
+                    CONCAT(gcd.gd_id, '-', gcd.gc_id, '-', gcd.gcd_grader_id)
+                        AS graded_component
+                FROM gradeable AS g
+                INNER JOIN electronic_gradeable AS eg
+                    ON g.g_id = eg.g_id
+                    AND eg.eg_student_view IS TRUE
+                    AND g.g_grade_released_date <= NOW()
+                INNER JOIN electronic_gradeable_version AS egv
+                    ON g.g_id = egv.g_id
+                    AND egv.active_version != '0'
+                    AND egv.g_notification_sent IS FALSE
+                INNER JOIN gradeable_component AS gc
+                    ON g.g_id = gc.g_id
+                INNER JOIN gradeable_data AS gd
+                    ON g.g_id = gd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                LEFT JOIN gradeable_teams AS gt
+                    ON gd.g_id = gt.g_id
+                    AND gd.gd_team_id = gt.team_id
+                LEFT JOIN teams AS t
+                    ON gt.team_id = t.team_id
+                LEFT JOIN electronic_gradeable_data AS egd
+                    ON g.g_id = egd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                    AND egv.active_version = egd.g_version
+                LEFT JOIN gradeable_component_data AS gcd
+                    ON gd.gd_id = gcd.gd_id
+                    AND gc.gc_id = gcd.gc_id
+                    AND gcd.gcd_grader_id IS NOT NULL
+                    AND egv.active_version = gcd.gcd_graded_version
+            )
+            SELECT DISTINCT
+                g_id,
+                g_title,
+                team_id,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
+                COALESCE(ns.all_released_grades, TRUE) AS site_enabled,
+                COALESCE(ns.all_released_grades_email, TRUE) AS email_enabled
+            FROM gradeables AS g
+            INNER JOIN users AS u
+                ON g.user_id = u.user_id
+            LEFT JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
+            WHERE g.g_id = ?
+            GROUP BY g_id, g_title, u.user_id, u.user_email, team_id,
+                ns.all_released_grades, ns.all_released_grades_email,
+                eg_use_ta_grading,autograding_complete
+            HAVING (
+                eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE
+                OR
+                COUNT(component) = COUNT(graded_component)
+            );",
+            [$g_id]
+        );
+
+        return count($this->course_db->rows());
+    }
+
+    public function resetGradeableNotifications(Gradeable $gradeable): void {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET g_notification_sent = FALSE
+            WHERE g_id = ?;
+        ", [$gradeable->getId()]);
+    }
+
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -5902,7 +5997,16 @@ AND gc_id IN (
               pgp.*,
               r.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
-              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
+              (
+                SELECT COUNT(*)
+                FROM (
+                    SELECT 1
+                    FROM electronic_gradeable_version
+                    WHERE g_id = g.g_id AND g_notification_sent IS TRUE
+                    GROUP BY user_id, team_id
+                ) AS distinct_submissions
+            ) AS notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT
@@ -8877,12 +8981,13 @@ WHERE current_state IN
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
-                 ns.self_notification,
+                 ns.self_notification, ns.all_released_grades,
                  ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
-                 ns.self_notification_email,sr.grading_registration_sections
+                 ns.self_notification_email, ns.all_released_grades_email,
+                 sr.grading_registration_sections
 
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id

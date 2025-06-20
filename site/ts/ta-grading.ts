@@ -1,11 +1,9 @@
 import { togglePanelSelectorModal } from './panel-selector-modal';
 import { initializeResizablePanels } from './resizable-panels';
 import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta-grading-keymap';
+import { gotoNextStudent, gotoPrevStudent } from './ta-grading-navigation';
 import {
-    closeAllComponents,
     closeComponent,
-    Component,
-    ComponentGradeInfo,
     CUSTOM_MARK_ID,
     getAnonId,
     getComponentIdByOrder,
@@ -16,54 +14,17 @@ import {
     getPrevComponentId,
     isSilentEditModeEnabled,
     NO_COMPONENT_ID,
+    toggleComponent as oldToggleComponent,
     onToggleEditMode,
     scrollToComponent,
     scrollToOverallComment,
     toggleCommonMark,
-    toggleComponent,
 } from './ta-grading-rubric';
 
 declare global {
     interface Window {
         deleteAttachment(target: string, file_name: string): void;
-        reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
-        toggleComponent(component_id: number, saveChanges: boolean, edit_mode: boolean): Promise<void>;
-        onAjaxInit(): void;
-        showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
-        onAddNewMark(me: HTMLElement): Promise<void>;
-        onRestoreMark(me: HTMLElement): void;
-        onDeleteMark(me: HTMLElement): void;
-        onDeleteComponent(me: HTMLElement): Promise<void>;
-        importComponentsFromFile(me: HTMLElement): Promise<void>;
-        onAddComponent(peer: boolean): Promise<void>;
-        onMarkPointsChange(me: HTMLElement): Promise<void>;
-        onGetMarkStats(me: HTMLElement): Promise<void>;
-        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
-        onCancelEditRubricComponent(me: HTMLElement): void;
-        onChangeOverallComment(me: HTMLElement): Promise<void>;
-        onCancelComponent(me: HTMLElement): Promise<void>;
-        onCustomMarkChange(me: HTMLElement): Promise<void>;
-        onToggleMark(me: HTMLElement): Promise<void>;
-        onToggleCustomMark(me: HTMLElement): Promise<void>;
-        onVerifyAll(me: HTMLElement): Promise<void>;
-        onVerifyComponent(me: HTMLElement): Promise<void>;
-        onClickCountUp(me: HTMLElement): void;
-        onClickCountDown(me: HTMLElement): void;
-        onComponentPointsChange(me: HTMLElement): Promise<void>;
-        onComponentTitleChange(me: HTMLElement): void;
-        onComponentPageNumberChange(me: HTMLElement): void;
-        onMarkPublishChange(me: HTMLElement): void;
-        setPdfPageAssignment(page: number): Promise<void>;
-        reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void>;
-        open_overall_comment_tab(user: string): void;
-        updateAllComponentVersions(): Promise<void>;
-        showSettings(): void;
-        restoreAllHotkeys(): void;
-        removeAllHotkeys(): void;
-        remapHotkey(i: number): void;
-        remapUnset(i: number): void;
         updateThePanelsElements(panelsAvailabilityObj: Record<PanelElement, boolean>): void;
-        gotoMainPage(): void;
         changePanelsLayout (panelsCount: string | number, isLeftTaller: boolean, twoOnRight: boolean): void;
         exchangeTwoPanels(): void;
         openAll (click_class: string, class_modifier: string): void;
@@ -73,47 +34,13 @@ declare global {
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
-        togglePanelSelectorModal: (show: boolean) => void;
-        closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
-        reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
         openFrame(html_file: string, url_file: string, num: string, pdf_full_panel: boolean, panel: string): void;
-        gotoPrevStudent(): void;
-        gotoNextStudent(): void;
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
-        ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]): Promise<string | undefined>;
-        getGradeableId(): string | undefined;
-        getAnonId (): string | undefined;
-        canVerifyGraders(): boolean;
-        getComponentIdFromDOMElement(me: HTMLElement): number;
-        isItempoolAvailable(): string;
-        getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
-        getAllComponentsFromDOM(): Component[];
-        toggleCustomMark(component_id: number): Promise<void>;
-        onToggleEditMode(): Promise<void>;
-        addComponent(peer: boolean): Promise<string | undefined>;
-        deleteComponent(component_id: number): Promise<string | undefined>;
-        addNewMark(component_id: number): Promise<void>;
-
-        PDF_PAGE_NONE: number;
-        PDF_PAGE_STUDENT: number;
-        PDF_PAGE_INSTRUCTOR: number;
-        taLayoutDet: {
-            numOfPanelsEnabled: number;
-            isFullScreenMode: boolean;
-            isFullLeftColumnMode: boolean;
-            currentOpenPanel: string | null;
-            currentTwoPanels: Record<string, string | null>;
-            currentActivePanels: Record<string, boolean>;
-            dividedColName: string;
-            leftPanelWidth: string;
-            bottomPanelHeight: string;
-            bottomFourPanelRightHeight: string;
-        };
     }
     interface JQueryStatic {
         active: number;
@@ -130,7 +57,7 @@ const MOBILE_WIDTH = 540;
 let isMobileView = false;
 
 // Panel elements info to be used for layout designs
-export type PanelElement =
+type PanelElement =
     | 'autograding_results'
     | 'grading_rubric'
     | 'submission_browser'
@@ -154,9 +81,21 @@ let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'grade_inquiry_info', icon: '.grading_toolbar .grade_inquiry_icon' },
     { str: 'notebook-view', icon: '.grading_toolbar .fas fa-book-open' },
 ];
+type TaLayoutDet = {
+    numOfPanelsEnabled: number;
+    isFullScreenMode: boolean;
+    isFullLeftColumnMode: boolean;
+    currentOpenPanel: string | null;
+    currentTwoPanels: Record<string, string | null>;
+    currentActivePanels: Record<string, boolean>;
+    dividedColName: string;
+    leftPanelWidth: string;
+    bottomPanelHeight: string;
+    bottomFourPanelRightHeight: string;
+};
 
 // Tracks the layout of TA grading page
-window.taLayoutDet = {
+const taLayoutDet: TaLayoutDet = {
     numOfPanelsEnabled: 1,
     isFullScreenMode: false,
     isFullLeftColumnMode: false,
@@ -222,7 +161,7 @@ window.updateThePanelsElements = function (panelsAvailabilityObj: Record<PanelEl
 };
 
 $(() => {
-    Object.assign(window.taLayoutDet, getSavedTaLayoutDetails());
+    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     // Check initially if its the mobile screen view or not
     isMobileView = window.innerWidth <= MOBILE_WIDTH;
     initializeTaLayout();
@@ -233,6 +172,23 @@ $(() => {
         // if the width is switched between smaller and bigger screens, re-initialize the layout
         if (wasMobileView !== isMobileView) {
             initializeTaLayout();
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        const name_div = $('#grading-panel-student-name');
+        // have to calculate the height since the item is positioned absolutely
+        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
+        const padding_bottom = 12;
+        name_div.css('height', height - padding_bottom);
+        name_div.show();
+        const panel_buttons_bbox = $('.panel-header-box')[0].getClientRects()[0];
+        const name_div_bbox = name_div[0].getClientRects()[0];
+
+        const overlap_margin = 15;
+        const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
+        if (overlapping || taLayoutDet.isFullLeftColumnMode) {
+            $('#grading-panel-student-name').hide();
         }
     });
 
@@ -305,7 +261,7 @@ $(() => {
         const isPanelOpen = $(`#${panelId}`).is(':visible');
         // If panel is not in-view and two/three-panel-mode is enabled show the drop-down to select position,
         // otherwise just toggle it
-        if (isPanelOpen || +window.taLayoutDet.numOfPanelsEnabled === 1) {
+        if (isPanelOpen || +taLayoutDet.numOfPanelsEnabled === 1) {
             setPanelsVisibilities(panelId);
         }
         else {
@@ -332,7 +288,6 @@ $(() => {
         }
     });
 
-    // eslint-disable-next-line eqeqeq
     if (
         localStorage.getItem('notebook-setting-file-submission-expand')
         === 'true'
@@ -553,20 +508,21 @@ function changeStudentArrowTooltips(data: string) {
     }
 }
 
-window.toggleComponent = async function (component_id, saveChanges) {
-    await toggleComponent(component_id, saveChanges);
+async function toggleComponent(component_id: number, saveChanges: boolean, edit_mode: boolean): Promise<void> {
+    void edit_mode; // to avoid unused variable warning
+    await oldToggleComponent(component_id, saveChanges);
     changeStudentArrowTooltips(
         localStorage.getItem('general-setting-arrow-function') || 'default',
     );
-};
+}
 
 function checkNotebookScroll() {
     if (
-        window.taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
-        || window.taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
-        || window.taLayoutDet.currentTwoPanels.rightTop === 'notebook-view'
-        || window.taLayoutDet.currentTwoPanels.rightBottom === 'notebook-view'
-        || window.taLayoutDet.currentOpenPanel === 'notebook-view'
+        taLayoutDet.currentTwoPanels.leftTop === 'notebook-view'
+        || taLayoutDet.currentTwoPanels.leftBottom === 'notebook-view'
+        || taLayoutDet.currentTwoPanels.rightTop === 'notebook-view'
+        || taLayoutDet.currentTwoPanels.rightBottom === 'notebook-view'
+        || taLayoutDet.currentOpenPanel === 'notebook-view'
     ) {
         $('#notebook-view').scroll(delayedNotebookSave());
     }
@@ -669,35 +625,35 @@ function notebookScrollSave() {
 // returns taLayoutDet object from LS, and if its not present returns empty object
 function getSavedTaLayoutDetails() {
     const savedData = localStorage.getItem('taLayoutDetails');
-    return savedData ? (JSON.parse(savedData) as typeof window.taLayoutDet) : {} as typeof window.taLayoutDet;
+    return savedData ? (JSON.parse(savedData) as TaLayoutDet) : {} as TaLayoutDet;
 }
 
 function saveTaLayoutDetails() {
-    localStorage.setItem('taLayoutDetails', JSON.stringify(window.taLayoutDet));
+    localStorage.setItem('taLayoutDetails', JSON.stringify(taLayoutDet));
 }
 
 function saveResizedColsDimensions(updateValue: string, isHorizontalResize: boolean) {
     if (isHorizontalResize) {
-        window.taLayoutDet.bottomPanelHeight = updateValue;
+        taLayoutDet.bottomPanelHeight = updateValue;
     }
     else {
-        window.taLayoutDet.leftPanelWidth = updateValue;
+        taLayoutDet.leftPanelWidth = updateValue;
     }
     saveTaLayoutDetails();
 }
 
 function saveRightResizedColsDimensions(updateValue: string, isHorizontalResize: boolean) {
     if (isHorizontalResize) {
-        window.taLayoutDet.bottomFourPanelRightHeight = updateValue;
+        taLayoutDet.bottomFourPanelRightHeight = updateValue;
     }
     else {
-        window.taLayoutDet.leftPanelWidth = updateValue;
+        taLayoutDet.leftPanelWidth = updateValue;
     }
     saveTaLayoutDetails();
 }
 
 function initializeHorizontalTwoPanelDrag() {
-    if (window.taLayoutDet.dividedColName === 'RIGHT') {
+    if (taLayoutDet.dividedColName === 'RIGHT') {
         initializeResizablePanels(
             panelsBucket.rightBottomSelector,
             rightHorizDragBarSelector,
@@ -705,8 +661,8 @@ function initializeHorizontalTwoPanelDrag() {
             saveResizedColsDimensions,
         );
     }
-    if (window.taLayoutDet.dividedColName === 'LEFT') {
-        if (window.taLayoutDet.numOfPanelsEnabled === 4) {
+    if (taLayoutDet.dividedColName === 'LEFT') {
+        if (taLayoutDet.numOfPanelsEnabled === 4) {
             initializeResizablePanels(
                 panelsBucket.rightBottomSelector,
                 rightHorizDragBarSelector,
@@ -727,9 +683,9 @@ function initializeTaLayout() {
     if (isMobileView) {
         resetSinglePanelLayout();
     }
-    else if (window.taLayoutDet.numOfPanelsEnabled) {
+    else if (taLayoutDet.numOfPanelsEnabled) {
         togglePanelLayoutModes(true);
-        if (window.taLayoutDet.isFullLeftColumnMode) {
+        if (taLayoutDet.isFullLeftColumnMode) {
             toggleFullLeftColumnMode(true);
         }
         // initialize the layout\
@@ -742,9 +698,11 @@ function initializeTaLayout() {
         initializeHorizontalTwoPanelDrag();
     }
     else {
-        setPanelsVisibilities(window.taLayoutDet.currentOpenPanel!);
+        if (taLayoutDet.currentOpenPanel) {
+            setPanelsVisibilities(taLayoutDet.currentOpenPanel);
+        }
     }
-    if (window.taLayoutDet.isFullScreenMode) {
+    if (taLayoutDet.isFullScreenMode) {
         toggleFullScreenMode();
     }
     updateLayoutDimensions();
@@ -755,35 +713,35 @@ function initializeTaLayout() {
 function updateLayoutDimensions() {
     // updates width of left columns (normal + full-left-col) with the last saved layout width
     $('.two-panel-item.two-panel-left').css({
-        width: window.taLayoutDet.leftPanelWidth ? window.taLayoutDet.leftPanelWidth : '50%',
+        width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : '50%',
     });
     // updates width of left columns (normal + full-left-col) with the last saved layout width
     const bottomRow
-        = window.taLayoutDet.dividedColName === 'RIGHT'
+        = taLayoutDet.dividedColName === 'RIGHT'
             ? $('.panel-item-section.right-bottom')
             : $('.panel-item-section.left-bottom');
     bottomRow.css({
-        height: window.taLayoutDet.bottomPanelHeight
-            ? window.taLayoutDet.bottomPanelHeight
+        height: taLayoutDet.bottomPanelHeight
+            ? taLayoutDet.bottomPanelHeight
             : '50%',
     });
 
-    if (window.taLayoutDet.numOfPanelsEnabled === 4) {
+    if (taLayoutDet.numOfPanelsEnabled === 4) {
         $('.panel-item-section.right-bottom').css({
-            height: window.taLayoutDet.bottomFourPanelRightHeight
-                ? window.taLayoutDet.bottomFourPanelRightHeight
+            height: taLayoutDet.bottomFourPanelRightHeight
+                ? taLayoutDet.bottomFourPanelRightHeight
                 : '50%',
         });
     }
 }
 
 function updatePanelOptions() {
-    if (window.taLayoutDet.numOfPanelsEnabled === 1) {
+    if (taLayoutDet.numOfPanelsEnabled === 1) {
         return;
     }
     $('.grade-panel .panel-position-cont').attr(
         'size',
-        window.taLayoutDet.numOfPanelsEnabled,
+        taLayoutDet.numOfPanelsEnabled,
     );
     const panelOptions: JQuery<HTMLOptionElement> = $(
         '.grade-panel .panel-position-cont option',
@@ -791,9 +749,9 @@ function updatePanelOptions() {
     panelOptions.each((idx) => {
         if (panelOptions[idx].value === 'leftTop') {
             if (
-                window.taLayoutDet.numOfPanelsEnabled === 2
-                || (window.taLayoutDet.numOfPanelsEnabled === 3
-                    && window.taLayoutDet.dividedColName === 'RIGHT')
+                taLayoutDet.numOfPanelsEnabled === 2
+                || (taLayoutDet.numOfPanelsEnabled === 3
+                    && taLayoutDet.dividedColName === 'RIGHT')
             ) {
                 panelOptions[idx].text = 'Open as left panel';
             }
@@ -803,9 +761,9 @@ function updatePanelOptions() {
         }
         else if (panelOptions[idx].value === 'leftBottom') {
             if (
-                window.taLayoutDet.numOfPanelsEnabled === 2
-                || (window.taLayoutDet.numOfPanelsEnabled === 3
-                    && window.taLayoutDet.dividedColName === 'RIGHT')
+                taLayoutDet.numOfPanelsEnabled === 2
+                || (taLayoutDet.numOfPanelsEnabled === 3
+                    && taLayoutDet.dividedColName === 'RIGHT')
             ) {
                 panelOptions[idx].classList.add('hide');
             }
@@ -815,9 +773,9 @@ function updatePanelOptions() {
         }
         else if (panelOptions[idx].value === 'rightTop') {
             if (
-                window.taLayoutDet.numOfPanelsEnabled === 2
-                || (window.taLayoutDet.numOfPanelsEnabled === 3
-                    && window.taLayoutDet.dividedColName !== 'RIGHT')
+                taLayoutDet.numOfPanelsEnabled === 2
+                || (taLayoutDet.numOfPanelsEnabled === 3
+                    && taLayoutDet.dividedColName !== 'RIGHT')
             ) {
                 panelOptions[idx].text = 'Open as right panel';
             }
@@ -827,9 +785,9 @@ function updatePanelOptions() {
         }
         else if (panelOptions[idx].value === 'rightBottom') {
             if (
-                window.taLayoutDet.numOfPanelsEnabled === 2
-                || (window.taLayoutDet.numOfPanelsEnabled === 3
-                    && window.taLayoutDet.dividedColName !== 'RIGHT')
+                taLayoutDet.numOfPanelsEnabled === 2
+                || (taLayoutDet.numOfPanelsEnabled === 3
+                    && taLayoutDet.dividedColName !== 'RIGHT')
             ) {
                 panelOptions[idx].classList.add('hide');
             }
@@ -932,7 +890,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=file_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name
                                     === file_path[x]
@@ -948,7 +905,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=div_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name
                                     === file_path[x]
@@ -962,7 +918,6 @@ function readCookies() {
                         $(this)
                             .children('div[id^=div_viewer_]')
                             .each(function () {
-                                // eslint-disable-next-line eqeqeq
                                 if (
                                     $(this)[0].dataset.file_name === file_path[x]
                                 ) {
@@ -1012,199 +967,6 @@ window.updateCookies = function () {
     window.Cookies.set('cookie_version', String(cookie_version), { path: '/' });
 };
 
-// -----------------------------------------------------------------------------
-// Student navigation
-
-function waitForAllAjaxToComplete(callback: { (): void; (): void; (): void; (): void }) {
-    const checkAjax = () => {
-        if ($.active > 0) {
-            setTimeout(checkAjax, 100);
-        }
-        else {
-            callback();
-        }
-    };
-    checkAjax();
-}
-
-window.gotoMainPage = function () {
-    const window_location = $('#main-page')[0].dataset.href!;
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, go to main page anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-};
-
-function gotoPrevStudent() {
-    let filter;
-    const navigate_assigned_students_only
-        = localStorage.getItem(
-            'general-setting-navigate-assigned-students-only',
-        ) !== 'false';
-
-    const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
-    const selector = '#prev-student';
-    let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
-
-    switch (filter) {
-        case 'ungraded':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'itempool':
-            window_location += `&component_id=${getFirstOpenComponentId(true)}`;
-            break;
-        case 'ungraded-itempool':
-            // TODO: ???
-            // eslint-disable-next-line no-var
-            var component_id = getFirstOpenComponentId(true);
-            if (component_id === NO_COMPONENT_ID) {
-                component_id = getFirstOpenComponentId();
-            }
-            break;
-        case 'inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'active-inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-    }
-
-    if (!navigate_assigned_students_only) {
-        window_location += '&navigate_assigned_students_only=false';
-    }
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, change student anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-}
-window.gotoPrevStudent = gotoPrevStudent;
-
-function gotoNextStudent() {
-    let filter;
-    const navigate_assigned_students_only
-        = localStorage.getItem(
-            'general-setting-navigate-assigned-students-only',
-        ) !== 'false';
-
-    const inquiry_status = window.Cookies.get('inquiry_status');
-    if (inquiry_status === 'on') {
-        filter = 'active-inquiry';
-    }
-    else {
-        if (
-            localStorage.getItem('general-setting-arrow-function')
-            !== 'active-inquiry'
-        ) {
-            filter
-                = localStorage.getItem('general-setting-arrow-function')
-                    || 'default';
-        }
-        else {
-            filter = 'default';
-        }
-    }
-    const selector = '#next-student';
-    let window_location = `${$(selector)[0].dataset.href}&filter=${filter}`;
-
-    switch (filter) {
-        case 'ungraded':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'itempool':
-            window_location += `&component_id=${getFirstOpenComponentId(true)}`;
-            break;
-        case 'ungraded-itempool':
-            // TODO: ???
-            // eslint-disable-next-line no-var
-            var component_id = getFirstOpenComponentId(true);
-            if (component_id === NO_COMPONENT_ID) {
-                component_id = getFirstOpenComponentId();
-            }
-            break;
-        case 'inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-        case 'active-inquiry':
-            window_location += `&component_id=${getFirstOpenComponentId()}`;
-            break;
-    }
-
-    if (!navigate_assigned_students_only) {
-        window_location += '&navigate_assigned_students_only=false';
-    }
-
-    if (getGradeableId() !== '') {
-        closeAllComponents(true)
-            .then(() => {
-                waitForAllAjaxToComplete(() => {
-                    window.location.href = window_location;
-                });
-            })
-            .catch(() => {
-                if (
-                    confirm(
-                        'Could not save open component, change student anyway?',
-                    )
-                ) {
-                    window.location.href = window_location;
-                }
-            });
-    }
-    else {
-        window.location.href = window_location;
-    }
-}
-window.gotoNextStudent = gotoNextStudent;
 // Navigate to the prev / next student buttons
 registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
     gotoPrevStudent();
@@ -1235,10 +997,10 @@ function resetSinglePanelLayout() {
         '.panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar',
     ).removeClass('active');
 
-    const leftTopPanelId = window.taLayoutDet.currentTwoPanels.leftTop!;
-    const leftBottomPanelId = window.taLayoutDet.currentTwoPanels.leftBottom!;
-    const rightTopPanelId = window.taLayoutDet.currentTwoPanels.rightTop!;
-    const rightBottomPanelId = window.taLayoutDet.currentTwoPanels.rightBottom!;
+    const leftTopPanelId = taLayoutDet.currentTwoPanels.leftTop!;
+    const leftBottomPanelId = taLayoutDet.currentTwoPanels.leftBottom!;
+    const rightTopPanelId = taLayoutDet.currentTwoPanels.rightTop!;
+    const rightBottomPanelId = taLayoutDet.currentTwoPanels.rightBottom!;
     // Now Fetch the panels from DOM
     const leftTopPanel = document.getElementById(leftTopPanelId);
     const leftBottomPanel = document.getElementById(leftBottomPanelId);
@@ -1247,24 +1009,26 @@ function resetSinglePanelLayout() {
 
     if (rightBottomPanel) {
         document.querySelector('.panels-container')?.append(rightBottomPanel);
-        window.taLayoutDet.currentOpenPanel = rightBottomPanelId;
+        taLayoutDet.currentOpenPanel = rightBottomPanelId;
     }
     if (rightTopPanel) {
         document.querySelector('.panels-container')?.append(rightTopPanel);
-        window.taLayoutDet.currentOpenPanel = rightTopPanelId;
+        taLayoutDet.currentOpenPanel = rightTopPanelId;
     }
     if (leftBottomPanel) {
         document.querySelector('.panels-container')?.append(leftBottomPanel);
-        window.taLayoutDet.currentOpenPanel = leftBottomPanelId;
+        taLayoutDet.currentOpenPanel = leftBottomPanelId;
     }
     if (leftTopPanel) {
         document.querySelector('.panels-container')?.append(leftTopPanel);
-        window.taLayoutDet.currentOpenPanel = leftTopPanelId;
+        taLayoutDet.currentOpenPanel = leftTopPanelId;
     }
     // current open panel will be either left or right panel from two-panel-mode
     // passing forceVisible = true, otherwise this method will just toggle it and it will get hidden
-    window.taLayoutDet.isFullLeftColumnMode = false;
-    setPanelsVisibilities(window.taLayoutDet.currentOpenPanel!, true);
+    taLayoutDet.isFullLeftColumnMode = false;
+    if (taLayoutDet.currentOpenPanel) {
+        setPanelsVisibilities(taLayoutDet.currentOpenPanel, true);
+    }
 }
 
 function checkForTwoPanelLayoutChange(
@@ -1274,22 +1038,22 @@ function checkForTwoPanelLayoutChange(
 ) {
     // update the global variable
     if (isPanelAdded) {
-        window.taLayoutDet.currentTwoPanels[panelPosition!] = panelId;
+        taLayoutDet.currentTwoPanels[panelPosition!] = panelId;
     }
     else {
         // panel is going to be removed from screen
         // check which one out of the left or right is going to be hidden
-        if (window.taLayoutDet.currentTwoPanels.leftTop === panelId) {
-            window.taLayoutDet.currentTwoPanels.leftTop = null;
+        if (taLayoutDet.currentTwoPanels.leftTop === panelId) {
+            taLayoutDet.currentTwoPanels.leftTop = null;
         }
-        else if (window.taLayoutDet.currentTwoPanels.leftBottom === panelId) {
-            window.taLayoutDet.currentTwoPanels.leftBottom = null;
+        else if (taLayoutDet.currentTwoPanels.leftBottom === panelId) {
+            taLayoutDet.currentTwoPanels.leftBottom = null;
         }
-        else if (window.taLayoutDet.currentTwoPanels.rightTop === panelId) {
-            window.taLayoutDet.currentTwoPanels.rightTop = null;
+        else if (taLayoutDet.currentTwoPanels.rightTop === panelId) {
+            taLayoutDet.currentTwoPanels.rightTop = null;
         }
-        else if (window.taLayoutDet.currentTwoPanels.rightBottom === panelId) {
-            window.taLayoutDet.currentTwoPanels.rightBottom = null;
+        else if (taLayoutDet.currentTwoPanels.rightBottom === panelId) {
+            taLayoutDet.currentTwoPanels.rightBottom = null;
         }
     }
     saveTaLayoutDetails();
@@ -1303,14 +1067,22 @@ function setMultiPanelModeVisiblities() {
             : `#${panel.str}-btn`;
 
         if (
-            window.taLayoutDet.currentTwoPanels.leftTop === panel.str
-            || window.taLayoutDet.currentTwoPanels.leftBottom === panel.str
-            || window.taLayoutDet.currentTwoPanels.rightTop === panel.str
-            || window.taLayoutDet.currentTwoPanels.rightBottom === panel.str
+            taLayoutDet.currentTwoPanels.leftTop === panel.str
+            || taLayoutDet.currentTwoPanels.leftBottom === panel.str
+            || taLayoutDet.currentTwoPanels.rightTop === panel.str
+            || taLayoutDet.currentTwoPanels.rightBottom === panel.str
         ) {
             $(`#${panel.str}`).toggle(true);
             $(panel.icon).toggleClass('icon-selected', true);
             $(id_str).toggleClass('active', true);
+
+            // display notebook elements if we have it
+            $(`#${panel.str}`)
+                .find('.CodeMirror')
+                .each(function () {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                    (this as any).CodeMirror?.refresh();
+                });
         }
         else {
             $(`#${panel.str}`).toggle(false);
@@ -1337,6 +1109,8 @@ function setPanelsVisibilities(
             $(`#${panel.str}`).toggle(eleVisibility);
             $(panel.icon).toggleClass('icon-selected', eleVisibility);
             $(id_str).toggleClass('active', eleVisibility);
+
+            // display notebook elements if we have it
             $(`#${panel.str}`)
                 .find('.CodeMirror')
                 .each(function () {
@@ -1344,7 +1118,7 @@ function setPanelsVisibilities(
                     (this as any).CodeMirror?.refresh();
                 });
 
-            if (window.taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
+            if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
                 checkForTwoPanelLayoutChange(
                     eleVisibility,
                     panel.str,
@@ -1353,19 +1127,19 @@ function setPanelsVisibilities(
             }
             else {
                 // update the global variable
-                window.taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
+                taLayoutDet.currentOpenPanel = eleVisibility ? panel.str : null;
                 $('.panels-container > .panel-instructions').toggle(
-                    !window.taLayoutDet.currentOpenPanel,
+                    !taLayoutDet.currentOpenPanel,
                 );
             }
         }
         else if (
-            (window.taLayoutDet.numOfPanelsEnabled
+            (taLayoutDet.numOfPanelsEnabled
                 && !isMobileView
-                && window.taLayoutDet.currentTwoPanels.rightTop !== panel.str
-                && window.taLayoutDet.currentTwoPanels.rightBottom !== panel.str
-                && window.taLayoutDet.currentTwoPanels.leftTop !== panel.str
-                && window.taLayoutDet.currentTwoPanels.leftBottom !== panel.str)
+                && taLayoutDet.currentTwoPanels.rightTop !== panel.str
+                && taLayoutDet.currentTwoPanels.rightBottom !== panel.str
+                && taLayoutDet.currentTwoPanels.leftTop !== panel.str
+                && taLayoutDet.currentTwoPanels.leftBottom !== panel.str)
             || panel.str !== ele
         ) {
             // only hide those panels which are not given panel and not in taLayoutDet.currentTwoPanels if the twoPanelMode is enabled
@@ -1375,7 +1149,7 @@ function setPanelsVisibilities(
         }
     });
     // update the two-panels-layout if it's enabled
-    if (window.taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
+    if (taLayoutDet.numOfPanelsEnabled > 1 && !isMobileView) {
         updatePanelLayoutModes();
     }
     else {
@@ -1386,7 +1160,7 @@ function setPanelsVisibilities(
 function toggleFullScreenMode() {
     $('main#main').toggleClass('full-screen-mode');
     $('#fullscreen-btn-cont').toggleClass('active');
-    window.taLayoutDet.isFullScreenMode = $('main#main').hasClass('full-screen-mode');
+    taLayoutDet.isFullScreenMode = $('main#main').hasClass('full-screen-mode');
 
     // update the dragging event for two panels
     initializeResizablePanels(
@@ -1403,10 +1177,10 @@ window.toggleFullScreenMode = toggleFullScreenMode;
 function toggleFullLeftColumnMode(forceVal = false) {
     // toggle between the normal left and full left panel mode
     if (!forceVal) {
-        window.taLayoutDet.isFullLeftColumnMode = !window.taLayoutDet.isFullLeftColumnMode;
+        taLayoutDet.isFullLeftColumnMode = !taLayoutDet.isFullLeftColumnMode;
     }
 
-    const newPanelsContSelector = window.taLayoutDet.isFullLeftColumnMode
+    const newPanelsContSelector = taLayoutDet.isFullLeftColumnMode
         ? '.content-items-container'
         : '.two-panel-cont';
 
@@ -1426,10 +1200,10 @@ function toggleFullLeftColumnMode(forceVal = false) {
  * @param twoOnRight
  */
 window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller: boolean, twoOnRight = false) {
-    window.taLayoutDet.numOfPanelsEnabled = +panelsCount;
-    window.taLayoutDet.isFullLeftColumnMode = isLeftTaller;
+    taLayoutDet.numOfPanelsEnabled = +panelsCount;
+    taLayoutDet.isFullLeftColumnMode = isLeftTaller;
 
-    window.taLayoutDet.dividedColName = twoOnRight ? 'RIGHT' : 'LEFT';
+    taLayoutDet.dividedColName = twoOnRight ? 'RIGHT' : 'LEFT';
 
     togglePanelLayoutModes(true);
     toggleFullLeftColumnMode(true);
@@ -1441,7 +1215,7 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
     );
     initializeHorizontalTwoPanelDrag();
     togglePanelSelectorModal(false);
-    if (!window.taLayoutDet.isFullLeftColumnMode) {
+    if (!taLayoutDet.isFullLeftColumnMode) {
         $('#grading-panel-student-name').show();
     }
 };
@@ -1449,13 +1223,13 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
 function togglePanelLayoutModes(forceVal = false) {
     const twoPanelCont = $('.two-panel-cont');
     if (!forceVal) {
-        window.taLayoutDet.numOfPanelsEnabled
-            = +window.taLayoutDet.numOfPanelsEnabled === 3
+        taLayoutDet.numOfPanelsEnabled
+            = +taLayoutDet.numOfPanelsEnabled === 3
                 ? 1
-                : +window.taLayoutDet.numOfPanelsEnabled + 1;
+                : +taLayoutDet.numOfPanelsEnabled + 1;
     }
 
-    if (window.taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
+    if (taLayoutDet.numOfPanelsEnabled === 2 && !isMobileView) {
         twoPanelCont.addClass('active');
         $('#two-panel-exchange-btn').addClass('active');
         $(
@@ -1465,7 +1239,7 @@ function togglePanelLayoutModes(forceVal = false) {
             'active',
         );
 
-        window.taLayoutDet.currentActivePanels = {
+        taLayoutDet.currentActivePanels = {
             leftTop: true,
             leftBottom: false,
             rightTop: true,
@@ -1474,27 +1248,27 @@ function togglePanelLayoutModes(forceVal = false) {
 
         updatePanelLayoutModes();
     }
-    else if (+window.taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
+    else if (+taLayoutDet.numOfPanelsEnabled === 3 && !isMobileView) {
         twoPanelCont.addClass('active');
         $('.two-panel-item.two-panel-left, .two-panel-drag-bar').addClass(
             'active',
         );
 
-        window.taLayoutDet.currentActivePanels = {
+        taLayoutDet.currentActivePanels = {
             leftTop: true,
             leftBottom: false,
             rightTop: true,
             rightBottom: false,
         };
 
-        if (window.taLayoutDet.dividedColName === 'RIGHT') {
+        if (taLayoutDet.dividedColName === 'RIGHT') {
             $(
                 '.panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag',
             ).removeClass('active');
             $(
                 '.panel-item-section.right-bottom, .panel-item-section-drag-bar.panel-item-right-drag',
             ).addClass('active');
-            window.taLayoutDet.currentActivePanels.rightBottom = true;
+            taLayoutDet.currentActivePanels.rightBottom = true;
         }
         else {
             $(
@@ -1503,19 +1277,19 @@ function togglePanelLayoutModes(forceVal = false) {
             $(
                 '.panel-item-section.left-bottom, .panel-item-section-drag-bar.panel-item-left-drag',
             ).addClass('active');
-            window.taLayoutDet.currentActivePanels.leftBottom = true;
+            taLayoutDet.currentActivePanels.leftBottom = true;
         }
 
         initializeHorizontalTwoPanelDrag();
         updatePanelLayoutModes();
     }
-    else if (+window.taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
+    else if (+taLayoutDet.numOfPanelsEnabled === 4 && !isMobileView) {
         twoPanelCont.addClass('active');
         $('.two-panel-item.two-panel-left, .two-panel-drag-bar').addClass(
             'active',
         );
 
-        window.taLayoutDet.currentActivePanels = {
+        taLayoutDet.currentActivePanels = {
             leftTop: true,
             leftBottom: true,
             rightTop: true,
@@ -1534,7 +1308,7 @@ function togglePanelLayoutModes(forceVal = false) {
     }
     else {
         resetSinglePanelLayout();
-        window.taLayoutDet.currentTwoPanels = {
+        taLayoutDet.currentTwoPanels = {
             leftTop: null,
             leftBottom: null,
             rightTop: null,
@@ -1563,12 +1337,12 @@ function updatePanelLayoutModes() {
     }
 
     // loop through panel positions (topLeft, topRight, etc)
-    for (const panel in window.taLayoutDet.currentTwoPanels) {
+    for (const panel in taLayoutDet.currentTwoPanels) {
         // if the panel isn't active, skip it
-        if (!window.taLayoutDet.currentActivePanels[panel]) {
+        if (!taLayoutDet.currentActivePanels[panel]) {
             continue;
         }
-        const panel_type = window.taLayoutDet.currentTwoPanels[panel];
+        const panel_type = taLayoutDet.currentTwoPanels[panel];
         // get panel corresponding with the layout position
         const layout_panel = $(`${panelsBucket[`${panel}Selector`]}`);
         // get panel corresponding with what the user selected to use for this spot (autograding, rubric, etc)
@@ -1587,27 +1361,27 @@ function updatePanelLayoutModes() {
 
 // Exchanges positions of left and right panels
 window.exchangeTwoPanels = function () {
-    if (+window.taLayoutDet.numOfPanelsEnabled === 2) {
-        window.taLayoutDet.currentTwoPanels = {
-            leftTop: window.taLayoutDet.currentTwoPanels.rightTop,
-            rightTop: window.taLayoutDet.currentTwoPanels.leftTop,
+    if (+taLayoutDet.numOfPanelsEnabled === 2) {
+        taLayoutDet.currentTwoPanels = {
+            leftTop: taLayoutDet.currentTwoPanels.rightTop,
+            rightTop: taLayoutDet.currentTwoPanels.leftTop,
         };
         updatePanelLayoutModes();
     }
     else if (
-        +window.taLayoutDet.numOfPanelsEnabled === 3
-        || +window.taLayoutDet.numOfPanelsEnabled === 4
+        +taLayoutDet.numOfPanelsEnabled === 3
+        || +taLayoutDet.numOfPanelsEnabled === 4
     ) {
-        window.taLayoutDet.currentTwoPanels = {
-            leftTop: window.taLayoutDet.currentTwoPanels.rightTop,
-            leftBottom: window.taLayoutDet.currentTwoPanels.rightBottom,
-            rightTop: window.taLayoutDet.currentTwoPanels.leftTop,
-            rightBottom: window.taLayoutDet.currentTwoPanels.leftBottom,
+        taLayoutDet.currentTwoPanels = {
+            leftTop: taLayoutDet.currentTwoPanels.rightTop,
+            leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
+            rightTop: taLayoutDet.currentTwoPanels.leftTop,
+            rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
         };
         $(
             '.panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar',
         ).toggleClass('active');
-        window.taLayoutDet.dividedColName = $('.panel-item-section.right-bottom').is(
+        taLayoutDet.dividedColName = $('.panel-item-section.right-bottom').is(
             ':visible',
         )
             ? 'RIGHT'
@@ -1680,7 +1454,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
     if (openComponentId === NO_COMPONENT_ID) {
         // No component is open, so open the first one
         const componentId = getComponentIdByOrder(0);
-        void window.toggleComponent(componentId, true, false).then(() => {
+        void toggleComponent(componentId, true, false).then(() => {
             scrollToComponent(componentId);
         });
     }
@@ -1688,7 +1462,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
         // Last component is open, close it and then open and scroll to first component
         void closeComponent(openComponentId, true).then(() => {
             const componentId = getComponentIdByOrder(0);
-            void window.toggleComponent(componentId, true, false).then(() => {
+            void toggleComponent(componentId, true, false).then(() => {
                 scrollToComponent(componentId);
             });
         });
@@ -1696,7 +1470,7 @@ registerKeyHandler({ name: 'Open Next Component', code: 'ArrowDown' }, (e: { pre
     else {
         // Any other case, open the next one
         const nextComponentId = getNextComponentId(openComponentId);
-        void window.toggleComponent(nextComponentId, true, false).then(() => {
+        void toggleComponent(nextComponentId, true, false).then(() => {
             scrollToComponent(nextComponentId);
         });
     }
@@ -1723,7 +1497,7 @@ registerKeyHandler(
             // First component is open, close it and then open and scroll to the last one
             void closeComponent(openComponentId, true).then(() => {
                 const componentId = getComponentIdByOrder(numComponents - 1);
-                void window.toggleComponent(componentId, true, false).then(() => {
+                void toggleComponent(componentId, true, false).then(() => {
                     scrollToComponent(componentId);
                 });
             });
@@ -1731,7 +1505,7 @@ registerKeyHandler(
         else {
             // Any other case, open the previous one
             const prevComponentId = getPrevComponentId(openComponentId);
-            void window.toggleComponent(prevComponentId, true, false).then(() => {
+            void toggleComponent(prevComponentId, true, false).then(() => {
                 scrollToComponent(prevComponentId);
             });
         }
@@ -2150,7 +1924,7 @@ function openFrame(
 }
 window.openFrame = openFrame;
 
-export type FileFullPanelOptions = keyof typeof fileFullPanelOptions;
+type FileFullPanelOptions = keyof typeof fileFullPanelOptions;
 const fileFullPanelOptions = {
     submission: {
         // Main viewer (submission panel)
