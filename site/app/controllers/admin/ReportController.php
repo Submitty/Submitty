@@ -853,18 +853,7 @@ class ReportController extends AbstractController {
         }
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
-
-        if (!is_dir($rainbow_grades_dir)) {
-            $msg = 'Rainbow Grades directory not found';
-            return JsonResponse::getErrorResponse($msg);
-        }
-
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
-
-        if (!is_file($customization_dest)) {
-            $msg = 'Customization file not found';
-            return JsonResponse::getErrorResponse($msg);
-        }
 
         if (isset($_POST['source']) && $_POST['source'] === 'submitty_daemon') {
             // Compare the customization.json and manual_customization.json to ensure instructors are using the GUI interface
