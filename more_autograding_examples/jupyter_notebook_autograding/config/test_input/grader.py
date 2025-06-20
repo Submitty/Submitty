@@ -42,30 +42,36 @@ def execute_notebook(timeout=600):
     for cell in nb.cells:
         if cell.cell_type == 'code':
             for output in cell.get('outputs', []):
-                save_output(cell_idx, output)
+                save_output(cell_idx, cell, output)
                 cell_idx += 1
     
-# Different cell types: https://nbformat.readthedocs.io/en/latest/format_description.html#cell-types
-def save_output(cell_idx, output):
-    # Handle different output types
+def save_output(cell_idx, cell, output):
+    # If the cell has a metadata field 'grade_id', use it as the file name
+    grade_id = cell.metadata.get('grade_id')
+    if grade_id:
+        file_name = f"{grade_id}"
+    else:
+        file_name = f"cell{cell_idx}"
+
+    # Handle different output types https://nbformat.readthedocs.io/en/latest/format_description.html#cell-types
     if output.output_type == 'stream':
-        cell_txt = Path(f"cell{cell_idx}.txt")
+        cell_txt = Path(f"{file_name}.txt")
         cell_txt.write_text(output.text.strip(), encoding='utf-8')
 
     elif output.output_type == 'execute_result' or output.output_type == 'display_data':
         data = output.get("data", {})
         if "text/plain" in data:
-            cell_txt = Path(f"cell{cell_idx}.txt")
+            cell_txt = Path(f"{file_name}.txt")
             cell_txt.write_text(data["text/plain"], encoding='utf-8')
 
         if "image/png" in data:
             img_data = base64.b64decode(data["image/png"])
-            img = Path(f"cell{cell_idx}.png")
+            img = Path(f"{file_name}.png")
             img.write_bytes(img_data)
 
     elif output.output_type == 'error':
         traceback = "\n".join(output.get("traceback", []))
-        cell_err =  Path(f"cell{cell_idx}.err")
+        cell_err =  Path(f"{file_name}.err")
         cell_err.write_text(traceback, encoding='utf-8')
 
 if __name__ == "__main__":
