@@ -123,6 +123,7 @@ class UserEntity {
     public function getDisplayedGivenName(): string {
         return $this->user_preferred_givenname ?? $this->user_givenname;
     }
+    
     public function getDisplayedFamilyName(): string {
         return $this->user_preferred_familyname ?? $this->user_familyname;
     }

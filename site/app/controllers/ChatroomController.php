@@ -205,6 +205,7 @@ class ChatroomController extends AbstractController {
             $msg_array['type'] = 'chat_close';
             $msg_array['id'] = $chatroom->getId();
             $msg_array['socket'] = "chatrooms";
+            // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
             $indiv_msg_array['type'] = 'chat_close';
             $indiv_msg_array['socket'] = "chatroom_$chatroom_id";
