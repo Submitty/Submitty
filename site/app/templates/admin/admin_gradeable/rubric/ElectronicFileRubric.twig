@@ -58,10 +58,6 @@
             $("#custom_marks_warning").show();
         }
         loadTemplates().then(function() {
-            if ($('#silent-edit-id').length === 0) {
-                return;
-            }
-
             reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
                 const componentContainer = document.querySelector('.component-container');
                 if (componentContainer) {
