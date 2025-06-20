@@ -187,7 +187,7 @@ class GlobalController extends AbstractController {
         if ($this->core->getConfig()->isChatEnabled()) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['chat']),
-                "title" => "Live Lecture Chat",
+                "title" => "Live Chat",
                 "id" => "nav-sidebar-chat",
                 "icon" => "fa-regular fa-keyboard"
             ]);

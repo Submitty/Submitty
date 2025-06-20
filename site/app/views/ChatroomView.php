@@ -9,7 +9,7 @@ use app\entities\chat\Chatroom;
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
         parent::__construct($core, $output);
-        $this->core->getOutput()->addBreadcrumb("Live Lecture Chat", $this->core->buildCourseUrl(['chat']));
+        $this->core->getOutput()->addBreadcrumb("Live Chat", $this->core->buildCourseUrl(['chat']));
         $this->core->getOutput()->addInternalCss('chatroom.css');
         $this->core->getOutput()->addInternalJs('chatroom.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
