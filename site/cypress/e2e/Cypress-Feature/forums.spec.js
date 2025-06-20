@@ -18,8 +18,6 @@ const createThread = (title, content, category) => {
     cy.get('#title').type(title);
     cy.get('.thread_post_content').type(content);
     cy.get('.cat-buttons').contains(category).click();
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(1000);
     cy.get('[name="post"]').click();
     cy.get('.flex-row > .thread-title-cont').should('contain', title);
 };
