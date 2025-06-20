@@ -172,7 +172,10 @@ def get_gradeable_buckets(soup):
 
         # Account for per-gradeable percents for the given bucket
         percents_checkbox = bucket_div.select_one(f'#per-gradeable-percents-checkbox-{bucket_type}')
-        is_percent_enabled_for_this_bucket = percents_checkbox is not None and percents_checkbox.has_attr('checked')
+        is_percent_enabled_for_this_bucket = (
+            percents_checkbox is not None and
+            percents_checkbox.has_attr('checked')
+        )
 
         for li in bucket_div.select(f'#gradeables-list-{bucket_type} .gradeable-li'):
             gradeable = {}
@@ -183,7 +186,6 @@ def get_gradeable_buckets(soup):
             if points_div and percent_div:
                 max_score_input = points_div.select_one('.max-score')
                 percent_input = percent_div.find('input')
-
                 gradeable['max'] = float(max_score_input['data-max-score'])
 
                 if is_percent_enabled_for_this_bucket:
@@ -193,8 +195,8 @@ def get_gradeable_buckets(soup):
                     try:
                         gradeable['percent'] = float(value) / 100.0
                     except (ValueError, TypeError):
-                        # Ignore invalid percent values for simplicity
-                        pass
+                        # Default to 0.0 if the percent value is invalid for simplicity
+                        gradeable['percent'] = 0.0
 
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
                 gradeable['id'] = li.select_one('.gradeable-id').text.strip()
@@ -210,23 +212,31 @@ def get_gradeable_buckets(soup):
 
                     gradeable['curve'].append(float(curve_input['value']))
 
-            # Validate the set of per-gradeable curve value
+            # Validate the set of per-gradeable curve values
             if 'curve' in gradeable:
                 if len(gradeable['curve']) != len(curve_points_selected):
-                    raise ValueError(f"To adjust the curve for gradeable {gradeable['id']} you must enter a value in each box")
+                    raise ValueError(
+                        f"To adjust the curve for gradeable {gradeable['id']} you must enter a value in each box"
+                    )
 
                 previous = gradeable['max']
                 for elem in gradeable['curve']:
                     try:
                         elem = float(elem)
                     except ValueError:
-                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be floating point values")
+                        raise ValueError(
+                            f"All curve inputs for gradeable {gradeable['id']} must be floating point values"
+                        )
 
                     if elem < 0:
-                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be greater than or equal to 0")
+                        raise ValueError(
+                            f"All curve inputs for gradeable {gradeable['id']} must be greater than or equal to 0"
+                        )
 
                     if elem > previous:
-                        raise ValueError(f"All curve inputs for gradeable {gradeable['id']} must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input")
+                        raise ValueError(
+                            f"All curve inputs for gradeable {gradeable['id']} must be less than or equal to the maximum points for the gradeable and also less than or equal to the previous input"
+                        )
 
                     previous = elem
 
@@ -280,7 +290,6 @@ def get_table_data(soup, table_name):
         elif table_name == 'performanceWarnings':
             data.append({
                 'msg': first_input,
-                # Trim each gradeable ID to account for potential HTML whitespace
                 'ids': [id.strip() for id in second_input.split(',')],
                 'value': float(third_input)
             })
@@ -327,7 +336,7 @@ def get_error_message(response):
 
 def load_and_save_gui_customization(semester, course, token):
     """Loads and saves the GUI customization for the given course."""
-    # Load the GUI customization page via server-side rendering for data parsing
+    # Load the GUI customization page for HTML data parsing
     load_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
             base_url, semester, course
@@ -401,7 +410,7 @@ def load_and_save_gui_customization(semester, course, token):
 def save_and_build_rainbow_grades(semester, course, token):
     """Loads and saves the GUI customization for the given course."""
     try:
-        # Try to select the GUI customization option to save changes based on the existing customization files
+        # Try to select the GUI customization option
         select_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
                 base_url, semester, course
@@ -417,7 +426,7 @@ def save_and_build_rainbow_grades(semester, course, token):
             status = select_response.json()['status']
 
             if status == 'success':
-                # Successful response implies the GUI customization is being applied for the given course
+                # A successful response implies the GUI customization is being applied for the given course
                 load_and_save_gui_customization(semester, course, token)
             else:
                 message = select_response.json()['message']
@@ -482,10 +491,10 @@ def main():
     source = args.source
 
     if source == 'submitty_daemon':
-        # Only save and build Rainbow Grades if the source is submitty_daemon
+        # Only save and build Rainbow Grades if the source is the daemon user
         save_and_build_rainbow_grades(semester, course, token)
 
-    # Always generate Rainbow Grades Grade Summaries
+    # Always generate Rainbow Grades grade summaries
     generate_grade_summaries(semester, course, token)
 
 
