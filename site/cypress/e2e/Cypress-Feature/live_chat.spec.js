@@ -3,10 +3,29 @@ const title2 = "Non Anon Test Chatroom Title"
 const description1 = "Test Description"
 const description2 = "Non Anon Test Description"
 
-const toggleLiveChat = () => {
-    cy.visit(['sample', 'config']);
-    return cy.get('[id="chat-enabled"]').first().should('exist').click();
+const getChatroom = (title) => {
+    return cy.get('[data-testid="chatroom-item"]').then(($rows) => {
+        return Cypress.$($rows).find('[data-testid="chatroom-title"]').first();
+    });
 }
+
+const startChatSession = (title) => {
+    chatroomExists(title).then((exists) => {
+        if (exists) {
+            return Cypress.$(getChatroom(title)).get('[onclick="toggle_chatroom(1, false)"]').first().click();
+        }
+    });
+}
+
+const toggleLiveChat = (enableChat) => {
+    cy.visit(['sample', 'config']);
+    return cy.get('input#chat-enabled').first().then(($checkbox) => {
+        const isCurrentlyEnabled = $checkbox.is(':checked');
+        if (isCurrentlyEnabled !== enableChat) {
+            cy.wrap($checkbox).click();
+        }
+    });
+};
 
 const chatroomExists = (title) => {
     return cy.get('[data-testid="chatroom-item"]').then(($rows) => {
@@ -92,17 +111,17 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
     });
 }
 
-describe('Tests for enabling Live Lecture Chat', () => {
+describe('Tests for enabling Live Chat', () => {
     beforeEach(() => {
         cy.login('instructor');
     })
 
-    it('Should enable the Live Lecture chat feature for the sample course', () => {
-        toggleLiveChat().then(() => {
+    it('Should enable the Live Chat feature for the sample course', () => {
+        toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="new-chatroom-btn"]').should('exist');
         }).then(() => {
-            toggleLiveChat().then(() => {
+            toggleLiveChat(false).then(() => {
                 cy.visit(['sample', 'chat']);
                 cy.get('[data-testid="new-chatroom-btn"]').should('not.exist');
             });
@@ -110,7 +129,7 @@ describe('Tests for enabling Live Lecture Chat', () => {
     });
     
     it('Should test creating new chats, allowing and disallowing anonymous participants.', () => {
-        toggleLiveChat().then(() => {
+        toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
             deleteChatroom(title1);
             deleteChatroom(title2);
@@ -118,27 +137,31 @@ describe('Tests for enabling Live Lecture Chat', () => {
             createChatroom(title2, description2, false);
             deleteChatroom(title1);
             deleteChatroom(title2);
-            toggleLiveChat().then(() => {
+            toggleLiveChat(false).then(() => {
                 cy.reload();
             });
         });
     });
 
     it('Should test editing chats', () => {
-        toggleLiveChat().then(() => {
+        toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
             deleteChatroom(title1);
             createChatroom(title1, description1, true);
             editChatroom(title1, title2, description2, true, false);
             deleteChatroom(title2);
-            toggleLiveChat().then(() => {
+            toggleLiveChat(false).then(() => {
                 cy.reload();
             });
         });
     });
 
     it('Should test starting chat sessions and chatting', () => {
-
+        toggleLiveChat(true).then(() => {
+            deleteChatroom(title1);
+            createChatroom(title1);
+            startChatSession(title1);
+        });
     });
 
     it('Should test anonymity', () => {
