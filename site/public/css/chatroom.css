@@ -6,9 +6,9 @@
 }
 
 .chatroom-header {
-    padding-top: 0.5rem;
-    padding-bottom: 1rem;
-    box-shadow: 0 4px 2px -2px rgb(255 255 255 / 100%);
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    box-shadow: 0 4px 2px -2px var(--standard-medium-gray);
     flex-shrink: 0;
 }
 
@@ -46,11 +46,6 @@
     background-color: var(--standard-hover-light-gray);
 }
 
-.message-header {
-    margin-bottom: 3px;
-    margin-left: 0.5rem;
-}
-
 .user-icon {
     margin-right: 0.5rem;
 }
@@ -77,6 +72,7 @@
     box-shadow: 0 -2px 10px 0 rgb(0 0 0 / 5%);
     padding: 0.5rem;
     flex-shrink: 0;
+    width: 100%;
 }
 
 .message-input {
@@ -85,8 +81,10 @@
     resize: none;
     overflow: hidden;
     font-size: 1rem;
-    min-width: 85%;
+    flex: 1;
     margin-left: 1rem;
+    margin-right: 1rem;
+    min-width: 0;
 }
 
 .message-input:focus {
@@ -95,10 +93,7 @@
 
 .send-message-btn {
     margin-left: 1rem;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    outline: none;
+    margin-right: 0.5rem;
 }
 
 .chatroom-toast {

@@ -3,7 +3,7 @@
     <div class="chatroom-container">
         <div class="chatroom-header">
             <span class="chatroom-title" title="{{ chatroom.getTitle() }}"> {{ chatroom.getTitle() | length > 40 ? chatroom.getTitle() | slice(0, 40) ~ '...' : chatroom.getTitle() }} </span>
-            <a href="{{ base_url }}" class="leave-room btn btn-danger">leave</a>
+            <a href="{{ base_url }}" class="leave-room btn btn-danger">Leave</a>
         </div>
         <div class="chatroom-content">
             <div class="messages-area"></div>

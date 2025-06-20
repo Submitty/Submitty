@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace app\entities\chat;
 
-use app\repositories\chat\ChatroomRepository;
+use app\entities\UserEntity;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ChatroomRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: "chatrooms")]
 class Chatroom {
     #[ORM\Id]
@@ -18,11 +18,9 @@ class Chatroom {
     #[ORM\GeneratedValue]
     private int $id;
 
-    #[ORM\Column(type: Types::STRING)]
-    private string $host_id;
-
-    #[ORM\Column(type: Types::STRING)]
-    private string $host_name;
+    #[ORM\ManyToOne(targetEntity: UserEntity::class, fetch: "EAGER")]
+    #[ORM\JoinColumn(name: "host_id", referencedColumnName: "user_id", nullable: false)]
+    private UserEntity $host;
 
     #[ORM\Column(type: Types::STRING)]
     private string $title;
@@ -36,15 +34,17 @@ class Chatroom {
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_anon;
 
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    private ?\DateTime $session_started_at = null;
+
     /**
      * @var Collection<Message>
      */
     #[ORM\OneToMany(mappedBy: "chatroom", targetEntity: Message::class)]
     private Collection $messages;
 
-    public function __construct(string $hostId, string $hostName, string $title, string $description) {
-        $this->setHostId($hostId);
-        $this->setHostName($hostName);
+    public function __construct(UserEntity $host, string $title, string $description) {
+        $this->host = $host;
         $this->setTitle($title);
         $this->setDescription($description);
         $this->messages = new ArrayCollection();
@@ -56,20 +56,16 @@ class Chatroom {
         return $this->id;
     }
 
-    public function setHostId(string $hostId): void {
-        $this->host_id = $hostId;
+    public function getHost(): UserEntity {
+        return $this->host;
     }
 
     public function getHostId(): string {
-        return $this->host_id;
-    }
-
-    public function setHostName(string $hostName): void {
-        $this->host_name = $hostName;
+        return $this->host->getId();
     }
 
     public function getHostName(): string {
-        return $this->host_name;
+        return $this->host->getDisplayFullName();
     }
 
     public function getTitle(): string {
@@ -110,5 +106,27 @@ class Chatroom {
 
     public function addMessage(Message|null $message): void {
         $this->messages->add($message);
+    }
+
+    public function calcAnonName(string $user_id): string {
+        $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
+        $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
+        $session_started_at = $this->getSessionStartedAt() !== null ? $this->getSessionStartedAt()->format('Y-m-d H:i:s') : 'unknown';
+        $seed_string = $user_id . '-' . $this->getId() . '-' . $this->getHostId() . '-' . $session_started_at;
+        $adj_hash = crc32($seed_string);
+        $noun_hash = crc32(strrev($seed_string));
+        $adj_index = abs($adj_hash) % count($adjectives);
+        $noun_index = abs($noun_hash) % count($nouns);
+        $adj  = $adjectives[$adj_index];
+        $noun = $nouns[$noun_index];
+        return "Anonymous {$adj} {$noun}";
+    }
+
+    public function getSessionStartedAt(): ?\DateTime {
+        return $this->session_started_at;
+    }
+
+    public function setSessionStartedAt(?\DateTime $session_started_at): void {
+        $this->session_started_at = $session_started_at;
     }
 }

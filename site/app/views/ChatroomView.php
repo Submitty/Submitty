@@ -9,7 +9,7 @@ use app\entities\chat\Chatroom;
 class ChatroomView extends AbstractView {
     public function __construct(Core $core, Output $output) {
         parent::__construct($core, $output);
-        $this->core->getOutput()->addBreadcrumb("Live Lecture Chat", $this->core->buildCourseUrl(['chat']));
+        $this->core->getOutput()->addBreadcrumb("Live Chat", $this->core->buildCourseUrl(['chat']));
         $this->core->getOutput()->addInternalCss('chatroom.css');
         $this->core->getOutput()->addInternalJs('chatroom.js');
         $this->core->getOutput()->addInternalJs('websocket.js');
@@ -59,20 +59,12 @@ class ChatroomView extends AbstractView {
         $user = $this->core->getUser();
         $display_name = $user->getDisplayFullName();
         $roomId = $chatroom->getId();
-        $sessKey = "anon_name_chatroom_{$roomId}";
         if ($anonymous) {
-            if (!isset($_SESSION[$sessKey])) {
-                $adjectives = ["Quick","Lazy","Cheerful","Pensive","Mysterious","Bright","Sly","Brave","Calm","Eager","Fierce","Gentle","Jolly","Kind","Lively","Nice","Proud","Quiet","Rapid","Swift"];
-                $nouns      = ["Duck","Goose","Swan","Eagle","Parrot","Owl","Sparrow","Robin","Pigeon","Falcon","Hawk","Flamingo","Pelican","Seagull","Cardinal","Canary","Finch","Hummingbird"];
-                $adj  = $adjectives[array_rand($adjectives)];
-                $noun = $nouns[array_rand($nouns)];
-                $_SESSION[$sessKey] = "Anonymous {$adj} {$noun}";
-            }
-            $display_name = $_SESSION[$sessKey];
+            $display_name = $chatroom->calcAnonName($user->getId());
         }
         else {
             if (!$user->accessAdmin()) {
-                $display_name = $user->getDisplayedGivenName() . " " . substr($user->getDisplayedFamilyName(), 0, 1) . ".";
+                $display_name = $user->getDisplayAbbreviatedName();
             }
         }
 

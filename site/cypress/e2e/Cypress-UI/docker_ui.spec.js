@@ -75,13 +75,11 @@ describe('Docker UI Test', () => {
     });
 
     it('Should filter images with tags', () => {
-        // These tags have no images
-        ['cpp', 'et-cetera', 'notebook', 'python'].forEach((tag) => {
-            cy.get(`button[data-capability="${tag}"]`)
-                .click();
-            cy.get('.image-row')
-                .should('not.be.visible');
-        });
+        // This tag has no images
+        cy.get('button[data-capability=\'et-cetera\']')
+            .click();
+        cy.get('.image-row')
+            .should('not.be.visible');
         // Default filter should have all images
         cy.get('button[data-capability=\'default\']')
             .click();
@@ -114,12 +112,12 @@ describe('Docker UI Test', () => {
     });
 
     it('Should link existed image to a new tag', () => {
-        // Check empty tag list, should have `cpp'
+        // Check empty tag list, should have `et-cetera'
         cy.get('#capabilities-list')
-            .contains('cpp');
+            .contains('et-cetera');
         // Check valid format and valid image
         cy.get('#capability-form')
-            .select('cpp');
+            .select('et-cetera');
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
@@ -138,15 +136,17 @@ describe('Docker UI Test', () => {
             return cy.get('#capabilities-list')
                 .invoke('text')
                 .then((text) => {
-                    return !text.includes('cpp');
+                    return !text.includes('et-cetera');
                 });
         }, 10000);
 
         // Check the empty tag list
         cy.get('#capabilities-list')
-            .should('not.contain.text', 'cpp');
+            .should('not.contain.text', 'et-cetera');
 
         // Try to add it again, should fail
+        cy.get('#capability-form')
+            .select('et-cetera');
         cy.get('#add-field')
             .clear();
         cy.get('#add-field')
@@ -157,7 +157,7 @@ describe('Docker UI Test', () => {
 
         cy.get('.alert-error')
             .should('have.text', 'submitty/autograding-default:latest '
-            + 'already exists in capability cpp');
+            + 'already exists in capability et-cetera');
     });
 
     // NOTE: Can be refactored later to speed up the Cypress test since

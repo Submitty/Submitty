@@ -275,8 +275,6 @@ class ElectronicGraderView extends AbstractView {
             }
             if (count($component_averages) !== 0) {
                 foreach ($component_averages as $comp) {
-                    /* @var SimpleStat $comp */
-                    $manual_average += $comp->getAverageScore();
                     $component_overall_score += $comp->getAverageScore();
                     $component_overall_max += $comp->getMaxValue();
                     $percentage = 0;
@@ -318,7 +316,9 @@ class ElectronicGraderView extends AbstractView {
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
             "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
                 && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
-            "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
+            "ta_grading_enabled" => $gradeable->isTaGrading(),
+            "autograding_enabled" => $gradeable->hasAutogradingConfig() ? $gradeable->getAutogradingConfig()->anyPoints() : false,
+            "autograding_non_extra_credit" => $gradeable->hasAutogradingConfig() ? $gradeable->getAutogradingConfig()->getTotalNonExtraCredit() : 0,
             "peer" => $peer,
             "blind_status" => $gradeable->getPeerBlind(),
             "team_total" => $team_total,
@@ -1245,6 +1245,7 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);

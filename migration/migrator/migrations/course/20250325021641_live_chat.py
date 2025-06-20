@@ -21,11 +21,11 @@ def up(config, database, semester, course):
         CREATE TABLE IF NOT EXISTS chatrooms (
             id SERIAL PRIMARY KEY,
             host_id character varying NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-            host_name character varying,
             title text NOT NULL,
             description text,
             is_active BOOLEAN DEFAULT false NOT NULL,
-            allow_anon BOOLEAN DEFAULT true NOT NULL
+            allow_anon BOOLEAN DEFAULT true NOT NULL,
+            session_started_at timestamp with time zone
         );
 
         CREATE TABLE IF NOT EXISTS chatroom_messages (
