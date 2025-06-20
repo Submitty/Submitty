@@ -1327,7 +1327,15 @@ CREATE TABLE public.gradeable_redaction (
     x1 double precision NOT NULL,
     x2 double precision NOT NULL,
     y1 double precision NOT NULL,
-    y2 double precision NOT NULL
+    y2 double precision NOT NULL,
+    CONSTRAINT x1_positive CHECK ((x1 >= (0)::double precision)),
+    CONSTRAINT x1_x2 CHECK ((x1 <= x2)),
+    CONSTRAINT x1_x2_range CHECK (((x1 <= (1)::double precision) AND (x2 <= (1)::double precision))),
+    CONSTRAINT x2_positive CHECK ((x2 >= (0)::double precision)),
+    CONSTRAINT y1_positive CHECK ((y1 >= (0)::double precision)),
+    CONSTRAINT y1_y2 CHECK ((y1 <= y2)),
+    CONSTRAINT y1_y2_range CHECK (((y1 <= (1)::double precision) AND (y2 <= (1)::double precision))),
+    CONSTRAINT y2_positive CHECK ((y2 >= (0)::double precision))
 );
 
 

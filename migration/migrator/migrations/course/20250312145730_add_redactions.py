@@ -19,10 +19,14 @@ def up(config, database, semester, course):
                         redaction_id SERIAL PRIMARY KEY,
                         g_id character varying(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
                         page integer NOT NULL,
-                        x1 float NOT NULL,
-                        x2 float NOT NULL,
-                        y1 float NOT NULL,
-                        y2 float NOT NULL
+                        x1 float NOT NULL CONSTRAINT x1_positive CHECK (x1 >= 0),
+                        x2 float NOT NULL CONSTRAINT x2_positive CHECK (x2 >= 0),
+                        y1 float NOT NULL CONSTRAINT y1_positive CHECK (y1 >= 0),
+                        y2 float NOT NULL CONSTRAINT y2_positive CHECK (y2 >= 0),
+                        CONSTRAINT x1_x2 CHECK (x1 <= x2),
+                        CONSTRAINT y1_y2 CHECK (y1 <= y2),
+                        CONSTRAINT x1_x2_range CHECK (x1 <= 1 AND x2 <= 1),
+                        CONSTRAINT y1_y2_range CHECK (y1 <= 1 AND y2 <= 1)
                      )
     """)
 
