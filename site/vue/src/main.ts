@@ -5,6 +5,7 @@ const exports = {
     async render(target: string | Element, component: string, args: Record<string, unknown> = {}) {
         const app = await (async () => {
             try {
+                // eslint-disable-next-line no-unsanitized/method
                 return createApp((await import(`./components/${component}.vue`) as { default: Parameters<typeof createApp>[0] }).default, args);
             }
             catch (e) {

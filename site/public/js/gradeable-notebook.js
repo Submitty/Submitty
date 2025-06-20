@@ -185,6 +185,7 @@ function restoreNotebookFromLocal() {
             old_answers_list.style.marginLeft = '3em';
             for (const i in not_found) {
                 const answer_text = document.createElement('li');
+                // eslint-disable-next-line no-unsanitized/property
                 answer_text.innerHTML = not_found[i];
                 old_answers_list.appendChild(answer_text);
             }
