@@ -483,49 +483,6 @@ SQL;
         });
     }
 
-    /*
-     * @return string[]
-     */
-    public function getAllTerms() {
-        $this->submitty_db->query(
-            "SELECT term_id FROM terms ORDER BY start_date DESC"
-        );
-        $return = [];
-        foreach ($this->submitty_db->rows() as $row) {
-            $return[] = $row['term_id'];
-        }
-        return $return;
-    }
-
-    /**
-     * Returns the provided term's start date in the given user's timezone.
-     * @param string $term Id of term we are checking.
-     * @param User $user whose timezone we get the date in.
-     * @return string The start date of the term.
-     */
-    public function getTermStartDate(string $term, User $user): string {
-        $this->submitty_db->query("
-            SELECT start_date
-            FROM terms
-            WHERE term_id=?
-        ", [$term]);
-        $timestamp = $this->submitty_db->rows()[0]['start_date'];
-        return DateUtils::convertTimeStamp($user, $timestamp, 'Y-m-d H:i:s');
-    }
-
-    /**
-     * @param string $term_id
-     * @param string $term_name
-     * @param \DateTime $start_date
-     * @param \DateTime $end_date
-     */
-    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
-        $this->submitty_db->query(
-            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
-            [$term_id, $term_name, $start_date, $end_date]
-        );
-    }
-
     /**
      * @param User $user
      */

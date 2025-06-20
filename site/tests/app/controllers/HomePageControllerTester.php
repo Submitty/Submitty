@@ -6,6 +6,8 @@ use app\controllers\HomePageController;
 use app\libraries\Core;
 use app\models\Course;
 use app\models\User;
+use app\entities\Term;
+use app\repositories\TermRepository;
 use tests\BaseUnitTest;
 
 class HomePageControllerTester extends BaseUnitTest {
@@ -28,6 +30,11 @@ class HomePageControllerTester extends BaseUnitTest {
 
     public function testGetCourses() {
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'student');
+        $repo = $this->createMock(TermRepository::class);
+        $entityManager = $core->getSubmittyEntityManager();
+        $entityManager->method('getRepository')
+            ->with(Term::class)
+            ->willReturn($repo);
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');
