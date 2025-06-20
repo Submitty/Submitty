@@ -1014,3 +1014,32 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         }
     }
 }
+
+function updateFilterWithdrawn() {
+    const checkbox = document.getElementById('filter-withdrawn');
+    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
+
+    if (checkbox.checked) {
+        withdrawnElements.hide();
+        Cookies.set('filter_withdrawn_student', 'true');
+    }
+    else {
+        withdrawnElements.show();
+        Cookies.set('filter_withdrawn_student', 'false');
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const filterCheckbox = document.getElementById('filter-withdrawn');
+    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
+    const filter_status = Cookies.get('filter_withdrawn_student');
+
+    if (filter_status === 'false') {
+        filterCheckbox.checked = false;
+        withdrawnElements.show();
+    }
+    else {
+        filterCheckbox.checked = true;
+        withdrawnElements.hide();
+    }
+});
