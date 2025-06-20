@@ -1019,7 +1019,7 @@ HTML;
             $limimted_access_blind = true;
             $isStudentInfoPanel = false;
         }
-        
+
         if (stripos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Cypress') === false) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
         }
