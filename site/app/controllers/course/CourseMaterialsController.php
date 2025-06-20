@@ -334,9 +334,6 @@ class CourseMaterialsController extends AbstractController {
         return JsonResponse::getSuccessResponse("Time successfully set.");
     }
 
-
-
-
     private function recursiveEditFolder(array $course_materials, CourseMaterial $main_course_material) {
         $main_path =  $main_course_material->getPath();
 
@@ -398,13 +395,13 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //handle sections here
-
-        $this->handleSectionLock($course_material, $_POST);
+        $section_lock_result = $this->handleSectionLock($course_material, $_POST);
+        if ($section_lock_result instanceof JsonResponse) {
+            return $section_lock_result;
+        }
 
 
         $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
-
-
         $course_material->setLastEditBy($this->core->getUser()->getId());
         $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
 
@@ -425,7 +422,6 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $file_name = basename($new_path);
             }
-
 
             if ($path !== $new_path) {
                 if (!FileUtils::ValidPath($new_path)) {
@@ -538,15 +534,14 @@ class CourseMaterialsController extends AbstractController {
             $expand_zip = $_POST['expand_zip'];
         }
 
-
         //configure upload path & requested path
-
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $details['path'][0] = $this->getRequestedPath($upload_path, $_POST['requested_path']);
         $requested_path = $details['path'][0];
-        //------------------------------------------------------
-
+        if ($requested_path instanceof JsonResponse) {
+            return $requested_path;
+        }
 
         $overwrite_all = false;
         if (isset($_POST['overwrite_all']) && $_POST['overwrite_all'] === 'true') {
@@ -812,9 +807,11 @@ class CourseMaterialsController extends AbstractController {
                 last_edit_by: null,
                 last_edit_date: null
             );
-            $this->handleSectionLock($course_material, $_POST);
+            $section_lock_response = $this->handleSectionLock($course_material, $_POST);
+            if ($section_lock_response instanceof JsonResponse) {
+                return $section_lock_response;
+            }
             $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
-
             $this->core->getCourseEntityManager()->persist($course_material);
         }
         $this->core->getCourseEntityManager()->flush();
