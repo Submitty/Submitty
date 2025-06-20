@@ -331,17 +331,17 @@ class DockerUI extends AbstractModel {
             }
 
             $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["worker"] = $matches[1];
             }
 
             $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["shipper"] = $matches[1];
             }
 
             $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["daemon"] = $matches[1];
             }
 
