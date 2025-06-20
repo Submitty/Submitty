@@ -2017,7 +2017,7 @@ class AdminGradeableController extends AbstractController {
         $job_path = FileUtils::joinPaths($daemon_job_queue_path, "regenerate_bulk_images__{$semester}__{$course}__{$gradeable_id}.json");
         $job_data = [
             "job" => "RegenerateBulkImages",
-            "pdf_file_path" => FileUtils::joinPaths("/var/local/submitty/courses", $semester, $course, "submissions/bulk_upload_test"),
+            "pdf_file_path" => FileUtils::joinPaths("/var/local/submitty/courses", $semester, $course, "submissions", $gradeable_id),
             "redactions" => array_map(
                 function (Redaction $redaction) {
                     return [
