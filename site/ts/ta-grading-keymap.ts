@@ -5,6 +5,15 @@
 
 // -----------------------------------------------------------------------------
 // Keyboard shortcut handling
+declare global {
+    interface Window {
+        showSettings(): void;
+        restoreAllHotkeys(): void;
+        removeAllHotkeys(): void;
+        remapHotkey(i: number): void;
+        remapUnset(i: number): void;
+    }
+}
 
 // eslint-disable-next-line no-var
 var keymap: KeymapEntry<unknown>[] = [];
@@ -13,7 +22,7 @@ var remapping = {
     active: false,
     index: 0,
 };
-export type KeymapEntry<T> = {
+type KeymapEntry<T> = {
     name: string;
     code: string;
     fn?: (e: KeyboardEvent, options?: T) => void;
