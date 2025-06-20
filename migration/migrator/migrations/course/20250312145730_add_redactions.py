@@ -16,13 +16,13 @@ def up(config, database, semester, course):
     """
     database.execute("""
                      CREATE TABLE IF NOT EXISTS gradeable_redaction (
-                     redaction_id SERIAL PRIMARY KEY,
-                     g_id character varying(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
-                     page integer NOT NULL,
-                     x1 float NOT NULL,
-                     x2 float NOT NULL,
-                     y1 float NOT NULL,
-                     y2 float NOT NULL
+                        redaction_id SERIAL PRIMARY KEY,
+                        g_id character varying(255) NOT NULL REFERENCES gradeable(g_id) ON DELETE CASCADE,
+                        page integer NOT NULL,
+                        x1 float NOT NULL,
+                        x2 float NOT NULL,
+                        y1 float NOT NULL,
+                        y2 float NOT NULL
                      )
     """)
 
