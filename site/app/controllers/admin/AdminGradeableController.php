@@ -522,6 +522,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
+        $config_files = FileUtils::getAllFiles($gradeable->getAutogradingConfigPath());
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
@@ -588,6 +589,7 @@ class AdminGradeableController extends AbstractController {
             'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
+            'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
@@ -606,6 +608,7 @@ class AdminGradeableController extends AbstractController {
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
             'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'config_files' => $config_files,
             'notifications_sent' => $gradeable->getNotificationsSent(),
             'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
         ]);
@@ -1991,5 +1994,75 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+
+    /**
+     * Loads config info for a gradeable to allow editing
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods: ["POST"])]
+    public function loadConfigEditor(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to load content.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $config_content = file_get_contents(FileUtils::joinPaths($file_path));
+        $output = [];
+        $output["config_content"] = $config_content;
+        $this->core->getOutput()->renderJsonSuccess($output);
+    }
+
+    /**
+     * Saves config info from a gradeable edit
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods: ["POST"])]
+    public function saveConfigEdit(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded autograding configurations for the current course and semester.");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to save changes.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $write_success = FileUtils::writeFile($file_path, $_POST['write_content']);
+        if (!$write_success) {
+            $this->core->getOutput()->renderJsonFail("An error occurred writing the file.");
+            return;
+        }
+
+        $result = $this->enqueueBuild($gradeable);
+        if ($result !== null) {
+            $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+        }
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 }

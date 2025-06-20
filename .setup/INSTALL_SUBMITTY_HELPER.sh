@@ -526,6 +526,11 @@ if [ "${WORKER}" == 0 ]; then
     # copy the files from the repo
     rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
 
+    # copy more_autograding_examples in order to make cypress autograding work
+    if [ "${VAGRANT}" == 1 ]; then 
+        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+    fi
+
     # root will be owner & group of these files
     chown -R  root:root "${SUBMITTY_INSTALL_DIR}/more_autograding_examples"
     # but everyone can read all that files & directories, and cd into all the directories
