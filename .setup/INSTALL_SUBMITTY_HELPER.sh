@@ -486,7 +486,7 @@ chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 
 #replace necessary variables
-array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp load_config_json.cpp )
 for i in "${array[@]}"; do
     replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/src/grading/${i}"
 done
