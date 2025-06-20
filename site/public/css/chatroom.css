@@ -82,8 +82,7 @@
     overflow: hidden;
     font-size: 1rem;
     flex: 1;
-    margin-left: 1rem;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     min-width: 0;
 }
 
