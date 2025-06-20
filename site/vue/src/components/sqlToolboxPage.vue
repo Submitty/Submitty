@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import SaveSQLQueries from './saveSqlQuery.vue';
 import SqlSchema from './sqlSchema.vue';
 import RunQuery from './runQuery.vue';
-import DisplayQueryResults from './displayQueryResults.vue';
 import DownloadQuery from './downloadQuery.vue';
+import type { QueryListEntry } from '../../../ts/sql-toolbox';
+import DisplayQueryResults from './displayQueryResults.vue';
+import ManageSqlQuery from './manageSqlQuery.vue';
 
-const { sqlStructureData } = defineProps<{
+const { sqlStructureData, userQueriesList } = defineProps<{
     sqlStructureData: {
         name: string;
         columns: {
@@ -13,22 +16,37 @@ const { sqlStructureData } = defineProps<{
             type: string;
         }[];
     }[];
+    userQueriesList: QueryListEntry[];
 }>();
 
+const runQueryResults = ref<{ [key: string]: number | string | null }[] | null>(null);
+const runQueryError = ref<string | false>(false);
 const currentQuery = ref({
     query_name: '',
     query: '',
 });
+const savedQueries = ref<QueryListEntry[]>(userQueriesList);
 
-function changeError(message: string | false) {
-    queryError.value = message;
+// For running the query
+function changeRunQueryError(message: string | false) {
+    runQueryError.value = message;
 }
-function changeData(data: { [key: string]: number | string | null }[]) {
-    resultsData.value = data;
+function changeRunQueryResults(data: { [key: string]: number | string | null }[]) {
+    runQueryResults.value = data;
 }
 
-const resultsData = ref<{ [key: string]: number | string | null }[] | null>(null);
-const queryError = ref<string | false>(false);
+// For saving and deleting user queries
+function deleteSavedQuery(id: number) {
+    savedQueries.value = savedQueries.value.filter((query) => query.id !== id);
+}
+function addSavedQuery(id: number, query_name: string, query: string) {
+    savedQueries.value.push({ id, query_name, query });
+}
+
+// For adding query to the current query textarea
+function addCurrentQuery(query: string) {
+    currentQuery.value.query += query;
+}
 
 </script>
 
@@ -46,6 +64,11 @@ const queryError = ref<string | false>(false);
         id="sql-schema"
         :data="sqlStructureData"
       />
+      <ManageSqlQuery
+        :queries="savedQueries"
+        @delete-saved-query="deleteSavedQuery"
+        @add-current-query="addCurrentQuery"
+      />
 
       <textarea
         id="toolbox-textarea"
@@ -58,28 +81,29 @@ const queryError = ref<string | false>(false);
         <RunQuery
           id="run-sql-btn"
           :query="currentQuery.query"
-          @change-data="changeData"
-          @change-error="changeError"
+          @change-run-query-error="changeRunQueryError"
+          @change-run-query-results="changeRunQueryResults"
+        />
+        <SaveSQLQueries
+          id="save-query-btn"
+          v-model:data="currentQuery"
+          @add-saved-query="addSavedQuery"
         />
         <DownloadQuery
-          v-if="resultsData && resultsData.length > 0 && !queryError"
+          v-if="runQueryResults && runQueryResults.length > 0 && !runQueryError"
           id="download-query-btn"
-          :data="resultsData"
+          :data="runQueryResults"
         />
       </div>
     </div>
     <DisplayQueryResults
-      :query-error="queryError"
-      :results-data="resultsData"
+      :query-error="runQueryError"
+      :results-data="runQueryResults"
     />
   </div>
 </template>
 
-<style scoped>
-#toolbox-display-queries {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
+<style lang="css" scoped>
 #run-sql-btn,
 #download-query-btn
 {
@@ -90,7 +114,7 @@ const queryError = ref<string | false>(false);
   margin-bottom: 2px;
 }
 #sql-schema {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 #toolbox-info {
   margin-bottom: 10px;
@@ -101,5 +125,4 @@ const queryError = ref<string | false>(false);
   min-height: 300px;
   resize: vertical;
 }
-
 </style>

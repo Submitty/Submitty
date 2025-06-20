@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\models\User;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\entities\db\Table;
@@ -29,7 +31,20 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         parent::setUp();
 
         $this->core = new Core();
+        $this->core->setUser(new User($this->core, [
+            'user_id' => 'test',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
+        ]));
 
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getInstructorQueries')->willReturn([]);
+        $this->core->setQueries($database_queries);
         $this->controller = new SqlToolboxController($this->core);
     }
 
@@ -96,7 +111,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertSame($response->parameters, [$table_data]);
+        $this->assertSame($response->parameters, [$table_data, []]);
     }
 
     public function testRunQuery(): void {
