@@ -1999,15 +1999,23 @@ class AdminGradeableController extends AbstractController {
 
         $redactions = [];
 
-        for ($i = 0; $i < count($_POST['redactions']); $i++) {
-            $redaction = $_POST['redactions'][$i];
-            if (!isset($redaction['page']) || !isset($redaction['x1']) || !isset($redaction['y1']) || !isset($redaction['x2']) || !isset($redaction['y2'])) {
-                $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
-                return;
-            }
+        if (is_array($_POST['redactions'])) {
+            for ($i = 0; $i < count($_POST['redactions']); $i++) {
+                $redaction = $_POST['redactions'][$i];
+                if (!isset($redaction['page']) || !isset($redaction['x1']) || !isset($redaction['y1']) || !isset($redaction['x2']) || !isset($redaction['y2'])) {
+                    $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
+                    return;
+                }
 
-            $redactions[] = new Redaction($this->core, $redaction['page'], $redaction['x1'], $redaction['y1'], $redaction['x2'], $redaction['y2']);
+                $redactions[] = new Redaction($this->core, $redaction['page'], $redaction['x1'], $redaction['y1'], $redaction['x2'], $redaction['y2']);
+            }
         }
+        elseif ($_POST['redactions'] !== "none") {
+            $this->core->getOutput()->renderJsonFail('Invalid redactions format');
+            return;
+        }
+
+
 
         $this->core->getQueries()->updateRedactions($gradeable, $redactions);
 

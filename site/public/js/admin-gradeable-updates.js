@@ -80,7 +80,17 @@ async function updateRedactionSettings() {
         return;
     }
     const file = files[0];
-    const data = JSON.parse(await file.text());
+    let data = await file.text();
+    try {
+        data = JSON.parse(data);
+    }
+    catch (e) {
+        errors['redactions'] = 'Invalid JSON format in redactions file.';
+        updateErrorMessage();
+        alert('Error saving redactions, please check the format of the JSON file.');
+        $('#redactions_json').val('');
+        return;
+    }
     const response = await $.getJSON({
         type: 'POST',
         url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
@@ -89,6 +99,17 @@ async function updateRedactionSettings() {
             csrf_token: csrfToken,
         },
     });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').show();
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        $('#redactions_json').val('');
+        alert('Error saving redactions, please check the format of the JSON file.');
+    }
 }
 
 async function removeRedactions() {
@@ -96,10 +117,21 @@ async function removeRedactions() {
         type: 'POST',
         url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
         data: {
-            redactions: [{ page: 1, x1: 0, y1: 0, x2: 0, y2: 0 }],
+            redactions: 'none',
             csrf_token: csrfToken,
         },
     });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').hide();
+        $('#redactions_json').val('');
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        alert('Error removing redactions, please try again.');
+    }
 }
 
 function onItemPoolOptionChange(componentId) {

@@ -61,6 +61,9 @@
 
 <script>
     $(document).ready(function() {
+        {% if gradeable.getRedactions()|length == 0 %}
+            $('#remove_redactions').hide();
+        {% endif %}
         if ($('#no_custom_marks').is(':checked')) {
             $("#custom_marks_warning").show();
         }
