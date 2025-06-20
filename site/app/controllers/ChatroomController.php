@@ -39,7 +39,7 @@ class ChatroomController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['socket'];
-        $msg_array['user_id'] = $this->core->getUser()->getId();
+        $msg_array['user_id'] = $msg_array['user_id'] ?? $this->core->getUser()->getId();
         try {
             $client = new Client($this->core);
             $client->json_send($msg_array);
@@ -256,7 +256,7 @@ class ChatroomController extends AbstractController {
         $msg_array = [];
         $msg_array['content'] = $_POST['content'];
         $msg_array['type'] = 'chat_message';
-        $msg_array['user_id'] = $user->getId();
+        $msg_array['user_id'] = $isAnonymous ? 'null' : $user->getId();
         $display_name = '';
         if ($chatroom->isAllowAnon() && $isAnonymous) {
             $display_name = $chatroom->calcAnonName($user->getId());
@@ -270,11 +270,11 @@ class ChatroomController extends AbstractController {
             }
         }
         $msg_array['display_name'] = $display_name;
-        $msg_array['role'] = $user->accessAdmin() ? 'instructor' : 'student';
+        $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
         $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
         $this->sendSocketMessage($msg_array);
-        $message = new Message($msg_array['user_id'], $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
+        $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
         return JsonResponse::getSuccessResponse($message);
