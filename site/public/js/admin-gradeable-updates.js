@@ -1,8 +1,9 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
+/* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
           PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
-/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
+/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
+          loadGradeableEditor, saveGradeableConfigEdit */
 
 let updateInProgressCount = 0;
 const errors = {};
@@ -877,4 +878,162 @@ function hideBuildLog() {
     $('.log-container').hide();
     $('#open-build-log').show();
     $('#close-build-log').hide();
+}
+
+// Register beforeunload listener once
+window.addEventListener('beforeunload', (event) => {
+    const isEdited = $('#gradeable-config-edit').data('edited');
+    if (isEdited) {
+        event.preventDefault();
+        event.return = '';
+    }
+});
+
+let originalConfigContent = null;
+
+// When the text editor opens, the user shouldn't have to manually scroll to see the contents
+function scrollToBottom() {
+    window.scrollTo({ top: 800, left: 0, behavior: 'smooth' });
+}
+
+let current_g_id = null;
+let current_file_path = null;
+
+function updateGradeableEditor(g_id, file_path) {
+    // If no file has been selected yet or it is not the currently selected one
+    if ((current_g_id === null && current_file_path === null) || (current_g_id !== g_id || current_file_path !== file_path)) {
+        current_g_id = g_id;
+        current_file_path = file_path;
+        loadGradeableEditor(g_id, file_path);
+    }
+}
+
+// When you load the editor
+function loadGradeableEditor(g_id, file_path) {
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'load']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            file_path: file_path,
+            csrf_token: csrfToken,
+        },
+        success: function (data) {
+            try {
+                const json = JSON.parse(data);
+                if (json.status === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+
+                $('#gradeable-config-edit-bar').show();
+
+                const configData = json['data'];
+                originalConfigContent = configData.config_content;
+                const editbox = $('textarea#gradeable-config-edit');
+                editbox.val(originalConfigContent);
+
+                editbox.off('input').on('input', function () {
+                    const current = $(this).val();
+                    $(this).data('edited', current !== originalConfigContent);
+                });
+
+                editbox.css({
+                    'min-width': '-webkit-fill-available',
+                });
+
+                editbox.data('edited', false);
+                editbox.data('file-path', file_path);
+                scrollToBottom();
+            }
+            catch {
+                displayErrorMessage('Error parsing data. Please try again');
+            }
+        },
+    });
+}
+
+function configSelectorChange() {
+    location.reload();
+}
+
+function isUsingDefaultConfig() {
+    const selector = document.getElementById('autograding_config_selector');
+    const selectedPath = selector.value;
+    return NONUPLOADED_CONFIG_VALUES.includes(selectedPath);
+}
+
+function updateEditorButtonStyle() {
+    const availableMessage = document.getElementById('editor-not-available');
+    const editorButton = document.getElementById('open-config-editor');
+
+    if (isUsingDefaultConfig()) {
+        editorButton.style.display = 'none';
+        availableMessage.style.display = 'block';
+    }
+    else {
+        editorButton.style.display = 'inline-block';
+        availableMessage.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateEditorButtonStyle();
+});
+
+function toggleGradeableConfigEdit() {
+    $('#gradeable-config-structure').toggleClass('open').toggle();
+    const editorButton = document.getElementById('open-config-editor');
+    if (editorButton.innerText === 'Open Editor') {
+        editorButton.innerText = 'Close Editor';
+        current_g_id = null;
+        current_file_path = null;
+        scrollToBottom();
+    }
+    else {
+        editorButton.innerText = 'Open Editor';
+        cancelGradeableConfigEdit(); // Ensure unsaved changes are deleted
+    }
+}
+
+function cancelGradeableConfigEdit() {
+    $('#gradeable-config-edit-bar').hide();
+    $('#gradeable-config-edit').data('edited', false);
+    current_g_id = null;
+    current_file_path = null;
+}
+
+function saveGradeableConfigEdit(g_id) {
+    const content = $('textarea#gradeable-config-edit').val();
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'save']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            file_path: $('textarea#gradeable-config-edit').data('file-path'),
+            write_content: content,
+            csrf_token: csrfToken,
+        },
+        success: function (data) {
+            try {
+                const json = JSON.parse(data);
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+                originalConfigContent = $('#gradeable-config-edit').val();
+                $('#gradeable-config-edit').data('edited', false);
+                cancelGradeableConfigEdit();
+                ajaxCheckBuildStatus();
+                displaySuccessMessage('Autograding configuration successfully updated.');
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
+            }
+        },
+        error: function () {
+            window.alert('Something went wrong while saving the gradeable config. Please try again.');
+        },
+    });
 }
