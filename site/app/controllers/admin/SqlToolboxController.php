@@ -23,13 +23,28 @@ use Symfony\Component\Routing\Annotation\Route;
 class SqlToolboxController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/sql_toolbox", methods: ["GET"])]
     public function showToolbox(): WebResponse {
+        $sql_tables = $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
+            ['schema' => 'public'],
+            ['name' => 'ASC']
+        );
+
+        // need to map to json-encodeable format
+        $sql_structure_data = array_map(function ($sql_table) {
+            return [
+                'name' => $sql_table->getName(),
+                'columns' => array_map(function ($column) {
+                    return [
+                        'name' => $column->getName(),
+                        'type' => $column->getType(),
+                    ];
+                }, $sql_table->getColumns()->toArray()),
+            ];
+        }, $sql_tables);
+
         return new WebResponse(
             SqlToolboxView::class,
             'showToolbox',
-            $this->core->getCourseEntityManager()->getRepository(Table::class)->findBy(
-                ['schema' => 'public'],
-                ['name' => 'ASC']
-            )
+            $sql_structure_data
         );
     }
 
