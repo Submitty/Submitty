@@ -15,9 +15,7 @@ use app\libraries\DateUtils;
  */
 
 class StudentActivityDashboardController extends AbstractController {
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/activity", methods: ["GET"])]
     public function getStudents() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();
@@ -54,9 +52,7 @@ class StudentActivityDashboardController extends AbstractController {
         ], 'createTable', $data_dump);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/activity/download_activity", methods: ["GET"])]
     public function downloadData() {
         $data_dump = $this->core->getQueries()->getAttendanceInfo();

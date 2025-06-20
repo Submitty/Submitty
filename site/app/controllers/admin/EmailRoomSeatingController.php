@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class EmailRoomSeatingController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class EmailRoomSeatingController extends AbstractController {
     const DEFAULT_EMAIL_SUBJECT = 'Seating Assignment for {$gradeable_id}';
     const DEFAULT_EMAIL_BODY = 'Hello,

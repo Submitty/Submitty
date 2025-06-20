@@ -17,8 +17,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ConfigurationController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class ConfigurationController extends AbstractController {
     const NO_SELF_REGISTER = 0; // Self registration disabled
     const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
