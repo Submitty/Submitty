@@ -34,7 +34,6 @@ declare global {
         imageRotateIcons (iframe: string): void;
         collapseFile (panel: string): void;
         uploadAttachment(): void;
-        togglePanelSelectorModal: (show: boolean) => void;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         registerKeyHandler(parameters: object, fn: Function): void;
         updateCookies (): void;
