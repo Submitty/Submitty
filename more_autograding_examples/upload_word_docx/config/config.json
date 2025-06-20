@@ -22,7 +22,7 @@
     "work_to_public": ["test01/student_file.pdf"]
   },
 
-  "assignment_message": "Submit a single Microsoft Word `.docx` document and it will be converted to a PDF for manual grading.  The maximum upload size is 10mb.".
+  "assignment_message": "Submit a single Microsoft Word `.docx` document and it will be converted to a PDF for manual grading.  The maximum upload size is 10mb.",
 
   "testcases": [
       {
