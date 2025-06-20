@@ -76,6 +76,9 @@ function confirmExtension(option) {
 function extensionPopup(json) {
     $('.popup-form').css('display', 'none');
     const form = $('#more_extension_popup');
+
+    // This seems like it is somewhat needed. This opens MoreExtensions.twig
+    // It is escaped in Twig which should mean its escaped in JS too.
     // eslint-disable-next-line no-unsanitized/property
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
