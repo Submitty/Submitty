@@ -75,7 +75,6 @@ def get_benchmark_percent(soup):
                 raise ValueError("All benchmark percents must have a value before saving.")
 
             try:
-                # Add to sections
                 benchmark_percent[benchmark] = float(element['value'])
             except ValueError:
                 raise ValueError("Benchmark percent input must be a floating point number.")
@@ -113,7 +112,6 @@ def get_final_cutoff_percent(soup):
                 raise ValueError("All final cutoffs must have a value before saving.")
 
             try:
-                # Add to sections
                 final_cutoff[letter_grade] = float(element['value'])
             except ValueError:
                 raise ValueError("Final cutoff input must be a floating point number.")
@@ -157,7 +155,7 @@ def get_gradeable_buckets(soup):
             continue
 
         # Extract bucket type from the h3 tag
-        bucket_type = type_header.text.lower()
+        bucket_type = type_header.text.strip().lower()
         bucket['type'] = bucket_type
 
         if bucket_type not in used_buckets:
@@ -388,7 +386,7 @@ def load_and_save_gui_customization(semester, course, token):
         ), file=stderr)
         exit(-1)
 
-    # Remain blocked until the build process is complete
+    # Remain blocked until the build process is complete to ensure grade summaries are accurate
     requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_status'.format(
             base_url, semester, course
