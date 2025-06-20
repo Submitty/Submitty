@@ -184,6 +184,15 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getConfig()->isChatEnabled()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['chat']),
+                "title" => "Live Chat",
+                "id" => "nav-sidebar-chat",
+                "icon" => "fa-regular fa-keyboard"
+            ]);
+        }
+
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_materials_path = $course_path . "/uploads/course_materials";
         $empty = FileUtils::isEmptyDir($course_materials_path);

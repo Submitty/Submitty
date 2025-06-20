@@ -120,6 +120,21 @@ class UserEntity {
     #[ORM\ManyToMany(mappedBy: "upduckers", targetEntity: Post::class)]
     protected Collection $upducks;
 
+    public function getDisplayedGivenName(): string {
+        return $this->user_preferred_givenname ?? $this->user_givenname;
+    }
+
+    public function getDisplayedFamilyName(): string {
+        return $this->user_preferred_familyname ?? $this->user_familyname;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayFullName() {
+        return $this->getDisplayedGivenName() . ' ' . $this->getDisplayedFamilyName();
+    }
+
     public function accessFullGrading(): bool {
         return $this->user_group < 3;
     }
@@ -133,8 +148,8 @@ class UserEntity {
      */
     public function getDisplayInfo(): array {
         $out = [];
-        $out["given_name"] = $this->user_preferred_givenname ?? $this->user_givenname;
-        $out["family_name"] = $this->user_preferred_familyname ?? $this->user_familyname;
+        $out["given_name"] = $this->getDisplayedGivenName();
+        $out["family_name"] = $this->getDisplayedFamilyName();
         $out["user_email"] = $this->user_email;
         $out["pronouns"] = $this->user_pronouns;
         $out["display_pronouns"] = $this->display_pronouns;

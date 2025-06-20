@@ -68,6 +68,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
+ * @method bool isChatEnabled()
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -338,7 +339,9 @@ class Config extends AbstractModel {
     /** @prop
      * @var bool */
     protected $polls_enabled;
-
+    /** @prop
+     * @var bool */
+    protected $chat_enabled;
 
     /** @prop-read
      * @var array */
@@ -589,7 +592,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled',
+            'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions', 'chat_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -619,6 +623,7 @@ class Config extends AbstractModel {
             'queue_enabled',
             'polls_enabled',
             'seek_message_enabled',
+            'chat_enabled',
         ];
         foreach ($array as $key) {
             $this->$key = (bool) $this->$key;

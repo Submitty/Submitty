@@ -90,6 +90,17 @@
                 <span class="option-alt">Choose whether to enable online polling for this course.</span>
             </label>
         </div>
+
+        <h2>Live Chat</h2>
+        <hr>
+        <div id="chat_enabled_wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="chat_enabled" id="chat-enabled" value="true" {{ fields['chat_enabled'] ? 'checked': '' }} />
+            <label for="chat-enabled">
+                <span class="option-title">Enable Live Chat</span>
+                <br>
+                <span class="option-alt">Choose whether to enable Live Chatroom for this course.</span>
+            </label>
+        </div>
         
         <h2>Submissions</h2>
         <hr>
