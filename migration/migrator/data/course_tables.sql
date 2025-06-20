@@ -991,6 +991,7 @@ CREATE TABLE public.electronic_gradeable_version (
     team_id character varying(255),
     active_version integer,
     anonymous_leaderboard boolean DEFAULT true NOT NULL,
+    g_notification_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -1558,7 +1559,9 @@ CREATE TABLE public.notification_settings (
     team_joined_email boolean DEFAULT true NOT NULL,
     team_member_submission_email boolean DEFAULT true NOT NULL,
     self_notification_email boolean DEFAULT false NOT NULL,
-    self_registration_email boolean DEFAULT true NOT NULL
+    self_registration_email boolean DEFAULT true NOT NULL,
+    all_released_grades boolean DEFAULT true NOT NULL,
+    all_released_grades_email boolean DEFAULT true NOT NULL
 );
 
 

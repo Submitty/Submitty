@@ -1,5 +1,5 @@
 {
-    "required_capabilities": "et-cetera",
+    "required_capabilities": "default",
     "autograding_method": "docker",
     "container_options": {
         "container_image": "submitty/autograding-default:latest"
