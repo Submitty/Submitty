@@ -26,7 +26,10 @@ module.exports = tseslint.config(
     },
     {
         name: 'Base options for all files',
-        extends: [eslint.configs.recommended, noUnsanitized.configs.recommended],
+        extends: [eslint.configs.recommended],
+        plugins: {
+            'no-unsanitized': noUnsanitized,
+        },
         languageOptions: {
             globals: {
                 ...globals.jquery,
@@ -59,6 +62,8 @@ module.exports = tseslint.config(
                         'MemberExpression[object.name="document"][property.name="cookie"]',
                 },
             ],
+            'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
+            'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
         },
     },
 
