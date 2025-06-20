@@ -859,8 +859,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines * 14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            // eslint-disable-next-line no-unsanitized/property
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
+            editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -2017,17 +2016,14 @@ function sortTable(sort_element_index, reverse = false) {
         const reverse_index = headers[i].innerHTML.indexOf(' ↑');
 
         if (index > -1 || reverse_index > -1) {
-            // eslint-disable-next-line no-unsanitized/property
-            headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+            headers[i].innerHTML = escapeSpecialChars(headers[i].innerHTML.slice(0, -2));
         }
     }
     if (reverse) {
-        // eslint-disable-next-line no-unsanitized/property
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↑`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↑`);
     }
     else {
-        // eslint-disable-next-line no-unsanitized/property
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↓`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↓`);
     }
 }
 
