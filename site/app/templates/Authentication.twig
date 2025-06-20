@@ -24,6 +24,9 @@
             <input type="checkbox" name="stay_logged_in" checked />
         </label>
         <input type="submit" name="login" value="Login" class="btn btn-primary" />
+        {% if user_create_account and is_database_auth %}
+            <a href="{{ new_account_url }}" class="btn btn-default" id="new-account" data-testid="new-account-button">{{ new_account_text }}</a>
+        {% endif %}
     </form>
     {% endif %}
 </div>
