@@ -1989,6 +1989,7 @@ class AdminGradeableController extends AbstractController {
     public function updateRedactions(string $gradeable_id): void {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
+            // tryGetGradeable will have already rendered an error message
             return;
         }
 
@@ -2002,9 +2003,11 @@ class AdminGradeableController extends AbstractController {
         if (is_array($_POST['redactions'])) {
             for ($i = 0; $i < count($_POST['redactions']); $i++) {
                 $redaction = $_POST['redactions'][$i];
-                if (!isset($redaction['page']) || !isset($redaction['x1']) || !isset($redaction['y1']) || !isset($redaction['x2']) || !isset($redaction['y2'])) {
-                    $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
-                    return;
+                foreach (["page", "x1", "y1", "x2", "y2"] as $key) {
+                    if (!isset($redaction[$key]) || !is_numeric($redaction[$key])) {
+                        $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
+                        return;
+                    }
                 }
 
                 $redactions[] = new Redaction($this->core, $redaction['page'], $redaction['x1'], $redaction['y1'], $redaction['x2'], $redaction['y2']);
