@@ -77,6 +77,66 @@ function updatePdfPageSettings() {
         });
 }
 
+async function updateRedactionSettings() {
+    const files = $('#redactions_json').prop('files');
+    if (files.length === 0) {
+        return;
+    }
+    const file = files[0];
+    let data = await file.text();
+    try {
+        data = JSON.parse(data);
+    }
+    catch (e) {
+        errors['redactions'] = 'Invalid JSON format in redactions file.';
+        updateErrorMessage();
+        alert('Error saving redactions, please check the format of the JSON file.');
+        $('#redactions_json').val('');
+        return;
+    }
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: data,
+            csrf_token: csrfToken,
+        },
+    });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').show();
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        $('#redactions_json').val('');
+        alert('Error saving redactions, please check the format of the JSON file.');
+    }
+}
+
+async function removeRedactions() {
+    const response = await $.getJSON({
+        type: 'POST',
+        url: buildCourseUrl(['gradeable', getGradeableId(), 'redactions']),
+        data: {
+            redactions: 'none',
+            csrf_token: csrfToken,
+        },
+    });
+    if (response.status === 'success') {
+        delete errors['redactions'];
+        updateErrorMessage();
+        $('#remove_redactions').hide();
+        $('#redactions_json').val('');
+    }
+    else {
+        errors['redactions'] = response.message;
+        updateErrorMessage();
+        alert('Error removing redactions, please try again.');
+    }
+}
+
 function onItemPoolOptionChange(componentId) {
     const linkItemPool = $(`#yes-link-item-pool-${componentId}`);
     // Provide a select option for item-pool items on the rubric components
