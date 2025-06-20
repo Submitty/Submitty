@@ -1026,7 +1026,7 @@ function updateFilterWithdrawn() {
     else {
         withdrawnElements.show();
         Cookies.set('filter_withdrawn_student', 'false');
-  }
+    }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
