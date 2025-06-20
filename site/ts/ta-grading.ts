@@ -760,7 +760,7 @@ function initializeTaLayout() {
             setPanelsVisibilities(taLayoutDet.currentOpenPanel);
         }
     }
-    if (taLayoutDet.isFullScreenMode && document.getElementById('grading-panel-header') !== null) {
+    if (taLayoutDet.isFullScreenMode && $('#silent-edit-id').length !== 0) {
         toggleFullScreenMode();
     }
     updateLayoutDimensions();
