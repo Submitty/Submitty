@@ -62,7 +62,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.6.2",
     "@types/node": "^24.0.0",
-    "@types/twig": "^1.12.16",
+    "@types/twig": "^1.12.17",
     "@typescript-eslint/parser": "^8.32.1",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.5.0",
