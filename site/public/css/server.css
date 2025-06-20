@@ -1326,10 +1326,6 @@ body.no-scroll {
     display: none;
 }
 
-.simple-grade-withdrawn {
-    display: none;
-}
-
 .tooltip {
     position: relative;
     display: inline-block;

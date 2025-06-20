@@ -131,33 +131,60 @@ function inquiry_update() {
 }
 
 function filter_withdrawn_update() {
-    const filterButton = document.getElementById('filter-withdrawn-button');
-    const filter_status = Cookies.get('filter_withdrawn_student');
-    const inquiry_status = Cookies.get('inquiry_status');
+  const filterCheckbox = document.getElementById('toggle-filter-withdrawn');
+  const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
+  const inquiry_status = Cookies.get('inquiry_status');
+  const inquiryMode = (inquiry_status === 'on');
 
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-    const inquiryMode = (inquiry_status === 'on');
-
-    if (filter_status === undefined || filter_status === 'true') {
-        withdrawnElements.hide();
-        filterButton.textContent = 'Show Withdrawn Students';
-        Cookies.set('filter_withdrawn_student', 'true');
-    } else {
-        withdrawnElements.each(function () {
-            const hasInquiry = typeof $(this).find('.grade-button').attr('data-grade-inquiry') !== 'undefined';
-            if (inquiryMode && !hasInquiry) {
-                $(this).hide();
-            } else {
-                $(this).show();
-            }
-        });
-        filterButton.textContent = 'Hide Withdrawn Students';
-        Cookies.set('filter_withdrawn_student', 'false');
-    }
-
-    filterButton.addEventListener('click', () => {
-        const currentlyHidden = Cookies.get('filter_withdrawn_student') === 'true';
-        Cookies.set('filter_withdrawn_student', currentlyHidden ? 'false' : 'true');
-        location.reload();
+  if (filterCheckbox.checked) {
+    withdrawnElements.hide();
+    Cookies.set('filter_withdrawn_student', 'true');
+  } else {
+    withdrawnElements.each(function () {
+      const hasInquiry = typeof $(this).find('.grade-button').attr('data-grade-inquiry') !== 'undefined';
+      if (inquiryMode && !hasInquiry) {
+        $(this).hide();
+      } else {
+        $(this).show();
+      }
     });
+    Cookies.set('filter_withdrawn_student', 'false');
+  }
 }
+
+// Ensures all filter checkboxes remain the same on page reload.
+window.addEventListener('DOMContentLoaded', () => {
+    // Only Assigned Sections
+    const assignedFilterBox = document.getElementById('view-sections');
+    const assignedFilterStatus = Cookies.get('view');
+    assignedFilterBox.checked = (assignedFilterStatus === 'assigned');
+    
+    // Randomize Order
+    const randomFilterBox = document.getElementById('random-default-order');
+    const randomFilterStatus = Cookies.get('sort');
+    randomFilterBox.checked = (randomFilterStatus === 'random');
+
+    // Anonymous Mode
+    const anonFilterBox = document.getElementById('toggle-anon-button');
+    const anonFilterStatus = Cookies.get(`anon_mode_${gradeable_id}`);
+    anonFilterBox.checked = (anonFilterStatus === 'on');
+    
+    // Grade Inquiry Only
+    const inquiryFilterBox = document.getElementById('toggle-grade-inquiry');
+    const inquiryFilterStatus = Cookies.get('inquiry_status');
+    inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
+
+    // Withdrawn Students, altered logic since page reload not required when toggling checkbox
+    const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+    const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    if (withdrawnFilterStatus === 'false') {
+        withdrawnFilterBox.checked = false;
+        withdrawnFilterElements.show();
+    }
+    else {
+        withdrawnFilterBox.checked = true;
+        withdrawnFilterElements.hide();
+    }
+});
+
