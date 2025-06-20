@@ -641,23 +641,6 @@ function setupSimpleGrading(action) {
     else if (action === 'numeric') {
         setupNumericTextCells();
     }
-    const filterWithdrawnCheckbox = $('#filter-withdrawn');
-    if (Cookies.get('filter_withdrawn_student') === 'false') {
-        $('.simple-grade-withdrawn').css('display', 'contents');
-        filterWithdrawnCheckbox.prop('checked', false);
-    }
-
-    // filter student who have withdrawn from this course
-    filterWithdrawnCheckbox.on('change', function () {
-        if (this.checked) {
-            $('.simple-grade-withdrawn').css('display', 'none');
-            Cookies.set('filter_withdrawn_student', true);
-        }
-        else {
-            $('.simple-grade-withdrawn').css('display', 'contents');
-            Cookies.set('filter_withdrawn_student', false);
-        }
-    });
 
     // search bar code starts here (see site/app/templates/grading/StudentSearch.twig for #student-search)
 
@@ -1031,3 +1014,32 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         }
     }
 }
+
+function updateFilterWithdrawn() {
+    const checkbox = document.getElementById('filter-withdrawn');
+    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
+
+    if (checkbox.checked) {
+        withdrawnElements.hide();
+        Cookies.set('filter_withdrawn_student', 'true');
+    }
+    else {
+        withdrawnElements.show();
+        Cookies.set('filter_withdrawn_student', 'false');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const filterCheckbox = document.getElementById('filter-withdrawn');
+    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
+    const filter_status = Cookies.get('filter_withdrawn_student');
+
+    if (filter_status === 'false') {
+        filterCheckbox.checked = false;
+        withdrawnElements.show();
+    }
+    else {
+        filterCheckbox.checked = true;
+        withdrawnElements.hide();
+    }
+});

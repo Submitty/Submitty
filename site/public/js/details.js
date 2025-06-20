@@ -136,11 +136,9 @@ function filter_withdrawn_update() {
     const inquiry_status = Cookies.get('inquiry_status');
 
     const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-
-    const shouldHideAll = (filter_status === undefined || filter_status === 'true');
     const inquiryMode = (inquiry_status === 'on');
 
-    if (shouldHideAll) {
+    if (filter_status === undefined || filter_status === 'true') {
         withdrawnElements.hide();
         filterButton.textContent = 'Show Withdrawn Students';
         Cookies.set('filter_withdrawn_student', 'true');
