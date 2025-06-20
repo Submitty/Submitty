@@ -12,7 +12,7 @@ const checkGradeable = (gradeable_id) => {
 };
 
 describe('Test course should exist', () => {
-    it('Check test course exists', () => {
+    it('Check test gradeables exists', () => {
         cy.login('instructor');
         checkGradeable('c_failure_messages');
         checkGradeable('c_malloc_not_allowed');
