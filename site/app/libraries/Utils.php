@@ -117,7 +117,7 @@ class Utils {
      * @param array<mixed> $requirements The user id requirements taken from the config file, like length, name requirements, etc.
      */
     public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
-        if (strlen($user_id) < $requirements['min_length'] || strlen($user_id) > $requirements['max_length'] || ) {
+        if (strlen($user_id) < $requirements['min_length'] || strlen($user_id) > $requirements['max_length']) {
             return false;
         }
         // Allow any user ID, if it fits in the size restraints.

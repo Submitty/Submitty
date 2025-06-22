@@ -82,6 +82,10 @@
     cursor: pointer;
 }
 
+.signup-btn { 
+    width: 100%;
+}
+
 .requirements-list {
     margin-left: 15px;
 }

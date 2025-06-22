@@ -6,14 +6,14 @@
     </div>
     <p> Email may take up to 5 minutes to send </p>
     <br/>
-    <form method="GET" id="verify-email" action="{{ verify_email_url }}" >
-        Enter Verification Code
+    <form method="GET" id="verify-email" action="{{ verify_email_url }}">
+        Enter Verification Code<br/>
         <input type="text" name="verification_code" required data-testid="verification-code" />
         <input type="submit" name="submit" value="Submit" class="btn btn-primary" data-testid="verify-email-button" />
     </form>
     <br/>
     <form id="resend-email" action="{{ resend_email_url }}" >
-        Resend Verification Code 
+        Resend Verification Code<br/>
         <input type="text" name="email" placeholder="Enter Email" />
         <input type="submit" name="submit" value="Resend" class="btn btn-primary" />
     </form>
