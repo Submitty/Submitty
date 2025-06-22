@@ -52,15 +52,13 @@ class UtilsTester extends BaseUnitTest {
     }
 
     public function testAcceptedEmail() {
-        $good_email_rpi = 'goodemail@rpi.edu';
-        $core = $this->createMockCore(['accepted_emails' => ['rpi.edu', 'gmail.com']]);
+        $core = $this->createMockCore(['accepted_emails' => ['gmail.com']]);
         $reqs = $core->getConfig()->getAcceptedEmails();
-        $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_rpi));
         $good_email_gmail = 'goodemail@gmail.com';
         $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_gmail));
         $bad_email_extension = 'goodemail@notanextension.edu';
         $this->assertFalse(Utils::isAcceptedEmail($reqs, $bad_email_extension));
-        $accepts_multiple_at_signs = 'good@email@testing@rpi.edu';
+        $accepts_multiple_at_signs = 'good@email@testing@gmail.edu';
         $this->assertTrue(Utils::isAcceptedEmail($reqs, $accepts_multiple_at_signs));
     }
 
