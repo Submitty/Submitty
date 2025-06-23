@@ -245,9 +245,9 @@ def send_email():
 
         if term and course:
             email_data["body"] += (
-                f"\nPlease refer to the course syllabus for contact information "
-                f"for your teaching staff.\nUpdate your email notification "
-                f"settings for this course here: "
+                "\nPlease refer to the course syllabus for contact information "
+                "for your teaching staff.\nUpdate your email notification "
+                "settings for this course here: "
                 f"{BASE_URL_PATH}/courses/{term}/{course}/notifications/settings"
             )
 
