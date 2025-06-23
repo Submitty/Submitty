@@ -338,11 +338,33 @@ class FileUtils {
         $res = $zip->open($filename);
         if ($res === true) {
             for ($i = 0; $i < $zip->count(); $i++) {
-                $size += $zip->statIndex($i)['size'];
+                $size += $zip->statIndex($i)['comp_size'];
             }
             $zip->close();
         }
         return $size;
+    }
+
+    public static function validateZipFileSize(string $filename): bool {
+        $zip = new \ZipArchive();
+        $res = $zip->open($filename);
+        for ($i = 0; $i < $zip->count(); $i++) {
+            $stream = $zip->getStream($zip->getNameIndex($i));
+            if ($stream === false) {
+                return false;
+            }
+            $size = 0;
+            $max_size = $zip->statIndex($i)['comp_size'];
+            while (!feof($stream)) {
+                $size += strlen(fread($stream, 8192));
+                if ($size > $max_size) {
+                    fclose($stream);
+                    return false; // early exit if size exceeds max size
+                }
+            }
+            fclose($stream);
+        }
+        return true;
     }
 
     /**
