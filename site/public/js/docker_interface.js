@@ -185,7 +185,7 @@ function applySort(sortKey, direction) {
     const table = document.getElementById('docker-table');
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
-    const colMap = { name: 0, size: 3, created: 5 };
+    const colMap = { name: 0, size: 4, created: 5 };
     const colIndex = colMap[sortKey];
 
     rows.sort((rowA, rowB) => {
@@ -193,11 +193,22 @@ function applySort(sortKey, direction) {
         const bText = rowB.children[colIndex].textContent.trim();
         let cmp = 0;
         if (sortKey === 'name') {
-            const [nameA, tagA = ''] = aText.split(':');
-            const [nameB, tagB = ''] = bText.split(':');
+            const nameA = rowA.children[0].textContent.trim();
+            const nameB = rowB.children[0].textContent.trim();
             cmp = nameA.localeCompare(nameB);
             if (cmp === 0) {
-                cmp = tagA.localeCompare(tagB);
+                const tagA = rowA.children[1].textContent.trim();
+                const tagB = rowB.children[1].textContent.trim();
+                const numA = parseFloat(tagA);
+                const numB = parseFloat(tagB);
+                const isNumA = !isNaN(numA);
+                const isNumB = !isNaN(numB);
+                if (isNumA && isNumB) {
+                    cmp = numA - numB;
+                }
+                else {
+                    cmp = tagA.localeCompare(tagB);
+                }
             }
         }
         else if (sortKey === 'size') {
