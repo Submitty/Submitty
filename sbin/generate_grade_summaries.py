@@ -76,11 +76,11 @@ def get_benchmark_percent(soup):
 
             try:
                 benchmark_percent[benchmark] = float(element['value'])
-
-                if benchmark_percent[benchmark] < 0 or benchmark_percent[benchmark] > 1:
-                    raise ValueError("Benchmark percent input must be between 0 and 1.")
             except ValueError:
                 raise ValueError("Benchmark percent input must be a floating point number.")
+
+            if benchmark_percent[benchmark] < 0 or benchmark_percent[benchmark] > 1:
+                raise ValueError("Benchmark percent input must be between 0 and 1.")
 
     return benchmark_percent
 
@@ -116,11 +116,11 @@ def get_final_cutoff_percent(soup):
 
             try:
                 final_cutoff[letter_grade] = float(element['value'])
-
-                if final_cutoff[letter_grade] < 0 or final_cutoff[letter_grade] > 100:
-                    raise ValueError("Final cutoff input must be between 0 and 100.")
             except ValueError:
                 raise ValueError("Final cutoff input must be a floating point number.")
+
+            if final_cutoff[letter_grade] < 0 or final_cutoff[letter_grade] > 100:
+                raise ValueError("Final cutoff input must be between 0 and 100.")
 
     return final_cutoff
 
@@ -217,7 +217,12 @@ def get_gradeable_buckets(soup):
                     if 'curve' not in gradeable:
                         gradeable['curve'] = []
 
-                    gradeable['curve'].append(float(curve_input['value']))
+                    try:
+                        gradeable['curve'].append(float(curve_input['value']))
+                    except ValueError:
+                        raise ValueError(
+                            f"All curve inputs for gradeable {gradeable['id']} must be floating point values"
+                        )
 
             # Validate the set of per-gradeable curve values
             if 'curve' in gradeable:
@@ -228,12 +233,7 @@ def get_gradeable_buckets(soup):
 
                 previous = gradeable['max']
                 for elem in gradeable['curve']:
-                    try:
-                        elem = float(elem)
-                    except ValueError:
-                        raise ValueError(
-                            f"All curve inputs for gradeable {gradeable['id']} must be floating point values"
-                        )
+                    elem = float(elem)
 
                     if elem < 0:
                         raise ValueError(
