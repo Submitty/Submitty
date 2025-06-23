@@ -13,6 +13,8 @@ class FormOptionsWidget extends Widget {
         const heading_container = this.getHeadingContainer('Form Options');
 
         const interactive_container = this.getInteractiveContainer();
+
+        // This is a fine usage of innerHTML
         // eslint-disable-next-line no-unsanitized/property
         interactive_container.innerHTML = this.getFormOptionsTemplate();
 
@@ -114,6 +116,7 @@ class FormOptionsWidget extends Widget {
     appendStatusMessage(message) {
         const status_div = document.querySelector('.form-options-widget .status');
         const p = document.createElement('p');
+        console.log(message);
         // eslint-disable-next-line no-unsanitized/property
         p.innerHTML = message;
         status_div.appendChild(p);
