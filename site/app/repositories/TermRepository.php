@@ -16,6 +16,9 @@ class TermRepository extends EntityRepository {
         return array_column($result, 'start_date')[0];
     }
 
+    /**
+     * @return string[]
+     */
     public function getAllTermNames(): array {
         $results = $this->getEntityManager()->createQueryBuilder()
             ->select('term.name')

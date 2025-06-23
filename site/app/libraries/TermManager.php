@@ -19,7 +19,7 @@ class TermManager {
     }
 
     /**
-     * @return array<string>
+     * @return string[]
      */
     public static function getAllTermNames(Core $core): array {
         $em = $core->getSubmittyEntityManager();

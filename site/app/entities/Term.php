@@ -10,6 +10,7 @@ use app\repositories\TermRepository;
 
 /**
  * Doctrine entity for Terms, not much used but used for other queries.
+ * @package app\entities
  */
 #[ORM\Entity(repositoryClass: TermRepository::class)]
 #[ORM\Table(name: "terms")]
