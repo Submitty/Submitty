@@ -394,13 +394,7 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getSuccessResponse("Success");
         }
 
-        //handle sections here
-        $section_lock_result = $this->handleSectionLock($course_material, $_POST);
-        if ($section_lock_result instanceof JsonResponse) {
-            return $section_lock_result;
-        }
-
-
+        $this->handleSectionLock($course_material, $_POST);
         $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
         $course_material->setLastEditBy($this->core->getUser()->getId());
         $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
@@ -539,9 +533,6 @@ class CourseMaterialsController extends AbstractController {
 
         $details['path'][0] = $this->getRequestedPath($upload_path, $_POST['requested_path']);
         $requested_path = $details['path'][0];
-        if ($requested_path instanceof JsonResponse) {
-            return $requested_path;
-        }
 
         $overwrite_all = false;
         if (isset($_POST['overwrite_all']) && $_POST['overwrite_all'] === 'true') {
@@ -807,10 +798,7 @@ class CourseMaterialsController extends AbstractController {
                 last_edit_by: null,
                 last_edit_date: null
             );
-            $section_lock_response = $this->handleSectionLock($course_material, $_POST);
-            if ($section_lock_response instanceof JsonResponse) {
-                return $section_lock_response;
-            }
+            $this->handleSectionLock($course_material, $_POST);
             $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
             $this->core->getCourseEntityManager()->persist($course_material);
         }
