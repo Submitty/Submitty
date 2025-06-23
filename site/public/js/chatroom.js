@@ -46,10 +46,6 @@ function sendMessage(chatroomId, userId, displayName, role, content, isAnonymous
 }
 
 function appendMessage(displayName, role, ts, content) {
-    const timestamp = ts || new Date(Date.now()).toLocaleString('en-us', 
-                { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric',
-                minute: 'numeric', second: 'numeric' });
-
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
         display_name = `${displayName} [${role}]`;
@@ -71,7 +67,7 @@ function appendMessage(displayName, role, ts, content) {
 
     const timestampSpan = document.createElement('span');
     timestampSpan.classList.add('timestamp');
-    timestampSpan.innerText = timestamp;
+    timestampSpan.innerText = ts;
 
     messageHeader.appendChild(senderName);
     messageHeader.appendChild(timestampSpan);
