@@ -382,7 +382,9 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'notifications_sent' => 0,
+            'notifications_pending' => 0
         ]);
     }
 
@@ -605,8 +607,10 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
+            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'config_files' => $config_files,
-            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary()
+            'notifications_sent' => $gradeable->getNotificationsSent(),
+            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1472,7 +1476,8 @@ class AdminGradeableController extends AbstractController {
         $numeric_properties = [
             'precision',
             'grader_assignment_method',
-            'depends_on_points'
+            'depends_on_points',
+            'notifications_sent'
         ];
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
@@ -1574,6 +1579,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'notifications_sent' && $post_val === "0" && $gradeable->getNotificationsSent() > 0) {
+                $this->core->getQueries()->resetGradeableNotifications($gradeable);
             }
 
             if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets, true)) {
@@ -1781,12 +1790,15 @@ class AdminGradeableController extends AbstractController {
                 $logs = $this->getBuildLogs($gradeable_id);
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
-                $haystack = $logs->json['data'][0];
+                $haystack = $logs->json['data'][0] ?? '';
 
                 if (str_contains($haystack, 'MAKE ERROR')) {
                     $status = false;
                 }
                 elseif (str_contains($haystack, $needle)) {
+                    $status = 'warnings';
+                }
+                elseif (str_contains($haystack, 'WARNING:')) {
                     $status = 'warnings';
                 }
             }

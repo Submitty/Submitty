@@ -312,6 +312,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/access"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/emails"
+    mkdir -p "${SUBMITTY_DATA_DIR}/logs/notifications"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/site_errors"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/socket_errors"
     mkdir -p "${SUBMITTY_DATA_DIR}/logs/ta_grading"
@@ -355,6 +356,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/access"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/bulk_uploads"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/emails"
+    chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/notifications"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/course_creation"
     chown  -R "${DAEMON_USER}":"${COURSE_BUILDERS_GROUP}" "${SUBMITTY_DATA_DIR}/logs/rainbow_grades"
     chown  -R "${PHP_USER}":"${COURSE_BUILDERS_GROUP}"    "${SUBMITTY_DATA_DIR}/logs/site_errors"
@@ -484,7 +486,7 @@ chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 
 #replace necessary variables
-array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp load_config_json.cpp )
 for i in "${array[@]}"; do
     replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/src/grading/${i}"
 done
