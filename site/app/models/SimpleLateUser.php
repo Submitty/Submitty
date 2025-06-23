@@ -5,6 +5,13 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 
+/**
+ * @method string getId()
+ * @method string getLateDayExceptions()
+ * @method string getDisplayedGivenName()
+ * @method string getDisplayedFamilyName()
+ * @method string getReasonForException()
+ */
 class SimpleLateUser extends AbstractModel {
     /** @prop
      * @var bool Is this user actually loaded (else you cannot access the other member variables) */
