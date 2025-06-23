@@ -48,7 +48,7 @@ class Utils {
  * @return \DateTime|null The DateTime object or null if invalid.
  */
     public static function convertToSQLDateTime(?string $date_string): ?\DateTime {
-        if (empty($date_string) || strtolower($date_string) === 'none') {
+        if ($date_string === null || trim($date_string) === '' || strtolower($date_string) === 'none') {
             return null;
         }
 

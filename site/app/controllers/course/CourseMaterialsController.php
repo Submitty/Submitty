@@ -362,7 +362,7 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
-        $calendar_display = $_POST['calendar_display'] != 'none';
+        $calendar_display = $_POST['calendar_display'] !== 'none';
         $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
         $associated_gradeable = $_POST['associated_gradeable'] != 'none' ? $_POST['associated_gradeable'] : null;
         $id = $_POST['id'] ?? '';
@@ -521,6 +521,8 @@ class CourseMaterialsController extends AbstractController {
                                     null,
                                     null,
                                     false,
+                                    false,
+                                    null,
                                     $course_material->getUploadedBy(),
                                     $course_material->getUploadedDate(),
                                     null,
@@ -567,7 +569,7 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setUrl($_POST['link_url']);
         }
 
-        if (isset($_POST['release_time']) && $_POST['release_time'] != '') {
+        if (isset($_POST['release_time']) && $_POST['release_time'] !== '') {
             $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
         }
@@ -585,7 +587,7 @@ class CourseMaterialsController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         /* SET UPLOAD OF COURSE MATERIALS TO INCLUDE VALUES */
-        $calendar_display = $_POST['calendar_display'] != 'none';
+        $calendar_display = $_POST['calendar_display'] !== 'none';
         $associated_date = $_POST['associated_date'];
         $associated_gradeable = $_POST['associated_gradeable'];
         $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
@@ -874,7 +876,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        if ($dirs_to_make != null) {
+        if ($dirs_to_make !== null) {
             $i = -1;
             $new_paths = [];
             foreach ($dirs_to_make as $dir) {

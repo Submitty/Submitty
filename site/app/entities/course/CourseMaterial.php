@@ -198,7 +198,7 @@ class CourseMaterial {
         return $this->on_calendar;
     }
 
-    public function setOnCalendar(bool $val) {
+    public function setOnCalendar(bool $val): void {
         if (!$val) {
             $this->gradeable = null;
             $this->calendar_date = null;

@@ -169,25 +169,22 @@ class CourseMaterialsView extends AbstractView {
             "file_upload_limit_mb" => $file_upload_limit_mb
         ]);
     }
-    private function setCourseMaterialMetadata(array $course_materials, string $full_path = ""): array {
+
+    private function setCourseMaterialMetadata(array &$course_materials, string $full_path = ""): array {
         $metadata = [];
 
         foreach ($course_materials as $name => $course_material) {
-            $current_path = empty($full_path) ? "/" . $name : $full_path . '/' . $name;
+            $current_path = $full_path === '' ? '/' . $name : $full_path . '/' . $name;
 
             if (is_array($course_material)) {
-                // Store metadata for the folder
                 $metadata[$current_path] = [
                     'associatedDate' => 'none',
                     'isOnCalendar' => 'none',
                     'gradeable' => 'none'
                 ];
 
-                // Recursively process nested course materials
                 $metadata = array_merge($metadata, $this->setCourseMaterialMetadata($course_material, $current_path));
-            }
-            else {
-                // Store metadata for the file
+            } else {
                 $metadata[$current_path] = [
                     'associatedDate' => $course_material->getCalendarDate() ? $course_material->getCalendarDate()->format("Y-m-d") : 'none',
                     'isOnCalendar' => $course_material->isOnCalendar() ? 'true' : 'none',
@@ -313,7 +310,7 @@ class CourseMaterialsView extends AbstractView {
         foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
                 $inner_full_path = "";
-                if (empty($full_path)) {
+                if ($full_path === '') {
                     $inner_full_path = $name;
                 }
                 else {
