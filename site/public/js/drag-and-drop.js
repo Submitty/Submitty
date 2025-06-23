@@ -139,7 +139,7 @@ function progress(e) {
         progressBar.max = e.total;
         progressBar.value = e.loaded;
         const perc = (e.loaded * 100) / e.total;
-        $('#loading-bar-percentage').html(`${perc.toFixed(2)} %`);
+        $('#loading-bar-percentage').text(`${perc.toFixed(2)} %`);
     }
 }
 

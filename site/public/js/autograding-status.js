@@ -32,7 +32,7 @@ function updateTable() {
 
                 // Update Class Statistics table
                 let table = document.getElementById('course-table');
-                $('#course-table tbody').html('');
+                $('#course-table tbody').text('');
                 Object.keys(json.course_info).forEach((key1) => {
                     const course_name = key1.split('__');
                     Object.keys(json.course_info[key1]).forEach((key2) => {
@@ -54,7 +54,7 @@ function updateTable() {
 
                 // Update Machine Statistics table
                 table = document.getElementById('machine-table');
-                $('#machine-table tbody').html('');
+                $('#machine-table tbody').text('');
                 Object.keys(json.ongoing_job_info).forEach((key) => {
                     const info = json.ongoing_job_info[key];
                     info.forEach((elem) => {

@@ -1199,6 +1199,7 @@ function setComponentHeaderContents(component_id: number, contents: string | Ele
  * @param {string} contents
  */
 function setTotalScoreBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#total-score-container').html(contents);
 }
 
@@ -1207,6 +1208,7 @@ function setTotalScoreBoxContents(contents: string | Element | DocumentFragment 
  * @param contents
  */
 function setRubricTotalBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#rubric-total-container').html(contents);
 }
 

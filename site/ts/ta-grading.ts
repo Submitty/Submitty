@@ -295,6 +295,7 @@ $(() => {
 
     // Progress bar value
     const value = $('.progressbar').val() ?? 0;
+    // eslint-disable-next-line no-restricted-syntax
     $('.progress-value').html(`<b>${String(value)}%</b>`);
 
     // Grading panel toggle buttons
@@ -2213,7 +2214,7 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     const promise = loadPDF(name, path, page_num, panel);
     $(fileFullPanelOptions[panel]['fileView']).show();
-    $(fileFullPanelOptions[panel]['gradingFileName']).html(name);
+    $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
         = $(fileFullPanelOptions[panel]['panel']).width()!
             - $(fileFullPanelOptions[panel]['innerPanel']).width()!;

@@ -367,21 +367,25 @@ function ajaxGetBuildLogs(gradeable_id) {
             const make_info = response['data'][2];
 
             if (build_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
             }
             else {
-                $('#build-log-body').html('There is currently no build output.');
+                $('#build-log-body').text('There is currently no build output.');
             }
             if (cmake_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#cmake-log-body').html(cmake_info);
             }
             else {
-                $('#cmake-log-body').html('There is currently no cmake output.');
+                $('#cmake-log-body').text('There is currently no cmake output.');
             }
             if (make_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html(make_info);
             }
             else {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html('There is currently no make output.');
             }
 
@@ -405,31 +409,31 @@ function ajaxCheckBuildStatus() {
         success: function (response) {
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
-                $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
             }
             else if (response['data'] === 'processing') {
-                $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
             }
             else if (response['data'] === 'warnings') {
-                $('#rebuild-status').html('Gradeable built with warnings');
+                $('#rebuild-status').text('Gradeable built with warnings');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == true) {
                 $('.config_search_error').hide();
-                $('#rebuild-status').html('Gradeable build complete');
+                $('#rebuild-status').text('Gradeable build complete');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
-                $('#rebuild-status').html('Gradeable build failed');
+                $('#rebuild-status').text('Gradeable build failed');
                 $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {
-                $('#rebuild-status').html('Error');
+                $('#rebuild-status').text('Error');
                 console.error('Internal server error, please try again.');
             }
         },

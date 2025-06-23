@@ -58,7 +58,7 @@ function checkForumFileExtensions(post_box_id, files) {
 }
 
 function resetForumFileUploadAfterError(displayPostId) {
-    $(`#file_name${displayPostId}`).html('');
+    $(`#file_name${displayPostId}`).text('');
     document.getElementById(`file_input_label${displayPostId}`).style.border = '2px solid red';
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
@@ -75,6 +75,7 @@ function checkNumFilesForumUpload(input, post_id) {
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
+        // eslint-disable-next-line no-restricted-syntax
         $(`#file_name${displayPostId}`).html(`<p style="display:inline-block;">${input.files.length} files selected.</p>`);
         $('#messages').fadeOut();
         document.getElementById(`file_input_label${displayPostId}`).style.border = '';
@@ -2384,6 +2385,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
+            // eslint-disable-next-line no-restricted-syntax
             $('#thread-content').html(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');

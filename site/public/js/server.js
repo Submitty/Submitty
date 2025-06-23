@@ -77,19 +77,19 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Visualize whitespace characters') {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-default');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-primary');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Display whitespace/non-printing characters as escape sequences');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Display whitespace/non-printing characters as escape sequences');
         list_white_spaces['newline'] = '&#9166;';
         option = 'unicode';
     }
     else if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Display whitespace/non-printing characters as escape sequences') {
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Original View');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Original View');
         list_white_spaces['newline'] = '\\n';
         option = 'escape';
     }
     else {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-primary');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-default');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Visualize whitespace characters');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Visualize whitespace characters');
         option = 'original';
     }
     // Insert actual and expected one at a time
@@ -118,6 +118,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                 list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
+            // eslint-disable-next-line no-restricted-syntax
             $(expected_div).html(response.data.html);
             url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
             }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
@@ -134,6 +135,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                         $(`#${helper_id}`).append(`<span style="outline:1px blue solid;">${list_white_spaces[property]}</span> = ${property} `);
                     }
                     $(actual_div).empty();
+                    // eslint-disable-next-line no-restricted-syntax
                     $(actual_div).html(response.data.html);
                 },
                 error: function () {
@@ -150,7 +152,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#delete-gradeable-form');
-    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).text('');
     $('[id="delete-gradeable-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -160,7 +162,7 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#close-submissions-form');
-    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).text('');
     $('[id="close-submissions-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -291,7 +293,7 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
     showPopup('#upload-course-materials-form');
@@ -307,7 +309,7 @@ function newUploadBanner() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-banner');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
 
     const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
     $('[name="existing-file-list"]', form).append(stringifiedFiles);

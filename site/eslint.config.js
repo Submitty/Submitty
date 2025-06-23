@@ -61,6 +61,10 @@ module.exports = tseslint.config(
                     selector:
                         'MemberExpression[object.name="document"][property.name="cookie"]',
                 },
+                {
+                    selector: 'CallExpression[arguments.length>0][callee.property.name="html"] > MemberExpression[object.callee.name="$"]',
+                    message: 'Do not use $(...).html(). Use safer DOM manipulation methods instead.',
+                },
             ],
             'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
             'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
