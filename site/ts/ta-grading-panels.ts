@@ -273,7 +273,7 @@ function initializeTaLayout() {
     }
     else if (taLayoutDet.numOfPanelsEnabled) {
         togglePanelLayoutModes(true);
-        if (taLayoutDet.isFullLeftColumnMode) {
+        if (taLayoutDet.isFullScreenMode && $('#silent-edit-id').length !== 0) {
             toggleFullLeftColumnMode(true);
         }
         // initialize the layout\
@@ -970,9 +970,13 @@ $(() => {
     });
 
     window.addEventListener('resize', () => {
+        if ($('#silent-edit-id').length === 0) {
+            return;
+        }
         const name_div = $('#grading-panel-student-name');
+        const panel_div = $('.panels-container');
         // have to calculate the height since the item is positioned absolutely
-        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
+        const height = panel_div[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
         const padding_bottom = 12;
         name_div.css('height', height - padding_bottom);
         name_div.show();
