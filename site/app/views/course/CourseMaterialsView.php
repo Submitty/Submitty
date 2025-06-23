@@ -164,17 +164,17 @@ class CourseMaterialsView extends AbstractView {
             "folder_paths" => $folder_paths,
             "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
             "current_gradeable" => null,
-            "calendar_info" =>$calendar_info,
+            "calendar_info" => $calendar_info,
             "beginning_of_time_date" => $beginning_of_time_date,
             "file_upload_limit_mb" => $file_upload_limit_mb
         ]);
     }
     private function setCourseMaterialMetadata(array $course_materials, string $full_path = ""): array {
         $metadata = [];
-    
+
         foreach ($course_materials as $name => $course_material) {
             $current_path = empty($full_path) ? "/" . $name : $full_path . '/' . $name;
-    
+
             if (is_array($course_material)) {
                 // Store metadata for the folder
                 $metadata[$current_path] = [
@@ -182,21 +182,22 @@ class CourseMaterialsView extends AbstractView {
                     'isOnCalendar' => 'none',
                     'gradeable' => 'none'
                 ];
-    
+
                 // Recursively process nested course materials
                 $metadata = array_merge($metadata, $this->setCourseMaterialMetadata($course_material, $current_path));
-            } else {
+            }
+            else {
                 // Store metadata for the file
                 $metadata[$current_path] = [
                     'associatedDate' => $course_material->getCalendarDate() ? $course_material->getCalendarDate()->format("Y-m-d") : 'none',
                     'isOnCalendar' => $course_material->isOnCalendar() ? 'true' : 'none',
                     'gradeable' => $course_material->getGradeable() ?? 'none'
-                ];                
+                ];
             }
         }
         return $metadata;
-    }    
-    
+    }
+
     private function removeEmptyFolders(array &$course_materials): bool {
         $is_empty = true;
         foreach ($course_materials as $path => $course_material) {

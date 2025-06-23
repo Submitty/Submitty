@@ -3,13 +3,17 @@ const settings_divs = ['#cal-gradeable-div', '#cal-date-div'];
 
 function setCalendarMenuValues(div_class, tag, number) {
     function updateCalendarMenuVisibility(container) {
-        if (!container) { return; }
+        if (!container) {
+            return;
+        }
 
         const dateInput = container.querySelector('#cal-date-div');
         const gradeableSelect = container.querySelector('#cal-gradeable-div');
         const showOnCalendar = container.querySelector('#show-menu');
 
-        if (!dateInput || !gradeableSelect || !showOnCalendar) { return; }
+        if (!dateInput || !gradeableSelect || !showOnCalendar) {
+            return;
+        }
 
         if (showOnCalendar.value === 'gradeable') {
             dateInput.style.display = 'none';
@@ -43,12 +47,12 @@ function setCalendarMenuValues(div_class, tag, number) {
 
         const showOnCalendar = container.querySelector('#show-menu');
         if (showOnCalendar) {
-            if (on_calendar && gradeable != 'none') {
+            if (on_calendar && gradeable !== 'none') {
                 showOnCalendar.value = 'gradeable';
 
                 dateInput.display = 'none';
             }
-            else if (on_calendar && associated_date != 'none') {
+            else if (on_calendar && associated_date !== 'none') {
                 showOnCalendar.value = 'date';
                 gradeableSelect.display = 'none';
             }

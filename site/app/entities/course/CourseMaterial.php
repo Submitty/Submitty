@@ -49,7 +49,7 @@ class CourseMaterial {
     protected ?string $gradeable = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
-    protected ?DateTime $calendar_date = null;  
+    protected ?DateTime $calendar_date = null;
 
     /**
      * @var Collection<CourseMaterialAccess>
@@ -205,7 +205,7 @@ class CourseMaterial {
         }
         $this->on_calendar = $val;
     }
-    
+
     public function setCalendarDate(?\DateTime $calendar_date): void {
         $this->calendar_date = $calendar_date;
     }

@@ -44,7 +44,7 @@ class Utils {
  * Prepares Date to Be Written to Database
  *
  * @param string|null $date_string The input date string to convert.
- * 
+ *
  * @return \DateTime|null The DateTime object or null if invalid.
  */
     public static function convertToSQLDateTime(?string $date_string): ?\DateTime {

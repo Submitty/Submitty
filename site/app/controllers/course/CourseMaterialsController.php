@@ -362,10 +362,9 @@ class CourseMaterialsController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
-        $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
-        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);    
+        $calendar_display = $_POST['calendar_display'] != 'none';
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
         $associated_gradeable = $_POST['associated_gradeable'] != 'none' ? $_POST['associated_gradeable'] : null;
-
         $id = $_POST['id'] ?? '';
         if ($id === '') {
             return JsonResponse::getErrorResponse("Id cannot be empty");
@@ -377,7 +376,6 @@ class CourseMaterialsController extends AbstractController {
         if ($course_material == null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
-
         $course_material->setCalendarDate($associated_date);
         $course_material->setGradeable($associated_gradeable);
         $course_material->setOnCalendar($calendar_display);
@@ -587,11 +585,10 @@ class CourseMaterialsController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
         /* SET UPLOAD OF COURSE MATERIALS TO INCLUDE VALUES */
-        $calendar_display = $_POST['calendar_display'] != 'none' ? true : false;
+        $calendar_display = $_POST['calendar_display'] != 'none';
         $associated_date = $_POST['associated_date'];
         $associated_gradeable = $_POST['associated_gradeable'];
-        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);    
-
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
         $details = [];
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
@@ -903,7 +900,7 @@ class CourseMaterialsController extends AbstractController {
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 $calendar_display,
-                $associated_gradeable, 
+                $associated_gradeable,
                 $associated_date,
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),

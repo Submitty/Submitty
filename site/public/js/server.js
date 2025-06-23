@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup setCalendarMenuValues */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget setCalendarMenuValues */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
