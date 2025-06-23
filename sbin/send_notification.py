@@ -134,7 +134,7 @@ def construct_notifications(term, course, pending):
                          f"{gradeable['title']}")
         email_body = (f"Your grade is now available for {gradeable['title']} "
                       f"in course \n{get_full_course_name(term, course)}.\n\n"
-                      f"Click here for more info: {gradeable_url}\n"
+                      f"Click here for more info: {gradeable_url}"
                       )
 
         if gradeable["site_enabled"] is True:

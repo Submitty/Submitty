@@ -47,7 +47,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame('email body' . "\n", $email->getBody());
+        $this->assertSame('email body', $email->getBody());
     }
 
     public function testRelevantUrl(): void {
@@ -60,7 +60,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame("email body\n\nClick here for more info: http://example.com\n", $email->getBody());
+        $this->assertSame("email body\n\nClick here for more info: http://example.com", $email->getBody());
     }
 
     public function testAuthor(): void {
@@ -73,7 +73,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame("email body\n\nAuthor: Test P.\n", $email->getBody());
+        $this->assertSame("email body\n\nAuthor: Test P.", $email->getBody());
     }
 
     public function testAuthorAnonymous(): void {
@@ -87,7 +87,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame("email body\n", $email->getBody());
+        $this->assertSame("email body", $email->getBody());
     }
 
     public function testAllDetails(): void {
@@ -102,7 +102,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
-            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com\n",
+            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com",
             $email->getBody()
         );
     }
@@ -114,7 +114,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $this->assertSame('email body' . "\n", $email->getBody());
+        $this->assertSame('email body', $email->getBody());
     }
 
     public function testNotificationSettingsWithoutLink(): void {
@@ -132,6 +132,6 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('[Submitty]: some email', $email_missing->getSubject());
-        $this->assertSame('email body' . "\n", $email_missing->getBody());
+        $this->assertSame('email body', $email_missing->getBody());
     }
 }

@@ -87,6 +87,6 @@ class Email extends AbstractModel {
             $extra[] = "Click here for more info: " . $relevant_url;
         }
 
-        return $body . (count($extra) > 0 ? "\n\n" . implode("\n", $extra) : "") . "\n";
+        return $body . (count($extra) > 0 ? "\n\n" . implode("\n", $extra) : "");
     }
 }
