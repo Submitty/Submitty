@@ -1,4 +1,4 @@
-/* global Widget */
+/* global Widget escapeSpecialChars */
 /* exported MultipleChoiceWidget */
 
 class MultipleChoiceWidget extends Widget {
@@ -70,6 +70,7 @@ class MultipleChoiceWidget extends Widget {
     getMultipleChoice() {
         const table = document.createElement('div');
         table.classList.add('mc-table');
+        // no user input
         // eslint-disable-next-line no-unsanitized/property
         table.innerHTML = this.getMultipleChoiceTemplate();
 
@@ -136,6 +137,7 @@ class MultipleChoiceWidget extends Widget {
         const mc_option = document.createElement('div');
         mc_option.classList.add('mc-entered-option');
         mc_option.classList.add('mc-row');
+        // sanitized in function
         // eslint-disable-next-line no-unsanitized/property
         mc_option.innerHTML = this.getMultipleChoiceOptionTemplate(value, description);
 
@@ -176,10 +178,10 @@ class MultipleChoiceWidget extends Widget {
     getMultipleChoiceOptionTemplate(value, description) {
         return `
         <div class="mc-col">
-            <input type="text" class="entered-value-input" value="${value}">    
+            <input type="text" class="entered-value-input" value="${escapeSpecialChars(value)}">    
         </div>
         <div class="mc-col-center">
-            <textarea class="entered-description-input">${description}</textarea>
+            <textarea class="entered-description-input">${escapeSpecialChars(description)}</textarea>
         </div>
         <div class="mc-col mc-buttons">
             <div class="move-btn up-button">
