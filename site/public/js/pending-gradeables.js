@@ -39,9 +39,13 @@ function applySort(sortKey, direction) {
             }
         }
         else if (sortKey === 'close_date') {
-            const dateA = new Date(aText);
-            const dateB = new Date(bText);
-            cmp = dateA - dateB;
+        const cleanedA = aText.replace('@', '').replace('EST', '').trim();
+        const cleanedB = bText.replace('@', '').replace('EST', '').trim();
+
+        const dateA = new Date(cleanedA); // e.g., "2027-12-17 11:59 PM"
+        const dateB = new Date(cleanedB);
+
+        cmp = dateA - dateB;
         }
         return direction === 'ASC' ? cmp : -cmp;
     });
