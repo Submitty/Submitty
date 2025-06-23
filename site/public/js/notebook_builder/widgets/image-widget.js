@@ -1,4 +1,4 @@
-/* global Widget, builder_data */
+/* global Widget, builder_data, escapeSpecialChars */
 /* exported ImageWidget */
 
 class ImageWidget extends Widget {
@@ -18,6 +18,7 @@ class ImageWidget extends Widget {
 
         // Setup interactive area
         const interactive_area = container.querySelector('.interactive-container');
+        // sanitized in getImageTemplate
         // eslint-disable-next-line no-unsanitized/property
         interactive_area.innerHTML = this.getImageTemplate(this.state.height, this.state.width, this.state.alt_text);
 
@@ -80,19 +81,19 @@ class ImageWidget extends Widget {
             <div class="image-col-small">
                 <label>
                     Width:
-                    <input class="width-input" type="number" placeholder="Default" min="1" value="${width ? width : ''}">
+                    <input class="width-input" type="number" placeholder="Default" min="1" value="${width ? escapeSpecialChars(width) : ''}">
                 </label>
             </div>
             <div class="image-col-small">
                 <label>
                     Height:
-                    <input class="height-input" type="number" placeholder="Default" min="1" value="${height ? height : ''}">
+                    <input class="height-input" type="number" placeholder="Default" min="1" value="${height ? escapeSpecialChars(height) : ''}">
                 </label>
             </div>
             <div class="image-col-large">
                 <label>
                     Alternate Text:
-                    <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents.">${alt_text ? alt_text : ''}</textarea>
+                    <textarea class="alt-text-input" placeholder="For accessibility, provide a short description of this image's contents.">${alt_text ? escapeSpecialChars(alt_text) : ''}</textarea>
                 </label>
             </div>
         </div>`;
