@@ -229,6 +229,11 @@ table#grader-history td {
     font-weight: bold;
 }
 
+#gradeable-notifications-message {
+    font-style: italic;
+    font-weight: bold;
+}
+
 #timezone-container {
     float: right;
 }
