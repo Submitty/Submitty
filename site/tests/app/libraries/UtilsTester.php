@@ -58,7 +58,7 @@ class UtilsTester extends BaseUnitTest {
         $this->assertTrue(Utils::isAcceptedEmail($reqs, $good_email_gmail));
         $bad_email_extension = 'goodemail@notanextension.edu';
         $this->assertFalse(Utils::isAcceptedEmail($reqs, $bad_email_extension));
-        $accepts_multiple_at_signs = 'good@email@testing@gmail.edu';
+        $accepts_multiple_at_signs = 'good@email@testing@gmail.com';
         $this->assertTrue(Utils::isAcceptedEmail($reqs, $accepts_multiple_at_signs));
     }
 

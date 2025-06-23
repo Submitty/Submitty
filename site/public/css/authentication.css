@@ -89,3 +89,16 @@
 .requirements-list {
     margin-left: 15px;
 }
+
+.verify-email {
+    display: flex;
+    justify-content: center;
+    flex-direction: column; /* Stack input and button vertically */
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.verify-input {
+    min-height: 34px;
+    box-sizing: border-box;
+}

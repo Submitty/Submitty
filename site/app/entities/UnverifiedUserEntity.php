@@ -93,7 +93,7 @@ class UnverifiedUserEntity {
     }
 
     public function setUserPassword(string $user_password): void {
-        if ($password !== '') {
+        if ($user_password !== '') {
             $info = password_get_info($user_password);
             if ($info['algo'] === 0) {
                 $this->user_password = password_hash($user_password, PASSWORD_DEFAULT);

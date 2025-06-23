@@ -315,7 +315,7 @@ class Config extends AbstractModel {
     protected $seating_only_for_instructor;
     /** @prop
      * @var bool */
-    protected $user_create_account;
+    protected $user_create_account = false;
     /** @prop
      * @var string|null */
     protected $room_seating_gradeable_id;
@@ -446,9 +446,11 @@ class Config extends AbstractModel {
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
 
-        $this->user_create_account = ($submitty_json['user_create_account'] ?? false) === true;
-        $this->user_id_requirements = $submitty_json['user_id_requirements'] ?? [];
-        $this->accepted_emails = $submitty_json['accepted_emails'] ?? [];
+        if (isset($$submitty_json['user_create_account'])) {
+            $this->user_create_account = $submitty_json['user_create_account'];
+            $this->user_id_requirements = $submitty_json['user_id_requirements'];
+            $this->accepted_emails = $submitty_json['accepted_emails'];
+        }
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
