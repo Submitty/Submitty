@@ -14,7 +14,6 @@ def up(config, database, semester, course):
 
 
 
-
 def down(config, database, semester, course):
     """
     Run down migration (rollback).

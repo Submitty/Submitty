@@ -1224,12 +1224,9 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         return;
     }
 
-
     formData.append('calendar_display', calendarMenu.calendar_display);
     formData.append('associated_date', calendarMenu.associated_date);
     formData.append('associated_gradeable', calendarMenu.gradeable_chosen);
-
-
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
@@ -1361,10 +1358,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     const formData = new FormData();
     console.log(calendarMenu);
 
-    //calendarMenu.associated_date = calendarMenu.associated_date->format('Y-m-d H:i:sO');
+    // calendarMenu.associated_date = calendarMenu.associated_date->format('Y-m-d H:i:sO');
 
     formData.append('calenderMenu', calendarMenu);
-
 
     const priority = parseFloat(sortPriority);
 

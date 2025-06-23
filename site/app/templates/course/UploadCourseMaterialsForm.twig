@@ -124,9 +124,7 @@
         "gradeables" : gradeables,
         "current_gradeable" : current_gradeable,
         "beginning_of_time_date" : beginning_of_time_date
-
     } only %}
-
 
     <script>    
         function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu) {
@@ -134,18 +132,12 @@
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
-
-
-
-
                 let container = document.getElementById('3');
-
                 let calendarMenu = {
                     calendar_display: 'none',
                     associated_date: 'none',
                     gradeable_chosen: 'none'
                 };
-
                 if (container) {
                     let showMenu = container.querySelector('#show-menu');
                     if (showMenu) {
@@ -157,10 +149,6 @@
                         }
                     }
                 }
-
-                console.log(calendarMenu);
-
-
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var sort = document.getElementById("upload_sort").value;

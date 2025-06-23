@@ -17,7 +17,7 @@ def up(config, database, semester, course):
     database.execute("""
         ALTER TABLE public.course_materials
         ADD COLUMN IF NOT EXISTS on_calendar BOOLEAN DEFAULT false,
-        ADD COLUMN IF NOT EXISTS calendar_date BOOLEAN DEFAULT None, 
+        ADD COLUMN IF NOT EXISTS calendar_date DATE DEFAULT NULL, 
         ADD COLUMN IF NOT EXISTS gradeable VARCHAR(255) DEFAULT 'none';
     """)
 

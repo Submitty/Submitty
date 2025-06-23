@@ -194,7 +194,6 @@ class CourseMaterialsView extends AbstractView {
                 ];                
             }
         }
-    
         return $metadata;
     }    
     

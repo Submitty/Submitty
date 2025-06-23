@@ -78,16 +78,12 @@
     } only %}
     <script>
         function submitFolderEdit(fullUpdate){ // Submit button
-
-
             let container = document.getElementById('2');
-
             let calendarMenu = {
                 calendar_display: 'none',
                 associated_date: 'none',
                 gradeable_chosen: 'none'
             };
-
             if (container) {
                 let showMenu = container.querySelector('#show-menu');
                 if (showMenu) {
@@ -99,11 +95,6 @@
                     }
                 }
             }
-
-            console.log("ca", calendarMenu);
-
-
-        
             let sectionsEdit = [];
             let partialSections = [];
             let cmTime = document.getElementById("edit-folder-picker").value;

@@ -18,26 +18,23 @@
         <input id="associated-date" class="date_picker flatpickr-input" type="text">
     </div>
 
-
     <script>
         flatpickr('.flatpickr-input', {
             plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Today"
-                            }
-                        ],
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0:
-                                    date = new Date();
-                                    break;
-                            }
-                            fp.setDate(date);
+                {
+                    button: [
+                        { label: "Today" }
+                    ],
+                    onClick: (index, fp) => {
+                        let date;
+                        switch (index) {
+                            case 0:
+                                date = new Date();
+                                break;
                         }
+                        fp.setDate(date);
                     }
+                }
             )],
             allowInput: true,
             time_24hr: true,

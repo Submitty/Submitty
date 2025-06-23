@@ -19,60 +19,46 @@
     </div>
 </div>
 
-
-
-
 <script>
-
-        flatpickr('.date_picker', {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Beginning of time"
-                            },
-                            {
-                                label: "Now"
-                            },
-                            {
-                                label: "Tomorrow"
-                            },
-                            {
-                                label: "End of time"
-                            }
-
-                        ],
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0:
-                                    date = new Date('{{ beginning_of_time_date }}');
-                                    break;
-                                case 1:
-                                    date = new Date();
-                                    break;
-                                case 2:
-                                    date = new Date();
-                                    date.setDate(date.getDate() + 1);
-                                    break;
-                                case 3:
-                                    date = new Date("9998-01-01T00:00:00");
-                                    break;
-                            }
-                            fp.setDate(date);
-                        }
+    flatpickr('.date_picker', {
+        plugins: [ShortcutButtonsPlugin(
+            {
+                button: [
+                    { label: "Beginning of time" },
+                    { label: "Now" },
+                    { label: "Tomorrow" },
+                    { label: "End of time" }
+                ],
+                onClick: (index, fp) => {
+                    let date;
+                    switch (index) {
+                        case 0:
+                            date = new Date('{{ beginning_of_time_date }}');
+                            break;
+                        case 1:
+                            date = new Date();
+                            break;
+                        case 2:
+                            date = new Date();
+                            date.setDate(date.getDate() + 1);
+                            break;
+                        case 3:
+                            date = new Date("9998-01-01T00:00:00");
+                            break;
                     }
-            )],
-            position: "above right",
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onReady: (a, b, fp) => {
-                fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
-                fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+                    fp.setDate(date);
+                }
             }
-        });
-
+        )],
+        position: "above right",
+        allowInput: true,
+        enableTime: true,
+        enableSeconds: true,
+        time_24hr: true,
+        dateFormat: "Y-m-d H:i:S",
+        onReady: (a, b, fp) => {
+            fp.calendarContainer.firstChild.childNodes[1].firstChild.firstChild.setAttribute('aria-label', 'Month');
+            fp.calendarContainer.childNodes[2].childNodes[4].firstChild.setAttribute('aria-label', 'Seconds');
+        }
+    });
 </script>

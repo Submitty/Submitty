@@ -87,9 +87,7 @@
         "gradeables" : gradeables,
         "current_gradeable" : current_gradeable,
         "beginning_of_time_date" : beginning_of_time_date
-
     } only %}
-
 
     <script>
         function submitEdit(){ // Submit button
@@ -117,7 +115,6 @@
                 }
 
                 let container = document.getElementById('1');
-
                 let calendarMenu = {
                     calendar_display: 'none',
                     associated_date: 'none',
@@ -142,12 +139,9 @@
                 let file_path = document.getElementById("new-file-name").value;
                 let overwrite = false;
                 let overwrite_elem = $('#overwrite-submit');
-
                 if (overwrite_elem.length && (overwrite_elem.attr('is-edit-form') === "1")) {
                     overwrite = true;
                 }
-                console.log("calendarMneu", calendarMenu);
-
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, null, cmTime, sort, sections_lock, null, url_url_val, title, overwrite, file_path, calendarMenu);
         };
 

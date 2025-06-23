@@ -57,11 +57,11 @@ class Utils {
             $datetime = new \DateTime($date_string);
             $formated =  $datetime->format("Y-m-d H:i:sO"); // Expected SQL format
             return new \DateTime($formated);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return null;
         }
     }
-
 
     /**
      * Generates a pseudo-random string that should be cryptographically secure for use
