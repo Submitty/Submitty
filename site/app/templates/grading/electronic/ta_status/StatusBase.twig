@@ -94,10 +94,19 @@
             var dataTotal=tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram', dataTotal, layout, {displayModeBar: false,displaylogo: false});
             bucketInputTotal.value='';
-            document.getElementById("SmallHistogram").innerHTML='<b>Mean: </b>'+{{ overall_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram").innerHTML=
+                '<span>' +
+                    '<b>Mean: </b>' +
+                    {{ overall_average != null ? overall_average.getAverageScore() | default(0) : 0 }}
+                    + '</span>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
+                    {{ overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -111,10 +120,19 @@
             var dataAuto = tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram3', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputAuto.value='';
-            document.getElementById("SmallHistogram3").innerHTML='<b>Mean: </b>'+{{ autograded_average.getAverageScore() | default('0') }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-            {{ autograded_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram3").innerHTML=
+                '<span>' +
+                    '<b>Mean: </b>' +
+                    {{ autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0 }}
+                    + '</span>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
+                    {{ autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -128,9 +146,19 @@
             var dataAuto = tracing(xBuckets,yValue);
             Plotly.newPlot('Histogram4', dataAuto, layout, {displayModeBar: false,displaylogo: false});
             bucketInputManual.value='';
-            document.getElementById("SmallHistogram4").innerHTML='<b>Mode: </b>'
-            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+max+
-            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+min+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+range;
+            document.getElementById("SmallHistogram4").innerHTML=
+                '<span>' +
+                    '<b>Mean: </b>' +
+                    {{ manual_average != null ? manual_average.getAverageScore() | default(0) : 0 }}
+                    + '</span>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min + '</span>' +
+                    '<span><b>Maximum: </b>' + max + '</span>' +
+                    '<span><b>Range: </b>' + (max - min) + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
+                    {{ manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0 }} +
+                '</span>'
             return mode;
         }
 
@@ -198,27 +226,40 @@
             <a class="nav-bar key_to_click" id="page_4_nav" onclick="onChangeNavTab(4);">Overall Histogram</a>
             <a class="nav-bar key_to_click" id="page_5_nav" onclick="onChangeNavTab(5);">Scatterplot</a>
         </div>
-        <br/>
-        <div class="modal-body">
+        <div class="modal-body gradeable-status-body">
             <div class="page-content" id="page_0_content">{{ include('grading/electronic/ta_status/StatusData.twig')     }}</div>
-            
-            {# Only create div if we can create the stats #}
-            {% if component_averages|length != 0 %}
+
+            {% if component_averages|length == 0 %}
+                <div class="page-content missing-data-container" id="page_1_content"><p>No manual grading component averages data available.</p></div>
+            {% else %}
                 <div class="page-content" id="page_1_content">{{ include('grading/electronic/ta_status/StatusComponentAverages.twig')   }}</div>
             {% endif %}
 
-            {% if component_averages|length != 0 and histograms['tTA']|length != 0 %}
-                <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'manual'})  }}</div>
+            {% if ta_grading_enabled %}
+                {% if component_averages|length == 0 or histograms['tTA']|length == 0 %}
+                    <div class="page-content missing-data-container" id="page_2_content"><p>No manual grading data available.</p></div>
+                {% else %}
+                    <div class="page-content" id="page_2_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'manual'})  }}</div>
+                {% endif %}
             {% endif %}
 
-            {% if autograded_average != null and autograded_average.getCount() != 0 and histograms['bAuto']|length != 0 %}
-                <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'auto'})  }}</div>
-                {% if histograms['runtime']|length != 0 and histograms['runtime'][0] != 0 %}
+            {% if autograding_enabled %}
+                {% if autograded_average == null or autograded_average.getCount() == 0 or histograms['bAuto']|length == 0 %}
+                    <div class="page-content missing-data-container" id="page_3_content"><p>No autograding data available.</p></div>
+                {% else %}
+                    <div class="page-content" id="page_3_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'auto'})  }}</div>
+                {% endif %}
+
+                {% if histograms['runtime']|length == 0 or histograms['runtime'][0] == 0 %}
+                    <div class="page-content missing-data-container" id="page_5_content"><p>No runtime data available.</p></div>
+                {% else %}
                     <div class="page-content" id="page_5_content">{{ include('grading/electronic/ta_status/Scatterplot.twig') }}</div>
                 {% endif %}
-            {% endif %}   
+            {% endif %}
 
-            {% if (overall_average != null and overall_average.getCount() != 0) or component_averages|length != 0 %}
+            {% if (overall_average == null or overall_average.getCount() == 0) or component_averages|length == 0 %}
+                <div class="page-content missing-data-container" id="page_4_content"><p>No overall data available.</p></div>
+            {% else %}
                 <div class="page-content" id="page_4_content">{{ include('grading/electronic/ta_status/GradingHistogram.twig', {'type': 'total'})  }}</div>
             {% endif %}
         </div>

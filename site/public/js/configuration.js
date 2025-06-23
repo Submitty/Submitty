@@ -94,6 +94,10 @@ function confirmSelfRegistration(element, needs_reg_sections) {
         alert('You need to create at least one registration section first');
         return false;
     }
+    if ($('#default-section-id').val() === '') {
+        alert('You need to select a registration section first');
+        return false;
+    }
 
     return !element.checked ? true : confirm('Are you sure you want to enable self registration to this course? This allows ALL users (even those manually removed from the course) to register for this course.');
 }

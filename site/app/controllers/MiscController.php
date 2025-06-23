@@ -88,6 +88,12 @@ class MiscController extends AbstractController {
         elseif (strpos($file_path, 'checkout') !== false) {
             $directory = 'checkout';
         }
+        elseif (strpos($file_path, 'results_public') !== false) {
+            $directory = 'results_public';
+        }
+        elseif (strpos($file_path, 'results') !== false) {
+            $directory = 'results';
+        }
         $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id);
 
         if ($gradeable->isGradeByRegistration()) {
