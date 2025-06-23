@@ -10,7 +10,6 @@ use app\models\Email;
 use app\models\User;
 
 class EmailTester extends \PHPUnit\Framework\TestCase {
-    private string $footer = "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.\nUpdate your email notification settings for this course here: http://localhost/courses/f21/csci1100/notifications/settings";
     /** @var Core */
     private $core;
 
@@ -48,7 +47,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame('email body' . $this->footer, $email->getBody());
+        $this->assertSame('email body' . "\n", $email->getBody());
     }
 
     public function testRelevantUrl(): void {
@@ -61,10 +60,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nClick here for more info: http://example.com" . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame("email body\n\nClick here for more info: http://example.com\n", $email->getBody());
     }
 
     public function testAuthor(): void {
@@ -77,10 +73,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body\n\nAuthor: Test P." . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame("email body\n\nAuthor: Test P.\n", $email->getBody());
     }
 
     public function testAuthorAnonymous(): void {
@@ -94,10 +87,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
 
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
-        $this->assertSame(
-            "email body" . $this->footer,
-            $email->getBody()
-        );
+        $this->assertSame("email body\n", $email->getBody());
     }
 
     public function testAllDetails(): void {
@@ -112,7 +102,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         $this->assertSame('person', $email->getUserId());
         $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
         $this->assertSame(
-            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com" . $this->footer,
+            "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com\n",
             $email->getBody()
         );
     }
@@ -124,8 +114,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $expected_body = 'email body' . $this->footer;
-        $this->assertSame($expected_body, $email->getBody());
+        $this->assertSame('email body' . "\n", $email->getBody());
     }
 
     public function testNotificationSettingsWithoutLink(): void {
@@ -142,9 +131,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $expected_body = 'email body' . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
-
         $this->assertSame('[Submitty]: some email', $email_missing->getSubject());
-        $this->assertSame($expected_body, $email_missing->getBody());
+        $this->assertSame('email body' . "\n", $email_missing->getBody());
     }
 }

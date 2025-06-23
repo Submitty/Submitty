@@ -77,7 +77,6 @@ class Email extends AbstractModel {
         return "$label: $subject";
     }
 
-    //inject a "do not reply" note in the footer of the body
     //also adds author and a relevant url if one exists
     private function formatBody(string $body, ?string $relevant_url, bool $author): string {
         $extra = [];
@@ -88,25 +87,6 @@ class Email extends AbstractModel {
             $extra[] = "Click here for more info: " . $relevant_url;
         }
 
-        // Adding any extra information
-        if (count($extra) > 0) {
-            $body .= "\n\n" . implode("\n", $extra);
-        }
-
-        // Adding notification footer
-        $config = $this->core->getConfig();
-        $base_url = rtrim($config->getBaseUrl(), "/");
-        $course = $config->getCourse();
-        $term = $config->getTerm();
-
-        // Adding the footer note first
-        $body .= "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.";
-
-        // Adding the notifications settings link after the footer
-        if ($course !== null && $term !== null) {
-            $notifications_url = $base_url . "/courses/{$term}/{$course}/notifications/settings";
-            $body .= "\nPlease refer to the course syllabus for contact information for your teaching staff.\nUpdate your email notification settings for this course here: " . $notifications_url;
-        }
-        return $body;
+        return $body . (count($extra) > 0 ? "\n\n" . implode("\n", $extra) : "") . "\n";
     }
 }

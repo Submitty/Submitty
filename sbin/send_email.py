@@ -237,6 +237,18 @@ def send_email():
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
 
+        # 1. add term and course to all SQL Select Queries
+        # 2. add the automated email footer part always, but not the notification part if course IS NULL or term IS NULL
+        """
+        f"\n--\nNOTE: This is an automated "
+        "email notification, which is unable to receive replies."
+        "\nPlease refer to the course syllabus for contact "
+        "information for your teaching staff.\nUpdate your "
+        "email notification settings for this course here: "
+        f"{BASE_URL_PATH}/courses/{term}/{course}/notifications"
+        "/settings"
+        """
+
         try:
             mail_client.sendmail(EMAIL_SENDER,
                                  email_data["send_to"], email.encode('utf8'))
