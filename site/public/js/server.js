@@ -215,8 +215,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
 
         const emElement = document.createElement('em');
-        // eslint-disable-next-line no-unsanitized/property
-        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}${num_links_txt}`;
+        emElement.innerHTML = ` (<b>contains ${escapeSpecialChars(num_of_files)}</b> file${escapeSpecialChars(file_s)}${escapeSpecialChars(num_links_txt)}`;
 
         cm_message.appendChild(emElement);
     }
@@ -484,8 +483,7 @@ function editFilePathRecommendations() {
         }
 
         options[i].value = newOption;
-        // eslint-disable-next-line no-unsanitized/property
-        options[i].innerHTML = newOption;
+        options[i].textContent = newOption;
     }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 }
@@ -1009,8 +1007,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'black';
             new_element.style.fontStyle = 'normal';
         }
-        // eslint-disable-next-line no-unsanitized/property
-        new_element.innerHTML = visible_username;
+        new_element.textContent = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
@@ -1019,8 +1016,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'grey';
             new_element.style.fontStyle = 'italic';
         }
-        // eslint-disable-next-line no-unsanitized/property
-        new_element.innerHTML = user;
+        new_element.textContent = user;
         icon.className = 'fas fa-eye-slash';
         icon.title = 'Hide full user information';
     }
@@ -1783,6 +1779,7 @@ function flagUserImage(user_id, flag) {
                 // Change icon
                 const a = image_container.querySelector('a');
                 a.href = data.href;
+                // safe html
                 // eslint-disable-next-line no-unsanitized/property
                 a.innerHTML = data.icon_html;
 
