@@ -140,6 +140,7 @@ class CourseMaterialsView extends AbstractView {
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
         $this->setFolderVisibilities($final_structure, $folder_visibilities);
+        $file_upload_limit_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
 
         $folder_paths = $this->compileAllFolderPaths($final_structure);
         $calendar_info = $this->setCourseMaterialMetadata($final_structure);
@@ -164,7 +165,8 @@ class CourseMaterialsView extends AbstractView {
             "gradeables" => $this->core->getQueries()->getAllElectronicGradeablesIds(),
             "current_gradeable" => null,
             "calendar_info" =>$calendar_info,
-            "beginning_of_time_date" => $beginning_of_time_date
+            "beginning_of_time_date" => $beginning_of_time_date,
+            "file_upload_limit_mb" => $file_upload_limit_mb
         ]);
     }
     private function setCourseMaterialMetadata(array $course_materials, string $full_path = ""): array {

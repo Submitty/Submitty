@@ -28,6 +28,9 @@
 {% endif %}
 
 <div id="gradeables-content" class="content">
+    {% if is_self_register %}
+        <button data-testid="unregister-button" class="unregister-button btn btn-primary" onclick="confirmUnregister()" type="submit">Unregister from Course</button>
+    {% endif %}
     <h1>Gradeables</h1>
     {% if sections|length > 0 %}
         <div id="gradeables">
@@ -74,6 +77,11 @@
                                 >
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
+                            {% endif %}
+                            {% if g_info.is_student_view != true and rainbow_grades_summary != true and info.section_id == "graded"  %}
+                                <span style="color: var(--danger-red); font-weight: bold; font-style: italic;">
+                                    NOTE: Scores are not visible to students as Rainbow Grades summaries are not enabled.
+                                </span>
                             {% endif %}
                         </div>
                     </div>
@@ -135,7 +143,7 @@
                 {% endif %}
                 {% if button.getDate() != null %}
                     <span class="subtitle">({{ button.getSubtitle()|nl2br }} {{ button.getDate()|date(date_format) }})</span>
-                {% else %}
+                {% else %}         
                     <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
                 {% endif %}
             {% endif %}
@@ -147,4 +155,4 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
-
+{% include('course/UnregisterForm.twig') %}

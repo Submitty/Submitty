@@ -470,6 +470,9 @@ class CourseMaterialsController extends AbstractController {
             $path = $course_material->getPath();
             $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
             $requested_path = $_POST['file_path'];
+            if (strpos($requested_path, '/') === 0) {
+                return JsonResponse::getErrorResponse("File paths cannot start with the root directory '/', use relative paths.");
+            }
             $new_path = FileUtils::joinPaths($upload_path, $requested_path);
 
             if (isset($_POST['title'])) {
@@ -483,6 +486,10 @@ class CourseMaterialsController extends AbstractController {
             if ($path !== $new_path) {
                 if (!FileUtils::ValidPath($new_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
+                }
+
+                if (($overflow = strlen($new_path) - 255) > 0) {
+                    return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
                 $requested_path = explode("/", $requested_path);
@@ -700,6 +707,11 @@ class CourseMaterialsController extends AbstractController {
                 );
             }
             $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
+
+            if (($overflow = strlen($details['path'][0]) - 255) > 0) {
+                return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
+            }
+
             FileUtils::writeFile($details['path'][0], "");
         }
         else {
@@ -725,9 +737,12 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
 
-            $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+            // Retrieve the max size allowed from the course config
+            $max_size_mb = $this->core->getConfig()->getCourseMaterialFileUploadLimitMb();
+            $max_size = $max_size_mb * 1024 * 1024;
+
             if ($file_size > $max_size) {
-                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.");
+                return JsonResponse::getErrorResponse("File(s) uploaded too large. Maximum size is " . Utils::formatBytes("mb", $max_size)  . ". Uploaded file(s) was " . Utils::formatBytes("mb", $file_size, true) . ". Please contact the system administrator if you need to increase the upload limit.");
             }
 
             if (!FileUtils::createDir($upload_path)) {

@@ -230,7 +230,6 @@ input[type="checkbox"]:checked::before {
     margin-left: 3px;
 }
 
-
 .fa-question-circle.disabled,
 .fa-question-circle[disabled],
 .disabled > .fa-question-circle,
@@ -253,7 +252,7 @@ button,
 [type="button"],
 [type="reset"],
 [type="submit"] {
-    appearance: button;
+    appearance: auto;
 }
 
 /* Hotkeys&Settings */
@@ -268,7 +267,7 @@ button,
     border-right: none;
 }
 
-.ta-grading-setting-list td{
+.ta-grading-setting-list td {
     padding: 4px;
 }
 
@@ -507,7 +506,6 @@ td > a.active-sort {
     padding: 5px;
 }
 
-
 .fa-green,
 .fas-green,
 .far-green {
@@ -519,7 +517,6 @@ td > a.active-sort {
 .far-red {
     color: var(--standard-vibrant-red);
 }
-
 
 .menu {
     font-size: 20px;
@@ -668,11 +665,11 @@ td > a.active-sort {
 
 .file-annotation {
     float: right;
-    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .btn-annotation {
-    word-break: break-word;
+    overflow-wrap: break-word;
     text-align: center;
     vertical-align: middle;
     float: right;
@@ -684,12 +681,6 @@ td > a.active-sort {
 
 .overall-comment-author {
     font-weight: bold;
-}
-
-#auto-results-queue-msg {
-    padding: 5px 12px;
-    margin-top: 10px;
-    font-size: 15px;
 }
 
 .submission-page-total-header {
@@ -710,7 +701,7 @@ td > a.active-sort {
     margin-left: 90px;
 }
 
-.box-title > h4 > code{
+.box-title > h4 > code {
     word-wrap: break-word;
 }
 
@@ -735,7 +726,7 @@ td > a.active-sort {
     margin-top: 10px;
 }
 
-.box > h4 > code{
+.box > h4 > code {
     word-wrap: break-word;
     padding-left: 50px;
 }
@@ -819,19 +810,19 @@ td > a.active-sort {
     background-color: var(--standard-medium-blue);
 }
 
-.dark-green-background{
+.dark-green-background {
     background-color: var(--good-green);
-    color: --btn-text-black;
+    color: var(--btn-text-black);
 }
 
-.dark-yellow-background{
+.dark-yellow-background {
     background-color: var(--standard-light-yellow);
-    color: --btn-text-black;
+    color: var(--btn-text-black);
 }
 
-.dark-red-background{
+.dark-red-background {
     background-color: var(--error-alert-dark-red);
-    color: --btn-text-black;
+    color: var(--btn-text-black);
 }
 
 .badge-container {
@@ -849,12 +840,13 @@ td > a.active-sort {
     width: 100%;
     padding: 0 50px 50px;
     font-size: 18px;
+    /* stylelint-disable-next-line declaration-no-important */
     text-align: left !important;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
 .gradeable_comment {
-    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -919,12 +911,14 @@ tbody.collapse.in {
     clear: both;
     font-weight: normal;
     line-height: 1.4286;
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
     white-space: nowrap;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--standard-deep-dark-gray) !important;
     text-decoration: none;
     background-color: var(--btn-standard-pale-blue-gray);
@@ -1104,12 +1098,14 @@ div.full-height {
 /* Used to pick the Submitty logo to show based on the theme */
 [data-theme="dark"] #logo-submitty-light,
 #logo-submitty {
+    /* stylelint-disable-next-line declaration-no-important */
     display: block !important;
 }
 
 /* Used to pick the Submitty logo to show based on the theme */
 [data-theme="dark"] #logo-submitty,
 #logo-submitty-light {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1182,7 +1178,6 @@ div.full-height {
     pointer-events: none;
 }
 
-
 .rainbow {
     background: var(--rainbow-gradient);
 }
@@ -1234,7 +1229,7 @@ body.no-scroll {
     margin: 10px;
     height: calc(100% - 20px);
     width: calc(100vw - 20px);
-    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .popup-form form {
@@ -1275,6 +1270,7 @@ body.no-scroll {
 
 .close-button {
     margin-right: 5px;
+    /* stylelint-disable-next-line declaration-no-important */
     border: 1px solid var(--default-black) !important;
 }
 
@@ -1456,7 +1452,11 @@ end of styles used in the admin gradeable page
 /* color for limited access graders who were verifed */
 .grader-verified {
     /* yellow       green   */
-    background: linear-gradient(to right, var(--standard-vibrant-yellow) 50%, var(--standard-vibrant-green) 50%);
+    background: linear-gradient(
+        to right,
+        var(--standard-vibrant-yellow) 50%,
+        var(--standard-vibrant-green) 50%
+    );
     background-clip: text;
     color: transparent;
     border-radius: 50%;
@@ -1467,18 +1467,18 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    color: var(--standard-plum-purple) /* purple */
+    color: var(--standard-plum-purple); /* purple */
 }
 
 /* color for a limited access grader */
 .grader-3 {
-    color: var(--important-post)  /* yellow */
+    color: var(--important-post); /* yellow */
 }
 
 /* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
-    color: var(--standard-vibrant-green) /* green */
+    color: var(--standard-vibrant-green); /* green */
 }
 
 .hide-highlights {
@@ -1487,7 +1487,7 @@ end of styles used in the admin gradeable page
 
 /* color for double graded */
 .grader-double {
-    color: var(--standard-vibrant-dark-blue)  /* dark blue */
+    color: var(--standard-vibrant-dark-blue); /* dark blue */
 }
 
 .grader-grade-inquiry {
@@ -1533,8 +1533,8 @@ end of styles used in the admin gradeable page
     color: var(--badge-backgroud-red);
 }
 
-.required::placeholder { 
-    color: var(--error-alert-dark-red); 
+.required::placeholder {
+    color: var(--error-alert-dark-red);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
@@ -1715,7 +1715,9 @@ end of styles used in the admin gradeable page
 
 .black-btn,
 .black-btn > i {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--text-black) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--text-black) !important;
     text-decoration: none;
 }
@@ -1723,14 +1725,18 @@ end of styles used in the admin gradeable page
 .black-btn:hover,
 .black-btn:hover > i,
 .black-btn > i:hover {
+    /* stylelint-disable-next-line declaration-no-important */
     color: #405e90 !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: #405e90 !important;
 }
 
 .black-btn:active,
 .black-btn:active > i,
 .black-btn > i:active {
+    /* stylelint-disable-next-line declaration-no-important */
     color: var(--external-link-active) !important;
+    /* stylelint-disable-next-line declaration-no-important */
     border-color: var(--external-link-active) !important;
 }
 
@@ -1784,6 +1790,7 @@ end of styles used in the admin gradeable page
 }
 
 .mobile-block {
+    /* stylelint-disable-next-line declaration-no-important */
     display: block !important;
 }
 
@@ -1812,7 +1819,7 @@ end of styles used in the admin gradeable page
     width: 100%;
 }
 
-.btn-wrapper .btn {
+.btn-wrapper > .btn {
     flex: 1 0 90%;
     margin: 5px 0 0 5px;
 }
@@ -1849,11 +1856,13 @@ header > * {
 }
 
 .full-width {
+    /* stylelint-disable-next-line declaration-no-important */
     width: 100% !important;
     display: block;
 }
 
 .align-left {
+    /* stylelint-disable-next-line declaration-no-important */
     text-align: left !important;
 }
 
@@ -1900,6 +1909,7 @@ header > * {
     }
 
     .mobile-block {
+        /* stylelint-disable-next-line declaration-no-important */
         display: none !important;
     }
 }
@@ -1909,7 +1919,7 @@ header > * {
         width: max-content;
     }
 
-    .btn-wrapper .btn {
+    .btn-wrapper > .btn {
         flex: 1 0 auto;
     }
 
@@ -1941,8 +1951,8 @@ header > * {
 }
 
 .loader {
-    border: 16px solid var(--standard-pale-gray); 
-    border-top: 16px solid var(--standard-medium-blue); 
+    border: 16px solid var(--standard-pale-gray);
+    border-top: 16px solid var(--standard-medium-blue);
     border-radius: 50%;
     top: 50%;
     left: 50%;
@@ -1953,14 +1963,20 @@ header > * {
     align-content: center;
     animation: spin 2s linear infinite;
     position: fixed; /* Sit on top of the page content */
-    background-color: var(--black-moderately-transparent); /* Black background with opacity */
+    background-color: var(
+        --black-moderately-transparent
+    ); /* Black background with opacity */
     z-index: 999; /* Specify a stack order in case you're using a different order for other elements */
     cursor: pointer; /* Add a pointer on hover */
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .custom-file-input::-webkit-file-upload-button {
@@ -1987,7 +2003,11 @@ header > * {
 }
 
 .custom-file-input:active::before {
-    background: linear-gradient(to bottom, var(--standard-light-gray), var(--standard-pale-gray));
+    background: linear-gradient(
+        to bottom,
+        var(--standard-light-gray),
+        var(--standard-pale-gray)
+    );
 }
 
 .mermaid-element {
@@ -2048,7 +2068,7 @@ Start of slider switch
     cursor: pointer;
     inset: 0;
     background-color: var(--standard-light-medium-gray);
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 34px;
 }
 
@@ -2060,7 +2080,7 @@ Start of slider switch
     left: 0.2em;
     bottom: 0.2em;
     background-color: var(--always-default-white);
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 50%;
 }
 
@@ -2070,7 +2090,7 @@ Start of slider switch
     top: 50%;
     left: 0.5em;
     transform: translateY(-50%);
-    transition: .4s;
+    transition: 0.4s;
 }
 
 input:checked + .slider {
@@ -2089,9 +2109,26 @@ input:checked + .slider::after {
 End of slider switch
  */
 
-.badge-1, .badge-2, .badge-3, .badge-4, .badge-5, .badge-6, .badge-7,
-.badge-8, .badge-9, .badge-10, .badge-11, .badge-12, .badge-13, .badge-14,
-.badge-15, .badge-16, .badge-17, .badge-18, .badge-19, .badge-20 {
+.badge-1,
+.badge-2,
+.badge-3,
+.badge-4,
+.badge-5,
+.badge-6,
+.badge-7,
+.badge-8,
+.badge-9,
+.badge-10,
+.badge-11,
+.badge-12,
+.badge-13,
+.badge-14,
+.badge-15,
+.badge-16,
+.badge-17,
+.badge-18,
+.badge-19,
+.badge-20 {
     color: var(--text-black);
     min-width: 10px;
     float: none;

@@ -103,7 +103,7 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
-    public function randomUrlProvider() {
+    public static function randomUrlProvider() {
         return [
             ["/everywhere"],
             ["/courses/s19"],

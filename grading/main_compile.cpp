@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
                     my_testcase.get_test_case_limits(),
                     config_json.value("resource_limits",nlohmann::json()),
                     config_json,
+                    my_testcase.get_test_case_config(),
                     false,
                     "NOT_A_WINDOWED_ASSIGNMENT",
                     my_testcase.has_timestamped_stdout());
@@ -161,6 +162,7 @@ int main(int argc, char *argv[]) {
                             my_testcase.get_test_case_limits(),
                             config_json.value("resource_limits",nlohmann::json()),
                             config_json,
+                            my_testcase.get_test_case_config(),
                             false,
                             "NOT_A_WINDOWED_ASSIGNMENT",
                             my_testcase.has_timestamped_stdout());

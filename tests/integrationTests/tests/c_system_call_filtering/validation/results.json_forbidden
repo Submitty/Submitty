@@ -1,0 +1,108 @@
+{
+    "automatic_grading_total": 13,
+    "nonhidden_automatic_grading_total": 13,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test01/STDERR.txt",
+                    "description": "Compilation Errors and/or Warnings",
+                    "messages": [
+                        {
+                            "message": "ERROR: This file should be empty!",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2672
+            },
+            "points_awarded": 1,
+            "test_name": "Compilation",
+            "testcase_message": "Compilation Errors and/or Warnings."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test02/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test02/0_diff.json",
+                    "expected_string": "hello world\ngoodbye\n",
+                    "use_expected_string": true
+                },
+                {
+                    "actual_file": "test02/STDERR.txt",
+                    "description": "STDERR.txt"
+                },
+                {
+                    "actual_file": "test02/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2676
+            },
+            "points_awarded": 5,
+            "test_name": "just the basics"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test03/0_diff.json",
+                    "expected_string": "hello world\ngoodbye\n",
+                    "use_expected_string": true
+                },
+                {
+                    "actual_file": "test03/STDERR.txt",
+                    "description": "STDERR.txt"
+                },
+                {
+                    "actual_file": "test03/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2676
+            },
+            "points_awarded": 4,
+            "test_name": "allowing process_control_scheduling"
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test04/STDOUT.txt",
+                    "description": "STDOUT.txt",
+                    "difference_file": "test04/0_diff.json",
+                    "expected_string": "hello world\ngoodbye\n",
+                    "use_expected_string": true
+                },
+                {
+                    "actual_file": "test04/STDERR.txt",
+                    "description": "STDERR.txt"
+                },
+                {
+                    "actual_file": "test04/execute_logfile.txt",
+                    "description": "Execution Logfile"
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2680
+            },
+            "points_awarded": 3,
+            "test_name": "allow process_control_scheduling AND device_management_advanced"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

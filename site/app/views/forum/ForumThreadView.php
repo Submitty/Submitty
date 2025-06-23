@@ -2,6 +2,7 @@
 
 namespace app\views\forum;
 
+use app\entities\forum\Category;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
@@ -164,7 +165,8 @@ class ForumThreadView extends AbstractView {
      */
     public function showForumThreads(string $user, Thread $thread, array $threads, array $merge_thread_options, bool $show_deleted, bool $show_merged_thread, string $display_option, int $initialPageNumber, bool $ajax = false): array|string {
         $currentCourse = $this->core->getConfig()->getCourse();
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
 
         $cookieSelectedCategories = $this->getSavedForumCategories($currentCourse, $categories);
         $cookieSelectedThreadStatus = $this->getSavedThreadStatuses();
@@ -410,6 +412,7 @@ class ForumThreadView extends AbstractView {
     public function generatePostList(Thread $thread, bool $includeReply, string $display_option, array $merge_thread_options, bool $render = true): array|string {
         $first = true;
         $post_data = [];
+        $anon_user_id = hash('sha3-224', $this->core->getUser()->getId());
         $csrf_token = $this->core->getCsrfToken();
         $GLOBALS['totalAttachments'] = 0;
         $user = $this->core->getUser();
@@ -481,6 +484,7 @@ class ForumThreadView extends AbstractView {
             "form_action_link" => $form_action_link,
             "merge_thread_content" => $merge_thread_content,
             "csrf_token" => $csrf_token,
+            "anon_user_id" => $anon_user_id,
             "activeThreadTitle" => "({$thread->getId()}) " . $thread->getTitle(),
             "post_box_id" => $post_box_id,
             "total_attachments" => $GLOBALS['totalAttachments'],
@@ -519,7 +523,8 @@ class ForumThreadView extends AbstractView {
     public function showFullThreadsPage(array $threads, bool $show_deleted, bool $show_merged_threads, int $block_number): string {
         $GLOBALS['totalAttachments'] = 0;
         $thread_content =  $this->displayThreadList($threads, false, true);
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         $current_course = $this->core->getConfig()->getCourse();
         // getting the forum page buttons
         $button_params = $this->getAllForumButtons(true, -1, null, $show_deleted, $show_merged_threads);
@@ -1003,11 +1008,8 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
-        $categories = "";
-
-        $category_colors;
-
-        $categories = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         $create_thread_message = $this->core->getConfig()->getForumCreateThreadMessage();
 
         $buttons = [
@@ -1056,10 +1058,10 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
-        $category_colors;
 
         if ($this->core->getUser()->accessGrading()) {
-            $categories = $this->core->getQueries()->getCategories();
+            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+            $categories = $repo->getCategories();
         }
 
         $buttons = [
