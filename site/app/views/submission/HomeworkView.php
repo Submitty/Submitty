@@ -1115,6 +1115,9 @@ class HomeworkView extends AbstractView {
 
             $files = $version_instance->getFiles();
             $processed_files = $version_instance->getProcessedFiles();
+            if (is_null($processed_files)) {
+                $processed_files = [];
+            }
 
             $param = array_merge($param, [
                 'is_notebook' => $autograding_config->isNotebookGradeable(),
