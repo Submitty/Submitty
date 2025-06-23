@@ -239,8 +239,8 @@ def send_email():
             continue
 
         email_data["body"] += (
-            f"\n\n--\nNOTE: This is an automated email notification, which "
-            f"is unable to receive replies."
+            "\n\n--\nNOTE: This is an automated email notification, which "
+            "is unable to receive replies."
         )
 
         if term and course:
