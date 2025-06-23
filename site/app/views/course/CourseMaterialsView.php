@@ -184,7 +184,8 @@ class CourseMaterialsView extends AbstractView {
                 ];
 
                 $metadata = array_merge($metadata, $this->setCourseMaterialMetadata($course_material, $current_path));
-            } else {
+            }
+            else {
                 $metadata[$current_path] = [
                     'associatedDate' => $course_material->getCalendarDate() ? $course_material->getCalendarDate()->format("Y-m-d") : 'none',
                     'isOnCalendar' => $course_material->isOnCalendar() ? 'true' : 'none',
