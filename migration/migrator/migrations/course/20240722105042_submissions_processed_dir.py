@@ -1,8 +1,6 @@
 """Migration for a given Submitty course database."""
 
 import os
-import pwd 
-import stat
 from pathlib import Path
 
 
@@ -25,13 +23,14 @@ def up(config, database, semester, course):
     os.makedirs(str(submissions_processed_dir), exist_ok=True)
 
     daemon_user = config.submitty_users['daemon_user']
-    daemon_user_id = pwd.getpwnam(daemon_user).pw_uid
 
     stat_info = os.stat(str(course_dir))
     course_group_id = stat_info.st_gid
 
-    os.chown(submissions_processed_dir, daemon_user_id, course_group_id)
-    os.chmod(submissions_processed_dir, stat.S_IRWXU | stat.S_IRWXG | stat.S_ISGID)
+    os.system(f"chown {daemon_user}:{course_group_id} {submissions_processed_dir}")
+    os.system(f"chmod u+rwx {submissions_processed_dir}")
+    os.system(f"chmod g+rwxs {submissions_processed_dir}")
+    os.system(f"chmod o-rwx {submissions_processed_dir}")
 
 
 def down(config, database, semester, course):

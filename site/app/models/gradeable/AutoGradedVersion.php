@@ -72,7 +72,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     private $files = null;
     /** @prop
-     * @var array[] An array of all the processed submission files  */
+     * @var array<string,string>[] An array of all the processed submission files  */
     private $submissions_processed_files = null;
     /** @prop
      * @var array[] An array of all the autograded results files  */
@@ -235,7 +235,7 @@ class AutoGradedVersion extends AbstractModel {
     /**
      * Loads information about processed submission files
      */
-    private function loadProcessedSubmissionFiles() {
+    private function loadProcessedSubmissionFiles(): void {
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -413,8 +413,9 @@ class AutoGradedVersion extends AbstractModel {
 
     /**
      * Gets an array of file details (indexed by file name) for all processed submission files
+     * @return array<string,string>[]
      */
-    public function getProcessedFiles() {
+    public function getProcessedFiles(): array {
         if ($this->submissions_processed_files === null) {
             $this->loadProcessedSubmissionFiles();
         }
