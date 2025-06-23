@@ -236,6 +236,7 @@ class AutoGradedVersion extends AbstractModel {
      * Loads information about processed submission files
      */
     private function loadProcessedSubmissionFiles(): void {
+        $this->submissions_processed_files = [];
         $submitter_id = $this->graded_gradeable->getSubmitter()->getId();
         $gradeable = $this->graded_gradeable->getGradeable();
         $course_path = $this->core->getConfig()->getCoursePath();
