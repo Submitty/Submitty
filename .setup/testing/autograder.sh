@@ -43,7 +43,6 @@ tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
 popd
-
 # --------------------------------------
 pushd /tmp
 
