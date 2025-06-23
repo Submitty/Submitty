@@ -9,11 +9,9 @@ use app\repositories\TermRepository;
 use app\libraries\TermManager;
 use app\entities\Term;
 use app\models\User;
-use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
 class TermManagerTester extends BaseUnitTest {
-
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
         $repo = $this->createMock(TermRepository::class);
@@ -65,5 +63,4 @@ class TermManagerTester extends BaseUnitTest {
         $user = new User($core, $detail);
         TermManager::getTermStartDate($core, 'id', $user);
     }
-
 }

@@ -2,11 +2,9 @@
 
 namespace app\repositories;
 
-use app\entities\Term;
 use Doctrine\ORM\EntityRepository;
 
 class TermRepository extends EntityRepository {
-
     public function getTermStartDate(string $term_id): string {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $result = $qb->select('term.start_date')
@@ -24,7 +22,7 @@ class TermRepository extends EntityRepository {
             ->from('app\entities\Term', 'term')
             ->orderBy('term.term_id', 'DESC')
             ->getQuery()
-            ->getResult();;
+            ->getResult();
         return array_column($results, 'name');
     }
 }

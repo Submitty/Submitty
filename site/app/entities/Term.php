@@ -37,19 +37,19 @@ class Term {
         $this->end_date = $end_date;
     }
 
-    public function getId() {
+    public function getId(): string {
         return $this->term_id;
     }
 
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
-    public function getStartDate() {
+    public function getStartDate(): string {
         return $this->start_date;
     }
 
-    public function getEndDate() {
+    public function getEndDate(): string {
         return $this->end_date;
     }
 }
