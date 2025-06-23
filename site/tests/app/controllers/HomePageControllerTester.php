@@ -35,6 +35,9 @@ class HomePageControllerTester extends BaseUnitTest {
         $entityManager->method('getRepository')
             ->with(Term::class)
             ->willReturn($repo);
+        // Set start day to today for dropped courses
+        $repo->method('getTermStartDate')
+            ->willReturn(date('Y-m-d H:i:s'));
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');

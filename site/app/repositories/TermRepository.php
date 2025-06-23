@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityRepository;
 
 class TermRepository extends EntityRepository {
 
-    public function getStartDate(string $term_id): string {
+    public function getTermStartDate(string $term_id): string {
         $qb = $this->getEntityManager()->createQueryBuilder();
         $result = $qb->select('term.start_date')
             ->from('app\entities\Term', 'term')
@@ -26,17 +26,5 @@ class TermRepository extends EntityRepository {
             ->getQuery()
             ->getResult();;
         return array_column($results, 'name');
-    }
-
-    public function createNewTerm(string $term_id, string $term_name, string $start_date, string $end_date): void {
-        $em = $this->getEntityManager();
-        $term = new Term(
-            $term_id,
-            $term_name,
-            $start_date,
-            $end_date,
-        );
-        $em->persist($term);
-        $em->flush();
     }
 }

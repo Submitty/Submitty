@@ -5,7 +5,6 @@ namespace app\libraries;
 use app\entities\Term;
 use app\repositories\TermRepository;
 use app\models\User;
-
 /**
  * Class TermManager
  */
@@ -14,7 +13,7 @@ class TermManager {
         $em = $core->getSubmittyEntityManager();
         /** @var TermRepository $repo */
         $repo = $em->getRepository(Term::class);
-        $timestamp = $repo->getStartDate($term_id);
+        $timestamp = $repo->getTermStartDate($term_id);
         return DateUtils::convertTimeStamp($user, $timestamp, 'Y-m-d H:i:s');
     }
 
@@ -28,10 +27,15 @@ class TermManager {
         return $repo->getAllTermNames();
     }
 
-    public static function createNewTerm(Core $core, string $term_id, string $name, string $start_day, string $end_day): void {
+    public static function createNewTerm(Core $core, string $term_id, string $term_name, string $start_date, string $end_date): void {
         $em = $core->getSubmittyEntityManager();
-        /** @var TermRepository $repo */
-        $repo = $em->getRepository(Term::class);
-        $repo->createNewTerm($term_id, $name, $start_day, $end_day);
+        $term = new Term(
+            $term_id,
+            $term_name,
+            $start_date,
+            $end_date,
+        );
+        $em->persist($term);
+        $em->flush();
     }
 }

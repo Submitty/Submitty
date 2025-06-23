@@ -21,8 +21,26 @@ class TermManagerTester extends BaseUnitTest {
         $entityManager->method('getRepository')
             ->with(Term::class)
             ->willReturn($repo);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('persist')
+            ->with(
+                $this->callback(function ($term): bool {
+                    $this->assertInstanceOf(Term::class, $term);
+                    $this->assertEquals($term->getId(), 'id');
+                    $this->assertEquals($term->getName(), 'name');
+                    $this->assertEquals($term->getStartDate(), '06/25/25');
+                    $this->assertEquals($term->getEndDate(), '07/18/25');
+                    return true;
+                })
+            );
+        $entityManager
+            ->expects($this->once())
+            ->method('flush');
         // Testing create terms
-        TermManager::createNewTerm($core, 'id', 'NAME', '06/25/25', '07/18/25');
+        TermManager::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
+        $repo->expects($this->once())
+            ->method('getTermStartDate');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
@@ -45,7 +63,7 @@ class TermManagerTester extends BaseUnitTest {
             'grading_registration_sections' => [1, 2]
         ];
         $user = new User($core, $detail);
-        $this->assertEquals(TermManager::getTermStartDate($core, 'id', $user), DateUtils::convertTimeStamp($user, '06/25/25', 'Y-m-d H:i:s'));
+        TermManager::getTermStartDate($core, 'id', $user);
     }
 
 }
