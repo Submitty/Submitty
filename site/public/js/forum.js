@@ -216,6 +216,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    // re-enable the submit button for users to try again
+                    form.find('[type=submit]').prop('disabled', false);
                     return;
                 }
             }

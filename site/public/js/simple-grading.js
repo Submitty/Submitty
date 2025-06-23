@@ -921,10 +921,16 @@ function setupSimpleGrading(action) {
     $('#student-search-input').on('keydown', () => {
         highlightOnSingleMatch(false);
     });
-    $('#student-search').on('DOMSubtreeModified', () => {
-        highlightOnSingleMatch(true);
-    });
-
+    const studentSearch = document.querySelector('#student-search');
+    if (studentSearch) {
+        const observer = new MutationObserver(() => {
+            highlightOnSingleMatch(true);
+        });
+        observer.observe(studentSearch, {
+            childList: true,
+            subtree: true,
+        });
+    }
     // clear the input field when it is focused
     $('#student-search-input').on('focus', function () {
         $(this).val('');

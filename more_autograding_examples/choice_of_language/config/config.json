@@ -1,5 +1,5 @@
 {
-    "required_capabilities": "et-cetera",
+    "required_capabilities": "default",
     "autograding_method": "docker",
 
     "assignment_message" : "Please submit your assignment in one of 3 languages.  Only submit to a single bucket.",

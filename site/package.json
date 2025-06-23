@@ -68,7 +68,7 @@
     "@vue/eslint-config-typescript": "^14.5.0",
     "@vue/tsconfig": "^0.7.0",
     "babel-jest": "^29.7.0",
-    "cypress": "^14.4.0",
+    "cypress": "^14.4.1",
     "cypress-browser-permissions": "^1.1.0",
     "cypress-file-upload": "^5.0.8",
     "esbuild": "^0.25.5",
