@@ -76,6 +76,9 @@ def get_benchmark_percent(soup):
 
             try:
                 benchmark_percent[benchmark] = float(element['value'])
+
+                if benchmark_percent[benchmark] < 0 or benchmark_percent[benchmark] > 1:
+                    raise ValueError("Benchmark percent input must be between 0 and 1.")
             except ValueError:
                 raise ValueError("Benchmark percent input must be a floating point number.")
 
@@ -113,6 +116,9 @@ def get_final_cutoff_percent(soup):
 
             try:
                 final_cutoff[letter_grade] = float(element['value'])
+
+                if final_cutoff[letter_grade] < 0 or final_cutoff[letter_grade] > 100:
+                    raise ValueError("Final cutoff input must be between 0 and 100.")
             except ValueError:
                 raise ValueError("Final cutoff input must be a floating point number.")
 
@@ -145,6 +151,9 @@ def get_gradeable_buckets(soup):
         # Parse the bucket name from the inner text (i.e., '% Homework (29 items)')
         bucket_name = li.get_text(strip=True).split('(')[0].replace('%', '').strip().lower()
         used_buckets.add(bucket_name)
+
+    # Fetch the selected curve benchmarks
+    selected_benchmarks = get_selected_curve_benchmarks(soup)
 
     for bucket_div in soup.select('.bucket_detail_div'):
         bucket = {}
@@ -201,12 +210,10 @@ def get_gradeable_buckets(soup):
                 gradeable['release_date'] = max_score_input['data-grade-release-date']
                 gradeable['id'] = li.select_one('.gradeable-id').text.strip()
 
-            # Get per-gradeable curve data
-            curve_points_selected = get_selected_curve_benchmarks(soup)
             for curve_input in li.select('.gradeable-li-curve input'):
                 benchmark = str(curve_input['data-benchmark'])
 
-                if benchmark in curve_points_selected and curve_input.get('value'):
+                if benchmark in selected_benchmarks and curve_input.get('value'):
                     if 'curve' not in gradeable:
                         gradeable['curve'] = []
 
@@ -214,7 +221,7 @@ def get_gradeable_buckets(soup):
 
             # Validate the set of per-gradeable curve values
             if 'curve' in gradeable:
-                if len(gradeable['curve']) != len(curve_points_selected):
+                if len(gradeable['curve']) != len(selected_benchmarks):
                     raise ValueError(
                         f"To adjust the curve for gradeable {gradeable['id']} you must enter a value in each box"
                     )
@@ -276,11 +283,14 @@ def get_table_data(soup, table_name):
         third_input = cells[2].text.strip()
 
         if table_name == 'plagiarism':
-            data.append({
-                'user': first_input,
-                'gradeable': second_input,
-                'penalty': float(third_input)
-            })
+            try:
+                data.append({
+                    'user': first_input,
+                    'gradeable': second_input,
+                    'penalty': float(third_input)
+                })
+            except ValueError:
+                raise ValueError("Penalty input for plagiarism must be a floating point number.")
         elif table_name == 'manualGrade':
             data.append({
                 'user': first_input,
@@ -288,11 +298,14 @@ def get_table_data(soup, table_name):
                 'note': third_input
             })
         elif table_name == 'performanceWarnings':
-            data.append({
-                'msg': first_input,
-                'ids': [id.strip() for id in second_input.split(',')],
-                'value': float(third_input)
-            })
+            try:
+                data.append({
+                    'msg': first_input,
+                    'ids': [id.strip() for id in second_input.split(',')],
+                    'value': float(third_input)
+                })
+            except ValueError:
+                raise ValueError("Value input for performance warnings must be a floating point number.")
 
     return data
 
@@ -304,10 +317,10 @@ def get_messages(soup):
     return [textarea.text.strip()] if textarea and textarea.text.strip() else []
 
 
-def build_json(html_string):
+def generate_customization_json(html_string):
     """
-    Constructs a JSON representation of the form input from an HTML string. This function
-    mimics the behavior of the original JavaScript `buildJSON` function.
+    Constructs a JSON representation of the form input from an HTML string, representing
+    the most up-to-date GUI customization for the given course.
     """
     soup = BeautifulSoup(html_string, 'html.parser')
     data = {
@@ -355,7 +368,7 @@ def load_and_save_gui_customization(semester, course, token):
         exit(-1)
 
     # Save the most up-to-date GUI customization to the server
-    json_string = build_json(load_response.text)
+    json_string = generate_customization_json(load_response.text)
     save_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
             base_url, semester, course
