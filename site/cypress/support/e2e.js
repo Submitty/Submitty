@@ -32,10 +32,6 @@ Cypress.on('uncaught:exception', (err) => {
         // Ignore Mermaid service worker-related errors
         return false;
     }
-    else if (err.message.includes('Cannot read properties of null (reading \'addEventListener\')')) {
-        // Ignore Vue event listener-related errors
-        return false;
-    }
 
     // Ensure all other exceptions fail the test
     return true;
