@@ -4,7 +4,7 @@ import SaveSQLQueries from './saveSqlQuery.vue';
 import SqlSchema from './sqlSchema.vue';
 import RunQuery from './runQuery.vue';
 import DownloadQuery from './downloadQuery.vue';
-import type { QueryListEntry } from '../../../ts/sql-toolbox';
+import type { QueryListEntry, RunQueryResults } from '../../../ts/sql-toolbox';
 import DisplayQueryResults from './displayQueryResults.vue';
 import ManageSqlQuery from './manageSqlQuery.vue';
 
@@ -19,7 +19,7 @@ const { sqlStructureData, userQueriesList } = defineProps<{
     userQueriesList: QueryListEntry[];
 }>();
 
-const runQueryResults = ref<{ [key: string]: number | string | null }[] | null>(null);
+const runQueryResults = ref<RunQueryResults | null>(null);
 const runQueryError = ref<string | false>(false);
 const currentQuery = ref({
     query_name: '',
@@ -27,15 +27,13 @@ const currentQuery = ref({
 });
 const savedQueries = ref<QueryListEntry[]>(userQueriesList);
 
-// For running the query
 function changeRunQueryError(message: string | false) {
     runQueryError.value = message;
 }
-function changeRunQueryResults(data: { [key: string]: number | string | null }[]) {
+function changeRunQueryResults(data: RunQueryResults | null) {
     runQueryResults.value = data;
 }
 
-// For saving and deleting user queries
 function deleteSavedQuery(id: number) {
     savedQueries.value = savedQueries.value.filter((query) => query.id !== id);
 }
@@ -43,7 +41,6 @@ function addSavedQuery(id: number, query_name: string, query: string) {
     savedQueries.value.push({ id, query_name, query });
 }
 
-// For adding query to the current query textarea
 function addCurrentQuery(query: string) {
     currentQuery.value.query += query;
 }

@@ -9539,8 +9539,6 @@ ORDER BY
         return $this->submitty_db->getRowCount() > 0;
     }
 
-    // ----------------- INSTRUCTOR SQL QUERIES -----------------
-
     /**
      * @param string $user_id the userid of the user
      * @return array<string>
@@ -9576,6 +9574,4 @@ ORDER BY
         );
         return $this->submitty_db->getRowCount() > 0;
     }
-
-    // ----------------- END INSTRUCTOR SQL QUERIES -----------------
 }

@@ -16,6 +16,8 @@ export type QueryListEntry = {
     query: string;
 };
 
+export type RunQueryResults = Record<string, number | string | null>[];
+
 export async function runSqlQuery(sql_query: string) {
     const form_data = new FormData();
     form_data.append('csrf_token', getCsrfToken());
