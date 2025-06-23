@@ -1,6 +1,55 @@
 import { viewFileFullPanel } from './ta-grading';
 import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 
+declare global {
+    interface Window {
+        reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
+        showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
+        onAddNewMark(me: HTMLElement): Promise<void>;
+        onRestoreMark(me: HTMLElement): void;
+        onDeleteMark(me: HTMLElement): void;
+        onDeleteComponent(me: HTMLElement): Promise<void>;
+        importComponentsFromFile(me: HTMLElement): Promise<void>;
+        onAddComponent(peer: boolean): Promise<void>;
+        onMarkPointsChange(me: HTMLElement): Promise<void>;
+        onGetMarkStats(me: HTMLElement): Promise<void>;
+        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
+        onCancelEditRubricComponent(me: HTMLElement): void;
+        onChangeOverallComment(me: HTMLElement): Promise<void>;
+        onCancelComponent(me: HTMLElement): Promise<void>;
+        onCustomMarkChange(me: HTMLElement): Promise<void>;
+        onToggleMark(me: HTMLElement): Promise<void>;
+        onToggleCustomMark(me: HTMLElement): Promise<void>;
+        onVerifyAll(me: HTMLElement): Promise<void>;
+        onVerifyComponent(me: HTMLElement): Promise<void>;
+        onClickCountUp(me: HTMLElement): void;
+        onClickCountDown(me: HTMLElement): void;
+        onComponentPointsChange(me: HTMLElement): Promise<void>;
+        onComponentTitleChange(me: HTMLElement): void;
+        onComponentPageNumberChange(me: HTMLElement): void;
+        onMarkPublishChange(me: HTMLElement): void;
+        setPdfPageAssignment(page: number): Promise<void>;
+        reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void>;
+        open_overall_comment_tab(user: string): void;
+        updateAllComponentVersions(): Promise<void>;
+        closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
+        reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
+        canVerifyGraders(): boolean;
+        isItempoolAvailable(): string;
+        getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
+        toggleCustomMark(component_id: number): Promise<void>;
+        onToggleEditMode(): Promise<void>;
+        addComponent(peer: boolean): Promise<string | undefined>;
+        deleteComponent(component_id: number): Promise<string | undefined>;
+        addNewMark(component_id: number): Promise<void>;
+        getGradeableId(): string | undefined;
+
+        PDF_PAGE_NONE: number;
+        PDF_PAGE_STUDENT: number;
+        PDF_PAGE_INSTRUCTOR: number;
+    }
+}
+
 /**
  *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
  */
@@ -19,14 +68,14 @@ type Gradeable = {
     precision: number;
     components: Component[];
 };
-export type Component = {
+type Component = {
     id: number; title: string; ta_comment: string; student_comment: string; page: number; lower_clamp: number; default: number; max_value: number; upper_clamp: number; is_itempool_linked: boolean; itempool_option: string; peer: boolean;
     marks: Mark[];
 };
 interface GradedComponent extends Component, ComponentGradeInfo {
     component_id: number;
 }
-export type ComponentGradeInfo = {
+type ComponentGradeInfo = {
     comment: string;
     score: number;
     custom_mark_selected: boolean;
@@ -862,7 +911,7 @@ async function ajaxVerifyAllComponents(gradeable_id: string | undefined, anon_id
  * @throws {Error} Throws except when the response returns status 'success'
  * @return {Object}
  */
-export async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]) {
+async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id: string | undefined, component_version: number, component_ids: number[]) {
     let response: Record<string, string | undefined> | null;
     try {
         response = await $.ajax({
@@ -1034,7 +1083,7 @@ function setRubricDOMElements(elements: string | Element | DocumentFragment | Do
  * @param me DOM element
  * @return {int}
  */
-export function getComponentIdFromDOMElement(me: HTMLElement) {
+function getComponentIdFromDOMElement(me: HTMLElement) {
     if ($(me).hasClass('component')) {
         return parseInt($(me).attr('data-component_id')!);
     }
@@ -1238,7 +1287,7 @@ function setMarkTitle(mark_id: number, title: string | number | string[] | ((thi
  * Loads all components from the DOM
  * @returns {Array}
  */
-export function getAllComponentsFromDOM() {
+function getAllComponentsFromDOM() {
     const components: Component[] = [];
     $('.component').each(function () {
         components.push(getComponentFromDOM(getComponentIdFromDOMElement(this)));

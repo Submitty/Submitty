@@ -139,6 +139,8 @@ class Access {
         $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.save_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.load_config"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.save_config"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.add_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.delete_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_graded_component"] = self::CHECK_CSRF | self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
