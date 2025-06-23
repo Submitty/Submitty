@@ -123,6 +123,7 @@ class ItemWidget extends Widget {
      */
     block() {
         this.commitState();
+        // this has no user input
         // eslint-disable-next-line no-unsanitized/property
         this.dom_pointer.querySelector('.interactive-container').innerHTML = this.getBlockedTemplate();
     }
