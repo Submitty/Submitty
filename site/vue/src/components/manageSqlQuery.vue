@@ -48,7 +48,7 @@ const handleDeletion = async (id: number) => {
 
 <template>
   <Popup
-    title="Add or Delete a Saved Query"
+    title="Saved Queries"
     :visible="showPopup"
     @toggle="handleToggle"
   >
@@ -58,7 +58,7 @@ const handleDeletion = async (id: number) => {
         class="btn btn-primary"
         @click="handleToggle"
       >
-        Manage Saved Queries
+        Saved Queries
       </button>
     </template>
 
@@ -80,11 +80,19 @@ const handleDeletion = async (id: number) => {
             v-for="query in queries"
             :key="query.id"
           >
-            <td class="td-wrap-element">
-              {{ query.query_name }}
+            <td
+              class="td-wrap-element"
+            >
+              <div class="query-container">
+                {{ query.query_name }}
+              </div>
             </td>
-            <td class="td-wrap-element">
-              {{ query.query.length > 200 ? query.query.substring(0, 200) + '...' : query.query }}
+            <td
+              class="td-wrap-element"
+            >
+              <div class="query-container">
+                {{ query.query }}
+              </div>
             </td>
             <td>
               <button
@@ -120,5 +128,9 @@ const handleDeletion = async (id: number) => {
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+.query-container {
+  max-height: 150px;
+  overflow-y: auto;
 }
 </style>

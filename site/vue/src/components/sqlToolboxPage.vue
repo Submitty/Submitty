@@ -102,8 +102,7 @@ function addCurrentQuery(query: string) {
 
 <style lang="css" scoped>
 #run-sql-btn,
-#download-query-btn
-{
+#download-query-btn {
   margin-top: 5px;
   margin-right: 5px;
 }
