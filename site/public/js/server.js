@@ -215,7 +215,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
 
         const emElement = document.createElement('em');
-        emElement.innerHTML = ` (<b>contains ${escapeSpecialChars(num_of_files)}</b> file${escapeSpecialChars(file_s)}${escapeSpecialChars(num_links_txt)}`;
+        emElement.innerHTML = ` (<b>contains ${escapeSpecialChars(num_of_files.toString())}</b> file${escapeSpecialChars(file_s.toString())}${escapeSpecialChars(num_links_txt.toString())}`;
 
         cm_message.appendChild(emElement);
     }
