@@ -62,6 +62,7 @@ class ItemWidget extends Widget {
     update(interactive_area) {
         this.commitState();
 
+        // this has no user input
         // eslint-disable-next-line no-unsanitized/property
         interactive_area.innerHTML = this.getUpdatedTemplate();
 
