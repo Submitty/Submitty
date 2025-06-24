@@ -2026,7 +2026,7 @@ class AdminGradeableController extends AbstractController {
 
         $redactions = [];
 
-        if (is_array($_POST['redactions'])) {
+        if (is_array($_POST['redactions']) && array_is_list($_POST['redactions'])) {
             for ($i = 0; $i < count($_POST['redactions']); $i++) {
                 $redaction = $_POST['redactions'][$i];
                 foreach (["page", "x1", "y1", "x2", "y2"] as $key) {
@@ -2041,7 +2041,7 @@ class AdminGradeableController extends AbstractController {
             }
         }
         elseif ($_POST['redactions'] !== "none") {
-            $this->core->getOutput()->renderJsonFail('Invalid redactions format');
+            $this->core->getOutput()->renderJsonFail('Invalid redactions format. Expected an array of redactions.');
             return;
         }
 
