@@ -52,8 +52,8 @@ for name, data in vagrant_workers_data.items():
     shutil.copyfile(f"{SUBMITTY_REPOSITORY}/.vagrant/machines/{name}/{provider}/private_key", f"/tmp/worker_keys/{name}")
     os.chown(f"/tmp/worker_keys/{name}", daemon_stat.pw_uid, daemon_stat.pw_gid)
     os.chmod(f"/tmp/worker_keys/{name}", 0o400)
-    w = subprocess.run(['su', DAEMON_USER, '-c', f"scp -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no ~/.ssh/id_rsa.pub root@{data['ip_addr']}:/tmp/workerkey"])
-    w = subprocess.run(['su', DAEMON_USER, '-c', f"ssh -i /tmp/worker_keys/{name} -o StrictHostKeyChecking=no root@{data['ip_addr']} \"chown {SUPERVISOR_USER}:{SUPERVISOR_USER} /tmp/workerkey && su {SUPERVISOR_USER} -c \\\"mkdir -p ~/.ssh && mv /tmp/workerkey ~/.ssh/authorized_keys\\\"\""])
+    w = subprocess.run(['su', DAEMON_USER, '-c', f"scp -i /tmp/worker_keys/{name} ~/.ssh/id_rsa.pub root@{data['ip_addr']}:/tmp/workerkey"])
+    w = subprocess.run(['su', DAEMON_USER, '-c', f"ssh -i /tmp/worker_keys/{name} root@{data['ip_addr']} \"chown {SUPERVISOR_USER}:{SUPERVISOR_USER} /tmp/workerkey && su {SUPERVISOR_USER} -c \\\"mkdir -p ~/.ssh && mv /tmp/workerkey ~/.ssh/authorized_keys\\\"\""])
     if w.returncode == 0:
         print("Connected to " + name)
         successful_machines.append(name)
