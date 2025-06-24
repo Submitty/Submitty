@@ -131,14 +131,19 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->core->setCourseEntityManager($entity_manager);
 
         $database_queries = $this->createMock(DatabaseQueries::class);
-        $database_queries->method('getInstructorQueries')->willReturn([['id' => 1, 'name' => 'Test Query', 'query' => 'Test Query']]);
+        $single_query = [
+            'id' => 1,
+            'name' => 'Test Query',
+            'query' => 'Test Query'
+        ];
+        $database_queries->method('getInstructorQueries')->willReturn([$single_query]);
         $this->core->setQueries($database_queries);
 
         $response = $this->controller->showToolbox();
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertSame($response->parameters, [[], [['id' => 1, 'name' => 'Test Query', 'query' => 'Test Query']]]);
+        $this->assertSame($response->parameters, [[], [$single_query]]);
     }
 
     public function testRunQuery(): void {
