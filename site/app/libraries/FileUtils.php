@@ -348,6 +348,9 @@ class FileUtils {
     public static function validateZipFileSize(string $filename): bool {
         $zip = new \ZipArchive();
         $res = $zip->open($filename);
+        if ($res !== true) {
+            return false; // not a valid zip file
+        }
         for ($i = 0; $i < $zip->count(); $i++) {
             $stream = $zip->getStream($zip->getNameIndex($i));
             if ($stream === false) {
