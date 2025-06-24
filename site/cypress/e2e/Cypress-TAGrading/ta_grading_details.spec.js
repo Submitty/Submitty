@@ -3,7 +3,7 @@ describe('TA Grading details page', () => {
         cy.login();
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.get('[data-testid="view-sections-label"]').should('contain', 'Only Assigned Sections');
-        cy.get('[data-testid="view-sections-checkbox"]').click();
+        cy.get('[data-testid="view-sections"]').click();
         cy.get('[data-testid="random-order-label"]').should('contain', 'Randomize Order');
         cy.get('[data-testid="anon-students-label"]').should('contain', 'Anonymize Student Name');
         cy.get('[data-testid="inquiry-only-label"]').should('contain', 'Grade Inquiries Only');

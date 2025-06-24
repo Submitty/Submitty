@@ -240,7 +240,7 @@ class ElectronicGraderView extends AbstractView {
                     $section['verified_percentage'] = number_format(($section['verified'] / $section['total']) * 100, 1);
                 }
 
-                if ($section['non_late_total'] == 0) {
+                if ($section['non_late_total'] === 0) {
                     $section['non_late_percentage'] = 0;
                     $section['non_late_verified_percentage'] = 0;
                 }
@@ -851,7 +851,7 @@ HTML;
         if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
             if ($view_all) {
                 if (count($grader_registration_sections) !== 0) {
-                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
+                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Toggle "Only Assigned Sections" to see only your sections.';
                     $message_warning = true;
                 }
             }

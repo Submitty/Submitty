@@ -1,4 +1,4 @@
-/* global courseUrl, showPopup */
+/* global courseUrl, showPopup, full_access_grader_permission, is_team_assignment, is_student */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update filter_withdrawn_update */
 const MOBILE_BREAKPOINT = 951;
 
@@ -150,7 +150,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // Only Assigned Sections
         const assignedFilterBox = document.getElementById('toggle-view-sections');
         const assignedFilterStatus = Cookies.get('view');
-        assignedFilterBox.checked = (assignedFilterStatus === 'assigned');
+        assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
         // Anonymous Mode
         const anonFilterBox = document.getElementById('toggle-anon-students');
@@ -181,7 +181,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
     // Grade Inquiry Only - students don't have permission
-    if(!is_student) {
+    if (!is_student) {
         const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
         inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
     }
