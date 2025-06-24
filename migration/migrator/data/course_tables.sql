@@ -617,6 +617,41 @@ $$;
 
 
 --
+-- Name: active_graders; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.active_graders (
+    id integer NOT NULL,
+    grader_id character varying(255) NOT NULL,
+    gc_id integer NOT NULL,
+    ag_user_id character varying(255),
+    ag_team_id character varying(255),
+    "timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT ag_user_team_id_check CHECK (((ag_user_id IS NOT NULL) OR (ag_team_id IS NOT NULL)))
+);
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.active_graders_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: active_graders_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.active_graders_id_seq OWNED BY public.active_graders.id;
+
+
+--
 -- Name: autograding_metrics; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -886,6 +921,7 @@ CREATE TABLE public.electronic_gradeable_version (
     team_id character varying(255),
     active_version integer,
     anonymous_leaderboard boolean DEFAULT true NOT NULL,
+    g_notification_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -1452,7 +1488,10 @@ CREATE TABLE public.notification_settings (
     team_invite_email boolean DEFAULT true NOT NULL,
     team_joined_email boolean DEFAULT true NOT NULL,
     team_member_submission_email boolean DEFAULT true NOT NULL,
-    self_notification_email boolean DEFAULT false NOT NULL
+    self_notification_email boolean DEFAULT false NOT NULL,
+    self_registration_email boolean DEFAULT true NOT NULL,
+    all_released_grades boolean DEFAULT true NOT NULL,
+    all_released_grades_email boolean DEFAULT true NOT NULL
 );
 
 
@@ -1945,6 +1984,13 @@ CREATE TABLE public.viewed_responses (
 
 
 --
+-- Name: active_graders id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders ALTER COLUMN id SET DEFAULT nextval('public.active_graders_id_seq'::regclass);
+
+
+--
 -- Name: calendar_messages id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2110,6 +2156,30 @@ ALTER TABLE ONLY public.student_favorites ALTER COLUMN id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
+
+
+--
+-- Name: active_graders active_graders_grader_id_gc_id_ag_team_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_team_id_key UNIQUE (grader_id, gc_id, ag_team_id);
+
+
+--
+-- Name: active_graders active_graders_grader_id_gc_id_ag_user_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_gc_id_ag_user_id_key UNIQUE (grader_id, gc_id, ag_user_id);
+
+
+--
+-- Name: active_graders active_graders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_pkey PRIMARY KEY (id);
 
 
 --
@@ -2753,6 +2823,38 @@ CREATE TRIGGER late_day_extension_change AFTER INSERT OR DELETE OR UPDATE ON pub
 --
 
 CREATE TRIGGER late_days_allowed_change AFTER INSERT OR DELETE OR UPDATE ON public.late_days FOR EACH ROW EXECUTE PROCEDURE public.late_days_allowed_change();
+
+
+--
+-- Name: active_graders active_graders_ag_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_team_id_fkey FOREIGN KEY (ag_team_id) REFERENCES public.gradeable_teams(team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_ag_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_ag_user_id_fkey FOREIGN KEY (ag_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_gc_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_gc_id_fkey FOREIGN KEY (gc_id) REFERENCES public.gradeable_component(gc_id) ON DELETE CASCADE;
+
+
+--
+-- Name: active_graders active_graders_grader_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.active_graders
+    ADD CONSTRAINT active_graders_grader_id_fkey FOREIGN KEY (grader_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --

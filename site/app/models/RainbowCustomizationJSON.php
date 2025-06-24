@@ -24,6 +24,10 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * @var string[]
      */
+    private array $omit_section_from_stats = [];
+    /**
+     * @var string[]
+     */
     private array $display_benchmark = [];
     /**
      * @var string[]
@@ -224,6 +228,10 @@ class RainbowCustomizationJSON extends AbstractModel {
             $this->section = $json->section;
         }
 
+        if (isset($json->omit_section_from_stats)) {
+            $this->omit_section_from_stats = $json->omit_section_from_stats;
+        }
+
         if (isset($json->messages)) {
             $this->messages = $json->messages;
         }
@@ -278,14 +286,19 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $sectionID The sectionID
      * @param string $label The label you would like to assign to the sectionID
-     * @throws BadArgumentException The passed in section label is empty
      */
     public function addSection(string $sectionID, string $label): void {
-        if ($label === '') {
-            throw new BadArgumentException('The section label may not be empty.');
-        }
+        // If label is not set, use sectionID as default
+        $this->section->$sectionID = $label === '' ? $sectionID : $label;
+    }
 
-        $this->section->$sectionID = $label;
+    /**
+     * Add an omitted section
+     *
+     * @param string $section_id The section id of the section to omit
+     */
+    public function addOmittedSection(string $section_id): void {
+        $this->omit_section_from_stats[] = $section_id;
     }
 
     /**
@@ -324,6 +337,15 @@ class RainbowCustomizationJSON extends AbstractModel {
      */
     public function getSection() {
         return $this->section;
+    }
+
+    /**
+     * Get array of sections omitted from stats
+     *
+     * @return string[]
+     */
+    public function getOmittedSections(): array {
+        return $this->omit_section_from_stats;
     }
 
     /**

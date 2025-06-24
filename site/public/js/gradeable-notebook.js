@@ -195,12 +195,6 @@ function restoreNotebookFromLocal() {
 }
 
 $(document).ready(() => {
-    // If any button inside the notebook has been clicked then enable the submission button
-    $('.notebook button').click(() => {
-        // Set global javascript variable to allow submission for notebook
-        window.is_notebook = true;
-    });
-
     $('#submit').click(() => {
         localStorage.removeItem(notebookAutosaveKey());
         // Changes have been submitted; we don't need to warn the user anymore

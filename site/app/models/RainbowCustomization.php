@@ -106,19 +106,23 @@ class RainbowCustomization extends AbstractModel {
 
             // Update bucket count
             $this->bucket_counts[$bucket]++;
-            $max_score = $gradeable->getManualGradingPoints();
+
+            $manual_grading_points = $gradeable->getManualGradingPoints();
+            $autograded_grading_points = 0;
+
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()) {
                 $last_index = count($this->customization_data[$bucket]) - 1;
-                $max_score += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+                $autograded_grading_points = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
+            $max_score = $manual_grading_points + $autograded_grading_points;
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
                 "max_score" => $max_score,
+                "manual_grading_points" => $manual_grading_points,
+                "autograded_grading_points" => $autograded_grading_points,
                 "grade_release_date" => $gradeable->hasReleaseDate() ? DateUtils::dateTimeToString($gradeable->getGradeReleasedDate()) : DateUtils::dateTimeToString($gradeable->getSubmissionOpenDate()),
-                "override" => false,
-                "override_max" => $max_score,
                 "override_percent" => false
             ];
         }
@@ -141,13 +145,22 @@ class RainbowCustomization extends AbstractModel {
 
                 $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
+
+            // If there are no assigned buckets, automatically assign buckets that contain gradeables
+            if (count($this->used_buckets) === 0) {
+                foreach (self::syllabus_buckets as $potential_bucket) {
+                    if ($this->bucket_counts[$potential_bucket] > 0) {
+                        $this->used_buckets[] = $potential_bucket;
+                    }
+                }
+            }
         }
 
         // Reorder buckets
         $this->reorderBuckets();
 
         //Now that the buckets are ordered and the customization has been initialized, we can
-        //loop through to find differences between the max_values from the database vs the customization JSON
+        //loop through to find differences between the percent values from the database vs the customization JSON
         if (!is_null($this->RCJSON) && count($this->RCJSON->getGradeables()) > 0) {
             $json_buckets = $this->RCJSON->getGradeables();
             //we have to keep track of the customization bucket and the JSON bucket separately, since the customization
@@ -164,13 +177,6 @@ class RainbowCustomization extends AbstractModel {
                 //loop through all gradeables in bucket and compare them
                 $j_index = 0;
                 foreach ($this->customization_data[$c_bucket] as &$c_gradeable) {
-                    if ($j_index >= count($json_bucket->ids)) {
-                        $c_gradeable['override_max'] = $c_gradeable['max_score'];
-                    }
-                    elseif ($c_gradeable['max_score'] !== (float) $json_bucket->ids[$j_index]->max) {
-                        $c_gradeable['override'] = true;
-                        $c_gradeable['override_max'] = $json_bucket->ids[$j_index]->max;
-                    }
                     if (isset($json_bucket->ids[$j_index]) && property_exists($json_bucket->ids[$j_index], 'percent')) {
                         $c_gradeable['override_percent'] = true;
                         $c_gradeable['percent'] = ($json_bucket->ids[$j_index]->percent) * 100;
@@ -341,6 +347,16 @@ class RainbowCustomization extends AbstractModel {
 
             // Save the sum of used percentages to special key in array
             $retArray['used_percentage'] = $sum;
+
+            // Assign percentage values for buckets added automatically (i.e. when no other buckets are used)
+            $json_bucket_types = [];
+            foreach ($json_buckets as $json_bucket) {
+                $json_bucket_types[] = $json_bucket->type;
+            }
+            $automatic_buckets = array_diff($this->used_buckets, $json_bucket_types);
+            foreach ($automatic_buckets as $automatic_bucket) {
+                $retArray[$automatic_bucket] = 0;
+            }
         }
 
         return $retArray;
@@ -561,6 +577,14 @@ class RainbowCustomization extends AbstractModel {
         }
     }
 
+    /**
+     * Get omit sections from stats from json file if there is any
+     *
+     * @return string[]
+     */
+    public function getOmittedSections(): array {
+        return $this->RCJSON?->getOmittedSections() ?? [];
+    }
 
     /**
      * Get plagiarism from json file if there is any
@@ -619,6 +643,12 @@ class RainbowCustomization extends AbstractModel {
         if (isset($form_json->section)) {
             foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
+            }
+        }
+
+        if (isset($form_json->omit_section_from_stats)) {
+            foreach ($form_json->omit_section_from_stats as $omit_section) {
+                $this->RCJSON->addOmittedSection($omit_section);
             }
         }
 

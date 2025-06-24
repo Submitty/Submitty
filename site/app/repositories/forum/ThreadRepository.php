@@ -16,7 +16,7 @@ class ThreadRepository extends EntityRepository {
      */
     private function getThreadBlock(string $user_id, int $block_number): array {
         $block_size = 30;
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->leftJoin('thread.favorers', 'favorers', Join::WITH, 'favorers.user_id = :user_id')
@@ -43,7 +43,7 @@ class ThreadRepository extends EntityRepository {
         }
         $block = $this->getThreadBlock($user_id, $block_number);
 
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
         // AddSelect allows us to join server-side, reducing the number of database queries.
@@ -104,7 +104,7 @@ class ThreadRepository extends EntityRepository {
 
 
     public function getThreadDetail(int $thread_id, string $order_posts_by = 'tree', bool $get_deleted = false): ?Thread {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')
@@ -134,19 +134,19 @@ class ThreadRepository extends EntityRepository {
         }
         switch ($order_posts_by) {
             case 'alpha':
-                $qb->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
+                $qb->addSelect("COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order")
                     ->addOrderBy('user_familyname_order', 'ASC')
                     ->addOrderBy('post.timestamp', 'ASC')
                     ->addOrderBy('post.id', 'ASC');
                 break;
             case 'alpha_by_registration':
                 $qb->addOrderBy('postAuthor.registration_section', 'ASC')
-                    ->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
+                    ->addSelect("COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order")
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'alpha_by_rotating':
                 $qb->addOrderBy('postAuthor.rotating_section', 'ASC')
-                    ->addSelect("COALESCE(NULLIF(postAuthor.user_preferred_familyname, ''), postAuthor.user_familyname) AS HIDDEN user_familyname_order")
+                    ->addSelect("COALESCE(postAuthor.user_preferred_familyname, postAuthor.user_familyname) AS HIDDEN user_familyname_order")
                     ->addOrderBy('user_familyname_order', 'ASC');
                 break;
             case 'reverse-time':
@@ -168,7 +168,7 @@ class ThreadRepository extends EntityRepository {
      * @return Thread[]
      */
     public function getMergeThreadOptions(Thread $thread): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')
@@ -189,7 +189,7 @@ class ThreadRepository extends EntityRepository {
         if (count($thread_ids) === 0 || count($user_ids) === 0) {
             return [];
         }
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('thread')
             ->from(Thread::class, 'thread')
             ->addSelect('post')

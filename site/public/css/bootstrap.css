@@ -523,6 +523,7 @@ input[type="button"].btn-block {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
+    word-break: break-all;
 }
 
 .alert,
@@ -613,7 +614,7 @@ input[type="button"].btn-block {
     color: var(--btn-text-white);
     text-align: center;
 
-    /* white-space: nowrap; */
+    white-space: nowrap;
     word-wrap: break-word;
     vertical-align: baseline;
     border-radius: 0.25em;

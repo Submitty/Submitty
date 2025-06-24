@@ -19,7 +19,7 @@
     <div style="margin-bottom:10px;" class="form-group row position-relative">
         <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown is defined and render_markdown ? 1 : 0 }}" />
     {% if show_merge_thread_button is defined and show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
+        <a class="btn btn-primary key_to_click" tabindex = "0" id="merge-thread-btn" title="Merge Thread Into Another Thread" data-testid="merge-thread" onclick="$('#merge-threads').css('display', 'block'); captureTabInModal('merge-threads');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date is defined and show_lock_date and core.getUser().getGroup() <= 2 %}
         <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
@@ -36,6 +36,9 @@
                                 },
                                 {
                                     label: "End of time"
+                                },
+                                {
+                                    label: "Clear"
                                 }
                             ],
                             label: "or",
@@ -44,12 +47,16 @@
                                 switch (index) {
                                     case 0:
                                         date = new Date();
+                                        fp.setDate(date, true);
                                         break;
                                     case 1:
                                         date = new Date("9998-01-01T00:00:00");
+                                        fp.setDate(date, true);
+                                        break;
+                                    case 2:
+                                        fp.clear();
                                         break;
                                 }
-                                fp.setDate(date, true);
                             }
                         })
                     ],
@@ -123,10 +130,10 @@
                 {# if diff > 0 then visible_Date is true
                  diff is used for comparison between the given date of category and the current date of user 
                  when date is above then current date then output is less than zero.
-                 and when date is below then current date the optput is greater then zero #}
-                {% if category.visible_date is null or category.diff > 0 %}
-                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                    <input type="checkbox" name="cat[]" value="{{ category.category_id }}" data-testid="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
+                 and when date is below then current date the output is greater then zero #}
+                {% if category.visibleDate is null or category.diff >= 0 %}
+                <div tabindex="0" class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.description }}
+                    <input type="checkbox" name="cat[]" value="{{ category.id }}" data-testid="{{ category.id }}" aria-label="Category {{ category.description }}">
                 </div>
                 {% endif %}
             {% endfor %}
@@ -180,17 +187,17 @@
         <div class="new-thread-settings-wrapper">
         {% if show_anon %}
             <input type="checkbox" class="thread-anon-checkbox" data-testid="thread-anon-checkbox" {% if anon_edit_post_id is defined and anon_edit_post_id %} id="{{ anon_edit_post_id }}"{% endif %} aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/>
-            <label>Anonymous (to class)? </label>
+            <label>Anonymous (to class) </label>
         {% endif %}
         {% if show_announcement is defined and show_announcement and core.getUser().accessFullGrading() %}
-            {% set announcement_text = email_enabled ? "Pin Thread?(w/email & notification)" : "Pin Thread?(w/ notification)" %}
+            {% set announcement_text = email_enabled ? "Notify students (w/email)" : "Notify students" %}
+            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
+            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>
             <input type="checkbox" id="Announcement" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
             <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
-            <input type="checkbox" class="pinThread-checkbox" name="pinThread" id="pinThread" value="pinThread" data-ays-ignore="true"/>
-            <label class="inline-block" for="pinThread">{{ "Pin Thread" }}</label>       
         {% endif %}
         {% if show_expiration is defined and show_expiration and core.getUser().accessFullGrading() %}
-            <div class = "expiration inline-block" style="display: none;">
+            <div id="pin-expiration-date">
               <label class="inline-block" for="expirationDate" style="margin-left: 15px;">{{ "Expiration Date" }}</label>
               <input type="date" class="date_picker" name="expirationDate" id="expirationDate" value="{{ expiration_placeholder is defined ? expiration_placeholder : '' }}"/>
             </div>
@@ -229,33 +236,36 @@
             if($(".thread-announcement-checkbox").prop("checked")){
                 $(".thread-announcement-checkbox").prop("checked", true);
                 $(".pinThread-checkbox").prop("checked", true);
-                $(".pinThread-checkbox").prop('disabled', true);
-                $(".expiration").show();
+                $("#pin-expiration-date").show();
                 $("#thread_status").val(0);
             } else {
                 $(".thread-announcement-checkbox").prop("checked", false);
                 $(".pinThread-checkbox").prop("checked", false);
-                $(".pinThread-checkbox").prop('disabled', false);
-                $(".expiration").hide();
+                $("#pin-expiration-date").hide();
             }
         });
 
         $(".pinThread-checkbox").click(function (){
-            $(".expiration").toggleClass("display-inline");
             if($(".pinThread-checkbox").prop("checked")){
                 $(".pinThread-checkbox").prop("checked", true);
-                $(".expiration").show();
+                $("#pin-expiration-date").show();
                 $("#thread_status").val(0);
             } else {
                 $(".pinThread-checkbox").prop("checked", false);
-                $(".expiration").hide();
+                $(".thread-announcement-checkbox").prop("checked", false);
+                $("#pin-expiration-date").hide();
             }
         });
 
         //only show skip buttons with class 'skip-first-post' if the user is navigating backwards
         //from an input with 'post-content-reply' class
         $('.post_content_reply').focus(function(){
+            this.dataset.active = 'true';
             $(this).closest('.markdown-area').prev('.skip-first-post').attr('tabindex', '0');
+        });
+
+        $('.post_content_reply').blur(function(){
+            delete this.dataset.active;
         });
 
         $(':not(.post_content_reply, .skip-first-post)').focus(function(){

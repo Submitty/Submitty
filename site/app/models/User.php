@@ -17,8 +17,8 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setNumericId(string $id)
  * @method string getPassword()
  * @method string getLegalGivenName() Get the given name of the loaded user
- * @method string getPreferredGivenName() Get the preferred given name of the loaded user
- * @method string getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
+ * @method string|null getPreferredGivenName() Get the preferred given name of the loaded user
+ * @method string|null getDisplayedGivenName() Returns the preferred given name if one exists and is not null or blank,
  *                                        otherwise return the legal given name field for the user.
  * @method string getLegalFamilyName() Get the family name of the loaded user
  * @method string getPreferredFamilyName()  Get the preferred family name of the loaded user
@@ -27,10 +27,9 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
- * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
- * @method void setDisplayNameOrder()
+ * @method void setDisplayNameOrder(string $display_name_order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -42,6 +41,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string setRegistrationSubsection(string $subsection)
  * @method string getCourseSectionId()
  * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
@@ -54,6 +54,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
+ * @method string getTimeZone()
+ * @method string getDisplayImageState()
+ * @method bool getEnforceSingleSession()
+ * @method string getRegistrationSubsection()
  */
 class User extends AbstractModel {
     /**
@@ -107,8 +111,8 @@ class User extends AbstractModel {
      * @var string The given name of the user */
     protected $legal_given_name;
     /** @prop
-     * @var string The preferred given name of the user */
-    protected $preferred_given_name = "";
+     * @var ?string The preferred given name of the user */
+    protected $preferred_given_name;
     /** @prop
      * @var  string The given name to be displayed by the system (either given name or preferred given name) */
     protected $displayed_given_name;
@@ -116,8 +120,8 @@ class User extends AbstractModel {
      * @var string The family name of the user */
     protected $legal_family_name;
     /** @prop
-     * @var string The preferred family name of the user */
-    protected $preferred_family_name = "";
+     * @var ?string The preferred family name of the user */
+    protected $preferred_family_name;
     /** @prop
      * @var  string The family name to be displayed by the system (either family name or preferred family name) */
     protected $displayed_family_name;
@@ -536,7 +540,7 @@ class User extends AbstractModel {
 
     /**
      * Set the preferred given name of the loaded user (does not affect db. call updateUser.)
-     * @param string $name
+     * @param ?string $name
      */
     public function setPreferredGivenName($name) {
         $this->preferred_given_name = $name;
@@ -729,6 +733,7 @@ class User extends AbstractModel {
         $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
@@ -737,7 +742,9 @@ class User extends AbstractModel {
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
         return $notification_settings;
     }
 

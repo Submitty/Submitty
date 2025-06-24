@@ -270,37 +270,13 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         {
             csrf_token: csrfToken,
             user_id: user_id,
+            anon_id: parent.data('anon'),
             old_scores: old_scores,
             scores: new_scores,
         },
         (returned_data) => {
-            if (returned_data.data && returned_data.data.date) {
-                const currentDate = new Date(returned_data.data.date);
-                if (!isNaN(currentDate.getTime())) {
-                    const formattedDate = `${currentDate.getFullYear()}-${padNumber(currentDate.getMonth() + 1)}-${padNumber(currentDate.getDate())} ${padNumber(currentDate.getHours())}:${padNumber(currentDate.getMinutes())}:${padNumber(currentDate.getSeconds())}`;
-                    elems.each((idx, elem) => {
-                        elem = $(elem);
-                        elem.animate({ 'border-right-width': '0px' }, 400);
-                        elem.attr('data-score', elem.data('score'));
-                        elem.attr('data-grader', elem.data('grader'));
-                        elem.attr('data-date', formattedDate);
-                        elem.find('.simple-grade-grader').text(elem.data('grader'));
-                        elem.find('.simple-grade-date').text(formattedDate);
-                    });
-                    window.socketClient.send({
-                        type: 'update_checkpoint',
-                        elem: elems.attr('id').split('-')[3],
-                        user: parent.data('anon'),
-                        score: elems.data('score'),
-                        grader: elems.data('grader'),
-                        date: formattedDate,
-                    });
-                }
-                else {
-                    console.log('Invalid date received:', returned_data.data.date);
-                }
-            }
-            else {
+            const returned_date = returned_data?.data?.date;
+            if (isNaN(new Date(returned_date).getTime())) {
                 console.log('Date not found in response:', returned_data);
                 elems.each((idx, elem) => {
                     elem = $(elem);
@@ -356,10 +332,51 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     setCheckpointHistory(g_id, history);
 }
 
+function adjustHeight(el) {
+    el.style.height = el.scrollHeight > el.clientHeight
+        ? `${el.scrollHeight}px`
+        : '30px';
+}
+
+function minimizeHeight(el) {
+    el.style.height = '30px';
+}
+
 function setupCheckboxCells() {
     // jQuery for the elements with the class cell-grade (those in the component columns)
     $('td.cell-grade').click(function () {
         updateCheckpointCells(this);
+    });
+    $('.cell-grade').change(function () {
+        let elem = $(this);
+        const split_id = elem.attr('id').split('-');
+        const row_el = $(`tr#row-${split_id[2]}-${split_id[3]}`);
+        const scores = {};
+        const old_scores = {};
+        row_el.find('.cell-grade').each(function () {
+            elem = $(this);
+            if (this.tagName.toLowerCase() === 'textarea') {
+                old_scores[elem.data('id')] = `${elem.data('origval')}`;
+                scores[elem.data('id')] = elem.val();
+                elem.data('origval', elem.val());
+                elem.attr('data-origval', elem.val());
+            }
+        });
+        submitAJAX(
+            buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+            {
+                csrf_token: csrfToken,
+                user_id: row_el.data('user'),
+                anon_id: row_el.data('anon'),
+                old_scores: old_scores,
+                scores: scores,
+            },
+            () => {}, // Empty function for success callback, null causing error.
+            () => {
+                console.error('Failed to save data for gradeable:', row_el.data('gradeable'),
+                    'user:', row_el.data('user'));
+            },
+        );
     });
 
     // Initialize based on cookies
@@ -423,16 +440,19 @@ function setupNumericTextCells() {
             }
             // Input greater than the max_clamp for the component is not allowed
             else {
-                if (elem.data('maxclamp') && elem.data('maxclamp') < this.value) {
-                    alert(`Score should be less than or equal to the max clamp value: ${elem.data('maxclamp')}`);
-                    this.value = 0;
+                if (elem.data('maxclamp') !== undefined) {
+                    const maxClamp = elem.data('maxclamp');
+                    if (maxClamp < this.value || maxClamp === 0) {
+                        alert(`Score should be less than or equal to the max clamp value: ${maxClamp}`);
+                        this.value = 0;
+                    }
                 }
             }
         }
 
         // eslint-disable-next-line eqeqeq
         if (this.value == 0) {
-            elem.css('color', '--standard-light-medium-gray');
+            elem.css('color', 'var(--standard-light-medium-gray)');
         }
         else {
             elem.css('color', '');
@@ -460,20 +480,11 @@ function setupNumericTextCells() {
             {
                 csrf_token: csrfToken,
                 user_id: row_el.data('user'),
+                anon_id: row_el.data('anon'),
+                elem: split_id[3],
                 old_scores: old_scores,
                 scores: scores,
-            },
-
-            () => {
-                // Finds the element that stores the total and updates it to reflect increase
-                // eslint-disable-next-line eqeqeq
-                if (row_el.find('.cell-total').text() != total) {
-                    row_el.find('.cell-total').text(total).hide().fadeIn('slow');
-                }
-
-                window.socketClient.send({ type: 'update_numeric', elem: split_id[3], user: row_el.data('anon'), value: value, total: total });
-            },
-            () => {
+            }, () => {}, () => {
                 elem.css('background-color', '--standard-light-pink');
             },
         );
@@ -489,53 +500,62 @@ function setupNumericTextCells() {
                 const reader = new FileReader();
                 reader.readAsText(f);
                 reader.onload = function () {
-                    let breakOut = false; // breakOut is used to break out of the function and alert the user the format is wrong
+                    // breakOut is used to break out of the function and the errorMessage alerts the user with the error
+                    let breakOut = false;
+                    let errorMessage = '';
+
                     const lines = (reader.result).trim().split(/\r\n|\n|\r/);
-                    let tempArray = lines[0].split(',');
-                    const csvLength = tempArray.length; // gets the length of the array, all the tempArray should be the same length
-                    for (let k = 0; k < lines.length && !breakOut; k++) {
-                        tempArray = lines[k].split(',');
-                        breakOut = tempArray.length !== csvLength; // if tempArray is not the same length, break out
+
+                    // constants
+                    const num_numeric = parseInt($('[data-numnumeric]').first().data('numnumeric'));
+                    const num_text = parseInt($('[data-numtext]').first().data('numtext'));
+                    const gradeable_id = $('[data-gradeable]').first().data('gradeable');
+
+                    // The csv length should be 3 (user information) + num_numeric + 1 (total if num_numeric exists) + num_text
+                    const csvLength = 3 + num_numeric + (num_numeric !== 0) + num_text;
+
+                    // error checking
+                    for (let row = 0; row < lines.length && !breakOut; row++) {
+                        const tempArray = lines[row].split(',');
+                        // if tempArray is not the same length, break out
+                        if (tempArray.length !== csvLength) {
+                            breakOut = true;
+                            errorMessage = `Row ${row + 1} of the CSV has the incorrect length. The correct length is ${csvLength}.`;
+                        }
+
+                        // the index where the numeric and text values start
+                        let dataStart = 3;
+                        let total = 0;
+                        if (!breakOut && num_numeric > 0) {
+                            // num_numeric + 4 because that is the number of numerical elements + total
+                            for (dataStart = 3; dataStart < num_numeric + 3 && !breakOut; dataStart++) {
+                                if (isNaN(Number(tempArray[dataStart]))) {
+                                    breakOut = true;
+                                    errorMessage = `Row ${row + 1} of the CSV's ${dataStart + 1} column should be a number. Found ${tempArray[dataStart]}.`;
+                                }
+                                total += Number(tempArray[dataStart]);
+                            }
+
+                            // if total is not a number
+                            if (isNaN(Number(tempArray[dataStart]))) {
+                                breakOut = true;
+                                errorMessage = `Row ${row + 1} of the CSV's ${dataStart + 1} column should be a number. Found ${tempArray[dataStart]}.`;
+                            }
+
+                            // if totals dont match
+                            const difference = total - Number(tempArray[dataStart]);
+
+                            // precision error
+                            if (difference < 0 || difference > 0.0000001) {
+                                breakOut = true;
+                                errorMessage = `Row ${row + 1} of the CSV does not have the correct total for numeric elements. Expected ${total}, got ${tempArray[dataStart]}.`;
+                            }
+                        }
                     }
-                    let textChecker = 0;
-                    let num_numeric = 0;
-                    let num_text = 0;
                     const user_ids = [];
-                    let get_once = true;
-                    let gradeable_id = '';
                     if (!breakOut) {
                         $('.cell-all').each(function () {
                             user_ids.push($(this).parent().data('user'));
-                            if (get_once) {
-                                num_numeric = $(this).parent().parent().data('numnumeric');
-                                num_text = $(this).parent().parent().data('numtext');
-                                gradeable_id = $(this).parent().data('gradeable');
-                                get_once = false;
-                                if (csvLength !== 4 + num_numeric + num_text) {
-                                    breakOut = true;
-                                    return false;
-                                }
-                                let k = 3; // checks if the file has the right number of numerics
-                                tempArray = lines[0].split(',');
-                                if (num_numeric > 0) {
-                                    for (k = 3; k < num_numeric + 4; k++) {
-                                        if (isNaN(Number(tempArray[k]))) {
-                                            breakOut = true;
-                                            return false;
-                                        }
-                                    }
-                                }
-
-                                // checks if the file has the right number of texts
-                                while (k < csvLength) {
-                                    textChecker++;
-                                    k++;
-                                }
-                                if (textChecker !== num_text) {
-                                    breakOut = true;
-                                    return false;
-                                }
-                            }
                         });
                     }
                     if (!breakOut) {
@@ -544,59 +564,56 @@ function setupNumericTextCells() {
                             { csrf_token: csrfToken, users: user_ids,
                                 num_numeric: num_numeric, big_file: reader.result },
                             (returned_data) => {
-                                $('.cell-all').each(function () {
-                                    for (let x = 0; x < returned_data['data'].length; x++) {
-                                        if ($(this).parent().data('user') === returned_data['data'][x]['username']) {
-                                            const starting_index1 = 0;
-                                            const starting_index2 = 3;
-                                            const value_str = 'value_';
-                                            const status_str = 'status_';
-                                            let value_temp_str = 'value_';
-                                            let status_temp_str = 'status_';
-                                            let total = 0;
-                                            let y = starting_index1;
-                                            let z = starting_index2; // 3 is the starting index of the grades in the csv
-                                            // puts all the data in the form
-                                            for (z = starting_index2; z < num_numeric + starting_index2; z++, y++) {
-                                                value_temp_str = value_str + y;
-                                                status_temp_str = status_str + y;
-                                                const elem = $(`#cell-${$(this).parent().parent().data('section')}-${$(this).parent().data('row')}-${z - starting_index2}`);
-                                                elem.val(returned_data['data'][x][value_temp_str]);
-                                                if (returned_data['data'][x][status_temp_str] === 'OK') {
-                                                    elem.css('background-color', '--main-body-white');
-                                                }
-                                                else {
-                                                    elem.css('background-color', '--standard-light-pink');
-                                                }
-
-                                                // eslint-disable-next-line eqeqeq
-                                                if (elem.val() == 0) {
-                                                    elem.css('color', '--standard-light-medium-gray');
-                                                }
-                                                else {
-                                                    elem.css('color', '');
-                                                }
-
-                                                total += Number(elem.val());
+                                for (let x = 0; x < returned_data['data'].length; x++) {
+                                    const rowElement = $(`tr[data-user="${returned_data['data'][x]['username']}"]`);
+                                    if (rowElement.length) {
+                                        let total = 0;
+                                        // return_data starts at 0
+                                        for (let col = 0, y = 0; col < csvLength - 3; col++) {
+                                            // if we hit the "total" column, display the total
+                                            if (num_numeric && col === num_numeric) {
+                                                const split_row = rowElement.attr('id').split('-');
+                                                $(`#total-${split_row[1]}-${split_row[2]}`).text(total);
+                                                continue;
                                             }
-                                            // $('#total-'+$(this).parent().data("row")).val(total);
-                                            const split_row = $(this).parent().attr('id').split('-');
-                                            $(`#total-${split_row[1]}-${split_row[2]}`).val(total);
-                                            z++;
-                                            let counter = 0;
-                                            while (counter < num_text) {
-                                                value_temp_str = value_str + y;
-                                                status_temp_str = status_str + y;
-                                                $(`#cell-${$(this).parent().data('row')}-${z - starting_index2 - 1}`).val(returned_data['data'][x][value_temp_str]);
-                                                z++;
+                                            const value = `value_${y}`;
+                                            const status = `status_${y}`;
+
+                                            let cellElement;
+
+                                            if (col < num_numeric) {
+                                                cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col}`);
+                                                cellElement.val(returned_data['data'][x][value]);
                                                 y++;
-                                                counter++;
+
+                                                if (Number(cellElement.val()) === 0) {
+                                                    cellElement.css('color', 'var(--standard-light-medium-gray)');
+                                                }
+                                                else {
+                                                    cellElement.css('color', '');
+                                                }
+                                                total += Number(cellElement.val());
+                                            }
+                                            else {
+                                                // -1 only if we have numeric elements for extra total column
+                                                cellElement = $(`#cell-${rowElement.parent().data('section')}-${rowElement.data('row')}-${col - (num_numeric !== 0)}`);
+                                                cellElement.text(returned_data['data'][x][value]);
+                                                y++;
                                             }
 
-                                            x = returned_data['data'].length;
+                                            if (returned_data['data'][x][status] === 'OK') {
+                                                cellElement.css('background-color', 'var(--default-white)');
+                                            }
+                                            // not saved
+                                            else {
+                                                cellElement.css('background-color', 'var(--simple-save-error-red)');
+                                            }
                                         }
                                     }
-                                });
+                                    else {
+                                        alert(`User ${returned_data['data'][x]['username']} does not exist.`);
+                                    }
+                                }
                             },
                             () => {
                                 alert('submission error');
@@ -605,7 +622,7 @@ function setupNumericTextCells() {
                     }
 
                     if (breakOut) {
-                        alert('CSV upload failed! Format file incorrect.');
+                        alert(errorMessage);
                     }
                 };
             }
@@ -685,7 +702,6 @@ function setupSimpleGrading(action) {
                 // // Selection needs to move to above the null section
                 if (new_selector_array[1] === '') {
                     new_selector_array[1] = 1;
-                    // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const temp_cell = $(`#${new_selector_array.join('-')}`);
                         if (!temp_cell.length) {
@@ -905,10 +921,16 @@ function setupSimpleGrading(action) {
     $('#student-search-input').on('keydown', () => {
         highlightOnSingleMatch(false);
     });
-    $('#student-search').on('DOMSubtreeModified', () => {
-        highlightOnSingleMatch(true);
-    });
-
+    const studentSearch = document.querySelector('#student-search');
+    if (studentSearch) {
+        const observer = new MutationObserver(() => {
+            highlightOnSingleMatch(true);
+        });
+        observer.observe(studentSearch, {
+            childList: true,
+            subtree: true,
+        });
+    }
     // clear the input field when it is focused
     $('#student-search-input').on('focus', function () {
         $(this).val('');
@@ -922,7 +944,7 @@ function initSocketClient() {
     window.socketClient.onmessage = (msg) => {
         switch (msg.type) {
             case 'update_checkpoint':
-                checkpointSocketHandler(msg.elem, msg.user, msg.score, msg.grader, msg.date);
+                checkpointSocketHandler(msg.is_text, msg.elem, msg.user, msg.value, msg.grader, msg.date);
                 break;
             case 'update_numeric':
                 numericSocketHandler(msg.elem, msg.user, msg.value, msg.total);
@@ -936,36 +958,45 @@ function initSocketClient() {
     updateVisibility();
 }
 
-function checkpointSocketHandler(elem_id, anon_id, score, grader, date) {
+function checkpointSocketHandler(is_text, elem_id, anon_id, value, grader, date) {
     const tr_elem = $(`table tbody tr[data-anon="${anon_id}"]`);
     if (tr_elem.length > 0) {
         const split_id = tr_elem.attr('id').split('-');
-        const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
-        elem.data('score', score);
-        elem.attr('data-score', score);
-        elem.data('grader', grader);
-        elem.attr('data-grader', grader);
-        elem.data('date', date);
-        elem.attr('data-date', date);
-        elem.find('.simple-grade-grader').text(grader);
-        elem.find('.simple-grade-date').text(date);
-
-        switch (score) {
-            case 1.0:
-                elem.addClass('simple-full-credit');
-                break;
-            case 0.5:
-                elem.removeClass('simple-full-credit');
-                elem.css('background-color', '');
-                elem.addClass('simple-half-credit');
-                break;
-            default:
-                elem.removeClass('simple-half-credit');
-                elem.css('background-color', '');
-                break;
+        if (is_text) {
+            const numnumeric = parseInt(tr_elem.parent().data('numnumeric'));
+            const elem = $(`#cell-comment-${split_id[1]}-${split_id[2]}-${elem_id - numnumeric}`);
+            elem.val(value);
         }
-        elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
-        elem.animate({ 'border-right-width': '0px' }, 400);
+        // otherwise it is a checkpoint
+        else {
+            const elem = $(`#cell-${split_id[1]}-${split_id[2]}-${elem_id}`);
+            const score = parseFloat(value);
+            elem.data('score', score);
+            elem.attr('data-score', score);
+            elem.data('grader', grader);
+            elem.attr('data-grader', grader);
+            elem.data('date', date);
+            elem.attr('data-date', date);
+            elem.find('.simple-grade-grader').text(grader);
+            elem.find('.simple-grade-date').text(date);
+
+            switch (score) {
+                case 1.0:
+                    elem.addClass('simple-full-credit');
+                    break;
+                case 0.5:
+                    elem.removeClass('simple-full-credit');
+                    elem.css('background-color', '');
+                    elem.addClass('simple-half-credit');
+                    break;
+                default:
+                    elem.removeClass('simple-half-credit');
+                    elem.css('background-color', '');
+                    break;
+            }
+            elem.css('border-right', `60px solid ${getComputedStyle(elem.parent()[0]).getPropertyValue('background-color')}`);
+            elem.animate({ 'border-right-width': '0px' }, 400);
+        }
     }
 }
 
@@ -977,15 +1008,13 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         elem.data('origval', value);
         elem.attr('data-origval', value);
         elem.val(value);
-        elem.css('background-color', '--always-default-white');
-        // eslint-disable-next-line eqeqeq
+        elem.css('background-color', 'var(--default-white)');
         if (value === 0) {
-            elem.css('color', '--standard-light-medium-gray');
+            elem.css('color', 'var(--standard-light-medium-gray)');
         }
         else {
             elem.css('color', '');
         }
-        // eslint-disable-next-line eqeqeq
         if (elem.parent().siblings('.option-small-output').children('.cell-total').text() !== total) {
             elem.parent().siblings('.option-small-output').children('.cell-total').text(total).hide().fadeIn('slow');
         }

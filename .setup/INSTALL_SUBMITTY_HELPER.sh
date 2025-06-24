@@ -235,7 +235,7 @@ chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands
 chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
 
 #replace necessary variables
-array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp )
+array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp load_config_json.cpp )
 for i in "${array[@]}"; do
     replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/src/grading/${i}"
 done
@@ -274,6 +274,11 @@ if [ "${IS_WORKER}" == 0 ]; then
 
     # copy the files from the repo
     rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
+
+    # copy more_autograding_examples in order to make cypress autograding work
+    if [ "${VAGRANT}" == 1 ]; then 
+        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+    fi
 
     # root will be owner & group of these files
     chown -R  root:root "${SUBMITTY_INSTALL_DIR}/more_autograding_examples"
