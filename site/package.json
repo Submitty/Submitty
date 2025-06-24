@@ -67,7 +67,7 @@
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.5.1",
     "@vue/tsconfig": "^0.7.0",
-    "babel-jest": "^29.7.0",
+    "babel-jest": "^30.0.2",
     "cypress": "^14.4.1",
     "cypress-browser-permissions": "^1.1.0",
     "cypress-file-upload": "^5.0.8",
