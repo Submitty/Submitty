@@ -2000,6 +2000,17 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
     }
 
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["GET"])]
+    public function getRedactions(string $gradeable_id): void {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            // tryGetGradeable will have already rendered an error message
+            return;
+        }
+
+        $this->core->getOutput()->renderJsonSuccess(array_map(fn($r) => $r->jsonSerialize(), $gradeable->getRedactions()));
+    }
+
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["POST"])]
     public function updateRedactions(string $gradeable_id): void {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -2019,8 +2030,9 @@ class AdminGradeableController extends AbstractController {
             for ($i = 0; $i < count($_POST['redactions']); $i++) {
                 $redaction = $_POST['redactions'][$i];
                 foreach (["page", "x1", "y1", "x2", "y2"] as $key) {
-                    if (!isset($redaction[$key]) || !is_numeric($redaction[$key])) {
-                        $this->core->getOutput()->renderJsonFail('Invalid redaction provided');
+                    if (!isset($redaction[$key]) || !is_numeric($redaction[$key]) || ($key !== "page" && ($redaction[$key] < 0 || $redaction[$key] > 1))) {
+                        $issue = !isset($redaction[$key]) ? "missing" : (!is_numeric($redaction[$key]) ? "non-numeric" : "out of bounds (0-1)");
+                        $this->core->getOutput()->renderJsonFail("Invalid redaction data at index {$i}: {$issue} for key '{$key}'");
                         return;
                     }
                 }
@@ -2044,15 +2056,7 @@ class AdminGradeableController extends AbstractController {
         $job_data = [
             "job" => "RegenerateBulkImages",
             "pdf_file_path" => FileUtils::joinPaths("/var/local/submitty/courses", $semester, $course, "submissions", $gradeable_id),
-            "redactions" => array_map(
-                function (Redaction $redaction) {
-                    return [
-                        'page_number' => $redaction->getPageNumber(),
-                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
-                    ];
-                },
-                $redactions
-            )
+            "redactions" =>  array_map(fn($r) => $r->jsonSerialize(), $redactions),
         ];
 
 
@@ -2062,7 +2066,7 @@ class AdminGradeableController extends AbstractController {
         }
 
 
-        $this->core->getOutput()->renderJsonSuccess();
+        $this->core->getOutput()->renderJsonSuccess(array_map(fn($r) => $r->jsonSerialize(), $redactions));
     }
 
     /**

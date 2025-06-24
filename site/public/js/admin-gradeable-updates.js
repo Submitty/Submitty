@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -77,6 +77,25 @@ function updatePdfPageSettings() {
         });
 }
 
+async function updateRedactionsDisplay(redactions = null) {
+    if (!redactions) {
+        const response = await $.ajax({
+            type: 'GET',
+            url: buildCourseUrl(['gradeable', $('#g_id').val(), 'redactions']),
+            dataType: 'json',
+        });
+        if (response.status === 'success') {
+            console.log(response.data);
+            redactions = response.data;
+        }
+        else {
+            console.error('Error fetching redactions:', response.message);
+            return;
+        }
+    }
+    $('#redactions_container').html(Twig.twig({ ref: 'Redactions' }).render({ redactions: redactions }));
+}
+
 async function updateRedactionSettings() {
     const files = $('#redactions_json').prop('files');
     if (files.length === 0) {
@@ -106,12 +125,14 @@ async function updateRedactionSettings() {
         delete errors['redactions'];
         updateErrorMessage();
         $('#remove_redactions').show();
+        console.log(response.data);
+        updateRedactionsDisplay(response.data);
     }
     else {
         errors['redactions'] = response.message;
         updateErrorMessage();
         $('#redactions_json').val('');
-        alert('Error saving redactions, please check the format of the JSON file.');
+        alert(response.message || 'Error saving redactions, please try again.');
     }
 }
 
@@ -224,6 +245,7 @@ $(document).ready(() => {
             event.returnValue = 1;
         }
     };
+    updateRedactionsDisplay();
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
