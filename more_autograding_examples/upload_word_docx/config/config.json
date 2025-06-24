@@ -16,64 +16,111 @@
 
   "autograding": {
     "submission_to_compilation": [],
-    "submission_to_runner": ["*.docx"],
+    "submission_to_runner": ["*.docx", "*.pdf" ],
     "submission_to_validation": [],
-    "work_to_details": ["test01/student_file.pdf"],
-    "work_to_public": ["test01/student_file.pdf"]
+    "work_to_details": ["test01/student_file.pdf", "**/*" ],
+    "work_to_public": ["test01/student_file.pdf", "**/*" ]
   },
 
-  "assignment_message": "Submit a single Microsoft Word `.docx` document and it will be converted to a PDF for manual grading.  The maximum upload size is 10mb.",
+    "assignment_message":
+"## Submit a single Microsoft Word `.docx` document OR a single Adobe PDF `.pdf` document.  \n\
+If you submit a `.docx` it will be converted to `.pdf` for TA grading.\n\
+Please verify that the `.pdf` version of your submitted file displays correctly within the appropriate test case below.  \n\
+*NOTE: The maximum upload size is 10mb.*",
 
   "testcases": [
       {
-	  "title" : "Did you submit a .docx file?",
-          // NOTE: This command will fail if the student no .docx files or submits multiple .docx files.
-	  "command" : [ "mv *.docx student_file.docx" ],
+	  "title" : "Did you submit exactly one .docx or .pdf file?",
+	  "command" : [ "ls *.docx *.pdf",
+                        "wc -l STDOUT_0.txt" ],
 	  "points" : 1,
 	  "validation": [
 	      {
-                  "actual_file": "student_file.docx",
+                  "actual_file": "STDOUT_1.txt",
+                  "expected_string": "1 STDOUT_0.txt\n",
                   "deduction": 1.0,
-                  "description": "Student's uploaded .docx file",
-                  "method": "fileExists",
-                  "show_actual": "never",
-                  "show_message": "on_failure",
-		  "failure_message": "Looks like you either did not submit a .docx file or you submitted multiple .docx files. Please submit exactly one .docx file."
+                  "description": "number of submitted files",
+                  "show_actual" : "never",
+                  "show_expected" : "never",
+                  "show_message" : "on_failure",
+                  "method": "diff",
+                  "failure_message": "Looks like you did not submit exactly one .docx or .pdf file."
               },
-              { "actual_file": "STDOUT.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
-              { "actual_file": "STDERR.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
-              { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
+              { "actual_file": "STDOUT_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0},
+              { "actual_file": "STDERR_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0},
+              { "actual_file": "STDERR_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0},
+              { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0}
 	  ]
       },
       {
-          "title": "Convert Word Document to PDF",
-          "pre_commands" : [
-	      {
-		  "command" : "cp",
-		  "testcase" : "test01",
-		  "source" : "student_file.docx",
-		  "destination" : "."
-	      }
-	  ],
-          "command": [
-              // BUILD the simple blank page latex file
-              "/usr/lib/libreoffice/program/soffice -env:UserInstallation=file:///tmp/ --headless --convert-to pdf student_file.docx"
-          ],
-          "points": 1,
+	  "title" : "Did you submit a .docx file?  We will convert the .docx to .pdf using LibreOffice.",
+	  "command" : [ "mv *.docx student_upload.docx",
+                        "/usr/lib/libreoffice/program/soffice -env:UserInstallation=file:///tmp/ --headless --convert-to pdf student_upload.docx",
+                        "mv student_upload.pdf student_converted.pdf" ],
+          "points" : 2,
           "validation": [
+	      {
+                  "actual_file": "student_upload.docx",
+                  "deduction": 0.5,
+                  "description": "Check existence of uploaded .docx file",
+                  "method": "fileExists",
+                  "show_actual": "never",
+                  "show_message": "on_failure",
+		  "failure_message": "You either did not submit a .docx file or you submitted multiple .docx files. Please submit exactly one .docx file."
+              },
               {
-                  "actual_file": "student_file.pdf",
-                  "deduction": 1.0,
-                  "description": "Check if the PDF file was created",
+                  "actual_file": "student_converted.pdf",
+                  "deduction": 0.5,
+                  "description": "Check if the .docx to .pdf conversion was successful",
                   "method": "fileExists",
                   "show_actual": "always",
                   "show_message": "on_failure",
-                  "failure_message": "We failed to create the PDF file from your Word document. Please ensure that your Word document is valid and can be converted to PDF."
+                  "failure_message": "We failed to create the .pdf file from your .docx Word document."
               },
-              { "actual_file": "STDOUT.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
-              { "actual_file": "STDERR.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+              { "actual_file": "STDOUT_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "STDERR_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "STDOUT_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "STDERR_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "STDOUT_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "STDERR_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 },
+              { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never", "deduction": 0 }
+	  ]
+      },
+      {
+	  "title" : "Alternatively...  Did you submit a .pdf file?",
+	  "command" : [ "ls *.docx *.pdf",
+                        "wc -l STDOUT_0.txt",
+                        "mv *.pdf student_submission.pdf" ],
+          "extra_credit" : true,
+	  "points" : 2,
+	  "validation": [
+	      {
+                  "actual_file": "student_submission.pdf",
+                  "deduction": 1.0,
+                  "description": "Student's uploaded .pdf file",
+                  "method": "fileExists",
+                  "show_actual": "always",
+                  "show_message": "on_failure",
+		  "failure_message": "We did not find a single .pdf file in your submission."
+              },
+	      {
+                  "actual_file": "STDOUT_1.txt",
+                  "expected_string": "1 STDOUT_0.txt\n",
+                  "deduction": 1.0,
+                  "description": "number of submitted files",
+                  "show_actual" : "never",
+                  "show_expected" : "never",
+                  "show_message" : "on_failure",
+                  "method": "diff",
+                  "failure_message": "You submitted more than one .pdf and/or .docx file."
+              },
+              { "actual_file": "STDOUT_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+              { "actual_file": "STDERR_0.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+              { "actual_file": "STDERR_1.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+              { "actual_file": "STDOUT_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
+              { "actual_file": "STDERR_2.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" },
               { "actual_file": "execute_logfile.txt", "method": "fileExists", "show_actual": "never", "show_message": "never" }
-          ]
+	  ]
       }
   ]
 }
