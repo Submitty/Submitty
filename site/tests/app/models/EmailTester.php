@@ -46,7 +46,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame('email body', $email->getBody());
     }
 
@@ -59,7 +59,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame("email body\n\nClick here for more info: http://example.com", $email->getBody());
     }
 
@@ -72,7 +72,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame("email body\n\nAuthor: Test P.", $email->getBody());
     }
 
@@ -86,7 +86,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame("email body", $email->getBody());
     }
 
@@ -100,7 +100,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
         ]);
 
         $this->assertSame('person', $email->getUserId());
-        $this->assertSame('[Submitty csci1100]: some email', $email->getSubject());
+        $this->assertSame('some email', $email->getSubject());
         $this->assertSame(
             "email body\n\nAuthor: Test P.\nClick here for more info: http://example.com",
             $email->getBody()
@@ -131,7 +131,7 @@ class EmailTester extends \PHPUnit\Framework\TestCase {
             'body' => 'email body',
         ]);
 
-        $this->assertSame('[Submitty]: some email', $email_missing->getSubject());
+        $this->assertSame('some email', $email_missing->getSubject());
         $this->assertSame('email body', $email_missing->getBody());
     }
 }

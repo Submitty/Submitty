@@ -62,19 +62,12 @@ class Email extends AbstractModel {
             $this->setEmailAddress($details["email_address"]);
             $this->setToName($details["to_name"]);
         }
-        $this->setSubject($this->formatSubject($details["subject"]));
+        $this->setSubject($details["subject"]);
         $this->setBody($this->formatBody(
             $details["body"],
             $details['relevant_url'] ?? null,
             $details['author'] ?? false
         ));
-    }
-
-    //inject course label into subject
-    private function formatSubject(string $subject): string {
-        $course = $this->core->getConfig()->getCourse();
-        $label = ($course !== null) ? "[Submitty $course]" : "[Submitty]";
-        return "$label: $subject";
     }
 
     //also adds author and a relevant url if one exists

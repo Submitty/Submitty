@@ -244,12 +244,18 @@ def send_email():
         )
 
         if term and course:
+            email_data["subject"] = f"[Submitty {course}]: {email_data['subject']}"
             email_data["body"] += (
                 "\nPlease refer to the course syllabus for contact information "
                 "for your teaching staff.\nUpdate your email notification "
                 "settings for this course here: "
                 f"{BASE_URL_PATH}/courses/{term}/{course}/notifications/settings"
             )
+        elif "[Submitty Admin Announcement]: " in email_data["subject"]:
+            # Admin-related subject's should be already formatted to differentiate from other emails
+            pass
+        else:
+            email_data["subject"] = f"[Submitty]: {email_data['subject']}"
 
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
