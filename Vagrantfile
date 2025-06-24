@@ -88,7 +88,7 @@ def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
   group = 'vagrant'
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
 
-  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax LichenTestData DockerImages DockerImagesRPI)
+  optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax IntroQuantumComputing LichenTestData DockerImages DockerImagesRPI)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)

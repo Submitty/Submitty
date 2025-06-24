@@ -3,6 +3,8 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\forum\Category;
+use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
@@ -18,11 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-    // The message that should be returned to the user if they fail the required validation to enable the nightly
-    // rainbow grades build checkbox
-    const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
-    'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
-    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
     const NO_SELF_REGISTER = 0; // Self registration disabled
     const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
     const ALL_SELF_REGISTER = 2; // Self registration allowed, and all users who register are automatically added
@@ -94,7 +91,8 @@ class ConfigurationController extends AbstractController {
                     'verified' => $this->core->getConfig()->isSubmittyAdminUserVerified(),
                     'in_course' => $admin_in_course,
                 ],
-                $this->core->getCsrfToken()
+                $this->core->getCsrfToken(),
+                $this->doesRainbowCustomizationExist()
             )
         );
     }
@@ -169,24 +167,6 @@ class ConfigurationController extends AbstractController {
             }
         }
         elseif ($name === 'auto_rainbow_grades') {
-            // Special validation for auto_rainbow_grades checkbox
-            // Get a new customization json object
-            $customization_json = new RainbowCustomizationJSON($this->core);
-
-            // If a manual_customization.json does not exist, then check for the presence of a regular one
-            if (!$customization_json->doesManualCustomizationExist()) {
-                // Attempt to populate it from the customization.json in the course rainbow_grades directory
-                // If no file exists do not allow user to enable this check mark until one is supplied
-                try {
-                    $customization_json->loadFromJsonFile();
-                }
-                catch (\Exception $e) {
-                    return MultiResponse::JsonOnlyResponse(
-                        JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
-                    );
-                }
-            }
-
             $entry = $entry === "true";
         }
 
@@ -202,8 +182,9 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {
+            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
             // Only create default categories when there is no existing categories (only happens when first enabled)
-            if (empty($this->core->getQueries()->getCategories())) {
+            if (count($repo->getCategories()) === 0) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
                 foreach ($categories as $rank => $category) {
                     $this->core->getQueries()->addNewCategory($category, $rank);
@@ -245,5 +226,18 @@ class ConfigurationController extends AbstractController {
         });
 
         return array_merge([['g_id' => '', 'g_title' => '--None--']], $gradeable_seating_options);
+    }
+
+    private function doesRainbowCustomizationExist(): bool {
+        $customization_json = new RainbowCustomizationJSON($this->core);
+        if (!$customization_json->doesManualCustomizationExist()) { // Check if manual_customization.json exists
+            try {
+                $customization_json->loadFromJsonFile(); // Check if any customization.json exists
+            }
+            catch (FileReadException $e) { // loadFromJsonFile() throws FileReadException if file is missing or empty
+                return false;
+            }
+        }
+        return true;
     }
 }

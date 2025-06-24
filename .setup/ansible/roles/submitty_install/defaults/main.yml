@@ -1,5 +1,6 @@
 ---
 submitty_install_submitty_version: main
+submitty_install_github_url: https://github.com/Submitty/Submitty.git
 submitty_install_db_host: localhost
 submitty_install_db_port: 5432
 submitty_install_submitty_dbuser: submitty_dbuser
@@ -23,3 +24,4 @@ submitty_install_admin_password: admin_password
 submitty_install_noreply_email: noreply_email@localhost
 submitty_install_smtp_server: mail.localhost
 submitty_install_smtp_port: 25
+submitty_install_course_materials_file_upload_limit_mb: 100

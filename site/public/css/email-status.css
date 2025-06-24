@@ -1,15 +1,17 @@
 .status-btn {
-    position: absolute;
-    min-width: 10%;
+    min-width: 140px;
     height: 7vh;
-    top: 0;
-    right: 0;
+    margin-left: 10px;
 }
 
 .button-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     position: relative;
     margin: auto;
-    display: inline-flexbox;
+    gap: 15px;
 }
 
 .expand {
@@ -106,6 +108,10 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }

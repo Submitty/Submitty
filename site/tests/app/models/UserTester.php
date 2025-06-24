@@ -184,6 +184,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_joined' => true,
                 'team_member_submission' => true,
                 'self_notification' => false,
+                'all_released_grades' => true,
                 'reply_in_post_thread_email' => false,
                 'merge_threads_email' => false,
                 'all_new_threads_email' => false,
@@ -192,7 +193,9 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_invite_email' => true,
                 'team_joined_email' => true,
                 'team_member_submission_email' => true,
-                'self_notification_email' => false
+                'self_notification_email' => false,
+                'self_registration_email' => true,
+                'all_released_grades_email' => true,
             ],
             'registration_subsection' => '',
             'enforce_single_session' => false
@@ -255,7 +258,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     }
 
 
-    public function validateUserDataProvider(): array {
+    public static function validateUserDataProvider(): array {
         $return = [
             ['user_id', 'test', true],
             ['user_id', 'system_user-1', true],

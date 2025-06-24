@@ -128,12 +128,16 @@
                     {# Populate codebox and set state of buttons initially #}
                     {% if highest_version == 0 %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "clear");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                        {% if not is_grader_view %}
+                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                        {% endif %}
                     {% else %}
                         setCodeBox("codebox_{{ num_codeboxes }}", "recent");
-                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
-                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                        {% if not is_grader_view %}
+                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = {{ viewing_inactive_version or is_grader_view ? 'true' : 'false'}}
+                            document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                        {% endif %}
                     {% endif %}
                 </script>
                 {% set num_codeboxes = num_codeboxes + 1 %}
@@ -174,7 +178,7 @@
                                            disabled = "disabled"
                                        {% endif %}
                                 />
-                                {{ cell.choices[idx].description | markdown }}
+                                {{ cell.choices[idx].description | markdown_to_html }}
                             </label>
                         {% endfor %}
                     {% else %}

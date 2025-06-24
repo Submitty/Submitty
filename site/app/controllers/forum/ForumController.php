@@ -5,7 +5,6 @@ namespace app\controllers\forum;
 use app\entities\UserEntity;
 use app\libraries\Core;
 use app\libraries\ForumUtils;
-use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
@@ -21,6 +20,7 @@ use app\entities\forum\Thread;
 use app\entities\forum\ThreadAccess;
 use app\entities\forum\Category;
 use WebSocket;
+use DateTime;
 
 /**
  * Class ForumHomeController
@@ -161,15 +161,16 @@ class ForumController extends AbstractController {
     }
 
     private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
         if (is_array($inputCategoriesIds)) {
             if (count($inputCategoriesIds) < 1) {
                 return false;
             }
             foreach ($inputCategoriesIds as $category_id) {
                 $match_found = false;
-                foreach ($rows as $index => $values) {
-                    if ($values["category_id"] === $category_id) {
+                foreach ($categories as $category) {
+                    if ($category->getId() === $category_id) {
                         $match_found = true;
                         break;
                     }
@@ -185,8 +186,8 @@ class ForumController extends AbstractController {
             }
             foreach ($inputCategoriesName as $category_name) {
                 $match_found = false;
-                foreach ($rows as $index => $values) {
-                    if ($values["category_desc"] === $category_name) {
+                foreach ($categories as $category) {
+                    if ($category->getDescription() === $category_name) {
                         $match_found = true;
                         break;
                     }
@@ -201,9 +202,10 @@ class ForumController extends AbstractController {
 
     private function isCategoryDeletionGood($category_id) {
         // Check if not the last category which exists
-        $rows = $this->core->getQueries()->getCategories();
-        foreach ($rows as $index => $values) {
-            if (((int) $values["category_id"]) !== $category_id) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
+        foreach ($categories as $category) {
+            if ($category->getId() !== $category_id) {
                 return true;
             }
         }
@@ -326,11 +328,12 @@ class ForumController extends AbstractController {
      */
     #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
-        $rows = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $categories = $repo->getCategories();
 
         $current_order = [];
-        foreach ($rows as $row) {
-            $current_order[] = (int) $row['category_id'];
+        foreach ($categories as $category) {
+            $current_order[] = $category->getId();
         }
         $new_order = [];
         foreach ($_POST['categorylistitem'] as $item) {
@@ -391,12 +394,10 @@ class ForumController extends AbstractController {
             $categories_ids[] = (int) $category_id;
         }
         if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
-            $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("One of the fields was empty or bad. Please re-submit your thread.");
         }
         elseif (!$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("You must select valid categories. Please re-submit your thread.");
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
@@ -445,21 +446,21 @@ class ForumController extends AbstractController {
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
                 if ($announcement) {
                     // notify on a new announcement
-                    $subject = "New Announcement: " . Notification::textShortner($thread_title);
+                    $subject = "New Announcement: " . $thread_title;
                     $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 else {
                     // notify on a new thread
-                    $subject = "New Thread: " . Notification::textShortner($thread_title);
+                    $subject = "New Thread: " . $thread_title;
                     $content = "A new discussion thread was created in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
-                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
+                $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
@@ -494,7 +495,7 @@ class ForumController extends AbstractController {
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $_POST['id']]), 'thread_id' => $_POST['id']]);
 
         $thread_title = $this->core->getQueries()->findThread($_POST['id'])['title'];
-        $subject = "New Announcement: " . Notification::textShortner($thread_title);
+        $subject = "New Announcement: " . $thread_title;
         $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
         $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
         $this->core->getNotificationFactory()->onNewAnnouncement($event);
@@ -600,8 +601,8 @@ class ForumController extends AbstractController {
 
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id]);
 
-                $subject = "New Reply: " . Notification::textShortner($thread_title);
-                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . Notification::textShortner($parent_post_content) . "\n\nNew Reply:\n\n" . $post_content;
+                $subject = "New Reply: " . $thread_title;
+                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . $parent_post_content . "\n\nNew Reply:\n\n" . $post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -776,12 +777,12 @@ class ForumController extends AbstractController {
         $full_course_name = $this->core->getFullCourseName();
         $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
         if ($did_edit_thread) {
-            $subject = "Thread Edited: " . Notification::textShortner($thread->getTitle());
+            $subject = "Thread Edited: " . $thread->getTitle();
             $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             $type = "edit_thread";
         }
         else {
-            $subject = "Post Edited: " . Notification::textShortner($post->getContent());
+            $subject = "Post Edited: " . $post->getContent();
             $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread->getTitle() . "\n\nEdited Post: \n\n" . $post->getContent();
             if ($order === 'tree') {
                 ForumUtils::BuildReplyHeirarchy($thread->getFirstPost());
@@ -848,7 +849,7 @@ class ForumController extends AbstractController {
                 }
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string) $post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Restored: " . Notification::textShortner($post->getContent());
+                $subject = "Restored: " . $post->getContent();
                 $content = "In " . $full_course_name . "\n\nThe following post was Restored.\n\nThread: " . $thread->getTitle() . "\n\n" . $post->getContent();
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             }
@@ -860,7 +861,7 @@ class ForumController extends AbstractController {
                 $type = "thread";
             }
             $metadata = json_encode([]);
-            $subject = "Deleted: " . Notification::textShortner($post->getContent());
+            $subject = "Deleted: " . $post->getContent();
             $content = "In " . $full_course_name . "\n\nThread: " . $thread->getTitle() . "\n\nPost:\n" . $post->getContent() . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post->getAuthor()->getId(), 'preference' => 'all_modifications_forum'];
             $this->core->getQueries()->removeNotificationsPost($post_id);
@@ -914,7 +915,7 @@ class ForumController extends AbstractController {
                 $child_thread_title = $child_thread['title'];
                 $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id);
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string) $child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post]);
-                $subject = "Thread Merge: " . Notification::textShortner($child_thread_title);
+                $subject = "Thread Merge: " . $child_thread_title;
                 $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
@@ -972,7 +973,7 @@ class ForumController extends AbstractController {
                 $thread_author = $thread['created_by'];
                 $thread_title = $thread['title'];
                 $metadata = json_encode(['url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id, 'post_id' => $post_id]);
-                $subject = "Post Split: " . Notification::textShortner($thread['title']);
+                $subject = "Post Split: " . $thread['title'];
                 $content = "A post was split in:\n" . $full_course_name . "\n\nAll posts under the split post are now contained within the new thread:\n" . $thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
@@ -1017,7 +1018,7 @@ class ForumController extends AbstractController {
 
         if ($user->accessAdmin()) {
             $lock_thread_date_input = filter_input(INPUT_POST, "lock_thread_date", FILTER_UNSAFE_RAW);
-            if ($lock_thread_date_input !== false) {
+            if ($lock_thread_date_input !== false && $lock_thread_date_input !== "") {
                 $thread->setLockDate(DateUtils::parseDateTime($lock_thread_date_input, $user->getUsableTimeZone()));
             }
             else {
@@ -1256,7 +1257,8 @@ class ForumController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["GET"])]
     public function showCreateThread() {
-        if (empty($this->core->getQueries()->getCategories())) {
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        if (count($repo->getCategories()) === 0) {
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
         }
@@ -1278,14 +1280,22 @@ class ForumController extends AbstractController {
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
         $result = $this->core->getQueries()->getPostOldThread($post_id);
-        $result["all_categories_list"] = $this->core->getQueries()->getCategories();
+        $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
+        $result["all_categories_list"] = $repo->getCategories();
+        $thread_repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
         if ($result["merged_thread_id"] == -1) {
             $post = $this->core->getQueries()->getPost($post_id);
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($post["thread_id"]);
+            $thread = $thread_repo->getThreadDetail($post['thread_id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
+                return $x->getId();
+            })->toArray();
             $result["title"] = $this->core->getQueries()->getThreadTitle($post["thread_id"]);
         }
         else {
-            $result["categories_list"] = $this->core->getQueries()->getCategoriesIdForThread($result["id"]);
+            $thread = $thread_repo->getThreadDetail($result['id']);
+            $result["categories_list"] = $thread->getCategories()->map(function ($x) {
+                return $x->getId();
+            })->toArray();
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
@@ -1366,30 +1376,43 @@ class ForumController extends AbstractController {
     public function getEditPostContent() {
         $post_id = $_POST["post_id"];
         if (!empty($post_id)) {
-            $result = $this->core->getQueries()->getPost($post_id);
-            $post_attachments = $this->core->getQueries()->getForumAttachments([$post_id]);
+            $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
+            $post_id = $_POST["post_id"];
+            $result = $repo->getPostDetail($post_id);
             $GLOBALS['totalAttachments'] = 0;
             $img_table = $this->core->getOutput()->renderTwigTemplate('forum/EditImgTable.twig', [
                 "post_attachments" => ForumUtils::getForumAttachments(
                     $post_id,
-                    $result['thread_id'],
-                    $post_attachments[$post_id][0],
+                    $result->getThread()->getId(),
+                    $result->getAttachments()->filter(function ($x) {
+                        return $x->isCurrent();
+                    })->map(function ($x) {
+                        return $x->getFileName();
+                    })->toArray(),
                     $this->core->getConfig()->getCoursePath(),
                     $this->core->buildCourseUrl(['display_file'])
                 )
             ]);
-            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+            if ($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result->getAuthor()->getId()])) {
                 $output = [];
-                $output['post'] = $result["content"];
-                $output['post_time'] = $result['timestamp'];
-                $output['anon'] = $result['anonymous'];
-                $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-                $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-                $output['markdown'] = $result['render_markdown'];
+                $output['post'] = $result->getContent();
+                //Use standard ISO time as forum.js is responsible for formatting
+                $output['post_time'] = $result->getTimestamp()->format(DateTime::ATOM);
+
+                $output['anon'] = $result->isAnonymous();
+                $output['change_anon'] = $this->modifyAnonymous($result->getAuthor()->getId());
+                $output['user'] = $output['anon'] ? 'Anonymous' : $result->getAuthor()->getId();
+                $output['markdown'] = $result->isRenderMarkdown();
                 $output['img_table'] = $img_table;
 
                 if (isset($_POST["thread_id"])) {
-                    $this->getThreadContent($_POST["thread_id"], $output);
+                    $output['lock_thread_date'] = $result->getThread()->getLockDate()?->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
+                    $output['title'] = $result->getThread()->getTitle();
+                    $output['categories_ids'] =  $result->getThread()->getCategories()->map(function ($x) {
+                        return $x->getId();
+                    })->toArray();
+                    $output['thread_status'] = $result->getThread()->getStatus();
+                    $output['expiration'] = $result->getThread()->getPinnedExpiration()->format($this->core->getConfig()->getDateTimeFormat()->getFormat('forum'));
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
             }
@@ -1400,15 +1423,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
-    private function getThreadContent($thread_id, &$output) {
-        $result = $this->core->getQueries()->getThread($thread_id);
-        $output['lock_thread_date'] = $result['lock_thread_date'];
-        $output['title'] = $result["title"];
-        $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
-        $output['thread_status'] = $result["status"];
-        $output['expiration'] = $result["pinned_expiration"];
-    }
-
+    // TODO: getPosts() and getUpducks() are single use queries that should be used together to achieve the same effect
     #[Route("/courses/{_semester}/{_course}/forum/stats")]
     public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
@@ -1421,9 +1436,9 @@ class ForumController extends AbstractController {
             $content = $posts[$i]["content"];
             if (!isset($users[$user])) {
                 $users[$user] = [];
-                $u = $this->core->getQueries()->getSubmittyUser($user);
-                $users[$user]["given_name"] = htmlspecialchars($u -> getDisplayedGivenName());
-                $users[$user]["family_name"] = htmlspecialchars($u -> getDisplayedFamilyName());
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
                 $users[$user]["posts"] = [];
                 $users[$user]["id"] = [];
                 $users[$user]["timestamps"] = [];
@@ -1442,6 +1457,14 @@ class ForumController extends AbstractController {
         }
         for ($i = 0; $i < $num_users_with_upducks; $i++) {
             $user = $upducks[$i]["user_id"];
+            // user has only upducks and no posts, need to set some information
+            if (!isset($users[$user])) {
+                $user_obj = $this->core->getQueries()->getSubmittyUser($user);
+                $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
+                $users[$user]["given_name"] = htmlspecialchars($user_obj->getDisplayedGivenName());
+                $users[$user]["family_name"] = htmlspecialchars($user_obj->getDisplayedFamilyName());
+                $users[$user]["total_threads"] = 0;
+            }
             $users[$user]["total_upducks"] = $upducks[$i]["upducks"];
         }
         ksort($users);
@@ -1462,16 +1485,27 @@ class ForumController extends AbstractController {
             return JsonResponse::getErrorResponse('Catch Fail in Query');
         }
 
+        $repo = $this->core->getCourseEntityManager()->getRepository(Thread::class);
+        $thread = $repo->getThreadDetail($_POST['thread_id']);
+        $source = hash('sha3-224', $_POST['current_user']);
         $this->sendSocketMessage([
             'type' => 'edit_likes',
             'post_id' => $_POST['post_id'],
             'status' => $output['status'],
             'likesCount' => $output['likesCount'],
-            'likesFromStaff' => $output['likesFromStaff']
+            'likesFromStaff' => $output['likesFromStaff'],
+            'source' => $source
+        ]);
+
+        $this->sendSocketMessage([
+            'type' => 'edit_thread_likes',
+            'thread_id' => $_POST['thread_id'],
+            'likesCount' => $thread->getSumUpducks()
         ]);
 
         return JsonResponse::getSuccessResponse([
             'status' => $output['status'], // 'like' or 'unlike'
+            'source' => $source, // user who toggled the like
             'likesCount' => $output['likesCount'], // Total likes count
             'likesFromStaff' => $output['likesFromStaff'] // Likes from staff
         ]);
