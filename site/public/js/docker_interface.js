@@ -203,12 +203,14 @@ function applySort(sortKey, direction) {
                 const numB = parseFloat(tagB);
                 const isNumA = !isNaN(numA);
                 const isNumB = !isNaN(numB);
+                // Tag is descending regardless of Image Name
                 if (isNumA && isNumB) {
-                    cmp = numA - numB;
+                    cmp = numB - numA;
                 }
                 else {
-                    cmp = tagA.localeCompare(tagB);
+                    cmp = tagB.localeCompare(tagA);
                 }
+                return cmp;
             }
         }
         else if (sortKey === 'size') {
