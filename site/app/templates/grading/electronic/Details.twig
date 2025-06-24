@@ -36,26 +36,26 @@
 
             <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <label for="toggle-sections-only" class="column-wrapper"> Only Assigned Sections
-                    <input type="checkbox" id="toggle-sections-only" data-testid="view-sections" onchange="changeSections()">
+                <label for="toggle-view-sections" data-testid="view-sections-label" class="column-wrapper" > Only Assigned Sections
+                    <input type="checkbox" id="toggle-view-sections" data-testid="view-sections-checkbox" onchange="changeSections()">
                 </label>
                 {% endif %}
-                <label for="toggle-random-order" class="column-wrapper"> Randomize Order
-                    <input type="checkbox" id="toggle-random-order" data-testid="random-default-order" onchange="changeSortOrder()">
+                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
+                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
                 </label>
                 {% if toggle_anon_button %}
-                <label for="toggle-anon-students" class="column-wrapper" id="anon-filter-label" data-gradeable-id="{{ gradeable.getId() }}">  Anonymize Student Name
-                    <input type="checkbox" id="toggle-anon-students" data-testid="toggle-anon-button" onchange="changeAnon('{{ gradeable.getId() }}')">
+                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Name
+                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon('{{ gradeable.getId() }}')">
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <label for="toggle-inquiry-only" class="column-wrapper"> Grade Inquiries Only
-                    <input type="checkbox" id="toggle-inquiry-only" data-testid="toggle-grade-inquiry" onchange="changeInquiry()">
+                <label for="toggle-inquiry-only" data-testid="inquiry-only-label" class="column-wrapper"> Grade Inquiries Only
+                    <input type="checkbox" id="toggle-inquiry-only" data-testid="inquiry-only-checkbox" onchange="changeInquiry()">
                 </label>
                 {% endif %}
-                {% if filter_withdrawn_student_button and not gradeable.isTeamAssignment() %}
-                <label for="toggle-filter-withdrawn" class="column-wrapper"> Hide Withdrawn Students
-                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="toggle-filter-withdrawn" onchange="filter_withdrawn_update()">
+                {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
+                <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
+                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_update()">
                 </label>
                 {% endif %}
             </div>
@@ -783,7 +783,11 @@
     {% if grade_inquiry_only_button %}
         inquiry_update();
     {% endif %}
-    
+
+    const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
+    const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
+    const is_student = {{ is_student ? 'true' : 'false' }};
+
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {

@@ -231,7 +231,7 @@ class ElectronicGraderView extends AbstractView {
                 $section['non_late_verified'] = round($section['non_late_verified_components'] / $non_zero_non_peer_components_count, 1);
                 $section['non_late_total'] = $section['non_late_total_components'];// / $non_zero_non_peer_components_count;
 
-                if ($section['total_components'] == 0) {
+                if ($section['total_components'] === 0) {
                     $section['percentage'] = 0;
                     $section['verified_percentage'] = 0;
                 }
@@ -923,7 +923,8 @@ HTML;
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
-            "filter_withdrawn_student_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
+            "full_access_grader_permission" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
+            "is_limited_access_grader" => ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
@@ -1641,7 +1642,7 @@ HTML;
             $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         }
         // Disable grading if the requested version isn't the active one
-        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
+        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0
             || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;

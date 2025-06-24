@@ -143,41 +143,52 @@ function filter_withdrawn_update() {
 
 // Ensures all filter checkboxes remain the same on page reload.
 window.addEventListener('DOMContentLoaded', () => {
-    // Only Assigned Sections
-    const assignedFilterBox = document.getElementById('toggle-sections-only');
-    const assignedFilterStatus = Cookies.get('view');
-    assignedFilterBox.checked = (assignedFilterStatus === 'assigned');
+    const inquiryFilterStatus = Cookies.get('inquiry_status');
+    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    // Instructors and TAs should have access to all toggles
+    if (full_access_grader_permission) {
+        // Only Assigned Sections
+        const assignedFilterBox = document.getElementById('toggle-view-sections');
+        const assignedFilterStatus = Cookies.get('view');
+        assignedFilterBox.checked = (assignedFilterStatus === 'assigned');
 
-    // Randomize Order
+        // Anonymous Mode
+        const anonFilterBox = document.getElementById('toggle-anon-students');
+        const currentGradeableCookiePath = `anon_mode_${Cookies.get('current_gradeable_path')}`;
+        const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
+        anonFilterBox.checked = (anonFilterStatus === 'on');
+
+        // Withdrawn Students, altered logic since page reload not required when toggling checkbox
+        const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+        const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+        if (!is_team_assignment) {
+            if (withdrawnFilterStatus === 'false' && inquiryFilterStatus === 'off') {
+                withdrawnFilterBox.disabled = false;
+                withdrawnFilterBox.checked = false;
+                withdrawnFilterElements.show();
+            }
+            else {
+                if (inquiryFilterStatus === 'on') {
+                    withdrawnFilterBox.disabled = true; // withdrawn students should always be hidden when 'grade inquiries only' is toggled
+                }
+                withdrawnFilterBox.checked = true;
+                withdrawnFilterElements.hide();
+            }
+        }
+        // Withdrawn students should always be visible in teams
+        else {
+            withdrawnFilterElements.show();
+        }
+    }
+    // Grade Inquiry Only - students don't have permission
+    if(!is_student) {
+        const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
+        inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
+    }
+    // Randomize Order - all graders have permission
     const randomFilterBox = document.getElementById('toggle-random-order');
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');
 
-    // Anonymous Mode
-    const anonFilterBox = document.getElementById('toggle-anon-students');
-    const currentGradeableCookiePath = `anon_mode_${Cookies.get('current_gradeable_path')}`;
-    const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
-    anonFilterBox.checked = (anonFilterStatus === 'on');
-
-    // Grade Inquiry Only
-    const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
-    const inquiryFilterStatus = Cookies.get('inquiry_status');
-    inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
-
-    // Withdrawn Students, altered logic since page reload not required when toggling checkbox
-    const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
-    const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
-    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-    if (withdrawnFilterStatus === 'false' && inquiryFilterStatus === 'off') {
-        withdrawnFilterBox.disabled = false;
-        withdrawnFilterBox.checked = false;
-        withdrawnFilterElements.show();
-    }
-    else {
-        if (inquiryFilterStatus === 'on') {
-            withdrawnFilterBox.disabled = true; // withdrawn students should always be hidden when 'grade inquiries only' is toggled
-        }
-        withdrawnFilterBox.checked = true;
-        withdrawnFilterElements.hide();
-    }
+    (is_team_assignment) ? withdrawnFilterElements.show() : withdrawnFilterElements.hide(); // all graders should see withdrawn students on team assignments
 });
