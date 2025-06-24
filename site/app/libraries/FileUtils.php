@@ -338,7 +338,7 @@ class FileUtils {
         $res = $zip->open($filename);
         if ($res === true) {
             for ($i = 0; $i < $zip->count(); $i++) {
-                $size += $zip->statIndex($i)['comp_size'];
+                $size += $zip->statIndex($i)['size'];
             }
             $zip->close();
         }
@@ -357,7 +357,7 @@ class FileUtils {
                 return false;
             }
             $size = 0;
-            $max_size = $zip->statIndex($i)['comp_size'];
+            $max_size = $zip->statIndex($i)['size'];
             while (!feof($stream)) {
                 $size += strlen(fread($stream, 8192));
                 if ($size > $max_size) {
