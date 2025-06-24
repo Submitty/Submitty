@@ -69,8 +69,8 @@ const handleDeletion = async (id: number) => {
       >
         <thead>
           <tr>
-            <th>Query Name</th>
-            <th>Query Snippet</th>
+            <th>Name</th>
+            <th>Query</th>
             <th>Add</th>
             <th>Delete</th>
           </tr>
