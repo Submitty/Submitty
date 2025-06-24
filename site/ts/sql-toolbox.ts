@@ -36,7 +36,7 @@ export async function runSqlQuery(sql_query: string) {
             throw new Error('Failed to run query.');
         }
 
-        const json = await resp.json() as ServerResponse<{ [key: string]: number | string | null }[]>;
+        const json = await resp.json() as ServerResponse<RunQueryResults>;
         return json;
     }
     catch (exc) {
