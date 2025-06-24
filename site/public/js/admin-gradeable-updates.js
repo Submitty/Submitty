@@ -245,7 +245,7 @@ $(document).ready(() => {
             event.returnValue = 1;
         }
     };
-    updateRedactionsDisplay();
+    loadTemplates().then(() => updateRedactionsDisplay());
 
     ajaxCheckBuildStatus();
     checkWarningBanners();
