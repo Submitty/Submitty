@@ -996,10 +996,10 @@ SQL;
      * @param string $course
      */
     public function unregisterCourseUser(User $user, $semester, $course): void {
-        $this->submitty_db->query(
-            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
-            [$user->getId(), $semester, $course]
-        );
+        // $this->submitty_db->query(
+        //     "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+        //     [$user->getId(), $semester, $course]
+        // );
 
         $this->course_db->query(
             "UPDATE users SET 
