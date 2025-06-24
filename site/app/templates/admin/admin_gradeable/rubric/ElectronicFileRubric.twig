@@ -69,16 +69,26 @@
         }
         loadTemplates().then(function() {
             reloadInstructorEditRubric($('#g_id').val(), $('#gradeable_rubric').attr('data-notebook'), JSON.parse($('#gradeable_rubric').attr('data-itempool-options'))).then( function() {
-                $('body').on('DOMSubtreeModified', '.component-container', function() {
-                    let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
-                    if (yesPeer) {
-                        $('#page_4_nav').show();
-                        $('#page_4_nav').removeClass("hidden-no-peers");
-                    } else {
-                        $('#page_4_nav').hide();
-                        $('#page_4_nav').addClass("hidden-no-peers");
-                    }
-                });
+                const componentContainer = document.querySelector('.component-container');
+                if (componentContainer) {
+                    const observer = new MutationObserver(() => {
+                        let yesPeer = ($('.peer-component-container').length == 0) ? false : true;
+                        if (yesPeer) {
+                            $('#page_4_nav').show();
+                            $('#page_4_nav').removeClass("hidden-no-peers");
+                        } else {
+                            $('#page_4_nav').hide();
+                            $('#page_4_nav').addClass("hidden-no-peers");
+                        }
+                    });
+
+                    observer.observe(componentContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            }).catch((error) => {
+                console.error('Failed to call reloadInstructorEditRubric', error);
             });
         });
         //toggle warning message if custom marks have already been used and the settings are changed
