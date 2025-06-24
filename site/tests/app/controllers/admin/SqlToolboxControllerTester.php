@@ -41,10 +41,6 @@ class SqlToolboxControllerTester extends BaseUnitTest {
             'user_email_secondary' => '',
             'user_email_secondary_notify' => false
         ]));
-
-        $database_queries = $this->createMock(DatabaseQueries::class);
-        $database_queries->method('getInstructorQueries')->willReturn([]);
-        $this->core->setQueries($database_queries);
         $this->controller = new SqlToolboxController($this->core);
     }
 
@@ -102,6 +98,10 @@ class SqlToolboxControllerTester extends BaseUnitTest {
 
         $this->core->setCourseEntityManager($entity_manager);
 
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getInstructorQueries')->willReturn([]);
+        $this->core->setQueries($database_queries);
+
         $table_data = [
             ['name' => 'bar', 'columns' => []],
             ['name' => 'foo', 'columns' => []]
@@ -112,6 +112,33 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
         $this->assertSame($response->parameters, [$table_data, []]);
+    }
+
+    public function testShowToolboxInstructorQueries() {
+        $tables = [];
+        $entity_manager = $this->createMock(EntityManager::class);
+        $repository = $this->createMock(EntityRepository::class);
+        $repository
+            ->expects($this->once())
+            ->method('findBy')
+            ->with(['schema' => 'public'], ['name' => 'ASC'])
+            ->willReturn($tables);
+        $entity_manager
+            ->expects($this->once())
+            ->method('getRepository')
+            ->with(Table::class)
+            ->willReturn($repository);
+        $this->core->setCourseEntityManager($entity_manager);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getInstructorQueries')->willReturn([['id' => 1, 'name' => 'Test Query', 'query' => 'Test Query']]);
+        $this->core->setQueries($database_queries);
+
+        $response = $this->controller->showToolbox();
+        $this->assertInstanceOf(WebResponse::class, $response);
+        $this->assertSame(SqlToolboxView::class, $response->view_class);
+        $this->assertSame('showToolbox', $response->view_function);
+        $this->assertSame($response->parameters, [[], [['id' => 1, 'name' => 'Test Query', 'query' => 'Test Query']]]);
     }
 
     public function testRunQuery(): void {
