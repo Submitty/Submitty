@@ -38,6 +38,7 @@ os.chown("/tmp/worker_keys", daemon_stat.pw_uid, daemon_stat.pw_gid)
 DAEMON_HOME = os.path.realpath(subprocess.check_output(['su', DAEMON_USER, '-c', 'echo $HOME']).strip())
 if not os.path.exists(DAEMON_HOME):
     print("Error: could not find home directory for daemon user")
+    exit(1)
 
 shutil.rmtree(os.path.join(DAEMON_HOME, b'.ssh'), True)
 subprocess.run(['su', DAEMON_USER, '-c', "ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ''"], check=True)
