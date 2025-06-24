@@ -749,6 +749,7 @@ jobs:
           sudo mv config/submitty.json config/old_submitty.json
           sudo cp $SUBMITTY_REPOSITORY/.setup/testing/testing_submitty_config.json config/submitty.json
           sudo chown root:submitty_daemonphp config/submitty.json
+          ls -alF config/
 
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
