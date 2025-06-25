@@ -60,7 +60,7 @@
             {% endif %}
          >
 
-            <div class="box-title-total">
+            <div class="box-title-total" data-testid="autograding-total-no-hidden">
                 {{ Badge.render(nonhidden_earned, nonhidden_max, false, true) }}
                 <h4>Autograding Total {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
             </div>
@@ -72,7 +72,7 @@
                     style="cursor:pointer;"
                 {% endif %}
             >
-                <div class="box-title-total">
+                <div class="box-title-total" data-testid="autograding-total-with-hidden">
                     {{ Badge.render(hidden_earned, hidden_max, false, true) }}
                     <h4>Autograding Total <i>(With Hidden Points)</i></h4>
                 </div>
@@ -141,7 +141,7 @@
                     {% set can_view = (not testcase.hidden or show_hidden) %}
                     {% set can_view_details = (not testcase.hidden or ((show_hidden_details or testcase.release_hidden_details) and show_hidden)) %}
 
-                    <div class="box results-box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
+                    <div class="box results-box" data-testid="results-box" {{ testcase.hidden and show_hidden ? "style='background-color:var(--standard-hover-light-gray);'" : "" }}>
                         <div id='tc_{{ loop.index0 }}' class="box-title key_to_click" tabindex="0"
 
                                 {% if can_view_details and testcase.has_extra_results %}

@@ -84,30 +84,8 @@
         'component': 'toggleColumns',
         'style': 'display: inline;',
         'args': {
-            'columns': [
-                "index",
-                "section",
-                "user_id",
-                "user_given",
-                "user_family",
-                "autograding",
-                "graded_questions",
-                "total",
-                "grading",
-                "active_version"
-            ],
-            'labels': [
-                "# / Count / Index",
-                "Section",
-                "User ID",
-                "User Given",
-                "User Family",
-                "Autograding",
-                "Graded Questions",
-                "Total",
-                "Grading",
-                "Active Version"
-            ],
+            'columns': all_columns|map(column => column.function),
+            'labels': all_columns|map(column => column.title),
             'forced': [
                 'grading'
             ],
