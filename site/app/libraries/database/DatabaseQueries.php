@@ -9608,4 +9608,39 @@ ORDER BY
         }
         $this->course_db->commit();
     }
+
+     * @param string $user_id the userid of the user
+     * @return array<string>
+     */
+    public function getInstructorQueries($user_id): array {
+        $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_name the query name save it as
+     * @param string $query the query to save
+     * @return int the last inserted id
+     */
+    public function saveInstructorQueries($user_id, $query_name, $query): int {
+        $this->submitty_db->query(
+            "INSERT INTO instructor_sql_queries (user_id, query_name, query) VALUES (?, ?, ?)",
+            [$user_id, $query_name, $query]
+        );
+        return $this->submitty_db->getLastInsertId();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_id the query id to delete
+     * @return bool true if the query was deleted, false otherwise
+     */
+    public function deleteInstructorQueries($user_id, $query_id): bool {
+        $this->submitty_db->query(
+            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND id = ?",
+            [$user_id, $query_id]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
 }
