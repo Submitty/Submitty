@@ -54,6 +54,18 @@ def print_docker_info() -> bool:
             print(f"\t-id: {image.short_id}")
             print(f'\t-created: {data["Created"]}')
             print(f'\t-size: {data["Size"]}')
+
+            digests = data.get("RepoDigests")
+            if digests:
+                full_digest = data["RepoDigests"][0]
+                digest_parts = full_digest.split('@')
+                if len(digest_parts) == 2:
+                    digest = digest_parts[1]
+                else:
+                    digest = full_digest
+            else:
+                digest = "None"
+            print(f'\t-digest: { digest }')
         return True
     except docker.errors.APIError:
         print("APIError was raised.")
@@ -66,6 +78,11 @@ def print_system_load() -> None:
     except AttributeError:
         print("System Load: Error")
 
+def get_distribution() -> None:
+    subprc = subprocess.run(["lsb_release", "-d"],
+                            stderr=subprocess.DEVNULL,
+                            stdout=subprocess.PIPE)
+    return subprc.stdout.decode("ascii")
 
 def print_distribution() -> None:
     subprc = subprocess.run(["lsb_release", "-d"],

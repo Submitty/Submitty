@@ -258,9 +258,17 @@ class DockerUI extends AbstractModel {
         // Read next three lines for additional details
         $image = $this->readImageDetails();
 
-        //take the first name in the list of name:tags and use that as the primary
+        // take the first name in the list of name:tags and use that as the primary
         $image->primary_name = array_shift($image_array);
         $image->aliases = $image_array;
+
+        $is_duplicate = in_array($image->primary_name, array_column($this->docker_images, 'primary_name'));
+
+        // Duplicate images from workers are not added to the list again
+        if ($is_duplicate) {
+            return;
+        }
+
         if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
             $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
@@ -272,7 +280,7 @@ class DockerUI extends AbstractModel {
     private function readImageDetails(): DockerImage {
         $log_lines = [];
 
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $line = strtok("\n");
             if ($line === false) {
                 throw new DockerLogParseException("Unexpected end of log while reading image details.");

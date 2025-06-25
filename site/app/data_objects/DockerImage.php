@@ -27,11 +27,12 @@ class DockerImage {
     /** @var array<string> What Submitty capabilities this image is associated with */
     public array $capabilities = [];
     /** Create a new DockerImage object*/
-    public function __construct(string $id, \DateTime $created, string $size) {
+    public function __construct(string $id, \DateTime $created, string $size, string $digest) {
         $this->id = $id;
         $this->created = $created;
         $this->created_timestamp = DateUtils::dateTimeToString($created);
         $this->size_mb = $size;
+        $this->digest = $digest;
     }
 
     /**
@@ -40,7 +41,7 @@ class DockerImage {
      * @throws DockerLogParseException
      */
     public static function fromLog(array $logLines): self {
-        if (count($logLines) < 3) {
+        if (count($logLines) < 4) {
             throw new DockerLogParseException("Unexpected log input, insufficient lines for image details.");
         }
 
@@ -67,6 +68,13 @@ class DockerImage {
 
         $bytes = (int) $matches[1];
         $size = Utils::formatBytes('mb', $bytes, true);
-        return new self($id, $created, $size);
+        
+        // Parse digest
+        if (preg_match("/\t-digest: (.+)/", $logLines[3], $matches) === 0) {
+            throw new DockerLogParseException("Unexpected log input, attempted to read digest.");
+        }
+
+        $digest = $matches[1];
+        return new self($id, $created, $size, $digest);
     }
 }
