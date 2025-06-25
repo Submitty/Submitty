@@ -18,57 +18,57 @@ Tag: submitty/tutorial:database_client
 	-id: sha256:d5673fdf5bc8
 	-created: 2024-07-16T02:52:16.239382548Z
 	-size: 156336869
-	-digest: c67c468a2e23
+	-digest: sha256:c67c468a2e23
 Tag: submitty/python:latest
 	-id: sha256:f7fd9934c406
 	-created: 2024-07-16T02:52:13.121291387Z
 	-size: 122349118
-	-digest: 42d7f214ffaa
+	-digest: sha256:42d7f214ffaa
 Tag: ubuntu:custom, submitty/autograding-default:latest
 	-id: sha256:7dd775925c50
 	-created: 2024-07-16T02:45:31.257166822Z
 	-size: 2082859977
-	-digest: dc1bdab64378
+	-digest: sha256:dc1bdab64378
 Tag: submitty/tutorial:tutorial_18
 	-id: sha256:02eff04c31a1
 	-created: 2024-07-16T02:44:30.902494657Z
 	-size: 418528938
-	-digest: 6eb4025774d7
+	-digest: sha256:6eb4025774d7
 Tag: submitty/java:11
 	-id: sha256:583ba9fc1ed2
 	-created: 2024-07-16T02:44:29.812324715Z
 	-size: 408742982
-	-digest: 90dd65bd99a4
+	-digest: sha256:90dd65bd99a4
 Tag: submittyrpi/csci4510:spring24_java
 	-id: sha256:e6756dfcd882
 	-created: 2024-02-27T06:17:31.983204524Z
 	-size: 1520962607
-	-digest: test
+	-digest: sha256:test
 Tag: lichen:latest, submitty/lichen:latest
 	-id: sha256:53f99dde23f7
 	-created: 2023-09-11T02:05:15.054839161Z
 	-size: 2133006237
-	-digest: 2eff59a4fec5
+	-digest: sha256:2eff59a4fec5
 Tag: submitty/docker-test-saml-idp:latest
 	-id: sha256:b65288f35156
 	-created: 2022-08-10T23:39:36.015343147Z
 	-size: 477543400
-	-digest: efa758bb8bc6
+	-digest: sha256:efa758bb8bc6
 Tag: submittyrpi/csci1200:default
 	-id: sha256:043ab5c7a417
 	-created: 2020-09-15T18:50:00.209462791Z
 	-size: 994466176
-	-digest: test
+	-digest: sha256:test
 Tag: submitty/clang:6.0
 	-id: sha256:2a579ee62d89
 	-created: 2019-09-16T23:06:54.924645447Z
 	-size: 429244918
-	-digest: c127cd4057df
+	-digest: sha256:c127cd4057df
 Tag: submitty/python:3.6
 	-id: sha256:38de7fde2dd8
 	-created: 2019-01-16T21:47:45.870821167Z
 	-size: 140678302
-	-digest: 735fc3add96d
+	-digest: sha256:735fc3add96d
 SUCCESS UPDATING MACHINE primary
 -------------------------------------------------------
 
