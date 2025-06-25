@@ -23,7 +23,7 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.mjs';
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -525,3 +525,11 @@ function repairPDF() {
 function saveFile() {
     $('#save-pdf-btn').click();
 }
+
+// Export functions to global scope for backward compatibility
+window.render_student = render_student;
+window.download_student = download_student; 
+window.loadPDFToolbar = loadPDFToolbar;
+window.toggleOtherAnnotations = toggleOtherAnnotations;
+window.loadAllAnnotations = loadAllAnnotations;
+window.loadGraderAnnotations = loadGraderAnnotations;
