@@ -828,7 +828,7 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
         $generate_images_data = [
-            "job"       => "GeneratePdfImages",
+            "job" => "GeneratePdfImages",
             "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
             "redactions" => array_map(
                 function (Redaction $redaction) {

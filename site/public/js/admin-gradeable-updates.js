@@ -85,7 +85,6 @@ async function updateRedactionsDisplay(redactions = null) {
             dataType: 'json',
         });
         if (response.status === 'success') {
-            console.log(response.data);
             redactions = response.data;
         }
         else {
@@ -125,7 +124,6 @@ async function updateRedactionSettings() {
         delete errors['redactions'];
         updateErrorMessage();
         $('#remove_redactions').show();
-        console.log(response.data);
         updateRedactionsDisplay(response.data);
     }
     else {
@@ -150,6 +148,7 @@ async function removeRedactions() {
         updateErrorMessage();
         $('#remove_redactions').hide();
         $('#redactions_json').val('');
+        updateRedactionsDisplay([]);
     }
     else {
         errors['redactions'] = response.message;

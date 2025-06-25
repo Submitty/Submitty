@@ -2045,8 +2045,6 @@ class AdminGradeableController extends AbstractController {
             return;
         }
 
-
-
         $this->core->getQueries()->updateRedactions($gradeable, $redactions);
 
         $semester = $this->core->getConfig()->getTerm();
@@ -2059,12 +2057,10 @@ class AdminGradeableController extends AbstractController {
             "redactions" =>  array_map(fn($r) => $r->jsonSerialize(), $redactions),
         ];
 
-
         if (!FileUtils::writeJsonFile($job_path, $job_data)) {
             $this->core->getOutput()->renderJsonFail('Failed to write job file');
             return;
         }
-
 
         $this->core->getOutput()->renderJsonSuccess(array_map(fn($r) => $r->jsonSerialize(), $redactions));
     }
