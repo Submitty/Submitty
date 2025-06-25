@@ -1492,7 +1492,7 @@ class SubmissionController extends AbstractController {
                                 return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
                             }
                             if (!FileUtils::validateZipFileSize($uploaded_files[$i]["tmp_name"][$j])) {
-                                return $this->uploadResult("Improper ZIP file structure for " . $uploaded_files[$i]["name"][$j] . ".", false);
+                                return $this->uploadResult("Corrupted ZIP file for " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                         }
                         else {
