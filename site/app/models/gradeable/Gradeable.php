@@ -2919,4 +2919,13 @@ class Gradeable extends AbstractModel {
         $this->allow_custom_marks = $allow_custom_marks;
         $this->modified = true;
     }
+
+    public function setNotificationsSent(int $notifications_sent): void {
+        $this->notifications_sent = $notifications_sent;
+        $this->modified = true;
+    }
+
+    public function getNotificationsSent(): int {
+        return $this->notifications_sent;
+    }
 }
