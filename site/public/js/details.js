@@ -1,5 +1,5 @@
 /* global courseUrl, showPopup, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update filter_withdrawn_update */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiryUpdate filterWithdrawnUpdate */
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -110,24 +110,24 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function inquiry_update() {
+function inquiryUpdate() {
     const status = Cookies.get('inquiry_status');
 
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').hide();
+                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
             }
         });
     }
     else {
         $('.grade-button').each(function () {
-            $(this).closest('.grade-table').show();
+            $(this).closest('.grade-table').show(); // show all gradeable items
         });
     }
 }
 
-function filter_withdrawn_update() {
+function filterWithdrawnUpdate() {
     const filterCheckbox = document.getElementById('toggle-filter-withdrawn');
     const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
 
@@ -141,11 +141,11 @@ function filter_withdrawn_update() {
     }
 }
 
-// Ensures all filter checkboxes remain the same on page reload.
+// Ensures all filters and checkboxes remain the same on page reload.
 window.addEventListener('DOMContentLoaded', () => {
     const inquiryFilterStatus = Cookies.get('inquiry_status');
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
-    // Instructors and TAs should have access to all toggles
+    // Instructors and TAs have access to all toggles
     if (full_access_grader_permission) {
         // Only Assigned Sections
         const assignedFilterBox = document.getElementById('toggle-view-sections');
@@ -158,7 +158,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
         anonFilterBox.checked = (anonFilterStatus === 'on');
 
-        // Withdrawn Students, altered logic since page reload not required when toggling checkbox
+        // Withdrawn Students
         const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
         if (!is_team_assignment) {
@@ -169,13 +169,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             else {
                 if (inquiryFilterStatus === 'on') {
-                    withdrawnFilterBox.disabled = true; // withdrawn students should always be hidden when 'grade inquiries only' is toggled
+                    withdrawnFilterBox.disabled = true; // withdrawn students are always hidden when 'grade inquiries only' is toggled
                 }
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
             }
         }
-        // Withdrawn students should always be visible in teams
+        // Withdrawn students should always be visible in team gradeables
         else {
             withdrawnFilterElements.show();
         }
@@ -189,6 +189,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const randomFilterBox = document.getElementById('toggle-random-order');
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');
-
-    (is_team_assignment) ? withdrawnFilterElements.show() : withdrawnFilterElements.hide(); // all graders should see withdrawn students on team assignments
+    
+     // all graders should see withdrawn students on team assignments
+    (is_team_assignment) ? withdrawnFilterElements.show() : withdrawnFilterElements.hide();
 });

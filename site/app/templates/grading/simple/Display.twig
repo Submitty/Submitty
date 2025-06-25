@@ -68,10 +68,10 @@
                 <br />
             {% endif %}
 
+            {% if core.getUser().accessFullGrading() %}
             <label for="filter-withdrawn" class="column-wrapper">Hide Withdrawn Students
                 <input type="checkbox" id="filter-withdrawn" onchange="updateFilterWithdrawn()">
             </label>
-            {% if core.getUser().accessFullGrading() %}
                 {% if action == 'lab' %}
                     <label for="show-graders" class="column-wrapper">Show Graders
                         <input type="checkbox" id="show-graders">
@@ -216,6 +216,8 @@
         {% endif %}
     </table>
     <script>
+        const full_grader_access = {{ core.getUser().accessFullGrading() ? 'true' : 'false' }};
+
         $(function() {
             setupSimpleGrading("{{ action }}");
         });

@@ -1016,30 +1016,35 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
 }
 
 function updateFilterWithdrawn() {
-    const checkbox = document.getElementById('filter-withdrawn');
-    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
+    const withdrawnFilterBox = document.getElementById('filter-withdrawn');
+    const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
 
-    if (checkbox.checked) {
-        withdrawnElements.hide();
+    if (withdrawnFilterBox.checked) {
+        withdrawnFilterElements.hide();
         Cookies.set('filter_withdrawn_student', 'true');
     }
     else {
-        withdrawnElements.show();
+        withdrawnFilterElements.show();
         Cookies.set('filter_withdrawn_student', 'false');
     }
 }
 
+// Withdrawn filter checkbox should remain the same on reload
 window.addEventListener('DOMContentLoaded', () => {
-    const filterCheckbox = document.getElementById('filter-withdrawn');
-    const withdrawnElements = $('[data-student="simple-grade-withdrawn"]');
-    const filter_status = Cookies.get('filter_withdrawn_student');
-
-    if (filter_status === 'false') {
-        filterCheckbox.checked = false;
-        withdrawnElements.show();
+    const withdrawnFilterBox = document.getElementById('filter-withdrawn');
+    const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
+    const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+    if(full_grader_access) {
+        if (withdrawnFilterStatus === 'false') {
+            withdrawnFilterBox.checked = false;
+            withdrawnFilterElements.show();
+        }
+        else {
+            withdrawnFilterBox.checked = true;
+            withdrawnFilterElements.hide();
+        }
     }
     else {
-        filterCheckbox.checked = true;
-        withdrawnElements.hide();
+        withdrawnFilterElements.hide();
     }
 });

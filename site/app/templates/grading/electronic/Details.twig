@@ -44,7 +44,7 @@
                     <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
                 </label>
                 {% if toggle_anon_button %}
-                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Name
+                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
                     <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon('{{ gradeable.getId() }}')">
                 </label>
                 {% endif %}
@@ -55,7 +55,7 @@
                 {% endif %}
                 {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
                 <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
-                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_update()">
+                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filterWithdrawnUpdate()">
                 </label>
                 {% endif %}
             </div>
@@ -781,7 +781,7 @@
 {# /Column functions #}
 <script>
     {% if grade_inquiry_only_button %}
-        inquiry_update();
+        inquiryUpdate();
     {% endif %}
 
     const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
