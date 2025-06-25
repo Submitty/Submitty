@@ -68,7 +68,7 @@ class DockerImage {
 
         $bytes = (int) $matches[1];
         $size = Utils::formatBytes('mb', $bytes, true);
-        
+
         // Parse digest
         if (preg_match("/\t-digest: (.+)/", $logLines[3], $matches) === 0) {
             throw new DockerLogParseException("Unexpected log input, attempted to read digest.");
