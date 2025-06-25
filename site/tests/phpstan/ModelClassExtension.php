@@ -18,6 +18,10 @@ class ModelClassExtension implements MethodsClassReflectionExtension {
         $method_name = preg_replace_callback('/([A-Z])/', function ($match) {
             return '_' . strtolower($match[0]);
         }, $method_name);
+        $phpDoc = $reflection->getResolvedPhpDoc();
+        if ($phpDoc === null || !array_key_exists($method_name, $phpDoc->getMethodTags())) {
+            return false;
+        }
         return $reflection->hasProperty($method_name);
     }
 
