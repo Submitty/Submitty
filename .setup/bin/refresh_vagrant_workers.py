@@ -89,7 +89,7 @@ for name, data in vagrant_workers_data.items():
     new_autograding_data[name] = worker_data
 
 with open(autograding_workers_path, 'w') as file:
-    json.dump(new_autograding_data, file)
+    json.dump(new_autograding_data, file, indent=4)
 print(f"Configuration saved with {enabled}/{total} machines enabled")
 print()
 
