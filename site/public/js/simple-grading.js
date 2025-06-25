@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, full_grader_access */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -1034,7 +1034,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
     const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
-    if(full_grader_access) {
+    if (full_grader_access) {
         if (withdrawnFilterStatus === 'false') {
             withdrawnFilterBox.checked = false;
             withdrawnFilterElements.show();

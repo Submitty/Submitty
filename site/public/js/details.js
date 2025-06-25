@@ -189,7 +189,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const randomFilterBox = document.getElementById('toggle-random-order');
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');
-    
-     // all graders should see withdrawn students on team assignments
+
+    // all graders should see withdrawn students on team assignments
     (is_team_assignment) ? withdrawnFilterElements.show() : withdrawnFilterElements.hide();
 });
