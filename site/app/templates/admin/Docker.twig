@@ -1,4 +1,4 @@
-{% import _self as self %}
+{% import "misc/TableHeaderSort.twig" as sort %}
 
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
@@ -91,12 +91,12 @@
     <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                {{ self.sortable_header('Image Name', 'name') }}
+                {{ sort.sortable_header('Image Name', 'name') }}
                 <th>Owner</th>
                 <th>Id</th>
-                {{ self.sortable_header('Size', 'size') }}
+                {{ sort.sortable_header('Size', 'size') }}
                 <th>Tag</th>
-                {{ self.sortable_header('Created', 'created') }}
+                {{ sort.sortable_header('Created', 'created') }}
                 <th>Alias</th>
                 <th>Capabilities Containing This Image</th>
                 <th>Remove</th>
@@ -181,15 +181,3 @@
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
-
-{% macro sortable_header(title, sort_key) %}
-    <th>
-        <a href="#"
-        onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
-        class="sortable-header"
-        data-sort-key="{{ sort_key }}">
-            {{ title }}
-            <i class="fa fa-sort"></i>
-        </a>
-    </th>
-{% endmacro %}
