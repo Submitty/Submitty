@@ -130,18 +130,10 @@ def construct_notifications(term, course, pending):
 
         # Notification-related content
         notification_content = "Grade Released: " + gradeable["title"]
-        email_subject = (f"[Submitty {course}] Grade Released: "
-                         f"{gradeable['title']}")
+        email_subject = f"Grade Released: {gradeable['title']}"
         email_body = (f"Your grade is now available for {gradeable['title']} "
                       f"in course \n{get_full_course_name(term, course)}.\n\n"
-                      f"Click here for more info: {gradeable_url}\n\n"
-                      f"--\nNOTE: This is an automated "
-                      "email notification, which is unable to receive replies."
-                      "\nPlease refer to the course syllabus for contact "
-                      "information for your teaching staff.\nUpdate your "
-                      "email notification settings for this course here: "
-                      f"{BASE_URL_PATH}/courses/{term}/{course}/notifications"
-                      "/settings"
+                      f"Click here for more info: {gradeable_url}"
                       )
 
         if gradeable["site_enabled"] is True:
