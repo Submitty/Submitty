@@ -1,4 +1,4 @@
-import { togglePanelSelectorModal } from './panel-selector-modal';
+import { togglePanelSelectorModal } from './panel-selector-modal-init';
 import { initializeResizablePanels } from './resizable-panels';
 
 declare global {
