@@ -262,10 +262,8 @@ class DockerUI extends AbstractModel {
         $image->primary_name = array_shift($image_array);
         $image->aliases = $image_array;
 
-        $is_duplicate = in_array($image->primary_name, array_column($this->docker_images, 'primary_name'));
-
         // Duplicate images from workers are not added to the list again
-        if ($is_duplicate) {
+        if (isset($this->docker_images[$image->primary_name])) {
             return;
         }
 
@@ -273,7 +271,7 @@ class DockerUI extends AbstractModel {
             $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
 
-        $this->docker_images[] = $image;
+        $this->docker_images[$image->primary_name] = $image;
     }
 
     /** Collect the details of an image and return them in a map, in the future a class should represent the return */

@@ -20,6 +20,8 @@ class DockerImage {
     public string $created_timestamp;
     /** size of the image in human readable format */
     public string $size_mb;
+    /** manifest digest of image */
+    public string $digest;
     /** The name:tag of the image */
     public string $primary_name;
     /** @var array<string> $aliases - Any other name:tags that also point to this image */
