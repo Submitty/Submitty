@@ -9609,6 +9609,7 @@ ORDER BY
         $this->course_db->commit();
     }
 
+     /**
      * @param string $user_id the userid of the user
      * @return array<string>
      */
