@@ -900,6 +900,10 @@ class Gradeable extends AbstractModel {
         return $this->isDiscussionBased() ? implode(',', $this->getDiscussionThreadId()) : '';
     }
 
+    /**
+     * Gets a string of all of the hidden files for this gradeable
+     * @return string|null
+     */
     public function getStringHiddenFiles(): ?string {
         if (count($this->hidden_files) === 0) {
             return null;
