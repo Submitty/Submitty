@@ -37,9 +37,9 @@ class PDFView extends AbstractView {
         }
 
         // Add PDF.js MJS modules with proper module loading
-        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.mjs'), 'vendor'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor'));
-        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.mjs'), 'vendor'));
         
         // Add regular JS files
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
@@ -102,7 +102,7 @@ class PDFView extends AbstractView {
         }
 
         // Add PDF.js MJS modules with proper module loading
-        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.mjs'), 'vendor'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor'));
         $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor'));
         
