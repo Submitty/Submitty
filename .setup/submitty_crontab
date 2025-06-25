@@ -18,3 +18,5 @@
 0 * * * * submitty_daemon   /usr/local/submitty/sbin/update_worker_sysinfo.sh UpdateSystemInfo
 # Run the repair_services.sh script every hour
 0 * * * * submitty_daemon   sudo /usr/local/submitty/sbin/repair_services.sh
+# Run the send_notification.py script every hour
+0 * * * * submitty_daemon   python3 /usr/local/submitty/sbin/send_notification.py

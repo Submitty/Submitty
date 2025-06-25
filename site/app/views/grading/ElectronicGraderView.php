@@ -892,11 +892,11 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-        if (count($grading_details_columns) > 0) {
-            $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
-                return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns[$column['function']];
-            });
-        }
+
+        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
+            return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
+        });
+
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
@@ -924,7 +924,8 @@ HTML;
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
-            "columns" => $columns,
+            "columns" => $shown_columns,
+            "all_columns" => $columns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
@@ -1246,6 +1247,8 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);

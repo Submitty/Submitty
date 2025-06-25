@@ -259,6 +259,9 @@ class Gradeable extends AbstractModel {
     /** @prop
      * @var ?int will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
+    /** @prop
+     * @var int total gradeable notifications sent */
+    protected $notifications_sent = 0;
 
     /**
      * Gradeable constructor.
@@ -337,6 +340,7 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
+            $this->setNotificationsSent($details['notifications_sent'] ?? 0);
             if (array_key_exists('hidden_files', $details) && is_string($details['hidden_files'])) {
                 $this->setHiddenFiles(explode(',', $details['hidden_files']));
             }

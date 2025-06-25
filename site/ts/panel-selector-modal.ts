@@ -1,3 +1,9 @@
+declare global {
+    interface Window {
+        togglePanelSelectorModal: (show: boolean) => void;
+    }
+}
+
 $(() => {
     // Draggable Popup box
     $('#panels-selector-modal').draggable();
