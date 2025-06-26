@@ -23,7 +23,7 @@ def execute_notebook(timeout=600):
     # - timeout: maximum time in seconds to execute a cell
     # - kernel_name: the kernel to use for execution (e.g., 'python3')
     # - allow_errors: if True, allows the execution to continue even if a cell raises an error (Optional, defaults to False)
-    ep = ExecutePreprocessor(timeout=timeout, kernel_name='python3', allow_errors=False)
+    ep = ExecutePreprocessor(timeout=timeout, kernel_name='python3', allow_errors=True)
 
     try:
         out = ep.preprocess(nb, {'metadata': {'path': notebook_filename.parent}})
@@ -37,15 +37,11 @@ def execute_notebook(timeout=600):
     
     with open("executed.ipynb", mode='w', encoding='utf-8') as f:  
         nbformat.write(nb, f)
+
+    for cell_idx, cell in enumerate(nb.cells):
+        save_output(cell_idx, cell)
     
-    cell_idx = 0
-    for cell in nb.cells:
-        if cell.cell_type == 'code':
-            for output in cell.get('outputs', []):
-                save_output(cell_idx, cell, output)
-                cell_idx += 1
-    
-def save_output(cell_idx, cell, output):
+def save_output(cell_idx, cell):
     # If the cell has a metadata field 'grade_id', use it as the file name
     grade_id = cell.metadata.get('grade_id')
     if grade_id:
@@ -53,26 +49,36 @@ def save_output(cell_idx, cell, output):
     else:
         file_name = f"cell{cell_idx}"
 
+    # Create an empty error file for the cell
+    cell_err = Path(f"{file_name}.err")
+    cell_err.write_text("", encoding='utf-8')
+
     # Handle different output types https://nbformat.readthedocs.io/en/latest/format_description.html#cell-types
-    if output.output_type == 'stream':
+    if cell.cell_type == 'markdown':
         cell_txt = Path(f"{file_name}.txt")
-        cell_txt.write_text(output.text.strip(), encoding='utf-8')
+        cell_txt.write_text(cell.source.strip(), encoding='utf-8')
 
-    elif output.output_type == 'execute_result' or output.output_type == 'display_data':
-        data = output.get("data", {})
-        if "text/plain" in data:
-            cell_txt = Path(f"{file_name}.txt")
-            cell_txt.write_text(data["text/plain"], encoding='utf-8')
+    elif cell.cell_type == 'code':
+        for output in cell.get('outputs', []):
+            if output.output_type == 'stream':
+                cell_txt = Path(f"{file_name}.txt")
+                cell_txt.write_text(output.text.strip(), encoding='utf-8')
 
-        if "image/png" in data:
-            img_data = base64.b64decode(data["image/png"])
-            img = Path(f"{file_name}.png")
-            img.write_bytes(img_data)
+            elif output.output_type == 'execute_result' or output.output_type == 'display_data':
+                data = output.get("data", {})
+                if "text/plain" in data:
+                    cell_txt = Path(f"{file_name}.txt")
+                    cell_txt.write_text(data["text/plain"], encoding='utf-8')
 
-    elif output.output_type == 'error':
-        traceback = "\n".join(output.get("traceback", []))
-        cell_err =  Path(f"{file_name}.err")
-        cell_err.write_text(traceback, encoding='utf-8')
+                if "image/png" in data:
+                    img_data = base64.b64decode(data["image/png"])
+                    img = Path(f"{file_name}.png")
+                    img.write_bytes(img_data)
+
+            elif output.output_type == 'error':
+                traceback = "\n".join(output.get("traceback", []))
+                cell_err = Path(f"{file_name}.err")
+                cell_err.write_text(traceback, encoding='utf-8')
 
 if __name__ == "__main__":
     execute_notebook()

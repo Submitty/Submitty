@@ -29,7 +29,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell0.txt",
+          "source" : "cell1.*",
           "destination" : "./"
         }
       ], 
@@ -38,8 +38,14 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "cell0.txt",
+          "actual_file": "cell1.txt",
           "expected_string" : "hello world!"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "cell1.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -48,7 +54,32 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell1.png",
+          "source" : "cell2.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Markdown",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "cell2.txt",
+          "expected_string" : "## 2. Create IPython images with the given \"one.png\" and \"two.png\".\nUse `from IPython.display import Image`"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "cell2.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "cell3.*",
           "destination" : "./"
         }
       ], 
@@ -56,13 +87,19 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell1.png",
+          "actual_file": "cell3.png",
           "expected_file": "one.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "cell3.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -71,7 +108,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell2.png",
+          "source" : "cell4.*",
           "destination" : "./"
         }
       ], 
@@ -79,13 +116,19 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell2.png",
+          "actual_file": "cell4.png",
           "expected_file": "two.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".3",
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "cell4.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -94,7 +137,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell3.png",
+          "source" : "cell6.*",
           "destination" : "./"
         }
       ], 
@@ -102,13 +145,19 @@
       "points": 1,
       "validation": [
         {
-          "actual_file": "cell3.png",
+          "actual_file": "cell6.png",
           "expected_file": "graph.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "cell6.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     }
