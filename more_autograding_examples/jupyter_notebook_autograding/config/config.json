@@ -8,12 +8,12 @@
     "RLIMIT_NPROC" : 32
   },
   "container_options": {
-    "container_image": "submitty/qiskit:latest"
+    "container_image": "submitty/jupyter:latest"
   },
   "testcases": [
     {
       "title": "Executes successfully",
-      "command": "python3 grader.py",
+      "command": "python3 jupyter_notebook_grader.py",
       "points": 1,
       "validation": [
         {
@@ -104,52 +104,6 @@
         {
           "actual_file": "cell3.png",
           "expected_file": "graph.png",
-          "method": "ImageDiff",
-          "acceptable_threshold": ".1",
-          "show_difference_image" : "always",
-          "show_actual": "always",
-          "show_expected": "always"
-        }
-      ]
-    },
-    {
-      "pre_commands" : [
-        {
-          "command" : "cp",
-          "testcase" : "test01",
-          "source" : "cell4.png",
-          "destination" : "./"
-        }
-      ], 
-      "title": "Circuit",
-      "points": 1,
-      "validation": [
-        {
-          "actual_file": "cell4.png",
-          "expected_file": "circuit.png",
-          "method": "ImageDiff",
-          "acceptable_threshold": ".2",
-          "show_difference_image" : "always",
-          "show_actual": "always",
-          "show_expected": "always"
-        }
-      ]
-    },
-    {
-      "pre_commands" : [
-        {
-          "command" : "cp",
-          "testcase" : "test01",
-          "source" : "cell5.png",
-          "destination" : "./"
-        }
-      ], 
-      "title": "Histogram",
-      "points": 1,
-      "validation": [
-        {
-          "actual_file": "cell5.png",
-          "expected_file": "histogram.png",
           "method": "ImageDiff",
           "acceptable_threshold": ".1",
           "show_difference_image" : "always",
