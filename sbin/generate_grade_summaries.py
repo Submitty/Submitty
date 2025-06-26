@@ -323,6 +323,11 @@ def generate_customization_json(html_string):
     the most up-to-date GUI customization for the given course.
     """
     soup = BeautifulSoup(html_string, 'html.parser')
+
+    if soup.select_one('#manual_customization').has_attr('checked'):
+        # Manual customizations are currently applied, so we can proceed with the grade summaries
+        return None
+
     data = {
         'display': get_display(soup),
         'display_benchmark': get_display_benchmark(soup),
@@ -347,8 +352,8 @@ def get_error_message(response):
         return response.text
 
 
-def load_and_save_gui_customization(semester, course, token):
-    """Loads and saves the GUI customization for the given course."""
+def save_and_build_rainbow_grades(semester, course, token):
+    """Saves the most up-to-date GUI customization for the given course."""
     # Load the GUI customization page for HTML data parsing
     load_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization'.format(
@@ -369,6 +374,10 @@ def load_and_save_gui_customization(semester, course, token):
 
     # Save the most up-to-date GUI customization to the server
     json_string = generate_customization_json(load_response.text)
+
+    if json_string is None:
+        return
+
     save_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
             base_url, semester, course
@@ -409,54 +418,15 @@ def load_and_save_gui_customization(semester, course, token):
         exit(-1)
 
     # Remain blocked until the build process is complete to ensure grade summaries are accurate
-    requests.post(
+    status_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_status'.format(
             base_url, semester, course
         ),
         headers={'Authorization': token}
     )
-    print("Successfully completed the Rainbow Grades build process for {}.{}".format(
-        semester, course
+    print("Successfully completed the Rainbow Grades build process for {}.{} - {}".format(
+        semester, course, status_response.json()
     ))
-
-
-def save_and_build_rainbow_grades(semester, course, token):
-    """Loads and saves the GUI customization for the given course."""
-    try:
-        # Try to select the GUI customization option
-        select_response = requests.post(
-            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
-                base_url, semester, course
-            ),
-            headers={'Authorization': token},
-            data={
-                "selected_value": "gui",
-                "source": "submitty_daemon"
-            }
-        )
-
-        if select_response.status_code == 200:
-            status = select_response.json()['status']
-
-            if status == 'success':
-                # A successful response implies the GUI customization is being applied for the given course
-                load_and_save_gui_customization(semester, course, token)
-            else:
-                message = select_response.json()['message']
-
-                if message == 'Manual customizations are currently applied.':
-                    # Manual customizations are currently applied, so we can proceed with the grade summaries
-                    pass
-                else:
-                    print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
-                        semester, course, message
-                    ), file=stderr)
-                    exit(-1)
-    except Exception as gui_exception:
-        print("ERROR: Failed to load or save GUI customization for {}.{} - {}".format(
-            semester, course, gui_exception
-        ), file=stderr)
-        exit(-1)
 
 
 def generate_grade_summaries(semester, course, token):

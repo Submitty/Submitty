@@ -687,6 +687,7 @@ class ReportController extends AbstractController {
                 'gui_customization_download_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'gui_download']),
                 'customization_upload_url' => $this->core->buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']),
                 "manual_customization_exists" => $customization->doesManualCustomizationExist(),
+                "uses_manual_customization" => $customization->usesManualCustomization(),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 'bucket_counts' => $customization->getBucketCounts(),
@@ -753,7 +754,6 @@ class ReportController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization/upload", methods: ["POST"])]
     public function uploadRainbowConfig() {
-        $redirect_url = $this->core->buildCourseUrl(['reports']);
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';
             $this->core->addErrorMessage($msg);
@@ -774,19 +774,17 @@ class ReportController extends AbstractController {
         // copy is expensive, but we are OK because it is small file.
         // setgid (sticky-bit) gets ignored and doesn't inherit the parent (rainbowgrades dir) permissions
         // known issue: look https://www.php.net/manual/en/function.move-uploaded-file.php for more details
-        if (!copy($upload['tmp_name'], $destination_path)) {
+        if (!copy($upload['tmp_name'], $destination_path) || !file_exists($destination_path)) {
             $msg = 'Upload failed: Could not copy file';
             $this->core->addErrorMessage($msg);
             return JsonResponse::getErrorResponse($msg);
         }
 
-        $manual_customization_exists =  file_exists($destination_path);
-
         $this->core->addSuccessMessage('Rainbow Grades Customization uploaded');
 
         return JsonResponse::getSuccessResponse([
             'customization_path' => $rainbow_grades_dir,
-            'manual_customization_exists' => $manual_customization_exists
+            'manual_customization_exists' => true
         ]);
     }
 
@@ -855,22 +853,6 @@ class ReportController extends AbstractController {
 
         $rainbow_grades_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "rainbow_grades");
         $customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
-
-        if (isset($_POST['source']) && $_POST['source'] === 'submitty_daemon') {
-            // Compare the customization.json and manual_customization.json to ensure instructors are using the GUI interface
-            $manual_customization_dest = FileUtils::joinPaths($rainbow_grades_dir, 'manual_customization.json');
-
-            if (file_exists($customization_dest) && file_exists($manual_customization_dest)) {
-                $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
-                $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
-
-                if ($customization_json === $manual_customization_json) {
-                    // Manual customizations must be applied given the file contents are the same
-                    $msg = 'Manual customizations are currently applied.';
-                    return JsonResponse::getErrorResponse($msg);
-                }
-            }
-        }
 
         // Determine the source file based on the selected value
         switch ($selectedValue) {
