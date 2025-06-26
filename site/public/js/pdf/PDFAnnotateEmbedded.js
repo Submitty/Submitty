@@ -1,4 +1,4 @@
-/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
+/* global PDFAnnotate, window.pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
 if (PDFAnnotate.default) {
@@ -23,7 +23,7 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.mjs';
+window.pdfjsLib.GlobalWorkerOptions.src = 'vendor/pdfjs/pdf.worker.min.mjs';
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -88,7 +88,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
-                pdfjsLib.getDocument({
+                window.pdfjsLib.getDocument({
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
@@ -247,7 +247,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
-                pdfjsLib.getDocument({
+                window.pdfjsLib.getDocument({
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
