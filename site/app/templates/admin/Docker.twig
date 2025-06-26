@@ -91,22 +91,12 @@
     <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-<<<<<<< pending-gradeable-sort
                 {{ sort.sortable_header('Image Name', 'name') }}
-                <th>Owner</th>
+                <th>Tag</th>
+                <th>Alias</th>
                 <th>Id</th>
                 {{ sort.sortable_header('Size', 'size') }}
-                <th>Tag</th>
                 {{ sort.sortable_header('Created', 'created') }}
-                <th>Alias</th>
-=======
-                {{ self.sortable_header('Image Name', 'name') }}
-                <th>Tag</th>
-                <th>Alias</th>
-                <th>Id</th>
-                {{ self.sortable_header('Size', 'size') }}
-                {{ self.sortable_header('Created', 'created') }}
->>>>>>> main
                 <th>Capabilities Containing This Image</th>
                 <th>Owner</th>
                 <th>Remove</th>
