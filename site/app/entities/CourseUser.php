@@ -28,8 +28,8 @@ class CourseUser {
     #[ORM\Column(type: Types::INTEGER)]
     protected int $user_group;
 
-    #[ORM\Column(type: Types::STRING)]
-    protected string $registration_section;
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $registration_section;
 
     #[ORM\Column(type: Types::STRING)]
     protected string $registration_type;
@@ -54,7 +54,7 @@ class CourseUser {
         $this->user_group = $user_group;
     }
 
-    public function setRegistrationSection(string $registration_section) {
+    public function setRegistrationSection(?string $registration_section) {
         $this->registration_section = $registration_section;
     }
 
