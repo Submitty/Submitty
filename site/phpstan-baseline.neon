@@ -10892,11 +10892,6 @@ parameters:
 			path: app/repositories/email/EmailRepository.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/repositories/email/EmailRepository.php
-
-		-
 			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) has parameter \\$course with no type specified\\.$#"
 			count: 1
 			path: app/repositories/email/EmailRepository.php

@@ -44,7 +44,7 @@ class EmailStatusController extends AbstractController {
     public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
-        $page = isset($_POST['page']) ? $_POST['page'] : 1;
+        $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
