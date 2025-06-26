@@ -1,5 +1,6 @@
-/* global courseUrl, showPopup, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiryUpdate filterWithdrawnUpdate */
+/* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filterWithdrawnUpdate */
+
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -38,8 +39,8 @@ $(document).ready(() => {
             // the content to be added is inside this data attr
             content = $(this).data('col-title');
             style.innerHTML += `
-              #details-table td:nth-of-type(${idx + 1}):before {
-                  content: "${content}";
+              #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
+                  content: "${escapeSpecialChars(content)}";
               }
             `;
         }

@@ -32,42 +32,40 @@ function updateTable() {
 
                 // Update Class Statistics table
                 let table = document.getElementById('course-table');
-                $('#course-table tbody').html('');
+                $('#course-table tbody').text('');
                 Object.keys(json.course_info).forEach((key1) => {
                     const course_name = key1.split('__');
                     Object.keys(json.course_info[key1]).forEach((key2) => {
                         const info = json.course_info[key1][key2];
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
-                        new_row.insertCell().innerHTML = course_name[0];
-                        new_row.insertCell().innerHTML = course_name[1];
-                        new_row.insertCell().innerHTML = key2;
+                        new_row.insertCell().innerText = course_name[0];
+                        new_row.insertCell().innerText = course_name[1];
+                        new_row.insertCell().innerText = key2;
                         const int_box = new_row.insertCell();
-                        // eslint-disable-next-line eqeqeq
-                        if (info.interactive != 0) {
-                            int_box.innerHTML = info.interactive;
+                        if (info.interactive !== 0) {
+                            int_box.innerText = info.interactive;
                         }
                         const regrade_box = new_row.insertCell();
-                        // eslint-disable-next-line eqeqeq
-                        if (info.regrade != 0) {
-                            regrade_box.innerHTML = info.regrade;
+                        if (info.regrade !== 0) {
+                            regrade_box.innerText = info.regrade;
                         }
                     });
                 });
 
                 // Update Machine Statistics table
                 table = document.getElementById('machine-table');
-                $('#machine-table tbody').html('');
+                $('#machine-table tbody').text('');
                 Object.keys(json.ongoing_job_info).forEach((key) => {
                     const info = json.ongoing_job_info[key];
                     info.forEach((elem) => {
                         const new_row = table.getElementsByTagName('tbody')[0].insertRow(-1);
-                        new_row.insertCell().innerHTML = key;
-                        new_row.insertCell().innerHTML = elem.semester;
-                        new_row.insertCell().innerHTML = elem.course;
-                        new_row.insertCell().innerHTML = elem.gradeable_id;
-                        new_row.insertCell().innerHTML = elem.user_id;
-                        new_row.insertCell().innerHTML = elem.elapsed_time;
-                        new_row.insertCell().innerHTML = elem.error;
+                        new_row.insertCell().innerText = key;
+                        new_row.insertCell().innerText = elem.semester;
+                        new_row.insertCell().innerText = elem.course;
+                        new_row.insertCell().innerText = elem.gradeable_id;
+                        new_row.insertCell().innerText = elem.user_id;
+                        new_row.insertCell().innerText = elem.elapsed_time;
+                        new_row.insertCell().innerText = elem.error;
                     });
                 });
 
@@ -75,31 +73,31 @@ function updateTable() {
                 table = document.getElementById('autograding-status-table');
                 const new_row = table.insertRow(3);
                 let new_cell = new_row.insertCell();
-                new_cell.innerHTML = json.time;
+                new_cell.innerText = json.time;
                 new_cell.className = 'right-boarder';
 
                 new_cell = new_row.insertCell();
                 // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.interactive_ongoing != 0) {
-                    new_cell.innerHTML = json.queue_counts.interactive_ongoing;
+                    new_cell.innerText = json.queue_counts.interactive_ongoing;
                 }
 
                 new_cell = new_row.insertCell();
                 // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.interactive != 0) {
-                    new_cell.innerHTML = json.queue_counts.interactive;
+                    new_cell.innerText = json.queue_counts.interactive;
                 }
                 new_cell.className = 'right-boarder';
 
                 new_cell = new_row.insertCell();
                 // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.regrade_ongoing != 0) {
-                    new_cell.innerHTML = json.queue_counts.regrade_ongoing;
+                    new_cell.innerText = json.queue_counts.regrade_ongoing;
                 }
                 new_cell = new_row.insertCell();
                 // eslint-disable-next-line eqeqeq
                 if (json.queue_counts.regrade != 0) {
-                    new_cell.innerHTML = json.queue_counts.regrade;
+                    new_cell.innerText = json.queue_counts.regrade;
                 }
                 new_cell.className = 'right-boarder';
                 Object.keys(json.machine_grading_counts).forEach((key, i) => {
@@ -107,7 +105,7 @@ function updateTable() {
                         new_cell = new_row.insertCell();
                         // eslint-disable-next-line eqeqeq
                         if (json.machine_grading_counts[key] != 0) {
-                            new_cell.innerHTML = json.machine_grading_counts[key];
+                            new_cell.innerText = json.machine_grading_counts[key];
                         }
                         new_cell.className = 'right-boarder';
                     }
@@ -115,7 +113,7 @@ function updateTable() {
                         new_cell = new_row.insertCell();
                         // eslint-disable-next-line eqeqeq
                         if (json.machine_grading_counts[key] != 0) {
-                            new_cell.innerHTML = json.machine_grading_counts[key];
+                            new_cell.innerText = json.machine_grading_counts[key];
                         }
                     }
                 });
@@ -124,7 +122,7 @@ function updateTable() {
                     const new_cell = new_row.insertCell();
                     // eslint-disable-next-line eqeqeq
                     if (json.capability_queue_counts[key] != 0) {
-                        new_cell.innerHTML = json.capability_queue_counts[key];
+                        new_cell.innerText = json.capability_queue_counts[key];
                     }
                 });
                 // Check if old logs should be removed to make room for new logs
