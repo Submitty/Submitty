@@ -751,7 +751,7 @@ jobs:
           sudo chown root:submitty_daemonphp config/submitty.json
           sudo chmod 444 config/submitty.json
           ls -alF config/
-
+          sudo bash ${env.SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
         with:
