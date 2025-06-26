@@ -26,3 +26,13 @@ afterEach(() => {
         cy.logout(true, checkLogout);
     });
 });
+
+Cypress.on('uncaught:exception', (err) => {
+    if (err.message.includes('Cannot read properties of undefined (reading \'claim\')')) {
+        // Ignore Mermaid service worker-related errors
+        return false;
+    }
+
+    // Ensure all other exceptions fail the test
+    return true;
+});

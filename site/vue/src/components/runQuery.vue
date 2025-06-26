@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { runSqlQuery, type SqlQueryResult } from '../../../ts/sql-toolbox';
+import { runSqlQuery, type RunQueryResults, type ServerResponse } from '../../../ts/sql-toolbox';
 const { query } = defineProps<{
     query: string;
 }>();
 const emit = defineEmits<{
-    changeData: [{ [key: string]: number | string | null }[]];
-    changeError: [message: string | false];
+    changeRunQueryResults: [RunQueryResults | null];
+    changeRunQueryError: [message: string | false];
 }>();
 const runQuery = async () => {
-    const result = await runSqlQuery(query) as SqlQueryResult;
+    const result = await runSqlQuery(query) as ServerResponse<RunQueryResults>;
     if (result.status === 'fail') {
-        emit('changeError', result.message);
-        emit('changeData', []);
+        emit('changeRunQueryError', result.message);
+        emit('changeRunQueryResults', null);
     }
     else {
-        emit('changeData', result.data);
-        emit('changeError', false);
+        emit('changeRunQueryError', false);
+        emit('changeRunQueryResults', result.data);
     }
 };
 </script>

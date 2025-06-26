@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { RunQueryResults } from '../../../ts/sql-toolbox';
+
 const { resultsData, queryError } = defineProps<{
-    resultsData: { [key: string]: number | string | null }[] | null;
+    resultsData: RunQueryResults | null;
     queryError: string | false;
 }>();
 </script>

@@ -636,7 +636,7 @@ export function viewFileFullPanel(name: string, path: string, page_num = 0, pane
 
     const promise = loadPDF(name, path, page_num, panel);
     $(fileFullPanelOptions[panel]['fileView']).show();
-    $(fileFullPanelOptions[panel]['gradingFileName']).html(name);
+    $(fileFullPanelOptions[panel]['gradingFileName']).text(name);
     const precision
         = $(fileFullPanelOptions[panel]['panel']).width()!
             - $(fileFullPanelOptions[panel]['innerPanel']).width()!;
