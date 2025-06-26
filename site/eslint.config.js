@@ -6,7 +6,6 @@ const jest = require('eslint-plugin-jest');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
-// @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
 const vuelint = require('eslint-plugin-vue');
 const noUnsanitized = require('eslint-plugin-no-unsanitized');
@@ -74,6 +73,7 @@ module.exports = tseslint.config(
     {
         name: 'Style rules for all files',
         extends: [
+            // @ts-expect-error (TS compiler expects `stylistic.default.configs`, which is not valid based on the source code type definitions)
             stylistic.configs.customize({
                 braceStyle: 'stroustrup',
                 indent: 4,
@@ -115,7 +115,7 @@ module.exports = tseslint.config(
     {
         name: 'Options for Vue files',
         files: ['vue/**/*.{js,ts,vue}'],
-        // @ts-expect-error vuelint doesnt have ts types yet
+        // vuelint doesnt have ts types yet
         extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parser: require('vue-eslint-parser'),
