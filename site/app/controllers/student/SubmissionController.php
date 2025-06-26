@@ -1485,7 +1485,15 @@ class SubmissionController extends AbstractController {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = true;
-                            $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $reported_size = FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $file_size += $reported_size;
+                            # Check size on each zip to ensure validation will not decompress a zip file that is too large
+                            if ($file_size > $max_size) {
+                                return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
+                            }
+                            if (!FileUtils::validateZipFileSize($uploaded_files[$i]["tmp_name"][$j])) {
+                                return $this->uploadResult("Corrupted ZIP file for " . $uploaded_files[$i]["name"][$j] . ".", false);
+                            }
                         }
                         else {
                             if (FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
