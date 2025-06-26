@@ -262,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        // eslint-disable-next-line no-unused-vars
         const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
