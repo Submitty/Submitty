@@ -5,7 +5,6 @@ declare global {
     interface Window {
         updateThePanelsElements(panelsAvailabilityObj: Record<PanelElement, boolean>): void;
         changePanelsLayout (panelsCount: string | number, isLeftTaller: boolean, twoOnRight: boolean): void;
-        exchangeTwoPanels(): void;
     }
 }
 
@@ -41,7 +40,7 @@ const MOBILE_WIDTH = 540;
 
 export let isMobileView = false;
 
-export type TaLayoutDet = {
+type TaLayoutDet = {
     numOfPanelsEnabled: number;
     isFullScreenMode: boolean;
     isFullLeftColumnMode: boolean;
@@ -116,7 +115,7 @@ export function saveResizedColsDimensions(updateValue: string, isHorizontalResiz
     saveTaLayoutDetails();
 }
 
-function toggleFullScreenMode() {
+export function toggleFullScreenMode() {
     $('main#main').toggleClass('full-screen-mode');
     $('#fullscreen-btn-cont').toggleClass('active');
     taLayoutDet.isFullScreenMode = $('main#main').hasClass('full-screen-mode');
@@ -166,7 +165,7 @@ function setMultiPanelModeVisiblities() {
 }
 
 // Handles the DOM manipulation to update the two panel layout
-export function updatePanelLayoutModes() {
+function updatePanelLayoutModes() {
     // remove all panel instructions
     $('.panel-instructions').remove();
     setMultiPanelModeVisiblities();
@@ -260,6 +259,44 @@ function checkForTwoPanelLayoutChange(
     }
     saveTaLayoutDetails();
 }
+
+// Exchanges positions of left and right panels
+export function exchangeTwoPanels() {
+    console.log(taLayoutDet);
+    if (+taLayoutDet.numOfPanelsEnabled === 2) {
+        taLayoutDet.currentTwoPanels = {
+            leftTop: taLayoutDet.currentTwoPanels.rightTop,
+            rightTop: taLayoutDet.currentTwoPanels.leftTop,
+        };
+        updatePanelLayoutModes();
+    }
+    else if (
+        +taLayoutDet.numOfPanelsEnabled === 3
+        || +taLayoutDet.numOfPanelsEnabled === 4
+    ) {
+        taLayoutDet.currentTwoPanels = {
+            leftTop: taLayoutDet.currentTwoPanels.rightTop,
+            leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
+            rightTop: taLayoutDet.currentTwoPanels.leftTop,
+            rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
+        };
+        $(
+            '.panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar',
+        ).toggleClass('active');
+        taLayoutDet.dividedColName = $('.panel-item-section.right-bottom').is(
+            ':visible',
+        )
+            ? 'RIGHT'
+            : 'LEFT';
+        updatePanelOptions();
+        updatePanelLayoutModes();
+        initializeHorizontalTwoPanelDrag();
+    }
+    else {
+        // taLayoutDet.numOfPanelsEnabled is 1
+        alert('Exchange works only when there are two panels...');
+    }
+};
 
 export function updatePanelOptions() {
     if (taLayoutDet.numOfPanelsEnabled === 1) {
@@ -562,8 +599,6 @@ export function changeMobileView() {
     isMobileView = window.innerWidth <= MOBILE_WIDTH;
 }
 
-window.toggleFullScreenMode = toggleFullScreenMode;
-
 // Only keep those panels which are available
 window.updateThePanelsElements = function (panelsAvailabilityObj: Record<PanelElement, boolean>) {
     // Attach the isAvailable to the panel elements to manage them
@@ -598,3 +633,13 @@ window.changePanelsLayout = function (panelsCount: string | number, isLeftTaller
         $('#grading-panel-student-name').show();
     }
 };
+
+// returns taLayoutDet object from LS, and if its not present returns empty object
+function getSavedTaLayoutDetails() {
+    const savedData = localStorage.getItem('taLayoutDetails');
+    return savedData ? (JSON.parse(savedData) as TaLayoutDet) : {} as TaLayoutDet;
+}
+
+$(() => {
+    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+});

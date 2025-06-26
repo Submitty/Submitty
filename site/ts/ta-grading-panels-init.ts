@@ -1,7 +1,6 @@
 import { initializeResizablePanels } from './resizable-panels';
 import {
     taLayoutDet,
-    TaLayoutDet,
     resetSinglePanelLayout,
     togglePanelLayoutModes,
     toggleFullLeftColumnMode,
@@ -11,7 +10,6 @@ import {
     initializeHorizontalTwoPanelDrag,
     setPanelsVisibilities,
     updatePanelOptions,
-    updatePanelLayoutModes,
     isMobileView,
     changeMobileView,
 } from './ta-grading-panels';
@@ -125,12 +123,6 @@ function notebookScrollSave() {
             }
         }
     }
-}
-
-// returns taLayoutDet object from LS, and if its not present returns empty object
-function getSavedTaLayoutDetails() {
-    const savedData = localStorage.getItem('taLayoutDetails');
-    return savedData ? (JSON.parse(savedData) as TaLayoutDet) : {} as TaLayoutDet;
 }
 
 function initializeTaLayout() {
@@ -328,43 +320,6 @@ function readCookies() {
     }
 }
 
-// Exchanges positions of left and right panels
-window.exchangeTwoPanels = function () {
-    if (+taLayoutDet.numOfPanelsEnabled === 2) {
-        taLayoutDet.currentTwoPanels = {
-            leftTop: taLayoutDet.currentTwoPanels.rightTop,
-            rightTop: taLayoutDet.currentTwoPanels.leftTop,
-        };
-        updatePanelLayoutModes();
-    }
-    else if (
-        +taLayoutDet.numOfPanelsEnabled === 3
-        || +taLayoutDet.numOfPanelsEnabled === 4
-    ) {
-        taLayoutDet.currentTwoPanels = {
-            leftTop: taLayoutDet.currentTwoPanels.rightTop,
-            leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
-            rightTop: taLayoutDet.currentTwoPanels.leftTop,
-            rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
-        };
-        $(
-            '.panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar',
-        ).toggleClass('active');
-        taLayoutDet.dividedColName = $('.panel-item-section.right-bottom').is(
-            ':visible',
-        )
-            ? 'RIGHT'
-            : 'LEFT';
-        updatePanelOptions();
-        updatePanelLayoutModes();
-        initializeHorizontalTwoPanelDrag();
-    }
-    else {
-        // taLayoutDet.numOfPanelsEnabled is 1
-        alert('Exchange works only when there are two panels...');
-    }
-};
-
 function openAutoGrading(num: string) {
     $(`#tc_${num}`).click();
     // eslint-disable-next-line eqeqeq
@@ -374,8 +329,6 @@ function openAutoGrading(num: string) {
 }
 
 $(() => {
-    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
-
     // Check initially if its the mobile screen view or not
     changeMobileView();
     initializeTaLayout();
