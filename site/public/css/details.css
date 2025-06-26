@@ -318,3 +318,8 @@
     margin-left: 30px;
     margin-bottom: 10px;
 }
+
+.inquiry-only-disabled {
+    /* stylelint-disable-next-line declaration-no-important */
+    display: none !important; /* Overrides .show() and .hide() to avoid withdrawn students without grade inquiries being visibile */
+}

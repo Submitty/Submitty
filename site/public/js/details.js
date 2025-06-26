@@ -116,13 +116,14 @@ function inquiryUpdate() {
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
+                $(this).closest('.grade-table').addClass('inquiry-only-disabled'); // hide gradeable items without active inquiries, overrrides withdrawn filter
             }
         });
     }
     else {
+        grade_inquiry_toggled = false;
         $('.grade-button').each(function () {
-            $(this).closest('.grade-table').show(); // show all gradeable items
+            $(this).closest('.grade-table').removeClass('inquiry-only-disabled'); // show all gradeable items
         });
     }
 }
@@ -161,18 +162,14 @@ window.addEventListener('DOMContentLoaded', () => {
         // Withdrawn Students
         const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
-        if (!is_team_assignment) {
-            if (withdrawnFilterStatus === 'false' && inquiryFilterStatus === 'off') {
-                withdrawnFilterBox.disabled = false;
-                withdrawnFilterBox.checked = false;
-                withdrawnFilterElements.show();
-            }
-            else {
-                if (inquiryFilterStatus === 'on') {
-                    withdrawnFilterBox.disabled = true; // withdrawn students are always hidden when 'grade inquiries only' is toggled
-                }
+        if (!is_team_assignment) { // Toggle not available on team assignments
+            if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
+            }
+            else {
+                withdrawnFilterBox.checked = false;
+                withdrawnFilterElements.show();
             }
         }
         // Withdrawn students should always be visible in team gradeables
@@ -191,5 +188,7 @@ window.addEventListener('DOMContentLoaded', () => {
     randomFilterBox.checked = (randomFilterStatus === 'random');
 
     // all graders should see withdrawn students on team assignments
-    (is_team_assignment) ? withdrawnFilterElements.show() : withdrawnFilterElements.hide();
+    if (is_team_assignment) {
+        withdrawnFilterElements.show();
+    }
 });
