@@ -67,9 +67,9 @@ def main():
     git_path = Path(current_path, '..', '..').resolve()
 
     observer = Observer()
-    observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
+    observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), recursive=True)
+    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), recursive=True)
+    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), recursive=True)
 
     observer.start()
     try:
