@@ -679,6 +679,9 @@ jobs:
         run: |
           npm ci
 
+      - name: Switch to Pam auth
+        run: sudo sed -ie "s/Database/Pam/g" ${SUBMITTY_INSTALL_DIR}/config/authentication.json
+
       - name: Run accessibility test
         uses: cypress-io/github-action@v6
         with:
@@ -743,15 +746,6 @@ jobs:
           working-directory: ${{env.SUBMITTY_REPOSITORY}}/site
           browser: chrome
 
-      - name: Switch to self_account_creation config
-        run: |
-          cd $SUBMITTY_INSTALL_DIR
-          sudo mv config/submitty.json config/old_submitty.json
-          sudo cp $SUBMITTY_REPOSITORY/.setup/testing/testing_submitty_config.json config/submitty.json
-          sudo chown root:submitty_daemonphp config/submitty.json
-          sudo chmod 444 config/submitty.json
-          ls -alF config/
-          sudo bash ${env.SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
       - name: Run self-account-creation tests.
         uses: cypress-io/github-action@v6
         with:
