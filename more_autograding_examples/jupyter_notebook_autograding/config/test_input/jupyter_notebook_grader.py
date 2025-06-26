@@ -11,6 +11,9 @@ def execute_notebook(timeout=600):
         raise FileNotFoundError("No Jupyter notebook files found in the current directory.")
     notebook_filename = Path(notebook_files[0])
 
+    if len(notebook_files) > 1:
+        print(f"Warning: Multiple notebook files found. Using the first one: {notebook_filename}")
+
     with open(notebook_filename) as f:
         # Load the notebook and do not convert it to a specific version
         nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
