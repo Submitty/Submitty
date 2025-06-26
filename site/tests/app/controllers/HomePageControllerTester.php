@@ -54,7 +54,7 @@ class HomePageControllerTester extends BaseUnitTest {
             ['instructor', false, true, []]
         ];
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
+        $repo->method('wasStudentEverInCourse')->willReturn(true);
         $controller = new HomePageController($core);
         $response = $controller->getCourses()->json_response->json['data'];
         $this->assertEqualsCanonicalizing(
@@ -72,7 +72,7 @@ class HomePageControllerTester extends BaseUnitTest {
 
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'other_student');
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
+        $repo->method('wasStudentEverInCourse')->willReturn(true);
         $controller = new HomePageController($core);
         $response = $controller->getCourses()->json_response->json['data'];
         $this->assertEqualsCanonicalizing(
@@ -102,7 +102,7 @@ class HomePageControllerTester extends BaseUnitTest {
 
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'instructor');
         $core->getQueries()->method('getCourseForUserId')->will($this->returnValueMap($val_map));
-        $core->getQueries()->method('wasStudentEverInCourse')->willReturn(true);
+        $repo->method('wasStudentEverInCourse')->willReturn(true);
         $instruc_map = [
             ['instructor', 'course_instructor', 'f24', true]
         ];

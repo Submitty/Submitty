@@ -2,61 +2,54 @@
 
 namespace app\repositories;
 
+use app\models\User;
+
 use Doctrine\ORM\EntityRepository;
 
 class CourseUserRepository extends EntityRepository {
-    public function getTermStartDate(string $term_id): string {
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $result = $qb->select('term.start_date')
-            ->from('app\entities\Term', 'term')
-            ->where('term.term_id = :term_id')
-            ->setParameter('term_id', $term_id)
-            ->getQuery()
-            ->getResult();
-        return array_column($result, 'start_date')[0];
-    }
-
     public function unregisterCourseUser(string $user_id, string $term, string $course): void {
-        $this->getEntityManager()
-            ->createQueryBuilder()
-            ->update('app\entities\CourseUser', 'CourseUser')
-            ->set('CourseUser.registration_section', ':registration_section')
-            ->where('CourseUser.user_id = :user_id')
-            ->andWhere('CourseUser.term = :term')
-            ->andWhere('CourseUser.course = :course')
-            ->setParameter('registration_section', NULL)
-            ->setParameter('user_id', $user_id)
-            ->setParameter('term', $term)
-            ->setParameter('course', $course)
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function updateCourseUser(string $user_id, string $term, string $course): void {
-        $params = [$user->getGroup(), $user->getRegistrationSection(),
-                            $this->submitty_db->convertBoolean($user->isManualRegistration()),
-                            $user->getRegistrationType(), $semester, $course,
-                            $user->getId()];
-            $this->submitty_db->query(
-                "
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
-WHERE term=? AND course=? AND user_id=?",
-                $params
-            );
-        $user = $this->findOneBy([
-                'user_id' => $user->getId(),
-                'term' => $term,
-                'course' => $course
-            ]);
-        $user->setRegistrationSection($registration_section);
-        $user->setUserGroup($user_group);
-        $user->setManualRegistration($manual_registration);
-        $user->setRegistrationType($registration_type);
-        $this->getEntityManager()->persist();
+        $course_user = $this->findOneBy([
+            'user_id' => $user_id,
+            'term' => $term,
+            'course' => $course
+        ]);
+        $course_user->setRegistrationSection(null);
+        $this->getEntityManager()->persist($course_user);
         $this->getEntityManager()->flush();
     }
 
+    public function updateCourseUser(User $user, string $term, string $course): void {
+        $course_user = $this->findOneBy([
+            'user_id' => $user->getId(),
+            'term' => $term,
+            'course' => $course
+        ]);
+        $course_user->setRegistrationSection($user->getRegistrationSection());
+        $course_user->setUserGroup($user->getGroup());
+        $course_user->setManualRegistration($user->isManualRegistration());
+        $course_user->setRegistrationType($user->getRegistrationType());
+        $this->getEntityManager()->persist($course_user);
+        $this->getEntityManager()->flush();
+    }
 
-
-    
+     /**
+     * Returns true if the student was ever in the course,
+     * even if they are in the null section now.
+     * @param string $user_id The name of the user.
+     * @param string $course The course we're looking at.
+     * @param string $term The term we're looking t.
+     * @return bool True if the student was ever in the course, false otherwise.
+     */
+    public function wasStudentEverInCourse(
+        string $user_id,
+        string $course,
+        string $term
+    ): bool {
+        $user = $this->findOneBy([
+                'user_id' => $user_id,
+                'term' => $term,
+                'course' => $course
+        ]);
+        return $user !== null;
+    }
 }

@@ -1016,16 +1016,16 @@ SQL;
      * @param string $course
      */
     public function insertCourseUser(User $user, $semester, $course) {
-        $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        $this->submitty_db->convertBoolean($user->isManualRegistration())];
-        $this->submitty_db->query(
-            "
-INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
-VALUES (?,?,?,?,?,?)",
-            $params
-        );
+//         $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
+//                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
+//         $this->submitty_db->query(
+//             "
+// INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
+// VALUES (?,?,?,?,?,?)",
+//             $params
+//         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+//         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
         $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
@@ -1067,17 +1067,6 @@ WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
         );
 
         if (!empty($semester) && !empty($course)) {
-            $params = [$user->getGroup(), $user->getRegistrationSection(),
-                            $this->submitty_db->convertBoolean($user->isManualRegistration()),
-                            $user->getRegistrationType(), $semester, $course,
-                            $user->getId()];
-            $this->submitty_db->query(
-                "
-UPDATE courses_users SET user_group=?, registration_section=?, manual_registration=?, registration_type=?
-WHERE term=? AND course=? AND user_id=?",
-                $params
-            );
-
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
             $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
@@ -5401,28 +5390,6 @@ AND gc_id IN (
                 WHERE to_user_id = ? and seen_at is NULL and {$id_query}",
             $parameters
         );
-    }
-
-    /**
-     * Returns true if the student was ever in the course,
-     * even if they are in the null section now.
-     * @param string $user_id The name of the user.
-     * @param string $course The course we're looking at.
-     * @param string $term The term we're looking t.
-     * @return bool True if the student was ever in the course, false otherwise.
-     */
-    public function wasStudentEverInCourse(
-        string $user_id,
-        string $course,
-        string $term
-    ): bool {
-        $this->submitty_db->query("
-                SELECT user_id
-                FROM courses_users
-                WHERE user_id=? and course=? and term=?;
-            ", [$user_id, $course, $term]);
-        $row = $this->submitty_db->row();
-        return count($row) > 0;
     }
 
     /**
