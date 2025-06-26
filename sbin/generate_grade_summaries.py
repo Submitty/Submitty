@@ -376,6 +376,7 @@ def save_and_build_rainbow_grades(semester, course, token):
     json_string = generate_customization_json(load_response.text)
 
     if json_string is None:
+        # Manual customizations are currently applied
         return
 
     save_response = requests.post(
@@ -396,7 +397,28 @@ def save_and_build_rainbow_grades(semester, course, token):
         ), file=stderr)
         exit(-1)
 
-    # Finalize the build process by submitting the build_form API call
+    # Simulate the entire GUI customization build process
+    select_response = requests.post(
+            '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
+                base_url, semester, course
+            ),
+            headers={'Authorization': token},
+            data={
+                "selected_value": "gui",
+                "source": "submitty_daemon"
+            }
+        )
+
+    if select_response.status_code == 200 and select_response.json()['status'] == 'success':
+        print("Successfully selected the GUI customization for {}.{}".format(
+            semester, course
+        ))
+    else:
+        print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
+            semester, course, get_error_message(select_response)
+        ), file=stderr)
+        exit(-1)
+
     build_response = requests.post(
         '{}/api/courses/{}/{}/reports/build_form'.format(
             base_url, semester, course
@@ -417,7 +439,7 @@ def save_and_build_rainbow_grades(semester, course, token):
         ), file=stderr)
         exit(-1)
 
-    # Remain blocked until the build process is complete to ensure grade summaries are accurate
+    # Remain blocked until the build process is complete and output the final status
     status_response = requests.post(
         '{}/api/courses/{}/{}/reports/rainbow_grades_status'.format(
             base_url, semester, course
