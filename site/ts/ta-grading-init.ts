@@ -280,6 +280,7 @@ $(() => {
 
     // Progress bar value
     const value = $('.progressbar').val() ?? 0;
+    // eslint-disable-next-line no-restricted-syntax
     $('.progress-value').html(`<b>${String(value)}%</b>`);
 
     if (
