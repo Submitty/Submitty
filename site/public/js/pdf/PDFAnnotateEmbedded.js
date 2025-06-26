@@ -23,7 +23,9 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-window.pdfjsLib.GlobalWorkerOptions.src = 'vendor/pdfjs/pdf.worker.min.mjs';
+if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+    window.pdfjsLib.GlobalWorkerOptions.src = 'vendor/pdfjs/pdf.worker.min.mjs';
+}
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
