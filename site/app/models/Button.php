@@ -90,7 +90,7 @@ class Button extends AbstractModel {
      * checks whether a button has on onclick affect
      * @return bool
      */
-    public function hasOnclick() {
+    public function isOnclick() {
         return !($this->getOnclick() == null);
     }
     public function getTitle(): ?string {

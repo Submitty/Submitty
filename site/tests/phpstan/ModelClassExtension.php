@@ -8,6 +8,9 @@ use PHPStan\Reflection\MethodsClassReflectionExtension;
 
 class ModelClassExtension implements MethodsClassReflectionExtension {
     public function hasMethod(ClassReflection $reflection, string $method_name): bool {
+        if ($reflection->hasNativeMethod($method_name)) {
+            return true;
+        }
         if (!str_starts_with($reflection->getName(), 'app\\models')) {
             return false;
         }
