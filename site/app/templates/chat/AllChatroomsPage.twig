@@ -50,11 +50,11 @@
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 </form>
                                 {% if not chatroom.isActive() %}
-                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)">
+                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)" data-testid="enable-chatroom">
                                         Start Session
                                     </button>
                                 {% else %}
-                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)">
+                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)" data-testid="disable-chatroom">
                                         <i class="fas fa-pause"></i>
                                         End Session
                                     </button>

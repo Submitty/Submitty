@@ -57,12 +57,15 @@ function appendMessage(displayName, role, ts, content) {
     if (role === 'instructor') {
         message.classList.add('admin-message');
     }
+    message.setAttribute("data-testid", "message-container");
 
     const messageHeader = document.createElement('div');
     messageHeader.classList.add('message-header');
+    messageHeader.setAttribute("data-testid", "message-header")
 
     const senderName = document.createElement('span');
     senderName.classList.add('sender-name');
+    senderName.setAttribute("data-testid", "sender-name");
     senderName.innerText = display_name;
 
     const timestampSpan = document.createElement('span');
@@ -74,6 +77,7 @@ function appendMessage(displayName, role, ts, content) {
 
     const messageContent = document.createElement('div');
     messageContent.classList.add('message-content');
+    messageContent.setAttribute("data-testid", "message-content");
     messageContent.innerText = content;
 
     message.appendChild(messageHeader);
