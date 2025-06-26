@@ -9,6 +9,7 @@ const tseslint = require('typescript-eslint');
 // @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
 const vuelint = require('eslint-plugin-vue');
+const noUnsanitized = require('eslint-plugin-no-unsanitized');
 
 module.exports = tseslint.config(
     {
@@ -26,6 +27,9 @@ module.exports = tseslint.config(
     {
         name: 'Base options for all files',
         extends: [eslint.configs.recommended],
+        plugins: {
+            'no-unsanitized': noUnsanitized,
+        },
         languageOptions: {
             globals: {
                 ...globals.jquery,
@@ -57,7 +61,13 @@ module.exports = tseslint.config(
                     selector:
                         'MemberExpression[object.name="document"][property.name="cookie"]',
                 },
+                {
+                    selector: 'CallExpression[arguments.length>0][callee.property.name="html"] > MemberExpression[object.callee.name="$"]',
+                    message: 'Do not use $(...).html(). Use safer DOM manipulation methods instead.',
+                },
             ],
+            'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
+            'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
         },
     },
 
