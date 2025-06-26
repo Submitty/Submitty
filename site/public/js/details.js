@@ -122,7 +122,6 @@ function inquiryUpdate() {
         });
     }
     else {
-        grade_inquiry_toggled = false;
         $('.grade-button').each(function () {
             $(this).closest('.grade-table').removeClass('inquiry-only-disabled'); // show all gradeable items
         });
