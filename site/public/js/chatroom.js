@@ -46,9 +46,6 @@ function sendMessage(chatroomId, userId, displayName, role, content, isAnonymous
 }
 
 function appendMessage(displayName, role, ts, content) {
-    const dt = new Date(Date.now()).toLocaleString('en-us', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
-    const timestamp = ts || dt;
-
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
         display_name = `${displayName} [${role}]`;
@@ -70,7 +67,7 @@ function appendMessage(displayName, role, ts, content) {
 
     const timestampSpan = document.createElement('span');
     timestampSpan.classList.add('timestamp');
-    timestampSpan.innerText = timestamp;
+    timestampSpan.innerText = ts;
 
     messageHeader.appendChild(senderName);
     messageHeader.appendChild(timestampSpan);
@@ -265,7 +262,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pageDataElement = document.getElementById('page-data');
     if (pageDataElement) {
         const pageData = JSON.parse(pageDataElement.textContent);
-        // eslint-disable-next-line no-unused-vars
         const { chatroomId, userId, displayName, user_admin, isAnonymous } = pageData;
 
         showJoinMessage(`You have successfully joined as ${displayName}.`);
