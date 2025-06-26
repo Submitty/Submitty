@@ -1,4 +1,4 @@
-/* global PDFAnnotate, window.pdfjsLib, csrfToken, jspdf */
+/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
 
 if (PDFAnnotate.default) {
