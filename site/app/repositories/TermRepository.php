@@ -3,7 +3,14 @@
 namespace app\repositories;
 
 use Doctrine\ORM\EntityRepository;
+use app\entities\Term;
 
+/**
+ * Repository for Term entities.
+ * Provides methods to retrieve term information from the database.
+ * @template T of Term
+ * @extends EntityRepository<T>
+ */
 class TermRepository extends EntityRepository {
     public function getTermStartDate(string $term_id): string {
         $qb = $this->getEntityManager()->createQueryBuilder();

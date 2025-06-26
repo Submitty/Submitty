@@ -4756,11 +4756,6 @@ parameters:
 			path: app/libraries/SessionManager.php
 
 		-
-			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\TermRepository is not subtype of type app\\\\repositories\\\\TermRepository\\<app\\\\entities\\\\Term\\>\\.$#"
-			count: 2
-			path: app/libraries/TermManager.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\TokenManager\\:\\:generateSessionToken\\(\\) has parameter \\$persistent with no type specified\\.$#"
 			count: 1
 			path: app/libraries/TokenManager.php
