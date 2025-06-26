@@ -532,7 +532,7 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        $has_overridden_grades = false;
+        $has_overridden_grades = $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades();
         if (!is_null($graded_gradeable)) {
             $graded_gradeable->hasOverriddenGrades();
         }
