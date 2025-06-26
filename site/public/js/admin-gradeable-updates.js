@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -9,6 +9,8 @@ let updateInProgressCount = 0;
 const errors = {};
 let previous_gradeable = '';
 let gradeable = '';
+let rebuild_triggered = false;
+
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').text('Some Changes Failed!').css('color', 'red');
@@ -114,6 +116,14 @@ function updateGradeableErrorCallback(message, response_data) {
         }
     }
     updateErrorMessage();
+}
+
+function parseUpdateGradeableResponseArray(response, gradeable_id) {
+    // Trigger periodic checks for latest rebuild status
+    if (response.includes('rebuild_queued')) {
+        rebuild_triggered = true;
+        ajaxCheckBuildStatus(gradeable_id, 'unknown');
+    }
 }
 
 function updateDueDate() {
@@ -370,6 +380,7 @@ function ajaxRebuildGradeableButton() {
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function () {
+            rebuild_triggered = true;
             ajaxCheckBuildStatus();
         },
         error: function (response) {
@@ -378,37 +389,55 @@ function ajaxRebuildGradeableButton() {
     });
 }
 
-function ajaxGetBuildLogs(gradeable_id) {
+function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
     $.getJSON({
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
+            let alerted = false;
             const build_info = response['data'][0];
             const cmake_info = response['data'][1];
             const make_info = response['data'][2];
 
             if (build_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
+                for (const line of build_info.split('\n')) {
+                    if (line.includes('WARNING:')) {
+                        alerted = true;
+                        displayWarningMessage(line.split('WARNING:')[1].trim());
+                    }
+                    else if (line.includes('ERROR:')) {
+                        alerted = true;
+                        displayErrorMessage(line.split('ERROR:')[1].trim());
+                    }
+                }
             }
             else {
-                $('#build-log-body').html('There is currently no build output.');
+                $('#build-log-body').text('There is currently no build output.');
             }
             if (cmake_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#cmake-log-body').html(cmake_info);
             }
             else {
-                $('#cmake-log-body').html('There is currently no cmake output.');
+                $('#cmake-log-body').text('There is currently no cmake output.');
             }
             if (make_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html(make_info);
             }
             else {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html('There is currently no make output.');
             }
 
-            $('.log-container').show();
-            $('#open-build-log').hide();
-            $('#close-build-log').show();
+            if (alerted || !rebuilt) {
+                // Display the build log for respective rebuild warnings/errors or manual instructor requests
+                $('.log-container').show();
+                $('#open-build-log').hide();
+                $('#close-build-log').show();
+            }
         },
         error: function (response) {
             console.error(`Failed to parse response from server: ${response}`);
@@ -426,32 +455,40 @@ function ajaxCheckBuildStatus() {
         success: function (response) {
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
-                $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
+                return;
             }
             else if (response['data'] === 'processing') {
-                $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
+                return;
             }
             else if (response['data'] === 'warnings') {
-                $('#rebuild-status').html('Gradeable built with warnings');
+                $('#rebuild-status').text('Gradeable built with warnings');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == true) {
                 $('.config_search_error').hide();
-                $('#rebuild-status').html('Gradeable build complete');
+                $('#rebuild-status').text('Gradeable build complete');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
-                $('#rebuild-status').html('Gradeable build failed');
+                $('#rebuild-status').text('Gradeable build failed');
                 $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {
-                $('#rebuild-status').html('Error');
+                $('#rebuild-status').text('Error');
                 console.error('Internal server error, please try again.');
+            }
+
+            if (rebuild_triggered) {
+                // Check for any potential build process warnings/errors
+                rebuild_triggered = false;
+                ajaxGetBuildLogs(gradeable_id, true);
             }
         },
         error: function (response) {
@@ -600,9 +637,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     data: p_values,
                     success: function (response) {
                         if (Array.isArray(response['data'])) {
-                            if (response['data'].includes('rebuild_queued')) {
-                                ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                            }
+                            parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                         }
                         setGradeableUpdateComplete();
                         if (response.status === 'success') {
@@ -650,9 +685,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             data: p_values,
             success: function (response) {
                 if (Array.isArray(response['data'])) {
-                    if (response['data'].includes('rebuild_queued')) {
-                        ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                    }
+                    parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                 }
                 setGradeableUpdateComplete();
                 if (response.status === 'success') {
