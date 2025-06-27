@@ -1530,22 +1530,6 @@ parameters:
 			path: app/controllers/admin/StudentActivityDashboardController.php
 
 		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 2
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -1627,11 +1611,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:uploadUserList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -2858,7 +2837,12 @@ parameters:
 			path: app/controllers/student/LeaderboardController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:run\\(\\) has no return type specified\\.$#"
+			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:gradesReport\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/controllers/student/RainbowGradesController.php
+
+		-
+			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/student/RainbowGradesController.php
 
