@@ -88,6 +88,11 @@ class EmailRepository extends EntityRepository {
             }
         }
 
+        // If the last increment was for a clean end, roll it back
+        if ($count === 0 && $subject_count === 0 && $page_count > 1) {
+            $page_count -= 1;
+        }
+
         return $page_count;
     }
 
