@@ -11,7 +11,7 @@ use app\models\User;
 class RainbowGradesController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/grades")]
     public function gradesReport() {
-        if(!$this->core->getConfig()->displayRainbowGradesSummary() && $this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR) {
+        if (!$this->core->getConfig()->displayRainbowGradesSummary() && $this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR) {
             $this->core->addErrorMessage("Rainbow Grades are not enabled for this course");
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
