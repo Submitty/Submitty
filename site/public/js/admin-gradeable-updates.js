@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, CodeMirror, isConfigEdited */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -937,7 +937,7 @@ let originalConfigContent = null;
 let codeMirrorInstance = null;
 let current_g_id = null;
 let current_file_path = null;
-isConfigEdited = false;
+let isConfigEdited = false;
 
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
