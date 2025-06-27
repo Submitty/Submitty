@@ -12,10 +12,10 @@ class ModelClassExtensionTester extends PHPStanTestCase {
         return [
             [Button::class, 'getOnclick', true],
             [Button::class, 'setOnclick', true],
-            [Button::class, 'isOnclick', true],
+            [Button::class, 'hasOnClick', true],
             [Button::class, 'getAriaLabel', true],
             [Button::class, 'setAriaLabel', true],
-            [Button::class, 'isOnclick', true],
+            [Button::class, 'hasOnclick', true],
             [Button::class, 'getFoo', false],
             [Button::class, 'setFoo', false],
             [Button::class, 'isFoo', false],
