@@ -2123,7 +2123,7 @@ ORDER BY {$orderby}",
             $go_create = "LEFT JOIN grade_override AS go ON gd.g_id = go.g_id AND gd.gd_{$user_or_team_id} = go.{$user_or_team_id}";
             $go_check = "AND go.g_id IS NULL AND go.user_id IS NULL";
             $go_select = "UNION ALL
-                        SELECT {$users_or_teams}.{$section_key}, count({$users_or_teams}.*) * component_count.num AS cnt
+                        SELECT {$users_or_teams}.{$section_key}, 1 AS cnt -- grade override's should count as 1 component
                         FROM grade_override AS go
                                 INNER JOIN {$users_or_teams} ON go.{$user_or_team_id} = {$users_or_teams}.{$user_or_team_id} AND go.g_id=?
                                 INNER JOIN (
