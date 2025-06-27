@@ -127,6 +127,15 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             thread_object.add_message(print_red(f"ERROR: An error occurred: {e}"))
             traceback.print_exc(file=sys.stderr)
 
+        try:
+            pruned_info = client.images.prune(filters={'dangling': True})
+            images_deleted = pruned_info.get('ImagesDeleted')
+            if images_deleted and len(images_deleted) > 0:
+                thread_object.add_message(f"Pruned {len(images_deleted)} dangling image(s)")
+        except Exception as e:
+            thread_object.add_message(print_red(f"ERROR: An error occurred while pruning dangling images: {e}"))
+            traceback.print_exc(file=sys.stderr)
+
         for image in images_to_update:
             thread_object.add_message(f"{get_machine_by_ip(host)}: locally pulling the image '{image}'")
             try:
@@ -201,8 +210,8 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
 
                 # Add specified outputs to the simplified output
                 for line in lines:
-                    if 'Docker Version:' in line or 'Description:' in line or 'Removed image' in line:
-                        thread_object.add_message(line)
+                    if 'Docker Version:' in line or 'Description:' in line or 'Removed' in line or 'Pruned' in line:
+                        thread_object.add_message(f'{get_machine_by_ip(host)}: {line}')
 
                 print("\n".join(f"{get_machine_by_ip(host)}: {line}" for line in lines if line))
                 status = int(stdout.channel.recv_exit_status())

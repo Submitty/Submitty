@@ -36,9 +36,7 @@ def remove_images(client, required_images, system_images):
             image_id_to_tags.setdefault(image.id, []).extend(tags)
 
         image_tags = set(tag_to_image_id.keys())
-        images_to_remove = set.difference(image_tags, images_to_keep)
-        for image in images_to_remove:
-            print(f"Removed image {image}")
+        images_to_remove = set.difference(image_tags, images_to_keep)     
 
         for image_tag_to_remove in images_to_remove:
             try:
@@ -50,7 +48,7 @@ def remove_images(client, required_images, system_images):
                     client.images.remove(image_tag_to_remove)
                 else:
                     client.images.remove(image_id)
-
+                print(f"Removed image {image_tag_to_remove}")
             except docker.errors.ImageNotFound:
                 # This can happen if removing by ID clears out multiple tags we were planning to remove.
                 print(f"Image/tag {image_tag_to_remove} was already removed, skipping.")
@@ -63,6 +61,16 @@ def remove_images(client, required_images, system_images):
         print(f"ERROR: A major error occurred during the removal process: {e}")
         traceback.print_exc(file=sys.stderr)
         # Propagate the exception to cause a non-zero exit code
+        raise e
+    
+    try:
+        pruned_info = client.images.prune(filters={'dangling': True})
+        images_deleted = pruned_info.get('ImagesDeleted')
+        if images_deleted and len(images_deleted) > 0:
+            print(f"Pruned {len(images_deleted)} dangling image(s)")
+    except Exception as e:
+        print(f"ERROR: An error occurred while pruning dangling images: {e}")
+        traceback.print_exc(file=sys.stderr)
         raise e
 
     print("Image removal complete.")
