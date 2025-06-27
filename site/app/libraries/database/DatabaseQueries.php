@@ -483,49 +483,6 @@ SQL;
         });
     }
 
-    /*
-     * @return string[]
-     */
-    public function getAllTerms() {
-        $this->submitty_db->query(
-            "SELECT term_id FROM terms ORDER BY start_date DESC"
-        );
-        $return = [];
-        foreach ($this->submitty_db->rows() as $row) {
-            $return[] = $row['term_id'];
-        }
-        return $return;
-    }
-
-    /**
-     * Returns the provided term's start date in the given user's timezone.
-     * @param string $term Id of term we are checking.
-     * @param User $user whose timezone we get the date in.
-     * @return string The start date of the term.
-     */
-    public function getTermStartDate(string $term, User $user): string {
-        $this->submitty_db->query("
-            SELECT start_date
-            FROM terms
-            WHERE term_id=?
-        ", [$term]);
-        $timestamp = $this->submitty_db->rows()[0]['start_date'];
-        return DateUtils::convertTimeStamp($user, $timestamp, 'Y-m-d H:i:s');
-    }
-
-    /**
-     * @param string $term_id
-     * @param string $term_name
-     * @param \DateTime $start_date
-     * @param \DateTime $end_date
-     */
-    public function createNewTerm($term_id, $term_name, $start_date, $end_date) {
-        $this->submitty_db->query(
-            "INSERT INTO terms (term_id, name, start_date, end_date) VALUES (?, ?, ?, ?)",
-            [$term_id, $term_name, $start_date, $end_date]
-        );
-    }
-
     /**
      * @param User $user
      */
@@ -1039,10 +996,10 @@ SQL;
      * @param string $course
      */
     public function unregisterCourseUser(User $user, $semester, $course): void {
-        $this->submitty_db->query(
-            "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
-            [$user->getId(), $semester, $course]
-        );
+        // $this->submitty_db->query(
+        //     "UPDATE courses_users SET registration_section = NULL WHERE user_id = ? AND term = ? AND course = ?",
+        //     [$user->getId(), $semester, $course]
+        // );
 
         $this->course_db->query(
             "UPDATE users SET 
@@ -1059,16 +1016,16 @@ SQL;
      * @param string $course
      */
     public function insertCourseUser(User $user, $semester, $course) {
-        $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
-                        $this->submitty_db->convertBoolean($user->isManualRegistration())];
-        $this->submitty_db->query(
-            "
-INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
-VALUES (?,?,?,?,?,?)",
-            $params
-        );
+//         $params = [$semester, $course, $user->getId(), $user->getGroup(), $user->getRegistrationSection(),
+//                         $this->submitty_db->convertBoolean($user->isManualRegistration())];
+//         $this->submitty_db->query(
+//             "
+// INSERT INTO courses_users (term, course, user_id, user_group, registration_section, manual_registration)
+// VALUES (?,?,?,?,?,?)",
+//             $params
+//         );
 
-        $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
+//         $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getRegistrationType(), $user->getId()];
         $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=?, registration_type=? WHERE user_id=?", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
@@ -1120,7 +1077,6 @@ UPDATE courses_users SET user_group=?, registration_section=?, manual_registrati
 WHERE term=? AND course=? AND user_id=?",
                 $params
             );
-
             $params = [$user->getRotatingSection(), $user->getRegistrationSubsection(), $user->getId()];
             $this->course_db->query("UPDATE users SET rotating_section=?, registration_subsection=? WHERE user_id=?", $params);
             $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
@@ -5446,28 +5402,6 @@ AND gc_id IN (
                 WHERE to_user_id = ? and seen_at is NULL and {$id_query}",
             $parameters
         );
-    }
-
-    /**
-     * Returns true if the student was ever in the course,
-     * even if they are in the null section now.
-     * @param string $user_id The name of the user.
-     * @param string $course The course we're looking at.
-     * @param string $term The term we're looking t.
-     * @return bool True if the student was ever in the course, false otherwise.
-     */
-    public function wasStudentEverInCourse(
-        string $user_id,
-        string $course,
-        string $term
-    ): bool {
-        $this->submitty_db->query("
-                SELECT user_id
-                FROM courses_users
-                WHERE user_id=? and course=? and term=?;
-            ", [$user_id, $course, $term]);
-        $row = $this->submitty_db->row();
-        return count($row) > 0;
     }
 
     /**

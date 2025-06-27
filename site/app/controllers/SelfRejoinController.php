@@ -6,6 +6,8 @@ use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\RedirectResponse;
+use app\libraries\TermManager;
+use app\libraries\CourseUserManager;
 use app\models\Email;
 use app\models\User;
 
@@ -101,7 +103,7 @@ class SelfRejoinController extends AbstractController {
         // Reasons why you can't rejoin:
 
         // Can't rejoin courses you were never in.
-        if (!$this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
+        if (!CourseUserManager::wasStudentEverInCourse($this->core, $user_id, $course, $term)) {
             return false;
         }
 
@@ -136,7 +138,7 @@ class SelfRejoinController extends AbstractController {
             }
         }
 
-        $term_start_date = $this->core->getQueries()->getTermStartDate($term, $user);
+        $term_start_date = TermManager::getTermStartDate($this->core, $term, $user);
         // If today is within first two weeks of term, can re-add self.
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {
             return true;
