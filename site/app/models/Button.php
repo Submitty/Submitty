@@ -77,7 +77,7 @@ class Button extends AbstractModel {
         $this->prerequisite = $details["prerequisite"] ?? null;
         $this->progress = $details["progress"] ?? null;
         if ($this->progress !== null) {
-            $this->progress = max(0, min(100, floatval($this->progress)));
+            $this->progress = floatval($this->progress);
         }
         $this->title_on_hover = $details["title_on_hover"] ?? false;
         $this->aria_label = $details["aria_label"] ?? null;
