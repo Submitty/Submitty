@@ -16,8 +16,8 @@ def parse_arguments():
     action_group.add_argument("--pull", metavar="IMAGE", type=str, help="The image to pull.")
     action_group.add_argument("--remove", action="store_true", help="Remove all unused images.")
 
-    parser.add_argument("--required-images", type=str, nargs='*', help="A list of required images to keep during cleanup.")
-    parser.add_argument("--system-images", type=str, nargs='*', help="A list of system images to always keep during cleanup.")
+    parser.add_argument("--required-images", type=str, nargs='*', help="A list of required images to keep during removal.")
+    parser.add_argument("--system-images", type=str, nargs='*', help="A list of system images to always keep during removal.")
     return parser.parse_args()
 
 def remove_images(client, required_images, system_images):
@@ -61,7 +61,7 @@ def remove_images(client, required_images, system_images):
         # client.images.prune(filters={'dangling': True})
 
     except Exception as e:
-        print(f"ERROR: A major error occurred during the cleanup process: {e}")
+        print(f"ERROR: A major error occurred during the removal process: {e}")
         traceback.print_exc(file=sys.stderr)
         # Propagate the exception to cause a non-zero exit code
         raise e
