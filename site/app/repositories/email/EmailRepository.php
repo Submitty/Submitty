@@ -72,8 +72,23 @@ class EmailRepository extends EntityRepository {
      * @return int
      */
     public function getPageNum(?string $semester, ?string $course): int {
-        // Add 1 as no placeholder element is added for the first page
-        return count($this->getPageSubjects(PHP_INT_MAX, $semester, $course)) + 1;
+        $emails = $this->fetchEmails($semester, $course);
+        $count = 0;
+        $subject_count = 0;
+        $page_count = 1;
+
+        foreach ($emails as $email) {
+            $count += $email['cnt'];
+            $subject_count += 1;
+
+            if ($count >= self::PAGE_SIZE || $subject_count === self::MAX_SUBJECTS_PER_PAGE) {
+                $page_count += 1;
+                $count = 0;
+                $subject_count = 0;
+            }
+        }
+
+        return $page_count;
     }
 
     /**
@@ -108,10 +123,6 @@ class EmailRepository extends EntityRepository {
 
                 if ($curr_page > $page) {
                     break;
-                }
-                elseif ($page === PHP_INT_MAX) {
-                    // Each placeholder element represents a page to simplify page calculation
-                    array_push($subjects, null);
                 }
             }
         }
