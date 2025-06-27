@@ -10,7 +10,6 @@ class RainbowGradesView extends AbstractView {
      * Renders the Rainbow Grades page.
      *
      * @param string|null $grade_file The contents of the grade file, or null if not available.
-     * @return string Rendered HTML for the Rainbow Grades page.
      */
     public function showGrades($grade_file): string {
         $this->core->getOutput()->addBreadcrumb('Rainbow Grades');
