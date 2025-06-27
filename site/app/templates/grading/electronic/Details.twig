@@ -83,7 +83,7 @@
         'args': {
             'columns': all_columns|map(column => column.function),
             'labels': all_columns|map(column => column.title),
-            'hiddenColumns': ["active_graders"],
+            'hiddenColumns': default_hidden_columns,
             'forced': [
                 'grading'
             ],

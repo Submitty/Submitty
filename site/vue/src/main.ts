@@ -14,7 +14,7 @@ const exports = {
             }
         })();
 
-        return app.mount(target);
+        app.mount(target);
     },
 };
 

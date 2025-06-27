@@ -503,6 +503,13 @@ HTML;
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
      * @param array<string,bool> $grading_details_columns
+     * @param array<string,array<string,array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>> $active_graders
      * @return string
      */
     public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
@@ -893,9 +900,10 @@ HTML;
             }
         }
 
-        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
-            if ($column['function'] === "active_graders") {
-                return array_key_exists('active_graders', $grading_details_columns) && $grading_details_columns['active_graders'];
+        $default_hidden_columns = ["active_graders"];
+        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns, $default_hidden_columns) {
+            if (in_array($column['function'], $default_hidden_columns, true)) {
+                return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns['active_graders'];
             }
             return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
         });
@@ -928,6 +936,7 @@ HTML;
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $shown_columns,
+            "default_hidden_columns" => $default_hidden_columns,
             "all_columns" => $columns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),

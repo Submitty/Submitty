@@ -12027,6 +12027,11 @@ parameters:
 			path: app/views/forum/ForumThreadView.php
 
 		-
+			message: "#^Call to function in_array\\(\\) with arguments \\('\\#'\\|'Active Version'\\|'active_version'\\|'auto'\\|'Autograding'\\|'autograding'\\|'autograding_peer'\\|'Edit Teams'\\|'Graded Questions'\\|'graded_questions'\\|'Grading'\\|'grading'\\|'grading_blind'\\|'id'\\|'index'\\|'Section'\\|'section'\\|'Student'\\|'Team ID'\\|'Team Members'\\|'Team Name'\\|'team_edit'\\|'team_id'\\|'team_id_anon'\\|'team_members'\\|'team_members_anon'\\|'team_name'\\|'Total'\\|'total'\\|'user_id'\\|'user_id_anon'\\|'Viewed Grade'\\|'viewed_grade'\\), array\\{'active_graders'\\} and true will always evaluate to false\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: "#^Implicit array creation is not allowed \\- variable \\$component_details might not exist\\.$#"
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
