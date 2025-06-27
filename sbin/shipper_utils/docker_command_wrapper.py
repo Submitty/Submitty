@@ -36,7 +36,7 @@ def remove_images(client, required_images, system_images):
             image_id_to_tags.setdefault(image.id, []).extend(tags)
 
         image_tags = set(tag_to_image_id.keys())
-        images_to_remove = set.difference(image_tags, images_to_keep)     
+        images_to_remove = set.difference(image_tags, images_to_keep)
 
         for image_tag_to_remove in images_to_remove:
             try:
@@ -62,7 +62,7 @@ def remove_images(client, required_images, system_images):
         traceback.print_exc(file=sys.stderr)
         # Propagate the exception to cause a non-zero exit code
         raise e
-    
+
     try:
         pruned_info = client.images.prune(filters={'dangling': True})
         images_deleted = pruned_info.get('ImagesDeleted')
