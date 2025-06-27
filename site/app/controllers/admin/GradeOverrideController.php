@@ -49,23 +49,13 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             elseif (intval($option) === 1) {
-                $team_member_ids = explode(", ", $team->getMemberList());
-                foreach ($team_member_ids as $member_id) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
                     $this->core->getQueries()->deleteOverriddenGrades($member_id, $gradeable_id);
                 }
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
-                $team_member_ids = explode(", ", $team->getMemberList());
-                $team_members = [];
-                foreach ($team_member_ids as $member_id) {
-                    $member = $this->core->getQueries()->getUserById($member_id);
-                    $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
-                }
-                $popup_html = $this->core->getOutput()->renderTwigTemplate(
-                    "admin/users/GradeOverridesTeamPrompt.twig",
-                    ['member_list' => $team_members, 'is_delete' => true]
-                );
+                $popup_html = $this->renderTeamPrompt($team, true);
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,
                     'popup' => $popup_html
@@ -101,23 +91,13 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             elseif (intval($option) === 1) {
-                $team_member_ids = explode(", ", $team->getMemberList());
-                foreach ($team_member_ids as $member_id) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
                     $this->core->getQueries()->updateGradeOverride($member_id, $gradeable_id, $_POST['marks'], $_POST['comment']);
                 }
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
-                $team_member_ids = explode(", ", $team->getMemberList());
-                $team_members = [];
-                foreach ($team_member_ids as $member_id) {
-                    $member = $this->core->getQueries()->getUserById($member_id);
-                    $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
-                }
-                $popup_html = $this->core->getOutput()->renderTwigTemplate(
-                    "admin/users/GradeOverridesTeamPrompt.twig",
-                    ['member_list' => $team_members, 'is_delete' => false]
-                );
+                $popup_html = $this->renderTeamPrompt($team, false);
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,
                     'popup' => $popup_html
@@ -128,5 +108,27 @@ class GradeOverrideController extends AbstractController {
             $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
             return $this->getOverriddenGrades($gradeable_id);
         }
+    }
+
+    /**
+     * Helper to extract team member IDs from a team object
+     */
+    private function getTeamMemberIds($team): array {
+        return explode(", ", $team->getMemberList());
+    }
+
+    /**
+     * Helper to render the team prompt popup
+     */
+    private function renderTeamPrompt($team, bool $is_delete): string {
+        $team_members = [];
+        foreach ($this->getTeamMemberIds($team) as $member_id) {
+            $member = $this->core->getQueries()->getUserById($member_id);
+            $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
+        }
+        return $this->core->getOutput()->renderTwigTemplate(
+            "admin/users/GradeOverridesTeamPrompt.twig",
+            ['member_list' => $team_members, 'is_delete' => $is_delete]
+        );
     }
 }
