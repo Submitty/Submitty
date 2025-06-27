@@ -9,10 +9,10 @@ def execute_notebook(timeout=600):
     notebook_files = list(Path('.').glob('*.ipynb'))
     if not notebook_files:
         raise FileNotFoundError("No Jupyter notebook files found in the current directory.")
-    notebook_filename = Path(notebook_files[0])
-
     if len(notebook_files) > 1:
-        print(f"Warning: Multiple notebook files found. Using the first one: {notebook_filename}")
+        raise ValueError("Multiple Jupyter notebook files found. Please ensure only one notebook file is present in the current directory.")
+    
+    notebook_filename = Path(notebook_files[0])
 
     with open(notebook_filename) as f:
         # Load the notebook and do not convert it to a specific version
