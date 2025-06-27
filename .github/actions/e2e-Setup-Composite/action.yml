@@ -135,7 +135,7 @@ runs:
     - name: Install third party dependencies
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh "config=/usr/local/submitty/config"
       shell: bash
 
     - name: Configure Test suite
