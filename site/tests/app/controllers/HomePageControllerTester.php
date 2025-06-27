@@ -29,6 +29,10 @@ class HomePageControllerTester extends BaseUnitTest {
 
     public function testGetCourses() {
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'student');
+        $controller = $this->createMock(TermController::class);
+        // Set start day to today for dropped courses
+        $controller->method('getTermStartDate')
+            ->willReturn(date('Y-m-d H:i:s'));
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');

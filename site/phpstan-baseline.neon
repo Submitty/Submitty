@@ -5151,11 +5151,6 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createNewTerm\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createPost\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
@@ -5607,11 +5602,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAllTeamViewedTimesForGradeable\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAllTerms\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -11655,11 +11645,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\admin\\\\ReportView\\:\\:showReportUpdates\\(\\) has parameter \\$json with no type specified\\.$#"
 			count: 1
 			path: app/views/admin/ReportView.php
-
-		-
-			message: "#^Method app\\\\views\\\\admin\\\\SqlToolboxView\\:\\:showToolbox\\(\\) has parameter \\$tables with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/admin/SqlToolboxView.php
 
 		-
 			message: "#^Method app\\\\views\\\\admin\\\\StudentActivityDashboardView\\:\\:createTable\\(\\) has no return type specified\\.$#"

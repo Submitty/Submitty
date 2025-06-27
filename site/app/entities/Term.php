@@ -10,6 +10,7 @@ use Doctrine\ORM\Entity;
 
 /**
  * Doctrine entity for Terms, not much used but used for other queries.
+ * @package app\entities
  */
 #[ORM\Entity]
 #[ORM\Table(name: "terms")]
@@ -35,5 +36,21 @@ class Term {
         $this->name = $name;
         $this->start_date = $start_date;
         $this->end_date = $end_date;
+    }
+
+    public function getId(): string {
+        return $this->term_id;
+    }
+
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function getStartDate(): string {
+        return $this->start_date;
+    }
+
+    public function getEndDate(): string {
+        return $this->end_date;
     }
 }

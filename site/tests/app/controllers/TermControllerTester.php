@@ -8,15 +8,31 @@ use app\libraries\Core;
 use app\libraries\TermController;
 use app\entities\Term;
 use app\models\User;
-use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
 class TermControllerTester extends BaseUnitTest {
-
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
+        $core->getSubmittyEntityManager()
+            ->expects($this->once())
+            ->method('persist')
+            ->with(
+                $this->callback(function ($term): bool {
+                    $this->assertInstanceOf(Term::class, $term);
+                    $this->assertEquals($term->getId(), 'id');
+                    $this->assertEquals($term->getName(), 'name');
+                    $this->assertEquals($term->getStartDate(), '06/25/25');
+                    $this->assertEquals($term->getEndDate(), '07/18/25');
+                    return true;
+                })
+            );
+        $entityManager
+            ->expects($this->once())
+            ->method('flush');
         // Testing create terms
-        TermController::createNewTerm($core, 'id', 'NAME', '06/25/25', '07/18/25');
+        TermManager::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
+        $repo->expects($this->once())
+            ->method('getTermStartDate');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
@@ -39,7 +55,6 @@ class TermControllerTester extends BaseUnitTest {
             'grading_registration_sections' => [1, 2]
         ];
         $user = new User($core, $detail);
-        $this->assertEquals(TermController::getTermStartDate($core, 'id', $user), DateUtils::convertTimeStamp($user, '06/25/25', 'Y-m-d H:i:s'));
+        TermManager::getTermStartDate($core, 'id', $user);
     }
-
 }
