@@ -2837,16 +2837,6 @@ parameters:
 			path: app/controllers/student/LeaderboardController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:gradesReport\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/RainbowGradesController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/RainbowGradesController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
 			path: app/controllers/student/SubmissionController.php
@@ -12339,31 +12329,6 @@ parameters:
 			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
 			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
