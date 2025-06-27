@@ -999,7 +999,7 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#grader-info').attr('data-can_verify') === 'true';
+    return $('#grader-info').attr('data-can_verify') === '1';
 }
 window.canVerifyGraders = canVerifyGraders;
 
