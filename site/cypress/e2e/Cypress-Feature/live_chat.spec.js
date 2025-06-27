@@ -1,18 +1,18 @@
-const title1 = "Test Chatroom Title";
-const title2 = "Non Anon Test Chatroom Title";
-const description1 = "Test Description";
-const description2 = "Non Anon Test Description";
-const msgText1 = "Test";
-const msgText2 = "Test2";
-const msgText3 = "!@!@!@!@!@!@#$#$#$#$%$%^%^&^&**&**(*(*(><><><><:K:KKKJJ{K}JKJK|||][]';';/./,.,djsdaaxeiq ggoih vjcaxkcx[x8ytgd";
-const name1 = "Quinn Instructor";
-const name2 = "Joe S.";
+const title1 = 'Test Chatroom Title';
+const title2 = 'Non Anon Test Chatroom Title';
+const description1 = 'Test Description';
+const description2 = 'Non Anon Test Description';
+const msgText1 = 'Test';
+const msgText2 = 'Test2';
+const msgText3 = '!@!@!@!@!@!@#$#$#$#$%$%^%^&^&**&**(*(*(><><><><:K:KKKJJ{K}JKJK|||][]';';/./,.,djsdaaxeiq ggoih vjcaxkcx[x8ytgd';
+const name1 = 'Quinn Instructor';
+const name2 = 'Joe S.';
 
 const getChatroom = (title) => {
     return cy.get('[data-testid="chatroom-item"]').filter((index, el) => {
         return Cypress.$(el).find('[data-testid="chatroom-title"]').text().trim() === title;
     }).first();
-}
+};
 
 const startChatSession = (title) => {
     chatroomExists(title).then((exists) => {
@@ -20,7 +20,7 @@ const startChatSession = (title) => {
             getChatroom(title).find('[data-testid="enable-chatroom"]').first().click();
         }
     });
-}
+};
 
 const endChatSession = (title) => {
     chatroomExists(title).then((exists) => {
@@ -28,7 +28,7 @@ const endChatSession = (title) => {
             cy.get('body').then(($body) => {
                 const chatroom = $body.find(`[data-testid="chatroom-item"]:has([data-testid="chatroom-title"]:contains("${title}"))`);
                 const disableBtn = chatroom.find('[data-testid="disable-chatroom"]');
-                
+
                 if (disableBtn.length > 0) {
                     cy.window().then((win) => {
                         cy.stub(win, 'confirm').callsFake((confirmText) => {
@@ -36,13 +36,13 @@ const endChatSession = (title) => {
                             return true;
                         });
                     });
-                    
+
                     getChatroom(title).find('[data-testid="disable-chatroom"]').first().click();
                 }
             });
         }
-    })
-}
+    });
+};
 
 const toggleLiveChat = (enableChat) => {
     cy.visit(['sample', 'config']);
@@ -66,7 +66,7 @@ const chatroomExists = (title) => {
             }).length > 0;
         });
     });
-}
+};
 
 const deleteChatroom = (title) => {
     cy.reload();
@@ -79,58 +79,58 @@ const deleteChatroom = (title) => {
                     return true;
                 });
             });
-                
+
             getChatroom(title).find('[data-testid="delete-chatroom"]').first().click();
         }
     });
-}
+};
 
 const checkTitle = (title) => {
     expect(chatroomExists(title) > 0);
-}
+};
 
 const checkDescription = (title, description) => {
     getChatroom(title).find('[data-testid="chatroom-description"]').then(($el) => {
         expect($el.text().trim() === description);
     })
-}
+};
 
 const checkHost = (title, host) => {
     getChatroom(title).find('[data-testid="chatroom-host"]').then(($el) => {
         expect($el.text().trim() === host);
     });
-}
+};
 
 const checkAnon = (title, expectedAnon) => {
-    getChatroom(title).then($chatroom => {
+    getChatroom(title).then(($chatroom) => {
         cy.wrap($chatroom).find('[data-testid="chat-join-btn"]').should('exist');
-        let exist = expectedAnon ? 'exist' : 'not.exist';
+        const exist = expectedAnon ? 'exist' : 'not.exist';
         cy.wrap($chatroom).find('[data-testid="anon-chat-join-btn"]').should(exist);
     });
-}
+};
 
 const createChatroom = (title, description, isAnon) => {
     cy.get('[data-testid="new-chatroom-btn"]').should('exist').click().then(() => {
         cy.get('[data-testid="chatroom-name-entry"]').should('exist').type(title, { force: true });
         cy.get('[data-testid="chatroom-description-entry"]').should('exist').type(description, { force: true });
-        if (!isAnon){
+        if (!isAnon) {
             cy.get('[data-testid="enable-disable-anon"]').should('exist').click();
         }
         cy.get('[data-testid="submit-chat-creation"]').should('exist').click({ force: true }).then(() => {
             checkTitle(title);
             checkDescription(title, description);
             checkAnon(title, isAnon);
-        })
+        });
     });
-}
+};
 
 const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAnon) => {
     cy.reload();
     chatroomExists(oldTitle).then((exists) => {
         if (exists) {
             getChatroom(oldTitle).find('[data-testid="edit-chatroom"]').first().click().then(() => {
-                cy.get('[data-testid="chatroom-name-edit"]').should('exist').clear({force : true}).type(newTitle, { force: true });
-                cy.get('[data-testid="chatroom-description-edit"]').should('exist').clear({force : true}).type(newDescription, { force: true });
+                cy.get('[data-testid="chatroom-name-edit"]').should('exist').clear({ force: true }).type(newTitle, { force: true });
+                cy.get('[data-testid="chatroom-description-edit"]').should('exist').clear({ force: true }).type(newDescription, { force: true });
                 if (toggleAnon) {
                     cy.get('[data-testid="edit-anon"]').should('exist').click();
                 }
@@ -138,18 +138,17 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
                     checkTitle(newTitle);
                     checkDescription(newTitle, newDescription);
                     checkAnon(newTitle, expectedAnon);
-                })
+                });
             });
-           
         }
     });
-}
+};
 
 const checkChatMessage = (text, name) => {
     expect(cy.get('[data-testid="message-container"]').last().text === text);
-    let title = cy.get('[data-testid="sender-name"]').last().text ?? "";
+    const title = cy.get('[data-testid="sender-name"]').last().text ?? "";
     expect(title.includes(name));
-}
+};
 
 const getAnonName = () => {
     return cy.get('[data-testid="sender-name"]').last().text;
@@ -161,18 +160,18 @@ const sendChatMessage = (text, name) => {
             checkChatMessage(text, name);
         });
     });
-}
+};
 
 const sendChatMessageEnter = (text, name) => {
     cy.get('[data-testid="msg-input"]').should('exist').type(text).type('{enter}').then(() => {
         checkChatMessage(text, name);
     });
-}
+};
 
 describe('Tests for enabling Live Chat', () => {
     beforeEach(() => {
         cy.login('instructor');
-    })
+    });
 
     it('Should enable the Live Chat feature for the sample course', () => {
         toggleLiveChat(true).then(() => {
@@ -185,7 +184,7 @@ describe('Tests for enabling Live Chat', () => {
             });
         });
     });
-    
+
     it('Should test creating new chats, allowing and disallowing anonymous participants.', () => {
         toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
@@ -220,31 +219,31 @@ describe('Tests for enabling Live Chat', () => {
             deleteChatroom(title1);
             createChatroom(title1, description1, false);
             cy.logout();
-            cy.login("student");
+            cy.login('student');
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="chatroom-item"]').should('not.exist');
             cy.logout();
-            cy.login("instructor");
+            cy.login('instructor');
             cy.visit(['sample', 'chat']);
             startChatSession(title1);
             cy.logout();
-            cy.login("student");
+            cy.login('student');
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="chatroom-item"]').should('exist');
             cy.logout();
-            cy.login("instructor");
+            cy.login('instructor');
             cy.visit(['sample', 'chat']);
             endChatSession(title1);
             cy.logout();
-            cy.login("student");
+            cy.login('student');
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="chatroom-item"]').should('not.exist');
             cy.logout();
-            cy.login("instructor");
+            cy.login('instructor');
             cy.visit(['sample', 'chat']);
             deleteChatroom(title1);
         });
-    })
+    });
 
     it('Should test starting chat sessions and chatting', () => {
         toggleLiveChat(true).then(() => {
@@ -257,7 +256,7 @@ describe('Tests for enabling Live Chat', () => {
             sendChatMessage(msgText3, name1);
             cy.get('[data-testid="leave-chat"]').click();
             cy.logout();
-            cy.login("student");
+            cy.login('student');
             cy.visit(['sample', 'chat']);
             checkTitle(title1);
             checkDescription(title1, description1);
@@ -271,7 +270,7 @@ describe('Tests for enabling Live Chat', () => {
             sendChatMessageEnter(msgText3, name2);
             cy.get('[data-testid="leave-chat"]').click();
             cy.logout();
-            cy.login("instructor");
+            cy.login('instructor');
             cy.visit(['sample', 'chat']);
             deleteChatroom(title1);
             toggleLiveChat(false).then(() => {
@@ -287,8 +286,8 @@ describe('Tests for enabling Live Chat', () => {
             createChatroom(title1, description1, true);
             startChatSession(title1);
             cy.get('[data-testid="anon-chat-join-btn"]').click();
-            sendChatMessage(msgText1, "Anonymous");
-            sendChatMessage(msgText3, "Anonymous");
+            sendChatMessage(msgText1, 'Anonymous');
+            sendChatMessage(msgText3, 'Anonymous');
             let instructorAnon = getAnonName();
             cy.get('[data-testid="leave-chat"]').click();
             cy.get('[data-testid="anon-chat-join-btn"]').click();
@@ -298,7 +297,7 @@ describe('Tests for enabling Live Chat', () => {
             checkChatMessage(msgText3, instructorAnon);
             sendChatMessage(msgText3, name1);
             cy.logout();
-            cy.login("student");
+            cy.login('student');
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="chat-join-btn"]').click();
             checkChatMessage(msgText3, name1);
@@ -306,12 +305,12 @@ describe('Tests for enabling Live Chat', () => {
             cy.get('[data-testid="leave-chat"]').click();
             cy.get('[data-testid="anon-chat-join-btn"]').click();
             checkChatMessage(msgText2, name2);
-            sendChatMessage(msgText2, "Anonymous");
+            sendChatMessage(msgText2, 'Anonymous');
             let studentAnon = getAnonName();
             //expect(instructorAnon === studentAnon); TODO: Make sure that this is never the case
             cy.get('[data-testid="leave-chat"]').click();
             cy.logout();
-            cy.login("instructor");
+            cy.login('instructor');
             cy.visit(['sample', 'chat']);
             cy.get('[data-testid="anon-chat-join-btn"]').click();
             checkChatMessage(msgText2, studentAnon);
