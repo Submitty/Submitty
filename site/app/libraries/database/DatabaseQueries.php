@@ -10,6 +10,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
@@ -5994,6 +5995,7 @@ AND gc_id IN (
               gamo.*,
               gc.*,
               pgp.*,
+              r.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
               (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
               (
@@ -6006,6 +6008,18 @@ AND gc_id IN (
                 ) AS distinct_submissions
             ) AS notifications_sent
             FROM gradeable g
+              LEFT JOIN (
+                SELECT
+                  g_id,
+                  json_agg(redaction_id) as redaction_id,
+                  json_agg(page) AS redaction_page,
+                  json_agg(x1) AS redaction_x1,
+                  json_agg(y1) AS redaction_y1,
+                  json_agg(x2) AS redaction_x2,
+                  json_agg(y2) AS redaction_y2
+                FROM gradeable_redaction
+                GROUP BY g_id
+              ) AS r ON g.g_id=r.g_id
               LEFT JOIN (
                 SELECT
                   g_id AS eg_g_id,
@@ -6212,6 +6226,39 @@ AND gc_id IN (
 
             // Set the components
             $gradeable->setComponentsFromDatabase($components);
+
+            if (isset($row["redaction_id"])) {
+                // Create the redaction data
+                $redaction_properties = [
+                    'id',
+                    'page',
+                    'x1',
+                    'y1',
+                    'x2',
+                    'y2'
+                ];
+                $unpacked_redaction_data = [];
+                foreach ($redaction_properties as $property) {
+                    $unpacked_redaction_data[$property] = json_decode($row['redaction_' . $property]) ?? [];
+                }
+
+                // Create the redactions
+                $redactions = [];
+                for ($i = 0; $i < count($unpacked_redaction_data['id']); ++$i) {
+                    // Transpose a single redaction at a time
+                    $redaction_data = [];
+                    foreach ($redaction_properties as $property) {
+                        $redaction_data[$property] = $unpacked_redaction_data[$property][$i];
+                    }
+
+                    // Create the redaction instance
+                    $redactions[] = new Redaction($this->core, $redaction_data['page'], $redaction_data['x1'], $redaction_data['y1'], $redaction_data['x2'], $redaction_data['y2']);
+                }
+
+                // Set the redactions
+                $gradeable->setRedactionsFromDatabase($redactions);
+            }
+
 
             return $gradeable;
         };
@@ -9540,9 +9587,32 @@ ORDER BY
     }
 
     /**
-     * @param string $user_id the userid of the user
-     * @return array<string>
+     * @param Gradeable $gradeable
+     * @param array<Redaction> $redactions
      */
+    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
+        $this->course_db->beginTransaction();
+        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
+        foreach ($redactions as $redaction) {
+            $this->course_db->query(
+                "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES (?, ?, ?, ?, ?, ?)",
+                [
+                    $gradeable->getId(),
+                    $redaction->getPageNumber(),
+                    $redaction->getX1(),
+                    $redaction->getY1(),
+                    $redaction->getX2(),
+                    $redaction->getY2()
+                ]
+            );
+        }
+        $this->course_db->commit();
+    }
+
+     /**
+      * @param string $user_id the userid of the user
+      * @return array<string>
+      */
     public function getInstructorQueries($user_id): array {
         $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
         return $this->submitty_db->rows();
