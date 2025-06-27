@@ -4,7 +4,7 @@ const description1 = 'Test Description';
 const description2 = 'Non Anon Test Description';
 const msgText1 = 'Test';
 const msgText2 = 'Test2';
-const msgText3 = '!@!@!@!@!@!@#$#$#$#$%$%^%^&^&**&**(*(*(><><><><:K:KKKJJ{K}JKJK|||][]';';/./,.,djsdaaxeiq ggoih vjcaxkcx[x8ytgd';
+const msgText3 = '!@!@!@!@!@!@#$#$#$#$%$%^%^&^&**&**(*(*(><><><><:K:KKKJJ{K}JKJK|||][];;/./,.,djsdaaxeiq ggoih vjcaxkcx[x8ytgd';
 const name1 = 'Quinn Instructor';
 const name2 = 'Joe S.';
 
@@ -92,7 +92,7 @@ const checkTitle = (title) => {
 const checkDescription = (title, description) => {
     getChatroom(title).find('[data-testid="chatroom-description"]').then(($el) => {
         expect($el.text().trim() === description);
-    })
+    });
 };
 
 const checkHost = (title, host) => {
@@ -146,13 +146,13 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
 
 const checkChatMessage = (text, name) => {
     expect(cy.get('[data-testid="message-container"]').last().text === text);
-    const title = cy.get('[data-testid="sender-name"]').last().text ?? "";
+    const title = cy.get('[data-testid="sender-name"]').last().text ?? '';
     expect(title.includes(name));
 };
 
 const getAnonName = () => {
     return cy.get('[data-testid="sender-name"]').last().text;
-}
+};
 
 const sendChatMessage = (text, name) => {
     cy.get('[data-testid="msg-input"]').should('exist').type(text).then(() => {
@@ -288,7 +288,7 @@ describe('Tests for enabling Live Chat', () => {
             cy.get('[data-testid="anon-chat-join-btn"]').click();
             sendChatMessage(msgText1, 'Anonymous');
             sendChatMessage(msgText3, 'Anonymous');
-            let instructorAnon = getAnonName();
+            const instructorAnon = getAnonName();
             cy.get('[data-testid="leave-chat"]').click();
             cy.get('[data-testid="anon-chat-join-btn"]').click();
             checkChatMessage(msgText3, instructorAnon);
@@ -306,8 +306,8 @@ describe('Tests for enabling Live Chat', () => {
             cy.get('[data-testid="anon-chat-join-btn"]').click();
             checkChatMessage(msgText2, name2);
             sendChatMessage(msgText2, 'Anonymous');
-            let studentAnon = getAnonName();
-            //expect(instructorAnon === studentAnon); TODO: Make sure that this is never the case
+            const studentAnon = getAnonName();
+            // expect(instructorAnon === studentAnon); TODO: Make sure that this is never the case
             cy.get('[data-testid="leave-chat"]').click();
             cy.logout();
             cy.login('instructor');
