@@ -94,7 +94,7 @@
                 {{ sort.sortable_header('Image Name', 'name') }}
                 <th>Tag</th>
                 <th>Alias</th>
-                <th>Id</th>
+                <th>Digest</th>
                 {{ sort.sortable_header('Size', 'size') }}
                 {{ sort.sortable_header('Created', 'created') }}
                 <th>Capabilities Containing This Image</th>
@@ -121,7 +121,7 @@
                         </ul>
                     {% endif %}
                 </td>
-                <td>{{ image.id | trim("sha256:")}}</td>
+                <td>{{ image.digest | trim("sha256:") | slice(0,20) }}</td>
                 <td>{{ image.size_mb }}</td>
                 <td>{{ image.created_timestamp }}</td>
                 <td>
