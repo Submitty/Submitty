@@ -345,6 +345,31 @@ class FileUtils {
         return $size;
     }
 
+    public static function validateZipFileSize(string $filename): bool {
+        $zip = new \ZipArchive();
+        $res = $zip->open($filename);
+        if ($res !== true) {
+            return false; // not a valid zip file
+        }
+        for ($i = 0; $i < $zip->count(); $i++) {
+            $stream = $zip->getStream($zip->getNameIndex($i));
+            if ($stream === false) {
+                return false;
+            }
+            $size = 0;
+            $max_size = $zip->statIndex($i)['size'];
+            while (!feof($stream)) {
+                $size += strlen(fread($stream, 8192));
+                if ($size > $max_size) {
+                    fclose($stream);
+                    return false; // early exit if size exceeds max size
+                }
+            }
+            fclose($stream);
+        }
+        return true;
+    }
+
     /**
      * @param string $zipname
      * @return bool

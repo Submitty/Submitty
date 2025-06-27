@@ -77,19 +77,19 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Visualize whitespace characters') {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-default');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-primary');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Display whitespace/non-printing characters as escape sequences');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Display whitespace/non-printing characters as escape sequences');
         list_white_spaces['newline'] = '&#9166;';
         option = 'unicode';
     }
     else if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Display whitespace/non-printing characters as escape sequences') {
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Original View');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Original View');
         list_white_spaces['newline'] = '\\n';
         option = 'escape';
     }
     else {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-primary');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-default');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Visualize whitespace characters');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Visualize whitespace characters');
         option = 'original';
     }
     // Insert actual and expected one at a time
@@ -118,6 +118,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                 list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
+            // eslint-disable-next-line no-restricted-syntax
             $(expected_div).html(response.data.html);
             url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
             }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
@@ -134,6 +135,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                         $(`#${helper_id}`).append(`<span style="outline:1px blue solid;">${list_white_spaces[property]}</span> = ${property} `);
                     }
                     $(actual_div).empty();
+                    // eslint-disable-next-line no-restricted-syntax
                     $(actual_div).html(response.data.html);
                 },
                 error: function () {
@@ -150,7 +152,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#delete-gradeable-form');
-    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).text('');
     $('[id="delete-gradeable-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -160,7 +162,7 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#close-submissions-form');
-    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).text('');
     $('[id="close-submissions-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -215,7 +217,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
 
         const emElement = document.createElement('em');
-        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}${num_links_txt}`;
+        emElement.innerHTML = ` (<b>contains ${escapeSpecialChars(num_of_files.toString())}</b> file${escapeSpecialChars(file_s.toString())}${escapeSpecialChars(num_links_txt.toString())}`;
 
         cm_message.appendChild(emElement);
     }
@@ -291,7 +293,7 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
     showPopup('#upload-course-materials-form');
@@ -307,7 +309,7 @@ function newUploadBanner() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-banner');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
 
     const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
     $('[name="existing-file-list"]', form).append(stringifiedFiles);
@@ -483,7 +485,7 @@ function editFilePathRecommendations() {
         }
 
         options[i].value = newOption;
-        options[i].innerHTML = newOption;
+        options[i].textContent = newOption;
     }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 }
@@ -800,20 +802,27 @@ function toggleDiv(id) {
     return true;
 }
 
-function checkRefreshPage(url) {
+function checkRefreshPage(url, anon_id = '') {
     setTimeout(() => {
-        check_server(url);
+        check_server(url, anon_id);
     }, 1000);
 }
 
-function check_server(url) {
-    $.get(url,
+function check_server(url, anon_id = '') {
+    $.get(url, { anon_id: anon_id },
         (data) => {
-            if (data.indexOf('REFRESH_ME') > -1) {
-                location.reload();
+            try {
+            // if the response bool is true, reload the page
+                const refresh_bool = JSON.parse(data).data;
+                if (refresh_bool === true) {
+                    location.reload();
+                }
+                else {
+                    checkRefreshPage(url, anon_id);
+                }
             }
-            else {
-                checkRefreshPage(url);
+            catch (e) {
+                console.log('Error parsing server response:', e);
             }
         },
     );
@@ -852,7 +861,7 @@ function checkColorActivated() {
     // eslint-disable-next-line no-undef
     pos = 0;
     // eslint-disable-next-line no-undef
-    seq = "&&((%'%'BA\r";
+    seq = '&&((%\'%\'BA\r';
     const rainbow_mode = JSON.parse(localStorage.getItem('rainbow-mode'));
 
     function inject() {
@@ -1000,7 +1009,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'black';
             new_element.style.fontStyle = 'normal';
         }
-        new_element.innerHTML = visible_username;
+        new_element.textContent = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
@@ -1009,7 +1018,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'grey';
             new_element.style.fontStyle = 'italic';
         }
-        new_element.innerHTML = user;
+        new_element.textContent = user;
         icon.className = 'fas fa-eye-slash';
         icon.title = 'Hide full user information';
     }
@@ -1124,7 +1133,6 @@ function resizeFrame(id, max_height = 500, force_height = -1) {
 /**
  * TODO: This may be unused.  Check, and potentially remove this function.
  */
-// eslint-disable-next-line no-unused-vars
 function batchImportJSON(url, csrf_token) {
     $.ajax(url, {
         type: 'POST',
@@ -1195,6 +1203,7 @@ function openPopUp(css, title, count, testcase_num, side) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${css}" />`;
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open('', '_blank', 'status=1,width=750,height=500');
+    // eslint-disable-next-line no-unsanitized/method
     my_window.document.write(elem_html);
     my_window.document.close();
     my_window.focus();
@@ -1397,7 +1406,7 @@ function escapeSpecialChars(text) {
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        "'": '&#039;',
+        '\'': '&#039;',
     };
 
     return text.replace(/[&<>"']/g, (m) => {
@@ -1772,6 +1781,8 @@ function flagUserImage(user_id, flag) {
                 // Change icon
                 const a = image_container.querySelector('a');
                 a.href = data.href;
+                // safe html
+                // eslint-disable-next-line no-unsanitized/property
                 a.innerHTML = data.icon_html;
 
                 displaySuccessMessage(success_message);

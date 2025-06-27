@@ -77,6 +77,19 @@
     {% endif %}
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
+    {% include 'Vue.twig' with {
+        'component': 'toggleColumns',
+        'style': 'display: inline;',
+        'args': {
+            'columns': all_columns|map(column => column.function),
+            'labels': all_columns|map(column => column.title),
+            'forced': [
+                'grading'
+            ],
+            'cookie': 'grading_details_columns',
+            'format': 'json',
+        },
+    } %}
     {% if message is not empty %}
     <div class="details-warning-box{% if message_warning %} details-warning-highlight{% else %} details-warning-neutral{% endif %}">
         {{ message|nl2br }}
@@ -127,7 +140,7 @@
             <tr>
                 {% for column in columns %}
                     {% if column.sort_type is defined %}
-                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">
+                        <th style="text-align: center" data-col-title="{{ column.title }}">
                             <a href="#" onclick= "sortTableByColumn('{{ column.sort_type }}', '{{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}')"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
@@ -142,7 +155,7 @@
                             </a>
                         </th>
                     {% else %}
-                        <th style="width:{{ column.width }}; text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
+                        <th style="text-align: center" data-col-title="{{ column.title }}">{{ column.title }}</th>
                     {% endif %}
                 {% endfor %}
             </tr>

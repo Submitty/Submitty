@@ -162,7 +162,8 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput(
                 'Error',
                 'unbuiltGradeable',
-                $gradeable->getTitle()
+                $gradeable,
+                "submissions"
             );
             $error = true;
         }
@@ -996,14 +997,17 @@ class SubmissionController extends AbstractController {
                     }
                 }
                 if ($regrade_all_students_all === 'true' || $regrade_all === 'true') {
-                    $active_version = $i;
+                    $version = $i;
                 }
                 else {
-                    $active_version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    $version = intval($_POST['version_to_regrade'] ?? 0);
+                    if ($version < 1 || $version > $g->getAutoGradedGradeable()->getHighestVersion()) {
+                        $version = $g->getAutoGradedGradeable()->getActiveVersion();
+                    }
                 }
                 //create file name
                 $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
-                    $gradeable_id, $who_id, $active_version];
+                    $gradeable_id, $who_id, $version];
                 $queue_file_helper = implode("__", $queue_file_helper);
                 $queue_file = FileUtils::joinPaths(
                     $this->core->getConfig()->getSubmittyPath(),
@@ -1023,7 +1027,7 @@ class SubmissionController extends AbstractController {
                     "team" => $team_id,
                     "user" => $user_id,
                     "vcs_checkout" => $gradeable->isVcs(),
-                    "version" => $active_version,
+                    "version" => $version,
                     "who" => $who_id
                 ];
                 //add file to directory which will trigger autograding
@@ -1480,7 +1484,15 @@ class SubmissionController extends AbstractController {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = true;
-                            $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $reported_size = FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $file_size += $reported_size;
+                            # Check size on each zip to ensure validation will not decompress a zip file that is too large
+                            if ($file_size > $max_size) {
+                                return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
+                            }
+                            if (!FileUtils::validateZipFileSize($uploaded_files[$i]["tmp_name"][$j])) {
+                                return $this->uploadResult("Corrupted ZIP file for " . $uploaded_files[$i]["name"][$j] . ".", false);
+                            }
                         }
                         else {
                             if (FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
@@ -1847,6 +1859,7 @@ class SubmissionController extends AbstractController {
                     file_put_contents($settings_file, FileUtils::encodeJson($settings));
                 }
             }
+            return $this->core->getOutput()->renderResultMessage($message, $success, false);
         }
         return $this->core->getOutput()->renderResultMessage($message, $success);
     }
@@ -2000,19 +2013,40 @@ class SubmissionController extends AbstractController {
         );
     }
 
+
+    /**
+     * Check if the unbuilt gradeable has been built yet
+     * @param string $gradeable_id
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")]
+    public function checkBuildRefresh(string $gradeable_id): JsonResponse {
+        $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
+        if ($gradeable === null) {
+            return JsonResponse::getFailResponse("No gradeable with that id.");
+        }
+
+        return JsonResponse::getSuccessResponse($gradeable->hasAutogradingConfig());
+    }
+
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      */
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements: ["gradeable_version" => "\d+"])]
-    public function checkRefresh($gradeable_id, $gradeable_version) {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
+    public function checkRefresh($gradeable_id, $gradeable_version): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // Don't load the graded gradeable, since that may not exist yet
         $submitter_id = $this->core->getUser()->getId();
+
+        // If we are an instructor, we can set the user_id to see regraded submissions
+        if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
+            $anon_id = $_GET['anon_id'];
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        }
+
         $user_id = $submitter_id;
         $team_id = null;
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
@@ -2049,16 +2083,7 @@ class SubmissionController extends AbstractController {
                 $team_id
             );
 
-        if ($has_results) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-        }
-        else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
-        }
-        $this->core->getOutput()->renderString($refresh_string);
-        return ['refresh' => $refresh_bool, 'string' => $refresh_string];
+        return JsonResponse::getSuccessResponse($has_results);
     }
 
     #[AccessControl(role: "FULL_ACCESS_GRADER")]

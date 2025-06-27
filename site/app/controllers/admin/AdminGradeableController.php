@@ -77,7 +77,7 @@ class AdminGradeableController extends AbstractController {
             'external_repo' => '',
             'using_subdirectory' => false,
             'vcs_subdirectory' => '',
-            'syllabus_bucket' => 'Homework',
+            'syllabus_bucket' => 'homework',
             'autograding_config_path' => ''
         ];
 
@@ -151,7 +151,7 @@ class AdminGradeableController extends AbstractController {
             $values['late_submission_allowed'] = $dates['late_submission_allowed'] ?? true;
             $values['late_days'] = $dates['late_days'] ?? 0;
         }
-        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'Homework';
+        $values['syllabus_bucket'] = $_POST['syllabus_bucket'] ?? 'homework';
         try {
             $build_result = $this->createGradeable($_POST['id'], $values);
             // Finally, redirect to the edit page
@@ -382,7 +382,9 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'notifications_sent' => 0,
+            'notifications_pending' => 0
         ]);
     }
 
@@ -393,6 +395,17 @@ class AdminGradeableController extends AbstractController {
         $gradeable_components_enc = array_map(function (Component $c) {
             return $c->toArray();
         }, $gradeable->getComponents());
+
+        $num_checkpoints = 0;
+        $num_text = 0;
+        foreach ($gradeable->getComponents() as $component) {
+            if ($component->isText()) {
+                $num_text++;
+            }
+            else {
+                $num_checkpoints++;
+            }
+        }
 
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
@@ -509,6 +522,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
+        $config_files = FileUtils::getAllFiles($gradeable->getAutogradingConfigPath());
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
@@ -524,8 +538,8 @@ class AdminGradeableController extends AbstractController {
         $hasCustomMarks =  $this->core->getQueries()->getHasCustomMarks($gradeable->getId());
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
-            $this->core->getOutput()->addInternalJs('ta-grading-rubric-conflict.js');
-            $this->core->getOutput()->addInternalJs('ta-grading-rubric.js');
+            $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
+            $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
         }
@@ -537,6 +551,8 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
+            'num_checkpoints' => $num_checkpoints,
+            'num_text_components' => $num_text,
             'gradeable' => $gradeable,
             'action' => 'edit',
             'nav_tab' => $nav_tab,
@@ -573,6 +589,7 @@ class AdminGradeableController extends AbstractController {
             'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
+            'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
@@ -590,7 +607,10 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
-            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary()
+            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'config_files' => $config_files,
+            'notifications_sent' => $gradeable->getNotificationsSent(),
+            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -616,7 +636,7 @@ class AdminGradeableController extends AbstractController {
             $tmp = $this->core->getQueries()->getPeerGradingAssignmentsForGrader($grader_id);
             $grading_assignment_for_grader = $tmp[$gradeable_id];
             foreach ($grading_assignment_for_grader as $i => $student_id) {
-                if (!in_array($student_id, json_decode($_POST['curr_student_ids']))) {
+                if (!in_array($student_id, json_decode($_POST['curr_student_ids']), true)) {
                     $this->core->getQueries()->removePeerAssignment($gradeable_id, $grader_id, $student_id);
                 }
             }
@@ -915,30 +935,56 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateRubric(Gradeable $gradeable, $details) {
-        $old_components = $gradeable->getComponents();
-        $num_old_components = count($old_components);
-        $start_index = $num_old_components;
-
-        /** @var Component[] $new_components */
-        $new_components = [];
-
-        // The electronic file mode is the least touched of them all since it will be replaced
-        //  with a unified interface with TA grading and share a separate "rubric" controller for it.
-        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            throw new \InvalidArgumentException('Attempt to update rubric using outdated method!');
-        }
-        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
+            if (!isset($details['text'])) {
+                $details['text'] = [];
+            }
+
+            $checkpoint_labels = [];
+            $checkpoint_extra = [];
+            $text_labels = [];
 
             $num_checkpoints = count($details['checkpoints']);
+            $num_text = count($details['text']);
+            $start_index_text = 0;
 
-            // Iterate through each existing component and update them in the database,
-            //  removing any extras
+            $old_checkpoints = [];
+            $num_old_checkpoints = 0;
+            $old_texts = [];
+            $num_old_texts = 0;
+
+            foreach ($gradeable->getComponents() as $old_component) {
+                if ($old_component->isText()) {
+                    $old_texts[] = $old_component;
+                    $num_old_texts++;
+                    $text_labels[] = $old_component->getTitle();
+                }
+                else {
+                    $old_checkpoints[] = $old_component;
+                    $num_old_checkpoints++;
+                    $checkpoint_labels[] = $old_component->getTitle();
+
+                    // Check if this checkpoint is extra credit
+                    $checkpoint_extra[] = $old_component->isExtraCredit();
+                }
+            }
+
+            $form_json = [
+                'checkpoint_label' => $checkpoint_labels,
+                'checkpoint_extra' => $checkpoint_extra,
+                'num_text_items' => $num_old_texts,
+                'num_checkpoint_items' => $num_old_checkpoints,
+                'text_label' => $text_labels,
+            ];
+
+            // Iterate through existing components
+            $new_components = [];
             $x = 0;
-            foreach ($old_components as $old_component) {
-                if ($x < $num_checkpoints && $x < $num_old_components) {
+            foreach ($old_checkpoints as $old_component) {
+                if ($x < $num_checkpoints) {
                     self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
                     $old_component->setOrder($x);
                     $new_components[] = $old_component;
@@ -946,11 +992,30 @@ class AdminGradeableController extends AbstractController {
                 $x++;
             }
 
-            // iterate through each new checkpoint, adding them to the database
-            for ($x = $start_index; $x < $num_checkpoints; $x++) {
+            for ($x = $num_old_checkpoints; $x < $num_checkpoints; $x++) {
                 $component = $this->newComponent($gradeable);
                 self::parseCheckpoint($component, $details['checkpoints'][$x]);
                 $component->setOrder($x);
+                $new_components[] = $component;
+            }
+
+            // Update existing text components with new details if they exist
+            $z = $x;
+            $x = 0;
+            foreach ($old_texts as $old_text) {
+                if ($x < $num_text && $x < $num_old_texts) {
+                    self::parseText($old_text, $details['text'][$x]);
+                    $old_text->setOrder($z + $x);// Maintain correct order after checkpoints
+                    $new_components[] = $old_text;
+                    $start_index_text++;
+                }
+                $x++;
+            }
+            // Add new text components if number of text items increase
+            for ($y = $start_index_text; $y < $num_text; $y++) {
+                $component = $this->newComponent($gradeable);
+                self::parseText($component, $details['text'][$y]);
+                $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
         }
@@ -965,16 +1030,13 @@ class AdminGradeableController extends AbstractController {
             $num_numeric = count($details['numeric']);
             $num_text = count($details['text']);
 
-            $start_index_numeric = 0;
-            $start_index_text = 0;
-
-            // Load all of the old numeric/text elements into two arrays
             $old_numerics = [];
             $num_old_numerics = 0;
             $old_texts = [];
             $num_old_texts = 0;
-            foreach ($old_components as $old_component) {
-                if ($old_component->isText() === true) {
+
+            foreach ($gradeable->getComponents() as $old_component) {
+                if ($old_component->isText()) {
                     $old_texts[] = $old_component;
                     $num_old_texts++;
                 }
@@ -984,43 +1046,40 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
+            $new_components = [];
             $x = 0;
-            // Iterate through each existing numeric component and update them in the database,
-            //  removing any extras
             foreach ($old_numerics as $old_numeric) {
                 if ($x < $num_numeric && $x < $num_old_numerics) {
                     self::parseNumeric($old_numeric, $details['numeric'][$x]);
                     $old_numeric->setOrder($x);
                     $new_components[] = $old_numeric;
-                    $start_index_numeric++;
                 }
                 $x++;
             }
 
-            for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
+            for ($x = $num_old_numerics; $x < $num_numeric; $x++) {
                 $component = $this->newComponent($gradeable);
                 self::parseNumeric($component, $details['numeric'][$x]);
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
 
+            // Iterate through text components and update them
             $z = $x;
             $x = 0;
-            // Iterate through each existing text component and update them in the database,
-            //  removing any extras
             foreach ($old_texts as $old_text) {
                 if ($x < $num_text && $x < $num_old_texts) {
                     self::parseText($old_text, $details['text'][$x]);
                     $old_text->setOrder($z + $x);
                     $new_components[] = $old_text;
-                    $start_index_text++;
                 }
                 $x++;
             }
 
-            for ($y = $start_index_text; $y < $num_text; $y++) {
+            // Add new text items if any
+            for ($y = $num_old_texts; $y < $num_text; $y++) {
                 $component = $this->newComponent($gradeable);
-                self::parseText($component, $details['text'][$x]);
+                self::parseText($component, $details['text'][$y]);
                 $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
@@ -1028,13 +1087,13 @@ class AdminGradeableController extends AbstractController {
         else {
             throw new \InvalidArgumentException("Invalid gradeable type");
         }
-
         // Finally, Set the components and update the gradeable
         $gradeable->setComponents($new_components);
 
         // Save to the database
         $this->core->getQueries()->updateGradeable($gradeable);
     }
+
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods: ["POST"])]
     public function updateGradersRequest($gradeable_id) {
@@ -1154,6 +1213,10 @@ class AdminGradeableController extends AbstractController {
         ];
         foreach ($front_page_property_names as $prop) {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
+        }
+
+        if (!in_array($details['syllabus_bucket'], self::syllabus_buckets, true)) {
+            throw new \InvalidArgumentException('Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets));
         }
 
         $repo_name = '';
@@ -1413,7 +1476,8 @@ class AdminGradeableController extends AbstractController {
         $numeric_properties = [
             'precision',
             'grader_assignment_method',
-            'depends_on_points'
+            'depends_on_points',
+            'notifications_sent'
         ];
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
@@ -1451,11 +1515,11 @@ class AdminGradeableController extends AbstractController {
         // Apply other new values for all properties submitted
         foreach ($details as $prop => $post_val) {
             // Convert boolean values into booleans
-            if (in_array($prop, $boolean_properties)) {
+            if (in_array($prop, $boolean_properties, true)) {
                 $post_val = $post_val === 'true';
             }
 
-            if (in_array($prop, $numeric_properties) && !is_numeric($post_val)) {
+            if (in_array($prop, $numeric_properties, true) && !is_numeric($post_val)) {
                 $errors[$prop] = "{$prop} must be a number";
                 continue;
             }
@@ -1515,6 +1579,14 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'notifications_sent' && $post_val === "0" && $gradeable->getNotificationsSent() > 0) {
+                $this->core->getQueries()->resetGradeableNotifications($gradeable);
+            }
+
+            if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets, true)) {
+                $errors['syllabus_bucket'] = 'Syllabus bucket must be one of the following: ' . implode(', ', self::syllabus_buckets);
             }
 
             // Try to set the property
@@ -1718,9 +1790,15 @@ class AdminGradeableController extends AbstractController {
                 $logs = $this->getBuildLogs($gradeable_id);
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
-                $haystack = $logs->json['data'][0];
+                $haystack = $logs->json['data'][0] ?? '';
 
-                if (strpos($haystack, $needle) !== false) {
+                if (str_contains($haystack, 'MAKE ERROR')) {
+                    $status = false;
+                }
+                elseif (str_contains($haystack, $needle)) {
+                    $status = 'warnings';
+                }
+                elseif (str_contains($haystack, 'WARNING:')) {
                     $status = 'warnings';
                 }
             }
@@ -1919,5 +1997,75 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+
+    /**
+     * Loads config info for a gradeable to allow editing
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods: ["POST"])]
+    public function loadConfigEditor(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to load content.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $config_content = file_get_contents(FileUtils::joinPaths($file_path));
+        $output = [];
+        $output["config_content"] = $config_content;
+        $this->core->getOutput()->renderJsonSuccess($output);
+    }
+
+    /**
+     * Saves config info from a gradeable edit
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods: ["POST"])]
+    public function saveConfigEdit(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded autograding configurations for the current course and semester.");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to save changes.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $write_success = FileUtils::writeFile($file_path, $_POST['write_content']);
+        if (!$write_success) {
+            $this->core->getOutput()->renderJsonFail("An error occurred writing the file.");
+            return;
+        }
+
+        $result = $this->enqueueBuild($gradeable);
+        if ($result !== null) {
+            $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+        }
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 }

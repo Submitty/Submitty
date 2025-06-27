@@ -307,7 +307,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
       std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
       assert (cat_itr != categories.end());
       if (cat_itr->second != "RESTRICTED") continue;
-      std::cout << "        \"ALLOW_SYSTEM_CALL_CATEGORY_" << itr->first << "\"";
+      std::cout << "        \"" << itr->first << "\"";
       if (restricted_count > 1) std::cout << ",";
       std::cout << std::endl;    
       restricted_count--;

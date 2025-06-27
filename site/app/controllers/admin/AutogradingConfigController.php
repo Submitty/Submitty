@@ -56,6 +56,15 @@ class AutogradingConfigController extends AbstractController {
     public function uploadConfig($g_id = ''): MultiResponse {
         $redirect_url = empty($g_id) ? $this->core->buildCourseUrl((['autograding_config']))
             : $this->core->buildCourseUrl(['autograding_config']) . '?g_id=' . $g_id;
+        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+
+        if ($gradeable === null) {
+            return new MultiResponse(
+                JsonResponse::getErrorResponse('Gradeable not found'),
+                null,
+                new RedirectResponse($redirect_url)
+            );
+        }
 
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $msg = 'Upload failed: No file to upload';

@@ -1,5 +1,14 @@
 {
-  "testcases": [
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/autograding-default:latest"
+    },
+    
+    "autograding": {
+        "submission_to_compilation": ["**/*.txt"] // todo: check if this is needed
+    },
+
+    "testcases": [
     {
       "type": "FileCheck",
       "title": "One Of True - Both Match",

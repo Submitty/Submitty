@@ -49,7 +49,7 @@ function download_student(gradeable_id, user_id, file_name, file_path, pdf_url, 
     download(gradeable_id, user_id, '', file_name, file_path, 1, pdf_url, rerender_pdf);
 }
 
-// eslint-disable-next-line default-param-last, no-unused-vars
+// eslint-disable-next-line default-param-last
 function download(gradeable_id, user_id, grader_id, file_name, file_path, page_num, url = '', rerender_pdf) {
     window.GENERAL_INFORMATION = {
         grader_id: grader_id,
@@ -234,8 +234,13 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
 
                 let pdfData;
                 try {
-                    pdfData = JSON.parse(data)['data'];
-                    pdfData = atob(pdfData);
+                    pdfData = JSON.parse(data);
+                    // Checking if the response is a failure due to large file size
+                    if (pdfData.status === 'fail') {
+                        $('#pdf-error-message').text(pdfData.message).show();
+                        return;
+                    }
+                    pdfData = atob(pdfData['data']);
                 }
                 catch (err) {
                     console.log(err);
@@ -258,7 +263,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                             e.preventDefault();
                         }
                     });
-                    $("a[value='zoomcustom']").text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
+                    $('a[value=\'zoomcustom\']').text(`${parseInt(window.RENDER_OPTIONS.scale * 100)}%`);
                     viewer.innerHTML = '';
                     NUM_PAGES = pdf.numPages;
                     for (let i = 0; i < NUM_PAGES; i++) {

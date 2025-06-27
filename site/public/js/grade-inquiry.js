@@ -206,7 +206,7 @@ function newPostRender(gc_id, post_id, new_post) {
     // eslint-disable-next-line eqeqeq
     if (gc_id != 0) {
     // add new post to all tab
-        const all_inquiries = $('.grade-inquiries').children("[data-component_id='0']");
+        const all_inquiries = $('.grade-inquiries').children('[data-component_id=\'0\']');
         let last_post = all_inquiries.children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
 
@@ -248,6 +248,7 @@ function newDiscussionRender(discussion) {
     }
     // student
     else {
+        // eslint-disable-next-line no-restricted-syntax
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }

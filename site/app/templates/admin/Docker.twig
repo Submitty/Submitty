@@ -1,4 +1,6 @@
-<div class="content" data-testid="systemwide_info">
+{% import _self as self %}
+
+<div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
 
     <h2>System Wide information:</h2>
@@ -7,7 +9,7 @@
     Should be added back eventually, ideally showing workers' version as well
     <p>Docker Version : {{ docker_info['ServerVersion'] }} </p>
     #}
-    <p>Docker info updated on: {{last_updated}}</p>
+    <p>Docker info updated on: {{ last_updated }}</p>
     <p>System info updated on: {{ sysinfo_last_updated }}</p>
     {% if error_logs | length > 0 %}
         <h2 style="margin-top: 1vh;">Error Logs associated with the last update attempt:</h2>
@@ -32,35 +34,38 @@
         </tr>
         <tr>
             {% for capability in capabilities %}
-            <td>{{capability}}</td>
+                <td>{{capability}}</td>
             {% endfor %}
         </tr>
         {% for worker in worker_machines %}
-        <tr data-enabled = {{worker['enabled'] == true and (worker['name'] not in machine_to_update | keys or machine_to_update[worker['name']] == true)? 'true' : 'false'}}>
-            <th style="vertical-align: middle;">{{worker['name']}}</th>
-            <td>{{worker['num_autograding_workers']}}</td>
-            <td data-testid="system_info">{% if worker['name'] in machine_system_details|keys %}
-                    {{ machine_system_details[worker['name']]['os'] }} <br />
-                    Disk Usage: {{ machine_system_details[worker['name']]['disk'] }} <br/>
-                    Load: {{ machine_system_details[worker['name']]['load'] }} <br />
-                    Worker: {{ machine_system_details[worker['name']]['worker'] }} <br/>
-                    {% if machine_system_details[worker['name']]['shipper'] is not null %}
-                        Shipper: {{ machine_system_details[worker['name']]['shipper'] }}<br/>
+            <tr data-enabled = {{worker.is_enabled == true and worker.failed_to_update == false }}>
+            <th style="vertical-align: middle;">{{worker.name}}</th>
+            <td>{{worker.num_autograding_workers}}</td>
+            <td data-testid="system-info">
+                {% if worker.system_information is not null %}
+                    OS: {{ worker.os }} <br />
+                    Disk Usage: {{ worker.system_information.disk_usage }} <br/>
+                    Load: {{ worker.system_information.load }} <br />
+                    Worker: {{ worker.system_information.worker_service }} <br/>
+                    {% if worker.system_information.shipper_service is not null %}
+                        Shipper: {{  worker.system_information.shipper_service }}<br/>
                     {% endif %}
-                    {% if machine_system_details[worker['name']]['daemon'] is not null %}
-                        Daemon: {{ machine_system_details[worker['name']]['daemon'] }}
+                    {% if worker.system_information.daemon_service is not null %}
+                        Daemon: {{ worker.system_information.daemon_service }}
                     {% endif %}
                 {% else %}
-                    Not yet retrieved
+                    No information parsed for {{ worker.name }}
                 {% endif %}
             </td>
-            <td data-testid="docker_version">{{ machine_docker_version[worker['name']] }}</td>
+            <td data-testid="docker-version">{{ worker.docker_version }}</td>
             {% for capability in capabilities %}
-                {% if capability in worker['capabilities'] %}
-                    <td><i class="fas fa-check"></i></td>
+                <td>
+                {% if capability in worker.capabilities %}
+                    <i class="fas fa-check"></i>
                 {% else %}
-                    <td></td>
+                    <i class="fas fa-x"></i>
                 {% endif %}
+                </td>
             {% endfor %}
         </tr>
         {% endfor %}
@@ -75,7 +80,7 @@
             <div style="display:inline-block;">
                 <button class="btn btn-primary" id="show-all">Show All</button>
                 {% for capability in capabilities %}
-                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:var(--category-color-{{capability_to_color[capability]}});">
+                    <button data-capability="{{capability}}" class="btn filter-buttons" style="background-color:var(--category-color-{{capability_to_color_mapping[capability]}});">
                         {{capability}}
                     </button>
                 {% endfor %}
@@ -83,71 +88,51 @@
         </div>
     {% endif %}
 
-    <table class="table table-striped docker-table mobile-table">
+    <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                <th>Image Name</th>
-                <th>Owner</th>
-                <th>Id</th>
-                <th>Size</th>
+                {{ self.sortable_header('Image Name', 'name') }}
                 <th>Tag</th>
-                <th>Created</th>
                 <th>Alias</th>
+                <th>Digest</th>
+                {{ self.sortable_header('Size', 'size') }}
+                {{ self.sortable_header('Created', 'created') }}
                 <th>Capabilities Containing This Image</th>
+                <th>Owner</th>
                 <th>Remove</th>
             </tr>
         </thead>
+
         <tbody>
-        {% for key, value in image_to_capability %}
-            <tr class="image-row" data-error={{key in fail_images ? "true" : "false"}}>
-                {% set full = key|split(":")  %}
-                {% set name = full[0] %}
-                {% set tag = full[1] %}
-                {% set used_name = key %}
-                {% if key in aliases|keys %}
-                    {% for alias in aliases[key] %}
-                        {% if alias in image_info|keys %}
-                            {% set used_name = alias %}
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    {% set used_name = null %}
-                {% endif %}
-                <td>{{ name }}</th>
-                <td>{{ docker_image_owners[key]|default("") }}</td>
+        {% for image in docker_images %}
+            {% set full = image.primary_name | split(":") %}
+            {% set name = full[0] %}
+            {% set tag = full[1] %}
+
+            <tr class="image-row" >
+                <td>{{ name }}</td>
+                <td>{{ tag }}</td>
                 <td>
-                    {% if used_name in image_info|keys %}
-                        {{ image_info[used_name]["id"] | trim("sha256:")}}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if used_name in image_info|keys %}
-                        {{ image_info[used_name]["size"] }}
-                    {% endif %}
-                </td>
-                <td>{{ tag }} </td>
-                <td>
-                    {% if used_name in image_info|keys %}
-                        {{ image_info[used_name]["created"] }}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if key in aliases|keys %}
+                    {% if image.aliases|length > 0 %}
                         <ul class="tag-list">
-                            {% for alias in aliases[key] %}
+                            {% for alias in image.aliases %}
                                 <li>{{ alias }}</li>
                             {% endfor %}
                         </ul>
                     {% endif %}
                 </td>
+                <td>{{ image.digest | trim("sha256:") | slice(0,20) }}</td>
+                <td>{{ image.size_mb }}</td>
+                <td>{{ image.created_timestamp }}</td>
                 <td>
-                    {% for capability in value %}
-                        <span class="badge badge-{{ capability_to_color[capability] % 8 + 1 }}">{{capability}}</span>
+                    {% for capability in image.capabilities %}
+                        <span class="badge badge-{{ capability_to_color_mapping[capability] % 8 + 1 }}">{{capability}}</span>
                     {% endfor %}
                 </td>
+                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
                 <td>
-                    {% if (docker_image_owners[key] is defined and user_id == docker_image_owners[key]) or superuser %}
-                    <button class="send-button btn btn-default" id="{{ key }}" data-image-id="{{ key }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
+                    {% if is_super_user or (docker_image_owners[image.primary_name] is defined and user_id == docker_image_owners[image.primary_name]) %}
+                        <button class="send-button btn btn-default" id="{{ image.primary_name }}" data-image-id="{{ image.primary_name }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>
                     {% endif %}
                 </td>
             </tr>
@@ -196,3 +181,15 @@
     </div>
     <button class="send-button btn btn-primary" id="send-button" onclick=addImage("{{admin_url}}/add_image") disabled="disabled">Submit</button>
 </div>
+
+{% macro sortable_header(title, sort_key) %}
+    <th>
+        <a href="#"
+        onclick="event.preventDefault(); sortTableByColumn('{{ sort_key }}')"
+        class="sortable-header"
+        data-sort-key="{{ sort_key }}">
+            {{ title }}
+            <i class="fa fa-sort"></i>
+        </a>
+    </th>
+{% endmacro %}

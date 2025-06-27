@@ -1,7 +1,8 @@
 {
-	"required_capabilities": "et-cetera",
+    "required_capabilities": "default",
+    "autograding_method": "docker",
 
-    "assignment_message" : "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
+    "assignment_message" : "Please submit your assignment in one of 3 languages.  Only submit to a single bucket.",
     "part_names" : [ "Python 3", "C", "C++" ],
 
     "one_part_only" : true,
@@ -12,7 +13,13 @@
         // Python 3
         {
             "title" : "Python 3 Testing",
-            "command" : "python3 part2/*.py",
+            "containers": [
+                {
+                    "container_name" : "container1",
+                    "container_image": "submitty/python:latest",
+                    "commands" : ["python3 part1/*.py"]
+                }
+            ],
             "points" : 5,
             "validation" : [
                 {
@@ -28,14 +35,25 @@
         {
             "type" : "Compilation",
             "title" : "C Compilation",
-            "command" : "clang -Wall -o p3.out -- part3/*.c",
+            "containers": [
+                {
+                    "container_name" : "container2",
+                    "container_image": "submitty/clang:latest",
+                    "commands" : ["clang -Wall -o p3.out -- part2/*.c"]
+                }
+            ],
             "executable_name" : "p3.out",
             "points" : 2
         },
-
         {
             "title" : "C Testing",
-            "command" : "./p3.out",
+            "containers": [
+                {
+                    "container_name" : "container3",
+                    "container_image": "submitty/clang:latest",
+                    "commands" : ["./p3.out"]
+                }
+            ],
             "points" : 3,
             "validation" : [
                 {
@@ -51,14 +69,25 @@
         {
             "type" : "Compilation",
             "title" : "C++ Compilation",
-            "command" : "clang++ -Wall -o p4.out -- part4/*.cpp",
+            "containers": [
+                {
+                    "container_name" : "container4",
+                    "container_image": "submitty/clang:latest",
+                    "commands" : ["clang++ -Wall -o p4.out -- part3/*.cpp"]
+                }
+            ],
             "executable_name" : "p4.out",
             "points" : 2
         },
-
         {
             "title" : "C++ Testing",
-            "command" : "./p4.out",
+            "containers": [
+                {
+                    "container_name" : "container5",
+                    "container_image": "submitty/clang:latest",
+                    "commands" : ["./p4.out"]
+                }
+            ],
             "points" : 3,
             "validation" : [
                 {
@@ -68,6 +97,5 @@
                 }
             ]
         }
-
     ]
 }

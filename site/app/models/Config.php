@@ -68,6 +68,7 @@ use app\libraries\FileUtils;
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
+ * @method bool isChatEnabled()
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -79,6 +80,11 @@ use app\libraries\FileUtils;
  * @method string getSubmittyInstallPath()
  * @method bool isDuckBannerEnabled()
  * @method string getPhpUser()
+ * @method DateTimeFormat getDateTimeFormat()
+ * @method string getSystemMessage()
+ * @method string getLatestTag()
+ * @method string getLatestCommit()
+ * @method int getCourseMaterialFileUploadLimitMb()
  */
 
 class Config extends AbstractModel {
@@ -151,6 +157,11 @@ class Config extends AbstractModel {
     /** @prop
      * @var string */
     protected $default_locale = 'en_US';
+    /**
+     * Maximum file upload size for course materials (in MB)
+     * @prop
+     */
+    protected int $course_material_file_upload_limit_mb;
     /** @prop
      * @var string */
     protected $submitty_path;
@@ -328,7 +339,9 @@ class Config extends AbstractModel {
     /** @prop
      * @var bool */
     protected $polls_enabled;
-
+    /** @prop
+     * @var bool */
+    protected $chat_enabled;
 
     /** @prop-read
      * @var array */
@@ -351,9 +364,10 @@ class Config extends AbstractModel {
         parent::__construct($core);
         $this->timezone = new \DateTimeZone($this->default_timezone);
 
-        // For now this will be set to 'MDY', and configured as a property of the Config class
-        // Eventually this should be moved to the User class and configured on a per-user basis
-        $this->date_time_format = new DateTimeFormat($this->core, 'MDY');
+        // For now this will be set to 'YMD', which follows the ISO 8601 global standard for date formatting.
+        // It is configured as a property of the Config class
+        // Eventually, this should be moved to the User class and configured on a per-user basis (see Issue#11751).
+        $this->date_time_format = new DateTimeFormat($this->core, 'YMD');
 
         if ($this->submitty_install_path) {
             $this->locale = new Locale($this->core, FileUtils::joinPaths($this->submitty_install_path, "site", "cache", "lang"), $this->default_locale);
@@ -468,6 +482,9 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
+        // Default to 100 MB if not set
+        $this->course_material_file_upload_limit_mb = (int) ($submitty_json['course_material_file_upload_limit_mb'] ?? 100);
+
         $this->submitty_path = $submitty_json['submitty_data_dir'];
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->submitty_install_path = $submitty_json['submitty_install_dir'];
@@ -575,7 +592,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled',
+            'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions', 'chat_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -605,6 +623,7 @@ class Config extends AbstractModel {
             'queue_enabled',
             'polls_enabled',
             'seek_message_enabled',
+            'chat_enabled',
         ];
         foreach ($array as $key) {
             $this->$key = (bool) $this->$key;

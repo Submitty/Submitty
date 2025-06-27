@@ -21,6 +21,23 @@ use Symfony\Component\Routing\Annotation\Route;
 class MiscController extends AbstractController {
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
 
+    private function convertToBytes(string $value): int {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        switch ($unit) {
+            case 'g':
+                return $num * 1024 * 1024 * 1024;
+            case 'm':
+                return $num * 1024 * 1024;
+            case 'k':
+                return $num * 1024;
+            default:
+                return (int) $value;
+        }
+    }
+
     /**
      * Get the current server time
      *
@@ -68,6 +85,12 @@ class MiscController extends AbstractController {
         elseif (strpos($file_path, 'checkout') !== false) {
             $directory = 'checkout';
         }
+        elseif (strpos($file_path, 'results_public') !== false) {
+            $directory = 'results_public';
+        }
+        elseif (strpos($file_path, 'results') !== false) {
+            $directory = 'results';
+        }
         $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id);
 
         if ($gradeable->isGradeByRegistration()) {
@@ -88,6 +111,15 @@ class MiscController extends AbstractController {
                 JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
         }
+
+        $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
+
+        if (filesize($file_path) > $max_size && $max_size >= 0) {
+            return new MultiResponse(JsonResponse::getFailResponse(
+                "This PDF is too large to be viewed online. Please download it instead."
+            ));
+        }
+
 
         $pdf64 = base64_encode(file_get_contents($file_path));
         return MultiResponse::JsonOnlyResponse(
@@ -308,7 +340,7 @@ class MiscController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($user_id !== $this->core->getUser()->getId()) {
-            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->addErrorMessage("You do not have permission to download this file!");
                 return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
             }
@@ -316,7 +348,7 @@ class MiscController extends AbstractController {
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
         $file_path = null;
         $testcase = $autograde->getTestcases()[$test_case - 1];
-        if ((!$testcase->getTestcase()->isHidden() || $this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) && $testcase->hasAutochecks()) {
+        if ((!$testcase->getTestcase()->isHidden() || $this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) && $testcase->hasAutochecks()) {
             foreach ($testcase->getAutochecks() as $autocheck) {
                 $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
                 $actual_file_name = array_pop($path);

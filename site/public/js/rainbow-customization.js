@@ -6,7 +6,6 @@ const allowed_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 
 const allowed_grades_excluding_f = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D'];
 const tables = ['plagiarism', 'manualGrade', 'performanceWarnings'];
 
-// eslint-disable-next-line no-unused-vars
 function ExtractBuckets() {
     const x = [];
     const bucket_list = $('#buckets_used_list').find('li');
@@ -90,7 +89,7 @@ function ResetPerGradeablePercents(bucket) {
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent-']").filter(function () {
+    $('input[id^=\'percent-\']').filter(function () {
         return $(this).parent().css('display') !== 'none';
     }).each(function () {
         val += parseFloat($(this).val());
@@ -106,7 +105,6 @@ function UpdateUsedPercentage() {
 }
 
 // Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
-// eslint-disable-next-line no-unused-vars
 function UpdateVisibilityBuckets() {
     // For each bucket that isn't being used, hide it
     $('#buckets_available_list').find('input').each(function () {
@@ -138,7 +136,7 @@ function getDisplay() {
     // Collect display
     const display = [];
 
-    $.each($("input[name='display']:checked"), function () {
+    $.each($('input[name=\'display\']:checked'), function () {
         display.push($(this).val());
     });
 
@@ -196,11 +194,22 @@ function DetectSameSectionName() {
     warningIcon.toggle(hasDuplicates);
 }
 
+function getOmittedSections() {
+    // Collect sections omitted from stats
+    const omit_section_from_stats = [];
+
+    $.each($('input[name=\'omit_section_from_statistics\']:checked'), function () {
+        omit_section_from_stats.push(String($(this).data('section')));
+    });
+
+    return omit_section_from_stats;
+}
+
 function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
 
-    $.each($("input[name='display_benchmarks']:checked"), function () {
+    $.each($('input[name=\'display_benchmarks\']:checked'), function () {
         display_benchmarks.push($(this).val());
     });
 
@@ -616,7 +625,7 @@ function getBenchmarkPercent() {
 
 function getFinalCutoffPercent() {
     // Verify that final_grade is used, otherwise set values to default (which will be unused)
-    if (!$("input[value='final_grade']:checked").val()) {
+    if (!$('input[value=\'final_grade\']:checked').val()) {
         return {
             'A': 93.0,
             'A-': 90.0,
@@ -667,6 +676,7 @@ function buildJSON() {
         benchmark_percent: getBenchmarkPercent(),
         final_cutoff: getFinalCutoffPercent(),
         section: getSection(),
+        omit_section_from_stats: getOmittedSections(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -686,11 +696,9 @@ function showLogButton(responseData) {
 
 function sendSelectedValue() {
     return new Promise((resolve, reject) => {
-        const selected_value = $("input[name='customization']:checked").val();
-        // eslint-disable-next-line no-undef
+        const selected_value = $('input[name=\'customization\']:checked').val();
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
         const formData = new FormData();
-        // eslint-disable-next-line no-undef
         formData.append('csrf_token', csrfToken);
         formData.append('selected_value', selected_value);
 
@@ -731,9 +739,7 @@ function sendSelectedValue() {
     });
 }
 
-// eslint-disable-next-line no-unused-vars
 function runBuild() {
-    // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['reports', 'build_form']);
 
     sendSelectedValue()
@@ -795,11 +801,14 @@ function checkBuildStatus() {
 $(document).ready(() => {
     // Run when page loads
     DetectSameSectionName();
-    $("input[name*='display']").change(() => {
+    $('input[name*=\'display\']').change(() => {
         saveChanges();
     });
     // Register change handlers to update the status message when form inputs change
-    $("input[name*='display_benchmarks']").change(() => {
+    $('input[name*=\'display_benchmarks\']').change(() => {
+        saveChanges();
+    });
+    $('input[name*=\'omit_section\']').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
@@ -893,7 +902,7 @@ function saveChanges() {
 }
 
 $(document).ready(() => {
-    $("input[name='customization']").change(() => {
+    $('input[name=\'customization\']').change(() => {
         $('#save_status').text('Switched customization, need to rebuild');
     });
 });
@@ -956,7 +965,6 @@ function setCustomizationItemVisibility(elem) {
 
 $(document).ready(() => {
     // Make the per-gradeable curve inputs toggle when the icon is clicked
-    // eslint-disable-next-line no-unused-vars
     $('.fa-gradeable-curve').click(function (event) {
         const id = jQuery(this).attr('id').split('-')[3];
         $(`#gradeable-curve-div-${id}`).toggle();
@@ -1035,7 +1043,6 @@ $(document).ready(() => {
         const selected_file = $(this)[0].files[0];
         console.log('Selected File: ', selected_file);
 
-        // eslint-disable-next-line no-undef
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'upload']);
         console.log('URL: ', url);
 

@@ -17,6 +17,13 @@
     padding-bottom: 0;
 }
 
+.unregister-button {
+    background-color: var(--actionable-blue);
+    float: right;
+    border: none;
+    color: var(--btn-text-white);
+}
+
 .gradeable-row:nth-last-child(1) {
     border: none;
 }
@@ -127,6 +134,7 @@
 
     /* stylelint-disable-next-line no-descending-specificity */
     .panel-head-active .collapse-icon,
+    /* stylelint-disable-next-line no-descending-specificity */
     .expand-icon {
         display: none;
     }
