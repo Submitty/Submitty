@@ -505,7 +505,7 @@ HTML;
      * @param array<string,bool> $grading_details_columns
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -607,6 +607,7 @@ HTML;
             }
             else {
                 $columns[] = ["title" => "Grading", "function" => "grading"];
+                $columns[] = ["title" => "Active Graders", "function" => "active_graders"];
             }
             $columns[] = ["title" => "Total", "function" => "total"];
             $columns[] = ["title" => "Active Version", "function" => "active_version"];
@@ -893,6 +894,9 @@ HTML;
         }
 
         $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
+            if ($column['function'] === "active_graders") {
+                return array_key_exists('active_graders', $grading_details_columns) && $grading_details_columns['active_graders'];
+            }
             return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
         });
 
@@ -948,6 +952,7 @@ HTML;
             "overrides" => $overrides,
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
+            "active_graders" => $active_graders,
             "csrf_token" => $this->core->getCsrfToken(),
         ]);
     }

@@ -83,6 +83,7 @@
         'args': {
             'columns': all_columns|map(column => column.function),
             'labels': all_columns|map(column => column.title),
+            'hiddenColumns': ["active_graders"],
             'forced': [
                 'grading'
             ],
@@ -194,7 +195,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -249,7 +250,7 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) %}
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
@@ -302,6 +303,8 @@
                 {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
+            {% elseif column.function == "active_graders" %}
+                {{ _self.render_column_active_graders(context, section, graded_gradeable, index, info, column, active_graders) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -746,6 +749,19 @@
     {% else %}
         <td></td>
     {% endif %}
+{% endmacro %}
+
+{# Active Graders #}
+{% macro render_column_active_graders(context, section, graded_gradeable, index, info, column, active_graders) %}
+    <td>
+    {% set user_id = graded_gradeable.getSubmitter().getId() %}
+    {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
+    {% include 'Vue.twig' with {
+        'component': 'activeGraders',
+        'args': {
+            "userGraders": user_graders
+        }
+    } %}
 {% endmacro %}
 
 {# /Column functions #}

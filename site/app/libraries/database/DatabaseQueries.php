@@ -9574,4 +9574,14 @@ ORDER BY
         );
         return $this->submitty_db->getRowCount() > 0;
     }
+
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
 }
