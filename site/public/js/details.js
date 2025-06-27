@@ -172,10 +172,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 withdrawnFilterElements.show();
             }
         }
-        // Withdrawn students should always be visible in team gradeables
-        else {
-            withdrawnFilterElements.show();
-        }
     }
     // Grade Inquiry Only - students don't have permission
     if (!is_student) {
@@ -187,7 +183,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const randomFilterStatus = Cookies.get('sort');
     randomFilterBox.checked = (randomFilterStatus === 'random');
 
-    // all graders should see withdrawn students on team assignments
+    // Withdrawn students should always be visible in team gradeables
     if (is_team_assignment) {
         withdrawnFilterElements.show();
     }
