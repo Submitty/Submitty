@@ -22,8 +22,8 @@ use app\controllers\SelfRejoinController;
 /**
  * Class UsersController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class UsersController extends AbstractController {
     /**
      * @return MultiResponse
@@ -1296,9 +1296,7 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     **/
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
     public function viewStudentGrades() {
         if (!isset($_POST["student_id"])) {
