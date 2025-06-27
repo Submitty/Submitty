@@ -83,28 +83,28 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
                         {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr>
+                            <tr data-testid="chatroom-item">
                                 <td>
                                     <span class="display-short" title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                         {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-testid="chatroom-host">
                                     {{ chatroom.getHostName() }}
                                 </td>
                                 <td>
-                                    <span class="display-short" title="{{ chatroom.getDescription() }}">
+                                    <span class="display-short" title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
                                         {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
+                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary"  data-testid="chat-join-btn">Join</a>
                                     {% if chatroom.isAllowAnon() %}
                                         <i> or </i>
-                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">Join As Anon.</a>
+                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
                                     {% endif %}
                                 </td>
                             </tr>
