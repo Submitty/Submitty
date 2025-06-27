@@ -144,7 +144,7 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
                     cy.get('[data-testid="edit-anon"]').click();
                 }
                 cy.get('[data-testid="submit-chat-edit"]').should('exist');
-                cy.get('[data-testid="submit-chat-edit"]').click({ force: true })
+                cy.get('[data-testid="submit-chat-edit"]').click({ force: true });
                 cy.get('[data-testid="submit-chat-edit"]').then(() => {
                     checkTitle(newTitle);
                     checkDescription(newTitle, newDescription);
@@ -167,8 +167,8 @@ const getAnonName = () => {
 
 const sendChatMessage = (text, name) => {
     cy.get('[data-testid="msg-input"]').should('exist');
-    cy.get('[data-testid="msg-input"]').type(text)
-    ct.get('[data-testid="msg-input"]').then(() => {
+    cy.get('[data-testid="msg-input"]').type(text);
+    cy.get('[data-testid="msg-input"]').then(() => {
         cy.get('[data-testid="send-btn"]').should('exist');
         cy.get('[data-testid="send-btn"]').click();
         cy.get('[data-testid="send-btn"]').then(() => {
