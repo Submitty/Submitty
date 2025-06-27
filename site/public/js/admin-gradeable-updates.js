@@ -1,13 +1,16 @@
-/* global csrfToken, buildCourseUrl, displayErrorMessage, gradeable_max_autograder_points,
+/* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE */
-/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage */
+/* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
+          loadGradeableEditor, saveGradeableConfigEdit */
 
 let updateInProgressCount = 0;
 const errors = {};
 let previous_gradeable = '';
 let gradeable = '';
+let rebuild_triggered = false;
+
 function updateErrorMessage() {
     if (Object.keys(errors).length !== 0) {
         $('#save_status').text('Some Changes Failed!').css('color', 'red');
@@ -113,6 +116,14 @@ function updateGradeableErrorCallback(message, response_data) {
         }
     }
     updateErrorMessage();
+}
+
+function parseUpdateGradeableResponseArray(response, gradeable_id) {
+    // Trigger periodic checks for latest rebuild status
+    if (response.includes('rebuild_queued')) {
+        rebuild_triggered = true;
+        ajaxCheckBuildStatus(gradeable_id, 'unknown');
+    }
 }
 
 function updateDueDate() {
@@ -224,12 +235,28 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
+        const notifications_sent = Number(document.querySelector('#container-rubric').dataset.notifications_sent);
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
             }
             if ($('#no_late_submission').is(':checked') && $(val).attr('name') === 'late_days') {
                 $(val).val('0');
+            }
+            // Ask for confirmation if the release is delegated to the future and notifications have been sent already
+            if (notifications_sent > 0 && val.name === 'grade_released_date') {
+                const updating = new Date($(val).val());
+                const original = new Date($(val).attr('data-original'));
+
+                if (original !== updating && updating >= new Date()) {
+                    const resend = confirm(
+                        'Students have been notified and emailed that grades for this gradeable have been released. '
+                        + 'If you change the grades release date, would you like to resend notifications and emails to '
+                        + 'students when the new grades release date is reached?',
+                    );
+
+                    data['notifications_sent'] = resend ? 0 : notifications_sent;
+                }
             }
             data[val.name] = $(val).val();
         };
@@ -259,6 +286,10 @@ $(document).ready(() => {
                 for (const key in data) {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
+                    }
+                    if (key === 'grade_released_date' && data['notifications_sent'] === 0) {
+                        document.getElementById('gradeable-notifications-message').remove();
+                        document.querySelector('#container-rubric').dataset.notifications_sent = '0';
                     }
                 }
                 updateErrorMessage();
@@ -349,6 +380,7 @@ function ajaxRebuildGradeableButton() {
     $.ajax({
         url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function () {
+            rebuild_triggered = true;
             ajaxCheckBuildStatus();
         },
         error: function (response) {
@@ -357,37 +389,55 @@ function ajaxRebuildGradeableButton() {
     });
 }
 
-function ajaxGetBuildLogs(gradeable_id) {
+function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
     $.getJSON({
         type: 'GET',
         url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
+            let alerted = false;
             const build_info = response['data'][0];
             const cmake_info = response['data'][1];
             const make_info = response['data'][2];
 
             if (build_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
+                for (const line of build_info.split('\n')) {
+                    if (line.includes('WARNING:')) {
+                        alerted = true;
+                        displayWarningMessage(line.split('WARNING:')[1].trim());
+                    }
+                    else if (line.includes('ERROR:')) {
+                        alerted = true;
+                        displayErrorMessage(line.split('ERROR:')[1].trim());
+                    }
+                }
             }
             else {
-                $('#build-log-body').html('There is currently no build output.');
+                $('#build-log-body').text('There is currently no build output.');
             }
             if (cmake_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#cmake-log-body').html(cmake_info);
             }
             else {
-                $('#cmake-log-body').html('There is currently no cmake output.');
+                $('#cmake-log-body').text('There is currently no cmake output.');
             }
             if (make_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html(make_info);
             }
             else {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html('There is currently no make output.');
             }
 
-            $('.log-container').show();
-            $('#open-build-log').hide();
-            $('#close-build-log').show();
+            if (alerted || !rebuilt) {
+                // Display the build log for respective rebuild warnings/errors or manual instructor requests
+                $('.log-container').show();
+                $('#open-build-log').hide();
+                $('#close-build-log').show();
+            }
         },
         error: function (response) {
             console.error(`Failed to parse response from server: ${response}`);
@@ -405,32 +455,40 @@ function ajaxCheckBuildStatus() {
         success: function (response) {
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
-                $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
+                return;
             }
             else if (response['data'] === 'processing') {
-                $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
+                return;
             }
             else if (response['data'] === 'warnings') {
-                $('#rebuild-status').html('Gradeable built with warnings');
+                $('#rebuild-status').text('Gradeable built with warnings');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == true) {
                 $('.config_search_error').hide();
-                $('#rebuild-status').html('Gradeable build complete');
+                $('#rebuild-status').text('Gradeable build complete');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
-                $('#rebuild-status').html('Gradeable build failed');
+                $('#rebuild-status').text('Gradeable build failed');
                 $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {
-                $('#rebuild-status').html('Error');
+                $('#rebuild-status').text('Error');
                 console.error('Internal server error, please try again.');
+            }
+
+            if (rebuild_triggered) {
+                // Check for any potential build process warnings/errors
+                rebuild_triggered = false;
+                ajaxGetBuildLogs(gradeable_id, true);
             }
         },
         error: function (response) {
@@ -540,12 +598,12 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
 
                 if (students_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'student' column");
+                    alert('Cannot process file, requires exactly one labelled \'student\' column');
                     return;
                 }
 
                 if (graders_lines_index === -1) {
-                    alert("Cannot process file, requires exactly one labelled 'grader' column");
+                    alert('Cannot process file, requires exactly one labelled \'grader\' column');
                     return;
                 }
 
@@ -564,7 +622,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                 }
                 const container = $('#container-rubric');
                 if (container.length === 0) {
-                    alert("UPDATES DISABLED: no 'container-rubric' element!");
+                    alert('UPDATES DISABLED: no \'container-rubric\' element!');
                     return;
                 }
                 // Don't process updates until the page is done loading
@@ -579,9 +637,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
                     data: p_values,
                     success: function (response) {
                         if (Array.isArray(response['data'])) {
-                            if (response['data'].includes('rebuild_queued')) {
-                                ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                            }
+                            parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                         }
                         setGradeableUpdateComplete();
                         if (response.status === 'success') {
@@ -615,7 +671,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     else {
         const container = $('#container-rubric');
         if (container.length === 0) {
-            alert("UPDATES DISABLED: no 'container-rubric' element!");
+            alert('UPDATES DISABLED: no \'container-rubric\' element!');
             return;
         }
         // Don't process updates until the page is done loading
@@ -629,9 +685,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             data: p_values,
             success: function (response) {
                 if (Array.isArray(response['data'])) {
-                    if (response['data'].includes('rebuild_queued')) {
-                        ajaxCheckBuildStatus(gradeable_id, 'unknown');
-                    }
+                    parseUpdateGradeableResponseArray(response['data'], gradeable_id);
                 }
                 setGradeableUpdateComplete();
                 if (response.status === 'success') {
@@ -877,4 +931,162 @@ function hideBuildLog() {
     $('.log-container').hide();
     $('#open-build-log').show();
     $('#close-build-log').hide();
+}
+
+// Register beforeunload listener once
+window.addEventListener('beforeunload', (event) => {
+    const isEdited = $('#gradeable-config-edit').data('edited');
+    if (isEdited) {
+        event.preventDefault();
+        event.return = '';
+    }
+});
+
+let originalConfigContent = null;
+
+// When the text editor opens, the user shouldn't have to manually scroll to see the contents
+function scrollToBottom() {
+    window.scrollTo({ top: 800, left: 0, behavior: 'smooth' });
+}
+
+let current_g_id = null;
+let current_file_path = null;
+
+function updateGradeableEditor(g_id, file_path) {
+    // If no file has been selected yet or it is not the currently selected one
+    if ((current_g_id === null && current_file_path === null) || (current_g_id !== g_id || current_file_path !== file_path)) {
+        current_g_id = g_id;
+        current_file_path = file_path;
+        loadGradeableEditor(g_id, file_path);
+    }
+}
+
+// When you load the editor
+function loadGradeableEditor(g_id, file_path) {
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'load']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            file_path: file_path,
+            csrf_token: csrfToken,
+        },
+        success: function (data) {
+            try {
+                const json = JSON.parse(data);
+                if (json.status === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+
+                $('#gradeable-config-edit-bar').show();
+
+                const configData = json['data'];
+                originalConfigContent = configData.config_content;
+                const editbox = $('textarea#gradeable-config-edit');
+                editbox.val(originalConfigContent);
+
+                editbox.off('input').on('input', function () {
+                    const current = $(this).val();
+                    $(this).data('edited', current !== originalConfigContent);
+                });
+
+                editbox.css({
+                    'min-width': '-webkit-fill-available',
+                });
+
+                editbox.data('edited', false);
+                editbox.data('file-path', file_path);
+                scrollToBottom();
+            }
+            catch {
+                displayErrorMessage('Error parsing data. Please try again');
+            }
+        },
+    });
+}
+
+function configSelectorChange() {
+    location.reload();
+}
+
+function isUsingDefaultConfig() {
+    const selector = document.getElementById('autograding_config_selector');
+    const selectedPath = selector.value;
+    return NONUPLOADED_CONFIG_VALUES.includes(selectedPath);
+}
+
+function updateEditorButtonStyle() {
+    const availableMessage = document.getElementById('editor-not-available');
+    const editorButton = document.getElementById('open-config-editor');
+
+    if (isUsingDefaultConfig()) {
+        editorButton.style.display = 'none';
+        availableMessage.style.display = 'block';
+    }
+    else {
+        editorButton.style.display = 'inline-block';
+        availableMessage.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateEditorButtonStyle();
+});
+
+function toggleGradeableConfigEdit() {
+    $('#gradeable-config-structure').toggleClass('open').toggle();
+    const editorButton = document.getElementById('open-config-editor');
+    if (editorButton.innerText === 'Open Editor') {
+        editorButton.innerText = 'Close Editor';
+        current_g_id = null;
+        current_file_path = null;
+        scrollToBottom();
+    }
+    else {
+        editorButton.innerText = 'Open Editor';
+        cancelGradeableConfigEdit(); // Ensure unsaved changes are deleted
+    }
+}
+
+function cancelGradeableConfigEdit() {
+    $('#gradeable-config-edit-bar').hide();
+    $('#gradeable-config-edit').data('edited', false);
+    current_g_id = null;
+    current_file_path = null;
+}
+
+function saveGradeableConfigEdit(g_id) {
+    const content = $('textarea#gradeable-config-edit').val();
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'save']),
+        type: 'POST',
+        data: {
+            gradeable_id: g_id,
+            file_path: $('textarea#gradeable-config-edit').data('file-path'),
+            write_content: content,
+            csrf_token: csrfToken,
+        },
+        success: function (data) {
+            try {
+                const json = JSON.parse(data);
+                if (json['status'] === 'fail') {
+                    displayErrorMessage(json['message']);
+                    return;
+                }
+                originalConfigContent = $('#gradeable-config-edit').val();
+                $('#gradeable-config-edit').data('edited', false);
+                cancelGradeableConfigEdit();
+                ajaxCheckBuildStatus();
+                displaySuccessMessage('Autograding configuration successfully updated.');
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again');
+                return;
+            }
+        },
+        error: function () {
+            window.alert('Something went wrong while saving the gradeable config. Please try again.');
+        },
+    });
 }

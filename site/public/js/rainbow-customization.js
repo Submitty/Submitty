@@ -89,7 +89,7 @@ function ResetPerGradeablePercents(bucket) {
 // Updates the sum of percentage points accounted for by the buckets being used
 function UpdateUsedPercentage() {
     let val = 0.0;
-    $("input[id^='percent-']").filter(function () {
+    $('input[id^=\'percent-\']').filter(function () {
         return $(this).parent().css('display') !== 'none';
     }).each(function () {
         val += parseFloat($(this).val());
@@ -136,7 +136,7 @@ function getDisplay() {
     // Collect display
     const display = [];
 
-    $.each($("input[name='display']:checked"), function () {
+    $.each($('input[name=\'display\']:checked'), function () {
         display.push($(this).val());
     });
 
@@ -194,11 +194,22 @@ function DetectSameSectionName() {
     warningIcon.toggle(hasDuplicates);
 }
 
+function getOmittedSections() {
+    // Collect sections omitted from stats
+    const omit_section_from_stats = [];
+
+    $.each($('input[name=\'omit_section_from_statistics\']:checked'), function () {
+        omit_section_from_stats.push(String($(this).data('section')));
+    });
+
+    return omit_section_from_stats;
+}
+
 function getDisplayBenchmark() {
     // Collect display benchmarks
     const display_benchmarks = [];
 
-    $.each($("input[name='display_benchmarks']:checked"), function () {
+    $.each($('input[name=\'display_benchmarks\']:checked'), function () {
         display_benchmarks.push($(this).val());
     });
 
@@ -614,7 +625,7 @@ function getBenchmarkPercent() {
 
 function getFinalCutoffPercent() {
     // Verify that final_grade is used, otherwise set values to default (which will be unused)
-    if (!$("input[value='final_grade']:checked").val()) {
+    if (!$('input[value=\'final_grade\']:checked').val()) {
         return {
             'A': 93.0,
             'A-': 90.0,
@@ -665,6 +676,7 @@ function buildJSON() {
         benchmark_percent: getBenchmarkPercent(),
         final_cutoff: getFinalCutoffPercent(),
         section: getSection(),
+        omit_section_from_stats: getOmittedSections(),
         gradeables: getGradeableBuckets(),
         messages: getMessages(),
         plagiarism: getTableData('plagiarism'),
@@ -684,7 +696,7 @@ function showLogButton(responseData) {
 
 function sendSelectedValue() {
     return new Promise((resolve, reject) => {
-        const selected_value = $("input[name='customization']:checked").val();
+        const selected_value = $('input[name=\'customization\']:checked').val();
         const url = buildCourseUrl(['reports', 'rainbow_grades_customization', 'manual_or_gui']);
         const formData = new FormData();
         formData.append('csrf_token', csrfToken);
@@ -789,11 +801,14 @@ function checkBuildStatus() {
 $(document).ready(() => {
     // Run when page loads
     DetectSameSectionName();
-    $("input[name*='display']").change(() => {
+    $('input[name*=\'display\']').change(() => {
         saveChanges();
     });
     // Register change handlers to update the status message when form inputs change
-    $("input[name*='display_benchmarks']").change(() => {
+    $('input[name*=\'display_benchmarks\']').change(() => {
+        saveChanges();
+    });
+    $('input[name*=\'omit_section\']').change(() => {
         saveChanges();
     });
     $('#cust_messages_textarea').on('change keyup paste focusout', () => {
@@ -887,7 +902,7 @@ function saveChanges() {
 }
 
 $(document).ready(() => {
-    $("input[name='customization']").change(() => {
+    $('input[name=\'customization\']').change(() => {
         $('#save_status').text('Switched customization, need to rebuild');
     });
 });

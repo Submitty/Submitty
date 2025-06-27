@@ -185,7 +185,7 @@ function restoreNotebookFromLocal() {
             old_answers_list.style.marginLeft = '3em';
             for (const i in not_found) {
                 const answer_text = document.createElement('li');
-                answer_text.innerHTML = not_found[i];
+                answer_text.innerText = not_found[i];
                 old_answers_list.appendChild(answer_text);
             }
             old_answers_div.appendChild(old_answers_list);
@@ -195,12 +195,6 @@ function restoreNotebookFromLocal() {
 }
 
 $(document).ready(() => {
-    // If any button inside the notebook has been clicked then enable the submission button
-    $('.notebook button').click(() => {
-        // Set global javascript variable to allow submission for notebook
-        window.is_notebook = true;
-    });
-
     $('#submit').click(() => {
         localStorage.removeItem(notebookAutosaveKey());
         // Changes have been submitted; we don't need to warn the user anymore

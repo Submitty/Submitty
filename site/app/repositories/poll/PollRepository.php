@@ -13,7 +13,7 @@ class PollRepository extends EntityRepository {
      * @return Poll[]
      */
     public function findAllByStudentIDWithAllOptions(string $user_id): array {
-        return $this->_em
+        return $this->getEntityManager()
             ->createQuery('
                 SELECT p, r, o FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r WITH r.student_id = :user_id
@@ -29,7 +29,7 @@ class PollRepository extends EntityRepository {
      * Find single poll and hydrate all options and the specific responses for the specified student
      */
     public function findByStudentID(string $user_id, int $poll_id): ?Poll {
-        $result = $this->_em
+        $result = $this->getEntityManager()
             ->createQuery('
                 SELECT p, r, o FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r WITH r.student_id = :user_id
@@ -49,7 +49,7 @@ class PollRepository extends EntityRepository {
      * Find a single poll specified by ID and hydrate options
      */
     public function findByIDWithOptions(int $poll_id): ?Poll {
-        $result = $this->_em
+        $result = $this->getEntityManager()
             ->createQuery('
                 SELECT p, o FROM app\entities\poll\Poll p
                 LEFT JOIN p.options o
@@ -67,7 +67,7 @@ class PollRepository extends EntityRepository {
      * @return Poll[]
      */
     public function findAllWithAllResponses(): array {
-        return $this->_em
+        return $this->getEntityManager()
             ->createQuery('
                 SELECT p, r FROM app\entities\poll\Poll p
                 LEFT JOIN p.responses r
@@ -81,7 +81,7 @@ class PollRepository extends EntityRepository {
      * @return array<array{poll: Poll, num_responses: int}>
      */
     public function findAllWithNumResponses(): array {
-        return $this->_em
+        return $this->getEntityManager()
             ->createQuery('
                 SELECT p AS poll, COUNT(DISTINCT r.student_id) AS num_responses
                 FROM app\entities\poll\Poll p

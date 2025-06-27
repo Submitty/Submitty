@@ -135,9 +135,11 @@ function updateUserPronouns(e) {
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns and display (true or false)
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
                     const isForumDisplayCheckedString = String(isForumDisplayChecked);
                     const capitalizedString = isForumDisplayCheckedString.charAt(0).toUpperCase() + isForumDisplayCheckedString.slice(1);
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_pronouns_val').html(`${icon} ${capitalizedString}`);
 
                     // update the data attributes
@@ -180,9 +182,11 @@ function updateDisplayNameOrder(e) {
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
                 if (data['display-name-order'] === 'GIVEN_F') {
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_name_order_val').html(`${icon} Given Name First`);
                 }
                 else {
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_name_order_val').html(`${icon} Family Name First`);
                 }
 
@@ -227,7 +231,9 @@ function updateUserPreferredNames() {
                     displaySuccessMessage(data.message);
                     // update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#givenname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_given_name));
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#familyname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_family_name));
                     // update the data attributes
                     given_name_field.data('current-name', data.preferred_given_name);
@@ -235,6 +241,7 @@ function updateUserPreferredNames() {
                     // Update abbreviated name
                     $('#user-last-initial-format-preview').data('options', data.abbreviation_options);
                     $('#user-last-initial-format-preview').text(data.current_abbreviation);
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#last-initial-format-row .icon').html(`${icon} `).append($('<span>').text(data.current_abbreviation));
                 }
                 else {
@@ -273,6 +280,7 @@ function updateUserLastInitialFormat() {
                 const { data } = response;
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
+                // eslint-disable-next-line no-restricted-syntax
                 $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
                 $('#user-last-initial-format-change').data('default', data.format);
             }
@@ -317,6 +325,7 @@ function updateUserProfilePhoto() {
                 data.image_flagged_state === 'flagged'
                     ? $('#flagged-message').addClass('show')
                     : $('#flagged-message').removeClass('show');
+                // eslint-disable-next-line no-restricted-syntax
                 $('.user-img-cont').html(updated_element);
             }
             else {
@@ -363,7 +372,9 @@ function updateUserSecondaryEmail() {
                         const { data } = response;
                         displaySuccessMessage(data.message);
                         const icon = '<i class="fas fa-pencil-alt"></i>';
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#secondary-email-row .icon').html(`${icon} ${data.secondary_email}`);
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#secondary-email-notify-row .icon').html(`${icon} ${data.secondary_email_notify}`);
                         second_email.data('current-second-email', data.secondary_email);
                         second_email_notify.data('current-second-email-notify', data.secondary_email_notify === 'True' ? 1 : 0);
@@ -491,7 +502,7 @@ $(document).ready(() => {
 
     $('#user-image-button').bind('change', function () {
         if ((this.files[0].size / 1048576) > 5.0) {
-            alert("Selected file's size exceeds 5 MB");
+            alert('Selected file\'s size exceeds 5 MB');
             $('#user-image-button').val('');
         }
     });

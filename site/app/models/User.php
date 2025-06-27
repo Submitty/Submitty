@@ -27,10 +27,9 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method string getPronouns() Returns the pronouns of the loaded user
  * @method bool getDisplayPronouns() Returns the display pronoun variable of loaded user
  * @method void setPronouns(string $pronouns)
- * @method void setDisplayPronouns(bool $display_pronouns)
  * @method int getLastInitialFormat()
  * @method string getDisplayNameOrder()
- * @method void setDisplayNameOrder()
+ * @method void setDisplayNameOrder(string $display_name_order)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method string getSecondaryEmail()
@@ -42,6 +41,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method void setGroup(integer $group)
  * @method void setRegistrationType(string $type)
  * @method string getRegistrationSection()
+ * @method string setRegistrationSubsection(string $subsection)
  * @method string getCourseSectionId()
  * @method void setCourseSectionId(string $Id)
  * @method int getRotatingSection()
@@ -54,6 +54,10 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool isInstructorUpdated()
  * @method array getGradingRegistrationSections()
  * @method bool isLoaded()
+ * @method string getTimeZone()
+ * @method string getDisplayImageState()
+ * @method bool getEnforceSingleSession()
+ * @method string getRegistrationSubsection()
  */
 class User extends AbstractModel {
     /**
@@ -729,6 +733,7 @@ class User extends AbstractModel {
         $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
@@ -739,6 +744,7 @@ class User extends AbstractModel {
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
         $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
         return $notification_settings;
     }
 

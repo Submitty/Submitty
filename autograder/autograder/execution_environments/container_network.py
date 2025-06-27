@@ -112,10 +112,12 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
+            self.log_docker_error('image is not available')
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
+            self.log_docker_error(f'could not create container {self.full_name}')
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
@@ -127,6 +129,44 @@ class Container():
             timer() - container_create_time
         )
         client.close()
+
+    def log_docker_error(self, message):
+        untrusted = self.full_name.split("_")[0]
+        docker_error_path = os.path.join(
+                '/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/tmp_logs')
+
+        queue_file = os.path.join('/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/queue_file.json')
+
+        machine = 'unknown'
+        with open(queue_file, 'r') as f:
+            try:
+                queue_file = json.load(f)
+                machine = queue_file["which_machine"]
+            except json.JSONDecodeError:
+                queue_file = {}
+
+        docker_error_file = os.path.join(docker_error_path, "docker_error.json")
+        docker_error_data = []
+        if os.path.exists(docker_error_file):
+            try:
+                with open(docker_error_file, "r") as json_file:
+                    docker_error_data = json.load(json_file)
+                    if not isinstance(docker_error_data, list):
+                        docker_error_data = []
+            except json.JSONDecodeError:
+                docker_error_data = []
+
+        error_log = {
+            "image": f'{self.image}',
+            "machine": f'{machine}',
+            "error": f'{message} on machine {machine}',
+        }
+
+        if error_log not in docker_error_data:
+            docker_error_data.append(error_log)
+
+        with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+            json.dump(docker_error_data, json_file, indent=4)
 
     def start(self, logfile):
         container_start_time = timer()
@@ -333,8 +373,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 created_containers.append(container)
             except Exception:
                 self.log_message(
-                  f"ERROR: Could not create container {container.name}"
-                  f" with image {container.image}"
+                    f"ERROR: Could not create container {container.name}"
+                    f" with image {container.image}"
                 )
                 self.log_stack_trace(traceback.format_exc())
 
@@ -508,13 +548,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 network.client.api.close()
                 network.client.close()
                 self.log_message(
-                  f'{dateutils.get_current_time()} '
-                  f'destroying docker network {network}'
+                    f'{dateutils.get_current_time()} '
+                    f'destroying docker network {network}'
                 )
             except Exception:
                 self.log_message(
-                  f'{dateutils.get_current_time()} ERROR: Could not remove docker '
-                  f'network {network}'
+                    f'{dateutils.get_current_time()} ERROR: Could not remove docker '
+                    f'network {network}'
                 )
         self.networks.clear()
 

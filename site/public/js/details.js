@@ -1,4 +1,4 @@
-/* global courseUrl */
+/* global courseUrl, showPopup, escapeSpecialChars */
 /* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 const MOBILE_BREAKPOINT = 951;
 
@@ -38,8 +38,8 @@ $(document).ready(() => {
             // the content to be added is inside this data attr
             content = $(this).data('col-title');
             style.innerHTML += `
-              #details-table td:nth-of-type(${idx + 1}):before {
-                  content: "${content}";
+              #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
+                  content: "${escapeSpecialChars(content)}";
               }
             `;
         }

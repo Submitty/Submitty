@@ -58,7 +58,7 @@ function checkForumFileExtensions(post_box_id, files) {
 }
 
 function resetForumFileUploadAfterError(displayPostId) {
-    $(`#file_name${displayPostId}`).html('');
+    $(`#file_name${displayPostId}`).text('');
     document.getElementById(`file_input_label${displayPostId}`).style.border = '2px solid red';
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
@@ -75,6 +75,7 @@ function checkNumFilesForumUpload(input, post_id) {
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
+        // eslint-disable-next-line no-restricted-syntax
         $(`#file_name${displayPostId}`).html(`<p style="display:inline-block;">${input.files.length} files selected.</p>`);
         $('#messages').fadeOut();
         document.getElementById(`file_input_label${displayPostId}`).style.border = '';
@@ -122,7 +123,7 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     // eslint-disable-next-line no-undef
     for (let j = 0; j < file_array[index].length; j++) {
         // eslint-disable-next-line no-undef
-        if (file_array[index][j].name.indexOf("'") !== -1
+        if (file_array[index][j].name.indexOf('\'') !== -1
             // eslint-disable-next-line no-undef
             || file_array[index][j].name.indexOf('"') !== -1) {
             // eslint-disable-next-line no-undef
@@ -215,6 +216,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    // re-enable the submit button for users to try again
+                    form.find('[type=submit]').prop('disabled', false);
                     return;
                 }
             }
@@ -460,7 +463,7 @@ function socketResolveThreadHandler(thread_id) {
 
     // eslint-disable-next-line eqeqeq
     if ($('#current-thread').val() == thread_id) {
-        $("[title='Mark thread as resolved']").remove();
+        $('[title=\'Mark thread as resolved\']').remove();
     }
 }
 
@@ -852,19 +855,14 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const anon = json.anon;
             const change_anon = json.change_anon;
             const user_id = escapeSpecialChars(json.user);
-            const validIsoString = json.post_time.replace(' ', 'T');
-            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
-            if (!time.isValid) {
-                // Timezone suffix ":00" might be missing
-                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
-            }
+            const time = DateTime.fromISO(json.post_time, { zone: 'local' });
             const categories_ids = json.categories_ids;
             const date = time.toLocaleString(DateTime.DATE_SHORT);
             const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines * 14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
+            editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -899,8 +897,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 const thread_title = json.title;
                 const thread_lock_date = json.lock_thread_date;
                 const thread_status = json.thread_status;
-                let expiration = json.expiration.replace('-', '/');
-                expiration = expiration.replace('-', '/');
+                const expiration = json.expiration;
                 $('#title').prop('disabled', false);
                 $('.edit_thread').show();
                 $('#label_lock_thread').show();
@@ -910,7 +907,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                     $('#pin-expiration-date').show();
                 }
-                $('#expirationDate').val(json.expiration);
+                $('#expirationDate').val(expiration);
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
@@ -1242,6 +1239,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             Cookies.remove('forum_thread_status', { path: '/' });
         },
     });
+
+    highlightAndScrollToCurrentThread();
 }
 
 function toggleLike(post_id, thread_id, current_user) {
@@ -1402,13 +1401,13 @@ function showSplit(post_id) {
                 if (json['categories_list'].includes(id)) {
                     if (!($(target).hasClass('btn-selected'))) {
                         $(target).addClass('btn-selected').trigger('eventChangeCatClass');
-                        $(target).find("input[type='checkbox']").prop('checked', true);
+                        $(target).find('input[type=\'checkbox\']').prop('checked', true);
                     }
                 }
                 else {
                     if ($(target).hasClass('btn-selected')) {
                         $(target).removeClass('btn-selected').trigger('eventChangeCatClass');
-                        $(target).find("input[type='checkbox']").prop('checked', false);
+                        $(target).find('input[type=\'checkbox\']').prop('checked', false);
                     }
                 }
             }
@@ -1689,7 +1688,7 @@ function refreshCategories() {
         order.forEach((category) => {
             const category_visible_date = category[4];
             const category_diff = category[3];
-            if (category_visible_date === '' || category_diff > 0) {
+            if (category_visible_date === '' || category_diff >= 0) {
                 const category_id = category[0];
                 const category_desc = category[1];
                 const category_color = category[2];
@@ -1704,7 +1703,7 @@ function refreshCategories() {
             }
         });
 
-        $(".cat-buttons input[type='checkbox']").each(function () {
+        $('.cat-buttons input[type=\'checkbox\']').each(function () {
             if ($(this).parent().hasClass('btn-selected')) {
                 $(this).prop('checked', true);
             }
@@ -1718,11 +1717,11 @@ function refreshCategories() {
     $('.cat-buttons').click(function () {
         if ($(this).hasClass('btn-selected')) {
             $(this).removeClass('btn-selected');
-            $(this).find("input[type='checkbox']").prop('checked', false);
+            $(this).find('input[type=\'checkbox\']').prop('checked', false);
         }
         else {
             $(this).addClass('btn-selected');
-            $(this).find("input[type='checkbox']").prop('checked', true);
+            $(this).find('input[type=\'checkbox\']').prop('checked', true);
         }
         $(this).trigger('eventChangeCatClass');
     });
@@ -2020,14 +2019,14 @@ function sortTable(sort_element_index, reverse = false) {
         const reverse_index = headers[i].innerHTML.indexOf(' ↑');
 
         if (index > -1 || reverse_index > -1) {
-            headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+            headers[i].innerHTML = escapeSpecialChars(headers[i].innerHTML.slice(0, -2));
         }
     }
     if (reverse) {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↑`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↑`);
     }
     else {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↓`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↓`);
     }
 }
 
@@ -2103,6 +2102,7 @@ function loadThreadHandler() {
             },
         });
     });
+    highlightAndScrollToCurrentThread();
 }
 
 function showAttachmentsOnload() {
@@ -2387,6 +2387,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
+            // eslint-disable-next-line no-restricted-syntax
             $('#thread-content').html(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');
@@ -2551,11 +2552,11 @@ function restoreCreateThreadFromLocal() {
         $('div.cat-buttons').each((_i, e) => {
             if (categories.includes(e.innerText)) {
                 e.classList.add('btn-selected');
-                $(e).find("input[type='checkbox']").prop('checked', true);
+                $(e).find('input[type=\'checkbox\']').prop('checked', true);
             }
             else {
                 e.classList.remove('btn-selected');
-                $(e).find("input[type='checkbox']").prop('checked', false);
+                $(e).find('input[type=\'checkbox\']').prop('checked', false);
             }
             $(e).trigger('eventChangeCatClass');
         });
@@ -2682,4 +2683,17 @@ function showUpduckUsers(post_id, csrf_token) {
             }
         },
     });
+}
+
+// Highlights and scrolls to the current thread if it exists.
+function highlightAndScrollToCurrentThread() {
+    const activeThreadId = $('#current-thread').val();
+    if (activeThreadId) {
+        const activeThread = $(`[data-thread_id='${activeThreadId}'] .thread_box`);
+        if (activeThread.length) {
+            $('.thread_box').removeClass('active');
+            activeThread.addClass('active');
+            scrollThreadListTo(activeThread[0]);
+        }
+    }
 }
