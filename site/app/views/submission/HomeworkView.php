@@ -623,6 +623,8 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $has_overridden_grades,
+            'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
