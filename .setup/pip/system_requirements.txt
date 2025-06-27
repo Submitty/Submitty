@@ -19,7 +19,7 @@ psycopg2-binary==2.9.10
 sqlalchemy==1.4.29
 psutil==7.0.0
 python-dateutil==2.9.0.post0
-watchdog==4.0.1
+watchdog==6.0.0
 xlsx2csv==0.8.4
 pause==0.3
 paramiko==3.5.1
@@ -29,7 +29,7 @@ distro==1.9.0
 jsonschema==4.24.0
 jsonref==1.1.0
 docker==7.1.0
-urllib3==2.4.0
+urllib3==2.5.0
 beautifulsoup4==4.13.4
 
 # Python libraries for QR bulk upload

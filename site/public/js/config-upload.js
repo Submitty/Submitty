@@ -8,14 +8,14 @@ $(document).ready(() => {
 
 function openRenamePopup(file_path) {
     const url = `${buildCourseUrl(['autograding_config', 'usage'])}?config_path=${encodeURIComponent(file_path)}`;
-    $('#alert_in_use').html('');
+    $('#alert_in_use').text('');
     $('#gradeables_using_config').empty();
     $.ajax({
         url: url,
         success(data) {
             const gradeable_ids = JSON.parse(data)['data'];
             if (gradeable_ids.length > 0) {
-                $('#alert_in_use').html('Note: Currently these gradeables are using this config, rename at your own risk');
+                $('#alert_in_use').text('Note: Currently these gradeables are using this config, rename at your own risk');
                 for (let i = 0; i < gradeable_ids.length; i++) {
                     $('#gradeables_using_config').append(`<li>${gradeable_ids[i]}</li>`);
                 }
