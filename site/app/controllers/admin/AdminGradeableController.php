@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\CodeMirrorUtils;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
@@ -547,6 +548,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
