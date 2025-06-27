@@ -11,7 +11,7 @@ def parse_arguments():
                                                  systemctl functions. This\
                                                  script must be run as the\
                                                  submitty supervisor.')
-    
+
     action_group = parser.add_mutually_exclusive_group(required=True)
     action_group.add_argument("--pull", metavar="IMAGE", type=str, help="The image to pull.")
     action_group.add_argument("--remove", action="store_true", help="Remove all unused images.")
@@ -19,6 +19,7 @@ def parse_arguments():
     parser.add_argument("--required-images", type=str, nargs='*', help="A list of required images to keep during removal.")
     parser.add_argument("--system-images", type=str, nargs='*', help="A list of system images to always keep during removal.")
     return parser.parse_args()
+
 
 def remove_images(client, required_images, system_images):
     """Remove all Docker images not in the required or system images lists."""
@@ -38,7 +39,7 @@ def remove_images(client, required_images, system_images):
         images_to_remove = set.difference(image_tags, images_to_keep)
         for image in images_to_remove:
             print(f"Removed image {image}")
-            
+
         for image_tag_to_remove in images_to_remove:
             try:
                 image_id = tag_to_image_id.get(image_tag_to_remove)
@@ -57,8 +58,6 @@ def remove_images(client, required_images, system_images):
             except Exception as e:
                 print(f"ERROR: An error occurred while removing {image_tag_to_remove}: {e}")
                 traceback.print_exc(file=sys.stderr)
-        # print("Pruning any remaining dangling images...")
-        # client.images.prune(filters={'dangling': True})
 
     except Exception as e:
         print(f"ERROR: A major error occurred during the removal process: {e}")
@@ -67,6 +66,7 @@ def remove_images(client, required_images, system_images):
         raise e
 
     print("Image removal complete.")
+
 
 if __name__ == '__main__':
     args = parse_arguments()

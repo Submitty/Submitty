@@ -157,9 +157,6 @@ class DockerInterfaceController extends AbstractController {
                 $json
             );
 
-            // if (!$this->updateDocker()) {
-            //     return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-            // }
             return JsonResponse::getSuccessResponse($_POST['image'] . ' has been added to the configuration! 
                                                                             Click \'Update dockers and machines\' to apply changes.');
         }
@@ -244,10 +241,6 @@ class DockerInterfaceController extends AbstractController {
             $jsonFilePath,
             $json,
         );
-
-        // if (!$this->updateDocker()) {
-        //     return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-        // }
 
         return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
                                                             Click \'Update dockers and machines\' to apply changes.');
