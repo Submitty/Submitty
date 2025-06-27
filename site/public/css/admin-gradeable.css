@@ -413,6 +413,11 @@ body::-webkit-scrollbar-track {
     border-radius: 4px !important;
     /* stylelint-disable-next-line declaration-no-important */
     vertical-align: middle !important;
+    min-height: 500px;
+    overflow: hidden;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+    resize: vertical;
 }
 
 #gradeable-config-edit-bar {

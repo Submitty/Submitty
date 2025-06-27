@@ -933,6 +933,12 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
+let originalConfigContent = null;
+let codeMirrorInstance = null;
+let current_g_id = null;
+let current_file_path = null;
+isConfigEdited = false;
+
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
         event.preventDefault();
@@ -944,12 +950,6 @@ window.addEventListener('beforeunload', (event) => {
 function scrollToBottom() {
     window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
 }
-
-let originalConfigContent = null;
-let codeMirrorInstance = null;
-let current_g_id = null;
-let current_file_path = null;
-isConfigEdited = false;
 
 function updateGradeableEditor(g_id, file_path) {
     if ((current_g_id !== g_id || current_file_path !== file_path)) {
