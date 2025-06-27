@@ -77,8 +77,8 @@ class EmailRepository extends EntityRepository {
     }
 
     /**
-     * Helper method to fetch the subjects for a specific page for pagination, containing their subject, created date,
-     * and count of emails.
+     * Helper method to fetch the emails for a specific page for pagination, containing their subject, created date,
+     * and count.
      *
      * @param int $page
      * @param string|null $semester
