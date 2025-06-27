@@ -6,12 +6,12 @@ namespace app\entities;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use app\repositories\TermRepository;
+use Doctrine\ORM\Entity;
 
 /**
  * Doctrine entity for Terms, not much used but used for other queries.
  */
-#[ORM\Entity(repositoryClass: TermRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: "terms")]
 class Term {
     #[ORM\Id]

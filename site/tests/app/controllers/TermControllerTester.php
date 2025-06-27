@@ -5,24 +5,18 @@ declare(strict_types=1);
 namespace tests\app\libraries;
 
 use app\libraries\Core;
-use app\repositories\TermRepository;
-use app\libraries\TermManager;
+use app\libraries\TermController;
 use app\entities\Term;
 use app\models\User;
 use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 
-class TermManagerTester extends BaseUnitTest {
+class TermControllerTester extends BaseUnitTest {
 
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
-        $repo = $this->createMock(TermRepository::class);
-        $entityManager = $core->getSubmittyEntityManager();
-        $entityManager->method('getRepository')
-            ->with(Term::class)
-            ->willReturn($repo);
         // Testing create terms
-        TermManager::createNewTerm($core, 'id', 'NAME', '06/25/25', '07/18/25');
+        TermController::createNewTerm($core, 'id', 'NAME', '06/25/25', '07/18/25');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
@@ -45,7 +39,7 @@ class TermManagerTester extends BaseUnitTest {
             'grading_registration_sections' => [1, 2]
         ];
         $user = new User($core, $detail);
-        $this->assertEquals(TermManager::getTermStartDate($core, 'id', $user), DateUtils::convertTimeStamp($user, '06/25/25', 'Y-m-d H:i:s'));
+        $this->assertEquals(TermController::getTermStartDate($core, 'id', $user), DateUtils::convertTimeStamp($user, '06/25/25', 'Y-m-d H:i:s'));
     }
 
 }
