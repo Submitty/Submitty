@@ -1,0 +1,71 @@
+{
+    "automatic_grading_total": 3,
+    "nonhidden_automatic_grading_total": 3,
+    "testcases": [
+        {
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2684
+            },
+            "points_awarded": 1,
+            "test_name": "Did you submit exactly one .docx or .pdf file?"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Check existence of uploaded .docx file",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  student_upload.docx",
+                            "type": "failure"
+                        },
+                        {
+                            "message": "You either did not submit a .docx file or you submitted multiple .docx files. Please submit exactly one .docx file.",
+                            "type": "failure"
+                        }
+                    ]
+                },
+                {
+                    "description": "Check if the .docx to .pdf conversion was successful",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  student_converted.pdf",
+                            "type": "failure"
+                        },
+                        {
+                            "message": "We failed to create the .pdf file from your .docx Word document.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2692
+            },
+            "points_awarded": 0,
+            "test_name": "Did you submit a .docx file?  We will convert the .docx to .pdf using LibreOffice."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/student_submission.pdf",
+                    "description": "Student's uploaded .pdf file",
+                    "results_public": true
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2684
+            },
+            "points_awarded": 2,
+            "test_name": "Alternatively...  Did you submit a .pdf file?"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}

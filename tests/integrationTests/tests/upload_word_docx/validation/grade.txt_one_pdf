@@ -1,0 +1,6 @@
+test01: Did you submit exactly one .docx or .pdf file?       1 /  1  
+test02: Did you submit a .docx file?  We will convert the .docx to .pdf using LibreOffice.   0 /  2  
+test03: Alternatively...  Did you submit a .pdf file?       +2 points
+SubmissionLimit: Submission Limit                                             
+Automatic grading total:                                          3 /  3
+Non-hidden automatic grading total:                               3 /  3
