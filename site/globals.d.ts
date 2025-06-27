@@ -8,6 +8,5 @@ declare global {
         $: JQueryStatic;
         Twig: typeof Twig;
         luxon: typeof luxon;
-
     }
 }
