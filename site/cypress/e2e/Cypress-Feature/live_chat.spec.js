@@ -110,15 +110,17 @@ const checkAnon = (title, expectedAnon) => {
 };
 
 const createChatroom = (title, description, isAnon) => {
-    cy.get('[data-testid="new-chatroom-btn"]').should('exist')
-    cy.get('[data-testid="new-chatroom-btn"]').click().then(() => {
+    cy.get('[data-testid="new-chatroom-btn"]').should('exist');
+    cy.get('[data-testid="new-chatroom-btn"]').click();
+    cy.get('[data-testid="new-chatroom-btn"]').then(() => {
         cy.get('[data-testid="chatroom-name-entry"]').should('exist').type(title, { force: true });
         cy.get('[data-testid="chatroom-description-entry"]').should('exist').type(description, { force: true });
         if (!isAnon) {
             cy.get('[data-testid="enable-disable-anon"]').should('exist').click();
         }
-        cy.get('[data-testid="submit-chat-creation"]').should('exist')
-        cy.get('[data-testid="submit-chat-creation"]').click({ force: true }).then(() => {
+        cy.get('[data-testid="submit-chat-creation"]').should('exist');
+        cy.get('[data-testid="submit-chat-creation"]').click({ force: true });
+        cy.get('[data-testid="submit-chat-creation"]').then(() => {
             checkTitle(title);
             checkDescription(title, description);
             checkAnon(title, isAnon);
@@ -132,14 +134,18 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
         if (exists) {
             getChatroom(oldTitle).find('[data-testid="edit-chatroom"]').first().click().then(() => {
                 cy.get('[data-testid="chatroom-name-edit"]').should('exist');
-                cy.get('[data-testid="chatroom-name-edit"]').clear({ force: true }).type(newTitle, { force: true });
+                cy.get('[data-testid="chatroom-name-edit"]').clear({ force: true });
+                cy.get('[data-testid="chatroom-name-edit"]').type(newTitle, { force: true });
                 cy.get('[data-testid="chatroom-description-edit"]').should('exist');
-                cy.get('[data-testid="chatroom-description-edit"]').clear({ force: true }).type(newDescription, { force: true });
+                cy.get('[data-testid="chatroom-description-edit"]').clear({ force: true });
+                cy.get('[data-testid="chatroom-description-edit"]').type(newDescription, { force: true });
                 if (toggleAnon) {
-                    cy.get('[data-testid="edit-anon"]').should('exist').click();
+                    cy.get('[data-testid="edit-anon"]').should('exist');
+                    cy.get('[data-testid="edit-anon"]').click();
                 }
                 cy.get('[data-testid="submit-chat-edit"]').should('exist');
-                cy.get('[data-testid="submit-chat-edit"]').click({ force: true }).then(() => {
+                cy.get('[data-testid="submit-chat-edit"]').click({ force: true })
+                cy.get('[data-testid="submit-chat-edit"]').then(() => {
                     checkTitle(newTitle);
                     checkDescription(newTitle, newDescription);
                     checkAnon(newTitle, expectedAnon);
@@ -161,9 +167,11 @@ const getAnonName = () => {
 
 const sendChatMessage = (text, name) => {
     cy.get('[data-testid="msg-input"]').should('exist');
-    cy.get('[data-testid="msg-input"]').type(text).then(() => {
-        cy.get('[data-testid="send-btn"]').should('exist')
-        cy.get('[data-testid="send-btn"]').click().then(() => {
+    cy.get('[data-testid="msg-input"]').type(text)
+    ct.get('[data-testid="msg-input"]').then(() => {
+        cy.get('[data-testid="send-btn"]').should('exist');
+        cy.get('[data-testid="send-btn"]').click();
+        cy.get('[data-testid="send-btn"]').then(() => {
             checkChatMessage(text, name);
         });
     });
@@ -172,7 +180,8 @@ const sendChatMessage = (text, name) => {
 const sendChatMessageEnter = (text, name) => {
     cy.get('[data-testid="msg-input"]').should('exist');
     cy.get('[data-testid="msg-input"]').type(text);
-    cy.get('[data-testid="msg-input"]').type('{enter}').then(() => {
+    cy.get('[data-testid="msg-input"]').type('{enter}');
+    cy.get('[data-testid="msg-input"]').then(() => {
         checkChatMessage(text, name);
     });
 };
