@@ -44,7 +44,7 @@ class EmailStatusController extends AbstractController {
     public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
-        $page = isset($_GET['page']) ? $_GET['page'] : 1;
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
@@ -67,7 +67,7 @@ class EmailStatusController extends AbstractController {
     public function getSuperuserEmailStatusPage(): WebResponse {
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
-        $num_page = $repository->getPageNum();
+        $num_page = $repository->getPageNum(null, null);
 
         return new WebResponse(
             EmailStatusView::class,
@@ -84,10 +84,10 @@ class EmailStatusController extends AbstractController {
      */
     #[Route("/superuser/email_status_page", methods: ["GET"])]
     public function getSuperuserEmailStatusesByPage(): WebResponse {
-        $page = $_GET['page'] ?? 1;
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         /** @var EmailRepository $repository */
         $repository = $this->core->getSubmittyEntityManager()->getRepository(EmailEntity::class);
-        $result = $repository->getEmailsByPage($page);
+        $result = $repository->getEmailsByPage($page, null, null);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         return new WebResponse(
