@@ -28,6 +28,7 @@ class RainbowGradesController extends AbstractController {
 
     /**
      * @AccessControl(role="INSTRUCTOR")
+     * This route is used to view the grades of a specific student.
      **/
     #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
     public function viewStudentGrades() {
