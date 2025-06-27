@@ -1080,7 +1080,6 @@ window.uploadAttachment = function () {
                     }
                     else {
                         const renderedData = window.Twig.twig({
-                            // @ts-expect-error @types/twig is not compatible with the current version of twig
                             ref: 'Attachments',
                         }).render({
                             file: data['data'],
