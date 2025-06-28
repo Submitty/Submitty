@@ -15,10 +15,8 @@ declare global {
     }
 }
 
-// eslint-disable-next-line no-var
-var keymap: KeymapEntry<unknown>[] = [];
-// eslint-disable-next-line no-var
-var remapping = {
+const keymap: KeymapEntry<unknown>[] = [];
+const remapping = {
     active: false,
     index: 0,
 };
@@ -166,12 +164,6 @@ window.showSettings = function () {
     captureTabInModal('settings-popup');
 };
 
-window.Twig.twig({
-    id: 'HotkeyList',
-    href: '/templates/grading/settings/HotkeyList.twig',
-    async: true,
-});
-
 window.restoreAllHotkeys = function () {
     keymap.forEach((hotkey, index) => {
         updateKeymapAndStorage(index, hotkey.originalCode!);
@@ -197,12 +189,6 @@ function generateHotkeysList() {
         })),
     }));
 }
-
-window.Twig.twig({
-    id: 'GeneralSettingList',
-    href: '/templates/grading/settings/GeneralSettingList.twig',
-    async: true,
-});
 
 /**
  * Generate list of settings on the ui
