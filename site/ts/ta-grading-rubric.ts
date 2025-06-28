@@ -1074,7 +1074,6 @@ function setRubricDOMElements(elements: string | Element | DocumentFragment | Do
     gradingBox.html(elements);
 
     if (isInstructorEditEnabled()) {
-        console.log('is instructor');
         setupSortableComponents();
     }
 }
