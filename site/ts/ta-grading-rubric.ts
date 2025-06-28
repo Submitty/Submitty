@@ -1074,6 +1074,7 @@ function setRubricDOMElements(elements: string | Element | DocumentFragment | Do
     gradingBox.html(elements);
 
     if (isInstructorEditEnabled()) {
+        console.log('is instructor');
         setupSortableComponents();
     }
 }
@@ -1202,7 +1203,7 @@ function setupSortableMarks(component_id: number) {
 function setupSortableComponents() {
     const componentList = $('#component-list');
     componentList.sortable({
-        update: void onComponentOrderChange,
+        update: () => void onComponentOrderChange(),
         handle: '.reorder-component-container',
     });
     componentList.on('keydown', keyPressHandler);
