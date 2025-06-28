@@ -713,4 +713,24 @@ class RainbowCustomization extends AbstractModel {
             'manual_customization.json'
         ));
     }
+
+    /**
+     * Check if the manual customization is being used
+     *
+     * @return bool
+     */
+    public function usesManualCustomization(): bool {
+        if (!$this->doesManualCustomizationExist()) {
+            return false;
+        }
+
+        $customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'customization.json');
+        $manual_customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'manual_customization.json');
+
+        $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
+        $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
+
+        // When selecting manual or gui customizations, the respective contents are copied to the main customization.json file
+        return $customization_json === $manual_customization_json;
+    }
 }
