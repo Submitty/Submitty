@@ -13,7 +13,7 @@ class RainbowGradesController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/grades")]
     public function gradesReport(): RedirectResponse|WebResponse {
         if (!$this->core->getConfig()->displayRainbowGradesSummary() && $this->core->getUser()->getGroup() !== User::GROUP_INSTRUCTOR) {
-            $this->core->addErrorMessage("Rainbow Grades are not enabled for this course");
+            $this->core->addErrorMessage("Rainbow Grades are not enabled for this course.");
             return new RedirectResponse($this->core->buildCourseUrl([]));
         }
         $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"

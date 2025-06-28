@@ -1,3 +1,10 @@
+{% if not rainbow_grade_active %}
+    <div class="content warning-banner" data-testid="rainbow-grades-not-active-banner">
+        <p>Rainbow Grades are not available to the student.</p>
+        <p>You can choose to toggle it on in <a href="{{ config_url }}">course settings.</a></p>
+    </div>
+{% endif %}
+
 <div class="content">
     <header>
         <h1 class="label">
