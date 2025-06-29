@@ -82,7 +82,6 @@ function removeImage(url, id) {
         success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
-                location.reload();
                 // eslint-disable-next-line no-undef
                 displaySuccessMessage(json.data);
             }
