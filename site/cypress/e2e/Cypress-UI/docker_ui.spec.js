@@ -135,18 +135,10 @@ describe('Docker UI Test', () => {
             .should('contain.text', 'Successfully queued the system to update');
 
         // Allow the system to update the info and reload
-        // eslint-disable-next-line no-restricted-syntax
-        cy.waitAndReloadUntil(() => {
-            return cy.get('#capabilities-list')
-                .invoke('text')
-                .then((text) => {
-                    return !text.includes('et-cetera');
-                });
-        }, 10000, 500);
+        cy.reload();
 
         // Check the empty tag list
-        cy.get('#capabilities-list')
-            .should('not.contain.text', 'et-cetera');
+        cy.get('#capabilities-list').should('not.exist');
 
         // Try to add it again, should fail
         cy.get('#capability-form')
@@ -168,7 +160,8 @@ describe('Docker UI Test', () => {
     //       we need to wait for the system to install the image
     //       Currently, using one of the smaller images submitty/prolog:8.
     it('Should add new image and remove it', () => {
-        cy.reload();
+        cy.intercept('POST', '**/admin/add_image').as('addImage');
+
         // Add a new image
         cy.get('#capability-form')
             .select('python');
@@ -179,6 +172,9 @@ describe('Docker UI Test', () => {
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
+
+        cy.wait('@addImage');
+
         // Check success message for adding to config
         cy.get('.alert-success')
             .should('contain.text', 'submitty/prolog:8 has been added to the configuration!');
@@ -201,21 +197,34 @@ describe('Docker UI Test', () => {
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('contain.text', 'Remove');
 
+        cy.intercept('POST', '**/admin/remove_image').as('removeImage');
+
         // Remove the image
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('be.visible')
             .click();
-        cy.get('.alert-success')
-            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration.');
 
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
+
+        cy.wait('@removeImage');
+
+        cy.get('.alert-success')
+            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration.');
 
         // Update the machine to remove the image
         cy.get('#update-machines').click();
         cy.get('.alert-success')
             .should('contain.text', 'Successfully queued the system to update');
 
+        // Reload the page and wait until the image is removed
+        cy.waitAndReloadUntil(() => {
+            return cy.get('body').then(($body) => {
+                const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
+                return !exists;
+            });
+        }, 10000, 500);
+        // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
     });
