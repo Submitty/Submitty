@@ -17,8 +17,21 @@ const docker_ui_path = '/admin/docker';
  *         "submitty/python:latest",
  *         "submitty/clang:latest",
  *         "submitty/gcc:latest",
+ *         "submitty/rust:latest",
  *         "submitty/java:latest",
- *         "submitty/pdflatex:latest",
+ *         "submitty/pdflatex:latest"
+ *     ],
+ *     "python": [
+ *         "submitty/autograding-default:latest",
+ *         "submitty/python:latest"
+ *     ],
+ *     "cpp": [
+ *         "submitty/autograding-default:latest",
+ *         "submitty/clang:latest",
+ *         "submitty/gcc:latest"
+ *     ],
+ *     "notebook": [
+ *         "submitty/autograding-default:latest"
  *     ]
  * }
  */
@@ -28,17 +41,6 @@ describe('Docker UI Test', () => {
         cy.login();
         cy.visit(docker_ui_path);
     });
-    // !DEPRECATED: Installer will also update the docker info
-    // it('Should be the first update', () => {
-    //     // No info update should be made before this test...
-    //     // Check if the update time is "Unknown"
-    //     cy.get(':nth-child(1) > p')
-    //         .should('contain.text', 'Unknown');
-    //     // Check if the OS info is empty
-    //     cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
-    //         .invoke('text')
-    //         .should('match', /[\n ]*/);
-    // });
 
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
@@ -123,9 +125,14 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
 
+        // Check success message for adding to config
         cy.get('.alert-success')
-            .should('have.text', 'submitty/autograding-default:latest'
-            + ' found on DockerHub and queued to be added!');
+            .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
+
+        // Update the machine to link existing image to a new tag
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
 
         // Allow the system to update the info and reload
         // eslint-disable-next-line no-restricted-syntax
@@ -135,7 +142,7 @@ describe('Docker UI Test', () => {
                 .then((text) => {
                     return !text.includes('et-cetera');
                 });
-        }, 10000);
+        }, 10000, 500);
 
         // Check the empty tag list
         cy.get('#capabilities-list')
@@ -159,6 +166,7 @@ describe('Docker UI Test', () => {
 
     // NOTE: Can be refactored later to speed up the Cypress test since
     //       we need to wait for the system to install the image
+    //       Currently, using one of the smaller images submitty/prolog:8.
     it('Should add new image and remove it', () => {
         cy.reload();
         // Add a new image
@@ -171,9 +179,14 @@ describe('Docker UI Test', () => {
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
+        // Check success message for adding to config
         cy.get('.alert-success')
-            .should('have.text', 'submitty/prolog:8 found on DockerHub'
-            + ' and queued to be added!');
+            .should('contain.text', 'submitty/prolog:8 has been added to the configuration!');
+
+        // Update the machine to pull the image
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
 
         // Allow the system to install the image and update UI
         // eslint-disable-next-line no-restricted-syntax
@@ -192,9 +205,16 @@ describe('Docker UI Test', () => {
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('be.visible')
             .click();
+        cy.get('.alert-success')
+            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration.');
 
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
+
+        // Update the machine to remove the image
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
 
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
