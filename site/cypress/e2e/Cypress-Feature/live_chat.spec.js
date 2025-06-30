@@ -2,9 +2,9 @@ const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
 const description1 = 'Test Description';
 const description2 = 'Non Anon Test Description';
-const msgText1 = 'Test';
-const msgText2 = 'Test2';
-const msgText3 = '!@!@!@!@!@!@#$#$#$#$%$%^%^&^&**&**(*(*(><><><><:K:KKKJJ{K}JKJK|||][];;/./,.,djsdaaxeiq ggoih vjcaxkcx[x8ytgd';
+const msgText1 = 'Message';
+const msgText2 = 'Message 2';
+const msgText3 = 'Message 3';
 const name1 = 'Quinn Instructor';
 const name2 = 'Joe S.';
 
@@ -149,34 +149,34 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
     });
 };
 
-const checkChatMessage = (text, name) => {
+const checkChatMessage = (text, sender) => {
     expect(cy.get('[data-testid="message-container"]').last().text === text);
     const title = cy.get('[data-testid="sender-name"]').last().text ?? '';
-    expect(title.includes(name));
+    expect(title.includes(sender));
 };
 
 const getAnonName = () => {
     return cy.get('[data-testid="sender-name"]').last().text;
 };
 
-const sendChatMessage = (text, name) => {
+const sendChatMessage = (text, sender) => {
     cy.get('[data-testid="msg-input"]').should('exist');
     cy.get('[data-testid="msg-input"]').type(text);
     cy.get('[data-testid="msg-input"]').then(() => {
         cy.get('[data-testid="send-btn"]').should('exist');
         cy.get('[data-testid="send-btn"]').click();
         cy.get('[data-testid="send-btn"]').then(() => {
-            checkChatMessage(text, name);
+            checkChatMessage(text, sender);
         });
     });
 };
 
-const sendChatMessageEnter = (text, name) => {
+const sendChatMessageEnter = (text, sender) => {
     cy.get('[data-testid="msg-input"]').should('exist');
     cy.get('[data-testid="msg-input"]').type(text);
     cy.get('[data-testid="msg-input"]').type('{enter}');
     cy.get('[data-testid="msg-input"]').then(() => {
-        checkChatMessage(text, name);
+        checkChatMessage(text, sender);
     });
 };
 
