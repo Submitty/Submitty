@@ -3676,26 +3676,6 @@ parameters:
 			path: app/libraries/CourseMaterialsUtils.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:__construct\\(\\) has parameter \\$baseRenderer with no type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:addLineNumbers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeInlineRenderer.php
-
-		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
 			count: 1
 			path: app/libraries/DateUtils.php
