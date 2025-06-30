@@ -23,10 +23,6 @@ window.GENERAL_INFORMATION = {
     broken: false,
 };
 
-if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
-    window.pdfjsLib.GlobalWorkerOptions.src = 'vendor/pdfjs/pdf.worker.min.mjs';
-}
-
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
 }
@@ -90,7 +86,7 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
-                window.pdfjsLib.getDocument({
+                pdfjsLib.getDocument({
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
@@ -249,7 +245,7 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     console.log(data);
                     alert('Something went wrong, please try again later.');
                 }
-                window.pdfjsLib.getDocument({
+                pdfjsLib.getDocument({
                     data: pdfData,
                     cMapUrl: '../../vendor/pdfjs/cmaps/',
                     cMapPacked: true,
@@ -527,11 +523,3 @@ function repairPDF() {
 function saveFile() {
     $('#save-pdf-btn').click();
 }
-
-// Export functions to global scope for backward compatibility
-window.render_student = render_student;
-window.download_student = download_student; 
-window.loadPDFToolbar = loadPDFToolbar;
-window.toggleOtherAnnotations = toggleOtherAnnotations;
-window.loadAllAnnotations = loadAllAnnotations;
-window.loadGraderAnnotations = loadGraderAnnotations;

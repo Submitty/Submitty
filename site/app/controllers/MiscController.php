@@ -271,6 +271,9 @@ class MiscController extends AbstractController {
             elseif (str_ends_with($path, '.html')) {
                 $mime_type = 'text/html';
             }
+            elseif (str_ends_with($path, '.mjs')) {
+                $mime_type = 'application/javascript';
+            }
         }
         header('Content-type: ' . $mime_type);
         readfile($path);
