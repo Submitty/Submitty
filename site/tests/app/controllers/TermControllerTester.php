@@ -13,7 +13,9 @@ use tests\BaseUnitTest;
 class TermControllerTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
-        $core->getSubmittyEntityManager()
+        $entity_manager = 
+        $core->getSubmittyEntityManager();
+        $entity_manager
             ->expects($this->once())
             ->method('persist')
             ->with(
@@ -26,13 +28,11 @@ class TermControllerTester extends BaseUnitTest {
                     return true;
                 })
             );
-        $entityManager
+        $entity_manager
             ->expects($this->once())
             ->method('flush');
         // Testing create terms
         TermManager::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
-        $repo->expects($this->once())
-            ->method('getTermStartDate');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",

@@ -3,6 +3,7 @@
 namespace tests\app\controllers;
 
 use app\controllers\HomePageController;
+use app\controllers\TermController;
 use app\libraries\Core;
 use app\models\Course;
 use app\models\User;
