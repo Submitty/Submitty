@@ -5,7 +5,7 @@ namespace app\controllers;
 use app\authentication\SamlAuthentication;
 use app\entities\VcsAuthToken;
 use app\entities\UnverifiedUserEntity;
-use app\libraries\UnverifiedUsersManager;
+use app\controllers\UnverifiedUserController;
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
@@ -395,11 +395,11 @@ EMAIL;
         }
         // Attempt to update values, if user is not found, false is returned.
         $verification_values = Utils::generateVerificationCode($this->core, $this->core->getConfig()->isDebug());
-        if (!UnverifiedUsersManager::updateUserVerificationValues($this->core, $_GET['email'], $verification_values['code'], $verification_values['expiration'])) {
+        if (!UnverifiedUserController::updateUserVerificationValues($this->core, $_GET['email'], $verification_values['code'], $verification_values['expiration'])) {
             $this->core->addErrorMessage('Either you have already verified your email, or that email is not associated with an account.');
             return new RedirectResponse($this->core->buildUrl(['authentication', 'login']));
         }
-        $unverified_user = UnverifiedUsersManager::getUnverifiedUser($this->core, $_GET['email']);
+        $unverified_user = UnverifiedUserController::getUnverifiedUser($this->core, $_GET['email']);
         $this->sendVerificationEmail($_GET['email'], $verification_values['code'], $unverified_user->getUserInfo()['user_id']);
         $this->core->addSuccessMessage('Verification email resent.');
         return new RedirectResponse($this->core->buildUrl(['authentication', 'email_verification']));
@@ -460,7 +460,7 @@ EMAIL;
         $given_name = $_POST['given_name'];
         $family_name = $_POST['family_name'];
         $user_exists = $this->core-> getQueries()->getUserIdEmailExists($email, $user_id);
-        $unverified_users = UnverifiedUsersManager::getUnverifiedUsers($this->core, $email, $user_id);
+        $unverified_users = UnverifiedUserController::getUnverifiedUsers($this->core, $email, $user_id);
 
         if ($user_exists || count($unverified_users) !== 0) {
             $this->core->addErrorMessage('User ID or email is already attached with an account.');
