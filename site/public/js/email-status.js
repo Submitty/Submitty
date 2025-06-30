@@ -1,6 +1,7 @@
 /* exported loadPage */
 const page_window = 5;
 function loadPage(page, load_page_url) {
+    $('.page-btn').removeClass('selected');
     $(`#${page}`).addClass('selected');
     $(`#${page}`).attr('disabled', 'disabled');
     $('.page-btn').each(function () {
