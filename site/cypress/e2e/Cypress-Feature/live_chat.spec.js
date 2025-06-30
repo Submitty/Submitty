@@ -21,7 +21,6 @@ const startChatSession = (title) => {
 
 const endChatSession = (title) => {
     checkChatExists(title);
-    // Check if the specific chatroom has a disable button
     getChatroom(title).then(($chatroom) => {
         if ($chatroom.find('[data-testid="disable-chatroom"]').length > 0) {
             cy.window().then((win) => {
@@ -30,8 +29,6 @@ const endChatSession = (title) => {
                     return true;
                 });
             });
-            
-            // Click the disable button for this specific chatroom
             cy.wrap($chatroom).find('[data-testid="disable-chatroom"]').first().click();
         }
     });
@@ -89,7 +86,8 @@ const checkChatNotExists = (title) => {
     cy.get('body').then(($body) => {
         if ($body.find('[data-testid="chatroom-item"]').length === 0) {
             expect(true).to.be.true;
-        } else {
+        }
+        else {
             cy.get('[data-testid="chatroom-title"]')
                 .contains(title)
                 .should('not.exist');
@@ -199,11 +197,17 @@ describe('Tests for enabling Live Chat', () => {
     it('Should enable the Live Chat feature for the sample course', () => {
         toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
+            cy.get('body').then(($body) => {
+                expect($body.find('[class="icon-title"]').text()).includes('Live Chat');
+            });
             cy.get('[data-testid="new-chatroom-btn"]').should('exist');
         }).then(() => {
             toggleLiveChat(false).then(() => {
                 cy.visit(['sample', 'chat']);
                 cy.get('[data-testid="new-chatroom-btn"]').should('not.exist');
+                cy.get('body').then(($body) => {
+                    expect($body.find('main div b').text()).to.equal('The chat feature is not enabled.');
+                });
             });
         });
     });
