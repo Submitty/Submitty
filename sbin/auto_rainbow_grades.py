@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Automatically generate rainbow grades.
+Automatically generate rainbow grades. The source should be either "submitty_gui"
+or "submitty_daemon". If the source is "submitty_gui", then the script will only
+generate grade summaries for the course. If the source is "submitty_daemon", then the
+script will submit the build process for courses using GUI customization, constructing
+the most up-to-date customization file prior to generating grade summaries.
 
 usage: python3 auto_rainbow_grades.py <semester> <course> <source>
 """
