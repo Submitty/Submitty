@@ -218,6 +218,7 @@ describe('Docker UI Test', () => {
             .should('contain.text', 'Successfully queued the system to update');
 
         // Reload the page and wait until the image is removed
+        // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('body').then(($body) => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
