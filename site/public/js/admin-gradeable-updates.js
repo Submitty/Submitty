@@ -942,7 +942,6 @@ let isConfigEdited = false;
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
         event.preventDefault();
-        event.returnValue = '';
     }
 });
 
@@ -955,10 +954,7 @@ function updateGradeableEditor(g_id, file_path) {
     if ((current_g_id !== g_id || current_file_path !== file_path)) {
         $('#gradeable-config-edit').data('edited', false);
 
-        if (codeMirrorInstance) {
-            codeMirrorInstance.toTextArea();
-            codeMirrorInstance = null;
-        }
+        closeCodeMirrorInstance();
 
         current_g_id = g_id;
         current_file_path = file_path;
@@ -1064,6 +1060,10 @@ function cancelGradeableConfigEdit() {
     current_g_id = null;
     current_file_path = null;
 
+    closeCodeMirrorInstance();
+}
+
+function closeCodeMirrorInstance() {
     if (codeMirrorInstance) {
         codeMirrorInstance.toTextArea(); // Replace CodeMirror with original <textarea>
         codeMirrorInstance = null;
@@ -1071,7 +1071,7 @@ function cancelGradeableConfigEdit() {
 }
 
 function saveGradeableConfigEdit(g_id) {
-    const content = $('textarea#gradeable-config-edit').val();
+    const content = codeMirrorInstance?.getValue() || $('textarea#gradeable-config-edit').val();
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'save']),
         type: 'POST',
