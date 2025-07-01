@@ -12,6 +12,7 @@ use Ratchet\ConnectionInterface;
 use app\libraries\Core;
 use app\libraries\TokenManager;
 use Psr\Http\Message\RequestInterface;
+use app\entities\poll\Poll;
 
 class Server implements MessageComponentInterface {
     // Holds the mapping between pages that have open socket clients and those clients
@@ -141,9 +142,12 @@ class Server implements MessageComponentInterface {
                     if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
                         return false;
                     }
-                    $group = $this->core->getUser()->getGroup();
                     $instructor = filter_var($query_params['instructor'], FILTER_VALIDATE_BOOLEAN);
-                    if (($instructor && $group > 1) || (!$instructor && $group > 4)) {
+                    $poll = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findByIDWithOptions(intval($query_params['poll_id']));
+                    if (!$this->core->getAccess()->canI("poll.view", ['poll' => $poll])) {
+                        return false;
+                    }
+                    else if ($instructor && !$this->core->getAccess()->canI("poll.view.histogram", ['poll' => $poll])) {
                         return false;
                     }
                     $page = $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
