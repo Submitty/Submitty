@@ -261,7 +261,7 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade"
+                class="cell-grade {{ component_grade is not null ? component_grade.getScore() == 1.0 ? "simple-full-credit" : "simple-half-credit" : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
@@ -269,11 +269,6 @@
                 data-grader="{{ component_grade.getGrader().getId() | default('') }}"
                 {% if component_grade is not null and component_grade.getGradeTime() != null %}
                     data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
-                {% endif %}
-                {% if component_grade is not null and component_grade.getScore() == 1.0 %}
-                    style="background-color: #149bdf;"
-                {% elseif component_grade is not null and component_grade.getScore() == 0.5 %}
-                    style="background-color: #88d0f4;"
                 {% endif %}
             >
                 {% if core.getUser().accessFullGrading() %}
