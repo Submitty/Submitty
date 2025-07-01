@@ -330,16 +330,28 @@ describe('Tests for creating, editing and using tests', () => {
         deleteChatroom(title1);
     });
 
+/*
+    TODO: Figure out how to send a POST request to test websockets.
     it('Should test socket functionality', () => {
         createChatroom(title1, description1, false);
         startChatSession(title1);
         
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-        const url = cy.url();
-        cy.request({
-            method: 'POST',
-            url: '/courses/s25/sample/chat/'
-        })
-        
-    });
+            cy.url().then((url) =>{
+            cy.request({
+                method: 'POST',
+                url: url + '/send',
+                content: 'check',
+                user_id: 'instructor',
+                display_name: 'Quinn+Instructor',
+                role: 'instructor',
+                csrf_token: ''
+            }).then((response) => {
+                cy.log(response);
+            });
+            checkChatMessage('check', name1);
+        });
+    });    
+*/
+
 });
