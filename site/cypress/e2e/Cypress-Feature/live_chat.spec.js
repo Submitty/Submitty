@@ -213,6 +213,9 @@ describe('Tests for enabling Live Chat', () => {
 });
 
 describe('Tests for creating, editing and using tests', () => {
+    /**
+     * Ensures a clean slate before and after each test by ensuring live chat is enabled/disabled and deleting sample chats.
+     */
     beforeEach(() => {
         cy.login('instructor');
         toggleLiveChat(true).then(() => {
