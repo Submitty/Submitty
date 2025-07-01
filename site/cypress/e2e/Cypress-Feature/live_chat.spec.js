@@ -9,18 +9,16 @@ const name1 = 'Quinn Instructor';
 const name2 = 'Joe S.';
 
 const getChatroom = (title) => {
-    return cy.get('[data-testid="chatroom-item"]').filter((index, el) => {
+    return cy.get('[data-testid="chatroom-item"]').filter((_, el) => {
         return Cypress.$(el).find('[data-testid="chatroom-title"]').text().trim() === title;
     }).first();
 };
 
 const startChatSession = (title) => {
-    checkChatExists(title);
     getChatroom(title).find('[data-testid="enable-chatroom"]').first().click();
 };
 
 const endChatSession = (title) => {
-    checkChatExists(title);
     getChatroom(title).then(($chatroom) => {
         if ($chatroom.find('[data-testid="disable-chatroom"]').length > 0) {
             cy.window().then((win) => {
@@ -76,24 +74,26 @@ const deleteChatroom = (title) => {
     });
 };
 
-const checkChatExists = (title) => {
-    cy.get('[data-testid="chatroom-title"]')
+const checkChatExists = (title, exists = true) => {
+    if (exists) {
+        cy.get('[data-testid="chatroom-title"]')
         .contains(title)
         .should('exist');
+    }
+    else {
+        cy.get('body').then(($body) => {
+            if ($body.find('[data-testid="chatroom-item"]').length === 0) {
+                expect(true).to.be.true;
+            }
+            else {
+                cy.get('[data-testid="chatroom-title"]')
+                    .contains(title)
+                    .should('not.exist');
+            }
+        });
+    }
 };
 
-const checkChatNotExists = (title) => {
-    cy.get('body').then(($body) => {
-        if ($body.find('[data-testid="chatroom-item"]').length === 0) {
-            expect(true).to.be.true;
-        }
-        else {
-            cy.get('[data-testid="chatroom-title"]')
-                .contains(title)
-                .should('not.exist');
-        }
-    });
-};
 
 const checkDescription = (title, description) => {
     getChatroom(title).find('[data-testid="chatroom-description"]').then(($el) => {
@@ -108,9 +108,9 @@ const checkHost = (title, host) => {
 };
 
 const checkAnon = (title, expectedAnon) => {
+    const exist = expectedAnon ? 'exist' : 'not.exist';
     getChatroom(title).then(($chatroom) => {
         cy.wrap($chatroom).find('[data-testid="chat-join-btn"]').should('exist');
-        const exist = expectedAnon ? 'exist' : 'not.exist';
         cy.wrap($chatroom).find('[data-testid="anon-chat-join-btn"]').should(exist);
     });
 };
@@ -136,7 +136,6 @@ const createChatroom = (title, description, isAnon) => {
 
 const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAnon) => {
     cy.reload();
-    checkChatExists(oldTitle);
     getChatroom(oldTitle).find('[data-testid="edit-chatroom"]').first().click().then(() => {
         cy.get('[data-testid="chatroom-name-edit"]').should('exist');
         cy.get('[data-testid="chatroom-name-edit"]').clear({ force: true });
@@ -249,7 +248,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'chat']);
-        checkChatNotExists(title1);
+        checkChatExists(title1, false);
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'chat']);
@@ -265,7 +264,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'chat']);
-        checkChatNotExists(title1);
+        checkChatExists(title1, false);
     });
 
     it('Should test starting chat sessions and chatting', () => {
@@ -326,5 +325,18 @@ describe('Tests for creating, editing and using tests', () => {
         sendChatMessage(msgText3, instructorAnon);
         cy.get('[data-testid="leave-chat"]').click();
         deleteChatroom(title1);
+    });
+
+    it('Should test socket functionality', () => {
+        createChatroom(title1, description1, false);
+        startChatSession(title1);
+        
+        getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
+        const url = cy.url();
+        cy.request({
+            method: 'POST',
+            url: '/courses/s25/sample/chat/'
+        })
+        
     });
 });
