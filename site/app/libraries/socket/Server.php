@@ -132,6 +132,11 @@ class Server implements MessageComponentInterface {
                 case 'discussion_forum':
                 case 'office_hours_queue':
                     break;
+                case 'chatrooms':
+                    if (isset($query_params['chatroom_id'])) {
+                        $page = $page . '-' . $query_params['chatroom_id'];
+                    }
+                    break;
                 case 'polls':
                     if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
                         return false;

@@ -108,7 +108,9 @@ function initChatroomSocketClient(chatroomId) {
                 console.error(msg);
         }
     };
-    window.socketClient.open(`chatroom_${chatroomId}`);
+    window.socketClient.open('chatrooms', {
+        chatroom_id: chatroomId,
+    });
 }
 
 function initChatroomListSocketClient() {
