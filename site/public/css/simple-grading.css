@@ -90,11 +90,11 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .simple-full-credit {
-    color: var(--simple-full-credit-dark-blue);
+    background-color: var(--simple-full-credit-dark-blue);
 }
 
 .simple-half-credit {
-    color: var(--simple-half-credit-light-blue);
+    background-color: var(--simple-half-credit-light-blue);
 }
 
 .simple-save-error {

@@ -29,7 +29,7 @@ distro==1.9.0
 jsonschema==4.24.0
 jsonref==1.1.0
 docker==7.1.0
-urllib3==2.4.0
+urllib3==2.5.0
 
 # Python libraries for QR bulk upload
 pyzbar==0.1.9

@@ -21,8 +21,6 @@ const docker_ui_path = '/admin/docker';
  *         "submitty/pdflatex:latest",
  *     ]
  * }
- * NOTE: sysinfo log is currently broken, so docker version will always show Error. Once this is fixed,
- * we should uncomment the relevant test.
  */
 
 describe('Docker UI Test', () => {
@@ -54,13 +52,12 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
-        // NOTE: Will currently always be Error. Fix sysinfo logging to fix this.
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker-version"]')
                 .invoke('text')
                 .then((text) => {
-                    return text !== 'Error';
+                    return text !== 'Unknown';
                 });
         }, 10000);
         // Updated time should not be "Unknown"
@@ -69,9 +66,9 @@ describe('Docker UI Test', () => {
         // Updated OS info should not be empty
         cy.get('[data-testid="system-info"]')
             .should('not.be.empty');
-        // Updated docker version should not be "Error"
+        // Updated docker version should not be "Unknown"
         cy.get('[data-testid="docker-version"]')
-            .should('not.contain.text', 'Error');
+            .should('not.contain.text', 'Unknown');
     });
 
     it('Should filter images with tags', () => {

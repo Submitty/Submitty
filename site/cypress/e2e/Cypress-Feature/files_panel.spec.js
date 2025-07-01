@@ -21,7 +21,7 @@ describe('Test cases involving the files panel', () => {
     beforeEach(() => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
-        cy.get('.btn').contains('View All').click();
+        cy.get('[data-testid="view-sections"]').uncheck();
         cy.get('#details-table').contains('mccule').siblings().eq(6).click();
         cy.get('#submission_browser_btn').click();
     });
