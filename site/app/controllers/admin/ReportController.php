@@ -1006,4 +1006,103 @@ class ReportController extends AbstractController {
             return null;
         }
     }
+
+    /**
+     * Save the most up-to-date GUI customization to both gui_customization.json and customization.json
+     * Only allowed if manual customization is not in use.
+     *
+     * @return JsonResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/reports/save_gui_customizations", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/save_gui_customizations", methods: ["POST"])]
+    public function saveGUICustomizations(): JsonResponse {
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+        if ($customization->usesManualCustomization()) {
+            return JsonResponse::getErrorResponse(
+                "Manual customization is currently in use. GUI customizations cannot be saved."
+            );
+        }
+        // Construct the JSON data for the GUI customization
+        $json_data = $this->buildGuiCustomizationJson($customization);
+        $rainbow_grades_dir = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            'rainbow_grades'
+        );
+        // Persist the changes onto disk
+        $gui_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
+        $customization_path = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
+        file_put_contents($gui_path, $json_data);
+        file_put_contents($customization_path, $json_data);
+        return JsonResponse::getSuccessResponse(json_decode($json_data, true));
+    }
+
+    /**
+     * Build the GUI customization JSON from the current DB state, matching the expected structure.
+     *
+     * @param RainbowCustomization $customization
+     * @return string JSON string
+     */
+    private function buildGuiCustomizationJson(RainbowCustomization $customization): string {
+        $json = [
+            'section' => (array) $customization->getSectionsAndLabels(),
+            'display_benchmark' => array_map(fn($b) => $b['id'], array_filter($customization->getDisplayBenchmarks(), fn($b) => $b['isUsed'])),
+            'messages' => $customization->getMessages(),
+            'display' => array_map(fn($opt) => $opt['id'], array_filter($customization->getDisplay(), fn($opt) => $opt['isUsed'])),
+            'benchmark_percent' => (array) $customization->getBenchmarkPercent(),
+            'final_cutoff' => (array) $customization->getFinalCutoff(),
+            'gradeables' => $this->buildGradeablesArray($customization),
+            'plagiarism' => $customization->getPlagiarism(),
+            'manual_grade' => $customization->getManualGrades(),
+            'warning' => $customization->getPerformanceWarnings(),
+            'omit_section_from_stats' => $customization->getOmittedSections(),
+        ];
+
+        return json_encode($json, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Build the gradeables array for the customization JSON, including per-gradeable curves if present.
+     *
+     * @param RainbowCustomization $customization
+     * @return array
+     */
+    private function buildGradeablesArray(RainbowCustomization $customization): array {
+        $customization_data = $customization->getCustomizationData();
+        $bucket_counts = $customization->getBucketCounts();
+        $bucket_remove_lowest = $customization->getBucketRemoveLowest();
+        $bucket_percentages = $customization->getBucketPercentages();
+        $per_gradeable_curves = $customization->getPerGradeableCurves();
+        $used_buckets = $customization->getUsedBuckets();
+
+        $gradeables = [];
+        foreach ($used_buckets as $bucket) {
+            $bucket_gradeables = $customization_data[$bucket] ?? [];
+            $ids = [];
+            foreach ($bucket_gradeables as $g) {
+                $gradeable = [
+                    'max' => $g['max_score'],
+                    'release_date' => $g['grade_release_date'],
+                    'id' => $g['id'],
+                ];
+                // Per-gradeable percent override
+                if (!empty($g['override_percent']) && isset($g['percent'])) {
+                    $gradeable['percent'] = $g['percent'] / 100.0;
+                }
+                // Per-gradeable curves
+                if (isset($per_gradeable_curves[$bucket][$g['id']])) {
+                    $gradeable['curve'] = $per_gradeable_curves[$bucket][$g['id']];
+                }
+                $ids[] = $gradeable;
+            }
+            $gradeables[] = [
+                'type' => $bucket,
+                'count' => $bucket_counts[$bucket] ?? count($ids),
+                'remove_lowest' => $bucket_remove_lowest[$bucket] ?? 0,
+                'percent' => ($bucket_percentages[$bucket] ?? 0) / 100.0,
+                'ids' => $ids,
+            ];
+        }
+        return $gradeables;
+    }
 }
