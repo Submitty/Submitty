@@ -399,7 +399,8 @@ class Gradeable(object):
                 eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
                 eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
                 eg_depends_on=self.depends_on,
-                eg_depends_on_points=self.depends_on_points
+                eg_depends_on_points=self.depends_on_points,
+                g_notification_sent=self.has_release_date and self.grade_released_date <= dateutils.get_current_time()
             )
 
         for component in self.components:
