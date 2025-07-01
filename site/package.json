@@ -17,7 +17,7 @@
     "@codemirror/lang-java": "6.0.1",
     "@codemirror/lang-json": "6.0.1",
     "@codemirror/lang-python": "6.2.1",
-    "@codemirror/language": "6.11.1",
+    "@codemirror/language": "6.11.2",
     "@codemirror/language-data": "6.5.1",
     "@codemirror/legacy-modes": "6.5.1",
     "@codemirror/lint": "6.8.5",
