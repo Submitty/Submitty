@@ -11,6 +11,7 @@ use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use app\libraries\Core;
 use app\libraries\TokenManager;
+use Psr\Http\Message\RequestInterface;
 
 class Server implements MessageComponentInterface {
     // Holds the mapping between pages that have open socket clients and those clients
@@ -88,7 +89,10 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
-        assert($request instanceof \Psr\Http\Message\RequestInterface);
+
+        if (!$request instanceof RequestInterface) {
+            return false;
+        }
 
         if ($this->isWebSocketClient($conn)) {
             $this->php_websocket_clients[$conn->resourceId] = true;
