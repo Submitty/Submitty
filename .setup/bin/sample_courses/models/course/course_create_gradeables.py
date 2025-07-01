@@ -197,14 +197,14 @@ class Course_create_gradeables:
                                                  team_id=team_id, g_version=version, submission_time=current_time_string)
                                     if version == versions_to_submit:
                                         self.conn.execute(self.electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=None,
-                                                     team_id=team_id, active_version=active_version)
+                                                     team_id=team_id, active_version=active_version, g_notification_sent=gradeable.has_release_date and gradeable.grade_released_date <= dateutils.get_current_time())
                                     json_history["team_history"] = json_team_history[team_id]
                                 else:
                                     self.conn.execute(self.electronic_gradeable_data.insert(), g_id=gradeable.id, user_id=user.id,
                                                 g_version=version, submission_time=current_time_string)
                                     if version == versions_to_submit:
                                         self.conn.execute(self.electronic_gradeable_version.insert(), g_id=gradeable.id, user_id=user.id,
-                                                    active_version=active_version)
+                                                    active_version=active_version, g_notification_sent=gradeable.has_release_date and gradeable.grade_released_date <= dateutils.get_current_time())
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
