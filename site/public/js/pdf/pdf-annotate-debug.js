@@ -3690,15 +3690,14 @@
                                                             a,
                                                         );
                                                 i.setTextContentSource(e);
-                                                    i.render(f);
-                                                    setTimeout(function () {
-                                                        try {
-                                                            hn(u.annotations),
-                                                                n();
-                                                        } catch (t) {
-                                                            r(t);
-                                                        }
-                                                    });
+                                                i.render(f);
+                                                setTimeout(function () {
+                                                    try {
+                                                        hn(u.annotations), n();
+                                                    } catch (t) {
+                                                        r(t);
+                                                    }
+                                                });
                                             });
                                         });
                                 })
@@ -3728,42 +3727,65 @@
                     UI: Ln,
                     render: function (t, e, n) {
                         return new Promise(function (r, o) {
-                            return (
-                                t.setAttribute(
-                                    "data-pdf-annotate-container",
-                                    !0,
-                                ),
-                                t.setAttribute(
-                                    "data-pdf-annotate-viewport",
-                                    JSON.stringify(e),
-                                ),
-                                t.removeAttribute("data-pdf-annotate-document"),
-                                t.removeAttribute("data-pdf-annotate-page"),
-                                n
-                                    ? (t.setAttribute(
-                                          "data-pdf-annotate-document",
-                                          n.documentId,
-                                      ),
-                                      t.setAttribute(
-                                          "data-pdf-annotate-page",
-                                          n.pageNumber,
-                                      ),
-                                      Array.isArray(n.annotations) &&
-                                      0 !== n.annotations.length
-                                          ? (n.annotations.forEach(
-                                                function (n) {
-                                                    var r = t.querySelector(
-                                                        '[data-pdf-annotate-id="' +
-                                                            n.uuid +
-                                                            '"]',
-                                                    );
-                                                    r ? P(t, r, e) : j(t, n, e);
-                                                },
-                                            ),
-                                            void r(t))
-                                          : r(t))
-                                    : ((t.innerHTML = ""), r(t))
+                            t.setAttribute("data-pdf-annotate-container", true);
+                            t.setAttribute(
+                                "data-pdf-annotate-viewport",
+                                JSON.stringify(e),
                             );
+                            t.removeAttribute("data-pdf-annotate-document");
+                            t.removeAttribute("data-pdf-annotate-page");
+
+                            // Ensure SVG container exists for DOM-based highlights
+                            let svg = t.querySelector("svg[data-annot-layer]");
+                            if (!svg) {
+                                svg = document.createElementNS(
+                                    "http://www.w3.org/2000/svg",
+                                    "svg",
+                                );
+                                svg.setAttribute("data-annot-layer", "true");
+                                svg.style.position = "absolute";
+                                svg.style.top = 0;
+                                svg.style.left = 0;
+                                svg.style.width = "100%";
+                                svg.style.height = "100%";
+                                svg.style.pointerEvents = "none";
+                                t.appendChild(svg);
+                            }
+
+                            if (n) {
+                                t.setAttribute(
+                                    "data-pdf-annotate-document",
+                                    n.documentId,
+                                );
+                                t.setAttribute(
+                                    "data-pdf-annotate-page",
+                                    n.pageNumber,
+                                );
+
+                                if (
+                                    Array.isArray(n.annotations) &&
+                                    n.annotations.length !== 0
+                                ) {
+                                    n.annotations.forEach(
+                                        function (annotation) {
+                                            const existing = t.querySelector(
+                                                '[data-pdf-annotate-id="' +
+                                                    annotation.uuid +
+                                                    '"]',
+                                            );
+                                            existing
+                                                ? P(t, existing, e)
+                                                : j(t, annotation, e);
+                                        },
+                                    );
+                                    return r(t);
+                                }
+
+                                return r(t);
+                            } else {
+                                t.innerHTML = "";
+                                return r(t);
+                            }
                         });
                     },
                     getAnnotations: function (t, e) {
