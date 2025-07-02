@@ -50,7 +50,8 @@ def get_error_message(response):
 
 
 def save_and_build_rainbow_grades(semester, course, token):
-    """Saves the most up-to-date GUI customization for the given course."""
+    """Saves the latest GUI customization file, if applicable, and submits the build process"""
+    option = "gui"
     save_response = requests.post(
         '{}/api/courses/{}/{}/reports/nightly_rainbow_grades_save'.format(
             base_url, semester, course
@@ -66,33 +67,32 @@ def save_and_build_rainbow_grades(semester, course, token):
         message = save_response.json()['message']
 
         if message == 'Manual customization is currently in use.':
-            # No need to simulate the build process if the manual customization is in use
-            return
+            option = "manual"
+        else:
+            print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
+                semester, course, message
+            ), file=stderr)
+            exit(-1)
 
-        print("ERROR: Failed to save Rainbow Grades GUI customization for {}.{} - {}".format(
-            semester, course, message
-        ), file=stderr)
-        exit(-1)
-
-    # Simulate the entire GUI customization build process
+    # Simulate the entire customization build process
     select_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
                 base_url, semester, course
             ),
             headers={'Authorization': token},
             data={
-                "selected_value": "gui",
+                "selected_value": option,
                 "source": "submitty_daemon"
             }
         )
 
     if select_response.status_code == 200 and select_response.json()['status'] == 'success':
-        print("Successfully selected the GUI customization for {}.{}".format(
-            semester, course
+        print("Successfully selected the {} customization for {}.{}".format(
+            option, semester, course
         ))
     else:
-        print("ERROR: Failed to select the GUI customization for {}.{} - {}".format(
-            semester, course, get_error_message(select_response)
+        print("ERROR: Failed to select the {} customization for {}.{} - {}".format(
+            option, semester, course, get_error_message(select_response)
         ), file=stderr)
         exit(-1)
 
