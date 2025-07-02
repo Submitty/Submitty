@@ -343,7 +343,7 @@ describe('Tests for creating, editing and using tests', () => {
         getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'POST',
-                url: `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/chat/${id}/send/anonymous`,
+                url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/send/anonymous`,
                 body: {
                     content: 'check',
                     user_id: 'instructor',
