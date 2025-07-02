@@ -1022,11 +1022,9 @@ class ReportController extends AbstractController {
                 "Manual customization is currently in use. GUI customizations cannot be saved."
             );
         }
-        // Construct the JSON data for the GUI customization
         $json_data = $this->buildGuiCustomizationJson($customization);
         $_POST['json_string'] = $json_data;
         $customization->processForm();
-        // Persist the changes onto disk
         return JsonResponse::getSuccessResponse(json_decode($json_data, true));
     }
 
@@ -1087,7 +1085,7 @@ class ReportController extends AbstractController {
             foreach ($bucket_gradeables as $g) {
                 $gradeable = [
                     'max' => $g['max_score'],
-                    'release_date' => $g['grade_release_date'],
+                    'release_date' => (float) $g['grade_release_date'],
                     'id' => $g['id'],
                 ];
                 // Per-gradeable percent override
@@ -1103,13 +1101,13 @@ class ReportController extends AbstractController {
                         )
                     );
                 }
-                $ids[] = $gradeable;
+                array_push($ids, $gradeable);
             }
             $gradeables[] = [
                 'type' => $bucket,
                 'count' => $bucket_counts[$bucket] ?? count($ids),
                 'remove_lowest' => $bucket_remove_lowest[$bucket] ?? 0,
-                'percent' => ($bucket_percentages[$bucket] ?? 0) / 100.0,
+                'percent' => (float) ($bucket_percentages[$bucket] ?? 0) / 100.0,
                 'ids' => $ids,
             ];
         }
