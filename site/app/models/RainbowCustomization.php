@@ -277,7 +277,7 @@ class RainbowCustomization extends AbstractModel {
      *
      * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
      *
-     * @return array<string,array<string,array<float>>>
+     * @return array<string,array<string,array<string|float>>>
      */
     public function getPerGradeableCurves(): array {
         $retArray = [];

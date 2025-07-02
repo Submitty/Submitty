@@ -1099,7 +1099,7 @@ class ReportController extends AbstractController {
                     $gradeable['curve'] = array_values(
                         array_filter(
                             $per_gradeable_curves[$bucket][$g['id']],
-                            fn($val) => is_numeric($val) && $val !== ''
+                            fn($val) => $val !== ''
                         )
                     );
                 }
