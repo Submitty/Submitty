@@ -147,7 +147,7 @@ class Server implements MessageComponentInterface {
                     if (!$this->core->getAccess()->canI("poll.view", ['poll' => $poll])) {
                         return false;
                     }
-                    else if ($instructor && !$this->core->getAccess()->canI("poll.view.histogram", ['poll' => $poll])) {
+                    elseif ($instructor && !$this->core->getAccess()->canI("poll.view.histogram", ['poll' => $poll])) {
                         return false;
                     }
                     $page = $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
