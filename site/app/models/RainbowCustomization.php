@@ -622,7 +622,6 @@ class RainbowCustomization extends AbstractModel {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
-
         $form_json = json_decode($form);
 
         if (isset($form_json->display_benchmark)) {
@@ -733,7 +732,7 @@ class RainbowCustomization extends AbstractModel {
         $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
         $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
 
-        // When selecting manual or gui customizations, the respective contents are copied to the main customization.json file
+        // Manual or GUI JSON contents are copied to the main customization.json file for the build processes
         return $customization_json === $manual_customization_json;
     }
 }

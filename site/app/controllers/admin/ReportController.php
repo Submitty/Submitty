@@ -1058,7 +1058,6 @@ class ReportController extends AbstractController {
             'manual_grade' => $customization->getManualGrades(),
             'warning' => $customization->getPerformanceWarnings(),
         ];
-
         return json_encode($json, JSON_PRETTY_PRINT);
     }
 
