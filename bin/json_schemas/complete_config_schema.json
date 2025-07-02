@@ -623,6 +623,12 @@
         "testcase_id" : {
           "type" : "string"
         },
+        "allow_system_calls" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
         "copy_access_files" : {
           "description" : "Copy files related to student assignment access into the autograding directory.",
           "type" : "boolean"

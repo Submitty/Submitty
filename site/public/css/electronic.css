@@ -85,7 +85,6 @@ aside {
 
 /* stylelint-disable-next-line no-duplicate-selectors */
 .navigation-box.smaller-navbar #grading-setting-btn,
-.navigation-box.smaller-navbar #grading-setting-btn,
 .navigation-box.smaller-navbar #two-panel-exchange-btn,
 .navigation-box.mobile-view #two-panel-mode-btn,
 .navigation-box.smaller-navbar #prev-ungraded-student-navlink,
@@ -150,6 +149,7 @@ aside {
 
 /* stylelint-disable-next-line no-descending-specificity */
 #fullscreen-btn-cont.active i.fa-expand,
+/* stylelint-disable-next-line no-descending-specificity */
 #fullscreen-btn-cont i.fa-compress {
     display: none;
 }
@@ -171,13 +171,23 @@ button > i.fas:hover {
     color: initial;
 }
 
+:root {
+    --default-border-color: black;
+    --default-box-shadow: 1px 1px 2px black;
+}
+
+[data-black_mode="black"][data-theme="dark"] {
+    --default-border-color: grey;
+    --default-box-shadow: 1px 1px 2px grey;
+}
+
 /* stylelint-disable-next-line no-descending-specificity */
 .ta-navlink-cont {
     position: relative;
     margin-right: 4px;
-    border: 2px solid var(--default-black);
+    border: 2px solid var(--default-border-color);
     border-radius: 5px;
-    box-shadow: 2px 2px 4px;
+    box-shadow: var(--default-box-shadow);
 }
 
 #prev-student-navlink i,
@@ -234,18 +244,18 @@ progress::-webkit-progress-value {
 
 .grade-panel button {
     color: var(--text-black);
-    position: relative;
     cursor: pointer;
-    padding: 2px 6px 5px 24px;
+    padding: 4px 12px;
     white-space: nowrap;
     outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* stylelint-disable-next-line no-descending-specificity */
 .grade-panel button i {
-    position: absolute;
-    top: 1px;
-    left: 4px;
+    margin-right: 5px;
     font-size: 14px;
 }
 
@@ -418,6 +428,7 @@ progress::-webkit-progress-value {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:hover,
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-position-cont option:focus {
     color: var(--default-white);
 }
@@ -1162,6 +1173,7 @@ tr.is_publish {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .gradeable .component .row.divider,
+/* stylelint-disable-next-line no-descending-specificity */
 .solution-box .row.divider {
     background: var(--standard-light-gray);
     height: 2px;
@@ -1260,6 +1272,7 @@ tr.is_publish {
 
 /* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container input,
+/* stylelint-disable-next-line no-descending-specificity */
 .gradeable .mark-container textarea {
     box-sizing: border-box;
 }
@@ -1518,6 +1531,12 @@ tr.is_publish {
     font-weight: bold;
 }
 
+.grader-names {
+    font-style: italic;
+    display: inline-flex;
+    align-items: center;
+}
+
 .solution-cont {
     display: flex;
     flex-direction: column;
@@ -1528,6 +1547,7 @@ tr.is_publish {
 }
 
 .solution-box button.hide {
+    /* stylelint-disable-next-line declaration-no-important */
     display: none !important;
 }
 
@@ -1540,7 +1560,7 @@ input[type="radio"][disabled=""]:checked::before {
     width: 7px;
     height: 7px;
     border-radius: 100%;
-    background: var(--standard-medium-dark-gray);
+    background: var(--standard-dark-gray);
 }
 
 /* Media queries */

@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\exceptions\DatabaseException;
+use app\controllers\admin\ConfigurationController;
 use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\models\gradeable\GradeableList;
@@ -19,7 +20,7 @@ class NavigationController extends AbstractController {
             $gradeables_list = new GradeableList($this->core);
         }
         catch (DatabaseException $e) {
-            ExceptionHandler::handleException($e);
+            ExceptionHandler::handleException($e, $this->core->getUser()?->getId());
 
             $error_messages = ['A broken gradeable was detected when collecting gradeable information from the database.  Contact the system administrator for assistance.'];
             return $this->core->getOutput()->renderOutput('Error', 'genericError', $error_messages);
@@ -81,8 +82,10 @@ class NavigationController extends AbstractController {
         }
 
         $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone, $gradeable_ids_and_titles);
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $is_self_register = $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone, $gradeable_ids_and_titles, $is_self_register);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }

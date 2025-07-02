@@ -3,20 +3,40 @@
 namespace app\controllers;
 
 use app\entities\course\CourseMaterial;
+use app\libraries\CodeMirrorUtils;
 use app\libraries\CourseMaterialsUtils;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
+use app\libraries\NotebookUtils;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\Gradeable;
+use app\models\User;
 use app\views\MiscView;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\User;
 
 class MiscController extends AbstractController {
     const GENERIC_NO_ACCESS_MSG = 'You do not have access to this file';
+
+    private function convertToBytes(string $value): int {
+        $value = trim($value);
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        switch ($unit) {
+            case 'g':
+                return $num * 1024 * 1024 * 1024;
+            case 'm':
+                return $num * 1024 * 1024;
+            case 'k':
+                return $num * 1024;
+            default:
+                return (int) $value;
+        }
+    }
 
     /**
      * Get the current server time
@@ -65,6 +85,12 @@ class MiscController extends AbstractController {
         elseif (strpos($file_path, 'checkout') !== false) {
             $directory = 'checkout';
         }
+        elseif (strpos($file_path, 'results_public') !== false) {
+            $directory = 'results_public';
+        }
+        elseif (strpos($file_path, 'results') !== false) {
+            $directory = 'results';
+        }
         $check_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $directory, $gradeable_id, $id);
 
         if ($gradeable->isGradeByRegistration()) {
@@ -85,6 +111,15 @@ class MiscController extends AbstractController {
                 JsonResponse::getFailResponse(self::GENERIC_NO_ACCESS_MSG)
             );
         }
+
+        $max_size = $this->convertToBytes(ini_get('memory_limit')) / 5;
+
+        if (filesize($file_path) > $max_size && $max_size >= 0) {
+            return new MultiResponse(JsonResponse::getFailResponse(
+                "This PDF is too large to be viewed online. Please download it instead."
+            ));
+        }
+
 
         $pdf64 = base64_encode(file_get_contents($file_path));
         return MultiResponse::JsonOnlyResponse(
@@ -170,6 +205,27 @@ class MiscController extends AbstractController {
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
+        }
+        elseif (pathinfo($path, PATHINFO_EXTENSION) === 'ipynb') { // TODO: Do this "properly" by determining a better MIME type via FileUtils::getContentType()
+            $this->core->getOutput()->setContentOnly(true);
+            CodeMirrorUtils::loadDefaultDependencies($this->core);
+            $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+            $this->core->getOutput()->renderString(
+                $this->core->getOutput()->renderTwigTemplate(
+                    "notebook/Notebook.twig",
+                    [
+                        'notebook' => NotebookUtils::jupyterToSubmittyNotebook($path),
+                        'student_id' => $user_id,
+                        'is_timed' => false,
+                        'allowed_minutes' => 0,
+                        'old_files' => [],
+                        'is_grader_view' => true,
+                        'testcase_messages' => [],
+                        'viewing_inactive_version' => false,
+                        'highest_version' => 0,
+                    ]
+                )
+            );
         }
         else {
             $contents = file_get_contents($corrected_name);
@@ -284,7 +340,7 @@ class MiscController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($user_id !== $this->core->getUser()->getId()) {
-            if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
+            if (!$this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
                 $this->core->addErrorMessage("You do not have permission to download this file!");
                 return new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id]));
             }
@@ -292,7 +348,7 @@ class MiscController extends AbstractController {
         $autograde = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
         $file_path = null;
         $testcase = $autograde->getTestcases()[$test_case - 1];
-        if ($testcase->hasAutochecks()) {
+        if ((!$testcase->getTestcase()->isHidden() || $this->core->getAccess()->canI("grading.electronic.grade_autograding", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) && $testcase->hasAutochecks()) {
             foreach ($testcase->getAutochecks() as $autocheck) {
                 $path = explode('/', $autocheck->getDiffViewer()->getActualFilename());
                 $actual_file_name = array_pop($path);
@@ -326,12 +382,20 @@ class MiscController extends AbstractController {
     public function downloadSubmissionZip($gradeable_id, $submitter_id, $version, $is_anon, $origin = null) {
 
         $anon_id = $submitter_id;
-        if ($is_anon === "true") {
-            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
-        }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
+            $message = "You do not have access to that page.";
+            $this->core->addErrorMessage($message);
+            $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
+        $blind_grading = ($peer && $gradeable->getPeerBlind() !== Gradeable::UNBLIND_GRADING) || ($gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING && $this->core->getUser()->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER);
+        if ($blind_grading || $is_anon === "true") {
+            $submitter_id = $this->core->getQueries()->getSubmitterIdFromAnonId($anon_id, $gradeable_id);
+        }
+        if ($submitter_id === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
             $this->core->redirect($this->core->buildCourseUrl());
@@ -356,8 +420,15 @@ class MiscController extends AbstractController {
         }
 
         $folder_names = [];
+        $access_args = ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()];
+        if ($gradeable->getGraderAssignmentMethod() === Gradeable::ROTATING_SECTION) {
+            $access_args["section"] = $graded_gradeable->getSubmitter()->getRotatingSection();
+        }
+        elseif ($gradeable->getGraderAssignmentMethod() === Gradeable::REGISTRATION_SECTION) {
+            $access_args["section"] = $graded_gradeable->getSubmitter()->getRegistrationSection();
+        }
         //See which directories we are allowed to read.
-        if ($this->core->getAccess()->canI("path.read.submissions", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+        if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
             $folder_names[] = "checkout";
@@ -367,10 +438,10 @@ class MiscController extends AbstractController {
         // If the request is coming from the submissions page, then the results and results_public folder
         // should not be included, otherwise include them
         if ($origin != 'submission') {
-            if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+            if ($this->core->getAccess()->canI("path.read.results", $access_args)) {
                 $folder_names[] = "results";
             }
-            if ($this->core->getAccess()->canI("path.read.results_public", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
+            if ($this->core->getAccess()->canI("path.read.results_public", $access_args)) {
                 $folder_names[] = "results_public";
             }
         }
@@ -390,12 +461,7 @@ class MiscController extends AbstractController {
 
         // TODO: Zip file anonymization is currently done based on access level (students==peers)
         // When single/double blind grading is merged, this will need to be updated.
-        if ($this->core->getUser()->getGroup() === User::GROUP_STUDENT) {
-            $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
-        }
-        else {
-            $zip_file_name = $gradeable_id . "_" . $submitter_id . "_v" . $version . ".zip";
-        }
+        $zip_file_name = $gradeable_id . "_" . $anon_id . "_v" . $version . ".zip";
 
         // create a new zipstream object
         $zip_stream = new \ZipStream\ZipStream(

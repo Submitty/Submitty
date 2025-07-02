@@ -26,7 +26,7 @@
                               onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
                               action="{{ change_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                            <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+                            <input type="submit" data-testid="version-change-btn" id="version_change" class="btn btn-primary" value="Grade This Version">
                         </form>
                     {% endif %}
                 {% endif %}
@@ -70,7 +70,7 @@
                         Contact an instructor or TA if this is unexpected.
                     </p>
                 {% elseif not active_same_as_graded and has_manual_grading %}
-                    <p class="red-message">
+                    <p class="red-message" data-testid="version-conflict-version-box">
                         Note: The version you have selected to be graded is not the version graded by the instructor/TAs.<br />
                         If the graded version does not match your selected version, a zero will be recorded in the gradebook.<br />
                     </p>

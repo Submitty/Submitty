@@ -354,12 +354,12 @@ class UsersController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalGivenName(trim($_POST['user_givenname']));
-        if (isset($_POST['user_preferred_givenname'])) {
+        if (isset($_POST['user_preferred_givenname']) && trim($_POST['user_preferred_givenname']) !== "") {
             $user->setPreferredGivenName(trim($_POST['user_preferred_givenname']));
         }
 
         $user->setLegalFamilyName(trim($_POST['user_familyname']));
-        if (isset($_POST['user_preferred_familyname'])) {
+        if (isset($_POST['user_preferred_familyname']) && trim($_POST['user_preferred_familyname']) !== "") {
             $user->setPreferredFamilyName(trim($_POST['user_preferred_familyname']));
         }
 
@@ -517,9 +517,13 @@ class UsersController extends AbstractController {
                 ]);
             }
         }
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
+        $is_self_register = $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
+        $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
         $this->core->getOutput()->renderOutput(
             ['admin', 'Users'],
             'sectionsForm',
@@ -527,13 +531,20 @@ class UsersController extends AbstractController {
             $reg_sections,
             $non_null_counts,
             $null_counts,
-            $max_section
+            $max_section,
+            $default_section,
+            $is_self_register
         );
     }
 
     #[Route("/courses/{_semester}/{_course}/sections/registration", methods: ["POST"])]
     public function updateRegistrationSections() {
         $return_url = $this->core->buildCourseUrl(['sections']);
+        $term = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        if (isset($_POST['default_section'])) {
+            $this->core->getQueries()->setDefaultRegistrationSection($term, $course, $_POST['default_section']);
+        }
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
@@ -570,12 +581,20 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
-                if ($num_del_sections === 0) {
-                    $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
+                $is_self_register =  $this->core->getQueries()->getSelfRegistrationType($term, $course) !== ConfigurationController::NO_SELF_REGISTER;
+                if ($default_section === $_POST['delete_reg_section'] && $is_self_register) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Cannot delete the default registration section if self registration is enabled.");
                 }
                 else {
-                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+
+                    if ($num_del_sections === 0) {
+                        $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                    }
+                    else {
+                        $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
+                    }
                 }
             }
             else {
@@ -1185,7 +1204,7 @@ class UsersController extends AbstractController {
             if (count($row) === 1) {
                 $user = $this->core->getQueries()->getUserById($row[0]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
                 $user_registration_type = $list_type === 'classlist' ? 'graded' : 'staff';
                 $user->setRegistrationType($user_registration_type);
@@ -1234,7 +1253,7 @@ class UsersController extends AbstractController {
             //Update registration section (student) or group (grader)
             if (count($row) === 1) {
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
             }
             else {

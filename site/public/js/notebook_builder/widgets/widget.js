@@ -1,6 +1,6 @@
 /* exported NUM_MARKDOWN, Widget */
-const NUM_MARKDOWN = 0;
-
+// eslint-disable-next-line prefer-const
+let NUM_MARKDOWN = 0;
 class Widget {
     /**
      * Get the html representation of the widget.
@@ -84,6 +84,7 @@ class Widget {
         const button = document.createElement('input');
         button.setAttribute('type', 'button');
         button.setAttribute('value', value);
+        button.dataset.testid = value.toLowerCase().split(' ').join('-');
 
         return button;
     }
@@ -100,6 +101,7 @@ class Widget {
         ['Up', 'Down', 'Remove'].forEach((label) => {
             const btn = this.getButton(label);
             btn.widget = this;
+            btn.classList.add('btn', 'btn-nav', 'btn-nav-grade', 'btn-default');
             container.appendChild(btn);
         });
 

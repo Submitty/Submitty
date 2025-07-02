@@ -138,7 +138,7 @@ function build_homework {
     else
         echo "ERROR!  This script must be run by root, or a member member of the course group."
         echo "        $my_username is NOT in $course_group"
-        exit 1
+        return 1
     fi
 
 
@@ -155,7 +155,7 @@ function build_homework {
 
 
     # copy the files to the build directory
-    rsync -ruz --delete  "$hw_source/"   "$hw_build_path" || ( echo 'ERROR: configuration source directory does not exist or DAEMON_USER cannot read this directory' ; exit 1 )
+    rsync -ruz --delete  "$hw_source/"   "$hw_build_path" || ( echo 'ERROR: configuration source directory does not exist or DAEMON_USER cannot read this directory' ; return 1 )
     find "$hw_build_path" -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find "$hw_build_path" -type f -exec chmod -f ug+rw,o= {} \;
     find "$hw_build_path" -type f -exec chgrp -f ${course_group} {} \;
@@ -173,7 +173,7 @@ function build_homework {
     if (( "$cpp_res" != 0 )); then
         echo -e "\nFailed to run cpp preprocessor on ${course_dir}/build/${assignment}/config.json"
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
     # Run the complete config json through a python json syntax checker.
@@ -182,7 +182,7 @@ function build_homework {
     if (( "$py_res" != 0 )); then
         echo -e "\nFailed to load the instructor config.json"
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
     # Add allowed minutes in database from config if exists
@@ -192,16 +192,17 @@ function build_homework {
     if (("$set_minutes" != 0)); then
         echo -e "\nFailed to set override allowed minutes. A student listed in config.json is missing from course."
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
+    # Call configure.out (which has its main in /grading/main_configure.cpp)
     "${SUBMITTY_INSTALL_DIR}/bin/configure.out" complete_config.json "${course_dir}/config/build/build_${assignment}.json" "$assignment"
     configure_res="$?"
 
     if (( "$configure_res" != 0 )); then
         echo -e "\nFailed to create a complete_config.json"
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
     # Remove the intermediate config
@@ -220,7 +221,7 @@ function build_homework {
         cat "$hw_build_path/log_cmake_output.txt"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
     # build (in parallel, 8 threads)
@@ -235,7 +236,7 @@ function build_homework {
         echo -e "\nMAKE ERROR\n\n"
         fix_permissions "$hw_config" "$hw_bin_path" "$hw_build_path" "$course_dir" "$assignment" "$course_group"
         popd > /dev/null
-        exit 1
+        return 1
     fi
 
     log_instructor_output="${hw_build_path}/log_instructor_output.txt"

@@ -49,7 +49,7 @@
     vertical-align: middle;
 }
 
-.option-btn input[type="radio"]{
+.option-btn input[type="radio"] {
     vertical-align: top;
 }
 
@@ -58,6 +58,9 @@
 }
 
 .option-text {
+    display: flex;
+    align-items: center;
+    gap: 15px;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
     padding-left: 0.25em;
@@ -129,6 +132,7 @@ form {
 .poll-timer {
     display: inline-block;
     text-align: center;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 4em !important;
 }
 
@@ -138,7 +142,20 @@ form {
     margin-right: 0.5em;
     margin-bottom: 1em;
     font-size: 0.8em;
+    /* stylelint-disable-next-line declaration-no-important */
     width: 4em !important;
+}
+
+.response-container .poll-response {
+    resize: none;
+    min-height: 50px;
+    max-height: 300px;
+    height: 50px;
+    width: calc(100% - 200px);
+}
+
+.response-container .poll-response-custom {
+    background-color: var(--standard-light-blue-gray);
 }
 
 .correct-tag-background {
@@ -147,4 +164,8 @@ form {
 
 .correct-tag-checkmark {
     color: var(--text-white);
+}
+
+.break-above {
+    margin-top: 1.5em;
 }

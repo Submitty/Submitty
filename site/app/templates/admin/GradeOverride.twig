@@ -27,15 +27,6 @@
                     <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
                 {% endfor %}
             </select>
-            <button type="button"
-                    class="btn btn-primary key_to_click"
-                    tabindex="0"
-                    style="margin-top: 10px"
-                    onclick="loadOverriddenGrades($('#g_id').val())"
-                    data-testid="overridden-grades-apply"
-            >
-                Apply Changes
-            </button>
         </div>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <fieldset class="single-student">
@@ -64,8 +55,8 @@
                 <thead>
                     <tr>
                         <th>Student ID</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
+                        <th>Given Name</th>
+                        <th>Family Name</th>
                         <th>Marks</th>
                         <th>Comments</th>
                         <th>Delete</th>

@@ -24,7 +24,8 @@ class NotificationController extends AbstractController {
         'team_invite',
         'team_joined',
         'team_member_submission',
-        'self_notification'
+        'self_notification',
+        'all_released_grades'
     ];
 
     const EMAIL_SELECTIONS = [
@@ -36,7 +37,9 @@ class NotificationController extends AbstractController {
         'team_invite_email',
         'team_joined_email',
         'team_member_submission_email',
-        'self_notification_email'
+        'self_notification_email',
+        'self_registration_email',
+        'all_released_grades_email'
     ];
 
     protected $selections;
@@ -120,7 +123,8 @@ class NotificationController extends AbstractController {
             new WebResponse(
                 'Notification',
                 'showNotificationSettings',
-                $this->core->getUser()->getNotificationSettings()
+                $this->core->getUser()->getNotificationSettings(),
+                $this->core->getQueries()->getSelfRegistrationType($this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse())
             )
         );
     }

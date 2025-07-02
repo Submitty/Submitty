@@ -50,7 +50,7 @@ class HomeworkView extends AbstractView {
             $this->core->getOutput()->addInternalModuleJs('grader-submission.js');
         }
 
-        // Only show the late banner if the submission has a due date
+        // Only show the late banner and daylight savings banner if the submission has a due date
         // Instructors shouldn't see this banner if they're not on a team (they won't have proper information)
         if (LateDays::filterCanView($this->core, $gradeable) && !($is_admin && !$on_team && $is_team_assignment)) {
             $late_days = LateDays::fromUser($this->core, $this->core->getUser());
@@ -197,14 +197,56 @@ class HomeworkView extends AbstractView {
             $active_days_charged = max(0, $active_days_late - $extensions);
         }
 
+        // process daylight savings banner
+        // check if we have excessive amounts of late days or if the due date and due date + late days is in different time zones
+        // and if the user can submit without it being too late
+        $due_date = $gradeable->getSubmissionDueDate();
+        $due_date_with_late_days = clone $due_date;
+        $due_date_with_late_days->modify('+' . $late_days_allowed . ' days');
+        $today = new \DateTime();
 
-        $date = new \DateTime();
-        $future_date = clone $date;
-        $future_date->modify('+7 days');
-        $past_date = clone $date;
-        $past_date->modify('-7 days');
-        // format("I") returns whether the given date is in daylight savings
-        $daylight_message_required = ($future_date->format("I") !== $past_date->format("I"));
+        // if we are past the due date + late days
+        if ($today > $due_date_with_late_days) {
+            $daylight_message_required = false;
+        }
+        elseif ($late_days_allowed <= 365) {
+            $daylight_due_date = intval($due_date->format("I"));
+            $daylight_due_date_with_late_days = intval($due_date_with_late_days->format("I"));
+            // DST is different, DST message always required
+            if ($daylight_due_date !== $daylight_due_date_with_late_days) {
+                $daylight_message_required = true;
+            }
+            else { // check if we walked in and then out of DST
+                // same year, only need to check due date outside DST (0) and late day + due date outside of DST but on the other side (0)
+                if ($due_date->format("y") === $due_date_with_late_days->format("y")) {
+                    if ($daylight_due_date === 1 || $daylight_due_date_with_late_days === 1) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = intval($due_date->format("m")) < 6 && intval($due_date_with_late_days->format("m")) > 6;
+                    }
+
+                // different year, only false if we go from second non-DST to first non-DST
+                }
+                else {
+                    if (
+                        $daylight_due_date === 0
+                        && $daylight_due_date_with_late_days === 0
+                        && intval($due_date->format("m")) > 6
+                        && intval($due_date_with_late_days->format("m")) < 6
+                    ) {
+                        $daylight_message_required = false;
+                    }
+                    else {
+                        $daylight_message_required = true;
+                    }
+                }
+            }
+        }
+        else {
+            // more than 365 days, always true
+            $daylight_message_required = true;
+        }
 
         // ------------------------------------------------------------
         // IF STUDENT HAS ALREADY SUBMITTED AND THE ACTIVE VERSION IS LATE, PRINT LATE DAY INFORMATION FOR THE ACTIVE VERSION
@@ -232,7 +274,8 @@ class HomeworkView extends AbstractView {
                 $messages[] = ['type' => 'late', 'info' => [
                     'late' => $active_days_late,
                     'charged' => $active_days_charged,
-                    'remaining' => $late_day_budget
+                    'remaining' => $late_day_budget,
+                    'allowed_remaining' => $late_days_allowed - $active_days_charged
                 ]];
             }
             if ($error) {
@@ -295,10 +338,13 @@ class HomeworkView extends AbstractView {
             ]];
         }
 
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/LateDayMessage.twig', [
             'messages' => $messages,
             'error' => $error,
-            'daylight' => $daylight_message_required
+            'daylight' => $daylight_message_required,
+            'late_days_url' => $late_days_url
         ]);
     }
 
@@ -481,14 +527,11 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
+        $this->core->getOutput()->addInternalJs('submitbox-button-status.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        $has_overridden_grades = false;
-        if (!is_null($graded_gradeable)) {
-            $graded_gradeable->hasOverriddenGrades();
-        }
         $vcs_partial_path = '';
         $vcs_partial_path = $gradeable->getVcsPartialPath();
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
@@ -514,6 +557,8 @@ class HomeworkView extends AbstractView {
         $recent_version_url = $graded_gradeable ? $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]) . '/' . $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : null;
         $numberUtils = new NumberUtils();
         return $output . $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'course' => $this->core->getConfig()->getCourse(),
+            'term' => $this->core->getConfig()->getTerm(),
             'using_subdirectory' => $gradeable->isUsingSubdirectory(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
             'vcs_partial_path' => $vcs_partial_path ,
@@ -573,7 +618,9 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $has_overridden_grades,
+            'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
@@ -622,16 +669,21 @@ class HomeworkView extends AbstractView {
         $cover_images = [];
         $count = 1;
         $count_array = [];
-        $bulk_upload_data = [];
         $matches = [];
         $use_ocr = false;
 
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
+            # read the decoded.json file
+            if (!array_key_exists('decoded.json', $dir_files)) {
+                continue;
+            }
+            $bulk_upload_data = FileUtils::readJsonFile($dir_files["decoded.json"]['path']);
+
             foreach ($dir_files as $filename => $details) {
                 if ($filename === 'decoded.json') {
                     // later submissions should replace the previous ones
-                    $bulk_upload_data = array_merge($bulk_upload_data, FileUtils::readJsonFile($details['path']));
+                    continue;
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -683,7 +735,7 @@ class HomeworkView extends AbstractView {
                         $cover_image = $img;
                     }
                 }
-                $files[] = [
+                $file = [
                     'clean_timestamp' => $clean_timestamp,
                     'filename_full' => $filename_full,
                     'filename' => $filename,
@@ -691,66 +743,64 @@ class HomeworkView extends AbstractView {
                     'url_full' => $url_full,
                     'cover_image' => $cover_image
                 ];
-                $count++;
-            }
-        }
-
-        for ($i = 0; $i < count($files); $i++) {
-            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)) {
-                continue;
-            }
-            elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $data = $bulk_upload_data[$files[$i]['filename_full']];
-            }
-
-            $page_count = 0;
-            $is_valid = true;
-            $id = '';
-
-            //decoded.json may be read before the associated data is written, check if key exists first
-            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
-                $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
-                $data = $bulk_upload_data[$files[$i]['filename_full']];
-
-                if ($use_ocr) {
-                    $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
-
-                    $matches = [];
-                    if (strpos($tgt_string, '_') !== false) {
-                        $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
-                    }
+                if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($file['filename_full'], $bulk_upload_data)) {
+                    continue;
+                }
+                elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                    $data = $bulk_upload_data[$file['filename_full']];
                 }
 
-                if (array_key_exists('id', $data)) {
-                    $id = $data['id'];
-                    if (is_numeric($id)) {
-                        $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                $page_count = 0;
+                $is_valid = true;
+                $id = '';
+
+                //decoded.json may be read before the associated data is written, check if key exists first
+                if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                    $use_ocr = array_key_exists('use_ocr', $bulk_upload_data) && $bulk_upload_data['use_ocr'];
+                    $data = $bulk_upload_data[$file['filename_full']];
+
+                    if ($use_ocr) {
+                        $tgt_string = $this->removeLowConfidenceDigits(json_decode($data['confidences']), $data['id']);
+
+                        $matches = [];
+                        if (strpos($tgt_string, '_') !== false) {
+                            $matches = $this->core->getQueries()->getSimilarNumericIdMatches($tgt_string);
+                        }
+                    }
+
+                    if (array_key_exists('id', $data)) {
+                        $id = $data['id'];
+                        if (is_numeric($id)) {
+                            $is_valid = $this->core->getQueries()->getUserByNumericId($id) !== null;
+                        }
+                        else {
+                            $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                        }
                     }
                     else {
-                        $is_valid = $this->core->getQueries()->getUserById($id) !== null;
+                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                        $id = '';
+                        $is_valid = false;
+                    }
+                    if (array_key_exists('page_count', $data)) {
+                        $page_count = $data['page_count'];
                     }
                 }
                 else {
-                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                    $is_valid = true;
                     $id = '';
-                    $is_valid = false;
+                    if (array_key_exists('page_count', $bulk_upload_data)) {
+                        $page_count = $bulk_upload_data['page_count'];
+                    }
                 }
-                if (array_key_exists('page_count', $data)) {
-                    $page_count = $data['page_count'];
-                }
-            }
-            else {
-                $is_valid = true;
-                $id = '';
-                if (array_key_exists('page_count', $bulk_upload_data)) {
-                    $page_count = $bulk_upload_data['page_count'];
-                }
-            }
 
-            $files[$i] += ['page_count' => $page_count,
-                           'id' => $id,
-                           'valid' => $is_valid,
-                           'matches' => $matches ];
+                $file += ['page_count' => $page_count,
+                        'id' => $id,
+                        'valid' => $is_valid,
+                        'matches' => $matches ];
+                $files[] = $file;
+                $count++;
+            }
         }
 
         $semester = $this->core->getConfig()->getTerm();
@@ -978,16 +1028,8 @@ class HomeworkView extends AbstractView {
                     'results' => 0,
                 ]);
             }
-
-            if ($version_instance->isQueued()) {
-                $param = array_merge($param, [
-                    'queue_pos' => $version_instance->getQueuePosition(),
-                    'queue_total' => $this->core->getGradingQueue()->getQueueCount()
-                ]);
-            }
         }
 
-        $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
 
@@ -1026,7 +1068,6 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             'display_version' => $display_version,
-            'check_refresh_submission_url' => $check_refresh_submission_url,
             'show_testcases' => $show_testcases,
             'show_incentive_message' => $show_incentive_message
         ]);
@@ -1365,6 +1406,8 @@ class HomeworkView extends AbstractView {
         $components_twig_array[] = ['id' => 0, 'title' => 'All'];
 
         return $this->core->getOutput()->renderTwigTemplate('submission/grade_inquiry/Discussion.twig', [
+            'course' => $this->core->getConfig()->getCourse(),
+            'term' => $this->core->getConfig()->getTerm(),
             'grade_inquiries' => $grade_inquiries_twig_array,
             'grade_inquiry_url' => $grade_inquiry_url,
             'change_request_status_url' => $change_request_status_url,
@@ -1374,7 +1417,8 @@ class HomeworkView extends AbstractView {
             'g_id' => $graded_gradeable->getGradeable()->getId(),
             'grade_inquiry_message' => $grade_inquiry_message,
             'can_inquiry' => $can_inquiry,
-            'is_inquiry_yet_to_start' => $graded_gradeable->getGradeable()->isGradeInquiryYetToStart(),
+            'is_inquiry_valid' => $graded_gradeable->getGradeable()->isGradeInquirySettingsValid(),
+            'is_inquiry_yet_to_start' => ($graded_gradeable->getGradeable()->isGradeInquiryYetToStart() || !$graded_gradeable->getGradeable()->isTaGradeReleased()),
             'is_inquiry_open' => $is_inquiry_open,
             'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,

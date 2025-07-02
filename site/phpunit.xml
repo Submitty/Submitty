@@ -1,32 +1,26 @@
-<phpunit
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/8.5/phpunit.xsd"
-    convertDeprecationsToExceptions="true"
-    bootstrap="./tests/bootstrap.php"
-    colors="true"
-    verbose="true"
->
-    <testsuites>
-        <testsuite name="Unit Tests">
-            <directory suffix="Tester.php">./tests/app</directory>
-        </testsuite>
-        <testsuite name="phpstan extension">
-            <directory suffix="Tester.php">./tests/phpstan</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./app</directory>
-            <exclude>
-                <directory suffix=".php">./app/views</directory>
-            </exclude>
-            <directory suffix=".php">./tests/phpstan</directory>
-        </whitelist>
-    </filter>
-
-    <logging>
-        <log type="coverage-clover" target="tests/report/clover.xml"/>
-        <log type="coverage-html"   target="tests/report" />
-    </logging>
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" convertDeprecationsToExceptions="true" bootstrap="./tests/bootstrap.php" colors="true" verbose="true">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">./app</directory>
+      <directory suffix=".php">./tests/phpstan</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">./app/views</directory>
+    </exclude>
+    <report>
+      <clover outputFile="tests/report/clover.xml"/>
+      <html outputDirectory="tests/report"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="Unit Tests">
+      <directory suffix="Tester.php">./tests/app</directory>
+    </testsuite>
+    <testsuite name="phpstan extension">
+      <directory suffix="Tester.php">./tests/phpstan</directory>
+      <exclude>./tests/phpstan/DoctrineExtensionTester.php</exclude>
+    </testsuite>
+  </testsuites>
+  <logging/>
 </phpunit>

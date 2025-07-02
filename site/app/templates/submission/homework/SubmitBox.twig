@@ -9,12 +9,16 @@
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
+    <div class='content overridden-message'>
+        <p>NOTE: The numeric score for this assignment has been overridden by your instructor.</p>
+        {% if rainbow_grades_active %} <p>Your numeric score for the assignment will be visible in <a href={{ rainbow_grades_url }}>Rainbow Grades.</a></p> {% endif %}
+        <p>Please see your instructor if you have questions about your grade for this assignment.</p>
+    </div>
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">
     <header id="gradeable-info">
-        <h1>
+        <h1 data-testid="new-submission-info">
             New submission for: {{ gradeable_name }}
             {% if gradeable_url|trim != "" %}
                 <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
@@ -45,7 +49,7 @@
                 {% if diff_time_zone %}
                     <h2>{{ due_date|date(date_time_format, server_time_zone_string) }} <i>(Server Time)</i></h2>
                 {% endif %}
-                <h2 id="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
+                <h2 id="gradeable-time-remaining-text" data-testid="gradeable-time-remaining-text">Gradeable Time Remaining: </h2>
             </div>
         {% endif %}
         <div class="loading-bar-wrapper">
@@ -65,20 +69,20 @@
     {% endif %}
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() and bulk_upload_access %}
-        <form id="submission-form" method="post">
+        <form id="submission-form" method="POST">
             <fieldset id="submission-mode">
                 <legend> Select submission mode: </legend>
                 <label for="radio-normal">
-                    <input type='radio' id="radio-normal" name="submission-type">
+                    <input type='radio' id="radio-normal" name="submission-type" {% if not is_bulk_upload %} checked {% endif %} >
                     Normal Submission
                 </label>
                 <label for="radio-student">
-                    <input type='radio' id="radio-student" name="submission-type">
+                    <input type='radio' id="radio-student" data-testid="radio-student-upload" name="submission-type">
                     Make Submission for a Student
                 </label>
                 {% if is_bulk_upload %}
                     <label for="radio-bulk">
-                        <input type='radio' id="radio-bulk" name="submission-type" checked="checked">
+                        <input type='radio' id="radio-bulk" data-testid="radio-bulk-upload" name="submission-type" checked="checked">
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_blank">
                             <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
@@ -93,7 +97,7 @@
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <label for="user_id"> user_id: </label>
-		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+		            <input type="text" id= "user_id" data-testid="submit-student-userid" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
             <div id="pdf-submit-button" class="sub hide">
@@ -101,12 +105,12 @@
 
                     <div id="toggle-qr-split">
                         <label for="use-qr">Split by QR code?</label>
-                        <input type="checkbox" id="use-qr">
+                        <input type="checkbox" id="use-qr" data-testid="split-by-qr-code">
 
                         {% if feature_flag_enabled('submitty_ocr') %}
                         <span id="toggle-id-scan" class="hide">
                             <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
-                            <input type="checkbox" id="use-ocr">
+                            <input type="checkbox" id="use-ocr" data-testid="use-ocr-id">
                         </span>
                         {% endif %}
                     </div>
@@ -119,17 +123,17 @@
     	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i></a>
                         </span>
 
-                        <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
-                        <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
+                        <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" data-testid="split-by-qr-prefix" />
+                        <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" data-testid="split-by-qr-suffix" />
                         <div id="expected-num-box">
                             <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
-                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
+                            <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" data-testid="expected-page-per-pdf" onchange="highlightPageCount()" />
                         </div>
                     </div>
 
                     <div id="numeric-split-opts">
                         <label id="pages-prompt" for="num_pages">Split by Page Count:</label>
-                        <input type="number" id= "num_pages" placeholder="required"/>
+                        <input type="number" id= "num_pages" data-testid="split-by-page-count" placeholder="required"/>
                     </div>
                 </div>
             </div>
@@ -227,6 +231,7 @@
             {% for part in part_names %}
                 {# uploadIndex and input-file + Index required for drag-and-drop.js #}
                 <div tabindex="0"
+                     data-testid="upload-files-{{ loop.index }}"
                      id="upload{{ loop.index }}"
                      class="upload-box"
                      onkeypress="clicked_on_box(event)"
@@ -244,7 +249,7 @@
                             {% if viewing_inactive_version %}
                                 disabled="disabled"
                             {% endif %}/>
-                    <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                    <table class="file-upload-table" data-testid="file-upload-table-{{ loop.index }}" id="file-upload-table-{{ loop.index }}">
                       <tr style="background:transparent; display:none;">
                         <th>File Name:</th>
                         <th>Size:</th>
@@ -278,7 +283,7 @@
                     "content" : upload_message
                 } only %}
             </div>
-            <button type="button" id="submit" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
+            <button type="button" id="submit" data-testid="submit-gradeable" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>
                 Submit
             </button>
             {% if is_notebook %}
@@ -292,7 +297,7 @@
         {% endif %}
 
         {% if part_names is not empty %}
-            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
+            <button type="button" id="startnew" class="btn btn-primary" data-testid="clear-all-files-button">Clear</button>
 
             {% if display_version == highest_version and display_version > 0 %}
                 <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
@@ -398,6 +403,8 @@
 
     // set for all but vcs as it has no box submission
     window.num_submission_boxes = {{ is_vcs ? 0 : part_names | length }};
+    window.course = "{{ course }}";
+    window.term = "{{ term }}";
     window.gradeable_id = "{{ gradeable_id }}";
 
     function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
@@ -463,9 +470,18 @@
             );
         }
     }
+
     $(function() {
-        $(".submit-gradeable").click(function(e){ // Submit button
-            $(".submit-gradeable").prop('disabled',true);
+        {% if is_vcs %} window.is_vcs = true; {% endif %}
+        {% if is_notebook %} window.is_notebook = true; {% endif %}
+        updateSubmitButtonStatus();
+        $(".submit-gradeable").click(function(e) { // Submit button
+            e.preventDefault(); // Prevent form submission for safety
+            if (!isValidSubmission() && empty_inputs) {
+                displayMessage('Duplicate submission detected. No attempts used', 'warning');
+                return;
+            }
+            $(".submit-gradeable").prop('disabled', true);
             window.onbeforeunload = null;
             var user_id = "";
             var num_pages = 0;

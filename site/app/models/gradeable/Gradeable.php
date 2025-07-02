@@ -84,7 +84,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
- * @method string  getDiscussionThreadId()
+ * @method string getDiscussionThreadId()
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveGradeInquiriesCount()
  * @method void setHasDueDate($has_due_date)
@@ -96,10 +96,22 @@ use app\controllers\admin\AdminGradeableController;
  * @method int getLimitedAccessBlind()
  * @method void setPeerBlind($peer_blind)
  * @method int getPeerBlind()
+ * @method void setPeerAutograding($peer_autograding)
+ * @method bool getPeerAutograding()
+ * @method void setPeerRubric($peer_rubric)
+ * @method bool getPeerRubric()
+ * @method void setPeerFiles($peer_files)
+ * @method bool getPeerFiles()
+ * @method void setPeerSolutions($peer_solutions)
+ * @method bool getPeerSolutions()
+ * @method void setPeerDiscussion($peer_discussion)
+ * @method bool getPeerDiscussion()
  * @method void setInstructorBlind($instructor_blind)
  * @method int getInstructorBlind()
  * @method bool getAllowCustomMarks()
  * @method void setAllowCustomMarks($allow_custom_marks)
+ * @method void setNotificationsSent($notification_sent)
+ * @method int getNotificationsSent()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -320,8 +332,26 @@ class Gradeable extends AbstractModel {
      * @var bool will peer graders grade the gradeable blindly*/
     protected $peer_blind = 3;
     /** @prop
+     * @var bool will peer graders access the autograding panel*/
+    protected $peer_autograding = true;
+    /** @prop
+     * @var bool will peer graders access the rubric panel*/
+    protected $peer_rubric = true;
+    /** @prop
+     * @var bool will peer graders access the files panel*/
+    protected $peer_files = true;
+    /** @prop
+     * @var bool will peer graders access the solution/notes panel*/
+    protected $peer_solutions = true;
+    /** @prop
+     * @var bool will peer graders access the discussion panel*/
+    protected $peer_discussion = true;
+    /** @prop
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
+    /** @prop
+     * @var int total gradeable notifications sent */
+    protected $notifications_sent = 0;
 
     /**
      * Gradeable constructor.
@@ -351,6 +381,20 @@ class Gradeable extends AbstractModel {
 
         if (array_key_exists('peer_blind', $details)) {
             $this->setPeerBlind($details['peer_blind']);
+        }
+
+        $mapping = [
+            'autograding' => 'setPeerAutograding',
+            'rubric' => 'setPeerRubric',
+            'files' => 'setPeerFiles',
+            'solution_notes' => 'setPeerSolutions',
+            'discussion' => 'setPeerDiscussion'
+        ];
+
+        foreach ($mapping as $key => $method) {
+            if (array_key_exists($key, $details)) {
+                call_user_func([$this, $method], $details[$key] ?? true);
+            }
         }
 
         if (array_key_exists('limited_access_blind', $details)) {
@@ -386,6 +430,7 @@ class Gradeable extends AbstractModel {
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
+            $this->setNotificationsSent($details['notifications_sent'] ?? 0);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }
@@ -453,8 +498,6 @@ class Gradeable extends AbstractModel {
         'grade_start_date',
         'grade_due_date',
         'grade_released_date',
-        'grade_inquiry_start_date',
-        'grade_inquiry_due_date'
     ];
 
     /**
@@ -744,8 +787,6 @@ class Gradeable extends AbstractModel {
         $no_due_date_reqs = [
             'ta_view_start_date',
             'submission_open_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         $no_release_date_reqs = [
@@ -754,8 +795,6 @@ class Gradeable extends AbstractModel {
             'submission_due_date',
             'grade_start_date',
             'grade_due_date',
-            'grade_inquiry_start_date',
-            'grade_inquiry_due_date'
         ];
 
         // Now, check if they are in increasing order
@@ -799,12 +838,6 @@ class Gradeable extends AbstractModel {
 
             if ($this->hasReleaseDate()) {
                 $result[] = 'grade_released_date';
-            }
-
-            // Only add in grade inquiry dates if its allowed
-            if ($this->isTaGrading() && $this->isGradeInquiryAllowed() && !$grade_inquiry_modified) {
-                $result[] = 'grade_inquiry_start_date';
-                $result[] = 'grade_inquiry_due_date';
             }
         }
         else {
@@ -1502,13 +1535,24 @@ class Gradeable extends AbstractModel {
         while ($checked_paths <= 1000 && count($cur_paths) !== 0) {
             foreach ($cur_paths as $cur_path) {
                 $is_dir = is_dir($cur_path);
-                if (!$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)) {
-                    return "Invalid permissions on a file or directory within specified path.";
+
+                // We don't need to check the permissions for autograding configurations
+                // in this courses config_upload directory.
+                // Instructor users can upload configs to this directory through the web UI
+                // and they can select and use these configs to autograding their assignments.
+                $config_upload_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
+                $is_in_config_upload_dir = str_starts_with($cur_path, $config_upload_dir);
+
+                if (
+                    !$is_in_config_upload_dir
+                    && !$this->checkValidPerms($cur_path, $group_map, $user_map, $is_dir)
+                ) {
+                    return "Invalid permissions on a file or directory within specified path:" . $cur_path;
                 }
                 if ($is_dir) {
                     $next_paths_tmp = @scandir($cur_path);
                     if (!is_array($next_paths_tmp)) {
-                        return "Invalid permissions on a file or directory within specified path.";
+                        return "Invalid directory array: " . $next_paths_tmp;
                     }
                     foreach ($next_paths_tmp as $next_path) {
                         if ($next_path === "." || $next_path === "..") {
@@ -2223,6 +2267,14 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Checks if the grade-inquiry settings are valid
+     * @return bool
+     */
+    public function isGradeInquirySettingsValid() {
+        return $this->isTaGradeReleased() && $this->grade_inquiry_allowed && $this->grade_inquiry_start_date <= $this->grade_inquiry_due_date;
+    }
+
+    /**
      * Creates a new team with the provided members
      * @param User $leader The team leader (first user)
      * @param User[] $members The team members (not including leader).
@@ -2521,7 +2573,8 @@ class Gradeable extends AbstractModel {
     public function getPrerequisite(): string {
         if ($this->depends_on !== null && $this->depends_on_points !== null) {
             $dependent_gradeable = $this->core->getQueries()->getGradeableConfig($this->depends_on);
-            return $dependent_gradeable->getTitle();
+            $dependent_gradeable_points = strval($this->depends_on_points);
+            return ($dependent_gradeable->getTitle() . " first with a score of " . $dependent_gradeable_points . " point(s)");
         }
         else {
             return '';

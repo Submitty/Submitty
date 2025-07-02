@@ -1,6 +1,6 @@
 {
-    "automatic_grading_total": 38,
-    "nonhidden_automatic_grading_total": 38,
+    "automatic_grading_total": 39,
+    "nonhidden_automatic_grading_total": 39,
     "testcases": [
         {
             "autochecks": [
@@ -131,7 +131,7 @@
                 "elapsed_time": 0.10000000149011612,
                 "max_rss_size": 2704
             },
-            "points_awarded": 7,
+            "points_awarded": 8,
             "test_name": "Allow Numeric Noise (+/- 4.0) AND Ignore Whitespace Differences"
         },
         {

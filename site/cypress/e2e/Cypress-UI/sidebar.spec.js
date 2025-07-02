@@ -5,8 +5,13 @@ const currentSemester = getCurrentSemester();
 function sidebarContains(title, extension, header = title) {
     cy.get('[data-testid="sidebar"]').contains(title).should('have.attr', 'href').and('contain', extension);
     cy.visit(extension);
-    cy.get('#main > .content').should('contain', header);
-    cy.get('#main > .content').should('not.contain', 'Server Error');
+
+    let selector = '#main > .content';
+    if (title === 'SQL Toolbox') {
+        selector = '#main > div[data-v-app] > .content';
+    }
+    cy.get(selector).should('contain', header);
+    cy.get(selector).should('not.contain', 'Server Error');
 }
 
 function baseSidebar() {
@@ -33,7 +38,7 @@ function instructorSidebar() {
     sidebarContains('Excused Absence Extensions', `/courses/${currentSemester}/sample/extensions`);
     sidebarContains('Grade Override', `/courses/${currentSemester}/sample/grade_override`);
     sidebarContains('Plagiarism Detection', `/courses/${currentSemester}/sample/plagiarism`);
-    sidebarContains('Grade Reports', `/courses/${currentSemester}/sample/reports`);
+    sidebarContains('Grades Configuration', `/courses/${currentSemester}/sample/reports/rainbow_grades_customization`, 'Rainbow Grades Configuration');
     sidebarContains('Docker', '/admin/docker');
     sidebarContains('New Course', '/home/courses/new');
     sidebarContains('Autograding Status', '/autograding_status', 'Job Statistics');
@@ -52,7 +57,7 @@ function notHaveInstructorSidebars() {
         'Excused Absence Extensions',
         'Grade Override',
         'Plagiarism Detection',
-        'Grade Reports',
+        'Rainbow Customization',
         'Docker',
         'New Course',
         'Autograding Status',

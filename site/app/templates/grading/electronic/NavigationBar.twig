@@ -52,7 +52,7 @@
             </span>
             <span class="ta-navlink-cont" id="fullscreen-btn-cont">
                 <button title="Toggle the full screen mode"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="toggleFullScreenMode();"
                 >
@@ -62,7 +62,7 @@
             </span>
             <span class="ta-navlink-cont" id="two-panel-mode-btn">
                 <button title="Toggle the two panel mode"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="togglePanelSelectorModal(true);"
                 >
@@ -71,7 +71,7 @@
             </span>
             <span class="ta-navlink-cont" id="two-panel-exchange-btn">
                 <button title="Exchange the panel positions"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="exchangeTwoPanels();"
                 >
@@ -81,7 +81,7 @@
 
             <span class="ta-navlink-cont" id="grading-setting-btn"  data-testid="grading-setting-btn">
                 <button title="Show Grading Settings"
-                        class="invisible-btn key_to_click"
+                        class="invisible-btn"
                         tabindex="0"
                         onclick="showSettings();"
                 >
@@ -95,21 +95,3 @@
         </div>
     </div>
 </div>
-<script>
-    window.addEventListener('resize', function(event) {
-        const name_div = $('#grading-panel-student-name');
-        //have to calculate the height since the item is positioned absolutely
-        const height = $('.panels-container')[0].getClientRects()[0].top - name_div.closest('.content-item')[0].getClientRects()[0].top;
-        const padding_bottom = 12;
-        name_div.css('height', height - padding_bottom);
-        name_div.show();
-        const panel_buttons_bbox = $('.panel-header-box')[0].getClientRects()[0];
-        const name_div_bbox = name_div[0].getClientRects()[0];
-
-        const overlap_margin = 15;
-        const overlapping = (panel_buttons_bbox.left - name_div_bbox.right) < overlap_margin;
-        if (overlapping || taLayoutDet.isFullLeftColumnMode) {
-            $('#grading-panel-student-name').hide()
-        }
-    });
-</script>

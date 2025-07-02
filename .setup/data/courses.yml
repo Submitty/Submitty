@@ -29,8 +29,9 @@
 #
 #   gradeables: a list of gradeables to be used for this course. Each gradeable is defined as:
 #
-#     g_id: what is the id for this gradeable. This is optional for electronic gradeables and will default to the
-#         filename of the gradeable_config, otherwise this is required to be defined.
+#     g_id: what is the id for this gradeable. This is optional for electronic gradeables that use gradeable_config
+#         and will default to the filename of the config from Tutorial or more_autograding_examples, and
+#         required otherwise.
 #
 #     g_title: [optional] what is the title for this gradeable. Defaults to a capitalized version of g_id with
 #         underscores converted to spaces.
@@ -53,31 +54,40 @@
 #     g_grader_assignment_method: [optional] integer between 0-2 inclusive, where 0 is grade by rotating section, 1 is grade by
 #         by registration section, and 2 is all access grading.  Defaults to 1: grade by registration section.
 #
-#     g_ta_view_start_date: when are TAs allowed to view this gradeable on the navigation page (before grading has started).
+#     g_ta_view_start_date: [optional] when are TAs allowed to view this gradeable on the navigation page (before grading has started).
 #         This should be before grading start date and submission open date (if electronic gradeable). Only instructors
-#         can view gradeables before this date has happened (then TAs are allowed).
+#         can view gradeables before this date has happened (then TAs are allowed). Defaults to beginning of time.
 #
-#     g_grade_start_date: when should grading start for the gradeable
+#     g_grade_start_date: [optional] when should grading start for the gradeable. Defaults to end of time.
 #
-#     g_grade_released_date: when are the grades are going to be available to the student via interface and rainbow
-#         grades. This should happen after the grading start date.
+#     g_grade_due_date [optional] when grading should end for the gradeable. Defaults to end of time
+#
+#     g_grade_released_date: [optional] when are the grades are going to be available to the student via interface and rainbow
+#         grades. This should happen after the grading start date. Defaults to end of time.
 #
 #     g_syllabus_bucket: [optional] what bucket should the gradeable be a part of for rainbox grades. Defaults to None.
 #
 #     g_min_grading_group: [optional] integer for what groups (and above) are allowed to submit grades. Defaults to 3.
 #
+#     eg_depends_on: [optional] gradeable_id for what the current gradeable should be locked behind.
+#          This will throw an error if the gradeable doesnt exist beforehand.
+#
+#     eg_depends_on_points: [optional] the number of points that the current gradeabe is locked behind
+#
 # These next fields are only if the gradeable is of type 0 (electronic gradeable) and can be ignored otherwise):
 #
-#     eg_submission_open_date: Timestamp on when does the gradeable open to students for submission. Should be before
-#         grading start date and submission due date, but after the TA view date.
+#     eg_config_path: Path to gradeable config. Do not use with gradeable_config.
 #
-#     eg_submission_due_date: Timestamp when is the due date for the gradeable. Should be after submission open date.
+#     eg_submission_open_date: [optional] Timestamp on when does the gradeable open to students for submission. Should be before
+#         grading start date and submission due date, but after the TA view date. Defaults to beginning of time.
+#
+#     eg_submission_due_date: [optional] Timestamp when is the due date for the gradeable. Should be after submission open date. Defaults to end of time.
 #
 #     eg_team_assignment: Boolean for if electronic gradeable is a team assignment. Defaults to False
 #
 #     eg_max_team_size: Integer for maximum team size (instructors can manually create larger teams). Defaults to 1
 #
-#     eg_team_lock_date: Timestamp on when teams lock (students can no longer leave their team or send invitations). Defaults to due date
+#     eg_team_lock_date: [optional] Timestamp on when teams lock (students can no longer leave their team or send invitations). Defaults to due date
 #
 #     eg_is_repository: [optional] Boolean for if this gradeable using version control (TRUE) or not (FALSE).
 #         Defaults to FALSE.
@@ -107,19 +117,32 @@
 #                           if this isn't provided but eg_lichen_sample_path is, random submissions will be made from the directory provided
 #
 # To make how the order of the time fields work more explicit:
-# g_ta_view_start_date < eg_submission_open_date < eg_submission_due_date < g_grade_start_date < g_grade_released_date
+# g_ta_view_start_date <= eg_submission_open_date <= eg_submission_due_date <= g_grade_start_date <= g_grade_released_date
 #
-#     components: this is a list of dictionaries for each component to be added for the gradeable. Each entry uses:
+#     components: [optional] this is a list of dictionaries for each component to be added for the gradeable. Defaults to []
+#      Each entry uses:
 #
 #       gc_title: string for component title.
+#
+#       gc_max_value: numeric for max value allowed for this component without extra credit included. If for g_type 1,
+#             can be omitted (and will always be 1).
+#
+#       gc_lower_clamp: the maximum number of points this component can contribute to the total score. May be greater
+#             than max. May be omitted for g_type 1.
+#
+#       gc_upper_clamp: the minimum points this component can contribute to the score. May be negative. May be omitted
+#             for g_type 1.
+#
+#       gc_default: the number of points this component is worth with no marks assigned.
+#
 #       gc_ta_comment: [optional] string for comment to be given to TA on grading. Only for electronic gradeables.
+#
 #       gc_student_comment: [optional] string for comment to be given to student on grade report. Only for electronic
 #             gradeables.
-#       gc_max_value: numeric for max value allowed for this component. If for g_type 1, can be omitted (and will
-#             always be 1).
-#       gc_is_text: [optional] boolean for if this is a text field or not. Only needed if gradeabe is of type
-#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value or gc_is_extra_credit.
-#       gc_is_extra_credit: [optional] boolean for if this is extra credit or not. Defaults to FALSE.
+#
+#       gc_is_text: [optional] boolean for if this is a text field or not. Only applicable if gradeable is of type
+#             Numeric/Text. Defaults to FALSE. If this is true, then you do not need gc_max_value, gc_lower_clamp,
+#             or gc_upper_clamp.
 #
 # Any field that uses a timestamp allows for strings in four formats (if the time is omitted, it defaults to 23:59:59).
 #   - YEAR-MONTH-DAY                      (Ex: 2016-10-13)

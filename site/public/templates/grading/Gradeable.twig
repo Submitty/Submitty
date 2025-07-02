@@ -3,7 +3,7 @@
     {% endblock %}
 {# Components #}
     {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
-    <div id="component-list">
+    <div id="component-list" data-testid="component-list">
         {% block components_block %}
             {% for component in gradeable.components %}
                 <div class="component-container">
@@ -44,8 +44,12 @@
                 });
         }
     }
-    // Will work for Chrome
-    window.onbeforeunload = unloadSave;
-    // Will work for other browsers
-    window.onunload = unloadSave;
+
+    if (navigator.userAgent.indexOf('Chrome') > -1) {
+        // Will work for Chrome
+        window.onbeforeunload = unloadSave;
+    } else {
+        // Will work for other browsers
+        window.onunload = unloadSave;
+    }
 </script>

@@ -13,6 +13,9 @@ class FormOptionsWidget extends Widget {
         const heading_container = this.getHeadingContainer('Form Options');
 
         const interactive_container = this.getInteractiveContainer();
+
+        // This is a fine usage of innerHTML
+        // eslint-disable-next-line no-unsanitized/property
         interactive_container.innerHTML = this.getFormOptionsTemplate();
 
         const container = document.createElement('div');
@@ -37,7 +40,7 @@ class FormOptionsWidget extends Widget {
     getFormOptionsTemplate() {
         return `
         <div class="buttons">
-            <input type="button" class="save-button" value="Save">
+            <input type="button" class="save-button btn btn-primary btn-nav btn-nav-submit" value="Save" data-testid="notebook-save">
         </div>
         <div class="status"></div>`;
     }
@@ -78,11 +81,7 @@ class FormOptionsWidget extends Widget {
             this.clearStatusMessages();
 
             if (result.status === 'success') {
-                const gradeable_submission_url = buildCourseUrl(['gradeable', builder_data.g_id]);
-                const edit_gradeable_url = buildCourseUrl(['gradeable', builder_data.g_id, 'update']);
-
-                this.appendStatusMessage(`Your gradeable is being installed.  To view it visit the <a href="${gradeable_submission_url}">submission page</a>.`);
-                this.appendStatusMessage(`To make other changes to the gradeable configuration visit the <a href="${edit_gradeable_url}">edit gradeable page</a>.`);
+                this.appendStatusMessage('Successfully Saved');
             }
             else {
                 this.appendStatusMessage(result.message);
@@ -113,7 +112,27 @@ class FormOptionsWidget extends Widget {
     appendStatusMessage(message) {
         const status_div = document.querySelector('.form-options-widget .status');
         const p = document.createElement('p');
-        p.innerHTML = message;
+        if (message === 'Successfully Saved') {
+            const gradeable_submission_url = buildCourseUrl(['gradeable', builder_data.g_id]);
+            const edit_gradeable_url = buildCourseUrl(['gradeable', builder_data.g_id, 'update']);
+
+            const submission_page_element = document.createElement('a');
+            submission_page_element.href = gradeable_submission_url;
+            submission_page_element.innerText = 'submission page';
+
+            const edit_page_element = document.createElement('a');
+            edit_page_element.href = edit_gradeable_url;
+            edit_page_element.innerText = 'edit gradeable page';
+
+            p.appendChild(document.createTextNode('Your gradeable has been successfully saved. To view it visit the '));
+            p.appendChild(submission_page_element);
+            p.appendChild(document.createTextNode('. To make other changes to the gradeable configuration visit the '));
+            p.appendChild(edit_page_element);
+            p.appendChild(document.createTextNode('.'));
+        }
+        else {
+            p.innerText = message;
+        }
         status_div.appendChild(p);
     }
 

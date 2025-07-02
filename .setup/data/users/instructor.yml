@@ -6,3 +6,16 @@ user_familyname: Instructor
 user_access_level: 2
 user_numeric_id: 801516157
 user_pronouns: She/Her
+courses:
+  sample:
+    user_group: 1
+  blank:
+    user_group: 1
+  development:
+    user_group: 1
+  plagiarism:
+    user_group: 1
+  archived:
+    user_group: 1
+  tutorial:
+    user_group: 1

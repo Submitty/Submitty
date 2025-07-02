@@ -9,7 +9,7 @@ use app\libraries\database\SqliteDatabase;
 use tests\BaseUnitTest;
 
 class DatabaseFactoryTester extends BaseUnitTest {
-    public function postgresqlDrivers() {
+    public static function postgresqlDrivers() {
         return [
             ['pgsql'],
             ['postgresql'],

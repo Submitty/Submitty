@@ -1,0 +1,157 @@
+{# This is Histogram for manual/auto/overall grading #}
+
+<div id="{{ type == 'manual' ? 'manual-grading-score-histogram' : type == 'total' ? 'total-score-histogram' : type == 'auto' ? 'autograding-score-histogram' }}" class="page-content">
+
+    <div class="bucket-size-container">
+        <input
+            class="bucket-size-input"
+            type='text'
+            id='bucket-size-{{ type }}'
+            name='bucket-val'
+            value=""
+            placeholder="Enter bucket size"
+        />
+        <input
+            readonly
+            class="bucket-size-submit-button btn btn-primary key_to_click"
+            tabindex="0"
+            id="submit_bucket_{{ type }}"
+            name="sub-{{ type }}"
+            value="Submit"
+            onclick="createNewBuckets(range{{type}},buckets,xValue,yValue,xBuckets,mode,modeCount,max{{ type }},min{{ type }})"
+        />
+    </div>
+
+    <div id="Histogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}"><!-- Plotly chart will be drawn inside this DIV --></div>
+
+    <script>
+        var buckets = new Map();
+        var buttonLayerHeight = 1.0;
+        var ct = 0;
+        var max{{ type }} = 0;
+        var min{{ type }} = {{ overall_total }} + 50;
+        var median = 0;
+        var mode = 0;
+        var modeCount = 0;
+
+        var range{{ type }} = 0;
+        var xValue = [];
+        var yValue = [];
+        var xBuckets = [];
+
+        xValue = [{{ histograms[type == 'manual' ? 'tTA' : type == 'auto' ? 'bAuto' : type == 'total' ? 'bTA'] | join(',') }}];
+        xValue.sort((a, b) => a - b);
+
+        if (xValue.length > 0) {
+            min{{ type }} = xValue[0];
+            max{{ type }} = xValue[xValue.length-1];
+            // range = max - min;
+            let pivot = Math.floor((xValue.length - 1) / 2);
+            if (xValue.length % 2 === 0) {
+                median = (xValue[pivot] + xValue[pivot+1]) / 2;
+            }
+            else {
+                median = xValue[pivot];
+            }
+        }
+
+        if (max{{ type }}!=0 && min{{ type }}!=50) {
+            range{{ type }} = max{{ type }}-min{{ type }};
+        }
+
+        if (min{{ type }} != max{{ type }}) {
+            mode = fillBucketsForRange(range{{ type }}, buckets, xValue, yValue, xBuckets, mode, modeCount, max{{ type }}, min{{ type }});
+        } else {
+            mode = xValue[0];
+            xBuckets = [String(mode)];
+            yValue = [xValue.length];
+        }
+
+        if (max{{ type }}==0 && min{{ type }}==50) {
+            min{{ type }}=0;
+        }
+
+        var trace1 = {
+            x: xBuckets,
+            y: yValue,
+            mode: 'markers',
+            name: 'Students with Each Score',
+            type: 'bar',
+            text: yValue,
+            textposition: 'auto',
+            hoverinfo: 'none',
+            marker: {
+                color: 'rgb(48,99,152)',
+                opacity: 1.0,
+                line: {
+                    color: 'rbg(170,170,170)',
+                    width: 1.5
+                }
+            }
+        };
+
+        var data = [trace1];
+
+        var layout = {
+            title: {
+                text: 'Students with Each Score',
+            },
+            xaxis: {
+                title: {
+                    text: 'Scores'
+                }
+            },
+            yaxis:{
+                title: {
+                    text: 'Number of Students'
+                }
+            },
+            barmode: 'overlay',
+            font: {
+                family: '"Source Sans Pro", sans-serif',
+            }
+        };
+
+        Plotly.newPlot('Histogram' + ('{{ type }}' == 'auto' ? '3' : ('{{ type }}' == 'manual' ? '4' : '')), data, layout, {displayModeBar: false, displaylogo: false, responsive: true});
+    </script>
+
+    <div id="SmallHistogram{{ type == 'auto' ? '3' : (type == 'manual' ? '4' : '') }}" class="statistic-container">
+        <script>
+            document.write(
+                '<span>' +
+                    '<b>Mean: </b>' +
+                    {{ type == 'total' ? overall_average != null ? overall_average.getAverageScore() | default(0) : 0
+                    : (type == 'auto' ? autograded_average != null ? autograded_average.getAverageScore() | default(0) : 0
+                    : (type == 'manual' ? manual_average != null ? manual_average.getAverageScore() | default(0) : 0 ))
+                    }} + '</span>' +
+                    '<span><b>Mode: </b>' + mode + '</span>' +
+                    '<span><b>Median: </b>' + median + '</span>' +
+                    '<span><b>Minimum: </b>' + min{{ type }} + '</span>' +
+                    '<span><b>Maximum: </b>' + max{{ type }} + '</span>' +
+                    '<span><b>Range: </b>' + (max{{ type }} - min{{ type }}) + '</span>' +
+                    '<span><b>Standard Deviation: </b>' +
+                    {{ type == 'total' ? overall_average != null ? overall_average.getStandardDeviation() | default(0) : 0
+                    : type == 'auto' ? autograded_average != null ? autograded_average.getStandardDeviation() | default(0) : 0
+                    : manual_average != null ? manual_average.getStandardDeviation() | default(0) : 0
+                    }} +
+                '</span>'
+            );
+        </script>
+    </div>
+    <br />
+    Version Conflicts: {{ histograms['VerConf'] }}
+    <br />
+    No Submissions: {{ histograms['noSub'] }}
+    <br />
+    No Active Versions: {{ histograms['noActive'] }}
+    <br />
+    Grade Inquiries: {{ histograms['GradeInq'] }}
+    <br />
+    Incomplete Grading: {{ histograms['IncompGrading'] }}
+    <br />
+    Cancelled Submissions: {{ histograms['cancelledSub'] }}
+    <br/>
+    <br/>
+    Double-click on the chart to zoom out
+    <hr>
+</div>

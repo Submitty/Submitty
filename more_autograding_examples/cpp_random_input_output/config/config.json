@@ -1,5 +1,9 @@
 {
-	"required_capabilities": "cpp",
+    "required_capabilities": "cpp",
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "submitty/clang:latest"
+    },
 
     "instructor_solution_compile_command": ["g++ -std=c++11 -Wall -Wextra instructor_solution.cpp -o inst_solution.out"],
 

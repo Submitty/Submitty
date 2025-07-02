@@ -16,6 +16,7 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Submini Polls", $this->core->buildCourseUrl(['polls']));
         $this->core->getOutput()->addInternalCss('polls.css');
         $this->core->getOutput()->addInternalJs('polls.js');
+        $this->core->getOutput()->addInternalJs('websocket.js');
         $this->core->getOutput()->enableMobileViewport();
     }
 
@@ -23,14 +24,16 @@ class PollView extends AbstractView {
      *
      * @param Poll[] $todays_polls
      * @param Poll[] $older_polls
+     * @param Poll[] $tomorrow_polls
      * @param Poll[] $future_polls
      */
-    public function showPollsInstructor(array $todays_polls, array $older_polls, array $future_polls, array $response_counts, array $dropdown_states) {
+    public function showPollsInstructor(array $todays_polls, array $older_polls, array $tomorrow_polls, array $future_polls, array $response_counts, array $dropdown_states) {
         return $this->core->getOutput()->renderTwigTemplate("polls/AllPollsPageInstructor.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'todays_polls' => $todays_polls,
             'older_polls' => $older_polls,
+            'tomorrow_polls' => $tomorrow_polls,
             'future_polls' => $future_polls,
             'dropdown_states' => $dropdown_states,
             'response_counts' => $response_counts,
@@ -81,6 +84,7 @@ class PollView extends AbstractView {
             'is_single_response' => PollUtils::isSingleResponse($poll->getQuestionType()),
             'end_time' => $poll->getEndTime()?->format('Y-m-d\TH:i:s'),
             'timer_enabled' => $poll->isTimerEnabled(),
+            'user_id' => $this->core->getUser()->getId()
         ]);
     }
 
@@ -90,11 +94,13 @@ class PollView extends AbstractView {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $is_survey = $poll?->isSurvey() ?? false;
         return $this->core->getOutput()->renderTwigTemplate("polls/PollForm.twig", [
             'csrf_token' => $this->core->getCsrfToken(),
             'base_url' => $this->core->buildCourseUrl() . '/polls',
             'poll' => $poll,
             'max_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'is_survey' => $is_survey,
           ]);
     }
 }

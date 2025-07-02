@@ -1,5 +1,7 @@
 import json
 import os
+import random
+import string
 import traceback
 import time
 from pwd import getpwnam
@@ -110,10 +112,12 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
+            self.log_docker_error('image is not available')
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
         except Exception:
+            self.log_docker_error(f'could not create container {self.full_name}')
             self.log_function(f'ERROR: could not create container {self.full_name}')
             client.close()
             raise
@@ -125,6 +129,44 @@ class Container():
             timer() - container_create_time
         )
         client.close()
+
+    def log_docker_error(self, message):
+        untrusted = self.full_name.split("_")[0]
+        docker_error_path = os.path.join(
+                '/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/tmp_logs')
+
+        queue_file = os.path.join('/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/queue_file.json')
+
+        machine = 'unknown'
+        with open(queue_file, 'r') as f:
+            try:
+                queue_file = json.load(f)
+                machine = queue_file["which_machine"]
+            except json.JSONDecodeError:
+                queue_file = {}
+
+        docker_error_file = os.path.join(docker_error_path, "docker_error.json")
+        docker_error_data = []
+        if os.path.exists(docker_error_file):
+            try:
+                with open(docker_error_file, "r") as json_file:
+                    docker_error_data = json.load(json_file)
+                    if not isinstance(docker_error_data, list):
+                        docker_error_data = []
+            except json.JSONDecodeError:
+                docker_error_data = []
+
+        error_log = {
+            "image": f'{self.image}',
+            "machine": f'{machine}',
+            "error": f'{message} on machine {machine}',
+        }
+
+        if error_log not in docker_error_data:
+            docker_error_data.append(error_log)
+
+        with open(os.path.join(docker_error_path, "docker_error.json"), "w") as json_file:
+            json.dump(docker_error_data, json_file, indent=4)
 
     def start(self, logfile):
         container_start_time = timer()
@@ -331,8 +373,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 created_containers.append(container)
             except Exception:
                 self.log_message(
-                  f"ERROR: Could not create container {container.name}"
-                  f" with image {container.image}"
+                    f"ERROR: Could not create container {container.name}"
+                    f" with image {container.image}"
                 )
                 self.log_stack_trace(traceback.format_exc())
 
@@ -345,7 +387,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                         pass
                 raise
 
-    def network_containers(self, containers):
+    def network_containers(self, containers, random_str):
         """ Given a set of containers, network them per their specifications. """
         if len(containers) <= 1:
             return
@@ -358,18 +400,18 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             none_network.disconnect(container.container, force=True)
 
         if self.get_router(containers) is not None:
-            self.network_containers_with_router(containers)
+            self.network_containers_with_router(containers, random_str)
         else:
-            self.network_containers_routerless(containers)
+            self.network_containers_routerless(containers, random_str)
 
         # Provide an initialization file to each container.
         self.create_knownhosts_txt(containers)
-        self.create_knownhosts_json(containers)
+        self.create_knownhosts_json(containers, random_str)
 
-    def network_containers_routerless(self, containers):
+    def network_containers_routerless(self, containers, random_str):
         """ If there is no router, all containers are added to the same network. """
         client = docker.from_env(timeout=60)
-        network_name = f'{self.untrusted_user}_routerless_network'
+        network_name = f'{self.untrusted_user}_routerless_network_{random_str}'
 
         # Assumes untrustedXX naming scheme, where XX is a number
         untrusted_num = int(self.untrusted_user.replace('untrusted', '')) + 100
@@ -387,6 +429,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         )
         client.close()
 
+        self.log_container(
+            'NET_CREATED',
+            network_name,
+            network.short_id
+        )
+
         host = 2
         for container in containers:
             ip_address = f'{ip_address_start}.{host}'
@@ -399,7 +447,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             host += 1
         self.networks.append(network)
 
-    def network_containers_with_router(self, containers):
+    def network_containers_with_router(self, containers, random_str):
         """
         If there is a router, all containers are added to their own network, on which the only
         other endpoint is the router, which has been aliased to impersonate all other reachable
@@ -415,7 +463,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         container_to_subnet = {}
 
         for container in containers:
-            network_name = f"{container.full_name}_network"
+            network_name = f"{container.full_name}_network_{random_str}"
             if container.name == 'router':
                 continue
             # We are creating a new subnet with a new subnet number
@@ -432,6 +480,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 ipam=ipam_config,
                 driver='bridge',
                 internal=True
+            )
+
+            self.log_container(
+                'NET_CREATED',
+                network_name,
+                network.short_id
             )
 
             # We connect the container with host=2. Later we'll connect the router with host=3
@@ -467,7 +521,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         # Connect the router to all networks.
         for startpoint, endpoints in router_connections.items():
             full_startpoint_name = f'{self.untrusted_user}_{startpoint}'
-            network_name = f"{full_startpoint_name}_network"
+            network_name = f"{full_startpoint_name}_network_{random_str}"
             # Store the ip address of the router on this network
             router_ip = f'{network_num}.{untrusted_num}.{container_to_subnet[startpoint]}.3'
             router.set_ip_address(network_name, router_ip)
@@ -486,20 +540,25 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         for network in self.networks:
             try:
                 network.remove()
+                self.log_container(
+                    'NET_DESTROYED',
+                    network.name,
+                    network.short_id
+                )
                 network.client.api.close()
                 network.client.close()
                 self.log_message(
-                  f'{dateutils.get_current_time()} '
-                  f'destroying docker network {network}'
+                    f'{dateutils.get_current_time()} '
+                    f'destroying docker network {network}'
                 )
             except Exception:
                 self.log_message(
-                  f'{dateutils.get_current_time()} ERROR: Could not remove docker '
-                  f'network {network}'
+                    f'{dateutils.get_current_time()} ERROR: Could not remove docker '
+                    f'network {network}'
                 )
         self.networks.clear()
 
-    def create_knownhosts_json(self, containers):
+    def create_knownhosts_json(self, containers, random_str):
         """
         Given a set of containers, add initialization files to each
         container's directory which specify how to connect to other endpoints
@@ -528,7 +587,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     connected_container_name,
                     containers
                 )
-                network_name = f"{container.full_name}_network"
+                network_name = f"{container.full_name}_network_{random_str}"
                 # If there is a router, the router is impersonating all other
                 # containers, but has only one ip address.
                 if router is not None:
@@ -536,20 +595,20 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                     if container.name == 'router' and connected_container_name == 'router':
                         continue
                     elif container.name == connected_container_name:
-                        network_name = f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network_{random_str}"
                         ip_address = container.get_ip_address(network_name)
                     # If this node is not the router, we must inject the router
                     elif container.name != 'router':
                         # Get the router's ip on the container's network
-                        network_name = f"{container.full_name}_network"
+                        network_name = f"{container.full_name}_network_{random_str}"
                         ip_address = router.get_ip_address(network_name)
                     else:
                         # If we are the router, get the connected container's ip on its own network
-                        network_name = f"{self.untrusted_user}_{connected_container_name}_network"
+                        network_name = f"{self.untrusted_user}_{connected_container_name}_network_{random_str}"
                         ip_address = connected_container.get_ip_address(network_name)
                 else:
                     ip_address = connected_container.get_ip_address(
-                        f'{self.untrusted_user}_routerless_network'
+                        f'{self.untrusted_user}_routerless_network_{random_str}'
                     )
 
                 container_knownhost['hosts'][connected_container.name] = {
@@ -803,9 +862,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
                 # Linter hates this line (return in a finally), but the workaround just adds noise
                 return -1  # noqa: B012
 
+        random_str = ''
+        valid_chars = string.ascii_letters + string.digits
+        for _ in range(6):
+            random_str += valid_chars[random.randrange(0, len(valid_chars))]
+
         try:
             self.create_containers(containers, script, arguments)
-            self.network_containers(containers)
+            self.network_containers(containers, random_str)
         except Exception:
             self.log_message(
                 'ERROR: Could not create or network containers. '

@@ -20,7 +20,7 @@
         "grade_inquiry_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
         "seating_only_for_instructor": false,
         "room_seating_gradeable_id": "",
-        "auto_rainbow_grades": false,
+        "auto_rainbow_grades": true,
         "queue_enabled": false,
         "queue_message": "",
         "queue_announcement_message": "",
@@ -29,6 +29,7 @@
         "polls_pts_for_incorrect": 0.0,
         "seek_message_enabled": false,
         "seek_message_instructions": "Optionally, provide your local timezone, desired project topic, or other information that would be relevant to forming your team.",
-        "git_autograding_branch": "main"
+        "git_autograding_branch": "main",
+        "chat_enabled": false
     }
 }

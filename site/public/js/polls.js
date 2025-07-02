@@ -1,5 +1,5 @@
-/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs toggle_section get_new_chart_width disableNoResponse clearResponses */
-/* global csrfToken */
+/* exported newDeletePollForm updatePollAcceptingAnswers updatePollVisible updateDropdownStates importPolls toggleTimerInputs togglePollFormOptions validateCustomResponse addCustomResponse removeCustomResponse toggle_section get_new_chart_width disableNoResponse clearResponses updateHistogram initializeInstructorSocketClient initializeStudentSocketClient */
+/* global csrfToken displaySuccessMessage displayErrorMessage Plotly WebSocketClient */
 
 $(document).ready(() => {
     $('.dropdown-bar').on('click', function () {
@@ -106,6 +106,103 @@ function updateDropdownStates(curr_state, cookie_key) {
     Cookies.set(cookie_key, !curr_state, { expires: expiration_date, path: '/' });
 }
 
+function togglePollFormOptions() {
+    const correct_options = $('.correct-box');
+
+    correct_options.each(function () {
+        $(this).prop('checked', $('#toggle-all').prop('checked'));
+    });
+}
+
+function validateCustomResponse() {
+    const custom_response = $('.custom-poll-response');
+    const custom_response_submit = $('.custom-response-submit');
+
+    const validate = () => {
+        custom_response_submit.prop('disabled',
+            custom_response.val().trim() === '' || custom_response_submit.attr('data-disabled') === 'true',
+        );
+    };
+
+    custom_response.on('input', () => {
+        validate();
+    });
+
+    validate();
+}
+
+function addCustomResponse(pollid, base_url) {
+    const custom_response_text = document.querySelector('.custom-poll-response').value;
+    const url = `${base_url}/addCustomResponse`;
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('custom-response', custom_response_text);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: (err) => {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: (data) => {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    window.location.reload();
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
+        },
+    });
+}
+
+function removeCustomResponse(pollid, optionid, base_url) {
+    const url = `${base_url}/removeCustomResponse`;
+    const fd = new FormData();
+    fd.append('csrf_token', csrfToken);
+    fd.append('poll_id', pollid);
+    fd.append('option_id', optionid);
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        error: (err) => {
+            console.error(err);
+            window.alert('Something went wrong. Please try again.');
+        },
+        success: (data) => {
+            try {
+                const msg = JSON.parse(data);
+                if (msg.status !== 'success') {
+                    displayErrorMessage(msg.message);
+                }
+                else {
+                    document.getElementById(`option-row-${optionid}`).remove();
+                    displaySuccessMessage(msg.data.message);
+                }
+            }
+            catch (err) {
+                console.error(err);
+                window.alert('Something went wrong. Please try again.');
+            }
+        },
+    });
+}
+
 function importPolls() {
     $('#import-polls-form').submit();
 }
@@ -117,6 +214,37 @@ function toggleTimerInputs() {
     else {
         $('#timer-inputs').hide();
     }
+}
+
+function updateTimer(endDate) {
+    const timerDisplayElement = $('#timerDisplay');
+    const timerElement = $('#timer');
+
+    function tick() {
+        const now = new Date();
+        const timeRemaining = endDate - now;
+
+        // Show the timer element once we're ready to start updating it
+        timerElement.show();
+
+        if (timeRemaining <= 0) {
+            timerElement.text('Poll Ended');
+            clearInterval(timerId);
+            return;
+        }
+
+        const seconds = Math.floor((timeRemaining / 1000) % 60);
+        const minutes = Math.floor((timeRemaining / (1000 * 60)) % 60);
+        const hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+
+        const hoursUpdated = (hours < 10) ? `0${hours}` : hours;
+        const minutesUpdated = (minutes < 10) ? `0${minutes}` : minutes;
+        const secondsUpdated = (seconds < 10) ? `0${seconds}` : seconds;
+
+        timerDisplayElement.text(`${hoursUpdated}:${minutesUpdated}:${secondsUpdated}`);
+    }
+
+    const timerId = setInterval(tick, 20);
 }
 
 function toggle_section(section_id) {
@@ -147,4 +275,70 @@ function clearResponses() {
     if ($('.no-response-radio').is(':checked')) {
         $('.response-radio').prop('checked', false);
     }
+}
+
+function updateHistogram(updates) {
+    // Fetch the global histogram variables and corresponding element
+    const { data, layout, responseIndices } = window.histogram;
+    const container = $('#chartContainer')[0];
+
+    for (const option of Object.keys(updates)) {
+        // Update the current y value for the option based on the updates (-1, 0, 1)
+        data[0].y[responseIndices[option]] += Number(updates[option]);
+    }
+
+    // Re-render the histogram based on the current layout
+    Plotly.newPlot(container, data, layout);
+}
+
+function initializeInstructorSocketClient(url) {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        switch (msg.type) {
+            case 'update_histogram':
+                updateHistogram(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open(url);
+}
+
+function initializeStudentSocketClient(url) {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
+        const submit_button = $('.student-submit');
+        const custom_response_submit = $('.custom-response-submit');
+
+        switch (msg.type) {
+            case 'poll_opened':
+            case 'poll_updated':
+                submit_button.prop('disabled', false);
+
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.attr('data-disabled', 'false');
+                    validateCustomResponse();
+                }
+
+                displaySuccessMessage(msg.message);
+                break;
+            case 'poll_closed':
+            case 'poll_ended':
+                submit_button.prop('disabled', true);
+
+                if (custom_response_submit.length > 0) {
+                    custom_response_submit.prop('disabled', true);
+                    custom_response_submit.attr('data-disabled', 'true');
+                }
+
+                displayErrorMessage(msg.message);
+                break;
+            default:
+                console.error('Unknown web socket message received:', msg);
+                break;
+        }
+    };
+    window.socketClient.open(url);
 }

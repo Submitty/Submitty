@@ -7,7 +7,6 @@ describe('testing grade override', () => {
             const selectGradeable = (gradeable === 'grading_homework') ? 'Grading Homework' : 'Grading Team Homework';
             cy.get('[data-testid="grade-override-message-box"]').should('contain', 'No gradeable has been selected');
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
-            cy.get('[data-testid="overridden-grades-apply"]').should('contain', 'Apply Changes');
             cy.get('[data-testid="student-grade-override"]').click();
             cy.get('[data-testid="student-grade-override"]').type('student');
             cy.get('[data-testid="grade-override-score"]').click();
@@ -27,7 +26,6 @@ describe('testing grade override', () => {
             }
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
-            cy.get('[data-testid="overridden-grades-apply"]').click();
             if (gradeable === 'grading_homework') {
                 cy.get('[data-testid="grade-override-delete"]').click();
             }

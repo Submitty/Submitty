@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-################################################################################################
 ### SITE INSTALLER
 #
 # This script is used to install the submitty site code from ${SUBMITTY_REPOSITORY}/site to
@@ -13,7 +11,9 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-################################################################################################
+# This script has two command-line arguments:
+#   Required argument: config=<config dir>.
+#   Optional argument: browscap
 
 set_permissions () {
     local fullpath=$1
@@ -24,7 +24,7 @@ set_permissions () {
         css|otf|jpg|png|mp3|ico|txt|twig|map)
             chmod 444 ${fullpath}
             ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|cgi)
+        bcmap|ttf|eot|svg|woff|woff2|js|mjs|cgi)
             chmod 445 ${fullpath}
             ;;
         html)
@@ -51,25 +51,25 @@ set_mjs_permission () {
 
 echo -e "Copy the submission website"
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-source ${THIS_DIR}/../bin/versions.sh
-
-# This is run under /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
-PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
-PHP_GROUP=${PHP_USER}
-CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
-CGI_GROUP=${CGI_USER}
-
-for arg in "$@"
+# Get arguments
+for cli_arg in "$@"
 do
-    if [ "$arg" == "browscap" ]; then
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
     fi
 done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    exit 1
+fi
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
+source ${SUBMITTY_REPOSITORY:?}/.setup/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+source ${SUBMITTY_REPOSITORY:?}/bin/versions.sh
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
@@ -100,6 +100,11 @@ chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 # causing compilation errors
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
     rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
+fi
+
+# Delete all vue code to prevent deleted vue files from being rendered
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
 fi
 
 # copy the website from the repo. We don't need the tests directory in production and then
@@ -353,6 +358,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # js-cookie
     mkdir ${VENDOR_FOLDER}/js-cookie
     cp ${NODE_FOLDER}/js-cookie/dist/js.cookie.min.js ${VENDOR_FOLDER}/js-cookie
+    #vue
+    mkdir ${VENDOR_FOLDER}/vue
+    cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
@@ -375,12 +383,16 @@ chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

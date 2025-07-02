@@ -55,6 +55,7 @@ submitty_course_dbuser
 submitty_course_dbuser
 America/New_York
 en_US
+100
 http://localhost
 
 

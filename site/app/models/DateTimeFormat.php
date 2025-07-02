@@ -7,7 +7,7 @@ use app\libraries\Core;
 
 class DateTimeFormat extends AbstractModel {
     // Set of legal specifiers
-    const SPECIFIERS = ['MDY', 'DMY'];
+    const SPECIFIERS = ['MDY', 'DMY', 'YMD'];
 
     // Keys available to use with getDateFormat
     const DATE_FORMATS_KEYS = [
@@ -26,7 +26,7 @@ class DateTimeFormat extends AbstractModel {
         'MDY' => [
             'gradeable' => 'm/d/Y @ h:i A T',
             'gradeable_with_seconds' => 'm/d/Y @ h:i:s A T',
-            'forum' => 'n/j g:i A',
+            'forum' => 'Y/n/j g:i A',
             'notification' => 'n/j g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
@@ -36,12 +36,23 @@ class DateTimeFormat extends AbstractModel {
         'DMY' => [
             'gradeable' => 'd/m/Y @ h:i A T',
             'gradeable_with_seconds' => 'd/m/Y @ h:i:s A T',
-            'forum' => 'j/n g:i A',
+            'forum' => 'Y/j/n g:i A',
             'notification' => 'j/n g:i A',
             'solution_ta_notes' => 'j/n g:i A',
             'office_hours_queue' => 'g:i A',
             'date_time_picker' => 'Y-m-d H:i:s',
             'late_days_allowed' => 'm/d/Y h:i:s A T'
+        ],
+        // ISO 8601 Standard Date Formatting
+        'YMD' => [
+            'gradeable' => 'Y-m-d @ h:i A T',
+            'gradeable_with_seconds' => 'Y-m-d @ h:i:s A T',
+            'forum' => 'Y-m-d g:i A',
+            'notification' => 'Y-m-d g:i A',
+            'solution_ta_notes' => 'Y-m-d g:i A',
+            'office_hours_queue' => 'g:i A',
+            'date_time_picker' => 'Y-m-d H:i:s',
+            'late_days_allowed' => 'Y-m-d'
         ]
     ];
 

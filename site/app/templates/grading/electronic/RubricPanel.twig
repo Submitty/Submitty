@@ -27,9 +27,26 @@
                     {% if show_verify_all %}
                         <div class="col-no-gutters">
                             <label for="verify-all" tabIndex="0" class="screen-reader">Verify All</label>
-                            <input id="verify-all" type="button" class="btn btn-default key_to_click" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
+                            <input id="verify-all" type="button" class="btn btn-default key_to_click mx-1" tabindex="0" value="Verify All" onclick="onVerifyAll(this)"/>
                         </div>
                     {% endif %}
+
+                    {# clear version conflicts button #}
+                    {% if show_clear_conflicts and not version_conflict %}
+                        <div class="col-no-gutters">
+                            <label for="change-graded-version" tabIndex="0" class="screen-reader">Clear Version Conflicts</label>
+                            <input 
+                                id="change-graded-version" 
+                                data-testid="change-graded-version" 
+                                type="button" 
+                                class="btn btn-default key_to_click mx-1" 
+                                tabindex="0" 
+                                value="Clear Version Conflicts" 
+                                onclick="updateAllComponentVersions()"
+                            />
+                        </div>
+                    {% endif %}
+
                     {# Silent Edit Checkbox #}
                     {% if show_silent_edit %}
                         <div class="col-no-gutters">

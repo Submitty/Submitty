@@ -6,13 +6,14 @@ const jest = require('eslint-plugin-jest');
 const globals = require('globals');
 const tseslint = require('typescript-eslint');
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
-// @ts-expect-error TS2307
 const cypress = require('eslint-plugin-cypress/flat');
+const vuelint = require('eslint-plugin-vue');
+const noUnsanitized = require('eslint-plugin-no-unsanitized');
 
 module.exports = tseslint.config(
     {
         name: 'Files to include',
-        files: ['**/*.{js,ts}'],
+        files: ['**/*.{js,ts,mts}'],
     },
     {
         // name: 'Files to ignore', (this line can be uncommented with eslint >=9.0)
@@ -25,6 +26,9 @@ module.exports = tseslint.config(
     {
         name: 'Base options for all files',
         extends: [eslint.configs.recommended],
+        plugins: {
+            'no-unsanitized': noUnsanitized,
+        },
         languageOptions: {
             globals: {
                 ...globals.jquery,
@@ -56,29 +60,34 @@ module.exports = tseslint.config(
                     selector:
                         'MemberExpression[object.name="document"][property.name="cookie"]',
                 },
+                {
+                    selector: 'CallExpression[arguments.length>0][callee.property.name="html"] > MemberExpression[object.callee.name="$"]',
+                    message: 'Do not use $(...).html(). Use safer DOM manipulation methods instead.',
+                },
             ],
+            'no-unsanitized/method': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
+            'no-unsanitized/property': ['error', { escape: { methods: ['escapeSpecialChars'] } }],
         },
     },
+
     {
         name: 'Style rules for all files',
         extends: [
-            /** @type {import("typescript-eslint").Config} */
-            /** @type {unknown} */
-            (
-                stylistic.configs.customize({
-                    braceStyle: 'stroustrup',
-                    indent: 4,
-                    semi: true,
-                    arrowParens: true,
-                })
-            ),
+            // @ts-expect-error (TS compiler expects `stylistic.default.configs`, which is not valid based on the source code type definitions)
+            stylistic.configs.customize({
+                braceStyle: 'stroustrup',
+                indent: 4,
+                semi: true,
+                arrowParens: true,
+            }),
         ],
         rules: {
-            '@stylistic/linebreak-style': ['error', 'unix'],
-            '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-            '@stylistic/semi-style': ['error'],
+            'linebreak-style': ['error', 'unix'],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'semi-style': ['error'],
         },
     },
+
     {
         name: 'Files in top directory are commonJS and not modules',
         files: ['*.{js,ts}'],
@@ -104,20 +113,65 @@ module.exports = tseslint.config(
         },
     },
     {
+        name: 'Options for Vue files',
+        files: ['vue/**/*.{js,ts,vue}'],
+        // vuelint doesnt have ts types yet
+        extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
+        languageOptions: {
+            parser: require('vue-eslint-parser'),
+            globals: globals.browser,
+            parserOptions: {
+                parser: '@typescript-eslint/parser',
+                project: 'tsconfig.app.json',
+                extraFileExtensions: ['.vue'],
+                tsconfigRootDir: `${__dirname}/vue`,
+            },
+        },
+        rules: {
+            'vue/multi-word-component-names': ['off'],
+            'vue/block-lang': ['error', { script: { lang: 'ts' } }],
+            'vue/block-order': ['error', { order: ['script:not([setup])', 'script[setup]', 'template', 'style'] }],
+            'vue/component-api-style': ['error', ['script-setup']],
+            'vue/define-emits-declaration': ['error', 'type-literal'],
+            'vue/define-macros-order': ['error',
+                {
+                    order: ['defineOptions', 'defineModel', 'defineProps', 'defineEmits', 'defineSlots'],
+                    defineExposeLast: true,
+                },
+            ],
+            'vue/define-props-declaration': ['error', 'type-based'],
+            'vue/html-self-closing': ['error', { html: { void: 'any' } }],
+            'vue/no-boolean-default': ['error', 'no-default'],
+            'vue/no-ref-object-reactivity-loss': ['warn'],
+            'vue/no-required-prop-with-default': ['error', { autofix: true }],
+            'vue/no-useless-mustaches': ['error'],
+            'vue/prefer-separate-static-class': ['error'],
+            'vue/require-typed-object-prop': ['error'],
+            'vue/require-typed-ref': ['error'],
+            'vue/valid-define-options': ['error'],
+        },
+    },
+    {
         name: 'Options for cypress files',
         files: ['cypress/**/*.{js,ts}'],
-        extends: [cypress.configs.globals],
-        // todo: enable cypress lint rules at some point
-        // extends: [cypress.configs.recommended],
+        extends: [cypress.configs.recommended],
         languageOptions: {
             globals: globals.nodeBuiltin,
+        },
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                {
+                    selector: '[type=CallExpression][callee.object.name=cy][callee.property.name=waitAndReloadUntil]',
+                    message: 'Do not wait for arbitrary time periods',
+                },
+            ],
         },
     },
     {
         name: 'Options for jest files',
         files: ['tests/**/*.{js,ts}'],
-        // todo: enable jest lint rules at some point
-        // extends: [jest.configs['flat/recommended']],
+        extends: [jest.configs['flat/recommended']],
         languageOptions: {
             globals: { ...globals.nodeBuiltin, ...jest.environments.globals.globals },
         },

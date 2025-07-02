@@ -1,13 +1,36 @@
 /* global buildCourseUrl, WebSocketClient */
-/* exported initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+/* exported loadDraft, initGradingInquirySocketClient, onComponentTabClicked, onGradeInquirySubmitClicked, onReady, onReplyTextAreaKeyUp */
+
+function getLocalStorageKey(key) {
+    const { course, term, gradeable_id } = window;
+
+    return `${course}-${term}-${gradeable_id}-${key}`;
+}
+
+function loadDraft() {
+    const draftContentRaw = localStorage.getItem(getLocalStorageKey('draftContent'));
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    const elements = $('.markdown-textarea.fill-available');
+    elements.each(function () {
+        const elementId = $(this).attr('id');
+        const componentId = $(this).closest('.reply-text-form').find('#gc_id').val();
+        const uniqueKey = `reply-text-area-${componentId}`;
+
+        if (Object.prototype.hasOwnProperty.call(draftContent, uniqueKey)) {
+            $(this).val(draftContent[uniqueKey]);
+        }
+    });
+}
 
 function onReady() {
     // open last opened grade inquiry or open first component with grade inquiry
-    const component_selector = localStorage.getItem('selected_tab');
+    const selectedTabKey = getLocalStorageKey('selectedTab');
+    const component_selector = localStorage.getItem(selectedTabKey);
     const first_unresolved_component = $('.component-unresolved').first();
     if (component_selector !== null) {
         $(component_selector).click();
-        localStorage.removeItem('selected_tab');
+        localStorage.removeItem(selectedTabKey);
     }
     else if (first_unresolved_component.length) {
         first_unresolved_component.click();
@@ -51,10 +74,20 @@ function onComponentTabClicked(tab) {
 
 function onReplyTextAreaKeyUp(textarea) {
     const reply_text_area = $(textarea);
+    const componentId = reply_text_area.closest('.reply-text-form').find('#gc_id').val();
+    const uniqueKey = `reply-text-area-${componentId}`;
+
     const must_have_text_buttons = $('.gi-submit:not(.gi-ignore-disabled)');
     must_have_text_buttons.prop('disabled', reply_text_area.val() === '');
     const must_be_empty_buttons = $('.gi-submit-empty:not(.gi-ignore-disabled)');
     must_be_empty_buttons.prop('disabled', reply_text_area.val() !== '');
+
+    const draftContentKey = getLocalStorageKey('draftContent');
+    const draftContentRaw = localStorage.getItem(draftContentKey);
+    const draftContent = draftContentRaw ? JSON.parse(draftContentRaw) : {};
+
+    draftContent[uniqueKey] = reply_text_area.val();
+    localStorage.setItem(draftContentKey, JSON.stringify(draftContent));
 
     if (reply_text_area.val() === '') {
         $('.gi-show-empty').show();
@@ -64,6 +97,7 @@ function onReplyTextAreaKeyUp(textarea) {
         $('.gi-show-not-empty').show();
         $('.gi-show-empty').hide();
     }
+    resizeTextarea(textarea);
 }
 
 function onGradeInquirySubmitClicked(button) {
@@ -71,7 +105,7 @@ function onGradeInquirySubmitClicked(button) {
     const button_clicked = $(button);
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    localStorage.setItem(getLocalStorageKey('selectedTab'), `.component-${component_id}`);
     const form = $(`#reply-text-form-${component_id}`);
     if (form.data('submitted') === true) {
         return;
@@ -79,6 +113,7 @@ function onGradeInquirySubmitClicked(button) {
 
     // if grader clicks Close Grade Inquiry button with text in text area we want to confirm that they want to close the grade inquiry
     // and ignore their response
+    const draftContentKey = getLocalStorageKey('draftContent');
     const text_area = $(`#reply-text-area-${component_id}`);
     const submit_button_id = button_clicked.attr('id');
     if (submit_button_id && submit_button_id === 'grading-close') {
@@ -88,6 +123,7 @@ function onGradeInquirySubmitClicked(button) {
             }
             else {
                 text_area.val('');
+                localStorage.removeItem(draftContentKey);
             }
         }
     }
@@ -101,7 +137,6 @@ function onGradeInquirySubmitClicked(button) {
 
     // prevent double submission
     form.data('submitted', true);
-    const gc_id = form.children('#gc_id').val();
     $.ajax({
         type: 'POST',
         url: button_clicked.attr('formaction'),
@@ -109,29 +144,10 @@ function onGradeInquirySubmitClicked(button) {
         success: function (response) {
             try {
                 const json = JSON.parse(response);
-                if (json['status'] === 'success') {
-                    const data = json['data'];
 
-                    // inform other open websocket clients
-                    const submitter_id = form.children('#submitter_id').val();
-                    if (data.type === 'new_post') {
-                        newPostRender(gc_id, data.post_id, data.new_post);
-                        text_area.val('');
-                        window.socketClient.send({
-                            type: data.type,
-                            post_id: data.post_id,
-                            submitter_id: submitter_id,
-                            gc_id: gc_id,
-                        });
-                    }
-                    else if (data.type === 'open_grade_inquiry') {
-                        window.socketClient.send({ type: 'toggle_status', submitter_id: submitter_id });
-                        window.location.reload();
-                    }
-                    else if (data.type === 'toggle_status') {
-                        newDiscussionRender(data.new_discussion);
-                        window.socketClient.send({ type: data.type, submitter_id: submitter_id });
-                    }
+                if (json['status'] === 'success') {
+                    text_area.val('');
+                    localStorage.removeItem(draftContentKey);
                 }
                 else {
                     alert(json['message']);
@@ -154,6 +170,9 @@ function initGradingInquirySocketClient() {
         switch (msg.type) {
             case 'new_post':
                 gradeInquiryNewPostHandler(msg.submitter_id, msg.post_id, msg.gc_id);
+                break;
+            case 'open_grade_inquiry':
+                window.location.reload();
                 break;
             case 'toggle_status':
                 gradeInquiryDiscussionHandler(msg.submitter_id);
@@ -187,7 +206,7 @@ function newPostRender(gc_id, post_id, new_post) {
     // eslint-disable-next-line eqeqeq
     if (gc_id != 0) {
     // add new post to all tab
-        const all_inquiries = $('.grade-inquiries').children("[data-component_id='0']");
+        const all_inquiries = $('.grade-inquiries').children('[data-component_id=\'0\']');
         let last_post = all_inquiries.children('.post_box').last();
         $(new_post).insertAfter(last_post).hide().fadeIn('slow');
 
@@ -221,7 +240,7 @@ function newDiscussionRender(discussion) {
     // save the selected component before updating regrade discussion
     const component_selected = $('.btn-selected');
     const component_id = component_selected.length ? component_selected.data('component_id') : 0;
-    localStorage.setItem('selected_tab', `.component-${component_id}`);
+    localStorage.setItem(getLocalStorageKey('selectedTab'), `.component-${component_id}`);
 
     // TA (access grading)
     if ($('#gradeInquiryBoxSection').length === 0) {
@@ -229,6 +248,31 @@ function newDiscussionRender(discussion) {
     }
     // student
     else {
+        // eslint-disable-next-line no-restricted-syntax
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }
+
+function resizeTextarea(textarea) {
+    if (!(textarea instanceof Element)) {
+        return;
+    }
+    textarea.style.height = '100px';
+    const currentScrollHeight = textarea.scrollHeight;
+    const clientHeight = textarea.clientHeight;
+    const scrollTop = textarea.scrollTop;
+    if (scrollTop > 0 || currentScrollHeight > clientHeight) {
+        textarea.style.height = `${currentScrollHeight}px`;
+    }
+    const parentBody = textarea.closest('.markdown-area-body');
+    if (parentBody) {
+        parentBody.style.height = `${textarea.scrollHeight + 32}px`;
+    }
+}
+$(document).ready(() => {
+    document.querySelectorAll('.markdown-area textarea').forEach((textarea) => {
+        resizeTextarea(textarea);
+    });
+    loadDraft();
+    onReady();
+});

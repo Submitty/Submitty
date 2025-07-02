@@ -345,6 +345,31 @@ class FileUtils {
         return $size;
     }
 
+    public static function validateZipFileSize(string $filename): bool {
+        $zip = new \ZipArchive();
+        $res = $zip->open($filename);
+        if ($res !== true) {
+            return false; // not a valid zip file
+        }
+        for ($i = 0; $i < $zip->count(); $i++) {
+            $stream = $zip->getStream($zip->getNameIndex($i));
+            if ($stream === false) {
+                return false;
+            }
+            $size = 0;
+            $max_size = $zip->statIndex($i)['size'];
+            while (!feof($stream)) {
+                $size += strlen(fread($stream, 8192));
+                if ($size > $max_size) {
+                    fclose($stream);
+                    return false; // early exit if size exceeds max size
+                }
+            }
+            fclose($stream);
+        }
+        return true;
+    }
+
     /**
      * @param string $zipname
      * @return bool
@@ -569,14 +594,24 @@ class FileUtils {
         $validator = function ($file) {
             $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
             $name = $file['name'];
+
+            //if the error flag is set for this file, no guarantee tmp_name points to a valid file, exit early
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                return [
+                    'name' => $name,
+                    'type' => null,
+                    'error' => ErrorMessages::uploadErrors($file['error']),
+                    'size' => $file['size'] ?? 0, //this may or may not be set as well
+                    'is_zip' => false,            //unknown at this point also
+                    'success' => false,
+                ];
+            }
+
             $tmp_name = $file['tmp_name'];
 
             $type = mime_content_type($tmp_name);
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $errors[] = ErrorMessages::uploadErrors($file['error']);
-            }
 
             //check if its a zip file
             $is_zip = $type === 'application/zip';
@@ -672,7 +707,7 @@ class FileUtils {
         // Check exists
         $exists = file_exists($path);
         if (!$exists) {
-            $results[] = "'${path}' does not exist.";
+            $results[] = "'{$path}' does not exist.";
             return $results;
         }
 
@@ -681,7 +716,7 @@ class FileUtils {
             $owner_id = fileowner($path);
             $owner_name = posix_getpwuid($owner_id)['name'];
             if ($owner_name !== $expected_owner) {
-                $results[] = "Expected '${path}' to have owner '${expected_owner}' but instead got '${owner_name}'.";
+                $results[] = "Expected '{$path}' to have owner '{$expected_owner}' but instead got '{$owner_name}'.";
             }
         }
 
@@ -690,20 +725,20 @@ class FileUtils {
             $group_id = filegroup($path);
             $group_name = posix_getgrgid($group_id)['name'];
             if ($group_name !== $expected_group) {
-                $results[] = "Expected '${path}' to have group '${expected_group}' but instead got '${group_name}'.";
+                $results[] = "Expected '{$path}' to have group '{$expected_group}' but instead got '{$group_name}'.";
             }
         }
 
         // Check is readable
         $readable = is_readable($path);
         if (!$readable) {
-            $results[] = "'${path}' is not readable.";
+            $results[] = "'{$path}' is not readable.";
         }
 
         // Check is writable
         $writable = is_writable($path);
         if (!$writable) {
-            $results[] = "'${path}' is not writable.";
+            $results[] = "'{$path}' is not writable.";
         }
 
         return $results;
