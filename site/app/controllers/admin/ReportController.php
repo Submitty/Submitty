@@ -1063,7 +1063,8 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Build the gradeables array for the customization JSON, including per-gradeable curves if present.
+     * Build the gradeables array for the customization JSON, including per-gradeable
+     * curves and percent overrides if present.
      *
      * @param RainbowCustomization $customization
      * @return array<int, array<string, array<int, array<string, mixed>>|float|int|string>>

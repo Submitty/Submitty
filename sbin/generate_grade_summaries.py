@@ -74,7 +74,7 @@ def save_and_build_rainbow_grades(semester, course, token):
             ), file=stderr)
             exit(-1)
 
-    # Simulate the entire customization build process
+    # Submit the build process
     select_response = requests.post(
             '{}/api/courses/{}/{}/reports/rainbow_grades_customization/manual_or_gui'.format(
                 base_url, semester, course

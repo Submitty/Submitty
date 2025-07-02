@@ -623,8 +623,7 @@ class RainbowCustomization extends AbstractModel {
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
 
-        $form_json = $form;
-        $form_json = json_decode($form_json);
+        $form_json = json_decode($form);
 
         if (isset($form_json->display_benchmark)) {
             foreach ($form_json->display_benchmark as $benchmark) {
