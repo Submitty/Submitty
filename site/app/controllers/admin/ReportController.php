@@ -1035,6 +1035,7 @@ class ReportController extends AbstractController {
     private function buildGuiCustomizationJson(RainbowCustomization $customization): string {
         $json = [
             'section' => (array) $customization->getSectionsAndLabels(),
+            'omit_section_from_stats' => $customization->getOmittedSections(),
             'display_benchmark' => array_values(array_map(
                 fn($b) => $b['id'],
                 array_filter(
@@ -1056,7 +1057,6 @@ class ReportController extends AbstractController {
             'plagiarism' => $customization->getPlagiarism(),
             'manual_grade' => $customization->getManualGrades(),
             'warning' => $customization->getPerformanceWarnings(),
-            'omit_section_from_stats' => $customization->getOmittedSections(),
         ];
 
         return json_encode($json, JSON_PRETTY_PRINT);
