@@ -6,9 +6,10 @@ use app\controllers\admin\ReportController;
 use app\models\RainbowCustomization;
 use app\libraries\response\JsonResponse;
 use app\models\gradeable\Gradeable;
-use app\libraries\DateUtils;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
+use app\libraries\database\DatabaseQueries;
+use app\libraries\database\AbstractDatabase;
 
 class ReportControllerTester extends BaseUnitTest {
     private $tmp_dir;
@@ -17,22 +18,43 @@ class ReportControllerTester extends BaseUnitTest {
     private $core;
 
     protected function setUp(): void {
-        parent::setUp();
         $this->tmp_dir = sys_get_temp_dir() . '/submitty_test_' . uniqid();
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
         $config = [
             'course_path' => $this->course_path,
-            'semester' => 'f25',
+            'semester' => 'f24',
             'course' => 'sample',
-            'base_url' => 'http://localhost'
+            'base_url' => 'http://localhost',
+            'use_mock_time' => true,
         ];
         $user_config = [
-            'access_admin' => true
+            'access_admin' => true,
+            'user_timezone' => 'America/New_York'
         ];
-        $this->core = $this->createMockCore($config, $user_config);
-        DateUtils::setTimezone(new \DateTimeZone("America/New_York"));
+        $queries = [
+            'getRegistrationSections' => [
+                ['sections_registration_id' => '1'],
+                ['sections_registration_id' => '2'],
+            ]
+        ];
+        $this->core = $this->createMockCore($config, $user_config, $queries);
+
+        // Mock the course database connection to avoid null query errors
+        $mock_db = $this->createMock(AbstractDatabase::class);
+        $mock_db->method('query');
+        $this->core->setCourseDatabase($mock_db);
+
+        $mock_queries = $this->createMockModel(DatabaseQueries::class);
+        $mock_queries->method('getGradeableConfigs')->willReturn([
+            $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title'])
+        ]);
+        $mock_queries->method('getRegistrationSections')->willReturn([
+            ['sections_registration_id' => '1'],
+            ['sections_registration_id' => '2'],
+        ]);
+        $this->core->setQueries($mock_queries);
     }
 
     protected function tearDown(): void {
@@ -139,11 +161,27 @@ class ReportControllerTester extends BaseUnitTest {
         ];
     }
 
+    /**
+     * Helper to create a mock Gradeable object for testing.
+     */
+    private function createMockGradeable($id = 'test', $title = 'Test Gradeable') {
+        $gradeable = $this->createMockModel(Gradeable::class);
+        $gradeable->method('getId')->willReturn($id);
+        $gradeable->method('getTitle')->willReturn($title);
+        $gradeable->method('hasReleaseDate')->willReturn(true);
+        $gradeable->method('getGradeReleasedDate')->willReturn(new \DateTime('2024-08-20 00:00:00-0400'));
+        $gradeable->method('getSubmissionOpenDate')->willReturn(new \DateTime('2024-08-01 00:00:00-0400'));
+        return $gradeable;
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
     public function testSaveGUICustomizationsGuiMode() {
         // No manual customization exists
         $mock_queries = $this->core->getQueries();
         $mock_queries->method('getGradeableConfigs')->willReturn([
-            new Gradeable($this->core, $this->getGradeableDetails('hw1', 'Homework 1'))
+            $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title'])
         ]);
         $controller = new ReportController($this->core);
         $response = $controller->saveGUICustomizations();
@@ -156,6 +194,9 @@ class ReportControllerTester extends BaseUnitTest {
         $this->assertNotEmpty($decoded['gradeables']);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSaveGUICustomizationsManualMode() {
         // Write manual customization and customization.json to match
         $content = $this->getSampleCustomizationJson();
@@ -163,7 +204,7 @@ class ReportControllerTester extends BaseUnitTest {
         $this->writeCustomization($content);
         $mock_queries = $this->core->getQueries();
         $mock_queries->method('getGradeableConfigs')->willReturn([
-            new Gradeable($this->core, $this->getGradeableDetails('hw1', 'Homework 1'))
+            $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title'])
         ]);
         $controller = new ReportController($this->core);
         $response = $controller->saveGUICustomizations();
@@ -172,18 +213,21 @@ class ReportControllerTester extends BaseUnitTest {
         $this->assertStringContainsString('Manual customization', $response->json['message']);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testSaveGUICustomizationsAddGradeable() {
         // Start with one gradeable, then add another
         $mock_queries = $this->core->getQueries();
         $mock_queries->method('getGradeableConfigs')->willReturn([
-            new Gradeable($this->core, $this->getGradeableDetails('hw1', 'Homework 1'))
+            $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title'])
         ]);
         $controller = new ReportController($this->core);
         $controller->saveGUICustomizations();
         // Now add a new gradeable
         $mock_queries->method('getGradeableConfigs')->willReturn([
-            new Gradeable($this->core, $this->getGradeableDetails('hw1', 'Homework 1')),
-            new Gradeable($this->core, $this->getGradeableDetails('hw2', 'Homework 2'))
+            $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title']),
+            $this->createMockGradeable($this->getGradeableDetails('hw2', 'Homework 2')['id'], $this->getGradeableDetails('hw2', 'Homework 2')['title'])
         ]);
         $controller = new ReportController($this->core);
         $controller->saveGUICustomizations();
