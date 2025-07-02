@@ -26,7 +26,7 @@
                 </thead>
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
-                        <tr data-testid="chatroom-item">
+                        <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
                             <td>
                                 <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn" data-testid="edit-chatroom"></a>
                             </td>
@@ -86,7 +86,7 @@
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
                         {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr data-testid="chatroom-item">
+                            <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
                                 <td>
                                     <span class="display-short" title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                         {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}

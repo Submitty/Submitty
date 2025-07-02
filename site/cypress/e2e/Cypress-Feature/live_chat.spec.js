@@ -1,3 +1,5 @@
+import { getApiKey, getCurrentSemester } from '../../support/utils';
+
 const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
 const description1 = 'Test Description';
@@ -327,28 +329,37 @@ describe('Tests for creating, editing and using tests', () => {
         deleteChatroom(title1);
     });
 
-/*
-    TODO: Figure out how to send a POST request to test websockets.
     it('Should test socket functionality', () => {
-        createChatroom(title1, description1, false);
+        let id = NaN;
+        createChatroom(title1, description1, true);
         startChatSession(title1);
-        
-        getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-            cy.url().then((url) =>{
+        getChatroom(title1).then(($chatroom) => {
+            id = Number($chatroom.attr('id'));
+            expect(id).to.be.a('number');
+            cy.visit(['sample', 'chat', id]);
+        });
+
+        // Add the message via a request
+        getApiKey('instructor', 'instructor').then((key) => {
             cy.request({
                 method: 'POST',
-                url: url + '/send',
-                content: 'check',
-                user_id: 'instructor',
-                display_name: 'Quinn+Instructor',
-                role: 'instructor',
-                csrf_token: ''
+                url: `${Cypress.config('baseUrl')}/courses/${getCurrentSemester()}/sample/chat/${id}/send/anonymous`,
+                body: {
+                    content: 'check',
+                    user_id: 'instructor',
+                    display_name: 'Quinn+Instructor',
+                    role: 'instructor',
+                },
+                headers: {
+                    Authorization: key,
+                },
             }).then((response) => {
                 cy.log(response);
+                // Verify a successful response and that WebSocket message handler added the message
+                expect(response.body.status).to.eql('success');
+                checkChatMessage('check', name1);
             });
-            checkChatMessage('check', name1);
         });
     });    
-*/
 
 });
