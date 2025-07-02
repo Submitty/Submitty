@@ -86,7 +86,7 @@
                 <tbody>
                     {% for chatroom in chatrooms %}
                         {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr>
+                            <tr id="{{ chatroom.getId() }}">
                                 <td>
                                     <span class="display-short" title="{{ chatroom.getTitle() }}">
                                         {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
