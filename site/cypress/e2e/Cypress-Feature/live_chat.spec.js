@@ -79,8 +79,8 @@ const deleteChatroom = (title) => {
 const checkChatExists = (title, exists = true) => {
     if (exists) {
         cy.get('[data-testid="chatroom-title"]')
-        .contains(title)
-        .should('exist');
+            .contains(title)
+            .should('exist');
     }
     else {
         cy.get('body').then(($body) => {
@@ -92,7 +92,6 @@ const checkChatExists = (title, exists = true) => {
         });
     }
 };
-
 
 const checkDescription = (title, description) => {
     getChatroom(title).find('[data-testid="chatroom-description"]').then(($el) => {
@@ -360,6 +359,5 @@ describe('Tests for creating, editing and using tests', () => {
                 checkChatMessage('check', name1);
             });
         });
-    });    
-
+    });
 });
