@@ -1013,8 +1013,7 @@ class ReportController extends AbstractController {
      *
      * @return JsonResponse
      */
-    #[Route("/courses/{_semester}/{_course}/reports/save_gui_customizations", methods: ["POST"])]
-    #[Route("/api/courses/{_semester}/{_course}/reports/save_gui_customizations", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/reports/nightly_rainbow_grades_save", methods: ["POST"])]
     public function saveGUICustomizations(): JsonResponse {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -1025,15 +1024,9 @@ class ReportController extends AbstractController {
         }
         // Construct the JSON data for the GUI customization
         $json_data = $this->buildGuiCustomizationJson($customization);
-        $rainbow_grades_dir = FileUtils::joinPaths(
-            $this->core->getConfig()->getCoursePath(),
-            'rainbow_grades'
-        );
+        $_POST['json_string'] = $json_data;
+        $customization->processForm();
         // Persist the changes onto disk
-        $gui_path = FileUtils::joinPaths($rainbow_grades_dir, 'gui_customization.json');
-        $customization_path = FileUtils::joinPaths($rainbow_grades_dir, 'customization.json');
-        file_put_contents($gui_path, $json_data);
-        file_put_contents($customization_path, $json_data);
         return JsonResponse::getSuccessResponse(json_decode($json_data, true));
     }
 
@@ -1046,11 +1039,23 @@ class ReportController extends AbstractController {
     private function buildGuiCustomizationJson(RainbowCustomization $customization): string {
         $json = [
             'section' => (array) $customization->getSectionsAndLabels(),
-            'display_benchmark' => array_map(fn($b) => $b['id'], array_filter($customization->getDisplayBenchmarks(), fn($b) => $b['isUsed'])),
+            'display_benchmark' => array_values(array_map(
+                fn($b) => $b['id'],
+                array_filter(
+                    $customization->getDisplayBenchmarks(),
+                    fn($b) => $b['isUsed'] && isset($b['id']) && is_string($b['id'])
+                )
+            )),
             'messages' => $customization->getMessages(),
-            'display' => array_map(fn($opt) => $opt['id'], array_filter($customization->getDisplay(), fn($opt) => $opt['isUsed'])),
-            'benchmark_percent' => (array) $customization->getBenchmarkPercent(),
-            'final_cutoff' => (array) $customization->getFinalCutoff(),
+            'display' => array_values(array_map(
+                fn($opt) => $opt['id'],
+                array_filter(
+                    $customization->getDisplay(),
+                    fn($opt) => isset($opt['isUsed'], $opt['id']) && $opt['isUsed'] && is_string($opt['id'])
+                )
+            )),
+            'benchmark_percent' => $customization->getBenchmarkPercent(),
+            'final_cutoff' => $customization->getFinalCutoff(),
             'gradeables' => $this->buildGradeablesArray($customization),
             'plagiarism' => $customization->getPlagiarism(),
             'manual_grade' => $customization->getManualGrades(),
@@ -1065,7 +1070,7 @@ class ReportController extends AbstractController {
      * Build the gradeables array for the customization JSON, including per-gradeable curves if present.
      *
      * @param RainbowCustomization $customization
-     * @return array
+     * @return array<int, array<string, array<int, array<string, mixed>>|float|int|string>>
      */
     private function buildGradeablesArray(RainbowCustomization $customization): array {
         $customization_data = $customization->getCustomizationData();
@@ -1086,12 +1091,17 @@ class ReportController extends AbstractController {
                     'id' => $g['id'],
                 ];
                 // Per-gradeable percent override
-                if (!empty($g['override_percent']) && isset($g['percent'])) {
+                if ($g['override_percent'] === true) {
                     $gradeable['percent'] = $g['percent'] / 100.0;
                 }
                 // Per-gradeable curves
                 if (isset($per_gradeable_curves[$bucket][$g['id']])) {
-                    $gradeable['curve'] = $per_gradeable_curves[$bucket][$g['id']];
+                    $gradeable['curve'] = array_values(
+                        array_filter(
+                            $per_gradeable_curves[$bucket][$g['id']],
+                            fn($val) => is_numeric($val) && $val !== ''
+                        )
+                    );
                 }
                 $ids[] = $gradeable;
             }
