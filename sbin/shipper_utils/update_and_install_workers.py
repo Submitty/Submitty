@@ -82,17 +82,22 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     thread_object.add_message(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        get_sysinfo.print_distribution()
+        thread_object.add_message(f"{get_sysinfo.get_distribution()}")
         client = docker.from_env()
+        docker_info = client.info()
+        thread_object.add_message(f"Docker Version: {docker_info['ServerVersion']}")
         try:
-            # List all images
-            image_set = {
-                image_name
-                for image in client.images.list()
-                for image_name in image.attrs["RepoTags"]
-            }
+            # Precompute dicts
+            image_id_to_tags = {}
+            tag_to_image_id = {}
+            for image in client.images.list():
+                tags = image.attrs.get("RepoTags") or []
+                for tag in tags:
+                    tag_to_image_id[tag] = image.id
+                image_id_to_tags.setdefault(image.id, []).extend(tags)
 
-            images_to_remove = set.difference(image_set, images_to_update)
+            image_tags = set(tag_to_image_id.keys())
+            images_to_remove = set.difference(image_tags, images_to_update)
 
             # Prevent removal of system docker containers
             with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
@@ -101,15 +106,19 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
             images_to_remove = set.difference(images_to_remove, set(system_docker_containers))
 
             # Remove images
-            for imageRemoved in images_to_remove:
+            for image_tag_to_remove in images_to_remove:
                 try:
-                    image_id = client.images.get(imageRemoved).id
-                    thread_object.add_message("Removed image " + imageRemoved)
-                except docker.errors.ImageNotFound as e:
-                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {imageRemoved}"))
+                    image_id = tag_to_image_id.get(image_tag_to_remove)
+                    ref_tags = image_id_to_tags.get(image_id, [])
+                    # If the image has multiple tags (aliases), remove by tag; otherwise, remove by ID
+                    if len(ref_tags) > 1:
+                        client.images.remove(image_tag_to_remove)
+                    else:
+                        client.images.remove(image_id)
+                    thread_object.add_message("Removed image " + image_tag_to_remove)
+                except docker.errors.ImageNotFound:
+                    thread_object.add_message(print_red(f"ERROR: Couldn't find image {image_tag_to_remove} ({image_id}) to remove."))
                     continue
-                try:
-                    client.images.remove(image_id, True)
                 except Exception as e:
                     thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}"))
                     traceback.print_exc(file=sys.stderr)
@@ -136,14 +145,11 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                   # normal case
                   success = False
 
-        docker_info = client.info()
-        docker_images_obj = client.images.list()
         #print the details of the image
         get_sysinfo.print_docker_info()
     else:
         commands = list()
         shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
-        commands = list()
         script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
@@ -176,6 +182,11 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
                 
                 lines = stdout.read().decode('utf-8').split("\n")
+
+                for line in lines:
+                    if 'Docker Version:' in line or 'Description:' in line:
+                        thread_object.add_message(line)
+
                 print("\n".join(f"{get_machine_by_ip(host)}: {line}" for line in lines if line))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:

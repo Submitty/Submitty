@@ -79,7 +79,7 @@ class AccessTester extends BaseUnitTest {
         self::assertFalse($this->access->isGradedGradeableInPeerAssignment($g3, $gg3, $user3));
     }
 
-    public function checkGroupPrivilegeProvider() {
+    public static function checkGroupPrivilegeProvider() {
         //This might seem overkill but maybe one day we'll replace these numbers with something
         // fancier and we need to make sure nothing breaks
         return [
@@ -194,5 +194,31 @@ class AccessTester extends BaseUnitTest {
             "dir" => "course_materials"
         ]));
         FileUtils::recursiveRmdir(".access_tester");
+    }
+
+    public function testPollViewPermissions() {
+        $student = $this->createMockModel(User::class);
+        $student->method('getGroup')->willReturn(User::GROUP_STUDENT);
+        $instructor = $this->createMockModel(User::class);
+        $instructor->method('getGroup')->willReturn(User::GROUP_INSTRUCTOR);
+
+        $poll = $this->getMockBuilder(\app\entities\poll\Poll::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $poll->method('isVisible')->willReturn(true);
+
+        // poll.view should be accessible to all groups
+        $this->assertTrue($this->access->canUser($student, 'poll.view', ['poll' => $poll]));
+        $this->assertTrue($this->access->canUser($instructor, 'poll.view', ['poll' => $poll]));
+
+        // poll.view.histogram should be accessible to instructors only
+        $this->assertFalse($this->access->canUser($student, 'poll.view.histogram', ['poll' => $poll]));
+        $this->assertTrue($this->access->canUser($instructor, 'poll.view.histogram', ['poll' => $poll]));
+
+        $poll->method('isHistogramAvailable')->willReturn(true);
+
+        // poll.view.histogram should be accessible to all groups if histogram is available
+        $this->assertTrue($this->access->canUser($student, 'poll.view.histogram', ['poll' => $poll]));
+        $this->assertTrue($this->access->canUser($instructor, 'poll.view.histogram', ['poll' => $poll]));
     }
 }

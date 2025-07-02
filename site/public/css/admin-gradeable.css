@@ -38,7 +38,7 @@ input[type="text"]:invalid {
 
 select {
     margin-top: 7px;
-    width: available;
+    width: 100%;
     min-width: 60px;
 }
 
@@ -79,7 +79,55 @@ select {
 .tab-bar-wrapper {
     border-bottom: 1px solid var(--standard-medium-gray);
     display: flex;
-    height: 35px;
+    min-height: 35px;
+}
+
+.gradeable-status-body {
+    margin-top: 10px;
+}
+
+.bucket-size-container,
+.scatterplot-type-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 10px 0;
+}
+
+.scatterplot-type-container {
+    gap: 8px;
+    margin: 0 0 10px;
+}
+
+.scatterplot-type-container * {
+    width: 100%;
+}
+
+.scatterplot-statistics {
+    margin-top: 10px;
+}
+
+.bucket-size-input {
+    width: auto;
+}
+
+.bucket-size-submit-button {
+    width: 75px;
+    height: 30px;
+    cursor: pointer;
+    padding: 0 10px;
+    caret-color: transparent;
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: var(--actionable-blue) !important;
+}
+
+.missing-data-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 35px;
 }
 
 .peer-button {
@@ -181,6 +229,11 @@ table#grader-history td {
     font-weight: bold;
 }
 
+#gradeable-notifications-message {
+    font-style: italic;
+    font-weight: bold;
+}
+
 #timezone-container {
     float: right;
 }
@@ -216,10 +269,10 @@ div.btn-container {
     margin-top: 10px;
 }
 
-#team-settings-container, #subdirectory-settings-container {
+#team-settings-container,
+#subdirectory-settings-container {
     margin-top: 10px;
 }
-
 
 #rebuild-status-panel {
     display: inline-block;
@@ -327,4 +380,80 @@ body::-webkit-scrollbar-track {
 #custom_marks_warning {
     color: var(--standard-vibrant-red);
     font-style: italic;
+}
+
+.raw-config-info {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.raw-config-info-header {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#gradeable-config-structure {
+    display: none;
+}
+
+.config-folder-view {
+    list-style-type: none;
+    margin-top: 0.5em;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+#gradeable-config-edit-bar .CodeMirror {
+    /* The below instances of !important are identical to those used in gradeable-notebook.css.
+    It appears to be the only way to override the CodeMirror styling */
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: var(--standard-input-background) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border: 1px solid var(--standard-light-gray) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    vertical-align: middle !important;
+    min-height: 500px;
+    overflow: hidden;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+    resize: vertical;
+}
+
+#gradeable-config-edit-bar {
+    display: none;
+}
+
+.not-available-message {
+    display: none;
+    color: var(--standard-vibrant-red);
+}
+
+.warning-banner {
+    display: none;
+    margin: 0 0 1em;
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
+
+.date-warning {
+    display: none;
+}
+
+.numerics-table,
+.checkpoints-table {
+    max-width: 50%;
+}
+
+.text-table {
+    max-width: 25%;
+}
+
+.statistic-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-top: 5px;
+    gap: 5px 15px;
 }

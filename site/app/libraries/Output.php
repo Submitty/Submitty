@@ -9,11 +9,10 @@ use app\models\Breadcrumb;
 use app\views\ErrorView;
 use League\CommonMark\Extension\Autolink\AutolinkExtension;
 use League\CommonMark\Extension\Table\TableExtension;
-use League\CommonMark\Block\Element\FencedCode;
-use League\CommonMark\Block\Element\IndentedCode;
-use League\CommonMark\Inline\Element\Code;
+use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
+use League\CommonMark\Extension\CommonMark\Node\Block\IndentedCode;
+use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\Environment;
 use app\libraries\CustomCodeInlineRenderer;
 use Twig\Extra\Markdown\MarkdownExtension;
 use Twig\Extra\Markdown\MarkdownRuntime;
@@ -100,10 +99,14 @@ class Output {
         return $this->render;
     }
 
+    public function getTwig(): ?\Twig\Environment {
+        return $this->twig;
+    }
+
     public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
-        $debug = $full_load && $this->core->getConfig()->isDebug();
+        $debug = $full_load && $this->core->getConfig()?->isDebug();
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
@@ -152,7 +155,7 @@ HTML;
         }));
 
         if ($full_load) {
-            if ($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()?->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     'site_uploads'
@@ -163,15 +166,15 @@ HTML;
             }));
         }
 
-        $environment = Environment::createCommonMarkEnvironment();
+        $config = ['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10];
+        $converter = new CommonMarkConverter($config);
+        $environment = $converter->getEnvironment();
         $environment->addExtension(new AutolinkExtension());
         $environment->addExtension(new TableExtension());
-        $environment->addBlockRenderer(FencedCode::class, new CustomFencedCodeRenderer());
-        $environment->addBlockRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
-        $environment->addInlineRenderer(Code::class, new CustomCodeInlineRenderer());
-        $environment->mergeConfig([]);
+        $environment->addRenderer(FencedCode::class, new CustomFencedCodeRenderer());
+        $environment->addRenderer(IndentedCode::class, new CustomIndentedCodeRenderer());
+        $environment->addRenderer(Code::class, new CustomCodeInlineRenderer());
 
-        $converter = new CommonMarkConverter(['html_input' => 'escape', 'allow_unsafe_links' => false, 'max_nesting_level' => 10], $environment);
         $this->twig->addExtension(new MarkdownExtension());
 
         $this->twig->addRuntimeLoader(new class ($converter) implements \Twig\RuntimeLoader\RuntimeLoaderInterface {

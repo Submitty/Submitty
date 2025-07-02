@@ -3,13 +3,16 @@
 namespace tests\app\controllers\admin;
 
 use app\controllers\admin\ConfigurationController;
+use app\entities\forum\Category;
 use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\FileUtils;
 use app\libraries\SessionManager;
 use app\libraries\Utils;
 use app\models\Config;
+use app\repositories\forum\CategoryRepository;
 use app\views\admin\ConfigurationView;
+use Doctrine\ORM\EntityManager;
 use tests\utils\NullOutput;
 
 class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
@@ -42,7 +45,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false, "chat_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -111,7 +114,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -196,7 +200,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -288,7 +293,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -415,11 +421,6 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
         $queries
-            ->expects($this->once())
-            ->method('getCategories')
-            ->with()
-            ->willReturn([]);
-        $queries
             ->expects($this->exactly(4))
             ->method('addNewCategory')
             ->with($this->callback(function ($value) {
@@ -448,7 +449,18 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
                         return 3;
                 }
             }));
-
+        $categoryRepository = $this->createMock(CategoryRepository::class);
+        $categoryRepository
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn([]);
+        $entityManager = $this->createMock(EntityManager::class);
+        $entityManager
+            ->method('getRepository')
+            ->with(Category::class)
+            ->willReturn($categoryRepository);
+        $core->setCourseEntityManager($entityManager);
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
         $expected = [
@@ -471,13 +483,20 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $_POST['entry'] = 'true';
         $queries = $this->createMock(DatabaseQueries::class);
         $queries
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
+        $categoryRepository = $this->createMock(CategoryRepository::class);
+        $categoryRepository
             ->expects($this->once())
             ->method('getCategories')
             ->with()
             ->willReturn(['Category']);
-        $queries
-            ->expects($this->exactly(0))
-            ->method('addNewCategory');
+        $entityManager = $this->createMock(EntityManager::class);
+        $entityManager
+            ->method('getRepository')
+            ->with(Category::class)
+            ->willReturn($categoryRepository);
+        $core->setCourseEntityManager($entityManager);
         $core->setQueries($queries);
         $response = $controller->updateConfiguration();
         $expected = [

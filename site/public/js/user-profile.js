@@ -110,7 +110,6 @@ function updateUserPronouns(e) {
     const forumDisplay = $('#pronouns-forum-display');
     pronounsLastVal = pronouns.val();
     if (pronouns.data('current-pronouns') === pronouns.val() && pronouns.data('pronouns-forum-display') === forumDisplay.val()) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update pronouns!');
         $('#edit-pronouns-form').hide();
     }
@@ -121,7 +120,6 @@ function updateUserPronouns(e) {
         data.append('csrf_token', csrfToken);
         data.append('pronouns', pronouns.val());
         data.append('pronouns-forum-display', isForumDisplayChecked);
-        // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_pronouns']);
         $.ajax({
             url,
@@ -134,13 +132,14 @@ function updateUserPronouns(e) {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     const icon = '<i class="fas fa-pencil-alt"></i>';
                     // update the pronouns and display (true or false)
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#pronouns_val').html(`${icon} ${data.pronouns}`);
                     const isForumDisplayCheckedString = String(isForumDisplayChecked);
                     const capitalizedString = isForumDisplayCheckedString.charAt(0).toUpperCase() + isForumDisplayCheckedString.slice(1);
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_pronouns_val').html(`${icon} ${capitalizedString}`);
 
                     // update the data attributes
@@ -148,12 +147,10 @@ function updateUserPronouns(e) {
                     $('#edit-pronouns-form').hide();
                 }
                 else {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(response.message);
                 }
             },
             error: function () {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating pronouns!');
             },
         });
@@ -185,9 +182,11 @@ function updateDisplayNameOrder(e) {
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
                 if (data['display-name-order'] === 'GIVEN_F') {
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_name_order_val').html(`${icon} Given Name First`);
                 }
                 else {
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#display_name_order_val').html(`${icon} Family Name First`);
                 }
 
@@ -210,7 +209,6 @@ function updateUserPreferredNames() {
     const family_name_field = $('#user-familyname-change');
     // If the names are not updated just display an error message and return without making any API call
     if (given_name_field.data('current-name') === given_name_field.val() && family_name_field.data('current-name') === family_name_field.val()) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to update preferred names!');
     }
     else {
@@ -219,7 +217,6 @@ function updateUserPreferredNames() {
         data.append('csrf_token', csrfToken);
         data.append('given_name', given_name_field.val());
         data.append('family_name', family_name_field.val());
-        // eslint-disable-next-line no-undef
         const url = buildUrl(['user_profile', 'change_preferred_names']);
         $.ajax({
             url,
@@ -231,11 +228,12 @@ function updateUserPreferredNames() {
                 const response = JSON.parse(res);
                 if (response.status === 'success') {
                     const { data } = response;
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage(data.message);
                     // update the preferred names
                     const icon = '<i class="fas fa-pencil-alt"></i>';
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#givenname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_given_name));
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#familyname-row .icon').html(`${icon} `).append($('<span>').text(data.displayed_family_name));
                     // update the data attributes
                     given_name_field.data('current-name', data.preferred_given_name);
@@ -243,16 +241,15 @@ function updateUserPreferredNames() {
                     // Update abbreviated name
                     $('#user-last-initial-format-preview').data('options', data.abbreviation_options);
                     $('#user-last-initial-format-preview').text(data.current_abbreviation);
+                    // eslint-disable-next-line no-restricted-syntax
                     $('#last-initial-format-row .icon').html(`${icon} `).append($('<span>').text(data.current_abbreviation));
                 }
                 else {
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage(response.message);
                 }
             },
             error: function () {
                 // display error message
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Some went wrong while updating preferred names!');
             },
         });
@@ -283,6 +280,7 @@ function updateUserLastInitialFormat() {
                 const { data } = response;
                 displaySuccessMessage(data.message);
                 const icon = '<i class="fas fa-pencil-alt"></i>';
+                // eslint-disable-next-line no-restricted-syntax
                 $('#last-initial-format-row .icon').html(`${icon} ${data.new_abbreviated_name}`);
                 $('#user-last-initial-format-change').data('default', data.format);
             }
@@ -303,7 +301,6 @@ function updateUserProfilePhoto() {
     const data = new FormData();
     data.append('csrf_token', $('#user-profile-photo-csrf').val());
     data.append('user_image', $('#user-image-button').prop('files')[0]);
-    // eslint-disable-next-line no-undef
     const url = buildUrl(['user_profile', 'change_profile_photo']);
 
     $.ajax({
@@ -318,7 +315,6 @@ function updateUserProfilePhoto() {
 
             if (response.status === 'success') {
                 const { data } = response;
-                // eslint-disable-next-line no-undef
                 displaySuccessMessage(data.message);
                 let updated_element = '<span class="center-img-tag">N/A</span>';
                 // create a new image node
@@ -329,16 +325,15 @@ function updateUserProfilePhoto() {
                 data.image_flagged_state === 'flagged'
                     ? $('#flagged-message').addClass('show')
                     : $('#flagged-message').removeClass('show');
+                // eslint-disable-next-line no-restricted-syntax
                 $('.user-img-cont').html(updated_element);
             }
             else {
-                // eslint-disable-next-line no-undef
                 displayErrorMessage(response.message);
             }
         },
         error: function () {
             // display error message
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Some went wrong while updating profile photo!');
         },
     });
@@ -352,12 +347,10 @@ function updateUserSecondaryEmail() {
     const second_email = $('#user-secondary-email-change');
     const second_email_notify = $('#user-secondary-email-notify-change');
     if (second_email.data('current-second-email') === second_email.val() && second_email_notify.get(0).checked === (second_email_notify.data('current-second-email-notify') === 1)) {
-        // eslint-disable-next-line no-undef
         displayErrorMessage('No changes detected to secondary email');
     }
     else {
         if (second_email.val() === '' && second_email_notify.get(0).checked) {
-            // eslint-disable-next-line no-undef
             displayErrorMessage('Please disable second email notifications or add a valid second email');
         }
         else {
@@ -366,7 +359,6 @@ function updateUserSecondaryEmail() {
             data.append('csrf_token', csrfToken);
             data.append('secondary_email', second_email.val());
             data.append('secondary_email_notify', second_email_notify.get(0).checked);
-            // eslint-disable-next-line no-undef
             const url = buildUrl(['user_profile', 'change_secondary_email']);
             $.ajax({
                 url,
@@ -378,22 +370,21 @@ function updateUserSecondaryEmail() {
                     const response = JSON.parse(res);
                     if (response.status === 'success') {
                         const { data } = response;
-                        // eslint-disable-next-line no-undef
                         displaySuccessMessage(data.message);
                         const icon = '<i class="fas fa-pencil-alt"></i>';
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#secondary-email-row .icon').html(`${icon} ${data.secondary_email}`);
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#secondary-email-notify-row .icon').html(`${icon} ${data.secondary_email_notify}`);
                         second_email.data('current-second-email', data.secondary_email);
                         second_email_notify.data('current-second-email-notify', data.secondary_email_notify === 'True' ? 1 : 0);
                     }
                     else if (response.status === 'error') {
-                        // eslint-disable-next-line no-undef
                         displayErrorMessage(response.message);
                     }
                 },
                 error: function () {
                     // display error message
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Something went wrong while updating secondary email address!');
                 },
             });
@@ -476,7 +467,6 @@ $(document).ready(() => {
 
         $.getJSON({
             type: 'POST',
-            // eslint-disable-next-line no-undef
             url: buildUrl(['user_profile', 'change_time_zone']),
             data: {
                 // eslint-disable-next-line no-undef
@@ -488,7 +478,6 @@ $(document).ready(() => {
                 if (response.status === 'success') {
                     $('#user_utc_offset').text(response.data.utc_offset);
                     $('#time_zone_selector_label').attr('data-user_time_zone', response.data.user_time_zone_with_offset);
-                    // eslint-disable-next-line no-undef
                     displaySuccessMessage('Time-zone updated successfully!');
 
                     // Check user's current time zone, give a warning message if the user's current time zone differs from systems' time-zone
@@ -500,13 +489,11 @@ $(document).ready(() => {
                 }
                 else {
                     console.log(response);
-                    // eslint-disable-next-line no-undef
                     displayErrorMessage('Time-zone is not updated!');
                 }
             },
             error: function (response) {
                 console.error('Failed to parse response from server!');
-                // eslint-disable-next-line no-undef
                 displayErrorMessage('Failed to parse response from server!');
                 console.log(response);
             },
@@ -515,7 +502,7 @@ $(document).ready(() => {
 
     $('#user-image-button').bind('change', function () {
         if ((this.files[0].size / 1048576) > 5.0) {
-            alert("Selected file's size exceeds 5 MB");
+            alert('Selected file\'s size exceeds 5 MB');
             $('#user-image-button').val('');
         }
     });

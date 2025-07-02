@@ -19,9 +19,9 @@
 .collapse-icon {
     position: absolute;
     transform: translate(50%, -50%);
-    font-size: 1rem;
-    top: 33%;
-    left: 0;
+    font-size: 30px;
+    top: 50%;
+    left: 3%;
 }
 
 .collapse-icon {
@@ -77,23 +77,10 @@
     margin-right: 6px;
 }
 
-.action-btn-cont {
+.row-wrapper {
     display: flex;
-    width: 200px;
-    height: 132px;
-    /* stylelint-disable-next-line declaration-block-no-redundant-longhand-properties */
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 10px auto;
-}
-
-.action-btn-cont button {
-    display: flex;
-    width: 100%;
-    height: 30px;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--standard-medium-gray);
+    flex-direction: column;
+    float: right;
 }
 
 #details-table#details-table td::before {
@@ -101,6 +88,7 @@
     color: var(--text-black);
 }
 
+/* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .expand-icon,
 .collapse-icon {
     display: inline;
@@ -108,6 +96,7 @@
 
 /* stylelint-disable-next-line no-descending-specificity */
 .panel-head-active .collapse-icon,
+/* stylelint-disable-next-line no-descending-specificity */
 .expand-icon {
     display: none;
 }
@@ -159,7 +148,9 @@
         color: var(--default-white);
     }
 
-    #details-table .details-content td:nth-of-type(1) { display: none; }
+    #details-table .details-content td:nth-of-type(1) {
+        display: none;
+    }
 
     /*
         The content for the ':before' will be added through details.js
@@ -236,13 +227,6 @@
         padding: 0 25px;
     }
 
-    .expand-icon,
-    .collapse-icon {
-        font-size: 30px;
-        top: 50%;
-        left: 3%;
-    }
-
     .collapse-icon {
         left: 4%;
     }
@@ -270,17 +254,23 @@
     .details-action-box > * {
         margin-top: 0;
     }
-    
+
     .markers-container {
-        display: grid;
+        display: flex;
         grid-template-columns: 60% 40%;
         gap: 10px;
     }
-    
+
     #details-legend {
         width: unset;
     }
-    
+
+    .column-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
     .action-btn-cont {
         margin: 0;
         width: unset;
@@ -298,17 +288,22 @@
     }
 
     .markers-container {
-        width: 600px;
+        width: 100%;
     }
 
-    #details-table td:nth-of-type(1) { display: table-cell; }
+    #details-table td:nth-of-type(1) {
+        display: table-cell;
+    }
 
     #details-table .details-info-header {
         cursor: pointer;
         position: relative;
     }
 
-    #details-table .details-info-header:not(.panel-head-active) tr:last-of-type > td {
+    #details-table
+        .details-info-header:not(.panel-head-active)
+        tr:last-of-type
+        > td {
         border-bottom: 1px solid var(--standard-hover-light-gray);
     }
 }
@@ -322,4 +317,9 @@
 .gradeable_message li {
     margin-left: 30px;
     margin-bottom: 10px;
+}
+
+.inquiry-only-disabled {
+    /* stylelint-disable-next-line declaration-no-important */
+    display: none !important; /* Overrides .show() and .hide() to avoid withdrawn students without grade inquiries being visibile */
 }

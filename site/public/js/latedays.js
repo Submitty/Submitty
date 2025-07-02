@@ -49,14 +49,12 @@ $(document).ready(() => {
         enableSeconds: false,
         time_24hr: true,
         dateFormat: 'Y-m-d',
-        // eslint-disable-next-line no-unused-vars
         onChange: function (selectedDates, dateStr, instance) {
             calculateLateDays(selectedDates[0]);
         },
     });
 });
 
-// eslint-disable-next-line no-unused-vars
 function updateLateDays(data) {
     const fd = new FormData($('#late-day-form').get(0));
     const selected_csv_option = $('input:radio[name=csv_option]:checked').val();
@@ -78,7 +76,6 @@ function updateLateDays(data) {
     return false;
 }
 
-// eslint-disable-next-line no-unused-vars
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     // datestamp_mmddyy = datestamp.split(" ")[0];
@@ -110,7 +107,7 @@ function updateCacheBuildStatus(url, confirm_message, status) {
     if (confirm) {
         // show rebuild status message
         $('#rebuild-status-panel').show();
-        $('#rebuild-status').html(status);
+        $('#rebuild-status').text(status);
 
         // disable and grey out table and buttons
         $('#calculate-btn').prop('disabled', true).css('opacity', 0.5);
@@ -129,7 +126,6 @@ function updateCacheBuildStatus(url, confirm_message, status) {
     }
 }
 
-// eslint-disable-next-line no-unused-vars
 function calculateLateDayCache() {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['bulk_late_days', 'calculate']);
@@ -138,7 +134,6 @@ function calculateLateDayCache() {
     updateCacheBuildStatus(url, confirm_message, status);
 }
 
-// eslint-disable-next-line no-unused-vars
 function flushLateDayCache() {
     // eslint-disable-next-line no-undef
     const url = buildCourseUrl(['bulk_late_days', 'flush']);
