@@ -49,7 +49,7 @@ const chatroomExists = (title) => {
         }
 
         return cy.get('[data-testid="chatroom-item"]').then(($rows) => {
-            return $rows.filter((index, el) => {
+            return $rows.filter((_, el) => {
                 return Cypress.$(el).find('[data-testid="chatroom-title"]').text().trim() === title;
             }).length > 0;
         });
@@ -82,10 +82,7 @@ const checkChatExists = (title, exists = true) => {
     }
     else {
         cy.get('body').then(($body) => {
-            if ($body.find('[data-testid="chatroom-item"]').length === 0) {
-                expect(true).to.be.true;
-            }
-            else {
+            if ($body.find('[data-testid="chatroom-item"]').length !== 0) {
                 cy.get('[data-testid="chatroom-title"]')
                     .contains(title)
                     .should('not.exist');
@@ -318,7 +315,7 @@ describe('Tests for creating, editing and using tests', () => {
         checkChatMessage(msgText2, name2);
         sendChatMessage(msgText2, 'Anonymous');
         const studentAnon = getAnonName();
-        // expect(instructorAnon === studentAnon); TODO: Make sure that this is never the case
+        // expect(instructorAnon !== studentAnon); TODO: Make sure that this is never the case. Right now chatroom uses a deterministic calculation to choose each anonymous name part from an array, but it doesn't add them to a list of already taken names within the chatroom, which could hypothetically cause an issue where two users get the same anon name.
         cy.get('[data-testid="leave-chat"]').click();
         cy.logout();
         cy.login('instructor');
