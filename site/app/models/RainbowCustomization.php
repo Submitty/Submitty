@@ -613,13 +613,17 @@ class RainbowCustomization extends AbstractModel {
         return $this->RCJSON?->getPerformanceWarnings() ?? [];
     }
 
-    // This function handles processing the incoming post data
-    public function processForm(): void {
+    /**
+     * This function handles processing the incoming post data
+     *
+     * @param string $form The JSON string to process
+     */
+    public function processForm($form): void {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
 
-        $form_json = $_POST['json_string'];
+        $form_json = $form;
         $form_json = json_decode($form_json);
 
         if (isset($form_json->display_benchmark)) {

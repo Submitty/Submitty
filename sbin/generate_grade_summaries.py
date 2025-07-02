@@ -58,8 +58,6 @@ def save_and_build_rainbow_grades(semester, course, token):
         headers={'Authorization': token},
     )
 
-    print(save_response.status_code, save_response.text)
-
     if save_response.status_code == 200 and save_response.json()['status'] == 'success':
         print("Successfully saved Rainbow Grades GUI customization for {}.{}".format(
             semester, course
@@ -67,7 +65,7 @@ def save_and_build_rainbow_grades(semester, course, token):
     else:
         message = save_response.json()['message']
 
-        if message == 'Manual customization is currently in use. GUI customizations cannot be saved.':
+        if message == 'Manual customization is currently in use.':
             # No need to simulate the build process if the manual customization is in use
             return
 

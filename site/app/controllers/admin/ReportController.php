@@ -625,7 +625,7 @@ class ReportController extends AbstractController {
 
         if (isset($_POST["json_string"])) {
             try {
-                $customization->processForm();
+                $customization->processForm($_POST['json_string']);
                 return $this->core->getOutput()->renderJsonSuccess();
             }
             catch (\Exception $e) {
@@ -655,7 +655,7 @@ class ReportController extends AbstractController {
         if (isset($_POST["json_string"])) {
             // Handle user input (the form) being submitted
             try {
-                $customization->processForm();
+                $customization->processForm($_POST['json_string']);
 
                 // Finally, send the requester back the information
                 return $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
@@ -1008,8 +1008,8 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Save the most up-to-date GUI customization to both gui_customization.json and customization.json
-     * Only allowed if manual customization is not in use.
+     * Save the most up-to-date GUI customization file for courses not using
+     * manual customizations.
      *
      * @return JsonResponse
      */
@@ -1018,18 +1018,16 @@ class ReportController extends AbstractController {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
         if ($customization->usesManualCustomization()) {
-            return JsonResponse::getErrorResponse(
-                "Manual customization is currently in use. GUI customizations cannot be saved."
-            );
+            return JsonResponse::getErrorResponse("Manual customization is currently in use.");
         }
         $json_data = $this->buildGuiCustomizationJson($customization);
-        $_POST['json_string'] = $json_data;
-        $customization->processForm();
+        $customization->processForm($json_data);
         return JsonResponse::getSuccessResponse(json_decode($json_data, true));
     }
 
     /**
-     * Build the GUI customization JSON from the current DB state, matching the expected structure.
+     * Build the GUI customization JSON from the combined database and existing
+     * customization file state.
      *
      * @param RainbowCustomization $customization
      * @return string JSON string
@@ -1046,10 +1044,10 @@ class ReportController extends AbstractController {
             )),
             'messages' => $customization->getMessages(),
             'display' => array_values(array_map(
-                fn($opt) => $opt['id'],
+                fn($d) => $d['id'],
                 array_filter(
                     $customization->getDisplay(),
-                    fn($opt) => isset($opt['isUsed'], $opt['id']) && $opt['isUsed'] && is_string($opt['id'])
+                    fn($d) => isset($d['isUsed'], $d['id']) && $d['isUsed'] && is_string($d['id'])
                 )
             )),
             'benchmark_percent' => $customization->getBenchmarkPercent(),
@@ -1077,15 +1075,15 @@ class ReportController extends AbstractController {
         $bucket_percentages = $customization->getBucketPercentages();
         $per_gradeable_curves = $customization->getPerGradeableCurves();
         $used_buckets = $customization->getUsedBuckets();
-
         $gradeables = [];
         foreach ($used_buckets as $bucket) {
             $bucket_gradeables = $customization_data[$bucket] ?? [];
             $ids = [];
             foreach ($bucket_gradeables as $g) {
+                // Base gradeable data
                 $gradeable = [
                     'max' => $g['max_score'],
-                    'release_date' => (float) $g['grade_release_date'],
+                    'release_date' => $g['grade_release_date'],
                     'id' => $g['id'],
                 ];
                 // Per-gradeable percent override
@@ -1097,7 +1095,7 @@ class ReportController extends AbstractController {
                     $gradeable['curve'] = array_values(
                         array_filter(
                             $per_gradeable_curves[$bucket][$g['id']],
-                            fn($val) => $val !== ''
+                            fn($curve) => $curve !== ''
                         )
                     );
                 }
