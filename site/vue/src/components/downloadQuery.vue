@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { RunQueryResults } from '../../../ts/sql-toolbox';
+
 const { data } = defineProps<{
-    data: { [key: string]: number | string | null }[];
+    data: RunQueryResults;
 }>();
 
 function downloadCsv() {
