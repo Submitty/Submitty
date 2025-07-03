@@ -516,6 +516,8 @@ class RainbowCustomization extends AbstractModel {
     /**
      * Get section ids and labels
      *
+     * @param DatabaseQueries|null $db The database queries to use for dependency injection.
+     *
      * If no customization.json file exists then this function will generate defaults
      * by examining what sections are registered in the database.  If a file does exist then sections and labels will
      * be read out of that.  If it turns out that new sections have been registered in the database that
@@ -523,9 +525,9 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return object The object mapping section ids to labels
      */
-    public function getSectionsAndLabels(): object {
+    public function getSectionsAndLabels(?DatabaseQueries $db = null): object {
         // Get sections from db
-        $db = new DatabaseQueries($this->core);
+        $db = $db ?? new DatabaseQueries($this->core);
         $db_sections = $db->getRegistrationSections();
 
         $sections = [];

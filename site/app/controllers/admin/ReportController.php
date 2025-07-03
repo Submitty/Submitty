@@ -1034,7 +1034,7 @@ class ReportController extends AbstractController {
      */
     private function buildGuiCustomizationJson(RainbowCustomization $customization): string {
         $json = [
-            'section' => (array) $customization->getSectionsAndLabels(),
+            'section' => (array) $customization->getSectionsAndLabels($this->core->getQueries()),
             'omit_section_from_stats' => $customization->getOmittedSections(),
             'display_benchmark' => array_values(array_map(
                 fn($b) => $b['id'],
