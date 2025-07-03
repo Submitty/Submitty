@@ -53,7 +53,7 @@ elif [ "$1" == "css-lint" ]; then
     run_css_style
 else
     echo "Unknown test type: $1
-        use phpstan, phpcs, php-lint, js-lint, css-lint
+        use phpstan, phpcs, php-lint, php-unit, js-lint, css-lint
         or help for detail"
 fi
 
