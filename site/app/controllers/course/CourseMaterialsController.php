@@ -635,11 +635,135 @@ class CourseMaterialsController extends AbstractController {
                 $this->addDirs($requested_path, $upload_path, $dirs_to_make);
                 $upload_path = $upload_nested_path;
             }
+
             $count_item = count($status);
             if (isset($uploaded_files[1])) {
-                $result = $this->processUploadedFiles($uploaded_files, $upload_path, $overwrite_all, $count_item, $expand_zip, $details, $dirs_to_make);
-                if ($result instanceof JsonResponse) {
-                    return $result; // Return error response if processing failed
+                $clash_resolution = $this->resolveClashingMaterials($upload_path, $uploaded_files[1]['name'], $overwrite_all);
+                if ($clash_resolution !== true) {
+                    return JsonResponse::getErrorResponse(
+                        'Name clash',
+                        $clash_resolution
+                    );
+                }
+                $index = 0;
+                for ($j = 0; $j < $count_item; $j++) {
+                    if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                        $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
+
+                        if (strlen($dst) > 255) {
+                            return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
+                        }
+
+                        $is_zip_file = false;
+
+                        if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) === "application/zip") {
+                            if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                                return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
+                            }
+                            $is_zip_file = true;
+                        }
+                        //cannot check if there are duplicates inside zip file, will overwrite
+                        //it is convenient for bulk uploads
+                        if ($expand_zip === 'on' && $is_zip_file === true) {
+                            //get the file names inside the zip to write to the JSON file
+
+                            $zip = new \ZipArchive();
+                            $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+
+                            if (!$res) {
+                                return JsonResponse::getErrorResponse("Failed to open zip archive");
+                            }
+
+                            $entries = [];
+                            $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
+                            $disallowed_files = ['.ds_store'];
+                            $double_dot = ["../","..\\","/..","\\.."];
+                            for ($i = 0; $i < $zip->numFiles; $i++) {
+                                $entries[] = $zip->getNameIndex($i);
+                                //check to ensure that entry name doesn't have ..
+                                $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
+                                    if (strpos($entries[count($entries) - 1], $dot) !== false) {
+                                        return true;
+                                    }
+                                    return false;
+                                });
+                                if (count($dot_check) !== 0) {
+                                    return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
+                                }
+                            }
+                            $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
+                                $name = strtolower($entry);
+                                foreach ($disallowed_folders as $folder) {
+                                    if (str_starts_with($folder, $name)) {
+                                        return false;
+                                    }
+                                }
+                                if (substr($name, -1) !== '/') {
+                                    foreach ($disallowed_files as $file) {
+                                        if (basename($name) === $file) {
+                                            return false;
+                                        }
+                                    }
+                                }
+                                return true;
+                            });
+                            $zfiles = array_filter($entries, function ($entry) {
+                                return substr($entry, -1) !== '/';
+                            });
+
+                            $clash_resolution = $this->resolveClashingMaterials($upload_path, $zfiles, $overwrite_all);
+                            if ($clash_resolution !== true) {
+                                return JsonResponse::getErrorResponse(
+                                    'Name clash',
+                                    $clash_resolution
+                                );
+                            }
+
+                            $zip->extractTo($upload_path, $entries);
+
+                            foreach ($zfiles as $zfile) {
+                                $path = FileUtils::joinPaths($upload_path, $zfile);
+                                $details['type'][$index] = CourseMaterial::FILE;
+                                $details['path'][$index] = $path;
+                                if ($dirs_to_make == null) {
+                                    $dirs_to_make = [];
+                                }
+                                $dirs = explode('/', $zfile);
+                                array_pop($dirs);
+                                $j = count($dirs);
+                                $count = count($dirs_to_make);
+                                foreach ($dirs as $dir) {
+                                    for ($i = $count; $i < $j + $count; $i++) {
+                                        if (!isset($dirs_to_make[$i])) {
+                                            $dirs_to_make[$i] = $upload_path . '/' . $dir;
+                                        }
+                                        else {
+                                            $dirs_to_make[$i] .= '/' . $dir;
+                                        }
+                                    }
+                                    $j--;
+                                }
+                                $index++;
+                            }
+                        }
+                        else {
+                            if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
+                                return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
+                            }
+                            else {
+                                $details['type'][$index] = CourseMaterial::FILE;
+                                $details['path'][$index] = $dst;
+                                $index++;
+                            }
+                        }
+                    }
+                    else {
+                        return JsonResponse::getErrorResponse("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.");
+                    }
+                    // Is this really an error we should fail on?
+                    if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
+                        return JsonResponse::getErrorResponse("Failed to delete the uploaded file {$uploaded_files[1]['name'][$j]} from temporary storage.");
+                    }
                 }
             }
         }
@@ -680,138 +804,6 @@ class CourseMaterialsController extends AbstractController {
         }
         $this->core->getCourseEntityManager()->flush();
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
-    }
-
-    private function processUploadedFiles(array $uploaded_files, string $upload_path, bool $overwrite_all, int $count_item, string $expand_zip, array &$details, array &$dirs_to_make): ?JsonResponse {
-        $clash_resolution = $this->resolveClashingMaterials($upload_path, $uploaded_files[1]['name'], $overwrite_all);
-            if ($clash_resolution !== true) {
-                return JsonResponse::getErrorResponse(
-                    'Name clash',
-                    $clash_resolution
-                );
-            }
-            $index = 0;
-            for ($j = 0; $j < $count_item; $j++) {
-                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                    $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-
-                    if (strlen($dst) > 255) {
-                        return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
-                    }
-
-                    $is_zip_file = false;
-
-                    if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) === "application/zip") {
-                        if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                            return JsonResponse::getErrorResponse("You may not use quotes, backslashes, or angle brackets in your filename for files inside " . $uploaded_files[1]['name'][$j] . ".");
-                        }
-                        $is_zip_file = true;
-                    }
-                    //cannot check if there are duplicates inside zip file, will overwrite
-                    //it is convenient for bulk uploads
-                    if ($expand_zip === 'on' && $is_zip_file === true) {
-                        //get the file names inside the zip to write to the JSON file
-
-                        $zip = new \ZipArchive();
-                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
-
-                        if (!$res) {
-                            return JsonResponse::getErrorResponse("Failed to open zip archive");
-                        }
-
-                        $entries = [];
-                        $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
-                        $disallowed_files = ['.ds_store'];
-                        $double_dot = ["../","..\\","/..","\\.."];
-                        for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $entries[] = $zip->getNameIndex($i);
-                            //check to ensure that entry name doesn't have ..
-                            $dot_check = array_filter($double_dot, function ($dot) use ($entries) {
-                                if (strpos($entries[count($entries) - 1], $dot) !== false) {
-                                    return true;
-                                }
-                                return false;
-                            });
-                            if (count($dot_check) !== 0) {
-                                return JsonResponse::getErrorResponse("Uploaded zip archive contains at least one file with invalid name.");
-                            }
-                        }
-                        $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
-                            $name = strtolower($entry);
-                            foreach ($disallowed_folders as $folder) {
-                                if (str_starts_with($folder, $name)) {
-                                    return false;
-                                }
-                            }
-                            if (substr($name, -1) !== '/') {
-                                foreach ($disallowed_files as $file) {
-                                    if (basename($name) === $file) {
-                                        return false;
-                                    }
-                                }
-                            }
-                            return true;
-                        });
-                        $zfiles = array_filter($entries, function ($entry) {
-                            return substr($entry, -1) !== '/';
-                        });
-
-                        $clash_resolution = $this->resolveClashingMaterials($upload_path, $zfiles, $overwrite_all);
-                        if ($clash_resolution !== true) {
-                            return JsonResponse::getErrorResponse(
-                                'Name clash',
-                                $clash_resolution
-                            );
-                        }
-
-                        $zip->extractTo($upload_path, $entries);
-
-                        foreach ($zfiles as $zfile) {
-                            $path = FileUtils::joinPaths($upload_path, $zfile);
-                            $details['type'][$index] = CourseMaterial::FILE;
-                            $details['path'][$index] = $path;
-                            if ($dirs_to_make == null) {
-                                $dirs_to_make = [];
-                            }
-                            $dirs = explode('/', $zfile);
-                            array_pop($dirs);
-                            $j = count($dirs);
-                            $count = count($dirs_to_make);
-                            foreach ($dirs as $dir) {
-                                for ($i = $count; $i < $j + $count; $i++) {
-                                    if (!isset($dirs_to_make[$i])) {
-                                        $dirs_to_make[$i] = $upload_path . '/' . $dir;
-                                    }
-                                    else {
-                                        $dirs_to_make[$i] .= '/' . $dir;
-                                    }
-                                }
-                                $j--;
-                            }
-                            $index++;
-                        }
-                    }
-                    else {
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return JsonResponse::getErrorResponse("Failed to copy uploaded file {$uploaded_files[1]['name'][$j]} to current location.");
-                        }
-                        else {
-                            $details['type'][$index] = CourseMaterial::FILE;
-                            $details['path'][$index] = $dst;
-                            $index++;
-                        }
-                    }
-                }
-                else {
-                    return JsonResponse::getErrorResponse("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.");
-                }
-                // Is this really an error we should fail on?
-                if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                    return JsonResponse::getErrorResponse("Failed to delete the uploaded file {$uploaded_files[1]['name'][$j]} from temporary storage.");
-                }
-            }
-            
-            return null; // Success - no error occurred
     }
 
     private function addDirs(string $requested_path, string $upload_path, array &$dirs_to_make): void {
