@@ -155,10 +155,11 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
     });
 };
 
-const checkChatMessage = (text, sender) => {
-    expect(cy.get('[data-testid="message-container"]').last().text === text);
-    const title = cy.get('[data-testid="sender-name"]').last().text ?? '';
-    expect(title.includes(sender));
+const checkChatMessage = (text, name) => {
+    const message = cy.get('[data-testid="message-container"]').last().text;
+    expect(message === text);
+    const sender = cy.get('[data-testid="sender-name"]').last().text ?? '';
+    expect(sender.includes(name));
 };
 
 const getAnonName = () => {
@@ -245,22 +246,28 @@ describe('Tests for creating, editing and using tests', () => {
     });
 
     it('Should test starting chat sessions and ending chat sessions', () => {
+        // Create Chatroom but don't enable
         createChatroom(title1, description1, false);
         cy.logout();
+        // Login to student account, which shouldn't see disabled chatrooms
         cy.login('student');
         cy.visit(['sample', 'chat']);
+        // Check for chatroom nonexistence
         checkChatExists(title1, false);
         cy.logout();
+        // Go back to instructor, enable chatroom
         cy.login('instructor');
         cy.visit(['sample', 'chat']);
         startChatSession(title1);
         cy.logout();
+        // Go to student, now chatroom should exist
         cy.login('student');
         cy.visit(['sample', 'chat']);
         checkChatExists(title1);
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'chat']);
+        // Now check for chatroom removal after ending session
         endChatSession(title1);
         cy.logout();
         cy.login('student');
@@ -269,11 +276,13 @@ describe('Tests for creating, editing and using tests', () => {
     });
 
     it('Should test starting chat sessions and chatting', () => {
+        // Create Chatroom with chat messages in it
         createChatroom(title1, description1, false);
         startChatSession(title1);
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         sendChatMessage(msgText1, name1);
         sendChatMessage(msgText3, name1);
+        // Check for leave chat button, check for chat state from other user
         cy.get('[data-testid="leave-chat"]').click();
         cy.logout();
         cy.login('student');
@@ -282,9 +291,11 @@ describe('Tests for creating, editing and using tests', () => {
         checkDescription(title1, description1);
         checkHost(title1, name1);
         getChatroom(title1);
+        // Add new messages, check for chat message
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         checkChatMessage(msgText3, name1);
         sendChatMessage(msgText2, name2);
+        // Check for message existence after reload, check that clicking enter sends a message
         cy.reload();
         checkChatMessage(msgText2, name2);
         sendChatMessageEnter(msgText3, name2);
@@ -292,19 +303,23 @@ describe('Tests for creating, editing and using tests', () => {
     });
 
     it('Should test anonymity', () => {
+        // Check for basic anonymous chat functions
         createChatroom(title1, description1, true);
         startChatSession(title1);
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         sendChatMessage(msgText1, 'Anonymous');
         sendChatMessage(msgText3, 'Anonymous');
         const instructorAnon = getAnonName();
+        // Check that messages are still anonymous after leaving and rejoining, with the same anon name as before.
         cy.get('[data-testid="leave-chat"]').click();
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText3, instructorAnon);
+        // Check for this even when rejoining non-anon
         cy.get('[data-testid="leave-chat"]').click();
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         checkChatMessage(msgText3, instructorAnon);
         sendChatMessage(msgText3, name1);
+        // Check that the student sees the non-anon name
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'chat']);
@@ -312,12 +327,14 @@ describe('Tests for creating, editing and using tests', () => {
         checkChatMessage(msgText3, name1);
         sendChatMessage(msgText2, name2);
         cy.get('[data-testid="leave-chat"]').click();
+        // Check for student anonymous function
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText2, name2);
         sendChatMessage(msgText2, 'Anonymous');
         const studentAnon = getAnonName();
-        // expect(instructorAnon !== studentAnon); TODO: Make sure that this is never the case. Right now chatroom uses a deterministic calculation to choose each anonymous name part from an array, but it doesn't add them to a list of already taken names within the chatroom, which could hypothetically cause an issue where two users get the same anon name.
+        // expect(instructorAnon !== studentAnon); TODO: Add all anon names in a chat to a list so that it's impossible to have two equivalent names.
         cy.get('[data-testid="leave-chat"]').click();
+        // Login to instructor, check for correct anonymous name and for anonymous name remaining across logins
         cy.logout();
         cy.login('instructor');
         cy.visit(['sample', 'chat']);
@@ -353,11 +370,11 @@ describe('Tests for creating, editing and using tests', () => {
                     Authorization: key,
                 },
             }).then((response) => {
-                cy.log(response);
-                // Verify a successful response and that WebSocket message handler added the message
+                // Verify a successful response and that the WebSocket message handler added the message
                 expect(response.body.status).to.eql('success');
                 checkChatMessage('check', name1);
             });
         });
+        deleteChatroom(title1);
     });
 });
