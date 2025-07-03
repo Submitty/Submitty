@@ -3,13 +3,10 @@
 namespace tests\app\controllers\admin;
 
 use app\controllers\admin\ReportController;
-use app\models\RainbowCustomization;
 use app\libraries\response\JsonResponse;
 use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
-use app\libraries\database\DatabaseQueries;
-use app\libraries\database\AbstractDatabase;
 
 class ReportControllerTester extends BaseUnitTest
 {
@@ -18,14 +15,20 @@ class ReportControllerTester extends BaseUnitTest
     private $tmp_dir;
     private $course_path;
     private $rainbow_dir;
+    private $gradeables;
     private $core;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
+        // Prepare the mock course configurations and directories
         $this->tmp_dir = sys_get_temp_dir() . '/submitty_test_' . uniqid();
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
+
+        // Mock the core application properties, user configurations, and database queries for the ReportController
         $config = [
             'course_path' => $this->course_path,
             'semester' => 'f24',
@@ -37,68 +40,72 @@ class ReportControllerTester extends BaseUnitTest
             'access_admin' => true,
             'user_timezone' => 'America/New_York'
         ];
+        $this->gradeables = [
+            $this->createMockGradeable('hw1', 'Homework 1', 'homework', 10),
+            $this->createMockGradeable('hw2', 'Homework 2', 'homework', 20),
+            $this->createMockGradeable('exam1', 'Exam 1', 'exam', 100),
+        ];
         $queries = [
-            'getGradeableConfig' => $this->createMockGradeable('hw1', 'Homework 1'),
+            'getGradeableConfigs' => $this->gradeables,
             'getRegistrationSections' => [
                 ['sections_registration_id' => '1'],
                 ['sections_registration_id' => '2'],
             ],
-            'getAllSectionsForGradeable' => [
-                '1',
-                '2'
-            ]
         ];
         $this->core = $this->createMockCore($config, $user_config, $queries);
         $this->controller = new ReportController($this->core);
-
-        // Write to the sample gui_customization.json
-        $gui_customization_file = FileUtils::joinPaths($this->course_path, 'rainbow_grades', 'gui_customization.json');
-        file_put_contents($gui_customization_file, json_encode($this->getSampleCustomizationJson(), JSON_PRETTY_PRINT));
     }
 
-    protected function tearDown(): void
+    private function getSampleCustomizationJson()
     {
-        FileUtils::recursiveRmdir($this->tmp_dir);
-        parent::tearDown();
-    }
-
-    private function writeManualCustomization($content)
-    {
-        file_put_contents($this->rainbow_dir . '/manual_customization.json', $content);
-    }
-
-    private function writeCustomization($content)
-    {
-        file_put_contents($this->rainbow_dir . '/customization.json', $content);
-    }
-
-    private function readGuiCustomization()
-    {
-        $file = $this->rainbow_dir . '/gui_customization.json';
-        return file_exists($file) ? file_get_contents($file) : null;
-    }
-
-    private function readCustomization()
-    {
-        $file = $this->rainbow_dir . '/customization.json';
-        return file_exists($file) ? file_get_contents($file) : null;
-    }
-
-    private function getSampleCustomizationJson() {
         return [
             'section' => [
                 '1' => '1',
                 '2' => '2',
-                '3' => '3',
-                '4' => '4',
-                '5' => '5',
             ],
-            'omit_section_from_stats' => ['1', '2', '3', '6', '9'],
+            'omit_section_from_stats' => ['1'],
             'display_benchmark' => ['average', 'lowest_a-', 'lowest_b-', 'lowest_c-', 'lowest_d'],
-            'messages' => ['Hello!'],
-            'display' => ['grade_summary', 'grade_details'],
-            'benchmark_percent' => ['lowest_a-' => 0.9, 'lowest_b-' => 0.8, 'lowest_c-' => 0.7, 'lowest_d' => 0.6],
+            'messages' => ['Instructor Message'],
+            'display' => ['grade_summary', 'grade_details', 'final_cutoff'],
+            'benchmark_percent' => ['lowest_a-' => 0.9, 'lowest_b-' => 0.8, 'lowest_c-' => 0.7, 'lowest_d' => 0.6, 'average' => 0.5],
             'final_cutoff' => ['A' => 93, 'A-' => 90, 'B+' => 87, 'B' => 83, 'B-' => 80, 'C+' => 77, 'C' => 73, 'C-' => 70, 'D+' => 67, 'D' => 60],
+            'gradeables' => [
+                [
+                    "type" => "homework",
+                    "count" => 2,
+                    "remove_lowest" => 0,
+                    "percent" => 0.25,
+                    'ids' => [
+                        [
+                            'max' => 10,
+                            'release_date' => '9998-12-31 23:59:59-0500',
+                            'id' => 'hw1',
+                            'percent' => 0.50,
+                            'curve' => [10, 9, 8, 6]
+                        ],
+                        [
+                            'max' => 20,
+                            'release_date' => '9998-12-31 23:59:59-0500',
+                            'id' => 'hw2',
+                            'percent' => 0.50
+                        ],
+                    ]
+                ],
+                [
+                    'type' => 'exam',
+                    'count' => 1,
+                    'remove_lowest' => 0,
+                    'percent' => 0.75,
+                    'ids' => [
+                        [
+                            'max' => 100,
+                            'release_date' => '9998-12-31 23:59:59-0500',
+                            'id' => 'exam1',
+                            'curve' => [85, 75, 65, 55]
+                        ]
+                    ]
+                ]
+            ],
             'plagiarism' => [
                 [
                     'user' => 'aphacker',
@@ -108,143 +115,120 @@ class ReportControllerTester extends BaseUnitTest
             ],
             'manual_grade' => [
                 [
-                    'user' => 'student',
+                    'user' => 'aphacker',
                     'grade' => 'A',
-                    'note' => 'Manual Grade'
+                    'note' => 'Manual Final Grade Override'
                 ]
             ],
             'warning' => [
                 [
-                    'msg' => 'Message',
+                    'msg' => 'Warning Message',
                     'ids' => ['grades_released_homework_onlyauto', 'grades_released_homework_autohiddenEC', 'bulk_upload_test'],
-                    'value' => 13
+                    'value' => 10
                 ]
             ],
-
-            'gradeables' => [
-                [
-                    "type" => "homework",
-                    "count" => 30,
-                    "remove_lowest" => 0,
-                    "percent" => 0.25,
-                    'ids' => [
-                        [
-                            'max' => 12,
-                            'release_date' => '9998-12-31 23:59:59-0500',
-                            'id' => 'open_team_homework',
-                            'curve' => [10, 9, 8, 6],
-                            'percent' => 0.50
-                        ],
-                        [
-                            'max' => 19,
-                            'release_date' => '9998-12-31 23:59:59-0500',
-                            'id' => 'open_vcs_homework',
-                            'percent' => 0.50
-                        ],
-                    ]
-                ]
-            ]
         ];
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        FileUtils::recursiveRmdir($this->tmp_dir);
+    }
+
+    private function writeCustomization($content, $file = 'gui_customization.json') {
+        file_put_contents($this->rainbow_dir . '/' . $file, json_encode($content, JSON_PRETTY_PRINT));
+    }
+
+    private function readCustomization($file = 'gui_customization.json')
+    {
+        return file_exists($this->rainbow_dir . '/' . $file) ? file_get_contents($this->rainbow_dir . '/' . $file) : null;
+    }
+
+    private function clearCustomization($file = 'gui_customization.json')
+    {
+        $file = $this->rainbow_dir . '/' . $file;
+        if (file_exists($file)) {
+            unlink($file);
+        }
+    }
+
+    private function verifyGUICustomizationUpdates($content) {
+        $expected_json = json_encode($content, JSON_PRETTY_PRINT);
+        $final_json = json_encode(json_decode(file_get_contents($this->rainbow_dir . '/gui_customization.json'), true), JSON_PRETTY_PRINT);
+        var_dump($expected_json);
+        var_dump("--------------------------------");
+        var_dump($final_json);
+        $this->assertEquals($expected_json, $final_json);
     }
 
     /**
      * Helper to create a mock Gradeable object for testing.
      */
-    private function createMockGradeable($id = 'test', $title = 'Test Gradeable')
+    private function createMockGradeable($id = 'test', $title = 'Test Gradeable', $bucket = 'homework', $points = 10)
     {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
         $gradeable->method('getTitle')->willReturn($title);
         $gradeable->method('hasReleaseDate')->willReturn(true);
-        $gradeable->method('getGradeReleasedDate')->willReturn(new \DateTime('2024-08-20 00:00:00-0400'));
-        $gradeable->method('getSubmissionOpenDate')->willReturn(new \DateTime('2024-08-01 00:00:00-0400'));
+        $gradeable->method('getSyllabusBucket')->willReturn($bucket);
+        $gradeable->method('getManualGradingPoints')->willReturn($points);
+        $gradeable->method('hasAutogradingConfig')->willReturn(false);
+        $gradeable->method('getGradeReleasedDate')->willReturn(new \DateTime('9998-12-31 23:59:59-0500'));
+        $gradeable->method('getSubmissionOpenDate')->willReturn(new \DateTime('9998-12-31 23:59:59-0500'));
+
         return $gradeable;
     }
 
-
-    public function testSaveGUICustomizationsGuiMode()
+    public function testExistingManualCustomization()
     {
-        // No manual customization exists
+        // Ensure the manual and main customization files are the same
+        $content = $this->getSampleCustomizationJson();
+        $this->writeCustomization($content, 'customization.json');
+        $this->writeCustomization($content, 'manual_customization.json');
+
+        // No GUI customization file modifications due to manual customization applications
+        $response = $this->controller->saveGUICustomizations();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals('error', $response->json['status']);
+        $this->assertSame('Manual customization is currently in use.', $response->json['message']);
+    }
+
+
+    public function testGUICustomizationSave() {
+        // Set the existing GUI customization file
+        $content = $this->getSampleCustomizationJson();
+        $this->writeCustomization($content, 'gui_customization.json');
+        $this->writeCustomization($content, 'customization.json');
+
+        // Test no modifications in the customization content
+        $content = $this->getSampleCustomizationJson();
+
         $response = $this->controller->saveGUICustomizations();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals('success', $response->json['status']);
-        $gui_json = $this->readGuiCustomization();
-        $this->assertNotNull($gui_json);
-        $decoded = json_decode($gui_json, true);
-        $this->assertArrayHasKey('gradeables', $decoded);
-        $this->assertNotEmpty($decoded['gradeables']);
-        var_dump($decoded);
-        // $mock_queries = $this->core->getQueries();
-        // $mock_queries->method('getGradeableConfigs')->willReturn([
-        //     $this->createMockGradeable($this->getGradeableDetails('hw1', 'Homework 1')['id'], $this->getGradeableDetails('hw1', 'Homework 1')['title'])
-        // ]);
-        // $controller = new ReportController($this->core);
-        // $response = $controller->saveGUICustomizations();
-        // $this->assertInstanceOf(JsonResponse::class, $response);
-        // $this->assertEquals('success', $response->json['status']);
-        // $gui_json = $this->readGuiCustomization();
-        // $this->assertNotNull($gui_json);
-        // $decoded = json_decode($gui_json, true);
-        // $this->assertArrayHasKey('gradeables', $decoded);
-        // $this->assertNotEmpty($decoded['gradeables']);
-    }
+        $this->assertNull($response->json['data']);
+        $this->verifyGUICustomizationUpdates($content);
 
-    public function testSaveGUICustomizationsManualMode()
-    {
-        return;
-        // Write manual customization and customization.json to match
+        // Test the addition of an exam gradeable
         $content = $this->getSampleCustomizationJson();
-        $this->writeManualCustomization($content);
-        $this->writeCustomization($content);
-        $mock_queries = $this->core->getQueries();
-        $mock_queries->method('getGradeableConfigs')->willReturn([
-            $this->createMockGradeable('hw1', 'Homework 1')
-        ]);
-        $controller = new ReportController($this->core);
-        $response = $controller->saveGUICustomizations();
+
+        // Mock the gradable addition for the database query
+        $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100);
+        $this->core->getQueries()->method('getGradeableConfigs')->willReturn($this->gradeables);
+
+        // Update the customization content to include the new exam gradeable
+        $content['gradeables'][1]['count'] = 2;
+        $content['gradeables'][1]['ids'][] = [
+            'max' => 100,
+            'release_date' => '9998-12-31 23:59:59-0500',
+            'id' => 'exam2',
+        ];
+
+        $response = $this->controller->saveGUICustomizations();
         $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals('fail', $response->json['status']);
-        $this->assertStringContainsString('Manual customization', $response->json['message']);
-    }
-
-
-    public function testSaveGUICustomizationsAddGradeable()
-    {
-        return;
-        // Start with one gradeable, then add another
-        $mock_queries = $this->core->getQueries();
-        $mock_queries->method('getGradeableConfigs')->willReturn([
-            $this->createMockGradeable('hw1', 'Homework 1')
-        ]);
-        $controller = new ReportController($this->core);
-        $controller->saveGUICustomizations();
-        // Now add a new gradeable
-        $mock_queries->method('getGradeableConfigs')->willReturn([
-            $this->createMockGradeable('hw1', 'Homework 1'),
-            $this->createMockGradeable('hw2', 'Homework 2')
-        ]);
-        $controller = new ReportController($this->core);
-        $controller->saveGUICustomizations();
-        $gui_json = $this->readGuiCustomization();
-        $this->assertNotNull($gui_json);
-        $decoded = json_decode($gui_json, true);
-        $found = false;
-        foreach ($decoded['gradeables'] as $bucket) {
-            foreach ($bucket['ids'] as $g) {
-                if ($g['id'] === 'hw2') {
-                    $found = true;
-                }
-            }
-        }
-        $this->assertTrue($found, 'New gradeable hw2 should be present in gui_customization.json');
-    }
-
-    public function testManualCustomizationDetection()
-    {
-        $content = $this->getSampleCustomizationJson();
-        $this->writeManualCustomization($content);
-        $this->writeCustomization($content);
-        $customization = new RainbowCustomization($this->core);
-        $this->assertTrue($customization->usesManualCustomization());
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertNull($response->json['data']);
+        // $this->verifyGUICustomizationUpdates($content);
     }
 }

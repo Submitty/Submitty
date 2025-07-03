@@ -1022,7 +1022,7 @@ class ReportController extends AbstractController {
         }
         $json_data = $this->buildGuiCustomizationJson($customization);
         $customization->processForm($json_data);
-        return JsonResponse::getSuccessResponse(json_decode($json_data, true));
+        return JsonResponse::getSuccessResponse();
     }
 
     /**
@@ -1034,7 +1034,7 @@ class ReportController extends AbstractController {
      */
     private function buildGuiCustomizationJson(RainbowCustomization $customization): string {
         $json = [
-            'section' => (array) $customization->getSectionsAndLabels($this->core->getQueries()),
+            'section' => (array) $customization->getSectionsAndLabels(),
             'omit_section_from_stats' => $customization->getOmittedSections(),
             'display_benchmark' => array_values(array_map(
                 fn($b) => $b['id'],

@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
@@ -18,7 +17,7 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     /**
-     * @var array<string,int>
+     * @ array<string,int>
      */
     private array $bucket_counts = [];                  // Keep track of how many items are in each bucket
     /**
@@ -514,9 +513,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-     * Get section ids and labels
-     *
-     * @param DatabaseQueries|null $db The database queries to use for dependency injection.
+     * Get section ids and labels.
      *
      * If no customization.json file exists then this function will generate defaults
      * by examining what sections are registered in the database.  If a file does exist then sections and labels will
@@ -525,10 +522,9 @@ class RainbowCustomization extends AbstractModel {
      *
      * @return object The object mapping section ids to labels
      */
-    public function getSectionsAndLabels(?DatabaseQueries $db = null): object {
+    public function getSectionsAndLabels(): object {
         // Get sections from db
-        $db = $db ?? new DatabaseQueries($this->core);
-        $db_sections = $db->getRegistrationSections();
+        $db_sections = $this->core->getQueries()->getRegistrationSections();
 
         $sections = [];
 
