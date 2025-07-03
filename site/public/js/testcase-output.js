@@ -174,6 +174,7 @@ function loadTestCaseOutput(div_name, gradeable_id, who_id, index, num_test_case
                 loading_test_cases_xml_http_requests.delete(orig_div_name);
 
                 $(div_name).empty();
+                // eslint-disable-next-line no-restricted-syntax
                 $(div_name).html(response.data);
                 // eslint-disable-next-line no-undef
                 toggleDiv(orig_div_name);

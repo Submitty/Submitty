@@ -58,7 +58,7 @@ function checkForumFileExtensions(post_box_id, files) {
 }
 
 function resetForumFileUploadAfterError(displayPostId) {
-    $(`#file_name${displayPostId}`).html('');
+    $(`#file_name${displayPostId}`).text('');
     document.getElementById(`file_input_label${displayPostId}`).style.border = '2px solid red';
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
@@ -75,6 +75,7 @@ function checkNumFilesForumUpload(input, post_id) {
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
+        // eslint-disable-next-line no-restricted-syntax
         $(`#file_name${displayPostId}`).html(`<p style="display:inline-block;">${input.files.length} files selected.</p>`);
         $('#messages').fadeOut();
         document.getElementById(`file_input_label${displayPostId}`).style.border = '';
@@ -861,7 +862,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines * 14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
+            editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -2018,14 +2019,14 @@ function sortTable(sort_element_index, reverse = false) {
         const reverse_index = headers[i].innerHTML.indexOf(' ↑');
 
         if (index > -1 || reverse_index > -1) {
-            headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+            headers[i].innerHTML = escapeSpecialChars(headers[i].innerHTML.slice(0, -2));
         }
     }
     if (reverse) {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↑`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↑`);
     }
     else {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↓`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↓`);
     }
 }
 
@@ -2386,6 +2387,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
+            // eslint-disable-next-line no-restricted-syntax
             $('#thread-content').html(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');

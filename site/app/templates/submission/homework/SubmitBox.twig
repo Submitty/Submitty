@@ -9,7 +9,11 @@
 {% endif %}
 
 {% if has_overridden_grades %}
-    <div class='content overridden-message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
+    <div class='content overridden-message'>
+        <p>NOTE: The numeric score for this assignment has been overridden by your instructor.</p>
+        {% if rainbow_grades_active %} <p>Your numeric score for the assignment will be visible in <a href={{ rainbow_grades_url }}>Rainbow Grades.</a></p> {% endif %}
+        <p>Please see your instructor if you have questions about your grade for this assignment.</p>
+    </div>
 {% endif %}
 
 <div class="content" id="gradeable-submission-cont">

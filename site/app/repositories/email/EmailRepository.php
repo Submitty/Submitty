@@ -8,7 +8,15 @@ class EmailRepository extends EntityRepository {
     const PAGE_SIZE = 5000;
     const MAX_SUBJECTS_PER_PAGE = 10;
 
-    public function getEmailsByPage(int $page, $semester = null, $course = null): array {
+    /**
+     * Fetches a specific page of email entities, grouped by subject and created date, ordered from newest to oldest.
+     *
+     * @param int $page
+     * @param string|null $semester
+     * @param string|null $course
+     * @return array<int, iterable<int, mixed>>
+     */
+    public function getEmailsByPage(int $page, ?string $semester, ?string $course): array {
         $subjects = $this->getPageSubjects($page, $semester, $course);
         $result = [];
 
@@ -16,7 +24,7 @@ class EmailRepository extends EntityRepository {
             $qb = $this->getEntityManager()->createQueryBuilder();
             $qb ->select('e')
                 ->from('app\entities\email\EmailEntity', 'e');
-            if ($semester && $course) {
+            if ($semester !== null && $course !== null) {
                 $qb->where('e.term = :term')
                     ->andWhere('e.course = :course')
                     ->setParameter('term', $semester)
@@ -33,57 +41,97 @@ class EmailRepository extends EntityRepository {
         return $result;
     }
 
-    public function getPageNum($semester = null, $course = null): int {
-        if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
+    /**
+     * Helper method to fetch all ordered emails for pagination, which contain their subject,
+     * created date, and count.
+     *
+     * @param string|null $semester
+     * @param string|null $course
+     * @return iterable<array<string, mixed>>
+     */
+    private function fetchEmails(?string $semester, ?string $course): iterable {
+        $qb = $this->getEntityManager()->createQueryBuilder();
+        $qb ->select('e.subject, e.created, COUNT(e) AS cnt')
+            ->from('app\entities\email\EmailEntity', 'e');
+        if ($semester !== null && $course !== null) {
+            $qb->where('e.term = :term')
+                ->andWhere('e.course = :course')
+                ->setParameter('term', $semester)
+                ->setParameter('course', $course);
         }
-        else {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
-        }
-        $q = $this->getEntityManager()->createQuery($dql);
-        $page = 1;
-        $count = 0;
-        $subject = 0;
-        $new_page_flag = false;
-        foreach ($q->toIterable() as $email) {
-            $count += $email[1];
-            $subject += 1;
-            if ($count >= self::PAGE_SIZE || $subject > self::MAX_SUBJECTS_PER_PAGE) {
-                $page += 1;
-                $count = 0;
-                $subject = 1;
-            }
-        }
-        return $page;
+        $qb->groupBy('e.subject, e.created')
+            ->orderBy('e.created', 'DESC');
+        return $qb->getQuery()->toIterable();
     }
 
-    private function getPageSubjects($page, $semester = null, $course = null): array {
-        if ($semester != null || $course != null) {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e WHERE e.term = \'' . $semester . '\' AND e.course = \'' . $course . '\' GROUP BY e.subject, e.created ORDER BY e.created DESC';
-        }
-        else {
-            $dql = 'SELECT e.subject, e.created, COUNT(e) FROM app\entities\email\EmailEntity e GROUP BY e.subject, e.created ORDER BY e.created DESC';
-        }
-        $q = $this->getEntityManager()->createQuery($dql);
-        $curr_page = 1;
+    /**
+     * Gets the total number of email pages for pagination.
+     *
+     * @param string|null $semester
+     * @param string|null $course
+     * @return int
+     */
+    public function getPageNum(?string $semester, ?string $course): int {
+        $emails = $this->fetchEmails($semester, $course);
         $count = 0;
         $subject_count = 0;
-        $subjects = [];
-        foreach ($q->toIterable() as $email) {
-            $count += $email[1];
+        $page_count = 1;
+
+        foreach ($emails as $email) {
+            $count += $email['cnt'];
             $subject_count += 1;
-            if ($curr_page > $page) {
-                break;
-            }
-            elseif ($curr_page == $page) {
-                $subjects[] = ["subject" => $email['subject'], "created" => $email['created']->format("Y-m-d H:i:s.u")];
-            }
-            if ($count >= self::PAGE_SIZE || $subject_count == self::MAX_SUBJECTS_PER_PAGE) {
-                $curr_page += 1;
+
+            if ($count >= self::PAGE_SIZE || $subject_count === self::MAX_SUBJECTS_PER_PAGE) {
+                $page_count += 1;
                 $count = 0;
                 $subject_count = 0;
             }
         }
+
+        // If the last increment was for a clean end, roll it back
+        if ($count === 0 && $subject_count === 0 && $page_count > 1) {
+            $page_count -= 1;
+        }
+
+        return $page_count;
+    }
+
+    /**
+     * Helper method to fetch the emails for a specific page for pagination, containing their subject, created date,
+     * and count.
+     *
+     * @param int $page
+     * @param string|null $semester
+     * @param string|null $course
+     * @return array<int, array<string, mixed>>
+     */
+    private function getPageSubjects(int $page, ?string $semester, ?string $course): array {
+        $emails = $this->fetchEmails($semester, $course);
+        $curr_page = 1;
+        $count = 0;
+        $subject_count = 0;
+        $subjects = [];
+        foreach ($emails as $email) {
+            $count += $email['cnt'];
+            $subject_count += 1;
+            if ($curr_page === $page) {
+                array_push($subjects, [
+                    "subject" => $email['subject'],
+                    "created" => $email['created']->format("Y-m-d H:i:s.u"),
+                    "cnt" => $email['cnt']
+                ]);
+            }
+            if ($count >= self::PAGE_SIZE || $subject_count === self::MAX_SUBJECTS_PER_PAGE) {
+                $curr_page += 1;
+                $count = 0;
+                $subject_count = 0;
+
+                if ($curr_page > $page) {
+                    break;
+                }
+            }
+        }
+
         return $subjects;
     }
 }

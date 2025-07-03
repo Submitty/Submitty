@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-################################################################################################
 ### SITE INSTALLER
 #
 # This script is used to install the submitty site code from ${SUBMITTY_REPOSITORY}/site to
@@ -13,7 +11,9 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-################################################################################################
+# This script has two command-line arguments:
+#   Required argument: config=<config dir>.
+#   Optional argument: browscap
 
 set_permissions () {
     local fullpath=$1
@@ -69,12 +69,25 @@ if [ -d "${THIS_DIR}/../../.vagrant" ]; then
     VAGRANT=1
 fi
 
-for arg in "$@"
+# Get arguments
+for cli_arg in "$@"
 do
-    if [ "$arg" == "browscap" ]; then
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
     fi
 done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    exit 1
+fi
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
+source ${SUBMITTY_REPOSITORY:?}/.setup/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+source ${SUBMITTY_REPOSITORY:?}/bin/versions.sh
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
