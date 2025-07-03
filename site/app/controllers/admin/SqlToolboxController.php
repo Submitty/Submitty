@@ -41,10 +41,14 @@ class SqlToolboxController extends AbstractController {
             ];
         }, $sql_tables);
 
+        $user_id = $this->core->getUser()->getId();
+        $user_queries = $this->core->getQueries()->getInstructorQueries($user_id);
+
         return new WebResponse(
             SqlToolboxView::class,
             'showToolbox',
-            $sql_structure_data
+            $sql_structure_data,
+            $user_queries
         );
     }
 
@@ -72,5 +76,35 @@ class SqlToolboxController extends AbstractController {
         finally {
             $this->core->getCourseDB()->rollback();
         }
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries", methods: ["POST"])]
+    public function saveQuery(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $query_name = $_POST['query_name'];
+        $query = $_POST['query'];
+
+        if (trim($query_name) === '' || trim($query) === '') {
+            return JsonResponse::getFailResponse("Query name or query cannot be empty");
+        }
+
+        if (strlen($query_name) > 255) {
+            return JsonResponse::getFailResponse("Query name must be less than 255 characters long: " . $query_name);
+        }
+
+        $saved_row = $this->core->getQueries()->saveInstructorQueries($user_id, $query_name, $query);
+        return JsonResponse::getSuccessResponse($saved_row);
+    }
+
+    #[Route("/courses/{_semester}/{_course}/sql_toolbox/queries/delete", methods: ["POST"])]
+    public function deleteQuery(): JsonResponse {
+        $user_id = $this->core->getUser()->getId();
+        $query_id = $_POST['query_id'];
+
+        $deleted = $this->core->getQueries()->deleteInstructorQueries($user_id, $query_id);
+        if (!$deleted) {
+            return JsonResponse::getFailResponse("Failed to delete the query, it may not exist or you may not be the query owner");
+        }
+        return JsonResponse::getSuccessResponse("Successfully deleted the query");
     }
 }
