@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
@@ -18,7 +17,7 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     /**
-     * @var array<string,int>
+     * @ array<string,int>
      */
     private array $bucket_counts = [];                  // Keep track of how many items are in each bucket
     /**
@@ -277,7 +276,7 @@ class RainbowCustomization extends AbstractModel {
      *
      * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
      *
-     * @return array<string,array<string,array<float>>>
+     * @return array<string,array<string,array<string|float>>>
      */
     public function getPerGradeableCurves(): array {
         $retArray = [];
@@ -514,7 +513,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-     * Get section ids and labels
+     * Get section ids and labels.
      *
      * If no customization.json file exists then this function will generate defaults
      * by examining what sections are registered in the database.  If a file does exist then sections and labels will
@@ -525,8 +524,7 @@ class RainbowCustomization extends AbstractModel {
      */
     public function getSectionsAndLabels(): object {
         // Get sections from db
-        $db = new DatabaseQueries($this->core);
-        $db_sections = $db->getRegistrationSections();
+        $db_sections = $this->core->getQueries()->getRegistrationSections();
 
         $sections = [];
 
@@ -613,14 +611,16 @@ class RainbowCustomization extends AbstractModel {
         return $this->RCJSON?->getPerformanceWarnings() ?? [];
     }
 
-    // This function handles processing the incoming post data
-    public function processForm(): void {
+    /**
+     * This function handles processing the incoming post data
+     *
+     * @param string $form The JSON string to process
+     */
+    public function processForm($form): void {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
-
-        $form_json = $_POST['json_string'];
-        $form_json = json_decode($form_json);
+        $form_json = json_decode($form);
 
         if (isset($form_json->display_benchmark)) {
             foreach ($form_json->display_benchmark as $benchmark) {
@@ -712,5 +712,25 @@ class RainbowCustomization extends AbstractModel {
             'rainbow_grades',
             'manual_customization.json'
         ));
+    }
+
+    /**
+     * Check if the manual customization is being used
+     *
+     * @return bool
+     */
+    public function usesManualCustomization(): bool {
+        if (!$this->doesManualCustomizationExist()) {
+            return false;
+        }
+
+        $customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'customization.json');
+        $manual_customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'manual_customization.json');
+
+        $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
+        $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
+
+        // Manual or GUI JSON contents are copied to the main customization.json file for the build processes
+        return $customization_json === $manual_customization_json;
     }
 }
