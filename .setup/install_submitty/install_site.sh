@@ -68,8 +68,8 @@ if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
 fi
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
-source ${SUBMITTY_REPOSITORY:?}/.setup/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
-source ${SUBMITTY_REPOSITORY:?}/bin/versions.sh
+source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+source ${SUBMITTY_REPOSITORY:?}/.setup/bin/versions.sh
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
