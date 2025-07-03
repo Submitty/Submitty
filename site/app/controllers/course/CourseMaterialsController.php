@@ -24,6 +24,10 @@ use app\libraries\routers\AccessControl;
 const DIR = 2;
 
 class CourseMaterialsController extends AbstractController {
+    private const DEFAULT_FUTURE_RELEASE_DATE = '9999-12-31 23:59:59';
+    private const MAX_PATH_LENGTH = 255;
+    private const DEFAULT_PRIORITY = 0.0;
+
     #[Route("/courses/{_semester}/{_course}/course_materials")]
     public function viewCourseMaterialsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(CourseMaterial::class);
@@ -394,7 +398,10 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getSuccessResponse("Success");
         }
 
-        $this->handleSectionLock($course_material, $_POST);
+        $section_result = $this->handleSectionLock($course_material, $_POST);
+        if (!$section_result['success']) {
+            return JsonResponse::getErrorResponse($section_result['error']);
+        }
         $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
         $course_material->setLastEditBy($this->core->getUser()->getId());
         $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
@@ -422,7 +429,7 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
-                if (($overflow = strlen($new_path) - 255) > 0) {
+                if (($overflow = strlen($new_path) - self::MAX_PATH_LENGTH) > 0) {
                     return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
 
@@ -585,7 +592,7 @@ class CourseMaterialsController extends AbstractController {
             }
             $details['path'][0] = FileUtils::joinPaths($final_path, $file_name);
 
-            if (($overflow = strlen($details['path'][0]) - 255) > 0) {
+            if (($overflow = strlen($details['path'][0]) - self::MAX_PATH_LENGTH) > 0) {
                 return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
             }
 
@@ -650,8 +657,8 @@ class CourseMaterialsController extends AbstractController {
                     if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
-                        if (strlen($dst) > 255) {
-                            return JsonResponse::getErrorResponse("Path cannot have a string length of more than 255 chars.");
+                        if (strlen($dst) > self::MAX_PATH_LENGTH) {
+                            return JsonResponse::getErrorResponse("Path cannot have a string length of more than " . self::MAX_PATH_LENGTH . " chars.");
                         }
 
                         $is_zip_file = false;
@@ -788,9 +795,9 @@ class CourseMaterialsController extends AbstractController {
             $course_material = new CourseMaterial(
                 $value,
                 $details['path'][$key],
-                $date_time = new \DateTime('9999-12-31 23:59:59'),
+                new \DateTime(self::DEFAULT_FUTURE_RELEASE_DATE),
                 false, //hide_from_students
-                0.0, //priority
+                self::DEFAULT_PRIORITY, //priority
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 uploaded_by: $this->core->getUser()->getId(),
@@ -798,7 +805,10 @@ class CourseMaterialsController extends AbstractController {
                 last_edit_by: null,
                 last_edit_date: null
             );
-            $this->handleSectionLock($course_material, $_POST);
+            $section_result = $this->handleSectionLock($course_material, $_POST);
+            if (!$section_result['success']) {
+                return JsonResponse::getErrorResponse($section_result['error']);
+            }
             $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
             $this->core->getCourseEntityManager()->persist($course_material);
         }
@@ -872,15 +882,22 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @param array<string, mixed> $post_data
-     * @return JsonResponse|array{
+     * @return array{
+     * 'success': bool,
+     * 'error': string|null,
      * 'section_lock': bool,
      * 'sections': array<int, string>|null
      * }
      */
-    private function handleSectionLock(CourseMaterial $course_material, array $post_data): JsonResponse|array {
+    private function handleSectionLock(CourseMaterial $course_material, array $post_data): array {
         // Default section lock to false
         $sections_lock = isset($post_data['sections_lock']) && $post_data['sections_lock'] === "true";
-        $details = ['section_lock' => $sections_lock];
+        $result = [
+            'success' => true,
+            'error' => null,
+            'section_lock' => $sections_lock,
+            'sections' => null
+        ];
 
         // Handle sections if section lock is enabled
         if ($sections_lock) {
@@ -890,11 +907,13 @@ class CourseMaterialsController extends AbstractController {
 
                 // If no sections are selected
                 if (empty($sections[0])) {
-                    return JsonResponse::getErrorResponse("Select at least one section");
+                    $result['success'] = false;
+                    $result['error'] = "Select at least one section";
+                    return $result;
                 }
 
-                // Populate details with exploded sections
-                $details['sections'] = $sections;
+                // Populate result with exploded sections
+                $result['sections'] = $sections;
 
                 // Handle section addition and removal
                 $keep_ids = $sections;
@@ -914,17 +933,13 @@ class CourseMaterialsController extends AbstractController {
                     }
                 }
             }
-            else {
-                $details['sections'] = null;
-            }
         }
         else {
             // If section lock is disabled, clear all sections
             $course_material->getSections()->clear();
-            $details['sections'] = null;
         }
 
-        return $details;
+        return $result;
     }
 
     // Helper function to check if a section exists
