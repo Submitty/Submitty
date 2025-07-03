@@ -1,0 +1,80 @@
+{
+    "automatic_grading_total": 1,
+    "nonhidden_automatic_grading_total": 1,
+    "testcases": [
+        {
+            "autochecks": [
+                {
+                    "description": "number of submitted files",
+                    "expected_string": "1 STDOUT_0.txt\n",
+                    "messages": [
+                        {
+                            "message": "Looks like you did not submit exactly one .docx or .pdf file.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2680
+            },
+            "points_awarded": 0,
+            "test_name": "Did you submit exactly one .docx or .pdf file?"
+        },
+        {
+            "autochecks": [
+                {
+                    "description": "Check if the .docx to .pdf conversion was successful",
+                    "messages": [
+                        {
+                            "message": "ERROR: required files not found:  student_converted.pdf",
+                            "type": "failure"
+                        },
+                        {
+                            "message": "We failed to create the .pdf file from your .docx Word document.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2700
+            },
+            "points_awarded": 1,
+            "test_name": "Did you submit a .docx file?  We will convert the .docx to .pdf using LibreOffice."
+        },
+        {
+            "autochecks": [
+                {
+                    "actual_file": "test03/student_submission.pdf",
+                    "description": "Student's uploaded .pdf file",
+                    "results_public": true
+                },
+                {
+                    "description": "number of submitted files",
+                    "expected_string": "1 STDOUT_0.txt\n",
+                    "messages": [
+                        {
+                            "message": "You submitted more than one .pdf and/or .docx file.",
+                            "type": "failure"
+                        }
+                    ]
+                }
+            ],
+            "metrics": {
+                "elapsed_time": 0.10000000149011612,
+                "max_rss_size": 2704
+            },
+            "points_awarded": 0,
+            "test_name": "Alternatively...  Did you submit a .pdf file?"
+        },
+        {
+            "metrics": null,
+            "points_awarded": 0,
+            "test_name": "Submission Limit",
+            "view_testcase": false
+        }
+    ]
+}
