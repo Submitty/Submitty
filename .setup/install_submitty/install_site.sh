@@ -63,10 +63,9 @@ done
 
 if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     echo "ERROR: This script requires a config dir argument"
-    SUBMITTY_CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
     echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    exit 1
 fi
-
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
 source ${SUBMITTY_REPOSITORY:?}/.setup/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
