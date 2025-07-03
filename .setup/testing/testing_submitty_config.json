@@ -1,0 +1,36 @@
+{
+    "submitty_install_dir": "/usr/local/submitty",
+    "submitty_repository": "/usr/local/submitty/GIT_CHECKOUT/Submitty",
+    "submitty_data_dir": "/var/local/submitty",
+    "autograding_log_path": "/var/local/submitty/logs/autograding",
+    "sys_admin_email": "submitty@test.com",
+    "sys_admin_url": "https://test.com",
+    "site_log_path": "/var/local/submitty/logs",
+    "submission_url": "https://submitty.test.com",
+    "vcs_url": "https://gitlab.test.com",
+    "cgi_url": "https://submitty.test.com/cgi-bin",
+    "websocket_port": 8443,
+    "institution_name": "Test University",
+    "institution_homepage": "https://test.com",
+    "timezone": "America/Los_Angeles",
+    "duck_special_effects": false,
+    "worker": false,
+    "user_create_account": false,
+    "user_id_requirements": {
+        "any_user_id": true,
+        "require_name": false,
+        "min_length": 6,
+        "max_length": 25,
+        "name_requirements": {
+            "given_first": false,
+            "given_name": 2,
+            "family_name": 4
+        },
+        "require_email": false,
+        "email_requirements": {
+            "whole_email": false,
+            "whole_prefix": false,
+            "prefix_count": 6
+        }
+    }
+}

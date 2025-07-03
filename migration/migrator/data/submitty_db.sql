@@ -691,6 +691,21 @@ CREATE TABLE public.terms (
 
 
 --
+-- Name: unverified_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unverified_users (
+    user_id character varying(50) NOT NULL,
+    user_givenname character varying NOT NULL,
+    user_password character varying,
+    user_familyname character varying NOT NULL,
+    user_email character varying NOT NULL,
+    verification_code character varying(40),
+    verification_expiration timestamp with time zone DEFAULT now()
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
