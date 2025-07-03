@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-################################################################################################
 ### SITE INSTALLER
 #
 # This script is used to install the submitty site code from ${SUBMITTY_REPOSITORY}/site to
@@ -13,7 +11,9 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-################################################################################################
+# This script has two command-line arguments:
+#   Required argument: config=<config dir>.
+#   Optional argument: browscap
 
 set_permissions () {
     local fullpath=$1
@@ -51,25 +51,25 @@ set_mjs_permission () {
 
 echo -e "Copy the submission website"
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-source ${THIS_DIR}/../bin/versions.sh
-
-# This is run under /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
-PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
-PHP_GROUP=${PHP_USER}
-CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
-CGI_GROUP=${CGI_USER}
-
-for arg in "$@"
+# Get arguments
+for cli_arg in "$@"
 do
-    if [ "$arg" == "browscap" ]; then
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
     fi
 done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    exit 1
+fi
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
+source ${SUBMITTY_REPOSITORY:?}/.setup/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+source ${SUBMITTY_REPOSITORY:?}/bin/versions.sh
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
