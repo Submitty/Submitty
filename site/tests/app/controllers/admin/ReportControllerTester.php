@@ -27,25 +27,29 @@ class ReportControllerTester extends BaseUnitTest
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
+        $this->mockCoreApplication();
+    }
 
+    private function mockCoreApplication($config = null, $user_config = null, $queries = null)
+    {
         // Mock the core application properties, user configurations, and database queries for the ReportController
-        $config = [
+        $config = $config ?? [
             'course_path' => $this->course_path,
-            'semester' => 'f24',
+            'semester' => 'f25',
             'course' => 'sample',
             'base_url' => 'http://localhost',
             'use_mock_time' => true,
         ];
-        $user_config = [
+        $user_config = $user_config ?? [
             'access_admin' => true,
             'user_timezone' => 'America/New_York'
         ];
-        $this->gradeables = [
+        $this->gradeables = $queries['getGradeableConfigs'] ?? [
             $this->createMockGradeable('hw1', 'Homework 1', 'homework', 10),
             $this->createMockGradeable('hw2', 'Homework 2', 'homework', 20),
             $this->createMockGradeable('exam1', 'Exam 1', 'exam', 100),
         ];
-        $queries = [
+        $queries = $queries ?? [
             'getGradeableConfigs' => $this->gradeables,
             'getRegistrationSections' => [
                 ['sections_registration_id' => '1'],
@@ -136,13 +140,14 @@ class ReportControllerTester extends BaseUnitTest
         FileUtils::recursiveRmdir($this->tmp_dir);
     }
 
-    private function writeCustomization($content, $file = 'gui_customization.json') {
+    private function writeCustomization($content, $file = 'gui_customization.json')
+    {
         file_put_contents($this->rainbow_dir . '/' . $file, json_encode($content, JSON_PRETTY_PRINT));
     }
 
-    private function readCustomization($file = 'gui_customization.json')
+    private function fetchCustomization($file = 'gui_customization.json')
     {
-        return file_exists($this->rainbow_dir . '/' . $file) ? file_get_contents($this->rainbow_dir . '/' . $file) : null;
+        return file_exists($this->rainbow_dir . '/' . $file) ? json_encode(json_decode(file_get_contents($this->rainbow_dir . '/' . $file), true), JSON_PRETTY_PRINT) : [];
     }
 
     private function clearCustomization($file = 'gui_customization.json')
@@ -153,12 +158,10 @@ class ReportControllerTester extends BaseUnitTest
         }
     }
 
-    private function verifyGUICustomizationUpdates($content) {
+    private function verifyGUICustomizationUpdates($content)
+    {
         $expected_json = json_encode($content, JSON_PRETTY_PRINT);
-        $final_json = json_encode(json_decode(file_get_contents($this->rainbow_dir . '/gui_customization.json'), true), JSON_PRETTY_PRINT);
-        var_dump($expected_json);
-        var_dump("--------------------------------");
-        var_dump($final_json);
+        $final_json = $this->fetchCustomization('gui_customization.json');
         $this->assertEquals($expected_json, $final_json);
     }
 
@@ -185,7 +188,7 @@ class ReportControllerTester extends BaseUnitTest
         // Ensure the manual and main customization files are the same
         $content = $this->getSampleCustomizationJson();
         $this->writeCustomization($content, 'customization.json');
-        $this->writeCustomization($content, 'manual_customization.json');
+        $this->writeCustomization($content, 'manual_customization.json');;
 
         // No GUI customization file modifications due to manual customization applications
         $response = $this->controller->saveGUICustomizations();
@@ -195,7 +198,8 @@ class ReportControllerTester extends BaseUnitTest
     }
 
 
-    public function testGUICustomizationSave() {
+    public function testGUICustomizationSave()
+    {
         // Set the existing GUI customization file
         $content = $this->getSampleCustomizationJson();
         $this->writeCustomization($content, 'gui_customization.json');
@@ -215,7 +219,7 @@ class ReportControllerTester extends BaseUnitTest
 
         // Mock the gradable addition for the database query
         $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100);
-        $this->core->getQueries()->method('getGradeableConfigs')->willReturn($this->gradeables);
+        $this->mockCoreApplication([], [], ['getGradeableConfigs' => $this->gradeables]);
 
         // Update the customization content to include the new exam gradeable
         $content['gradeables'][1]['count'] = 2;
@@ -229,6 +233,6 @@ class ReportControllerTester extends BaseUnitTest
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals('success', $response->json['status']);
         $this->assertNull($response->json['data']);
-        // $this->verifyGUICustomizationUpdates($content);
+        $this->verifyGUICustomizationUpdates($content);
     }
 }
