@@ -168,7 +168,7 @@ class ReportControllerTester extends BaseUnitTest
     /**
      * Helper to create a mock Gradeable object for testing.
      */
-    private function createMockGradeable($id = 'test', $title = 'Test Gradeable', $bucket = 'homework', $points = 10)
+    private function createMockGradeable($id = 'test', $title = 'Test Gradeable', $bucket = 'homework', $points = 10, $date = '9998-12-31 23:59:59-0500')
     {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
@@ -177,9 +177,8 @@ class ReportControllerTester extends BaseUnitTest
         $gradeable->method('getSyllabusBucket')->willReturn($bucket);
         $gradeable->method('getManualGradingPoints')->willReturn($points);
         $gradeable->method('hasAutogradingConfig')->willReturn(false);
-        $gradeable->method('getGradeReleasedDate')->willReturn(new \DateTime('9998-12-31 23:59:59-0500'));
-        $gradeable->method('getSubmissionOpenDate')->willReturn(new \DateTime('9998-12-31 23:59:59-0500'));
-
+        $gradeable->method('getGradeReleasedDate')->willReturn(new \DateTime($date));
+        $gradeable->method('getSubmissionOpenDate')->willReturn(new \DateTime($date));
         return $gradeable;
     }
 
@@ -219,7 +218,13 @@ class ReportControllerTester extends BaseUnitTest
 
         // Mock the gradable addition for the database query
         $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100);
-        $this->mockCoreApplication([], [], ['getGradeableConfigs' => $this->gradeables]);
+        $this->mockCoreApplication(null, null, [
+            'getGradeableConfigs' => $this->gradeables,
+            'getRegistrationSections' => [
+                ['sections_registration_id' => '1'],
+                ['sections_registration_id' => '2'],
+            ],
+        ]);
 
         // Update the customization content to include the new exam gradeable
         $content['gradeables'][1]['count'] = 2;
@@ -234,5 +239,26 @@ class ReportControllerTester extends BaseUnitTest
         $this->assertEquals('success', $response->json['status']);
         $this->assertNull($response->json['data']);
         $this->verifyGUICustomizationUpdates($content);
+
+        // Test the update of the release date of the exam gradeable
+        array_pop($this->gradeables); // Remove the new gradeable
+        $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100, '2025-01-01 23:59:59-0500');
+        $this->mockCoreApplication(null, null, [
+            'getGradeableConfigs' => $this->gradeables,
+            'getRegistrationSections' => [
+                ['sections_registration_id' => '1'],
+                ['sections_registration_id' => '2'],
+            ],
+        ]);
+        $content['gradeables'][1]['ids'][1]['release_date'] = '2025-01-01 23:59:59-0500';
+        $response = $this->controller->saveGUICustomizations();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals('success', $response->json['status']);
+        $this->assertNull($response->json['data']);
+        $this->verifyGUICustomizationUpdates($content);
+
+        // TODO: test removal of a gradeable
+
+        // TODO: test the swapping of a gradeable bucket with proper change in syllabus bucket counts
     }
 }
