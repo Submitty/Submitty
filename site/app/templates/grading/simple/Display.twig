@@ -68,12 +68,17 @@
                 <br />
             {% endif %}
 
-            {% if action == 'lab' and core.getUser().accessFullGrading() %}
-                <label for="show-graders" class="column-wrapper">Show Graders
-                    <input type="checkbox" id="show-graders">
-                </label>
-                <label for="show-dates" class="column-wrapper">Show Dates Graded
-                    <input type="checkbox" id="show-dates">
+            {% if core.getUser().accessFullGrading() %}
+                {% if action == 'lab' %}
+                    <label for="show-graders" class="column-wrapper">Show Graders
+                        <input type="checkbox" id="show-graders">
+                    </label>
+                    <label for="show-dates" class="column-wrapper">Show Dates Graded
+                        <input type="checkbox" id="show-dates">
+                    </label>
+                {% endif %}
+                <label for="filter-withdrawn" class="column-wrapper">Hide Withdrawn Students
+                    <input type="checkbox" id="filter-withdrawn" onchange="updateFilterWithdrawn()">
                 </label>
             {% endif %}
         </div>
@@ -211,6 +216,8 @@
         {% endif %}
     </table>
     <script>
+        const full_grader_access = {{ core.getUser().accessFullGrading() ? 'true' : 'false' }};
+
         $(function() {
             setupSimpleGrading("{{ action }}");
         });
@@ -220,6 +227,11 @@
 {# Render one student's row in the table #}
 {% macro render_row(action, gradeable, section_id, grade, index, components_numeric, anon_ids) %}
     <tr id="row-{{ section_id }}-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{ grade.getSubmitter().getId() }}" data-anon="{{ anon_ids[grade.getSubmitter().getId()] }}" data-row="{{ index }}"
+        {% if grade.getSubmitter().getUser().getRegistration_type() == "withdrawn" %}
+            data-student="simple-grade-withdrawn"
+        {% else %}
+            data-student="simple-grade-active"
+        {% endif %}
         {% if not grade.getSubmitter().isTeam() and grade.getSubmitter().getUser().accessGrading() %}
             class="highlighted-row"
         {% endif %}
@@ -249,7 +261,7 @@
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade is not null ? ta_grade.getGradedComponent(component) : null %}
             <td
-                class="cell-grade"
+                class="cell-grade {{ component_grade is not null ? component_grade.getScore() == 1.0 ? "simple-full-credit" : "simple-half-credit" : "" }}"
                 id="cell-{{ section_id }}-{{ index }}-{{ loop.index0 }}"
                 tabindex="0"
                 data-id="{{ component.getId() }}"
@@ -257,11 +269,6 @@
                 data-grader="{{ component_grade.getGrader().getId() | default('') }}"
                 {% if component_grade is not null and component_grade.getGradeTime() != null %}
                     data-grade-time="{{ component_grade.getGradeTime()|date("Y-m-d H:i:s") }}"
-                {% endif %}
-                {% if component_grade is not null and component_grade.getScore() == 1.0 %}
-                    style="background-color: #149bdf;"
-                {% elseif component_grade is not null and component_grade.getScore() == 0.5 %}
-                    style="background-color: #88d0f4;"
                 {% endif %}
             >
                 {% if core.getUser().accessFullGrading() %}

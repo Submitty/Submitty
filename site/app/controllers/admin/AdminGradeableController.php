@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\libraries\CodeMirrorUtils;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
@@ -382,7 +383,9 @@ class AdminGradeableController extends AbstractController {
             'vcs_partial_path' => '',
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
+            'csrf_token' => $this->core->getCsrfToken(),
+            'notifications_sent' => 0,
+            'notifications_pending' => 0
         ]);
     }
 
@@ -520,6 +523,7 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         }
+        $config_files = FileUtils::getAllFiles($gradeable->getAutogradingConfigPath());
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
@@ -544,6 +548,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        CodeMirrorUtils::loadDefaultDependencies($this->core);
         $this->core->getOutput()->addSelect2WidgetCSSAndJs();
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
@@ -586,6 +591,7 @@ class AdminGradeableController extends AbstractController {
             'isDiscussionPanel' => $gradeable->isDiscussionBased(),
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
+            'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
@@ -603,7 +609,10 @@ class AdminGradeableController extends AbstractController {
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
             'has_custom_marks' => $hasCustomMarks,
             'is_bulk_upload' => $gradeable->isBulkUpload(),
-            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary()
+            'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'config_files' => $config_files,
+            'notifications_sent' => $gradeable->getNotificationsSent(),
+            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
@@ -1469,7 +1478,8 @@ class AdminGradeableController extends AbstractController {
         $numeric_properties = [
             'precision',
             'grader_assignment_method',
-            'depends_on_points'
+            'depends_on_points',
+            'notifications_sent'
         ];
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
@@ -1571,6 +1581,10 @@ class AdminGradeableController extends AbstractController {
 
             if ($prop === 'grade_inquiry_per_component_allowed' && $post_val === true && !$gradeable->isGradeInquiryPerComponentAllowed()) {
                 $this->core->getQueries()->revertInquiryComponentId($gradeable);
+            }
+
+            if ($prop === 'notifications_sent' && $post_val === "0" && $gradeable->getNotificationsSent() > 0) {
+                $this->core->getQueries()->resetGradeableNotifications($gradeable);
             }
 
             if ($prop === 'syllabus_bucket' && !in_array($post_val, self::syllabus_buckets, true)) {
@@ -1778,12 +1792,15 @@ class AdminGradeableController extends AbstractController {
                 $logs = $this->getBuildLogs($gradeable_id);
 
                 $needle = 'The submitty configuration validator detected the above error in your config.';
-                $haystack = $logs->json['data'][0];
+                $haystack = $logs->json['data'][0] ?? '';
 
                 if (str_contains($haystack, 'MAKE ERROR')) {
                     $status = false;
                 }
                 elseif (str_contains($haystack, $needle)) {
+                    $status = 'warnings';
+                }
+                elseif (str_contains($haystack, 'WARNING:')) {
                     $status = 'warnings';
                 }
             }
@@ -1982,5 +1999,75 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+
+    /**
+     * Loads config info for a gradeable to allow editing
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/load", methods: ["POST"])]
+    public function loadConfigEditor(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to load content.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $config_content = file_get_contents(FileUtils::joinPaths($file_path));
+        $output = [];
+        $output["config_content"] = $config_content;
+        $this->core->getOutput()->renderJsonSuccess($output);
+    }
+
+    /**
+     * Saves config info from a gradeable edit
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/save", methods: ["POST"])]
+    public function saveConfigEdit(): void {
+        $gradeable = $this->tryGetGradeable($_POST['gradeable_id']);
+        if ($gradeable === false) {
+            $this->core->getOutput()->renderJsonFail("Invalid gradeable");
+            return;
+        }
+
+        if (!$gradeable->isUsingUploadedConfig()) {
+            $this->core->getOutput()->renderJsonFail("You may only save changes to uploaded autograding configurations for the current course and semester.");
+            return;
+        }
+
+        if (!$this->core->getAccess()->canI("grading.electronic.load_config", ["gradeable" => $gradeable])) {
+            $this->core->getOutput()->renderJsonFail("Insufficient permissions to save changes.");
+            return;
+        }
+
+        $file_path = $_POST['file_path'];
+        if (!FileUtils::validPath($file_path) || !str_starts_with($file_path, $gradeable->getAutogradingConfigPath())) {
+            $this->core->getOutput()->renderJsonFail("Invalid file path");
+            return;
+        }
+
+        $write_success = FileUtils::writeFile($file_path, $_POST['write_content']);
+        if (!$write_success) {
+            $this->core->getOutput()->renderJsonFail("An error occurred writing the file.");
+            return;
+        }
+
+        $result = $this->enqueueBuild($gradeable);
+        if ($result !== null) {
+            $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+        }
+
+        $this->core->getOutput()->renderJsonSuccess();
     }
 }
