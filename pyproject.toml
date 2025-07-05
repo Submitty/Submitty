@@ -1,0 +1,41 @@
+[tool.ruff]
+line-length = 100
+extend-ignore = ["E203", "E501", "E704"]
+exclude = [
+    ".git",
+    ".setup/bin/code_watcher.py",
+    ".setup/bin/init_auto_rainbow.py",
+    ".setup/bin/input_forum_data.py",
+    ".setup/bin/reset_system.py",
+    ".setup/bin/reupload_generate_csv.py",
+    ".setup/bin/reupload_old_assignments.py",
+    ".setup/bin/sample_courses/models/course/course_create_gradeables.py",
+    ".setup/bin/track_git_version.py",
+    ".setup/CONFIGURE_SUBMITTY.py",
+    ".setup/update_database.py",
+    "bin/extract_notes_page.py",
+    "bin/generate_repos.py",
+    "bin/left_right_parse.py",
+    "bin/make_assignments_txt_file.py",
+    "bin/make_generated_output.py",
+    "bin/regrade.py",
+    "grading/python/submitty_router.py",
+    "grading/json_syntax_checker.py",
+    "migration/migrator/migrations",
+    "more_autograding_examples",
+    "ParseLogFiles",
+    "sample_files",
+    "sbin/shipper_utils/systemctl_wrapper.py",
+    "sbin/shipper_utils/update_and_install_workers.py",
+    "sbin/anonymize_autograding_logs.py",
+    "sbin/build_config_upload.py",
+    "sbin/check_everything.py",
+    "sbin/compare_reuploads.py",
+    "sbin/count_autograding_logs.py",
+    "sbin/untrusted_canary.py",
+    "tests",
+]
+[tool.ruff.per-file-ignores]
+".github/workflows/pr_title_tester.py" = ["E501", "W605"]
+"sbin/submitty_daemon_jobs/submitty_jobs/jobs.py" = ["E501"]
+"autograder/autograder/autograding_utils.py" = ["E501", "F841"]
