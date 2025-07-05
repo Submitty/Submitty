@@ -185,7 +185,7 @@ ignore = [
     "I0011",    # wrong-import-order
     "PLR0912",  # too-many-branches
 ]
-]
+
 [tool.ruff.per-file-ignores]
 ".github/workflows/pr_title_tester.py" = ["E501", "W605"]
 "sbin/submitty_daemon_jobs/submitty_jobs/jobs.py" = ["E501"]
