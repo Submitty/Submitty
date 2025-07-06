@@ -180,6 +180,7 @@ ignore = [
     "PLR0914",  # too-many-locals
     # "PLR0903",  # too-few-public-methods
     "D100",    # missing-module-docstring
+    "D104",    # missing-method-docstring
     "PLW1514",   # unspecified-encoding
     "D103",    # missing-function-docstring
     "I001",    # wrong-import-order
