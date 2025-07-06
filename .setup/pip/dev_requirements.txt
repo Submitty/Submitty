@@ -1,4 +1,4 @@
 # Development Requirements
 
 # Linter and formatter
-ruff==0.4.8
+ruff
