@@ -1,4 +1,5 @@
 # Development Requirements
 
-# Linter and formatter
+# Linter and formatter to be run with pre-commit
 ruff
+pre-commit
