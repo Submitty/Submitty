@@ -182,7 +182,7 @@ ignore = [
     "C0114",    # missing-module-docstring
     "RUF100",   # unspecified-encoding
     "C0116",    # missing-function-docstring
-    "I0011",    # wrong-import-order
+    "I001",    # wrong-import-order
     "PLR0912",  # too-many-branches
 ]
 
