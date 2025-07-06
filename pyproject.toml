@@ -178,7 +178,7 @@ select = ["ALL"]
 ignore = [
     "PLR0913",  # too-many-arguments
     "PLR0914",  # too-many-locals
-    "PLR0205",  # too-few-public-methods
+    "PLR0903",  # too-few-public-methods
     "C0114",    # missing-module-docstring
     "RUF100",   # unspecified-encoding
     "C0116",    # missing-function-docstring
