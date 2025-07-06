@@ -1,6 +1,6 @@
 [tool.ruff]
 line-length = 100
-extend-ignore = ["E203", "E501", "E704"]
+extend-ignore = ["E203", "E501"]
 exclude = [
     ".git",
     ".setup/bin/code_watcher.py",
