@@ -232,10 +232,8 @@ jobs:
               ${{ runner.os }}-${{ github.job }}-pip-
       - name: Install python libraries
         run: python3 -m pip install -r .setup/pip/dev_requirements.txt
-      - name: Run ruff linter
-        run: python3 -m ruff check .
-      - name: Run ruff formatter
-        run: python3 -m ruff format --check .
+      - name: Run pre-commit
+        run: pre-commit run --all-files
 
   python-unit:
     name: Python Unit
