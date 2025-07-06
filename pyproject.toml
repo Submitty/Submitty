@@ -179,9 +179,9 @@ ignore = [
     "PLR0913",  # too-many-arguments
     "PLR0914",  # too-many-locals
     # "PLR0903",  # too-few-public-methods
-    "DOC501",    # missing-module-docstring
+    "D100",    # missing-module-docstring
     "PLW1514",   # unspecified-encoding
-    # "C0116",    # missing-function-docstring
+    "D103",    # missing-function-docstring
     "I001",    # wrong-import-order
     "PLR0912",  # too-many-branches
 ]
