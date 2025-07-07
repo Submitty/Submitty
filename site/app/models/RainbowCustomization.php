@@ -141,11 +141,7 @@ class RainbowCustomization extends AbstractModel {
                 $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
                     $removed = !isset($gradeable_buckets[$g['id']]);
                     $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
-                    if ($removed || $swapped) {
-                        return false;
-                    }
-
-                    return true;
+                    return !$removed && !$swapped;
                 }));
 
                 if ($json_bucket->count > $this->bucket_counts[$bucket]) {
@@ -522,7 +518,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     /**
-     * Get section ids and labels.
+     * Get section ids and labels
      *
      * If no customization.json file exists then this function will generate defaults
      * by examining what sections are registered in the database.  If a file does exist then sections and labels will

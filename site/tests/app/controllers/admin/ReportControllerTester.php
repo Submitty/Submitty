@@ -10,6 +10,7 @@ use app\libraries\FileUtils;
 
 class ReportControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
+
     private $tmp_dir;
     private $controller;
     private $course_path;
@@ -138,13 +139,6 @@ class ReportControllerTester extends BaseUnitTest {
         return file_exists($this->rainbow_dir . '/' . $file) ? json_decode(file_get_contents($this->rainbow_dir . '/' . $file), true) : [];
     }
 
-    private function clearCustomization($file = 'gui_customization.json') {
-        $file = $this->rainbow_dir . '/' . $file;
-        if (file_exists($file)) {
-            unlink($file);
-        }
-    }
-
     private function verifyCustomizationUpdates($content) {
         $expected_json = json_encode($content, JSON_PRETTY_PRINT);
         $final_json = json_encode($this->readCustomization('gui_customization.json'), JSON_PRETTY_PRINT);
@@ -159,7 +153,8 @@ class ReportControllerTester extends BaseUnitTest {
         if ($expected_status == 'success') {
             $this->assertNull($response->json['data']);
             $this->verifyCustomizationUpdates($content);
-        } else {
+        }
+        else {
             $this->assertSame('Manual customization is currently in use.', $response->json['message']);
         }
         return $response;
@@ -195,7 +190,6 @@ class ReportControllerTester extends BaseUnitTest {
         $this->writeCustomization($content, 'customization.json');
 
         // Test no modifications in the customization content
-        $content = $this->getSampleCustomizationJson();
         $this->submitCustomization($content);
 
         // Test the addition of an exam gradeable
@@ -219,10 +213,10 @@ class ReportControllerTester extends BaseUnitTest {
         $this->submitCustomization($content);
 
         // Test the swapping of a gradeable bucket
-        array_pop($this->gradeables); // Remove the∆original exam gradeable
+        array_pop($this->gradeables); // Remove the original exam gradeable
         $this->gradeables[] = $this->createMockGradeable('exam1', 'Exam 1', 'homework', 100, '2025-01-01 23:59:59-0500');
         $content['gradeables'][0]['count'] = 3; // Increment in count should only be possible to handle "future gradeable" configurations
-        $content['gradeables'][1]['ids'] = []; // Exam gradeable removed
+        $content['gradeables'][1]['ids'] = []; // No existing exam gradeables
         $content['gradeables'][0]['ids'][] = [
             'max' => 100,
             'release_date' => '2025-01-01 23:59:59-0500',
