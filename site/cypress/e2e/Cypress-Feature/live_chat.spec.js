@@ -187,6 +187,11 @@ const sendChatMessageEnter = (text, sender) => {
     });
 };
 
+const leaveChat = (title) => {
+    cy.get('[data-testid="leave-chat"]').click();
+    checkChatExists(title);
+}
+
 describe('Tests for enabling Live Chat', () => {
     beforeEach(() => {
         cy.login('instructor');
@@ -283,7 +288,7 @@ describe('Tests for creating, editing and using tests', () => {
         sendChatMessage(msgText1, name1);
         sendChatMessage(msgText3, name1);
         // Check for leave chat button, check for chat state from other user
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'chat']);
@@ -299,7 +304,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.reload();
         checkChatMessage(msgText2, name2);
         sendChatMessageEnter(msgText3, name2);
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
     });
 
     it('Should test anonymity', () => {
@@ -311,11 +316,11 @@ describe('Tests for creating, editing and using tests', () => {
         sendChatMessage(msgText3, 'Anonymous');
         const instructorAnon = getAnonName();
         // Check that messages are still anonymous after leaving and rejoining, with the same anon name as before.
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText3, instructorAnon);
         // Check for this even when rejoining non-anon
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         checkChatMessage(msgText3, instructorAnon);
         sendChatMessage(msgText3, name1);
@@ -326,14 +331,14 @@ describe('Tests for creating, editing and using tests', () => {
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         checkChatMessage(msgText3, name1);
         sendChatMessage(msgText2, name2);
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         // Check for student anonymous function
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText2, name2);
         sendChatMessage(msgText2, 'Anonymous');
         const studentAnon = getAnonName();
         // expect(instructorAnon !== studentAnon); TODO: Add all anon names in a chat to a list so that it's impossible to have two equivalent names.
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         // Login to instructor, check for correct anonymous name and for anonymous name remaining across logins
         cy.logout();
         cy.login('instructor');
@@ -341,7 +346,7 @@ describe('Tests for creating, editing and using tests', () => {
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText2, studentAnon);
         sendChatMessage(msgText3, instructorAnon);
-        cy.get('[data-testid="leave-chat"]').click();
+        leaveChat(title1);
         deleteChatroom(title1);
     });
 
