@@ -27,6 +27,9 @@ afterEach(() => {
     });
 });
 
+// See this issue: https://github.com/Submitty/Submitty/issues/11815
+// The dependency bump from Mermaid 10.9.1 to 11+ causes a cypress test failure with the error below.
+// We chose to ignore this specific error for now.
 Cypress.on('uncaught:exception', (err) => {
     if (err.message.includes('Cannot read properties of undefined (reading \'claim\')')) {
         // Ignore Mermaid service worker-related errors

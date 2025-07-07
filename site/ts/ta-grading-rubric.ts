@@ -999,7 +999,7 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#grader-info').attr('data-can_verify') === 'true';
+    return $('#grader-info').attr('data-can_verify') === '1';
 }
 window.canVerifyGraders = canVerifyGraders;
 
@@ -1202,7 +1202,7 @@ function setupSortableMarks(component_id: number) {
 function setupSortableComponents() {
     const componentList = $('#component-list');
     componentList.sortable({
-        update: void onComponentOrderChange,
+        update: () => void onComponentOrderChange(),
         handle: '.reorder-component-container',
     });
     componentList.on('keydown', keyPressHandler);
