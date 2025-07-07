@@ -532,10 +532,6 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        $has_overridden_grades = false;
-        if (!is_null($graded_gradeable)) {
-            $graded_gradeable->hasOverriddenGrades();
-        }
         $vcs_partial_path = '';
         $vcs_partial_path = $gradeable->getVcsPartialPath();
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
@@ -622,7 +618,9 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $has_overridden_grades,
+            'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
