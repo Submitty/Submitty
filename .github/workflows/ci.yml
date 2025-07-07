@@ -451,13 +451,13 @@ jobs:
 
       - name: Download Required Packages
         run: |
-          cat ${MAIN_REPO_PATH}/Submitty/.setup/pip/system_requirements.txt
+          cat ${PR_REPO_PATH}/Submitty/.setup/pip/system_requirements.txt
           pip install -r <(
               grep  -e "tzlocal"    -e "sqlalchemy" -e "ruamel"                             \
                     -e "psycopg2"   -e "docker"                                             \
-                    ${MAIN_REPO_PATH}/Submitty/.setup/pip/system_requirements.txt
+                    ${PR_REPO_PATH}/Submitty/.setup/pip/system_requirements.txt
           )
-          pip install ${MAIN_REPO_PATH}/Submitty/python_submitty_utils
+          pip install ${PR_REPO_PATH}/Submitty/python_submitty_utils
 
 
       - name: Create Users and Groups
