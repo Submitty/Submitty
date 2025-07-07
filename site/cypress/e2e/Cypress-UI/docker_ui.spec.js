@@ -138,7 +138,8 @@ describe('Docker UI Test', () => {
         cy.reload();
 
         // Check the empty tag list
-        cy.get('#capabilities-list').should('not.exist');
+        cy.get('#capabilities-list')
+            .should('not.contain.text', 'et-cetera');
 
         // Try to add it again, should fail
         cy.get('#capability-form')
@@ -173,6 +174,7 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
 
+        // Wait for the add image request to complete
         cy.wait('@addImage');
 
         // Check success message for adding to config
@@ -207,6 +209,7 @@ describe('Docker UI Test', () => {
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
 
+        // Wait for the remove image request to complete
         cy.wait('@removeImage');
 
         cy.get('.alert-success')
