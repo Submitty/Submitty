@@ -449,6 +449,11 @@ popd > /dev/null
 
 ################################################################################################################
 ################################################################################################################
+
+# Obtains the current git hash and tag and stores them in the appropriate jsons.
+python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
+chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
+
 # COPY THE 1.0 Grading Website if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
     bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap "config=${SUBMITTY_CONFIG_DIR:?}"
@@ -561,10 +566,6 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-
-# Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 "${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py"
-chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
 
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
