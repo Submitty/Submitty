@@ -11,13 +11,13 @@ const exports = {
         const app = await (async () => {
             try {
                 // https://vite.dev/guide/features.html#glob-import
-                const modules = import.meta.glob(['./components/**/*.vue', './components/*.vue', './pages/*.vue']);
+                const modules = import.meta.glob(['./components/**/*.vue', './components/*.vue', './pages/*.vue'], { import: 'default' });
                 const path = `./${type}s/${name}.vue`;
                 if (!(path in modules)) {
                     throw new Error(`Module ${path} not found`);
                 }
-                const mod = await modules[path]() as { default: Parameters<typeof createApp>[0] };
-                return createApp(mod.default, args);
+                const mod = await modules[path]();
+                return createApp(mod as Parameters<typeof createApp>[0], args);
             }
             catch (e) {
                 console.error(`Could not find vue ${type} ${name}:`, e);
