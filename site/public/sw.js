@@ -11,16 +11,7 @@ self.addEventListener('install', (installEvent) => {
 });
 
 self.addEventListener('activate', (event) => {
-    if (typeof self.clients === 'object' && typeof self.clients.claim === 'function') {
-        event.waitUntil(self.clients.claim());
-    }
-    else {
-        // Fake clients for test environments (Cypress)
-        self.clients = {
-            claim: () => Promise.resolve(),
-            matchAll: () => Promise.resolve([]),
-        };
-    }
+    event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', (fetchEvent) => {
