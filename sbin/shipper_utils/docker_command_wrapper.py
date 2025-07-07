@@ -53,6 +53,15 @@ def remove_images(client, required_images, system_images):
                 # This can happen if removing by ID clears out multiple tags we were planning to remove.
                 print(f"Image/tag {image_tag_to_remove} was already removed, skipping.")
                 continue
+            except docker.errors.APIError as e:
+                # Check if the error occurs as a result of running container and skip
+                if 'image is being used by running container' in str(e):
+                    print(f"WARNING: Image/tag {image_tag_to_remove} is in use by a running container, skipping")
+                    continue
+                else:
+                    # Handle other potential API errors
+                    print(f"ERROR: An API error occurred while removing {image_tag_to_remove}: {e}")
+                    traceback.print_exc(file=sys.stderr)
             except Exception as e:
                 print(f"ERROR: An error occurred while removing {image_tag_to_remove}: {e}")
                 traceback.print_exc(file=sys.stderr)
