@@ -257,24 +257,12 @@
                 "courseQueries": course_queries
             }
         } %}
-        <div id='messages'>
-            <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
-            {% for message in messages %}
-                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}" data-testid="popup-message">
-                    <span>
-                        {% if message.type == "error" %}
-                        <i class="fas fa-times-circle"></i>
-                        {% elseif message.type == "success" %}
-                        <i class="fas fa-check-circle"></i>
-                        {% else %}
-                        <i class="fas fa-circle-exclamation"></i>
-                        {% endif %}
-                        {{ message.error | nl2br }}
-                    </span>
-                    <a class="fas fa-times key_to_click" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                </div>
-            {% endfor %}
-        </div>
+        {% include 'Vue.twig' with {
+            'component': 'toasts',
+            'args': {
+                "messages": messages,
+            }
+        } %}
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
                 <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
