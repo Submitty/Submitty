@@ -26,10 +26,6 @@ class ReportControllerTester extends BaseUnitTest {
         FileUtils::createDir($this->rainbow_dir, true);
     }
 
-    protected function tearDown(): void {
-        FileUtils::recursiveRmdir($this->tmp_dir);
-    }
-
     private function setupMockConfigs() {
         // Mock the core application properties, user configurations, and database queries for the ReportController
         $config = [
@@ -43,7 +39,7 @@ class ReportControllerTester extends BaseUnitTest {
             'access_admin' => true,
             'user_timezone' => 'America/New_York'
         ];
-        $this->gradeables = count($this->gradeables ?? []) > 0 ? $this->gradeables : [
+        $this->gradeables = $this->gradeables ?? [
             $this->createMockGradeable('hw1', 'Homework 1', 'homework', 10),
             $this->createMockGradeable('hw2', 'Homework 2', 'homework', 20),
             $this->createMockGradeable('exam1', 'Exam 1', 'exam', 100),
@@ -131,12 +127,12 @@ class ReportControllerTester extends BaseUnitTest {
         ];
     }
 
-    private function writeCustomization($content, $file = 'gui_customization.json') {
-        file_put_contents($this->rainbow_dir . '/' . $file, json_encode($content, JSON_PRETTY_PRINT));
-    }
-
     private function readCustomization($file = 'gui_customization.json') {
         return file_exists($this->rainbow_dir . '/' . $file) ? json_decode(file_get_contents($this->rainbow_dir . '/' . $file), true) : [];
+    }
+
+    private function writeCustomization($content, $file = 'gui_customization.json') {
+        file_put_contents($this->rainbow_dir . '/' . $file, json_encode($content, JSON_PRETTY_PRINT));
     }
 
     private function verifyCustomizationUpdates($content) {
@@ -150,6 +146,7 @@ class ReportControllerTester extends BaseUnitTest {
         $response = $this->controller->saveGUICustomizations();
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals($expected_status, $response->json['status']);
+
         if ($expected_status == 'success') {
             $this->assertNull($response->json['data']);
             $this->verifyCustomizationUpdates($content);
@@ -157,6 +154,7 @@ class ReportControllerTester extends BaseUnitTest {
         else {
             $this->assertSame('Manual customization is currently in use.', $response->json['message']);
         }
+
         return $response;
     }
 
@@ -181,7 +179,6 @@ class ReportControllerTester extends BaseUnitTest {
         $this->writeCustomization($content, 'manual_customization.json');
         $this->submitCustomization($content, 'error');
     }
-
 
     public function testGUICustomizationSave() {
         // Set the existing GUI customization file
