@@ -192,6 +192,12 @@ const leaveChat = (title) => {
     checkChatExists(title);
 }
 
+const visitLiveChat = (user) => {
+    cy.logout();
+    cy.login(user);
+    cy.visit(['sample', 'chat']);
+}
+
 describe('Tests for enabling Live Chat', () => {
     beforeEach(() => {
         cy.login('instructor');
@@ -230,9 +236,7 @@ describe('Tests for creating, editing and using tests', () => {
     });
 
     afterEach(() => {
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('instructor')
         deleteChatroom(title1);
         deleteChatroom(title2);
         toggleLiveChat(false).then(() => {
@@ -253,30 +257,20 @@ describe('Tests for creating, editing and using tests', () => {
     it('Should test starting chat sessions and ending chat sessions', () => {
         // Create Chatroom but don't enable
         createChatroom(title1, description1, false);
-        cy.logout();
         // Login to student account, which shouldn't see disabled chatrooms
-        cy.login('student');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('student');
         // Check for chatroom nonexistence
         checkChatExists(title1, false);
-        cy.logout();
         // Go back to instructor, enable chatroom
-        cy.login('instructor');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('instructor');
         startChatSession(title1);
-        cy.logout();
         // Go to student, now chatroom should exist
-        cy.login('student');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('student');
         checkChatExists(title1);
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('instructor');
         // Now check for chatroom removal after ending session
         endChatSession(title1);
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('student');
         checkChatExists(title1, false);
     });
 
@@ -289,9 +283,7 @@ describe('Tests for creating, editing and using tests', () => {
         sendChatMessage(msgText3, name1);
         // Check for leave chat button, check for chat state from other user
         leaveChat(title1);
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('student');
         checkChatExists(title1);
         checkDescription(title1, description1);
         checkHost(title1, name1);
@@ -325,9 +317,7 @@ describe('Tests for creating, editing and using tests', () => {
         checkChatMessage(msgText3, instructorAnon);
         sendChatMessage(msgText3, name1);
         // Check that the student sees the non-anon name
-        cy.logout();
-        cy.login('student');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('student');
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
         checkChatMessage(msgText3, name1);
         sendChatMessage(msgText2, name2);
@@ -340,9 +330,7 @@ describe('Tests for creating, editing and using tests', () => {
         // expect(instructorAnon !== studentAnon); TODO: Add all anon names in a chat to a list so that it's impossible to have two equivalent names.
         leaveChat(title1);
         // Login to instructor, check for correct anonymous name and for anonymous name remaining across logins
-        cy.logout();
-        cy.login('instructor');
-        cy.visit(['sample', 'chat']);
+        visitLiveChat('instructor');
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
         checkChatMessage(msgText2, studentAnon);
         sendChatMessage(msgText3, instructorAnon);
