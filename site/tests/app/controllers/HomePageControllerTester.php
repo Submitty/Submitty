@@ -30,10 +30,12 @@ class HomePageControllerTester extends BaseUnitTest {
 
     public function testGetCourses() {
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'student');
-        $controller = $this->createMock(TermController::class);
-        // Set start day to today for dropped courses
-        $controller->method('getTermStartDate')
-            ->willReturn(date('Y-m-d H:i:s'));
+        $term = TermController::createNewTerm($core, 'f24', 'Fall 2024', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+        // Set start day to today for dropped 
+        $core->getSubmittyEntityManager()
+            ->method('find')
+            ->with(Term::Class, 'f24')
+            ->willReturn($term);
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');

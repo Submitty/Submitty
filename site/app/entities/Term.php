@@ -6,7 +6,6 @@ namespace app\entities;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Entity;
 
 /**
  * Doctrine entity for Terms, not much used but used for other queries.

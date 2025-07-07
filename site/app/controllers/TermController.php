@@ -25,7 +25,7 @@ class TermController extends AbstractController {
             ->getSingleColumnResult();
     }
 
-    public static function createNewTerm(Core $core, string $term_id, string $term_name, string $start_date, string $end_date): void {
+    public static function createNewTerm(Core $core, string $term_id, string $term_name, string $start_date, string $end_date): Term {
         $em = $core->getSubmittyEntityManager();
         $term = new Term(
             $term_id,
@@ -35,5 +35,6 @@ class TermController extends AbstractController {
         );
         $em->persist($term);
         $em->flush();
+        return $term;
     }
 }

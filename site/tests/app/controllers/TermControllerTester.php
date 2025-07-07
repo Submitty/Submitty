@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace tests\app\libraries;
+namespace tests\app\Controllers;
 
 use app\libraries\Core;
-use app\libraries\TermController;
+use app\controllers\TermController;
 use app\entities\Term;
 use app\models\User;
 use tests\BaseUnitTest;
@@ -13,7 +13,6 @@ use tests\BaseUnitTest;
 class TermControllerTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
-        $entity_manager = 
         $core->getSubmittyEntityManager();
         $entity_manager
             ->expects($this->once())
@@ -32,7 +31,7 @@ class TermControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('flush');
         // Testing create terms
-        TermManager::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
+        $term = TermController::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
@@ -54,7 +53,11 @@ class TermControllerTester extends BaseUnitTest {
             'manual_registration' => false,
             'grading_registration_sections' => [1, 2]
         ];
+        $core->getSubmittyEntityManager()
+            ->method('find')
+            ->with(Term::Class, 'id')
+            ->willReturn($term);
         $user = new User($core, $detail);
-        TermManager::getTermStartDate($core, 'id', $user);
+        TermController::getTermStartDate($core, 'id', $user);
     }
 }
