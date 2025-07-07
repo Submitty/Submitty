@@ -26,3 +26,13 @@ afterEach(() => {
         cy.logout(true, checkLogout);
     });
 });
+
+Cypress.on('uncaught:exception', (err) => {
+    if (err.message.includes('Cannot read properties of undefined (reading \'claim\')')) {
+        // Ignore service worker-related exceptions as it's not required for end to end testing and Cypress inject's their own network interceptors
+        return false;
+    }
+
+    // Ensure all other exceptions fail the test
+    return true;
+});
