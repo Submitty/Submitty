@@ -8,60 +8,56 @@ use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 use app\libraries\FileUtils;
 
-class ReportControllerTester extends BaseUnitTest
-{
+class ReportControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
-    private $controller;
     private $tmp_dir;
+    private $controller;
     private $course_path;
     private $rainbow_dir;
     private $gradeables;
     private $core;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Prepare the mock course configurations and directories
+    protected function setUp(): void {
+        // Prepare the mock course configurations and directories for Rainbow Grades
         $this->tmp_dir = sys_get_temp_dir() . '/submitty_test_' . uniqid();
         $this->course_path = $this->tmp_dir . '/course';
         $this->rainbow_dir = $this->course_path . '/rainbow_grades';
         FileUtils::createDir($this->rainbow_dir, true);
-        $this->mockCoreApplication();
     }
 
-    private function mockCoreApplication($config = null, $user_config = null, $queries = null)
-    {
+    protected function tearDown(): void {
+        FileUtils::recursiveRmdir($this->tmp_dir);
+    }
+
+    private function setupMockConfigs() {
         // Mock the core application properties, user configurations, and database queries for the ReportController
-        $config = $config ?? [
+        $config = [
             'course_path' => $this->course_path,
             'semester' => 'f25',
             'course' => 'sample',
             'base_url' => 'http://localhost',
             'use_mock_time' => true,
         ];
-        $user_config = $user_config ?? [
+        $user_config = [
             'access_admin' => true,
             'user_timezone' => 'America/New_York'
         ];
-        $this->gradeables = $queries['getGradeableConfigs'] ?? [
+        $this->gradeables = count($this->gradeables ?? []) > 0 ? $this->gradeables : [
             $this->createMockGradeable('hw1', 'Homework 1', 'homework', 10),
             $this->createMockGradeable('hw2', 'Homework 2', 'homework', 20),
             $this->createMockGradeable('exam1', 'Exam 1', 'exam', 100),
         ];
-        $queries = $queries ?? [
+        $queries = [
             'getGradeableConfigs' => $this->gradeables,
             'getRegistrationSections' => [
                 ['sections_registration_id' => '1'],
                 ['sections_registration_id' => '2'],
             ],
         ];
-        $this->core = $this->createMockCore($config, $user_config, $queries);
-        $this->controller = new ReportController($this->core);
+        $this->controller = new ReportController($this->createMockCore($config, $user_config, $queries));
     }
 
-    private function getSampleCustomizationJson()
-    {
+    private function getSampleCustomizationJson() {
         return [
             'section' => [
                 '1' => '1',
@@ -97,7 +93,7 @@ class ReportControllerTester extends BaseUnitTest
                 ],
                 [
                     'type' => 'exam',
-                    'count' => 1,
+                    'count' => 3,
                     'remove_lowest' => 0,
                     'percent' => 0.75,
                     'ids' => [
@@ -127,49 +123,50 @@ class ReportControllerTester extends BaseUnitTest
             'warning' => [
                 [
                     'msg' => 'Warning Message',
-                    'ids' => ['grades_released_homework_onlyauto', 'grades_released_homework_autohiddenEC', 'bulk_upload_test'],
+                    'ids' => ['grades_released_homework_onlyauto'],
                     'value' => 10
                 ]
             ],
         ];
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        FileUtils::recursiveRmdir($this->tmp_dir);
-    }
-
-    private function writeCustomization($content, $file = 'gui_customization.json')
-    {
+    private function writeCustomization($content, $file = 'gui_customization.json') {
         file_put_contents($this->rainbow_dir . '/' . $file, json_encode($content, JSON_PRETTY_PRINT));
     }
 
-    private function fetchCustomization($file = 'gui_customization.json')
-    {
-        return file_exists($this->rainbow_dir . '/' . $file) ? json_encode(json_decode(file_get_contents($this->rainbow_dir . '/' . $file), true), JSON_PRETTY_PRINT) : [];
+    private function readCustomization($file = 'gui_customization.json') {
+        return file_exists($this->rainbow_dir . '/' . $file) ? json_decode(file_get_contents($this->rainbow_dir . '/' . $file), true) : [];
     }
 
-    private function clearCustomization($file = 'gui_customization.json')
-    {
+    private function clearCustomization($file = 'gui_customization.json') {
         $file = $this->rainbow_dir . '/' . $file;
         if (file_exists($file)) {
             unlink($file);
         }
     }
 
-    private function verifyGUICustomizationUpdates($content)
-    {
+    private function verifyCustomizationUpdates($content) {
         $expected_json = json_encode($content, JSON_PRETTY_PRINT);
-        $final_json = $this->fetchCustomization('gui_customization.json');
+        $final_json = json_encode($this->readCustomization('gui_customization.json'), JSON_PRETTY_PRINT);
         $this->assertEquals($expected_json, $final_json);
     }
 
-    /**
-     * Helper to create a mock Gradeable object for testing.
-     */
-    private function createMockGradeable($id = 'test', $title = 'Test Gradeable', $bucket = 'homework', $points = 10, $date = '9998-12-31 23:59:59-0500')
-    {
+    private function submitCustomization($content, $expected_status = 'success') {
+        $this->setupMockConfigs();
+        $response = $this->controller->saveGUICustomizations();
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals($expected_status, $response->json['status']);
+        if ($expected_status == 'success') {
+            $this->assertNull($response->json['data']);
+            $this->verifyCustomizationUpdates($content);
+        } else {
+            $this->assertSame('Manual customization is currently in use.', $response->json['message']);
+        }
+        return $response;
+    }
+
+    private function createMockGradeable($id = 'test', $title = 'Test Gradeable', $bucket = 'homework', $points = 10, $date = '9998-12-31 23:59:59-0500') {
+        // Mock all gradeable methods required to construct the customization data
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn($id);
         $gradeable->method('getTitle')->willReturn($title);
@@ -182,23 +179,16 @@ class ReportControllerTester extends BaseUnitTest
         return $gradeable;
     }
 
-    public function testExistingManualCustomization()
-    {
-        // Ensure the manual and main customization files are the same
+    public function testExistingManualCustomization() {
+        // Ensure the manual and main customization files are the same to imply manual customization applications
         $content = $this->getSampleCustomizationJson();
         $this->writeCustomization($content, 'customization.json');
-        $this->writeCustomization($content, 'manual_customization.json');;
-
-        // No GUI customization file modifications due to manual customization applications
-        $response = $this->controller->saveGUICustomizations();
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals('error', $response->json['status']);
-        $this->assertSame('Manual customization is currently in use.', $response->json['message']);
+        $this->writeCustomization($content, 'manual_customization.json');
+        $this->submitCustomization($content, 'error');
     }
 
 
-    public function testGUICustomizationSave()
-    {
+    public function testGUICustomizationSave() {
         // Set the existing GUI customization file
         $content = $this->getSampleCustomizationJson();
         $this->writeCustomization($content, 'gui_customization.json');
@@ -206,59 +196,42 @@ class ReportControllerTester extends BaseUnitTest
 
         // Test no modifications in the customization content
         $content = $this->getSampleCustomizationJson();
-
-        $response = $this->controller->saveGUICustomizations();
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals('success', $response->json['status']);
-        $this->assertNull($response->json['data']);
-        $this->verifyGUICustomizationUpdates($content);
+        $this->submitCustomization($content);
 
         // Test the addition of an exam gradeable
-        $content = $this->getSampleCustomizationJson();
-
-        // Mock the gradable addition for the database query
         $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100);
-        $this->mockCoreApplication(null, null, [
-            'getGradeableConfigs' => $this->gradeables,
-            'getRegistrationSections' => [
-                ['sections_registration_id' => '1'],
-                ['sections_registration_id' => '2'],
-            ],
-        ]);
-
-        // Update the customization content to include the new exam gradeable
-        $content['gradeables'][1]['count'] = 2;
         $content['gradeables'][1]['ids'][] = [
             'max' => 100,
             'release_date' => '9998-12-31 23:59:59-0500',
             'id' => 'exam2',
         ];
-
-        $response = $this->controller->saveGUICustomizations();
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals('success', $response->json['status']);
-        $this->assertNull($response->json['data']);
-        $this->verifyGUICustomizationUpdates($content);
+        $this->submitCustomization($content);
 
         // Test the update of the release date of the exam gradeable
-        array_pop($this->gradeables); // Remove the new gradeable
+        array_pop($this->gradeables); // Replace the mock gradeable
         $this->gradeables[] = $this->createMockGradeable('exam2', 'Exam 2', 'exam', 100, '2025-01-01 23:59:59-0500');
-        $this->mockCoreApplication(null, null, [
-            'getGradeableConfigs' => $this->gradeables,
-            'getRegistrationSections' => [
-                ['sections_registration_id' => '1'],
-                ['sections_registration_id' => '2'],
-            ],
-        ]);
         $content['gradeables'][1]['ids'][1]['release_date'] = '2025-01-01 23:59:59-0500';
-        $response = $this->controller->saveGUICustomizations();
-        $this->assertInstanceOf(JsonResponse::class, $response);
-        $this->assertEquals('success', $response->json['status']);
-        $this->assertNull($response->json['data']);
-        $this->verifyGUICustomizationUpdates($content);
+        $this->submitCustomization($content);
 
-        // TODO: test removal of a gradeable
+        // Test removal of the new gradeable
+        array_pop($this->gradeables);
+        array_pop($content['gradeables'][1]['ids']);
+        $this->submitCustomization($content);
 
-        // TODO: test the swapping of a gradeable bucket with proper change in syllabus bucket counts
+        // Test the swapping of a gradeable bucket
+        array_pop($this->gradeables); // Remove the∆original exam gradeable
+        $this->gradeables[] = $this->createMockGradeable('exam1', 'Exam 1', 'homework', 100, '2025-01-01 23:59:59-0500');
+        $content['gradeables'][0]['count'] = 3; // Increment in count should only be possible to handle "future gradeable" configurations
+        $content['gradeables'][1]['ids'] = []; // Exam gradeable removed
+        $content['gradeables'][0]['ids'][] = [
+            'max' => 100,
+            'release_date' => '2025-01-01 23:59:59-0500',
+            'id' => 'exam1'
+        ];
+        $this->submitCustomization($content);
+
+        // Test the addition of a gradeable in an unused bucket, leading to no changes
+        $this->gradeables[] = $this->createMockGradeable('lab1', 'Lab 1', 'lab', 100, '2025-01-01 23:59:59-0500');
+        $this->submitCustomization($content);
     }
 }

@@ -17,7 +17,7 @@ class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     /**
-     * @ array<string,int>
+     * @var array<string,int>
      */
     private array $bucket_counts = [];                  // Keep track of how many items are in each bucket
     /**
@@ -88,7 +88,7 @@ class RainbowCustomization extends AbstractModel {
             $this->bucket_counts[$bucket] = 0;
             $this->bucket_remove_lowest[$bucket] = 0;
         }
-
+        $gradeable_buckets = [];
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
         foreach ($gradeables as $gradeable) {
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
@@ -111,10 +111,10 @@ class RainbowCustomization extends AbstractModel {
 
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()) {
-                $last_index = count($this->customization_data[$bucket]) - 1;
                 $autograded_grading_points = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
             $max_score = $manual_grading_points + $autograded_grading_points;
+            $gradeable_buckets[$gradeable->getId()] = $bucket;
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
@@ -125,7 +125,6 @@ class RainbowCustomization extends AbstractModel {
                 "override_percent" => false
             ];
         }
-
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();
@@ -138,10 +137,20 @@ class RainbowCustomization extends AbstractModel {
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
 
+                // Filter out removed gradeables or updated gradeable buckets
+                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                    $removed = !isset($gradeable_buckets[$g['id']]);
+                    $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
+                    if ($removed || $swapped) {
+                        return false;
+                    }
+
+                    return true;
+                }));
+
                 if ($json_bucket->count > $this->bucket_counts[$bucket]) {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
-
                 $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
 
