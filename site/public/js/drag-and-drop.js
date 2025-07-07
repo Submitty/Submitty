@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage escapeSpecialChars */
 
 /*
 References:
@@ -139,7 +139,7 @@ function progress(e) {
         progressBar.max = e.total;
         progressBar.value = e.loaded;
         const perc = (e.loaded * 100) / e.total;
-        $('#loading-bar-percentage').html(`${perc.toFixed(2)} %`);
+        $('#loading-bar-percentage').text(`${perc.toFixed(2)} %`);
     }
 }
 
@@ -414,8 +414,8 @@ function addLabel(filename, filesize, part, previous) {
     const fileTrashElement = document.createElement('td');
     fileTrashElement.setAttribute('class', 'file-trash');
 
-    fileDataElement.innerHTML = filename;
-    fileTrashElement.innerHTML = `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
+    fileDataElement.innerText = filename;
+    fileTrashElement.innerHTML = `${escapeSpecialChars(filesize.toString())}KB  <i aria-label='Press enter to remove file ${escapeSpecialChars(filename.toString())}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -490,6 +490,10 @@ function isValidSubmission() {
 
     // If is_notebook is set then always valid submission
     if (Object.prototype.hasOwnProperty.call(window, 'is_notebook')) {
+        return true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(window, 'is_vcs')) {
         return true;
     }
 

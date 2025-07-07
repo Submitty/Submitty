@@ -93,9 +93,6 @@
             }
         }
 
-        var onAjaxInit;
-
-
         //determines if the user has a set theme
         function detectColorScheme(){
             document.documentElement.setAttribute("data-theme", "");
@@ -288,7 +285,7 @@
                     </ul>
                 </aside>
             {% endif %}
-            <main id="main">
+            <main id="main" data-testid="content-main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button, mobile) %}

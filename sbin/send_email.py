@@ -66,7 +66,7 @@ except Exception as config_fail_error:
         str(datetime.datetime.now()), str(config_fail_error)))
     sys.exit(1)
 
-
+BASE_URL_PATH = SUBMITTY_CONFIG["submission_url"]
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
 EMAIL_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "emails")
 TODAY = datetime.datetime.now()
@@ -134,7 +134,7 @@ def construct_mail_client():
 
 def get_email_queue(db):
     """Get an active queue of internal emails waiting to be sent."""
-    query = """SELECT id, user_id, to_name, email_address, subject, body FROM emails
+    query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE email_address SIMILAR TO :format AND sent is NULL AND
     error = '' ORDER BY id LIMIT 100;"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
@@ -147,7 +147,9 @@ def get_email_queue(db):
             'to_name': row[2],
             'send_to': row[3],
             'subject': row[4],
-            'body': row[5]
+            'body': row[5],
+            'term': row[6],
+            'course': row[7]
             })
 
     return queued_emails
@@ -158,8 +160,8 @@ def get_external_queue(db, num):
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
     email_address NOT SIMILAR TO :format"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
-    result = db.execute(text(query), {"format": domain_format})
-    query = """SELECT id, user_id, to_name, email_address, subject, body FROM emails
+    result = db.execute(text(query), format=domain_format)
+    query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
     error = '' ORDER BY id LIMIT :lim;"""
     result = db.execute(text(query), {"format": domain_format,
@@ -172,7 +174,9 @@ def get_external_queue(db, num):
             'to_name': row[2],
             'send_to': row[3],
             'subject': row[4],
-            'body': row[5]
+            'body': row[5],
+            'term': row[6],
+            'course': row[7]
             })
     return queued_emails
 
@@ -226,7 +230,7 @@ def send_email():
         return
 
     for email_data in queued_emails:
-        name = email_data["user_id"]
+        name, term, course = email_data["user_id"], email_data["term"], email_data["course"]
         if name is None:
             name = email_data["to_name"]
         if email_data["send_to"] == "":
@@ -235,6 +239,25 @@ def send_email():
                 str(datetime.datetime.now()), name)
             LOG_FILE.write(e+"\n")
             continue
+
+        email_data["body"] += (
+            "\n\n--\nNOTE: This is an automated email notification, which "
+            "is unable to receive replies."
+        )
+
+        if term and course:
+            email_data["subject"] = f"[Submitty {course}]: {email_data['subject']}"
+            email_data["body"] += (
+                "\nPlease refer to the course syllabus for contact information "
+                "for your teaching staff.\nUpdate your email notification "
+                "settings for this course here: "
+                f"{BASE_URL_PATH}/courses/{term}/{course}/notifications/settings"
+            )
+        elif "[Submitty Admin Announcement]: " in email_data["subject"]:
+            # Admin-related subject's should be already formatted to differentiate from other emails
+            pass
+        else:
+            email_data["subject"] = f"[Submitty]: {email_data['subject']}"
 
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
