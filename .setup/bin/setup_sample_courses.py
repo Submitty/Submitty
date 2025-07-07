@@ -65,6 +65,7 @@ def main() -> None:
     """
 
     use_courses = args.course
+    os.system('pip3 list')
 
     # We have to stop all running daemon grading and jobs handling
     # processes as otherwise we end up with the process grabbing the
