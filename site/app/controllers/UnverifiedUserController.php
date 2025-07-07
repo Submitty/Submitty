@@ -1,6 +1,7 @@
 <?php
 
 namespace app\controllers;
+
 use app\libraries\Core;
 use app\entities\UnverifiedUserEntity;
 

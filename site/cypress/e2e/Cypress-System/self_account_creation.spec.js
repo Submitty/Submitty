@@ -20,7 +20,7 @@ describe('Self account creation tests', () => {
         cy.visit();
         cy.get('[data-testid="new-account-button"]').click();
         // Not accepted email extension
-        inputData('test.email.bad@bad.com');
+        inputData('test.email.bad@bad.com', 'new_user_id');
         cy.get('[data-testid="sign-up-button"]').click();
         cy.get('[data-testid="popup-message"]').should('contain.text', 'This email is not accepted');
         // Id too short
