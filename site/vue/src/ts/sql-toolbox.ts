@@ -1,4 +1,4 @@
-import { buildCourseUrl, getCsrfToken } from './utils/server';
+import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
 
 export type ServerResponse<T> =
     | {
