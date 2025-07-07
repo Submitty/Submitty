@@ -99,8 +99,7 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
         <i
           v-else
           class="fas fa-circle-exclamation"
-        />
-        {{ message.message }}
+        />{{ message.message }}
       </span>
       <a
         id="remove_popup"
