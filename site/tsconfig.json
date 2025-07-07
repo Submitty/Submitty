@@ -1,5 +1,5 @@
 {
-    "include": ["./ts/**/*.ts", "globals.d.ts", "./public/js/**/*.js", "vue/src/ts/**.ts"],
+    "include": ["./ts/**/*.ts", "globals.d.ts", "./public/js/**/*.js"],
     "compilerOptions": {
         "strict": true,
         "allowJs": true,
