@@ -5,21 +5,17 @@ declare(strict_types=1);
 namespace tests\app\libraries;
 
 use app\libraries\Core;
-use app\repositories\TermRepository;
-use app\libraries\TermManager;
+use app\libraries\TermController;
 use app\entities\Term;
 use app\models\User;
 use tests\BaseUnitTest;
 
-class TermManagerTester extends BaseUnitTest {
+class TermControllerTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
-        $repo = $this->createMock(TermRepository::class);
-        $entityManager = $core->getSubmittyEntityManager();
-        $entityManager->method('getRepository')
-            ->with(Term::class)
-            ->willReturn($repo);
-        $core->getSubmittyEntityManager()
+        $entity_manager = 
+        $core->getSubmittyEntityManager();
+        $entity_manager
             ->expects($this->once())
             ->method('persist')
             ->with(
@@ -32,13 +28,11 @@ class TermManagerTester extends BaseUnitTest {
                     return true;
                 })
             );
-        $entityManager
+        $entity_manager
             ->expects($this->once())
             ->method('flush');
         // Testing create terms
         TermManager::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
-        $repo->expects($this->once())
-            ->method('getTermStartDate');
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
