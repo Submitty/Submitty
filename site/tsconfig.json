@@ -1,5 +1,5 @@
 {
-    "include": ["./ts/**/*.ts", "globals.d.ts", "./public/js/**/*.js"],
+    "include": ["./ts/**/*.ts", "globals.d.ts", "./public/js/**/*.js", "vue/src/ts/sql-toolbox.ts"],
     "compilerOptions": {
         "strict": true,
         "allowJs": true,
