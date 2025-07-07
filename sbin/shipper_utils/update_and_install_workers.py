@@ -82,8 +82,10 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     thread_object.add_message(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        get_sysinfo.print_distribution()
+        thread_object.add_message(f"{get_sysinfo.get_distribution()}")
         client = docker.from_env()
+        docker_info = client.info()
+        thread_object.add_message(f"Docker Version: {docker_info['ServerVersion']}")
         try:
             # Precompute dicts
             image_id_to_tags = {}
@@ -143,14 +145,11 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                   # normal case
                   success = False
 
-        docker_info = client.info()
-        docker_images_obj = client.images.list()
         #print the details of the image
         get_sysinfo.print_docker_info()
     else:
         commands = list()
         shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
-        commands = list()
         script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
@@ -183,6 +182,11 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
                 
                 lines = stdout.read().decode('utf-8').split("\n")
+
+                for line in lines:
+                    if 'Docker Version:' in line or 'Description:' in line:
+                        thread_object.add_message(line)
+
                 print("\n".join(f"{get_machine_by_ip(host)}: {line}" for line in lines if line))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
