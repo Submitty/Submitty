@@ -504,7 +504,7 @@ HTML;
      * @param bool $inquiry_status
      * @param bool $filter_withdrawn_student
      * @param array<string,bool> $grading_details_columns
-     * @param array<string,array<string,array{
+     * @param array<string,array<number,array{
      *      gc_id: number,
      *      gc_title: string,
      *      grader_id: string,

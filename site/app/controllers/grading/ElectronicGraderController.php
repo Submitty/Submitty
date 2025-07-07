@@ -1105,7 +1105,7 @@ class ElectronicGraderController extends AbstractController {
             $key = "ag_user_id";
         }
         for ($i = 0; $i < count($activeGradersData); $i++) {
-            $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_title']][] = $activeGradersData[$i];
+            $activeGraders[$activeGradersData[$i][$key]][$activeGradersData[$i]['gc_id']][] = $activeGradersData[$i];
         }
 
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $anon_mode, $overrides, $anon_ids, $inquiry_status, $filter_withdrawn_student, $grading_details_columns, $activeGraders);

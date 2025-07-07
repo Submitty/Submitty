@@ -276,7 +276,7 @@
             {% elseif column.function == "autograding_peer" %}
                 {{ _self.render_column_autograding_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "graded_questions" %}
-                {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) }}
             {% elseif column.function == "grading" %}
                 {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
@@ -311,8 +311,6 @@
                 {{ _self.render_column_user_family(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
                 {{ _self.render_column_viewed_grade(context, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
-            {% elseif column.function == "active_graders" %}
-                {{ _self.render_column_active_graders(context, section, graded_gradeable, index, info, column, active_graders) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -409,13 +407,19 @@
 {% endmacro %}
 
 {# Graded Questions #}
-{% macro render_column_graded_questions(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) %}
     <td class="td-graded-questions" style="text-align: center">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
             {% if core.getUser().accessGrading() %}
-                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
+                    {% set user_id = graded_gradeable.getSubmitter().getId() %}
+                    {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
+                    {% set component_graders = user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] is defined ? user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] : {} %}
+
+                    {% if component_graders is not empty %}
+                        <i title="Currently being graded by: {{ component_graders | map(grader => grader.grader_id) | join(', ') }}" class="fas fa-circle grader-active"></i>
+                    {%  elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                     {% else %}
                         {% if info.graded_groups[index] =="peer-null"   %}
@@ -757,19 +761,6 @@
     {% else %}
         <td></td>
     {% endif %}
-{% endmacro %}
-
-{# Active Graders #}
-{% macro render_column_active_graders(context, section, graded_gradeable, index, info, column, active_graders) %}
-    <td>
-    {% set user_id = graded_gradeable.getSubmitter().getId() %}
-    {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
-    {% include 'Vue.twig' with {
-        'component': 'activeGraders',
-        'args': {
-            "userGraders": user_graders
-        }
-    } %}
 {% endmacro %}
 
 {# /Column functions #}
