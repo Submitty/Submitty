@@ -502,6 +502,7 @@ HTML;
      * @param array<string, bool> $overrides
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
+     * @param bool $filter_withdrawn_student
      * @param array<string,bool> $grading_details_columns
      * @param array<string,array<string,array{
      *      gc_id: number,
@@ -512,7 +513,7 @@ HTML;
      * }>> $active_graders
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, bool $filter_withdrawn_student, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -857,12 +858,12 @@ HTML;
         if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
             if ($view_all) {
                 if (count($grader_registration_sections) !== 0) {
-                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
+                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Toggle "Only Assigned Sections" to see only your sections.';
                     $message_warning = true;
                 }
             }
             elseif (count($grader_registration_sections) === 0) {
-                $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
+                $message = 'Notice: You are not assigned to grade any students for this gradeable. Untoggle "Only Assigned Sections" to see the whole class.';
                 $message_warning = true;
             }
         }
@@ -929,9 +930,12 @@ HTML;
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
             "inquiry_status" => $inquiry_status,
+            "filter_withdrawn_student" => $filter_withdrawn_student,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
+            "full_access_grader_permission" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
+            "is_limited_access_grader" => ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
@@ -1654,7 +1658,7 @@ HTML;
             $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         }
         // Disable grading if the requested version isn't the active one
-        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
+        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0
             || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
@@ -1679,7 +1683,7 @@ HTML;
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
-                "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
+                "student_grader" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
@@ -1695,7 +1699,7 @@ HTML;
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-        $is_student = $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $is_student = $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {
