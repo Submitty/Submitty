@@ -11,7 +11,7 @@ const exports = {
         const app = await (async () => {
             try {
                 // https://vite.dev/guide/features.html#glob-import
-                const modules = import.meta.glob(['./components/**/*.vue', './components/*.vue', './pages/*.vue'], { import: 'default' });
+                const modules = import.meta.glob(['./components/**/*.vue', './pages/*.vue'], { import: 'default' });
                 const path = `./${type}s/${name}.vue`;
                 if (!(path in modules)) {
                     throw new Error(`Module ${path} not found`);
