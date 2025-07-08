@@ -47,7 +47,7 @@ class Redaction extends AbstractModel implements \JsonSerializable {
 
     /**
      * Returns the JSON representation of the redaction.
-     * @return array<{page_number: int, coordinates: array<float>}>
+     * @return array{page_number: int, coordinates: array<float>}
      */
     public function jsonSerialize(): array {
         return [
