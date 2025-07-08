@@ -60,3 +60,37 @@ export function buildUrl(parts = [], include_base = false) {
 
     return `${url}courses/${getCurrentSemester()}/${parts.join('/')}`;
 }
+
+/**
+ * Verify the WebSocket functionality of a given request.
+ *
+ * @param {String} user - The user to verify the WebSocket functionality for
+ * @param {String} method - The HTTP method to use for the request
+ * @param {String} url - The URL to send the request to
+ * @param {Object} body - The body of the request, which can be a FormData object or a JSON object
+ * @param {Function} verifyResponse - The method to call once the response can be verified, which should verify the response and updates to the DOM
+ */
+export function verifyWebSocketFunctionality(
+    method = 'GET',
+    url = '',
+    body = {},
+    verifyResponse = () => {},
+) {
+    cy.window().then(async (window) => {
+        if (body instanceof FormData) {
+            body.append('csrf_token', window.csrfToken);
+        }
+        else {
+            body.csrf_token = window.csrfToken;
+        }
+
+        cy.request({
+            headers: { 'Content-Type': body instanceof FormData ? 'multipart/form-data' : 'application/json' },
+            method: method,
+            url: url,
+            body: body,
+        }).then((response) => {
+            verifyResponse(response);
+        });
+    });
+}

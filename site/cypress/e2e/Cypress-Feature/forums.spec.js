@@ -1,3 +1,5 @@
+import { buildUrl, verifyWebSocketFunctionality } from '../../support/utils';
+
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
@@ -122,6 +124,28 @@ describe('Forum Thread Lock Date Functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Should verify WebSocket functionality', () => {
+        // Visit the forum thread page
+        cy.visit(['sample', 'forum']);
+
+        // Create a new thread via a POST request
+        const formData = new FormData();
+        formData.append('title', 'WebSocket Title Test');
+        formData.append('markdown_status', 0);
+        formData.append('lock_thread_date', '');
+        formData.append('thread_post_content', 'WebSocket Content Test');
+        formData.append('cat[]', '2'); //  TODO: to prevent flaky tests, fetch all categories to not map to magic numbers ["Question" == 2]
+        formData.append('expirationDate', new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString()); // 1 week from now
+        formData.append('thread_status', -1);
+
+        verifyWebSocketFunctionality('POST', buildUrl(['sample', 'forum', 'threads', 'new'], true), formData, (response) => {
+            expect(response.status).to.eq(200);
+            cy.get('[data-testid="thread-list-item"]').contains('WebSocket Title Test').should('exist');
+            removeThread('WebSocket Title Test');
+            cy.get('[data-testid="thread-list-item"]').contains('WebSocket Title Test').should('not.exist');
+        });
     });
 
     it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
