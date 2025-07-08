@@ -63,7 +63,7 @@
     "@types/luxon": "^3.6.2",
     "@types/node": "^24.0.10",
     "@types/twig": "^1.12.17",
-    "@typescript-eslint/parser": "^8.35.0",
+    "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-typescript": "^14.5.1",
     "@vue/tsconfig": "^0.7.0",
