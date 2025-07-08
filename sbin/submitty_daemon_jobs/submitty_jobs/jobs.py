@@ -437,6 +437,7 @@ class UpdateSystemInfo(AbstractJob):
         pass
 
 
+# Used to regenerate images for all submissions in a bulk upload
 class RegenerateBulkImages(AbstractJob):
     def run_job(self):
         folder = self.job_details["pdf_file_path"]

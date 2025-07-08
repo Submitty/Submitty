@@ -45,7 +45,11 @@ class Redaction extends AbstractModel implements \JsonSerializable {
         $this->y2 = $y2;
     }
 
-    public function jsonSerialize(): mixed {
+    /**
+     * Returns the JSON representation of the redaction.
+     * @return array<{page_number: int, coordinates: array<float>}>
+     */
+    public function jsonSerialize(): array {
         return [
             'page_number' => $this->page_number,
             "coordinates" => [$this->x1, $this->y1, $this->x2, $this->y2]

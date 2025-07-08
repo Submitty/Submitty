@@ -2001,14 +2001,16 @@ class AdminGradeableController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["GET"])]
-    public function getRedactions(string $gradeable_id): void {
+    public function getRedactions(string $gradeable_id): JsonResponse {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             // tryGetGradeable will have already rendered an error message
-            return;
+            return JsonResponse::getFailResponse("Unknown gradeable");
         }
 
-        $this->core->getOutput()->renderJsonSuccess(array_map(fn($r) => $r->jsonSerialize(), $gradeable->getRedactions()));
+        return JsonResponse::getSuccessResponse(
+            array_map(fn($r) => $r->jsonSerialize(), $gradeable->getRedactions())
+        );
     }
 
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["POST"])]
@@ -2053,7 +2055,7 @@ class AdminGradeableController extends AbstractController {
         $job_path = FileUtils::joinPaths($daemon_job_queue_path, "regenerate_bulk_images__{$semester}__{$course}__{$gradeable_id}.json");
         $job_data = [
             "job" => "RegenerateBulkImages",
-            "pdf_file_path" => FileUtils::joinPaths("/var/local/submitty/courses", $semester, $course, "submissions", $gradeable_id),
+            "pdf_file_path" => FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $semester, $course, "submissions", $gradeable_id),
             "redactions" =>  array_map(fn($r) => $r->jsonSerialize(), $redactions),
         ];
 

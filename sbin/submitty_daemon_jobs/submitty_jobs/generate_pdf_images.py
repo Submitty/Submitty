@@ -60,7 +60,8 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
                 x1 = int(redaction.coordinates[2] * img.size[0])
                 y1 = int(redaction.coordinates[3] * img.size[1])
 
-                # Create a grid of squares within the redaction area
+                # Create a grid of black and grey squares within the redaction area
+                # Loops ensure that the checkered pattern is created
                 for y in range(y0, y1, square_size):
                     for x in range(x0, x1, square_size):
                         fill_color = "black" if ((x // square_size + y // square_size) % 2 == 0) else "grey"

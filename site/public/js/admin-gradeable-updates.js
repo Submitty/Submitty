@@ -79,7 +79,7 @@ function updatePdfPageSettings() {
 
 async function updateRedactionsDisplay(redactions = null) {
     if (!redactions) {
-        const response = await $.ajax({
+        const response = await $.get({
             type: 'GET',
             url: buildCourseUrl(['gradeable', $('#g_id').val(), 'redactions']),
             dataType: 'json',
