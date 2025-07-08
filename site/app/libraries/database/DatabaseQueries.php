@@ -9587,33 +9587,9 @@ ORDER BY
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @param array<Redaction> $redactions
+     * @param string $user_id the userid of the user
+     * @return array<string>
      */
-    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
-        $this->course_db->beginTransaction();
-        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
-
-        $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
-        $params = [];
-
-        foreach ($redactions as $redaction) {
-            $params[] = $gradeable->getId();
-            $params[] = $redaction->getPageNumber();
-            $params[] = $redaction->getX1();
-            $params[] = $redaction->getY1();
-            $params[] = $redaction->getX2();
-            $params[] = $redaction->getY2();
-        }
-
-        $this->course_db->query(
-            "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES " . $param_text,
-            $params
-        );
-
-        $this->course_db->commit();
-    }
-
     public function getInstructorQueries($user_id): array {
         $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
         return $this->submitty_db->rows();
@@ -9644,5 +9620,33 @@ ORDER BY
             [$user_id, $query_id]
         );
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array<Redaction> $redactions
+     */
+    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
+        $this->course_db->beginTransaction();
+        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
+
+        $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
+        $params = [];
+
+        foreach ($redactions as $redaction) {
+            $params[] = $gradeable->getId();
+            $params[] = $redaction->getPageNumber();
+            $params[] = $redaction->getX1();
+            $params[] = $redaction->getY1();
+            $params[] = $redaction->getX2();
+            $params[] = $redaction->getY2();
+        }
+
+        $this->course_db->query(
+            "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES " . $param_text,
+            $params
+        );
+
+        $this->course_db->commit();
     }
 }
