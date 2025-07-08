@@ -193,7 +193,9 @@ describe('Docker UI Test', () => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
                 return exists;
             });
-        }, 10000, 500);
+        }, 60000, 500);
+
+        cy.reload();
 
         // Check if the image can be removed
         cy.get('[data-image-id="submitty/prolog:8"]')
@@ -227,7 +229,10 @@ describe('Docker UI Test', () => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
                 return !exists;
             });
-        }, 10000, 500);
+        }, 60000, 500);
+
+        cy.reload();
+
         // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
