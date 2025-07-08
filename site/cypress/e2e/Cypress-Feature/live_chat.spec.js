@@ -116,20 +116,16 @@ const checkAnon = (title, expectedAnon) => {
 const createChatroom = (title, description, isAnon) => {
     cy.get('[data-testid="new-chatroom-btn"]').should('exist');
     cy.get('[data-testid="new-chatroom-btn"]').click();
-    cy.get('[data-testid="new-chatroom-btn"]').then(() => {
-        cy.get('[data-testid="chatroom-name-entry"]').should('exist').type(title, { force: true });
-        cy.get('[data-testid="chatroom-description-entry"]').should('exist').type(description, { force: true });
-        if (!isAnon) {
-            cy.get('[data-testid="enable-disable-anon"]').should('exist').click();
-        }
-        cy.get('[data-testid="submit-chat-creation"]').should('exist');
-        cy.get('[data-testid="submit-chat-creation"]').click({ force: true });
-        cy.get('[data-testid="submit-chat-creation"]').then(() => {
-            checkChatExists(title);
-            checkDescription(title, description);
-            checkAnon(title, isAnon);
-        });
-    });
+    cy.get('[data-testid="chatroom-name-entry"]').should('exist').type(title, { force: true });
+    cy.get('[data-testid="chatroom-description-entry"]').should('exist').type(description, { force: true });
+    if (!isAnon) {
+        cy.get('[data-testid="enable-disable-anon"]').should('exist').click();
+    }
+    cy.get('[data-testid="submit-chat-creation"]').should('exist');
+    cy.get('[data-testid="submit-chat-creation"]').click({ force: true });
+    checkChatExists(title);
+    checkDescription(title, description);
+    checkAnon(title, isAnon);
 };
 
 const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAnon) => {
@@ -173,21 +169,15 @@ const getLastMessageId = () => {
 const sendChatMessage = (text, sender, expectedId, action = false) => {
     cy.get('[data-testid="msg-input"]').should('exist');
     cy.get('[data-testid="msg-input"]').type(text);
-    cy.get('[data-testid="msg-input"]').then(() => {
-        if (action) {
-            cy.get('[data-testid="msg-input"]').type('{enter}');
-            cy.get('[data-testid="msg-input"]').then(() => {
-                checkChatMessage(text, sender, expectedId);
-            });
-        }
-        else {
-            cy.get('[data-testid="send-btn"]').should('exist');
-            cy.get('[data-testid="send-btn"]').click();
-            cy.get('[data-testid="send-btn"]').then(() => {
-                checkChatMessage(text, sender, expectedId);
-            });
-        }
-    });
+    if (action) {
+        cy.get('[data-testid="msg-input"]').type('{enter}');
+        checkChatMessage(text, sender, expectedId);
+    }
+    else {
+        cy.get('[data-testid="send-btn"]').should('exist');
+        cy.get('[data-testid="send-btn"]').click();
+        checkChatMessage(text, sender, expectedId);
+    }
 };
 
 const generateMessageID = () => {
