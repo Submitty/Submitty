@@ -9593,10 +9593,10 @@ ORDER BY
     public function updateRedactions(Gradeable $gradeable, array $redactions): void {
         $this->course_db->beginTransaction();
         $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
-    
+
         $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
         $params = [];
-        
+
         foreach ($redactions as $redaction) {
             $params[] = $gradeable->getId();
             $params[] = $redaction->getPageNumber();
@@ -9605,12 +9605,12 @@ ORDER BY
             $params[] = $redaction->getX2();
             $params[] = $redaction->getY2();
         }
-        
+
         $this->course_db->query(
             "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES " . $param_text,
             $params
         );
-    
+
         $this->course_db->commit();
     }
 

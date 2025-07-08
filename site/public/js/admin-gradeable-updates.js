@@ -92,6 +92,7 @@ async function updateRedactionsDisplay(redactions = null) {
             return;
         }
     }
+    // eslint-disable-next-line no-restricted-syntax
     $('#redactions_container').html(Twig.twig({ ref: 'Redactions' }).render({ redactions: redactions }));
 }
 
