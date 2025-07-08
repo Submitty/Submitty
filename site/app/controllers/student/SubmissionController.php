@@ -1708,12 +1708,12 @@ class SubmissionController extends AbstractController {
         if ($has_docx) {
             // Add to queue to convert Word documents to PDF files for viewing
             $doc_queue_data = [
-            "job" => "DocToPDF",
-            "term" => $this->core->getConfig()->getTerm(),
-            "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" => $gradeable->getId(),
-            "user" => $user_id,
-            "version" => $new_version
+                "job" => "DocToPDF",
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "user" => $user_id,
+                "version" => $new_version
             ];
 
             $doc_queue_file_helper = implode("__", ["doc_to_pdf", $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
