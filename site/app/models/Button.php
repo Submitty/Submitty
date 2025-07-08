@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Represents a button to display on the page
  * @package app\models
  */
-class Button extends AbstractModel {
+class Button extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string|null $title */
     protected $title;
@@ -188,5 +188,26 @@ class Button extends AbstractModel {
     }
     public function setIcon(?string $icon): void {
         $this->icon = $icon;
+    }
+
+    public function jsonSerialize(): array {
+        return [
+            'title' => $this->title,
+            'subtitle' => $this->subtitle,
+            'name' => $this->name,
+            'date' => $this->date ? $this->date->format('Y-m-d H:i:s') : null,
+            'href' => $this->href,
+            'onclick' => $this->onclick,
+            'class' => $this->class,
+            'id' => $this->id,
+            'disabled' => $this->disabled,
+            'prerequisite' => $this->prerequisite,
+            'progress' => $this->progress,
+            'title_on_hover' => $this->title_on_hover,
+            'aria_label' => $this->aria_label,
+            'badge' => $this->badge,
+            'icon' => $this->icon,
+            'prefix' => $this->prefix
+        ];
     }
 }
