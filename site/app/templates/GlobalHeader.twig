@@ -12,7 +12,7 @@
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
 
-        if (!window.Cypress && "serviceWorker" in navigator) {
+        if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("{{ service_worker_path }}")
