@@ -81,7 +81,8 @@
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% include 'Vue.twig' with {
-        'component': 'toggleColumns',
+        'type': 'component',
+        'name': 'toggleColumns',
         'style': 'display: inline;',
         'args': {
             'columns': all_columns|map(column => column.function),
