@@ -1262,10 +1262,14 @@ HTML;
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
