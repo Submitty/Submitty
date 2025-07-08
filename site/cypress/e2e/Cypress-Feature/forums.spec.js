@@ -129,9 +129,6 @@ describe('Forum Thread Lock Date Functionality', () => {
     });
 
     it('Should verify WebSocket functionality', () => {
-        // Visit the forum thread page
-        cy.visit(['sample', 'forum']);
-
         // Create a new thread via a POST request
         const body = {
             'title': title5,
@@ -142,8 +139,6 @@ describe('Forum Thread Lock Date Functionality', () => {
             'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
             'thread_status': -1,
         };
-
-        removeThread(title5);
 
         verifyWebSocketFunctionality(buildUrl(['sample', 'forum', 'threads', 'new'], true), 'POST', 'multipart/form-data', body, (response) => {
             expect(response.status).to.eq(200);
