@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Popup from './popup.vue';
-import { displaySuccessMessage } from '../../../ts/utils/server';
-import { saveSqlQuery, type ServerResponse } from '../../../ts/sql-toolbox';
+import Popup from '@/components/popup.vue';
+import { displaySuccessMessage } from '../../../../ts/utils/server';
+import { saveSqlQuery, type ServerResponse } from '@/ts/sql-toolbox';
 
 const data = defineModel<{
     query_name: string;
