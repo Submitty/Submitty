@@ -7,7 +7,7 @@ import {
 } from './ta-grading-rubric';
 
 declare global {
-interface Window {
+    interface Window {
         deleteAttachment(target: string, file_name: string): void;
         openAll (click_class: string, class_modifier: string): void;
         changeCurrentPeer(): void;
