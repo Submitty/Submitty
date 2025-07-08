@@ -8,7 +8,7 @@ function fetchMessages(chatroomId) {
         success: function (responseData) {
             if (responseData.status === 'success' && Array.isArray(responseData.data)) {
                 responseData.data.forEach((msg) => {
-                    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
+                    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
                 });
                 const messages_area = document.querySelector('.messages-area');
                 messages_area.scrollTop = messages_area.scrollHeight;
@@ -45,7 +45,7 @@ function sendMessage(chatroomId, userId, displayName, role, content, isAnonymous
     });
 }
 
-function appendMessage(displayName, role, ts, content) {
+function appendMessage(displayName, role, ts, content, msgID) {
     let display_name = displayName;
     if (role && role !== 'student' && display_name.substring(0, 9) !== 'Anonymous') {
         display_name = `${displayName} [${role}]`;
@@ -58,6 +58,9 @@ function appendMessage(displayName, role, ts, content) {
         message.classList.add('admin-message');
     }
     message.setAttribute('data-testid', 'message-container');
+    if (msgID) {
+        message.setAttribute('data-message-id', msgID);
+    }
 
     const messageHeader = document.createElement('div');
     messageHeader.classList.add('message-header');
@@ -93,7 +96,7 @@ function appendMessage(displayName, role, ts, content) {
 }
 
 function socketChatMessageHandler(msg) {
-    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content);
+    appendMessage(msg.display_name, msg.role, msg.timestamp, msg.content, msg.id);
 }
 
 function initChatroomSocketClient(chatroomId) {

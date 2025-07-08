@@ -46,6 +46,7 @@ class ChatroomController extends AbstractController {
         }
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
+            throw $e; // Re-throw to allow caller to handle the failure
         }
     }
 
@@ -275,10 +276,11 @@ class ChatroomController extends AbstractController {
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
         $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
-        $this->sendSocketMessage($msg_array);
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
+        $msg_array['id'] = $message->getId();
+        $this->sendSocketMessage($msg_array);
         return JsonResponse::getSuccessResponse($message);
     }
 }
