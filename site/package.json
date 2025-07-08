@@ -81,7 +81,7 @@
     "jest": "^30.0.3",
     "jest-environment-jsdom": "^30.0.2",
     "node-fetch": "^2.7.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "regenerator-runtime": "^0.14.1",
     "stylelint": "^16.21.1",
     "stylelint-config-standard": "^38.0.0",
