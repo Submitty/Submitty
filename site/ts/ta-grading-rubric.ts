@@ -1202,7 +1202,7 @@ function setupSortableMarks(component_id: number) {
 function setupSortableComponents() {
     const componentList = $('#component-list');
     componentList.sortable({
-        update: void onComponentOrderChange,
+        update: () => void onComponentOrderChange(),
         handle: '.reorder-component-container',
     });
     componentList.on('keydown', keyPressHandler);
