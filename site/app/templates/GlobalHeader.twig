@@ -250,7 +250,8 @@
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
         {% include 'Vue.twig' with {
-            'component': 'performanceWarning',
+            'type': 'component',
+            'name': 'performanceWarning',
             'args': {
                 "performanceWarning": performance_warning,
                 "submittyQueries": submitty_queries,
