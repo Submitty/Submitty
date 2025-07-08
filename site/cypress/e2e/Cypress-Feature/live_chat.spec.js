@@ -172,20 +172,23 @@ const getLastMessageId = () => {
 
 const sendChatMessage = (text, sender, expectedId, action = false) => {
     cy.get('[data-testid="msg-input"]').should('exist');
-    cy.get('[data-testid="msg-input"]').type(text).then(() => {
+    cy.get('[data-testid="msg-input"]').type(text);
+    cy.get('[data-testid="msg-input"]').then(() => {
         if (action) {
-            cy.get('[data-testid="msg-input"]').type('{enter}').then(() => {
+            cy.get('[data-testid="msg-input"]').type('{enter}');
+            cy.get('[data-testid="msg-input"]').then(() => {
                 checkChatMessage(text, sender, expectedId);
             });
         }
-        else{
+        else {
             cy.get('[data-testid="send-btn"]').should('exist');
-            cy.get('[data-testid="send-btn"]').click().then(() => {
+            cy.get('[data-testid="send-btn"]').click();
+            cy.get('[data-testid="send-btn"]').then(() => {
                 checkChatMessage(text, sender, expectedId);
             });
         }
     });
-}
+};
 
 const generateMessageID = () => {
     return cy.get('[data-testid="msg-input"]').should('exist').then(() => {
@@ -196,18 +199,18 @@ const generateMessageID = () => {
         cy.reload();
         return getLastMessageId();
     });
-}
+};
 
 const leaveChat = (title) => {
     cy.get('[data-testid="leave-chat"]').click();
     checkChatExists(title);
-}
+};
 
 const visitLiveChat = (user) => {
     cy.logout();
     cy.login(user);
     cy.visit(['sample', 'chat']);
-}
+};
 
 describe('Tests for enabling Live Chat', () => {
     beforeEach(() => {
@@ -247,7 +250,7 @@ describe('Tests for creating, editing and using tests', () => {
     });
 
     afterEach(() => {
-        visitLiveChat('instructor')
+        visitLiveChat('instructor');
         deleteChatroom(title1);
         deleteChatroom(title2);
         toggleLiveChat(false).then(() => {
@@ -390,6 +393,5 @@ describe('Tests for creating, editing and using tests', () => {
             });
             deleteChatroom(title1);
         });
-        
     });
 });
