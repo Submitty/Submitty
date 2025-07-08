@@ -95,13 +95,13 @@ const checkChatExists = (title, exists = true) => {
 
 const checkDescription = (title, description) => {
     getChatroom(title).find('[data-testid="chatroom-description"]').then(($el) => {
-        expect($el.text().trim() === description);
+        expect($el.text().trim()).to.equal(description);
     });
 };
 
 const checkHost = (title, host) => {
     getChatroom(title).find('[data-testid="chatroom-host"]').then(($el) => {
-        expect($el.text().trim() === host);
+        expect($el.text().trim()).to.equal(host);
     });
 };
 
@@ -147,45 +147,56 @@ const editChatroom = (oldTitle, newTitle, newDescription, toggleAnon, expectedAn
         }
         cy.get('[data-testid="submit-chat-edit"]').should('exist');
         cy.get('[data-testid="submit-chat-edit"]').click({ force: true });
-        cy.get('[data-testid="submit-chat-edit"]').then(() => {
-            checkChatExists(newTitle);
-            checkDescription(newTitle, newDescription);
-            checkAnon(newTitle, expectedAnon);
-        });
+        checkChatExists(newTitle);
+        checkDescription(newTitle, newDescription);
+        checkAnon(newTitle, expectedAnon);
     });
 };
 
-const checkChatMessage = (text, name) => {
-    const message = cy.get('[data-testid="message-container"]').last().text;
-    expect(message === text);
-    const sender = cy.get('[data-testid="sender-name"]').last().text ?? '';
-    expect(sender.includes(name));
+const checkChatMessage = (text, name, id) => {
+    cy.get(`[data-message-id="${id}"]`).should('contain.text', text);
+    cy.get(`[data-message-id="${id}"]`).should('contain.text', name);
 };
 
 const getAnonName = () => {
-    return cy.get('[data-testid="sender-name"]').last().text;
-};
-
-const sendChatMessage = (text, sender) => {
-    cy.get('[data-testid="msg-input"]').should('exist');
-    cy.get('[data-testid="msg-input"]').type(text);
-    cy.get('[data-testid="msg-input"]').then(() => {
-        cy.get('[data-testid="send-btn"]').should('exist');
-        cy.get('[data-testid="send-btn"]').click();
-        cy.get('[data-testid="send-btn"]').then(() => {
-            checkChatMessage(text, sender);
-        });
+    return cy.get('[data-testid="sender-name"]').last().then(($el) => {
+        return $el.text().trim();
     });
 };
 
-const sendChatMessageEnter = (text, sender) => {
-    cy.get('[data-testid="msg-input"]').should('exist');
-    cy.get('[data-testid="msg-input"]').type(text);
-    cy.get('[data-testid="msg-input"]').type('{enter}');
-    cy.get('[data-testid="msg-input"]').then(() => {
-        checkChatMessage(text, sender);
+const getLastMessageId = () => {
+    return cy.get('[data-testid="message-container"]').last().then(($el) => {
+        return parseInt($el.attr('data-message-id'));
     });
 };
+
+const sendChatMessage = (text, sender, expectedId, action = false) => {
+    cy.get('[data-testid="msg-input"]').should('exist');
+    cy.get('[data-testid="msg-input"]').type(text).then(() => {
+        if (action) {
+            cy.get('[data-testid="msg-input"]').type('{enter}').then(() => {
+                checkChatMessage(text, sender, expectedId);
+            });
+        }
+        else{
+            cy.get('[data-testid="send-btn"]').should('exist');
+            cy.get('[data-testid="send-btn"]').click().then(() => {
+                checkChatMessage(text, sender, expectedId);
+            });
+        }
+    });
+}
+
+const generateMessageID = () => {
+    return cy.get('[data-testid="msg-input"]').should('exist').then(() => {
+        return cy.get('[data-testid="msg-input"]').type('grabid');
+    }).then(() => {
+        return cy.get('[data-testid="msg-input"]').type('{enter}');
+    }).then(() => {
+        cy.reload();
+        return getLastMessageId();
+    });
+}
 
 const leaveChat = (title) => {
     cy.get('[data-testid="leave-chat"]').click();
@@ -279,24 +290,26 @@ describe('Tests for creating, editing and using tests', () => {
         createChatroom(title1, description1, false);
         startChatSession(title1);
         getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-        sendChatMessage(msgText1, name1);
-        sendChatMessage(msgText3, name1);
-        // Check for leave chat button, check for chat state from other user
-        leaveChat(title1);
-        visitLiveChat('student');
-        checkChatExists(title1);
-        checkDescription(title1, description1);
-        checkHost(title1, name1);
-        getChatroom(title1);
-        // Add new messages, check for chat message
-        getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-        checkChatMessage(msgText3, name1);
-        sendChatMessage(msgText2, name2);
-        // Check for message existence after reload, check that clicking enter sends a message
-        cy.reload();
-        checkChatMessage(msgText2, name2);
-        sendChatMessageEnter(msgText3, name2);
-        leaveChat(title1);
+        generateMessageID().then((baseId) => {
+            sendChatMessage(msgText1, name1, baseId + 1);
+            sendChatMessage(msgText3, name1, baseId + 2);
+            // Check for leave chat button, check for chat state from other user
+            leaveChat(title1);
+            visitLiveChat('student');
+            checkChatExists(title1);
+            checkDescription(title1, description1);
+            checkHost(title1, name1);
+            getChatroom(title1);
+            // Add new messages, check for chat message
+            getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
+            checkChatMessage(msgText3, name1, baseId + 2);
+            sendChatMessage(msgText2, name2, baseId + 3);
+            // Check for message existence after reload, check that clicking enter sends a message
+            cy.reload();
+            checkChatMessage(msgText2, name2, baseId + 3);
+            sendChatMessage(msgText3, name2, baseId + 4, true);
+            leaveChat(title1);
+        });
     });
 
     it('Should test anonymity', () => {
@@ -304,41 +317,47 @@ describe('Tests for creating, editing and using tests', () => {
         createChatroom(title1, description1, true);
         startChatSession(title1);
         getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
-        sendChatMessage(msgText1, 'Anonymous');
-        sendChatMessage(msgText3, 'Anonymous');
-        const instructorAnon = getAnonName();
-        // Check that messages are still anonymous after leaving and rejoining, with the same anon name as before.
-        leaveChat(title1);
-        getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
-        checkChatMessage(msgText3, instructorAnon);
-        // Check for this even when rejoining non-anon
-        leaveChat(title1);
-        getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-        checkChatMessage(msgText3, instructorAnon);
-        sendChatMessage(msgText3, name1);
-        // Check that the student sees the non-anon name
-        visitLiveChat('student');
-        getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
-        checkChatMessage(msgText3, name1);
-        sendChatMessage(msgText2, name2);
-        leaveChat(title1);
-        // Check for student anonymous function
-        getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
-        checkChatMessage(msgText2, name2);
-        sendChatMessage(msgText2, 'Anonymous');
-        const studentAnon = getAnonName();
-        // expect(instructorAnon !== studentAnon); TODO: Add all anon names in a chat to a list so that it's impossible to have two equivalent names.
-        leaveChat(title1);
-        // Login to instructor, check for correct anonymous name and for anonymous name remaining across logins
-        visitLiveChat('instructor');
-        getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
-        checkChatMessage(msgText2, studentAnon);
-        sendChatMessage(msgText3, instructorAnon);
-        leaveChat(title1);
-        deleteChatroom(title1);
+        generateMessageID().then((baseId) => {
+            sendChatMessage(msgText1, 'Anonymous', baseId + 1);
+            sendChatMessage(msgText3, 'Anonymous', baseId + 2);
+            // Get the instructor's anonymous name and use it in subsequent tests
+            getAnonName().then((instructorAnon) => {
+                // Check that messages are still anonymous after leaving and rejoining, with the same anon name as before.
+                leaveChat(title1);
+                getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
+                checkChatMessage(msgText3, instructorAnon, baseId + 2);
+                // Check for this even when rejoining non-anon
+                leaveChat(title1);
+                getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
+                checkChatMessage(msgText3, instructorAnon, baseId + 2);
+                sendChatMessage(msgText2, name1, baseId + 3);
+                // Check that the student sees the non-anon name
+                visitLiveChat('student');
+                getChatroom(title1).find('[data-testid="chat-join-btn"]').click();
+                checkChatMessage(msgText2, name1, baseId + 3);
+                sendChatMessage(msgText2, name2, baseId + 4);
+                leaveChat(title1);
+                // Check for student anonymous function
+                getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
+                checkChatMessage(msgText2, name2, baseId + 4);
+                sendChatMessage(msgText2, 'Anonymous', baseId + 5);
+                // Get the student's anonymous name and use it in subsequent tests
+                getAnonName().then((studentAnon) => {
+                    // expect(instructorAnon !== studentAnon); TODO: Add all anon names in a chat to a list so that it's impossible to have two equivalent names.
+                    leaveChat(title1);
+                    // Login to instructor, check for correct anonymous name and for anonymous name remaining across logins
+                    visitLiveChat('instructor');
+                    getChatroom(title1).find('[data-testid="anon-chat-join-btn"]').click();
+                    checkChatMessage(msgText2, studentAnon, baseId + 5);
+                    sendChatMessage(msgText3, instructorAnon, baseId + 6);
+                    leaveChat(title1);
+                    deleteChatroom(title1);
+                });
+            });
+        });
     });
 
-    it('Should test socket functionality', () => {
+    it('Should test WebSocket functionality', () => {
         let id = NaN;
         createChatroom(title1, description1, true);
         startChatSession(title1);
@@ -347,27 +366,30 @@ describe('Tests for creating, editing and using tests', () => {
             expect(id).to.be.a('number');
             cy.visit(['sample', 'chat', id]);
         });
-
-        // Add the message via a request
-        getApiKey('instructor', 'instructor').then((key) => {
-            cy.request({
-                method: 'POST',
-                url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/send/anonymous`,
-                body: {
-                    content: 'check',
-                    user_id: 'instructor',
-                    display_name: 'Quinn+Instructor',
-                    role: 'instructor',
-                },
-                headers: {
-                    Authorization: key,
-                },
-            }).then((response) => {
-                // Verify a successful response and that the WebSocket message handler added the message
-                expect(response.body.status).to.eql('success');
-                checkChatMessage('check', name1);
+        generateMessageID().then((messageId) => {
+            // Add the message via a request
+            getApiKey('instructor', 'instructor').then((key) => {
+                cy.request({
+                    method: 'POST',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/chat/${id}/send`,
+                    body: {
+                        content: 'check',
+                        user_id: 'instructor',
+                        display_name: 'Quinn+Instructor',
+                        role: 'instructor',
+                    },
+                    headers: {
+                        Authorization: key,
+                    },
+                }).then((response) => {
+                    // Verify a successful response and that the WebSocket message handler added the message
+                    expect(response.body.status).to.eql('success');
+                    // Get the message ID from the response if available
+                    checkChatMessage('check', name1, messageId + 1);
+                });
             });
+            deleteChatroom(title1);
         });
-        deleteChatroom(title1);
+        
     });
 });
