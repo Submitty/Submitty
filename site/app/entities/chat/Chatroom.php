@@ -112,7 +112,7 @@ class Chatroom {
         $this->messages->add($message);
     }
 
-    public function deleteChat() {
+    public function deleteChat(): void {
         $this->is_deleted = true;
     }
 
