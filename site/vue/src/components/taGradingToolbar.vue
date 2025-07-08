@@ -51,7 +51,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
     optional-spanid="fullscreen-btn-cont"
   />
   <NavigationButton
-    :on-click="togglePanelSelectorModal"
+    :on-click="() => togglePanelSelectorModal(true)"
     :icons="['fa-columns']"
     button-id="two-panel-mode-btn"
     title="Toggle the two panel mode"
@@ -61,6 +61,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
   <NavigationButton
     :on-click="exchangeTwoPanels"
     :icons="['fa-exchange-alt']"
+    button-id="two-panel-exchange-btn"
     title="Exchange the panel positions"
     optional-spanid="two-panel-exchange-btn"
   />
