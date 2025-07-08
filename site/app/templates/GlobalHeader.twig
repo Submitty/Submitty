@@ -132,23 +132,21 @@
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
-                <ul>
-                    {% include 'Vue.twig' with {
-                        'type': 'component',
-                        'name': 'sidebar/button',
-                        'args': {
-                                "buttons": sidebar_buttons,
-                                "mobile": true
-                            }
+                {% include 'Vue.twig' with {
+                    'type': 'component',
+                    'name': 'sidebar/button',
+                    'args': {
+                            "buttons": sidebar_buttons,
+                            "mobile": true
                         }
-                    %}
-                    {% set total_notifications = 0 %}
-                    {% for button in sidebar_buttons %}
-                        {% if button.getBadge() %}
-                            {% set total_notifications = total_notifications + button.getBadge() %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
+                    }
+                %}
+                {% set total_notifications = 0 %}
+                {% for button in sidebar_buttons %}
+                    {% if button.getBadge() %}
+                        {% set total_notifications = total_notifications + button.getBadge() %}
+                    {% endif %}
+                {% endfor %}
             </div>
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
@@ -285,16 +283,14 @@
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
                 <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
-                    <ul>
-                        {% include 'Vue.twig' with {
-                            'type': 'component',
-                            'name': 'sidebar/button',
-                            'args': {
-                                "buttons": sidebar_buttons,
-                                "mobile": false 
-                            }
-                        } %}
-                    </ul>
+                    {% include 'Vue.twig' with {
+                        'type': 'component',
+                        'name': 'sidebar/button',
+                        'args': {
+                            "buttons": sidebar_buttons,
+                            "mobile": false 
+                        }
+                    } %}
                 </aside>
             {% endif %}
             <main id="main" data-testid="content-main">
