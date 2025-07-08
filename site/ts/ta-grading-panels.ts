@@ -10,16 +10,16 @@ declare global {
 }
 
 // Panel elements info to be used for layout designs
-type PanelElement =
-    | 'autograding_results'
-    | 'grading_rubric'
-    | 'submission_browser'
-    | 'solution_ta_notes'
-    | 'student_info'
-    | 'grade_inquiry_info'
-    | 'discussion_browser'
-    | 'peer_info'
-    | 'notebook-view';
+type PanelElement
+    = | 'autograding_results'
+        | 'grading_rubric'
+        | 'submission_browser'
+        | 'solution_ta_notes'
+        | 'student_info'
+        | 'grade_inquiry_info'
+        | 'discussion_browser'
+        | 'peer_info'
+        | 'notebook-view';
 
 let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'autograding_results', icon: '.grading_toolbar .fa-list' },
