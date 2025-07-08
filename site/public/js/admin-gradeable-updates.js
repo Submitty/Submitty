@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig, loadTemplates */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, Twig, loadTemplates, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -481,6 +481,7 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
             const make_info = response['data'][2];
 
             if (build_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#build-log-body').html(build_info);
                 for (const line of build_info.split('\n')) {
                     if (line.includes('WARNING:')) {
@@ -494,18 +495,21 @@ function ajaxGetBuildLogs(gradeable_id, rebuilt = false) {
                 }
             }
             else {
-                $('#build-log-body').html('There is currently no build output.');
+                $('#build-log-body').text('There is currently no build output.');
             }
             if (cmake_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#cmake-log-body').html(cmake_info);
             }
             else {
-                $('#cmake-log-body').html('There is currently no cmake output.');
+                $('#cmake-log-body').text('There is currently no cmake output.');
             }
             if (make_info !== null) {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html(make_info);
             }
             else {
+                // eslint-disable-next-line no-restricted-syntax
                 $('#make-log-body').html('There is currently no make output.');
             }
 
@@ -532,34 +536,33 @@ function ajaxCheckBuildStatus() {
         success: function (response) {
             $('#rebuild-log-button').css('display', 'block');
             if (response['data'] === 'queued') {
-                $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
                 return;
             }
             else if (response['data'] === 'processing') {
-                $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild-status').text(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild-log-button').css('display', 'none');
                 setTimeout(ajaxCheckBuildStatus, 1000);
                 return;
             }
-
-            if (response['data'] === 'warnings') {
-                $('#rebuild-status').html('Gradeable built with warnings');
+            else if (response['data'] === 'warnings') {
+                $('#rebuild-status').text('Gradeable built with warnings');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == true) {
                 $('.config_search_error').hide();
-                $('#rebuild-status').html('Gradeable build complete');
+                $('#rebuild-status').text('Gradeable build complete');
             }
             // eslint-disable-next-line eqeqeq
             else if (response['data'] == false) {
-                $('#rebuild-status').html('Gradeable build failed');
+                $('#rebuild-status').text('Gradeable build failed');
                 $('#autograding_config_error').text('The current configuration is not valid, please check the build log for details.');
                 $('.config_search_error').show();
             }
             else {
-                $('#rebuild-status').html('Error');
+                $('#rebuild-status').text('Error');
                 console.error('Internal server error, please try again.');
             }
 
@@ -1011,28 +1014,29 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
-// Register beforeunload listener once
+let originalConfigContent = null;
+let codeMirrorInstance = null;
+let current_g_id = null;
+let current_file_path = null;
+let isConfigEdited = false;
+
 window.addEventListener('beforeunload', (event) => {
-    const isEdited = $('#gradeable-config-edit').data('edited');
-    if (isEdited) {
+    if (isConfigEdited) {
         event.preventDefault();
-        event.return = '';
     }
 });
 
-let originalConfigContent = null;
-
 // When the text editor opens, the user shouldn't have to manually scroll to see the contents
 function scrollToBottom() {
-    window.scrollTo({ top: 800, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
 }
 
-let current_g_id = null;
-let current_file_path = null;
-
 function updateGradeableEditor(g_id, file_path) {
-    // If no file has been selected yet or it is not the currently selected one
-    if ((current_g_id === null && current_file_path === null) || (current_g_id !== g_id || current_file_path !== file_path)) {
+    if ((current_g_id !== g_id || current_file_path !== file_path)) {
+        $('#gradeable-config-edit').data('edited', false);
+
+        closeCodeMirrorInstance();
+
         current_g_id = g_id;
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
@@ -1057,7 +1061,9 @@ function loadGradeableEditor(g_id, file_path) {
                     return;
                 }
 
-                $('#gradeable-config-edit-bar').show();
+                if (!$('#gradeable-config-edit-bar').is(':visible')) {
+                    $('#gradeable-config-edit-bar').show();
+                }
 
                 const configData = json['data'];
                 originalConfigContent = configData.config_content;
@@ -1075,6 +1081,7 @@ function loadGradeableEditor(g_id, file_path) {
 
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
+                loadCodeMirror();
                 scrollToBottom();
             }
             catch {
@@ -1130,12 +1137,22 @@ function toggleGradeableConfigEdit() {
 function cancelGradeableConfigEdit() {
     $('#gradeable-config-edit-bar').hide();
     $('#gradeable-config-edit').data('edited', false);
+    isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
+
+    closeCodeMirrorInstance();
+}
+
+function closeCodeMirrorInstance() {
+    if (codeMirrorInstance) {
+        codeMirrorInstance.toTextArea(); // Replace CodeMirror with original <textarea>
+        codeMirrorInstance = null;
+    }
 }
 
 function saveGradeableConfigEdit(g_id) {
-    const content = $('textarea#gradeable-config-edit').val();
+    const content = codeMirrorInstance?.getValue() || $('textarea#gradeable-config-edit').val();
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'save']),
         type: 'POST',
@@ -1166,5 +1183,23 @@ function saveGradeableConfigEdit(g_id) {
         error: function () {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
+    });
+}
+
+function loadCodeMirror() {
+    codeMirrorInstance = CodeMirror.fromTextArea(
+        document.getElementById('gradeable-config-edit'),
+        {
+            mode: { name: 'json', json: true },
+            theme: localStorage.theme === 'light' ? 'eclipse' : 'monokai',
+            lineNumbers: false,
+            tabSize: 2,
+            indentUnit: 2,
+            lineWrapping: true,
+        },
+    );
+    codeMirrorInstance.on('change', () => {
+        const currentContent = codeMirrorInstance.getValue();
+        isConfigEdited = currentContent !== originalConfigContent;
     });
 }
