@@ -23,8 +23,6 @@ class ReportView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Gradebook');
         $this->core->getOutput()->addInternalCss('rainbow-grades.css');
 
-        $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
-
         return $this->core->getOutput()->renderTwigTemplate("submission/RainbowGrades.twig", [
             "show_summary" => $grade_file !== null,
             "grade_file" => $grade_file,
