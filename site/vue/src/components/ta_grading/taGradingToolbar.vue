@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
-import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../ts/ta-grading-navigation';
-import { toggleFullScreenMode, exchangeTwoPanels } from '../../../ts/ta-grading-panels';
-import { togglePanelSelectorModal } from '../../../ts/panel-selector-modal';
-import NavigationButton from './navigationButton.vue';
-import { showSettings } from '../../../ts/ta-grading-keymap';
+import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '@/ts/ta-grading-toolbar';
+import NavigationButton from '@/components/ta_grading/navigationButton.vue';
+import { toggleFullScreenMode, exchangeTwoPanels } from '../../../../ts/ta-grading-panels';
+import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
+import { showSettings } from '../../../../ts/ta-grading-keymap';
 
 const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
     homeUrl: string;
@@ -83,6 +83,8 @@ const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
       max="100"
       :value="progress"
     />
-    <span class="progress-value" />
+    <span class="progress-value">
+      <b>{{ progress }}%</b>
+    </span>
   </span>
 </template>

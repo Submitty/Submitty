@@ -1,4 +1,4 @@
-import { closeAllComponents, getFirstOpenComponentId, getGradeableId, NO_COMPONENT_ID } from './ta-grading-rubric';
+import { closeAllComponents, getFirstOpenComponentId, getGradeableId, NO_COMPONENT_ID } from '../../../ts/ta-grading-rubric';
 
 function waitForAllAjaxToComplete(callback: { (): void }) {
     const checkAjax = () => {

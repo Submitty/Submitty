@@ -1,6 +1,6 @@
 import { changeStudentArrowTooltips } from './ta-grading';
 import { loadTAGradingSettingData, registerKeyHandler, settingsData } from './ta-grading-keymap';
-import { gotoNextStudent, gotoPrevStudent } from './ta-grading-navigation';
+// import { gotoNextStudent, gotoPrevStudent } from './ta-grading-navigation';
 import {
     closeComponent,
     CUSTOM_MARK_ID,
@@ -56,12 +56,12 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 }
 
 // Navigate to the prev / next student buttons
-registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
-    gotoPrevStudent();
-});
-registerKeyHandler({ name: 'Next Student', code: 'ArrowRight' }, () => {
-    gotoNextStudent();
-});
+// registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
+//     gotoPrevStudent();
+// });
+// registerKeyHandler({ name: 'Next Student', code: 'ArrowRight' }, () => {
+//     gotoNextStudent();
+// });
 
 // Key handler / shorthand for toggling in between panels
 registerKeyHandler({ name: 'Toggle Autograding Panel', code: 'KeyA' }, () => {
@@ -277,11 +277,6 @@ $(() => {
             }
         },
     );
-
-    // Progress bar value
-    const value = $('.progressbar').val() ?? 0;
-    // eslint-disable-next-line no-restricted-syntax
-    $('.progress-value').html(`<b>${String(value)}%</b>`);
 
     if (
         localStorage.getItem('notebook-setting-file-submission-expand')
