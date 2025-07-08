@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Popup from './popup.vue';
+import Popup from '@/components/popup.vue';
 import { ref } from 'vue';
-import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '../../../ts/sql-toolbox';
+import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '@/ts/sql-toolbox';
 
 const { queries } = defineProps<{
     queries: QueryListEntry[];

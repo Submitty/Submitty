@@ -2217,3 +2217,8 @@ End of slider switch
 .notebook-cell {
     padding: 0 0.5em;
 }
+
+.warning-banner {
+    background-color: var(--standard-vibrant-yellow);
+    color: var(--default-black);
+}
