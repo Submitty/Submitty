@@ -130,4 +130,8 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
   /* stylelint-disable-next-line declaration-no-important */
   padding: 8px 14px !important;
 }
+
+span > i {
+  margin-right: 10px;
+}
 </style>
