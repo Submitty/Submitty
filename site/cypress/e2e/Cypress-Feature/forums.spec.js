@@ -4,9 +4,11 @@ const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
 const title4 = 'Python Tutorials';
+const title5 = 'WebSocket Title Test';
 const content1 = 'Cypress Content 1 Cypress';
 const content2 = 'Cypress Content 2 Cypress';
 const content3 = 'Cypress Content 3 Cypress';
+const content4 = 'Cypress Content 4 Cypress';
 const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
@@ -132,49 +134,48 @@ describe('Forum Thread Lock Date Functionality', () => {
 
         // Create a new thread via a POST request
         const body = {
-            'title': 'WebSocket Title Test',
+            'title': title5,
             'markdown_status': 0,
             'lock_thread_date': '',
-            'thread_post_content': 'WebSocket Content Test',
+            'thread_post_content': content4,
             'cat[]': '2', //  TODO: to prevent flaky tests, fetch all categories to not map to magic numbers ["Question" == 2]
             'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
             'thread_status': -1,
         };
 
-        removeThread('WebSocket Title Test');
+        removeThread(title5);
 
         verifyWebSocketFunctionality(buildUrl(['sample', 'forum', 'threads', 'new'], true), 'POST', 'multipart/form-data', body, (response) => {
             expect(response.status).to.eq(200);
 
             // Verify the thread is created
-            cy.get('[data-thread_title*="WebSocket Title Test"]') // Thread container
+            cy.get(`[data-thread_title*="${title5}"]`) // Thread container
                 .should('exist')
                 .within(() => {
                     cy.get('[data-testid="thread-list-item"]') // Verify the thread title
-                        .should('contain', 'WebSocket Title Test');
+                        .should('contain', title5);
                     cy.get('.thread-content') // Verify the thread content
-                        .should('contain', 'WebSocket Content Test');
+                        .should('contain', content4);
                     cy.get('.label_forum') // Verify the thread category
                         .should('contain', 'Question');
                 });
 
-            let id = NaN;
-            cy.get('[data-thread_title*="WebSocket Title Test"]')
+            cy.get(`[data-thread_title*="${title5}"]`)
                 .should('exist')
                 .invoke('attr', 'data-thread_id')
                 .then((val) => {
-                    id = Number(val); // Parse the inserted thread ID
+                    const id = Number(val); // Parse the inserted thread ID
                     expect(id).to.be.a('number');
                     expect(id).to.be.greaterThan(0);
 
-                    cy.get('[data-thread_title*="WebSocket Title Test"]')
+                    cy.get(`[data-thread_title*="${title5}"]`) // Verify we can visit the new thread
                         .should('exist')
                         .click();
                     cy.url().should('include', buildUrl(['sample', 'forum', 'threads', id], true));
                 });
 
-            removeThread('WebSocket Title Test');
-            cy.get('[data-testid="thread-list-item"]').contains('WebSocket Title Test').should('not.exist');
+            removeThread(title5);
+            cy.get('[data-testid="thread-list-item"]').contains(title5).should('not.exist');
         });
     });
 
