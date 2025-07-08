@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import SaveSQLQueries from './saveSqlQuery.vue';
-import SqlSchema from './sqlSchema.vue';
-import RunQuery from './runQuery.vue';
-import DownloadQuery from './downloadQuery.vue';
-import type { QueryListEntry, RunQueryResults } from '../../../ts/sql-toolbox';
-import DisplayQueryResults from './displayQueryResults.vue';
-import ManageSqlQuery from './manageSqlQuery.vue';
+import SaveSQLQueries from '@/components/sql_toolbox/saveSqlQuery.vue';
+import SqlSchema from '@/components/sql_toolbox/sqlSchema.vue';
+import RunQuery from '@/components/sql_toolbox/runQuery.vue';
+import DownloadQuery from '@/components/sql_toolbox/downloadQuery.vue';
+import type { QueryListEntry, RunQueryResults } from '@/ts/sql-toolbox';
+import DisplayQueryResults from '@/components/sql_toolbox/displayQueryResults.vue';
+import ManageSqlQuery from '@/components/sql_toolbox/manageSqlQuery.vue';
 
 const { sqlStructureData, userQueriesList } = defineProps<{
     sqlStructureData: {
