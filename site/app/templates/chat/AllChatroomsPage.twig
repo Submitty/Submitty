@@ -26,48 +26,13 @@
                 </thead>
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
-                        <tr>
-                            <td>
-                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn"></a>
-                            </td>
-                            <td>
-                                {% if not chatroom.isActive() %}
-                                    <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}", "{{ base_url }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span title="{{ chatroom.getTitle() }}">
-                                    {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
-                                </span>
-                            </td>
-                            <td>
-                                <span title="{{ chatroom.getDescription() }}">
-                                    {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
-                                </span>
-                            </td>
-                            <td>
-                                <form id="chatroom_toggle_form_{{ chatroom.getId() }}" action="{{ base_url }}/{{ chatroom.getId() }}/toggleActiveStatus" method="post">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                </form>
-                                {% if not chatroom.isActive() %}
-                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)">
-                                        Start Session
-                                    </button>
-                                {% else %}
-                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)">
-                                        <i class="fas fa-pause"></i>
-                                        End Session
-                                    </button>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
-                                {% if chatroom.isAllowAnon() %}
-                                    <i> or </i>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
-                                {% endif %}
-                            </td>
-                        </tr>
+                        {% include "chat/ChatroomRow.twig" with 
+                        {"id": chatroom.getId(),
+                        "description": chatroom.getDescription(),
+                        "title": chatroom.getTitle(),
+                        "isAllowAnon": chatroom.isAllowAnon(),
+                        "isAdmin": user_admin,
+                        "isActive": chatroom.isActive()} %}
                     {% endfor %}
                 </tbody>
             {% else %} <!--student's view-->
@@ -85,35 +50,26 @@
                 </thead>
                 <tbody>
                     {% for chatroom in chatrooms %}
-                        {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr>
-                                <td>
-                                    <span class="display-short" title="{{ chatroom.getTitle() }}">
-                                        {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {{ chatroom.getHostName() }}
-                                </td>
-                                <td>
-                                    <span class="display-short" title="{{ chatroom.getDescription() }}">
-                                        {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
-                                    {% if chatroom.isAllowAnon() %}
-                                        <i> or </i>
-                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">Join As Anon.</a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
+                        {% include "chat/ChatroomRow.twig" with 
+                        { "id": chatroom.getId(),
+                        "description": chatroom.getDescription(),
+                        "title": chatroom.getTitle(),
+                        "hostName": chatroom.getHostName(),
+                        "isAllowAnon": chatroom.isAllowAnon(),
+                        "isAdmin": user_admin,
+                        "isActive": chatroom.isActive(),
+                        "baseUrl": base_url } %}
                     {% endfor %}
                 </tbody>
             {% endif %}
         </table>
     </div>
 </div>
+<script type="application/json" id="all-chatroom-data">
+    {
+        "user_admin": "{{ user_admin }}",
+        "base_url": "{{ base_url }}"
+    }
+</script>
 {% include('chat/CreateChatroomForm.twig') %}
 {% include('chat/EditChatroomForm.twig') %}
