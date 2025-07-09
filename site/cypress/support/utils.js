@@ -70,7 +70,7 @@ export function buildUrl(parts = [], include_base = false) {
  * @returns {Object} - The formatted body of the request
  */
 function formatBody(body, contentType, csrfToken) {
-    if (contentType === 'multipart/form-data') {
+    if (contentType !== 'application/json') {
         const formData = new FormData();
 
         for (const [key, value] of Object.entries(body)) {
@@ -87,14 +87,14 @@ function formatBody(body, contentType, csrfToken) {
 /**
  * Verify the WebSocket functionality of a given request.
  *
- * @param {String} url - The URL to send the request to
+ * @param {String[]} urlArray - The URL parts to string together using the buildUrl function
  * @param {String} method - The HTTP method to use for the request
  * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
  * @param {Object} body - The body of the request, which can be a FormData object or a JSON object
- * @param {Function} verifyResponse - The method to call once the response can be verified, which should verify the response and updates to the DOM
+ * @param {Function} verifyResponse - The method to call once the response resulting action and response data can be verified
  */
 export function verifyWebSocketFunctionality(
-    url = '',
+    urlArray = [],
     method = 'GET',
     contentType = 'application/json',
     body = {},
@@ -104,10 +104,22 @@ export function verifyWebSocketFunctionality(
         cy.request({
             headers: { 'Content-Type': contentType },
             method: method,
-            url: url,
+            url: buildUrl(urlArray, true), // Always include the base URL for websocket requests
             body: formatBody(body, contentType, window.csrfToken),
-        }).then((response) => {
-            verifyResponse(response);
+        }).then((res) => {
+            // Cypress response body is returned as an array buffer, so we need to parse it into a valid JSON representation
+            const response = JSON.parse(Cypress.Blob.arrayBufferToBinaryString(res.body) || '{}');
+
+            if (Object.keys(response).length > 0) {
+                // Handle responses returning data, such as create requests
+                expect(response.status).to.equal('success');
+                verifyResponse(response.data);
+            }
+            else {
+                // Handle responses returning no data, such as delete requests
+                expect(res.status).to.equal(200);
+                verifyResponse(res);
+            }
         });
     });
 }

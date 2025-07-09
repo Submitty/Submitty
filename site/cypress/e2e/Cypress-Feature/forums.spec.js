@@ -128,52 +128,6 @@ describe('Forum Thread Lock Date Functionality', () => {
         cy.get('#nav-sidebar-collapse-sidebar').click();
     });
 
-    it('Should verify WebSocket functionality', () => {
-        // Create a new thread via a POST request
-        const body = {
-            'title': title5,
-            'markdown_status': 0,
-            'lock_thread_date': '',
-            'thread_post_content': content4,
-            'cat[]': '2', //  TODO: to prevent flaky tests, fetch all categories to not map to magic numbers ["Question" == 2]
-            'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
-            'thread_status': -1,
-        };
-
-        verifyWebSocketFunctionality(buildUrl(['sample', 'forum', 'threads', 'new'], true), 'POST', 'multipart/form-data', body, (response) => {
-            expect(response.status).to.eq(200);
-
-            // Verify the thread is created
-            cy.get(`[data-thread_title*="${title5}"]`) // Thread container
-                .should('exist')
-                .within(() => {
-                    cy.get('[data-testid="thread-list-item"]') // Verify the thread title
-                        .should('contain', title5);
-                    cy.get('.thread-content') // Verify the thread content
-                        .should('contain', content4);
-                    cy.get('.label_forum') // Verify the thread category
-                        .should('contain', 'Question');
-                });
-
-            cy.get(`[data-thread_title*="${title5}"]`)
-                .should('exist')
-                .invoke('attr', 'data-thread_id')
-                .then((val) => {
-                    const id = Number(val); // Parse the inserted thread ID
-                    expect(id).to.be.a('number');
-                    expect(id).to.be.greaterThan(0);
-
-                    cy.get(`[data-thread_title*="${title5}"]`) // Verify we can visit the new thread
-                        .should('exist')
-                        .click();
-                    cy.url().should('include', buildUrl(['sample', 'forum', 'threads', id], true));
-                });
-
-            removeThread(title5);
-            cy.get('[data-testid="thread-list-item"]').contains(title5).should('not.exist');
-        });
-    });
-
     it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
         return;
         createThread(title1, content1, 'Comment');
@@ -257,5 +211,70 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
         cy.get('[data-testid="thread-list-item"]').contains(title3).should('not.exist');
         cy.get('[data-testid="thread-list-item"]').contains(title1).should('exist');
         removeThread(title1);
+    });
+});
+
+describe('Should test WebSocket functionality', () => {
+    beforeEach(() => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum']);
+        cy.get('#nav-sidebar-collapse-sidebar').click();
+    });
+
+    it('Should verify WebSocket functionality for creating and deleting a new thread', () => {
+        removeThread(title5);
+
+        const createBody = {
+            'title': title5,
+            'markdown_status': 0,
+            'lock_thread_date': '',
+            'thread_post_content': content4,
+            'cat[]': '2', // "Question" category
+            'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
+            'thread_status': -1,
+        };
+
+        verifyWebSocketFunctionality(['sample', 'forum', 'threads', 'new'], 'POST', 'multipart/form-data', createBody, (response) => {
+            // Verify the thread is created
+            cy.get(`[data-thread_title*="${title5}"]`).should('exist').as('newThread');
+            cy.get('@newThread').within(() => {
+                // Verify all the thread inner-components
+                cy.get('[data-testid="thread-list-item"]').should('contain', title5);
+                cy.get('.thread-content').should('contain', content4);
+                cy.get('.label_forum').should('contain', 'Question');
+            });
+            // Verify the thread ID
+            cy.get('@newThread').invoke('attr', 'data-thread_id').then((val) => {
+                // Parse the inserted thread ID
+                const threadId = Number(val);
+                expect(threadId).to.be.a('number').and.be.greaterThan(0);
+                expect(response.thread_id).to.equal(threadId);
+
+                // Ensure the new container can allow us to visit the thread
+                const nextPage = buildUrl(['sample', 'forum', 'threads', threadId], true);
+                expect(response.next_page).to.equal(nextPage);
+                cy.get('@newThread').click();
+                cy.url().should('include', nextPage);
+
+                // Parse the inserted post ID
+                return cy.get('.first_post').invoke('attr', 'id').then((val) => {
+                    const postId = Number(val);
+                    expect(postId).to.be.a('number').and.be.greaterThan(0);
+                    expect(response.post_id).to.equal(postId);
+                });
+            }).then(() => {
+                // Submit a delete request for the thread, where removing the first post will also remove the thread
+                const [threadId, postId] = [response.thread_id, response.post_id];
+                const deleteBody = { thread_id: threadId, post_id: postId };
+                verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'text/html; charset=UTF-8', deleteBody, (response) => {
+                    // Verify the delete type is the thread itself
+                    expect(response.type).to.equal('thread');
+                    // Verify the thread is deleted
+                    cy.get('[data-testid="thread-list-item"]').contains(title5).should('not.exist');
+                    // Verify the auto-redirection when the current thread is deleted from an external source
+                    cy.url({ timeout: 10000 }).should('not.include', buildUrl(['sample', 'forum', 'threads', threadId], true));
+                });
+            });
+        });
     });
 });

@@ -1,7 +1,7 @@
 import { buildCourseUrl, getCsrfToken } from '../../../ts/utils/server';
 
-export type ServerResponse<T> =
-    | {
+export type ServerResponse<T>
+    = | {
         status: 'success';
         data: T;
     }
