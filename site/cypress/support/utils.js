@@ -100,16 +100,18 @@ export function verifyWebSocketFunctionality(
     body = {},
     verifyResponse = () => {},
 ) {
-    cy.window().then(async (window) => {
+    return cy.window().then(async (window) => {
         cy.request({
             headers: { 'Content-Type': contentType },
             method: method,
             url: buildUrl(urlArray, true), // Always include the base URL for websocket requests
             body: formatBody(body, contentType, window.csrfToken),
         }).then((res) => {
+            console.log(res);
+            console.log(Cypress.Blob.arrayBufferToBinaryString(res.body));
             // Cypress response body is returned as an array buffer, so we need to parse it into a valid JSON representation
             const response = JSON.parse(Cypress.Blob.arrayBufferToBinaryString(res.body) || '{}');
-
+            console.log(response);
             if (Object.keys(response).length > 0) {
                 // Handle responses returning data, such as create requests
                 expect(response.status).to.equal('success');

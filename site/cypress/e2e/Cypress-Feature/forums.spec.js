@@ -13,6 +13,7 @@ const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
 const reply4 = 'Cypress Reply 4 Cypress';
+const reply5 = 'Cypress Reply 5 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
@@ -285,7 +286,7 @@ describe('Should test WebSocket functionality', () => {
         });
     });
 
-    it('Should verify WebSocket functionality for incoming posts with the correct reply level', () => {
+    it('Should verify WebSocket functionality for incoming and deleting posts with the correct reply level', () => {
         removeThread(title5);
 
         const createBody = {
@@ -327,6 +328,50 @@ describe('Should test WebSocket functionality', () => {
                         // Verify the next page is the thread page
                         const nextPage = `${buildUrl(['sample', 'forum', 'threads', threadId], true)}?option=tree`;
                         expect(response.next_page).to.equal(nextPage);
+
+                        return newPostId;
+                    });
+                }).then((newPostId) => {
+                    console.log('newPostId', newPostId);
+                    // Reply to self
+                    const createBody = {
+                        thread_id: threadId,
+                        parent_id: newPostId,
+                        thread_post_content: reply5,
+                        markdown_status: 0,
+                    };
+
+                    console.log(createBody);
+
+                    verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'new'], 'POST', 'multipart/form-data', createBody, (response) => {
+                        cy.get('.post_box').contains(reply5).should('exist').closest('.post_box').as('finalPost');
+                        return cy.get('@finalPost').then((post) => {
+                            const finalPostId = Number(post.attr('id'));
+                            expect(finalPostId).to.be.a('number').and.be.greaterThan(0);
+                            expect(response.post_id).to.equal(finalPostId);
+
+                            // Verify the reply level is 3, as it is a reply to the second post
+                            const replyLevel = Number(post.attr('data-reply_level'));
+                            expect(replyLevel).to.be.a('number').and.to.equal(3);
+
+                            // Verify the parent ID is the second post
+                            const parentId = Number(post.attr('data-parent_id'));
+                            expect(parentId).to.be.a('number').and.to.equal(newPostId);
+
+                            // Verify the next page is the thread page
+                            const nextPage = `${buildUrl(['sample', 'forum', 'threads', threadId], true)}?option=tree`;
+                            expect(response.next_page).to.equal(nextPage);
+
+                            return finalPostId;
+                        });
+                    }).then((finalPostId) => {
+                        // Delete the initial reply to verify both posts are deleted
+                        const deleteBody = { thread_id: threadId, post_id: newPostId };
+                        verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'multipart/form-data', deleteBody, (response) => {
+                            console.log(response);
+                            cy.get(`#${newPostId}`).should('not.exist');
+                            cy.get(`#${finalPostId}`).should('not.exist');
+                        });
                     });
                 });
             });
