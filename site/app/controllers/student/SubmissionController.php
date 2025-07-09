@@ -265,11 +265,15 @@ class SubmissionController extends AbstractController {
         //filter out empty, null strings
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //If no user id's were submitted, give a graceful error.
@@ -309,7 +313,9 @@ class SubmissionController extends AbstractController {
                     $teams[] = $tmp->getId();
                 }
             }
-            $teams = array_unique(array_filter($teams));
+            $teams = array_unique(array_filter($teams, function ($team) {
+                return $team !== '';
+            }));
             $inconsistent_teams = count($teams) > 1;
         }
 
@@ -557,11 +563,15 @@ class SubmissionController extends AbstractController {
 
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.

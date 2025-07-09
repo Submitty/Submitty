@@ -126,7 +126,7 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || $_POST['late_days'] > 2147483647)) {
+            if ($_POST['late_days'] > 2147483647) {
                 $error = "Late Days must be within the range of integer values";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
@@ -327,6 +327,10 @@ class LateController extends AbstractController {
      * The function returns an array with two keys:
      *      success: boolean, true if CSV was properly validated and parsed
      *      error: string, why the CSV failed to validate and parse
+     * @param string $csv_file The path to the uploaded CSV file
+     * @param array $data The array to fill with the parsed CSV data
+     * @param-out ?array $data The array filled with the parsed CSV data
+     * @param string $type The type of CSV being parsed, either "late" or
      */
     private function parseAndValidateCsv(string $csv_file, array &$data, string $type): array {
         //Validate file MIME type (needs to be "text/plain")
