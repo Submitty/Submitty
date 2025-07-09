@@ -70,7 +70,7 @@ export function buildUrl(parts = [], include_base = false) {
  * @returns {Object} - The formatted body of the request
  */
 function formatBody(body, contentType, csrfToken) {
-    if (contentType !== 'application/json') {
+    if (contentType === 'multipart/form-data') {
         const formData = new FormData();
 
         for (const [key, value] of Object.entries(body)) {

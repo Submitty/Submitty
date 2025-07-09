@@ -12,6 +12,7 @@ const content4 = 'Cypress Content 4 Cypress';
 const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
+const reply4 = 'Cypress Reply 4 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
 const attachment1 = 'sea_animals.png';
@@ -256,23 +257,77 @@ describe('Should test WebSocket functionality', () => {
                 cy.get('@newThread').click();
                 cy.url().should('include', nextPage);
 
-                // Parse the inserted post ID
-                return cy.get('.first_post').invoke('attr', 'id').then((val) => {
-                    const postId = Number(val);
-                    expect(postId).to.be.a('number').and.be.greaterThan(0);
+                return cy.get('.first_post').should('exist').then((post) => {
+                    // Verify the inserted initial post ID
+                    const postId = Number(post.attr('id'));
+                    expect(postId).to.be.a('number').and.to.be.greaterThan(0);
                     expect(response.post_id).to.equal(postId);
+
+                    // Verify the initial reply level is 1
+                    const replyLevel = Number(post.attr('data-reply_level'));
+                    expect(replyLevel).to.be.a('number').and.to.equal(1);
                 });
             }).then(() => {
                 // Submit a delete request for the thread, where removing the first post will also remove the thread
                 const [threadId, postId] = [response.thread_id, response.post_id];
                 const deleteBody = { thread_id: threadId, post_id: postId };
-                verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'text/html; charset=UTF-8', deleteBody, (response) => {
+                const oldPage = buildUrl(['sample', 'forum', 'threads', threadId], true);
+
+                verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'multipart/form-data', deleteBody, (response) => {
                     // Verify the delete type is the thread itself
                     expect(response.type).to.equal('thread');
                     // Verify the thread is deleted
                     cy.get('[data-testid="thread-list-item"]').contains(title5).should('not.exist');
                     // Verify the auto-redirection when the current thread is deleted from an external source
-                    cy.url({ timeout: 10000 }).should('not.include', buildUrl(['sample', 'forum', 'threads', threadId], true));
+                    cy.url({ timeout: 10000 }).should('not.include', oldPage);
+                });
+            });
+        });
+    });
+
+    it('Should verify WebSocket functionality for incoming posts with the correct reply level', () => {
+        removeThread(title5);
+
+        const createBody = {
+            'title': title5,
+            'markdown_status': 0,
+            'lock_thread_date': '',
+            'thread_post_content': content4,
+            'cat[]': '2', // "Question" category
+            'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
+            'thread_status': -1,
+        };
+
+        verifyWebSocketFunctionality(['sample', 'forum', 'threads', 'new'], 'POST', 'multipart/form-data', createBody, (response) => {
+            const [threadId, postId, nextPage] = [response.thread_id, response.post_id, response.next_page];
+            cy.visit(nextPage).then(() => {
+                const createBody = {
+                    thread_id: threadId,
+                    parent_id: postId,
+                    thread_post_content: reply4,
+                    markdown_status: 0,
+                    display_option: 'tree',
+                    thread_status: -1,
+                };
+
+                verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'new'], 'POST', 'multipart/form-data', createBody, (response) => {
+                    cy.get('.post_box').contains(reply4).should('exist').closest('.post_box').as('newPost');
+                    cy.get('@newPost').then((post) => {
+                        const newPostId = Number(post.attr('id'));
+                        expect(newPostId).to.be.a('number').and.be.greaterThan(0);
+                        expect(response.post_id).to.equal(newPostId);
+
+                        // Verify the reply level is 2, as it is a reply to the first post
+                        const replyLevel = Number(post.attr('data-reply_level'));
+                        expect(replyLevel).to.be.a('number').and.to.equal(2);
+
+                        const parentId = Number(post.attr('data-parent_id'));
+                        expect(parentId).to.be.a('number').and.to.equal(postId);
+
+                        // Verify the next page is the thread page
+                        const nextPage = `${buildUrl(['sample', 'forum', 'threads', threadId], true)}?option=tree`;
+                        expect(response.next_page).to.equal(nextPage);
+                    });
                 });
             });
         });
