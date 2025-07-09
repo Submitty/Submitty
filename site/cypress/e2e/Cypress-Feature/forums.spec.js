@@ -221,11 +221,10 @@ describe('Should test WebSocket functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        removeThread(title5);
     });
 
     it('Should verify WebSocket functionality for creating and deleting a new thread', () => {
-        removeThread(title5);
-
         const createBody = {
             'title': title5,
             'markdown_status': 0,
@@ -287,8 +286,6 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for incoming and deleting posts with the correct reply level', () => {
-        removeThread(title5);
-
         const createBody = {
             'title': title5,
             'markdown_status': 0,
@@ -332,7 +329,6 @@ describe('Should test WebSocket functionality', () => {
                         return newPostId;
                     });
                 }).then((newPostId) => {
-                    console.log('newPostId', newPostId);
                     // Reply to self
                     const createBody = {
                         thread_id: threadId,
@@ -340,8 +336,6 @@ describe('Should test WebSocket functionality', () => {
                         thread_post_content: reply5,
                         markdown_status: 0,
                     };
-
-                    console.log(createBody);
 
                     verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'new'], 'POST', 'multipart/form-data', createBody, (response) => {
                         cy.get('.post_box').contains(reply5).should('exist').closest('.post_box').as('finalPost');
@@ -368,7 +362,6 @@ describe('Should test WebSocket functionality', () => {
                         // Delete the initial reply to verify both posts are deleted
                         const deleteBody = { thread_id: threadId, post_id: newPostId };
                         verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'multipart/form-data', deleteBody, (response) => {
-                            console.log(response);
                             cy.get(`#${newPostId}`).should('not.exist');
                             cy.get(`#${finalPostId}`).should('not.exist');
                         });
