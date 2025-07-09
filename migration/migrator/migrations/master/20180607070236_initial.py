@@ -1,11 +1,10 @@
 from pathlib import Path
-from sqlalchemy import text
 
 
 def up(config, database):
     sql_file = Path(Path(__file__).parent.parent.parent, 'data', 'submitty_db.sql')
     with sql_file.open() as open_file:
-        database.execute(text(open_file.read()))
+        database.execute(open_file.read())
 
 
 def down(config, database):
