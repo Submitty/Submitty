@@ -2070,7 +2070,7 @@ class AdminGradeableController extends AbstractController {
 
         $this->core->getOutput()->renderJsonSuccess();
     }
-    
+
     /**
      * Updates the saved config structure when the user adds or deletes.
      */
