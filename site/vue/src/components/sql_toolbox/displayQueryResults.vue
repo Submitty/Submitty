@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { RunQueryResults } from '../../../ts/sql-toolbox';
+import type { RunQueryResults } from '@/ts/sql-toolbox';
 
 const { resultsData, queryError } = defineProps<{
     resultsData: RunQueryResults | null;
