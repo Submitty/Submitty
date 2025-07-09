@@ -4,11 +4,13 @@ const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
 const title3 = 'Cypress Title 3 Cypress';
 const title4 = 'Python Tutorials';
-const title5 = 'WebSocket Title Test';
+const title5 = 'WebSocket Title Test 1';
+const title6 = 'WebSocket Title Test 2';
 const content1 = 'Cypress Content 1 Cypress';
 const content2 = 'Cypress Content 2 Cypress';
 const content3 = 'Cypress Content 3 Cypress';
 const content4 = 'Cypress Content 4 Cypress';
+const content5 = 'Cypress Content 5 Cypress';
 const reply1 = 'Cypress Reply 1 Cypress';
 const reply2 = 'Cypress Reply 2 Cypress';
 const reply3 = 'Cypress Reply 3 Cypress';
@@ -16,6 +18,7 @@ const reply4 = 'Cypress Reply 4 Cypress';
 const reply5 = 'Cypress Reply 5 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
+const merged3 = 'Merged Thread Title: '.concat(title6, '\n\n', content1);
 const attachment1 = 'sea_animals.png';
 
 const createThread = (title, content, category) => {
@@ -364,6 +367,64 @@ describe('Should test WebSocket functionality', () => {
                         verifyWebSocketFunctionality(['sample', 'forum', 'posts', 'delete'], 'POST', 'multipart/form-data', deleteBody, (response) => {
                             cy.get(`#${newPostId}`).should('not.exist');
                             cy.get(`#${finalPostId}`).should('not.exist');
+                        });
+                    });
+                });
+            });
+        });
+    });
+
+    it('Should verify WebSocket functionality for merging threads', () => {
+        // Create the base thread
+        const baseThreadBody = {
+            'title': title5,
+            'markdown_status': 0,
+            'lock_thread_date': '',
+            'thread_post_content': content4,
+            'cat[]': '2', // "Question" category
+            'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
+            'thread_status': -1,
+        };
+
+        verifyWebSocketFunctionality(['sample', 'forum', 'threads', 'new'], 'POST', 'multipart/form-data', baseThreadBody, (response) => {
+            const [mainThreadId, mainPostId, mainNextPage] = [response.thread_id, response.post_id, response.next_page];
+            cy.visit(mainNextPage).then(() => {
+                // Create the merging thread
+                const mergingThreadBody = {
+                    'title': title6,
+                    'markdown_status': 0,
+                    'lock_thread_date': '',
+                    'thread_post_content': content5,
+                    'cat[]': '2', // "Question" category
+                    'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
+                    'thread_status': -1,
+                };
+
+                verifyWebSocketFunctionality(['sample', 'forum', 'threads', 'new'], 'POST', 'multipart/form-data', mergingThreadBody, (response) => {
+                    const [mergingThreadId, mergingPostId, mergingNextPage] = [response.thread_id, response.post_id, response.next_page];
+                    const mergeBody = {
+                        merge_thread_parent: mainThreadId,
+                        merge_thread_child: mergingThreadId,
+                    };
+
+                    verifyWebSocketFunctionality(['sample', 'forum', 'threads', 'merge'], 'POST', 'multipart/form-data', mergeBody, (response) => {
+                        expect(response.redirect).to.equal(mainNextPage);
+                        cy.get('.post_box').contains(`Merged Thread Title: ${title6}`).should('exist').closest('.post_box').as('mergedPost');
+                        cy.get('@mergedPost').then((post) => {
+                            const mergedPostId = Number(post.attr('id'));
+                            expect(mergedPostId).to.be.a('number').and.be.greaterThan(0);
+                            expect(mergingPostId).to.equal(mergedPostId);
+
+                            // Verify the reply level is 2, as it is a reply to the first post
+                            const replyLevel = Number(post.attr('data-reply_level'));
+                            expect(replyLevel).to.be.a('number').and.to.equal(2);
+
+                            // Verify the parent ID is the first post
+                            const parentId = Number(post.attr('data-parent_id'));
+                            expect(parentId).to.be.a('number').and.to.equal(mainPostId);
+
+                            // Verify the content is the merged content
+                            cy.get('.post_content').should('contain', content5);
                         });
                     });
                 });
