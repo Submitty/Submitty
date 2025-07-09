@@ -72,9 +72,11 @@ function renderPDFToolbar() {
                     const hide_other = $('#toggle-annotations-btn').hasClass('hide-other-annotations');
                     $('#toggle-annotations-btn').toggleClass('hide-other-annotations');
                     if (hide_other) {
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#toggle-annotations-btn').html('Show All Annotations <i class="fas fa-eye"></i>');
                     }
                     else {
+                        // eslint-disable-next-line no-restricted-syntax
                         $('#toggle-annotations-btn').html('Hide Other Annotations <i class="fas fa-eye-slash"></i>');
                     }
                     toggleOtherAnnotations(hide_other);
