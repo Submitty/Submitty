@@ -8,12 +8,12 @@
     "RLIMIT_NPROC" : 32
   },
   "container_options": {
-    "container_image": "submitty/qiskit:latest"
+    "container_image": "submitty/jupyter:latest"
   },
   "testcases": [
     {
       "title": "Executes successfully",
-      "command": "python3 grader.py",
+      "command": "python3 jupyter_notebook_grader.py",
       "points": 1,
       "validation": [
         {
@@ -29,7 +29,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "hello_world_submitted.txt",
+          "source" : "hello_world_submitted.*",
           "destination" : "./"
         }
       ], 
@@ -40,6 +40,12 @@
           "method": "diff",
           "actual_file": "hello_world_submitted.txt",
           "expected_string" : "hello world!"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "hello_world_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -48,7 +54,32 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "one_submitted.png",
+          "source" : "markdown_submitted.*",
+          "destination" : "./"
+        }
+      ], 
+      "title": "Markdown",
+      "points": 1,
+      "validation": [
+        {
+          "method": "diff",
+          "actual_file": "markdown_submitted.txt",
+          "expected_string" : "## 2. Create IPython images with the given \"one.png\" and \"two.png\".\nUse `from IPython.display import Image`"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "markdown_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        }
+      ]
+    },
+    {
+      "pre_commands" : [
+        {
+          "command" : "cp",
+          "testcase" : "test01",
+          "source" : "one_submitted.*",
           "destination" : "./"
         }
       ], 
@@ -63,6 +94,12 @@
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "one_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -71,7 +108,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "two_submitted.png",
+          "source" : "two_submitted.*",
           "destination" : "./"
         }
       ], 
@@ -86,6 +123,12 @@
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "two_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     },
@@ -94,7 +137,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "graph_submitted.png",
+          "source" : "graph_submitted.*",
           "destination" : "./"
         }
       ], 
@@ -109,52 +152,12 @@
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
-        }
-      ]
-    },
-    {
-      "pre_commands" : [
+        },
         {
-          "command" : "cp",
-          "testcase" : "test01",
-          "source" : "circuit_submitted.png",
-          "destination" : "./"
-        }
-      ], 
-      "title": "Circuit",
-      "points": 1,
-      "validation": [
-        {
-          "actual_file": "circuit_submitted.png",
-          "expected_file": "circuit.png",
-          "method": "ImageDiff",
-          "acceptable_threshold": ".2",
-          "show_difference_image" : "always",
-          "show_actual": "always",
-          "show_expected": "always"
-        }
-      ]
-    },
-    {
-      "pre_commands" : [
-        {
-          "command" : "cp",
-          "testcase" : "test01",
-          "source" : "histogram_submitted.png",
-          "destination" : "./"
-        }
-      ], 
-      "title": "Histogram",
-      "points": 1,
-      "validation": [
-        {
-          "actual_file": "histogram_submitted.png",
-          "expected_file": "histogram.png",
-          "method": "ImageDiff",
-          "acceptable_threshold": ".1",
-          "show_difference_image" : "always",
-          "show_actual": "always",
-          "show_expected": "always"
+          "method" : "errorIfNotEmpty",
+		      "actual_file" : "graph_submitted.err",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         }
       ]
     }
