@@ -8,7 +8,8 @@
 <script>
     window.submitty.render(
         "#vue-{{ id }}",
-        "{{ component }}",
+        "{{ type }}",
+        "{{ name }}",
         {{ args | default({}) | json_encode() | raw() }}
     );
 </script>

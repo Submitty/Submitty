@@ -135,7 +135,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
                 'seek_message_instructions'      => '',
-                'polls_enabled'                  => false
+                'polls_enabled'                  => false,
+                'chat_enabled'                   => false
             ],
             'feature_flags' => [
 
@@ -311,7 +312,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'queue_announcement_message' => '',
                     'seek_message_enabled'           => false,
                     'seek_message_instructions'      => '',
-                    'polls_enabled'                  => false
+                    'polls_enabled'                  => false,
+                    'chat_enabled'                   => false
                 ],
                 'feature_flags' => []
             ],
@@ -343,6 +345,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
+            'chat_enabled' => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
@@ -523,7 +526,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
                 'grade_inquiry_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
-                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
+                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions',
+                'chat_enabled'
             ],
         ];
         $return = [];
