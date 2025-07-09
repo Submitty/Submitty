@@ -938,6 +938,11 @@ let codeMirrorInstance = null;
 let current_g_id = null;
 let current_file_path = null;
 let isConfigEdited = false;
+let selectedFilePaths = [];
+function FilePath(path, type) {
+    this.path = path;
+    this.type = type;
+}
 
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
@@ -984,6 +989,7 @@ function loadGradeableEditor(g_id, file_path) {
                     $('#gradeable-config-edit-bar').show();
                 }
 
+                document.getElementById('add-to-config').disabled = true;
                 const configData = json['data'];
                 originalConfigContent = configData.config_content;
                 const editbox = $('textarea#gradeable-config-edit');
@@ -1103,6 +1109,215 @@ function saveGradeableConfigEdit(g_id) {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
     });
+}
+
+function addRootFolder(g_id) {
+    const folderName = prompt('Enter a name for the new folder:');
+    if (!folderName) {
+        return;
+    }
+
+    const folderPath = `/${folderName}`;
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'add_folder',
+            gradeable_id: g_id,
+            path: folderPath,
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Folder created successfully.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Failed to create folder.'),
+    });
+}
+
+function addIconHandler(g_id) {
+    if (!selectedFilePaths || selectedFilePaths.length === 0) {
+        openFilePickerAndUpload(null, g_id); // root
+        return;
+    }
+    if (selectedFilePaths.length === 1) {
+        const path = selectedFilePaths[0].path.replace(/^.*config_upload\/\d+\//, '');
+        if (selectedFilePaths[0].type === 'folder') {
+            openFilePickerAndUpload(path, g_id); // folder
+            return;
+        }
+    }
+}
+
+function openFilePickerAndUpload(targetFolderPath, g_id) {
+    const input = document.getElementById('hidden-config-file-input');
+    input.onchange = function (event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const fileContent = e.target.result;
+            const destination = targetFolderPath ? targetFolderPath : '/';
+            uploadConfigFile(destination, file.name, fileContent, g_id);
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function uploadConfigFile(destination, filename, content, g_id) {
+    const cleanedDestination = destination?.replace(/^\/+/, '') ?? '';
+    const relativePath = cleanedDestination ? `${cleanedDestination}/${filename}` : filename;
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        type: 'POST',
+        data: {
+            action: 'add_file',
+            gradeable_id: g_id,
+            path: relativePath,
+            file_content: content,
+            csrf_token: csrfToken,
+        },
+        success: function (response) {
+            const json = JSON.parse(response);
+            if (json.status === 'success') {
+                displaySuccessMessage('File successfully added.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message || 'Failed to add file.');
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong while uploading.');
+        },
+    });
+}
+
+function removeFiles(g_id) {
+    const confirmed = confirm('Are you sure you want to delete the selected items? NOTE: If a folder is selected, all of its contents will be deleted. This action cannot be undone.');
+    if (!confirmed) {
+        return;
+    }
+
+    const pathsToDelete = selectedFilePaths.map((f) => f.path);
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'delete',
+            gradeable_id: g_id,
+            paths: JSON.stringify(pathsToDelete),
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Selected items deleted.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Error deleting files/folders.'),
+    });
+}
+
+// Toggles between displaying the checkboxes and hiding them
+function toggleSelect() {
+    const selectButton = document.getElementById('select-files-toggle');
+    const folderCheckboxes = document.querySelectorAll('.folder-select-box');
+    const fileCheckboxes = document.querySelectorAll('.file-select-box');
+    const addButton = document.getElementById('add-to-config');
+    const folderButton = document.getElementById('add-root-folder');
+    const deleteButton = document.getElementById('delete-from-config');
+    const isSelecting = selectButton.innerText === 'SELECT';
+    selectButton.innerText = isSelecting ? 'DESELECT ALL' : 'SELECT';
+
+    folderCheckboxes.forEach((cb) => {
+        cb.style.display = isSelecting ? 'inline-block' : 'none';
+        if (!isSelecting) {
+            cb.checked = false;
+        }
+    });
+
+    fileCheckboxes.forEach((cb) => {
+        cb.style.display = isSelecting ? 'inline-block' : 'none';
+        if (!isSelecting) {
+            cb.checked = false;
+        }
+    });
+    // When checkboxes are reset, action buttons may change status
+    if (!isSelecting) {
+        folderButton.style.opacity = '0.5';
+        deleteButton.style.opacity = '0.5';
+        selectedFilePaths.length = 0;
+    }
+    addButton.style.opacity = '1';
+    addButton.style.pointerEvents = 'auto';
+    folderButton.style.opacity = '1';
+    folderButton.style.pointerEvents = 'auto';
+}
+
+// When a box is changed, add or delete it from the selected files array and update the action buttons
+function checkSelected(checkbox) {
+    const filePath = checkbox.getAttribute('data-path');
+    const fileType = checkbox.getAttribute('data-type');
+
+    // Add to the files array when checked
+    if (checkbox.checked) {
+        if (!selectedFilePaths.some((fp) => fp.path === filePath)) {
+            selectedFilePaths.push(new FilePath(filePath, fileType));
+        }
+    }
+    // Remove from files array when unchecked
+    else {
+        selectedFilePaths = selectedFilePaths.filter((p) => p.path !== filePath);
+    }
+    updateActionButtonState();
+}
+
+function updateActionButtonState() {
+    const folderButton = document.getElementById('add-root-folder');
+    const addButton = document.getElementById('add-to-config');
+    const deleteButton = document.getElementById('delete-from-config');
+
+    // Nothing selected: add to root allowed, delete disabled
+    if (selectedFilePaths.length === 0) {
+        folderButton.style.pointerEvents = 'auto';
+        folderButton.style.opacity = '1';
+        addButton.style.pointerEvents = 'auto';
+        addButton.style.opacity = '1';
+        deleteButton.style.opacity = '0.5';
+        deleteButton.style.pointerEvents = 'none';
+    }
+    // One folder selected: disable add folder - allow adding to that folder and allow that folder to be deleted
+    else if (selectedFilePaths.length === 1 && selectedFilePaths[0].type === 'folder') {
+        folderButton.style.pointerEvents = 'none';
+        folderButton.style.opacity = '0.5';
+        addButton.style.pointerEvents = 'auto';
+        addButton.style.opacity = '1';
+        deleteButton.style.opacity = '1';
+        deleteButton.style.pointerEvents = 'auto';
+    }
+    // Multiple folders or files: delete enabled, adding disabled
+    else {
+        folderButton.style.pointerEvents = 'none';
+        folderButton.style.opacity = '0.5';
+        addButton.style.pointerEvents = 'none';
+        addButton.style.opacity = '0.5';
+        deleteButton.style.opacity = '1';
+        deleteButton.style.pointerEvents = 'auto';
+    }
 }
 
 function loadCodeMirror() {

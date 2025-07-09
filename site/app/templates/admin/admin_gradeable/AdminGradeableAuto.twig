@@ -112,17 +112,40 @@
     </div>
 
     <div class="raw-config-info">
-        <div class="option-title raw-config-info-header">Edit Uploaded Configuration:</div>
-        <p class="not-available-message" id="editor-not-available">Not available for provided configurations.</p>
-        <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
+    <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
+        <div class="option-title raw-config-info-header">
+            <span>Edit Uploaded Configuration:</span>
+            <p class="not-available-message" id="editor-not-available">
+                Not available for provided configurations.
+            </p>
+            <a class="btn btn-primary editor-toggle-btn" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">
+                Open Editor
+            </a>
+        </div>
         <div id="gradeable-config-structure">
-            <ul class="config-folder-view">
-                {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
-            </ul>
-            <div id="gradeable-config-edit-bar">
-                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
-                <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
-                <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+            <p class="config-editor-about">
+                Click on a file to view it in the gradeable editor. To add a folder to the root level, click <i class="fas fa-folder config-about-icon"></i> with nothing selected, 
+                and type the name you would like to use. To add a file to the root level, click <b class="config-about-add">+</b> with nothing selected. To add a 
+                file to a folder, select the folder, then click <b class="config-about-add">+</b>. Select any file or folder and <i class="fas fa-trash config-about-icon"></i> to remove it. 
+                By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files within it!</i>
+            </p>
+            <div>
+                <div class="config-editor-action-btns">
+                    <a class="key_to_click select-files-btn" id="select-files-toggle" onClick="toggleSelect()">SELECT</a>
+                    <i class="fas fa-folder" class="file-action-folder" id="add-root-folder" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
+                    <a class="file-action-add" id="add-to-config" onClick="addIconHandler('{{ gradeable.getId() }}')">+</a>
+                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick="removeFiles('{{ gradeable.getId() }}')"></i>
+                </div>
+                <div>
+                    <ul class="config-folder-view">
+                        {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+                    </ul>
+                </div>
+                <div id="gradeable-config-edit-bar">
+                    <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
+                    <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
+                    <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+                </div>
             </div>
         </div>
     </div>
@@ -159,6 +182,7 @@
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
     const ALL_NONUPLOADED_CONFIG_PATHS = {{ all_nonuploaded_config_paths|json_encode|raw }};
     const NONUPLOADED_CONFIG_VALUES = ALL_NONUPLOADED_CONFIG_PATHS.map(pair => pair[1]);
+    const configTree = {{ config_files|json_encode|raw }};
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
@@ -252,12 +276,16 @@
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         <li style="margin-left:{{ indent * 15 }}px">
             {% if file.files is defined %}
-                <span id="{{ id }}-span" class="fas fa-folder"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                <input type="checkbox" id="folder-select-box" data-path="{{ file.path }}" data-type="folder" class="folder-select-box config-contents-display" onchange="checkSelected(this)">
+                <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
                 <ul id="{{ id }}" class="config-folder-view">
                     {{ _self.display_config_files(file.files, indent + 1, g_id) }}
                 </ul>
             {% else %}
-                <span class="fas fa-file"></span>
+                {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
+                    <input type="checkbox" id="file-select-box" data-path="{{ file.path }}" data-type="file" class="file-select-box config-contents-display" onchange="checkSelected(this)">
+                {% endif %}
+                <span class="fas fa-file config-file-icon"></span>
                 <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
             {% endif %}
         </li>
