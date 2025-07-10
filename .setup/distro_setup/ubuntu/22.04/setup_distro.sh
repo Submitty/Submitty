@@ -20,6 +20,7 @@ fi
 # Need to change this otherwise it will hang the script in interactive mode
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 
+add-apt-repository ppa:ondrej/php
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
@@ -52,7 +53,7 @@ apt-get install -qqy libpam-passwdqc
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-14
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
-apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml php-ds php-imagick php-intl
+apt-get install -qqy php8.1 php8.1-cli php8.1-fpm php8.1-curl php8.1-pgsql php8.1-zip php8.1-mbstring php8.1-xml php8.1-ds php8.1-imagick php8.1-intl
 
 if [ ${DEV_VM} == 1 ]; then
     apt-get install -qqy php-xdebug
