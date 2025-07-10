@@ -18,7 +18,7 @@ const reply4 = 'Cypress Reply 4 Cypress';
 const reply5 = 'Cypress Reply 5 Cypress';
 const merged1 = 'Merged Thread Title: '.concat(title3, '\n\n', content3);
 const merged2 = 'Merged Thread Title: '.concat(title2, '\n\n', content2);
-const merged3 = 'Merged Thread Title: '.concat(title6, '\n\n', content1);
+const merged3 = 'Merged Thread Title: '.concat(title6, '\n\n', content5);
 const attachment1 = 'sea_animals.png';
 
 const createThread = (title, content, category) => {
@@ -329,7 +329,9 @@ const expectPostHierarchy = (post, expected) => {
         expect(Number(post.attr('id'))).to.equal(postId);
         expect(Number(post.attr('data-parent_id'))).to.equal(parentPostId);
         expect(Number(post.attr('data-reply_level'))).to.equal(level);
-        expect(post.get('post_content')).to.equal(content);
+        cy.get('.post_content').invoke('text').then((text) => {
+            expect(text.trim()).to.equal(content);
+        });
     });
 
     // Verify the next page is the thread page
@@ -436,14 +438,13 @@ describe('Should test WebSocket functionality', () => {
 
                 cy.visit(mergingNextPage).then(() => {
                     submitMergeThreadRequest(threadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
-                        console.log(mergeResponse);
                         expect(mergeResponse.redirect).to.equal(baseNextPage);
                         expectPostHierarchy(mergedPost, {
                             threadId: mergingThreadId,
                             postId: mergingPostId,
                             parentPostId: parentPostId,
                             level: 2,
-                            content: content5,
+                            content: merged3,
                             nextPage: mergingNextPage + '?option=tree',
                         });
                     });

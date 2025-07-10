@@ -112,11 +112,11 @@ export function verifyWebSocketFunctionality(
 
             if (res.redirects && Array.isArray(res.redirects)) {
                 // Handle redirects
+                const index = res.redirects[0].indexOf('http');
+                const redirect = res.redirects[0].slice(index).trim();
                 response = {
                     status: 'success',
-                    data: {
-                        redirect: `http${res.redirects[0].split('http')[1].trim()}`,
-                    },
+                    data: { redirect },
                 };
             }
             else {
