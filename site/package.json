@@ -62,6 +62,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.6.2",
     "@types/node": "^24.0.10",
+    "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
     "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-vue": "^6.0.0",
@@ -98,6 +99,7 @@
     "css-stylelint:fix": "stylelint \"**/*.css\" --fix",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
+    "type-check": "vue-tsc --noEmit",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
     "build": "tsc -p . && node .build.js && vite build vue"

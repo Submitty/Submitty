@@ -63,6 +63,25 @@ jobs:
         run: npm run prettier:fix
       - run: git diff --exit-code
 
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+                ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run Type Check
+        run: npm run vue-tsc
+
   js-lint:
     name: JavaScript Lint
     runs-on: ubuntu-22.04
