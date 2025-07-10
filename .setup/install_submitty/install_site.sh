@@ -51,24 +51,6 @@ set_mjs_permission () {
 
 echo -e "Copy the submission website"
 
-THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-source ${THIS_DIR}/../bin/versions.sh
-
-# This is run under /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
-PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
-PHP_GROUP=${PHP_USER}
-CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
-CGI_GROUP=${CGI_USER}
-VAGRANT=0
-
-if [ -d "${THIS_DIR}/../../.vagrant" ]; then
-    VAGRANT=1
-fi
-
 # Get arguments
 for cli_arg in "$@"
 do
@@ -129,13 +111,6 @@ fi
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
 result=$(rsync -rtz -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
-if [ ${VAGRANT} == 1 ]; then
-    rsync -rtz -i ${SUBMITTY_REPOSITORY}/site/tests ${SUBMITTY_REPOSITORY}/site/phpunit.xml ${SUBMITTY_INSTALL_DIR}/site > /dev/null
-    chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/tests
-    chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/tests
-    chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
-    chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
-fi
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -240,18 +215,10 @@ done
 
 if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
-    if [ ${VAGRANT} == 1 ]; then
-        su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --dev --prefer-dist --optimize-autoloader"
-    else
-        su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
-    fi
+    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 else
-    if [ ${VAGRANT} == 1 ]; then
-        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
-    else
-        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
-    fi
+    su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 

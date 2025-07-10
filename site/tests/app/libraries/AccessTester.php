@@ -5,7 +5,6 @@ namespace tests\app\libraries;
 use app\libraries\Access;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\Team;
@@ -22,14 +21,8 @@ class AccessTester extends BaseUnitTest {
      */
     private $access;
 
-    /**
-     * @var string $course_path
-     */
-    private $course_path;
-
     protected function setUp(): void {
-        $this->course_path = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-        $this->core = $this->createMockCore(['course_path' => $this->course_path]);
+        $this->core = $this->createMockCore();
         $this->access = new Access($this->core);
     }
 
@@ -189,18 +182,18 @@ class AccessTester extends BaseUnitTest {
             "dir" => "course_materials"
         ]));
 
-        FileUtils::createDir(FileUtils::joinPaths($this->course_path, "course_materials", ".access_tester"), true);
-        self::assertTrue(FileUtils::writeFile(FileUtils::joinPaths($this->course_path, "course_materials", ".access_tester/test.txt"), "data"));
+        FileUtils::createDir(".access_tester");
+        self::assertTrue(FileUtils::writeFile(".access_tester/test.txt", "data"));
         self::assertTrue($this->access->canUser($user1, "path.write", [
-            "path" => FileUtils::joinPaths($this->course_path, "course_materials", ".access_tester/test.txt"),
+            "path" => ".access_tester/test.txt",
             "dir" => "course_materials"
         ]));
 
         self::assertFalse($this->access->canUser($user1, "path.write", [
-            "path" => FileUtils::joinPaths($this->course_path, "course_materials", ".access_tester/../.access_tester/test.txt"),
+            "path" => ".access_tester/../.access_tester/test.txt",
             "dir" => "course_materials"
         ]));
-        FileUtils::recursiveRmdir($this->course_path);
+        FileUtils::recursiveRmdir(".access_tester");
     }
 
     public function testPollViewPermissions() {
