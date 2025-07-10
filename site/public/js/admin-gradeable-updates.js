@@ -294,6 +294,10 @@ $(document).ready(() => {
                 }
                 updateErrorMessage();
                 checkWarningBanners();
+                if (this.id === 'autograding_config_selector') {
+                    location.reload();
+                    return;
+                }
             }, updateGradeableErrorCallback);
     });
 
