@@ -8,7 +8,7 @@
   ansible.builtin.apt:
     name: php
     state: present
-  register: apt_action
+  register: submitty_install_apt_action
   retries: 100
   until: apt_action is success or
     ('Failed to lock apt for exclusive operation' not in apt_action.msg and

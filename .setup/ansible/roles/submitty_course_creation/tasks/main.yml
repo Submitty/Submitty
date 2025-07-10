@@ -115,7 +115,7 @@
     chdir: /usr/local/submitty/sbin/
   become: true
   become_user: root
-  register: submitty_course_creation
+  register: submitty_course_creation_submitty_course_creation
   changed_when: submitty_course_creation.rc != 0
 
 - name: Restart PHP=FPM service.
