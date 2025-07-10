@@ -810,7 +810,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Development-Autograding", "Tutorial-Autograding"]
+        containers: ["Admin", "Feature", "Gradeable", "TAGrading", "UI", "Autograding-Development", "Autograding-Tutorial"]
     services:
       postgres:
         image: postgres
@@ -838,16 +838,16 @@ jobs:
         uses: ./.github/actions/e2e-Setup-Composite
         with:
           courses: >-
-            ${{ matrix.containers == 'Development' && 'development' ||
-                matrix.containers == 'Tutorial' && 'tutorial' ||
+            ${{ matrix.containers == 'Autograding-Development' && 'development' ||
+                matrix.containers == 'Autograding-Tutorial' && 'tutorial' ||
                 'sample testing archived'
             }}
           flags: >-
-            ${{ (matrix.containers == 'Development' || matrix.containers == 'Tutorial') && '--no_submissions' ||
+            ${{ (matrix.containers == 'Autograding-Development' || matrix.containers == 'Autograding-Tutorial') && '--no_submissions' ||
                 '--test_only_grading' }}
 
       - name: Copy Autograding Files
-        if: ${{ matrix.containers == 'Development' }}
+        if: ${{ matrix.containers == 'Autograding-Development' }}
         run: |
           cp -R ${{env.SUBMITTY_REPOSITORY}}/more_autograding_examples ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/copy_of_more_autograding_examples
 
