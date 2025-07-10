@@ -97,10 +97,19 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
-                $popup_html = $this->renderTeamPrompt($team, false);
+                $team_members = [];
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
+                    $member = $this->core->getQueries()->getUserById($member_id);
+                    $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
+                }
+
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,
-                    'popup' => $popup_html
+                    'component' => 'overrideTeamPopup',
+                    'args' => [
+                        'memberList' => $team_members,
+                        'isDelete' => false,
+                    ],
                 ]);
             }
         }
@@ -120,15 +129,20 @@ class GradeOverrideController extends AbstractController {
     /**
      * Helper to render the team prompt popup
      */
-    private function renderTeamPrompt($team, bool $is_delete): string {
+    private function renderTeamPrompt($team, bool $is_delete): array {
         $team_members = [];
         foreach ($this->getTeamMemberIds($team) as $member_id) {
             $member = $this->core->getQueries()->getUserById($member_id);
             $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
         }
-        return $this->core->getOutput()->renderTwigTemplate(
-            "admin/users/GradeOverridesTeamPrompt.twig",
-            ['member_list' => $team_members, 'is_delete' => $is_delete]
-        );
+
+        return [
+            'is_team' => true,
+            'component' => 'overrideTeamPopup',
+            'args' => [
+                'memberList' => $team_members,
+                'isDelete' => $is_delete,
+            ]
+        ];
     }
 }

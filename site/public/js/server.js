@@ -1422,10 +1422,19 @@ function confirmOverride(option, isDelete) {
 
 function overridePopup(json) {
     $('.popup-form').hide();
-    const form = $('#override_team_popup');
-    form[0].outerHTML = json['data']['popup'];
-    $('#override_team_popup').css('display', 'block');
-    $('#team-override-cancel').focus();
+    $('#override_team_popup').remove();
+
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args
+    );
 }
 
 /**
