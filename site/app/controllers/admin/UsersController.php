@@ -1204,7 +1204,7 @@ class UsersController extends AbstractController {
             if (count($row) === 1) {
                 $user = $this->core->getQueries()->getUserById($row[0]);
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
                 $user_registration_type = $list_type === 'classlist' ? 'graded' : 'staff';
                 $user->setRegistrationType($user_registration_type);
@@ -1253,7 +1253,7 @@ class UsersController extends AbstractController {
             //Update registration section (student) or group (grader)
             if (count($row) === 1) {
                 // set group as 'student' if upload is meant for classlist else set 'limited_access_grader' level
-                $user_group = $list_type === 'classlist' ? '4' : '3';
+                $user_group = $list_type === 'classlist' ? User::GROUP_STUDENT : User::GROUP_LIMITED_ACCESS_GRADER;
                 $user->setGroup($user_group);
             }
             else {
@@ -1294,43 +1294,5 @@ class UsersController extends AbstractController {
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
-    }
-
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     **/
-    #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
-    public function viewStudentGrades() {
-        if (!isset($_POST["student_id"])) {
-            $this->core->addErrorMessage("No student ID provided");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['users']))
-            );
-        }
-        $student_id = $_POST["student_id"];
-        $user = $this->core->getQueries()->getUserById($student_id);
-        if ($user === null) {
-            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['users']))
-            );
-        }
-
-        $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
-            . $student_id . "_summary.html";
-
-        $grade_file = null;
-        if (file_exists($grade_path)) {
-            $grade_file = file_get_contents($grade_path);
-        }
-
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['submission', 'RainbowGrades'],
-                'showStudentToInstructor',
-                $user,
-                $grade_file
-            )
-        );
     }
 }

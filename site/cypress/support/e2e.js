@@ -19,6 +19,14 @@ import('@cypress/skip-test/support');
 
 beforeEach(() => {
     cy.wrap(false).as('checkLogout');
+
+    if (window.navigator && navigator.serviceWorker) {
+        // Disable service workers during end-to-end tests to avoid conflicts with Cypress network interceptors,
+        // which may register if Cypress fails to inject it's globals in time
+        cy.wrap(navigator.serviceWorker.getRegistrations()).then((registrations) => {
+            cy.wrap(Promise.all(registrations.map((reg) => reg.unregister())));
+        });
+    }
 });
 
 afterEach(() => {

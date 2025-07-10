@@ -107,7 +107,7 @@ function updateCacheBuildStatus(url, confirm_message, status) {
     if (confirm) {
         // show rebuild status message
         $('#rebuild-status-panel').show();
-        $('#rebuild-status').html(status);
+        $('#rebuild-status').text(status);
 
         // disable and grey out table and buttons
         $('#calculate-btn').prop('disabled', true).css('opacity', 0.5);

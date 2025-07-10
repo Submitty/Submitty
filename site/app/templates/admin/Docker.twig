@@ -1,3 +1,5 @@
+{% import "misc/TableHeaderSort.twig" as sort %}
+
 <div class="content" data-testid="systemwide-info">
     <h1>Submitty Docker Interface</h1>
 
@@ -86,20 +88,21 @@
         </div>
     {% endif %}
 
-    <table class="table table-striped docker-table mobile-table">
+    <table class="table table-striped docker-table mobile-table" id="docker-table">
         <thead>
             <tr>
-                <th>Image Name</th>
-                <th>Owner</th>
-                <th>Id</th>
-                <th>Size</th>
+                {{ sort.sortable_header('Image Name', 'name') }}
                 <th>Tag</th>
-                <th>Created</th>
                 <th>Alias</th>
+                <th>Digest</th>
+                {{ sort.sortable_header('Size', 'size') }}
+                {{ sort.sortable_header('Created', 'created') }}
                 <th>Capabilities Containing This Image</th>
+                <th>Owner</th>
                 <th>Remove</th>
             </tr>
         </thead>
+
         <tbody>
         {% for image in docker_images %}
             {% set full = image.primary_name | split(":") %}
@@ -107,12 +110,8 @@
             {% set tag = full[1] %}
 
             <tr class="image-row" >
-                <td>{{ name }}</th>
-                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
-                <td>{{ image.id | trim("sha256:")}}</td>
-                <td>{{ image.size_mb }}</td>
+                <td>{{ name }}</td>
                 <td>{{ tag }}</td>
-                <td>{{ image.created_timestamp }}</td>
                 <td>
                     {% if image.aliases|length > 0 %}
                         <ul class="tag-list">
@@ -122,11 +121,15 @@
                         </ul>
                     {% endif %}
                 </td>
+                <td>{{ image.digest | trim("sha256:") | slice(0,20) }}</td>
+                <td>{{ image.size_mb }}</td>
+                <td>{{ image.created_timestamp }}</td>
                 <td>
                     {% for capability in image.capabilities %}
                         <span class="badge badge-{{ capability_to_color_mapping[capability] % 8 + 1 }}">{{capability}}</span>
                     {% endfor %}
                 </td>
+                <td>{{ docker_image_owners[image.primary_name] | default("") }}</td>
                 <td>
                     {% if is_super_user or (docker_image_owners[image.primary_name] is defined and user_id == docker_image_owners[image.primary_name]) %}
                         <button class="send-button btn btn-default" id="{{ image.primary_name }}" data-image-id="{{ image.primary_name }}" onclick=confirmationDialog("{{admin_url}}/remove_image",id)>Remove</button>

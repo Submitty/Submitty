@@ -7,6 +7,18 @@ const notifiedMessage = 'Your instructor will be notified and can then choose to
 
 const no_access_message = 'You don\'t have access to this course.';
 
+function register(message) {
+    cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
+    cy.get('[data-testid="testing-button"]').last().click();
+    cy.get('[data-testid="no-access-message"]').should('contain', message)
+        .and('contain', selectMessage)
+        .and('contain', notifiedMessage);
+    cy.get('[data-testid="register-button"]').click();
+    cy.get('[data-testid="open_homework"]').should('exist');
+    cy.visit();
+    cy.get('[data-testid="testing-button"]').first().should('contain', 'Section 5');
+}
+
 describe('Tests for self registering for courses', () => {
     before(() => {
         // Testing course defaults to having self registration enabled, so we need to disable it for the tests.
@@ -63,8 +75,8 @@ describe('Tests for self registering for courses', () => {
         // Check normal view (with no course name)
         cy.login('gutmal');
         cy.visit();
-        cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="testing-button"]').click();
+        cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
+        cy.get('[data-testid="testing-button"]').last().click();
         cy.get('[data-testid="no-access-message"]').should('contain', openMessage)
             .and('contain', selectMessage)
             .and('contain', notifiedMessage);
@@ -72,20 +84,12 @@ describe('Tests for self registering for courses', () => {
         // Set course name
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
-        cy.get('[data-testid="course-name"').type('Testing Course{enter}');
+        cy.get('[data-testid="course-name"]').type('Testing Course{enter}');
         cy.logout();
         // Check with course name
         cy.login('gutmal');
         cy.visit();
-        cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="testing-button"]').click();
-        cy.get('[data-testid="no-access-message"]').should('contain', openMessageFull)
-            .and('contain', selectMessage)
-            .and('contain', notifiedMessage);
-        cy.get('[data-testid="register-button"]').click();
-        cy.get('[data-testid="open_homework"]').should('exist');
-        cy.visit();
-        cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
+        register(openMessageFull);
         cy.logout();
         cy.login('instructor2');
         cy.visit(['testing', 'users']);
@@ -103,15 +107,12 @@ describe('Tests for self registering for courses', () => {
         cy.logout();
         cy.login('gutmal');
         cy.visit();
-        cy.get('[data-testid="courses-list"').should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="testing-button"]').click();
-        cy.get('[data-testid="no-access-message"]').should('contain', openMessageFull)
-            .and('contain', selectMessage)
-            .and('contain', notifiedMessage);
-        cy.get('[data-testid="register-button"]').click();
-        cy.get('[data-testid="open_homework"]').should('exist');
-        cy.visit();
-        cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
+        register(openMessageFull);
+        cy.visit(['testing']);
+        cy.get('[data-testid="unregister-button"]').click();
+        cy.get('[data-testid="unregister-confirm"]').click();
+        cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
+        cy.get('[data-testid="testing-button"]').last().should('exist');
         cy.logout();
     });
 });

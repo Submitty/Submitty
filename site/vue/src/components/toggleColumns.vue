@@ -38,7 +38,7 @@ function loadColumns() {
 }
 function saveColumns() {
     if (format === 'json') {
-        const cookieData: Record<string, boolean> = {};
+        const cookieData: Record<string, boolean> = JSON.parse(decodeURIComponent(Cookies.get(cookie) ?? encodeURIComponent('{}'))) as Record<string, boolean>;
         columns.forEach((col, i) => {
             cookieData[col] = selected.value[i];
         });

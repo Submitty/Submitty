@@ -162,16 +162,6 @@ parameters:
 			path: app/controllers/DockerInterfaceController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
-			message: "#^Only booleans are allowed in a negated boolean, int given\\.$#"
-			count: 1
-			path: app/controllers/DockerInterfaceController.php
-
-		-
 			message: "#^Only booleans are allowed in \\|\\|, int given on the left side\\.$#"
 			count: 1
 			path: app/controllers/DockerInterfaceController.php
@@ -740,7 +730,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\OptionRepository is not subtype of type app\\\\repositories\\\\poll\\\\OptionRepository\\<app\\\\entities\\\\poll\\\\Option\\>\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/PollController.php
 
 		-
@@ -751,11 +741,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 2
-			path: app/controllers/SelfRejoinController.php
-
-		-
-			message: "#^Strict comparison using \\!\\=\\= between bool and null will always evaluate to true\\.$#"
-			count: 1
 			path: app/controllers/SelfRejoinController.php
 
 		-
@@ -784,11 +769,6 @@ parameters:
 		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
-			path: app/controllers/admin/AdminGradeableController.php
-
-		-
-			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 3
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
@@ -918,6 +898,11 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:genBlankComponent\\(\\) has no return type specified\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Method app\\\\controllers\\\\admin\\\\AdminGradeableController\\:\\:getGradeableJson\\(\\) should return array\\{title\\: mixed, type\\: mixed, id\\: mixed, instructions_url\\: mixed, syllabus_bucket\\: mixed, autograding_config_path\\: mixed, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: mixed\\}, \\.\\.\\.\\} but returns array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string, bulk_upload\\: bool, team_gradeable\\?\\: array\\{team_size_max\\: int, inherit_from\\: ''\\}, \\.\\.\\.\\}\\|array\\{title\\: string, type\\: string, id\\: string, instructions_url\\: string, syllabus_bucket\\: string, autograding_config_path\\: string\\}\\.$#"
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1190,7 +1175,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
@@ -1545,22 +1530,6 @@ parameters:
 			path: app/controllers/admin/StudentActivityDashboardController.php
 
 		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 2
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -1642,11 +1611,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:uploadUserList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -1798,7 +1762,7 @@ parameters:
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 29
+			count: 28
 			path: app/controllers/forum/ForumController.php
 
 		-
@@ -2779,11 +2743,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
-			path: app/controllers/grading/popup_refactor/RubricGraderController.php
-
-		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 1
 			path: app/controllers/pdf/PDFController.php
 
 		-
@@ -2876,11 +2835,6 @@ parameters:
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/controllers/student/LeaderboardController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/RainbowGradesController.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
@@ -3084,6 +3038,11 @@ parameters:
 
 		-
 			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<app\\\\models\\\\User\\> given\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Parameter \\#3 \\$team of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getGradedGradeable\\(\\) expects string\\|null, bool given\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3689,26 +3648,6 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\CourseMaterialsUtils\\:\\:insertCourseMaterialAccess\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/CourseMaterialsUtils.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:__construct\\(\\) has parameter \\$baseRenderer with no type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:addLineNumbers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeInlineRenderer.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
@@ -5692,21 +5631,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAverageGraderScores\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategories\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategoriesIdForThread\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/database/DatabaseQueries.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getCategoriesIdForThread\\(\\) has parameter \\$thread_id with no type specified\\.$#"
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -8167,6 +8091,16 @@ parameters:
 			path: app/models/GradingOrder.php
 
 		-
+			message: "#^Parameter \\#1 \\$string1 of function strcmp expects string, int given\\.$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Parameter \\#2 \\$string2 of function strcmp expects string, int given\\.$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
 			message: "#^Method app\\\\models\\\\GradingSection\\:\\:__construct\\(\\) has parameter \\$name with no type specified\\.$#"
 			count: 1
 			path: app/models/GradingSection.php
@@ -10117,6 +10051,21 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadGradedComponentsCountByGradingSections\\(\\) expects int, string given\\.$#"
+			count: 2
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadTeamSubmissionsByGradingSection\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^Parameter \\#1 \\$g_id of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getBadUserSubmissionsByGradingSection\\(\\) expects int, string given\\.$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: "#^Property app\\\\models\\\\gradeable\\\\Gradeable\\:\\:\\$active_grade_inquiries_count \\(bool\\) does not accept default value of type int\\.$#"
 			count: 1
 			path: app/models/gradeable/Gradeable.php
@@ -10512,7 +10461,7 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
-			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:createEventInfo\\(\\) should return array\\<string, int\\> but returns array\\<string, mixed\\>\\.$#"
+			message: "#^Method app\\\\models\\\\gradeable\\\\LateDays\\:\\:createEventInfo\\(\\) should return array\\<string, int\\> but returns array\\<string, app\\\\models\\\\gradeable\\\\GradedGradeable\\|int\\|string\\>\\.$#"
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -10890,61 +10839,6 @@ parameters:
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/repositories/SessionRepository.php
-
-		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 4
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageNum\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageNum\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$page with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
 
 		-
 			message: "#^Method app\\\\repositories\\\\poll\\\\OptionRepository\\:\\:findByPollWithResponseCounts\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -11657,11 +11551,6 @@ parameters:
 			path: app/views/admin/ReportView.php
 
 		-
-			message: "#^Method app\\\\views\\\\admin\\\\SqlToolboxView\\:\\:showToolbox\\(\\) has parameter \\$tables with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/views/admin/SqlToolboxView.php
-
-		-
 			message: "#^Method app\\\\views\\\\admin\\\\StudentActivityDashboardView\\:\\:createTable\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/views/admin/StudentActivityDashboardView.php
@@ -11879,11 +11768,6 @@ parameters:
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 11
-			path: app/views/forum/ForumThreadView.php
-
-		-
-			message: "#^Expression \"\\$category_colors\" on a separate line does not do anything\\.$#"
-			count: 2
 			path: app/views/forum/ForumThreadView.php
 
 		-
@@ -12370,31 +12254,6 @@ parameters:
 			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
 			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"

@@ -124,7 +124,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.34.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -151,7 +151,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.34.1
         with:
           php-version: ${{ env.PHP_VER }}
       - name: Cache Composer
@@ -187,7 +187,7 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@2.33.0
+      - uses: shivammathur/setup-php@2.34.1
         with:
           php-version: ${{ env.PHP_VER }}
           extensions: imagick
@@ -839,6 +839,11 @@ jobs:
         with:
           courses: development
           flags: --no_submissions
+
+      - name: Copy Autograding Files
+        if: ${{ matrix.containers == 'Autograding' }}
+        run: |
+          cp -R ${{env.SUBMITTY_REPOSITORY}}/more_autograding_examples ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/copy_of_more_autograding_examples
 
       - name: Run setup script without inputs (Other containers)
         if: ${{ matrix.containers != 'Autograding' }}
