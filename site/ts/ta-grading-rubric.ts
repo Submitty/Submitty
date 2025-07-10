@@ -1157,7 +1157,7 @@ function getItempoolOptions(parsed = false): string | Record<string, string[]> {
             return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')!) as Record<string, string[]> : {};
         }
         catch {
-            displayErrorMessage('Something went wrong retrieving itempool options');
+            window.displayErrorMessage('Something went wrong retrieving itempool options');
             return {};
         }
     }
@@ -1940,7 +1940,7 @@ window.onRestoreMark = function (me: HTMLElement) {
 window.onDeleteComponent = async function (me: HTMLElement) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
-        displayErrorMessage('Cannot delete the only component.');
+        window.displayErrorMessage('Cannot delete the only component.');
         return;
     }
 

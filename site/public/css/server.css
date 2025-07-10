@@ -524,16 +524,6 @@ td > a.active-sort {
     align-items: center;
 }
 
-.inner-message {
-    margin: 0 auto 10px;
-}
-
-.message-close {
-    float: right;
-    margin-right: -20px;
-    cursor: pointer;
-}
-
 .option {
     margin-bottom: 20px;
 }

@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage escapeSpecialChars */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, escapeSpecialChars */
 
 /*
 References:
@@ -538,22 +538,11 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 // @param index used for id
 // function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    // let the id be the date to prevent closing the wrong message
-    const d = new Date();
-    const t = String(d.getTime());
-
-    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"`;
-    const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
-    const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
-    const response = (json['status'] === 'success' ? json['data'] : json['message']);
-
-    const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
-    $('#messages').append(message);
-
     if (json['status'] === 'success') {
-        setTimeout(() => {
-            removeMessagePopup(t);
-        }, 5000);
+        displayMessage(json['data'], 'success');
+    }
+    else {
+        displayMessage(json['message'], 'error');
     }
 }
 
