@@ -388,7 +388,7 @@ jobs:
           fi
 
   type-check:
-    name: Type Check
+    name: TypeScript and Vue Type Check
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
