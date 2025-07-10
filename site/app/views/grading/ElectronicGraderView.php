@@ -903,8 +903,10 @@ HTML;
 
         $default_hidden_columns = ["active_graders"];
         $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns, $default_hidden_columns) {
-            if (in_array($column['function'], $default_hidden_columns, true)) {
-                return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns['active_graders'];
+            foreach ($default_hidden_columns as $hidden) {
+                if (strcmp($column['function'], $hidden) === 0) {
+                    return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns['active_graders'];
+                }
             }
             return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
         });
