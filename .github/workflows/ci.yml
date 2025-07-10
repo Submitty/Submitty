@@ -62,6 +62,7 @@ jobs:
       - name: Run Prettier Format
         run: npm run prettier:fix
       - run: git diff --exit-code
+
   js-lint:
     name: JavaScript Lint
     runs-on: ubuntu-22.04
