@@ -9,4 +9,4 @@
   become_user: root
   notify: Reload fpm
   register: submitty_term_creation_create_term_creation_output
-  changed_when: create_term_creation_output.rc != 0
+  changed_when: submitty_term_creation_create_term_creation_output.rc != 0

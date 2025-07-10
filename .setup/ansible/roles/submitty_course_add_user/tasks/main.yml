@@ -25,4 +25,4 @@
   register: submitty_course_add_user_add_user_result
   become: true
   become_user: root
-  changed_when: "'User added' in add_user_result.stdout"
+  changed_when: "'User added' in submitty_course_add_user_add_user_result.stdout"
