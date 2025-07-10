@@ -1,7 +1,7 @@
 const checkGradeable = (gradeable_id) => {
     cy.visit(['tutorial']);
     cy.get(`[data-testid="${gradeable_id}"`).find('[data-testid="submit-btn"]').click();
-    cy.get('[data-testid="new-submission-info"]').contains('New submission for');
+    cy.get('[data-testid="new-submission-info"]').should('contain.text', 'New submission for');
 };
 
 describe('Test course should exist', () => {
