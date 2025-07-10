@@ -32,7 +32,7 @@ describe('Test course should exist', () => {
         checkGradeable('image_diff_mirror');
         checkGradeable('input_output_subdirectories');
         checkGradeable('leaderboard');
-        // checkGradeable('jupyter_autograding_with_cell_ids');
+        checkGradeable('jupyter_autograding_with_cell_ids');
         checkGradeable('left_right_exam_seating');
         checkGradeable('matlab');
         checkGradeable('minimal_code_editing');
