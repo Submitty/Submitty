@@ -22,7 +22,7 @@
       "{{ submitty_course_add_user_registration_section }}"
       --user_group "{{ submitty_course_add_user_user_group }}"
     chdir: /usr/local/submitty/sbin/
-  register: submitty_course_add_user_add_user_result
+  register: submitty_course_add_user_result
   become: true
   become_user: root
-  changed_when: "'User added' in submitty_course_add_user_add_user_result.stdout"
+  changed_when: "'User added' in submitty_course_add_user_result.stdout"
