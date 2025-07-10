@@ -7,7 +7,6 @@ declare -A services=(
     ["nginx"]="Nginx Server"
     ["apache2"]="Web Server"
     ["postgresql"]="Database Server"
-    ["nullsmtpd"]="Mail Server"
     ["autograding"]="Autograding Shipper/Workers"
     ["submitty_websocket_server"]="WebSocket Server"
     ["submitty_daemon_jobs_handler"]="Daemon Jobs Handler"
@@ -22,15 +21,15 @@ log_service_restart() {
     today=$(date +%Y%m%d)
     local timestamp
     timestamp=$(date "+%Y-%m-%d:%H:%M:%S")
-    local log_file="/var/log/services/${today}.txt"
+    local log_file="/var/local/submitty/logs/services/${today}.txt"
 
     if [[ ! -f "${log_file}" ]]; then
         sudo touch "${log_file}"
     fi
 
-    echo -e "${timestamp}:${services["${service}"]}\n" | sudo tee -a "${log_file}"
+    echo -e "${timestamp}: ${services["${service}"]}\n" | sudo tee -a "${log_file}"
     echo -e "${message}\n\n${last_status}" | sudo tee -a "${log_file}"
-    echo -e "\n----------------------------------------\n" | sudo tee -a "${log_file}"
+    echo -e "----------------------------------------" | sudo tee -a "${log_file}"
 }
 
 repair_autograding() {
