@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\entities;
 
-use app\repositories\UnverifiedUserRepository;
 use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,7 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
  * the user is added to the normal users table, and then the unverified user entity is removed.
  * @package app\entities
  */
-#[ORM\Entity(repositoryClass: UnverifiedUserRepository::class)]
+#[ORM\Entity]
 #[ORM\Table(name: "unverified_users")]
 class UnverifiedUserEntity {
     #[ORM\Id]

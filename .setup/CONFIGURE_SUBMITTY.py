@@ -626,17 +626,27 @@ if not args.worker:
 
 ##############################################################################
 # Write submitty json
+# Full documentation at submitty.org/...
 user_id_requirements = {
     "any_user_id": True,
     "require_name": False,
     "min_length": 6,
     "max_length": 25,
+    # Example for Alyssa Hacker : hackal -- If the user's name is shorter, then numbers will be added. 
+    # Example for Joseph Wo : wo11jo
     "name_requirements": {
         "given_first": False,
         "given_name": 2,
         "family_name": 4
     },
     "require_email": False,
+    # If the user_id must contain part of the email. If whole_email is true, it must match the email.
+    # If whole_prefix is true, then the user_id must equal everything before the final @ sign.
+    # Else, it must be a certain number of characters of the prefix. 
+    # Examples for myemail@email.com:
+    # Whole email: myemail@gmail.com
+    # Whole prefix: myemail
+    # Part of prefix: myemai
     "email_requirements": {
         "whole_email": False,
         "whole_prefix": False,
