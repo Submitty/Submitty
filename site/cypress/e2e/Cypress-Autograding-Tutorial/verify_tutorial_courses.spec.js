@@ -23,7 +23,7 @@ describe('Test course should exist', () => {
         checkGradeable('14_tkinter');
         checkGradeable('15_GLFW');
         checkGradeable('16_docker_network_python');
-        checkGradeable('17_dispatch_actions_and_standard_input');
+        checkGradeable('17_dispatched_actions_and_standard_input');
         // checkGradeable('18_postgres_database');
     });
 });
