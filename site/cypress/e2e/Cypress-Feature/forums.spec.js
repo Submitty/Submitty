@@ -338,20 +338,17 @@ function submitToggleLikeRequest({ threadId, postId, currentUser, apiKey }) {
         'Authorization': apiKey,
     };
 
-    return cy.window().then((window) => {
-        return cy.request({
-            method: 'POST',
-            url,
-            headers,
-            body: {
-                thread_id: threadId,
-                post_id: postId,
-                current_user: currentUser,
-                csrf_token: window.csrfToken,
-            },
-        }).then((response) => {
-            return JSON.parse(Cypress.Blob.arrayBufferToBinaryString(response.body) || '{}');
-        });
+    return cy.request({
+        method: 'POST',
+        url,
+        headers,
+        body: {
+            thread_id: threadId,
+            post_id: postId,
+            current_user: currentUser
+        },
+    }).then((response) => {
+        return JSON.parse(Cypress.Blob.arrayBufferToBinaryString(response.body) || '{}');
     });
 }
 
