@@ -32,6 +32,9 @@ class Chatroom {
     private bool $is_active;
 
     #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $is_deleted;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
     private bool $allow_anon;
 
     #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
@@ -50,6 +53,7 @@ class Chatroom {
         $this->messages = new ArrayCollection();
         $this->is_active = false;
         $this->allow_anon = true;
+        $this->is_deleted = false;
     }
 
     public function getId(): int {
@@ -106,6 +110,14 @@ class Chatroom {
 
     public function addMessage(Message|null $message): void {
         $this->messages->add($message);
+    }
+
+    public function deleteChat(): void {
+        $this->is_deleted = true;
+    }
+
+    public function chatDeleted(): bool {
+        return $this->is_deleted;
     }
 
     public function calcAnonName(string $user_id): string {
