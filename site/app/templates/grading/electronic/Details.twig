@@ -82,7 +82,7 @@
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% include 'Vue.twig' with {
         'type': 'component',
-        'name': 'toggleColumns',
+        'name': 'ToggleColumns',
         'style': 'display: inline;',
         'args': {
             'columns': all_columns|map(column => column.function),
