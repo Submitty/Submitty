@@ -4,10 +4,12 @@ descriptions: 'Uses the composite action to copy and set up our e2e Selenium and
 inputs:
   courses:
     describes: 'The course(s) to set up for testing'
-    required: true
+    required: false
+    default: 'sample testing archived'
   flags:
     describes: 'Flags to pass to the setup script'
-    required: true
+    required: false
+    default: '--test_only_grading'
 
 env:
   PGPASSWORD: submitty_dbuser
