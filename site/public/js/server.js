@@ -1433,7 +1433,7 @@ function overridePopup(json) {
         `#${mount_id}`,
         'component',
         json.data.component,
-        json.data.args
+        json.data.args,
     );
 }
 
