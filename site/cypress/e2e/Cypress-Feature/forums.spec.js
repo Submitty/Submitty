@@ -545,5 +545,8 @@ describe('Should test WebSocket functionality', () => {
                 });
             });
         });
+
+        // Cleanup to prevent conflicts with upduck_forum.spec.js
+        removeThread(title5);
     });
 });
