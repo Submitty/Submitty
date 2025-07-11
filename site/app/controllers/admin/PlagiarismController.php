@@ -978,7 +978,7 @@ class PlagiarismController extends AbstractController {
             $plagiarism_config->setHasProvidedCode(true);
 
             // error checking
-            if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name']) || $_FILES['provided_code_file']['tmp_name'] === "") {
+            if (empty($_FILES) || !isset($_FILES['provided_code_file']) || !isset($_FILES['provided_code_file']['tmp_name'])) {
                 $this->core->addErrorMessage("Upload failed: Instructor code not provided");
                 return new RedirectResponse($return_url);
             }
@@ -1414,7 +1414,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $data = [];
-        $data["versions"] = array_values($all_versions_user_1);
+        $data["versions"] = $all_versions_user_1;
         $data["max_matching"] = strval($max_matching_version);
         $data["active_version"] = strval($active_version_user_1);
         return JsonResponse::getSuccessResponse($data);

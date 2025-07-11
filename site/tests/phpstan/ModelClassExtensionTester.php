@@ -29,7 +29,7 @@ class ModelClassExtensionTester extends PHPStanTestCase {
      * @dataProvider methodDataProvider
      */
     public function testHasMethod(string $class, string $method, bool $expected): void {
-        $broker = $this->createBroker();
+        $broker = $this->createReflectionProvider();
         $extension = new ModelClassExtension();
         $reflection = $broker->getClass($class);
         $this->assertSame($expected, $extension->hasMethod($reflection, $method));
@@ -39,7 +39,7 @@ class ModelClassExtensionTester extends PHPStanTestCase {
      * @dataProvider methodDataProvider
      */
     public function testGetMethod(string $class, string $method, bool $expected): void {
-        $broker = $this->createBroker();
+        $broker = $this->createReflectionProvider();
         $extension = new ModelClassExtension();
         $reflection = $broker->getClass($class);
         $this->assertSame($method, $extension->getMethod($reflection, $method)->getName());
