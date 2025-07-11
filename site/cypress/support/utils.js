@@ -62,21 +62,25 @@ export function buildUrl(parts = [], include_base = false) {
 }
 
 /**
- * Format the body of the request based on the content type and the CSRF token
+ * Formats the request body based on the content type and presence of a CSRF token
  *
  * @param {Object} body - The body of the request, which can be a FormData or JSON object
  * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
- * @param {String} csrfToken - The CSRF token to be added to the request
- * @returns {Object} - The formatted body of the request
+ * @param {String} csrfToken - The CSRF token to be added to the request, if present
+ * @returns {Object} - The formatted request body
  */
-function formatBody(body, contentType, csrfToken) {
+function formatRequestBody(body, contentType, csrfToken) {
     if (contentType === 'multipart/form-data') {
         const formData = new FormData();
+
+        if (csrfToken) {
+            formData.append('csrf_token', csrfToken);
+        }
 
         for (const [key, value] of Object.entries(body)) {
             formData.append(key, value);
         }
-        formData.append('csrf_token', csrfToken);
+
         return formData;
     }
     else {
@@ -85,33 +89,37 @@ function formatBody(body, contentType, csrfToken) {
 }
 
 /**
- * Verify the WebSocket functionality of a given request.
+ * Verifies the WebSocket functionality of a given request
  *
- * @param {String[]} urlArray - The URL parts to string together using the buildUrl function
+ * @param {String[]} urlArray - The URL parts to string together using the buildUrl function including the base URL
  * @param {String} method - The HTTP method to use for the request
  * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
  * @param {Object} body - The body of the request, which can be a FormData object or a JSON object
- * @param {Function} verifyResponse - The method to call once the response resulting action and response data can be verified
+ * @param {Function} successCallback - The method to call for response and UI verification
+ * @param {String} apiKey - The API key to use for the request Authorization header, if present
  */
 export function verifyWebSocketFunctionality(
     urlArray = [],
     method = 'GET',
     contentType = 'application/json',
     body = {},
-    verifyResponse = () => {},
+    successCallback = () => {},
+    apiKey = '',
 ) {
     return cy.window().then(async (window) => {
         cy.request({
-            headers: { 'Content-Type': contentType },
+            headers: {
+                'Content-Type': contentType,
+                'Authorization': apiKey || undefined,
+            },
             method: method,
-            url: buildUrl(urlArray, true), // Always include the base URL for websocket requests
-            body: formatBody(body, contentType, window.csrfToken),
+            url: buildUrl(urlArray, true),
+            body: formatRequestBody(body, contentType, apiKey ? undefined : window.csrfToken),
         }).then((res) => {
-            // Cypress response body is returned as an array buffer, so we need to parse it into a valid JSON representation
             let response;
 
             if (res.redirects && Array.isArray(res.redirects)) {
-                // Handle redirects
+                // Redirects are in typically in the form "302: http://localhost:1511/courses/s21/foo/bar"
                 const index = res.redirects[0].indexOf('http');
                 const redirect = res.redirects[0].slice(index).trim();
                 response = {
@@ -120,18 +128,19 @@ export function verifyWebSocketFunctionality(
                 };
             }
             else {
+                // Cypress response body is formatted as an array buffer, so we need to convert it to a valid JSON representation
                 response = JSON.parse(Cypress.Blob.arrayBufferToBinaryString(res.body) || '{}');
             }
 
             if (Object.keys(response).length > 0) {
-                // Handle responses returning data, such as create requests
+                // Validate server-side formatted JSON responses or redirects
                 expect(response.status).to.equal('success');
-                verifyResponse(response.data);
+                successCallback(response.data);
             }
             else {
-                // Handle responses returning no data, such as delete requests
+                // Validate responses with no required data
                 expect(res.status).to.equal(200);
-                verifyResponse(res);
+                successCallback(response);
             }
         });
     });

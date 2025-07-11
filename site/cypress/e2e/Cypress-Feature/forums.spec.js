@@ -345,7 +345,7 @@ function submitToggleLikeRequest({ threadId, postId, currentUser, apiKey }) {
         body: {
             thread_id: threadId,
             post_id: postId,
-            current_user: currentUser
+            current_user: currentUser,
         },
     }).then((response) => {
         return JSON.parse(Cypress.Blob.arrayBufferToBinaryString(response.body) || '{}');
