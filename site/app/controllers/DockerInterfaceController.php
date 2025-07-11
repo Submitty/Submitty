@@ -157,10 +157,8 @@ class DockerInterfaceController extends AbstractController {
                 $json
             );
 
-            if (!$this->updateDocker()) {
-                return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-            }
-            return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub and queued to be added!');
+            return JsonResponse::getSuccessResponse($_POST['image'] . ' has been added to the configuration! 
+                                                                            Click \'Update dockers and machines\' to apply changes.');
         }
         else {
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
@@ -244,10 +242,7 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        if (!$this->updateDocker()) {
-            return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-        }
-
-        return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
+        return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
+                                                            Click \'Update dockers and machines\' to apply changes.');
     }
 }
