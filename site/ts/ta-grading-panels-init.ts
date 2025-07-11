@@ -1,19 +1,9 @@
-import { initializeResizablePanels } from './resizable-panels';
 import {
     taLayoutDet,
-    TaLayoutDet,
-    resetSinglePanelLayout,
-    togglePanelLayoutModes,
-    toggleFullLeftColumnMode,
-    leftSelector,
-    verticalDragBarSelector,
-    saveResizedColsDimensions,
-    initializeHorizontalTwoPanelDrag,
     setPanelsVisibilities,
-    updatePanelOptions,
-    updatePanelLayoutModes,
     isMobileView,
     changeMobileView,
+    initializeTaLayout,
 } from './ta-grading-panels';
 
 // Grading Panel header width
@@ -127,68 +117,6 @@ function notebookScrollSave() {
     }
 }
 
-// returns taLayoutDet object from LS, and if its not present returns empty object
-function getSavedTaLayoutDetails() {
-    const savedData = localStorage.getItem('taLayoutDetails');
-    return savedData ? (JSON.parse(savedData) as TaLayoutDet) : {} as TaLayoutDet;
-}
-
-function initializeTaLayout() {
-    if (isMobileView) {
-        resetSinglePanelLayout();
-    }
-    else if (taLayoutDet.numOfPanelsEnabled) {
-        togglePanelLayoutModes(true);
-        if (taLayoutDet.isFullScreenMode && $('#silent-edit-id').length !== 0) {
-            toggleFullLeftColumnMode(true);
-        }
-        // initialize the layout\
-        initializeResizablePanels(
-            leftSelector,
-            verticalDragBarSelector,
-            false,
-            saveResizedColsDimensions,
-        );
-        initializeHorizontalTwoPanelDrag();
-    }
-    else {
-        if (taLayoutDet.currentOpenPanel) {
-            setPanelsVisibilities(taLayoutDet.currentOpenPanel);
-        }
-    }
-    if (taLayoutDet.isFullScreenMode) {
-        toggleFullScreenMode();
-    }
-    updateLayoutDimensions();
-    updatePanelOptions();
-    readCookies();
-}
-
-function updateLayoutDimensions() {
-    // updates width of left columns (normal + full-left-col) with the last saved layout width
-    $('.two-panel-item.two-panel-left').css({
-        width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : '50%',
-    });
-    // updates width of left columns (normal + full-left-col) with the last saved layout width
-    const bottomRow
-        = taLayoutDet.dividedColName === 'RIGHT'
-            ? $('.panel-item-section.right-bottom')
-            : $('.panel-item-section.left-bottom');
-    bottomRow.css({
-        height: taLayoutDet.bottomPanelHeight
-            ? taLayoutDet.bottomPanelHeight
-            : '50%',
-    });
-
-    if (taLayoutDet.numOfPanelsEnabled === 4) {
-        $('.panel-item-section.right-bottom').css({
-            height: taLayoutDet.bottomFourPanelRightHeight
-                ? taLayoutDet.bottomFourPanelRightHeight
-                : '50%',
-        });
-    }
-}
-
 /*
   Adjust buttons inside Grading panel header and shows only icons on smaller screens
  */
@@ -246,139 +174,9 @@ function adjustGradingPanelHeader() {
     panelsContainer.style.height = `calc(100% - ${height}px)`;
 }
 
-function readCookies() {
-    const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
-
-    const autoscroll = window.Cookies.get('autoscroll') || '';
-    const opened_mark = window.Cookies.get('opened_mark') || '';
-    const scroll_pixel = parseFloat(window.Cookies.get('scroll_pixel') || '');
-
-    const testcases = window.Cookies.get('testcases') || '';
-
-    const files = window.Cookies.get('files') || '';
-
-    $('#silent-edit-id').prop('checked', silent_edit_enabled);
-
-    window.addEventListener('load', () => {
-        $(`#title-${opened_mark}`).trigger('click');
-        if (scroll_pixel > 0) {
-            const gradingRubric = document.getElementById(
-                'grading-rubric',
-            ) as HTMLElement;
-            gradingRubric.scrollTop = scroll_pixel;
-        }
-    });
-
-    if (autoscroll === 'on') {
-        ($('#autoscroll_id')[0] as HTMLInputElement).checked = true;
-        const files_array = JSON.parse(files) as string[];
-        files_array.forEach((element: string) => {
-            const file_path = element.split('#$SPLIT#$');
-            let current = $('#file-container');
-            for (let x = 0; x < file_path.length; x++) {
-                current.children().each(function () {
-                    if (x === file_path.length - 1) {
-                        $(this)
-                            .children('div[id^=file_viewer_]')
-                            .each(function () {
-                                if (
-                                    $(this)[0].dataset.file_name
-                                    === file_path[x]
-                                    && !$($(this)[0]).hasClass('open')
-                                ) {
-                                    openFrame(
-                                        $(this)[0].dataset.file_name!,
-                                        $(this)[0].dataset.file_url!,
-                                        $(this).attr('id')!.split('_')[2],
-                                    );
-                                }
-                            });
-                        $(this)
-                            .children('div[id^=div_viewer_]')
-                            .each(function () {
-                                if (
-                                    $(this)[0].dataset.file_name
-                                    === file_path[x]
-                                    && !$($(this)[0]).hasClass('open')
-                                ) {
-                                    openDiv($(this).attr('id')!.split('_')[2]);
-                                }
-                            });
-                    }
-                    else {
-                        $(this)
-                            .children('div[id^=div_viewer_]')
-                            .each(function () {
-                                if (
-                                    $(this)[0].dataset.file_name === file_path[x]
-                                ) {
-                                    current = $(this);
-                                    return false;
-                                }
-                            });
-                    }
-                });
-            }
-        });
-    }
-    for (let x = 0; x < testcases.length; x++) {
-        if (testcases[x] !== '[' && testcases[x] !== ']') {
-            openAutoGrading(testcases[x]);
-        }
-    }
-}
-
-// Exchanges positions of left and right panels
-window.exchangeTwoPanels = function () {
-    if (+taLayoutDet.numOfPanelsEnabled === 2) {
-        taLayoutDet.currentTwoPanels = {
-            leftTop: taLayoutDet.currentTwoPanels.rightTop,
-            rightTop: taLayoutDet.currentTwoPanels.leftTop,
-        };
-        updatePanelLayoutModes();
-    }
-    else if (
-        +taLayoutDet.numOfPanelsEnabled === 3
-        || +taLayoutDet.numOfPanelsEnabled === 4
-    ) {
-        taLayoutDet.currentTwoPanels = {
-            leftTop: taLayoutDet.currentTwoPanels.rightTop,
-            leftBottom: taLayoutDet.currentTwoPanels.rightBottom,
-            rightTop: taLayoutDet.currentTwoPanels.leftTop,
-            rightBottom: taLayoutDet.currentTwoPanels.leftBottom,
-        };
-        $(
-            '.panel-item-section.left-bottom, .panel-item-section.right-bottom, .panel-item-section-drag-bar',
-        ).toggleClass('active');
-        taLayoutDet.dividedColName = $('.panel-item-section.right-bottom').is(
-            ':visible',
-        )
-            ? 'RIGHT'
-            : 'LEFT';
-        updatePanelOptions();
-        updatePanelLayoutModes();
-        initializeHorizontalTwoPanelDrag();
-    }
-    else {
-        // taLayoutDet.numOfPanelsEnabled is 1
-        alert('Exchange works only when there are two panels...');
-    }
-};
-
-function openAutoGrading(num: string) {
-    $(`#tc_${num}`).click();
-    // eslint-disable-next-line eqeqeq
-    if ($(`#testcase_${num}`)[0] != null) {
-        $(`#testcase_${num}`)[0].style.display = 'block';
-    }
-}
-
 $(() => {
-    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
-
     // Check initially if its the mobile screen view or not
     changeMobileView();
-    initializeTaLayout();
 
     window.addEventListener('resize', () => {
         const wasMobileView = isMobileView;
