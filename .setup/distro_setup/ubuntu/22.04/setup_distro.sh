@@ -56,7 +56,7 @@ apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-externa
 apt-get install -qqy php8.1 php8.1-cli php8.1-fpm php8.1-curl php8.1-pgsql php8.1-zip php8.1-mbstring php8.1-xml php8.1-ds php8.1-imagick php8.1-intl
 
 if [ ${DEV_VM} == 1 ]; then
-    apt-get install -qqy php-xdebug
+    apt-get install -qqy php-xdebug php-ldap
 fi
 
 #Add the scrot screenshotting program
@@ -116,8 +116,6 @@ apt-get install git -y
 
 # Install OpenLDAP for testing on Vagrant
 if [ ${DEV_VM} == 1 ]; then
-    apt-get install -qqy php-ldap
-
     CUR_DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
     source "$CUR_DIR/../../../vagrant/setup_ldap.sh"
