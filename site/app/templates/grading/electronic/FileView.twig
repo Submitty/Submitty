@@ -12,9 +12,6 @@
             </span>
             <strong id="{{ save_status_id|default('save_status') }}">No changes</strong>
         </div>
-        {% if show_pdf_bar|default(true) %}
-        {% include "grading/electronic/PDFAnnotationBar.twig" %}
-        {% endif %}
         <div class="image-rotate-bar" id="{{ image_rotate_bar_id|default('image-rotate-icons-bar') }}">
             <a class="image-rotate-icon-ccw">
             <i class="fas fa-undo" title="Rotate image counterclockwise"></i></a>
