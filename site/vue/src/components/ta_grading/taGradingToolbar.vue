@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '@/ts/ta-grading-toolbar';
-import NavigationButton from '@/components/ta_grading/navigationButton.vue';
+import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import { toggleFullScreenMode, exchangeTwoPanels } from '../../../../ts/ta-grading-panels';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
@@ -63,7 +63,6 @@ const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
     :icons="['fa-exchange-alt']"
     button-id="two-panel-exchange-btn"
     title="Exchange the panel positions"
-    optional-spanid="two-panel-exchange-btn"
   />
 
   <NavigationButton
