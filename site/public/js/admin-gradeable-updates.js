@@ -1144,12 +1144,14 @@ function addRootFolder(g_id) {
 function addIconHandler(g_id) {
     if (!selectedFilePaths || selectedFilePaths.length === 0) {
         openFilePickerAndUpload(null, g_id); // root
+        selectedFilePaths.length = 0;
         return;
     }
     if (selectedFilePaths.length === 1) {
         const path = selectedFilePaths[0].path.replace(/^.*config_upload\/\d+\//, '');
         if (selectedFilePaths[0].type === 'folder') {
             openFilePickerAndUpload(path, g_id); // folder
+            selectedFilePaths.length = 0;
             return;
         }
     }
@@ -1159,40 +1161,37 @@ function openFilePickerAndUpload(targetFolderPath, g_id) {
     const input = document.getElementById('hidden-config-file-input');
     input.onchange = function (event) {
         const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const fileContent = e.target.result;
-            const destination = targetFolderPath ? targetFolderPath : '/';
-            uploadConfigFile(destination, file.name, fileContent, g_id);
-        };
-        reader.readAsText(file);
+        if (!file) return;
+
+        const destination = targetFolderPath || '/';
+        uploadConfigFile(destination, file, g_id);
     };
     input.click();
 }
 
-function uploadConfigFile(destination, filename, content, g_id) {
+function uploadConfigFile(destination, file, g_id) {
     const cleanedDestination = destination?.replace(/^\/+/, '') ?? '';
-    const relativePath = cleanedDestination ? `${cleanedDestination}/${filename}` : filename;
+    const relativePath = cleanedDestination ? `${cleanedDestination}/${file.name}` : file.name;
+
+    const formData = new FormData();
+    formData.append('action', 'add_file');
+    formData.append('gradeable_id', g_id);
+    formData.append('path', relativePath);
+    formData.append('file', file);
+    formData.append('csrf_token', csrfToken);
+
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
         type: 'POST',
-        data: {
-            action: 'add_file',
-            gradeable_id: g_id,
-            path: relativePath,
-            file_content: content,
-            csrf_token: csrfToken,
-        },
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function (response) {
             const json = JSON.parse(response);
             if (json.status === 'success') {
                 displaySuccessMessage('File successfully added.');
                 location.reload();
-            }
-            else {
+            } else {
                 displayErrorMessage(json.message || 'Failed to add file.');
             }
         },
@@ -1202,6 +1201,7 @@ function uploadConfigFile(destination, filename, content, g_id) {
     });
 }
 
+
 function removeFiles(g_id) {
     const confirmed = confirm('Are you sure you want to delete the selected items? NOTE: If a folder is selected, all of its contents will be deleted. This action cannot be undone.');
     if (!confirmed) {
@@ -1209,6 +1209,7 @@ function removeFiles(g_id) {
     }
 
     const pathsToDelete = selectedFilePaths.map((f) => f.path);
+    selectedFilePaths.length = 0;
 
     $.post({
         url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),

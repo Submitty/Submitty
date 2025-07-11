@@ -2133,7 +2133,7 @@ class AdminGradeableController extends AbstractController {
                 return;
 
             case 'add_file':
-                $content = $_POST['file_content'] ?? '';
+                $content = file_get_contents($_FILES['file']['tmp_name'] ?? '');
                 if (!FileUtils::writeFile($full_path, $content)) {
                     $this->core->getOutput()->renderJsonFail("Could not create file.");
                     return;
