@@ -1,10 +1,5 @@
-/* global PDFAnnotate, pdfjsLib, csrfToken, jspdf */
+/* global pdfjsLib, csrfToken, jspdf */
 /* exported render_student, download_student, loadPDFToolbar, toggleOtherAnnotations, loadAllAnnotations, loadGraderAnnotations */
-
-if (PDFAnnotate.default) {
-    // eslint-disable-next-line no-global-assign
-    PDFAnnotate = PDFAnnotate.default;
-}
 
 window.RENDER_OPTIONS = {
     documentId: '',
@@ -22,6 +17,154 @@ window.GENERAL_INFORMATION = {
     file_name: '',
     broken: false,
 };
+
+function createPage(pageNumber) {
+    const PAGE_TEMPLATE = `
+  <div style="visibility: hidden;" class="page" data-loaded="false">
+    <div class="canvasWrapper">
+      <canvas></canvas>
+    </div>
+  </div>
+`;
+    const temp = document.createElement('div');
+
+    temp.innerHTML = PAGE_TEMPLATE;
+
+    const page = temp.children[0];
+    const canvas = page.querySelector('canvas');
+
+    page.setAttribute('id', `pageContainer${pageNumber}`);
+    page.setAttribute('data-page-number', pageNumber);
+
+    canvas.mozOpaque = true;
+    canvas.setAttribute('id', `page${pageNumber}`);
+
+    return page;
+}
+
+function scalePage(pageNumber, viewport, context) {
+    const page = document.getElementById(`pageContainer${pageNumber}`);
+    const canvas = page.querySelector('.canvasWrapper canvas');
+    const outputScale = getOutputScale(context);
+    const transform = !outputScale.scaled ? null : [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
+    const sfx = approximateFraction(outputScale.sx);
+    const sfy = approximateFraction(outputScale.sy);
+
+    // Adjust width/height for scale
+    page.style.visibility = '';
+    canvas.width = roundToDivide(viewport.width * outputScale.sx, sfx[0]);
+    canvas.height = roundToDivide(viewport.height * outputScale.sy, sfy[0]);
+    canvas.style.width = `${roundToDivide(viewport.width, sfx[1])}px`;
+    canvas.style.height = `${roundToDivide(viewport.height, sfx[1])}px`;
+    page.style.width = `${viewport.width}px`;
+    page.style.height = `${viewport.height}px`;
+
+    return transform;
+}
+
+/**
+ * Approximates a float number as a fraction using Farey sequence (max order of 8).
+ *
+ * @param {Number} x Positive float number
+ * @return {Array} Estimated fraction: the first array item is a numerator,
+ *                 the second one is a denominator.
+ */
+function approximateFraction(x) {
+    // Fast path for int numbers or their inversions.
+    if (Math.floor(x) === x) {
+        return [x, 1];
+    }
+
+    const xinv = 1 / x;
+    const limit = 8;
+    if (xinv > limit) {
+        return [1, limit];
+    }
+    else if (Math.floor(xinv) === xinv) {
+        return [1, xinv];
+    }
+
+    const x_ = x > 1 ? xinv : x;
+
+    // a/b and c/d are neighbours in Farey sequence.
+    let a = 0;
+    let b = 1;
+    let c = 1;
+    let d = 1;
+
+    // Limit search to order 8.
+    while (true) {
+    // Generating next term in sequence (order of q).
+        const p = a + c;
+        const q = b + d;
+        if (q > limit) {
+            break;
+        }
+        if (x_ <= p / q) {
+            c = p;
+            d = q;
+        }
+        else {
+            a = p;
+            b = q;
+        }
+    }
+
+    // Select closest of neighbours to x.
+    if (x_ - a / b < c / d - x_) {
+        return x_ === x ? [a, b] : [b, a];
+    }
+    else {
+        return x_ === x ? [c, d] : [d, c];
+    }
+}
+
+function getOutputScale(ctx) {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const backingStoreRatio = ctx.webkitBackingStorePixelRatio
+        || ctx.mozBackingStorePixelRatio
+        || ctx.msBackingStorePixelRatio
+        || ctx.oBackingStorePixelRatio
+        || ctx.backingStorePixelRatio || 1;
+    const pixelRatio = devicePixelRatio / backingStoreRatio;
+    return {
+        sx: pixelRatio,
+        sy: pixelRatio,
+        scaled: pixelRatio !== 1,
+    };
+}
+
+function roundToDivide(x, div) {
+    const r = x % div;
+    return r === 0 ? x : Math.round(x - r + div);
+}
+
+function renderPage(pageNumber, renderOptions) {
+    const {
+        documentId,
+        pdfDocument,
+        scale,
+        rotate,
+    } = renderOptions;
+
+    // Load the page and annotations
+    return pdfDocument.getPage(pageNumber).then((pdfPage) => {
+        const page = document.getElementById(`pageContainer${pageNumber}`);
+        const canvas = page.querySelector('.canvasWrapper canvas');
+        const canvasContext = canvas.getContext('2d', { alpha: false });
+        const totalRotation = (rotate + pdfPage.rotate) % 360;
+        const viewport = pdfPage.getViewport({ scale: scale, rotation: totalRotation });
+        const transform = scalePage(pageNumber, viewport, canvasContext);
+
+        // Render the page
+        return pdfPage.render({ canvasContext, viewport, transform }).promise.then(() => {
+            // Indicate that the page was loaded
+            page.setAttribute('data-loaded', 'true');
+
+            return pdfPage;
+        });
+    });
+}
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
@@ -77,7 +220,6 @@ function download(gradeable_id, user_id, grader_id, file_name, file_path, page_n
                 csrf_token: csrfToken,
             },
             success: (data) => {
-                PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(window.GENERAL_INFORMATION.grader_id));
                 let pdfData;
                 try {
                     pdfData = JSON.parse(data)['data'];
@@ -127,37 +269,13 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
             };
 
             page.render(renderContext).promise.then(() => {
-                PDFAnnotate.getAnnotations(file_name, num).then((annotationsPage) => {
-                    const annotations = annotationsPage.annotations;
-                    for (let an = 0; an < annotations.length; an++) {
-                        const annotation = annotations[an];
-                        if (annotation.type === 'drawing') {
-                            ctx.lineWidth = annotation.width * scale;
-                            ctx.strokeStyle = annotation.color;
-                            ctx.beginPath();
-                            for (let line = 1; line < annotation.lines.length; line++) {
-                                ctx.moveTo(annotation.lines[line - 1][0] * scale, annotation.lines[line - 1][1] * scale);
-                                ctx.lineTo(annotation.lines[line][0] * scale, annotation.lines[line][1] * scale);
-                                ctx.stroke();
-                            }
-                        }
-
-                        if (annotation.type === 'textbox') {
-                            ctx.font = `${annotation.size * scale}px sans-serif`;
-                            ctx.fillStyle = annotation.color;
-                            const text = annotation.content;
-                            if (text !== null) {
-                                ctx.fillText(text, annotation.x * scale, annotation.y * scale);
-                            }
-                        }
-                    }
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                    const width = doc.internal.pageSize.getWidth();
-                    const height = doc.internal.pageSize.getHeight();
-                    doc.addImage(imgData, 'JPEG', 0, 0, width, height);
-                    renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
-                    // TODO: Get the saving and loading from annotated_pdfs working
-                    /* console.log("CHECK2");
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                const width = doc.internal.pageSize.getWidth();
+                const height = doc.internal.pageSize.getHeight();
+                doc.addImage(imgData, 'JPEG', 0, 0, width, height);
+                renderPageForDownload(pdf, doc, num + 1, targetNum, file_name);
+                // TODO: Get the saving and loading from annotated_pdfs working
+                /* console.log("CHECK2");
                     var fd = new FormData();
                     var pdfToSave = btoa(doc.output());
                     let GENERAL_INFORMATION = window.GENERAL_INFORMATION;
@@ -190,7 +308,6 @@ function renderPageForDownload(pdf, doc, num, targetNum, file_name) {
                             alert("Something went wrong, please contact a administrator.");
                         }
                     }); */
-                });
             });
         });
     }
@@ -229,7 +346,6 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                 csrf_token: csrfToken,
             },
             success: (data) => {
-                PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(window.GENERAL_INFORMATION.grader_id));
                 // documentId = file_name;
 
                 let pdfData;
@@ -267,10 +383,10 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                     viewer.innerHTML = '';
                     NUM_PAGES = pdf.numPages;
                     for (let i = 0; i < NUM_PAGES; i++) {
-                        const page = PDFAnnotate.UI.createPage(i + 1);
+                        const page = createPage(i + 1);
                         viewer.appendChild(page);
                         const page_id = i + 1;
-                        PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(() => {
+                        renderPage(page_id, window.RENDER_OPTIONS).then(() => {
                             // eslint-disable-next-line eqeqeq
                             if (i == page_num) {
                                 // scroll to page on load
@@ -286,19 +402,6 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                     $('#save_status').css('color', 'red');
                                     $('#save-pdf-btn').removeClass('btn-default');
                                     $('#save-pdf-btn').addClass('btn-primary');
-                                }
-                            });
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('mouseenter', () => {
-                                const selected = $($('.tool-selected')[0]).attr('value');
-                                if (selected === 'pen') {
-                                    PDFAnnotate.UI.enablePen();
-                                }
-                            });
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('mouseleave', () => {
-                                // disable pen when mouse leaves the pdf page to allow for selecting inputs (like pen size)
-                                const selected = $($('.tool-selected')[0]).attr('value');
-                                if (selected === 'pen') {
-                                    PDFAnnotate.UI.disablePen();
                                 }
                             });
                         });
@@ -326,17 +429,6 @@ $(window).on('unload', () => {
     }
 });
 **/
-
-function loadPDFToolbar() {
-    const init_pen_size = document.getElementById('pen_size_selector').value;
-    const init_color = document.getElementById('color_selector').style.backgroundColor;
-    localStorage.setItem('pen/size', init_pen_size);
-    localStorage.setItem('main_color', init_color);
-    PDFAnnotate.UI.setPen(init_pen_size, init_color);
-    const init_text_size = document.getElementById('text_size_selector').value;
-    localStorage.setItem('text/size', init_text_size);
-    PDFAnnotate.UI.setText(init_text_size, init_color);
-}
 
 function loadAllAnnotations(annotations, file_name) {
     for (const grader in annotations) {
