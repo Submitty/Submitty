@@ -134,7 +134,6 @@ describe('Forum Thread Lock Date Functionality', () => {
     });
 
     it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
-        return;
         createThread(title1, content1, 'Comment');
         setLockDateToPast(title1);
         cy.login('student');
@@ -156,7 +155,6 @@ describe('Forum Thread Lock Date Functionality', () => {
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
     beforeEach(() => {
-        return;
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
@@ -166,7 +164,6 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 
     it('Remove threads removes all threads with the same title', () => {
-        return;
         createThread(title1, content1, 'Comment');
         createThread(title1, content1, 'Comment');
         removeThread(title1);
@@ -174,14 +171,12 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 
     it('Reply button is disabled when applicable and thread reply can contain an attachment', () => {
-        return;
         createThread(title1, title1, 'Comment');
         replyDisabled(title1, attachment1);
         removeThread(title1);
     });
 
     it('Form content is not cleared while submitting with empty description', () => {
-        return;
         cy.get('[data-testid="Create Thread"]').click();
         cy.get('[data-testid="title"]').type(title1);
         cy.get('[data-testid="categories-pick-list"]').contains('Comment').click();
@@ -196,7 +191,6 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 
     it('Create, reply to, merge, and delete threads', () => {
-        return;
         // Add and Delete Image Attachment
         uploadAttachmentAndDelete(title4, attachment1);
         createThread(title1, content1, 'Comment');
@@ -219,29 +213,25 @@ describe('Should test creating, replying, merging, removing, and upducks in foru
     });
 });
 
-const submitCreateThreadRequest = (title, content, category = '2') => {
+const submitCreateThreadRequest = (title, content) => {
     const body = {
         'title': title,
         'markdown_status': 0,
         'lock_thread_date': '',
         'thread_post_content': content,
-        'cat[]': category,
+        'cat[]': '2', // "Question" category
         'expirationDate': new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week from now
         'thread_status': -1,
     };
 
-    // Properly return the Cypress chain containing the response object and the thread element
+    // Properly return the Cypress chain containing the server response and local thread element
     return cy.wrap(null).then(() => {
         return verifyWebSocketFunctionality(
             ['sample', 'forum', 'threads', 'new'],
             'POST',
             'multipart/form-data',
             body,
-            (response) => {
-                return cy.get(`[data-thread_title*="${title}"]`)
-                    .should('exist')
-                    .then((thread) => [response, thread]);
-            },
+            (response) => cy.get(`[data-thread_title*="${title}"]`).then((post) => [response, post]),
         );
     });
 };
@@ -263,19 +253,16 @@ const submitCreatePostRequest = (threadId, parentPostId, content) => {
             'POST',
             'multipart/form-data',
             body,
-            (response) => {
-                return cy.get('.post_box')
-                    .contains(content)
-                    .should('exist')
-                    .closest('.post_box')
-                    .then((post) => [response, post]);
-            },
+            (response) => cy.get('.post_box').contains(content).should('exist').closest('.post_box').then((post) => [response, post]),
         );
     });
 };
 
 const submitDeletePostRequest = (title, threadId, postId, isFirstPost = false) => {
-    const body = { thread_id: threadId, post_id: postId };
+    const body = {
+        thread_id: threadId,
+        post_id: postId,
+    };
 
     return verifyWebSocketFunctionality(
         ['sample', 'forum', 'posts', 'delete'],
@@ -283,18 +270,20 @@ const submitDeletePostRequest = (title, threadId, postId, isFirstPost = false) =
         'multipart/form-data',
         body,
         (response) => {
-            // Verify the response type is correct
             if (isFirstPost) {
-                const oldPage = buildUrl(['sample', 'forum', 'threads', threadId], true);
-                cy.get(`[data-thread_title*="${title}"]`).should('not.exist');
+                // Verify thread deletion
+                const redirectPage = buildUrl(['sample', 'forum'], true);
                 expect(response.type).to.equal('thread');
-                cy.url().should('not.include', oldPage);
+                cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
+                // Verify automatic redirect to thread list page after deletion
+                cy.url().should('equal', redirectPage);
             }
             else {
+                // Verify server-side post deletion
                 expect(response.type).to.equal('post');
             }
 
-            // Post should always be deleted
+            // Always verify post deletion
             cy.get(`#${postId}`).should('not.exist');
         });
 };
@@ -305,52 +294,39 @@ const submitMergeThreadRequest = (threadId, childThreadId) => {
         merge_thread_child: childThreadId,
     };
 
-    // Properly return the Cypress chain containing the response object and the merged thread element
+    // Properly return the Cypress chain containing the server response and local merged thread element
     return cy.wrap(null).then(() => {
         return verifyWebSocketFunctionality(
             ['sample', 'forum', 'threads', 'merge'],
             'POST',
             'multipart/form-data',
             body,
-            (response) => {
-                return cy.get('.post_box').contains(`Merged Thread Title: ${title6}`).should('exist').closest('.post_box').then((post) => {
-                    return [response, post];
-                });
-            },
+            (response) => cy.get('.post_box').contains(`Merged Thread Title: ${title6}`).should('exist').closest('.post_box').then((post) => [response, post]),
         );
     });
 };
 
-/**
- * Submit a like/unlike (toggle) request for a forum post via the API.
- *
- * @param {Object} params - The parameters for the request
- * @param {number} params.postId - The post ID to like/unlike
- * @param {number} params.threadId - The thread ID containing the post
- * @param {string} params.currentUser - The user performing the action
- * @param {string} [params.apiKey] - Optional API key for Authorization header
- * @returns {Cypress.Chainable}
- */
-function submitToggleLikeRequest({ threadId, postId, currentUser, apiKey }) {
-    const url = buildUrl(['sample', 'posts', 'likes'], true).replace('courses', 'api/courses');
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': apiKey,
+const submitToggleLikeRequest = (currentUser, apiKey, threadId, postId, expected) => {
+    const { likeCount, likeIcon, instructorLikeBadge } = expected;
+    const body = {
+        thread_id: threadId,
+        post_id: postId,
+        current_user: currentUser,
     };
 
-    return cy.request({
-        method: 'POST',
-        url,
-        headers,
-        body: {
-            thread_id: threadId,
-            post_id: postId,
-            current_user: currentUser,
+    return verifyWebSocketFunctionality(
+        ['sample', 'posts', 'likes'],
+        'POST',
+        'application/json',
+        body,
+        (response) => {
+            cy.get(`[data-testid="like-count"]#likeCounter_${postId}`).should('have.text', likeCount);
+            cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', likeIcon);
+            cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should(instructorLikeBadge ? 'not.have.attr' : 'have.attr', 'style', 'display: none;');
         },
-    }).then((response) => {
-        return JSON.parse(Cypress.Blob.arrayBufferToBinaryString(response.body) || '{}');
-    });
-}
+        apiKey,
+    );
+};
 
 const expectPostHierarchy = (post, expected) => {
     const { threadId, postId, parentPostId, level, content, nextPage } = expected;
@@ -360,13 +336,13 @@ const expectPostHierarchy = (post, expected) => {
         expect(Number(post.attr('id'))).to.equal(postId);
         expect(Number(post.attr('data-parent_id'))).to.equal(parentPostId);
         expect(Number(post.attr('data-reply_level'))).to.equal(level);
-        cy.get('.post_content').invoke('text').then((text) => {
-            expect(text.trim()).to.equal(content);
-        });
+        cy.get('.post_content').should('contain', content);
     });
 
-    // Verify the next page is the thread page
-    expect(nextPage).to.equal(`${buildUrl(['sample', 'forum', 'threads', threadId], true)}?option=tree`);
+    // Verify the next page is the thread page, if present
+    if (nextPage) {
+        expect(nextPage).to.equal(`${buildUrl(['sample', 'forum', 'threads', threadId], true)}?option=tree`);
+    }
 };
 
 describe('Should test WebSocket functionality', () => {
@@ -378,18 +354,17 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for creating and deleting a new thread', () => {
-        return;
-        submitCreateThreadRequest(title5, content4, '2').then(([response, thread]) => {
+        submitCreateThreadRequest(title5, content4).then(([response, thread]) => {
             cy.wrap(thread).as('thread');
 
-            // Verify all the thread inner-components
+            // Verify all the inner-thread components
             cy.get('@thread').within(() => {
                 cy.get('[data-testid="thread-list-item"]').should('contain', title5);
                 cy.get('.thread-content').should('contain', content4);
                 cy.get('.label_forum').should('contain', 'Question');
             });
 
-            // Verify the server response matches the DOM
+            // Verify the server response data matches the DOM representation
             cy.get('@thread').invoke('attr', 'data-thread_id').then((val) => {
                 const threadId = Number(val);
                 expect(response.thread_id).to.equal(threadId);
@@ -404,7 +379,9 @@ describe('Should test WebSocket functionality', () => {
                         // Verify the inserted initial post ID
                         expect(Number(post.attr('id'))).to.equal(response.post_id);
 
-                        // Verify the initial reply level is 1
+                        // Verify the thread page content and initial reply level
+                        cy.get('[data-testid="create-post-head"]').should('contain', title5);
+                        cy.get('.post_content').should('contain', content4);
                         expect(Number(post.attr('data-reply_level'))).to.equal(1);
                     });
                 });
@@ -415,33 +392,30 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for incoming and deleting posts with the correct reply level', () => {
-        return;
-        submitCreateThreadRequest(title5, content4, '2').then(([threadResponse, _]) => {
-            const [threadId, parentPostId, nextPage] = [threadResponse.thread_id, threadResponse.post_id, threadResponse.next_page];
+        submitCreateThreadRequest(title5, content4).then(([response, _]) => {
+            const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
 
             cy.visit(nextPage).then(() => {
-                let firstPostId, secondPostId;
-
                 submitCreatePostRequest(threadId, parentPostId, reply4).then(([firstPostResponse, firstPost]) => {
-                    firstPostId = firstPostResponse.post_id;
+                    const firstPostId = firstPostResponse.post_id;
                     cy.wrap(expectPostHierarchy(firstPost, {
                         threadId,
                         postId: firstPostId,
                         parentPostId,
-                        level: 2,
+                        level: 2, // Reply to the original parent post
                         content: reply4,
                         nextPage: firstPostResponse.next_page,
                     })).as('firstPost');
 
+                    let secondPostId;
                     cy.get('@firstPost').then(() => {
-                        firstPostId = firstPostResponse.post_id;
                         submitCreatePostRequest(threadId, firstPostId, reply5).then(([secondPostResponse, secondPost]) => {
                             secondPostId = secondPostResponse.post_id;
                             cy.wrap(expectPostHierarchy(secondPost, {
                                 threadId,
                                 postId: secondPostId,
                                 parentPostId: firstPostId,
-                                level: 3,
+                                level: 3, // Reply to the post above
                                 content: reply5,
                                 nextPage: secondPostResponse.next_page,
                             })).as('secondPost');
@@ -449,8 +423,8 @@ describe('Should test WebSocket functionality', () => {
                     });
 
                     cy.get('@secondPost').then(() => {
+                        // Verify the thread tree from the first post is deleted
                         submitDeletePostRequest(title5, threadId, firstPostId, false).then(() => {
-                            // Verify the thread tree is deleted
                             cy.get(`#${firstPostId}`).should('not.exist');
                             cy.get(`#${secondPostId}`).should('not.exist');
                         });
@@ -461,25 +435,57 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for merging threads', () => {
-        return;
+        // Remove the merging thread title once during the entire testing file to avoid redundant calls
+        removeThread(title6);
+
         // Create the base thread
-        submitCreateThreadRequest(title5, content4, '2').then(([threadResponse, _]) => {
-            const [threadId, parentPostId, baseNextPage] = [threadResponse.thread_id, threadResponse.post_id, threadResponse.next_page];
+        submitCreateThreadRequest(title5, content4).then(([baseResponse, _]) => {
+            const { thread_id: baseThreadId, post_id: basePostId, next_page: baseNextPage } = baseResponse;
 
             // Create the merging thread
-            submitCreateThreadRequest(title6, content5, '2').then(([threadResponse, _]) => {
-                const [mergingThreadId, mergingPostId, mergingNextPage] = [threadResponse.thread_id, threadResponse.post_id, threadResponse.next_page];
+            submitCreateThreadRequest(title6, content5).then(([mergingResponse, _]) => {
+                let replyId;
+                const { thread_id: mergingThreadId, post_id: mergingPostId, next_page: mergingNextPage } = mergingResponse;
 
+                // Visit the merging thread
                 cy.visit(mergingNextPage).then(() => {
-                    submitMergeThreadRequest(threadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
-                        expect(mergeResponse.redirect).to.equal(baseNextPage);
-                        expectPostHierarchy(mergedPost, {
-                            threadId: mergingThreadId,
-                            postId: mergingPostId,
-                            parentPostId: parentPostId,
-                            level: 2,
-                            content: merged3,
-                            nextPage: `${mergingNextPage}?option=tree`,
+                    // Submit a reply to the merging thread
+                    submitCreatePostRequest(mergingThreadId, mergingPostId, reply5).then(([replyResponse, reply]) => {
+                        const { post_id, next_page: replyNextPage } = replyResponse;
+                        replyId = post_id;
+
+                        return cy.wrap(null).then(() => {
+                            expectPostHierarchy(reply, {
+                                threadId: mergingThreadId,
+                                postId: replyId,
+                                parentPostId: mergingPostId,
+                                level: 2, // Reply to the merging thread initial post
+                                content: reply5,
+                                nextPage: replyNextPage,
+                            });
+
+                            return cy.wrap(replyId);
+                        });
+                    }).then((replyId) => {
+                        // Submit the merge request
+                        submitMergeThreadRequest(baseThreadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
+                            expect(mergeResponse.redirect).to.equal(baseNextPage);
+                            expectPostHierarchy(mergedPost, {
+                                threadId: mergingThreadId,
+                                postId: mergingPostId,
+                                parentPostId: basePostId,
+                                level: 2, // Reply to the initial post of the base thread
+                                content: merged3,
+                            });
+                            cy.get(`#${replyId}`).then((reply) => {
+                                expectPostHierarchy(reply, {
+                                    threadId: mergingThreadId,
+                                    postId: replyId,
+                                    parentPostId: mergingPostId,
+                                    level: 3, // Reply to the initial post of the merging thread
+                                    content: reply5,
+                                });
+                            });
                         });
                     });
                 });
@@ -489,8 +495,10 @@ describe('Should test WebSocket functionality', () => {
 
     it('Should verify WebSocket functionality for liking and unliking posts via API', () => {
         // Create a thread as instructor
-        submitCreateThreadRequest(title5, content4, '2').then(([threadResponse, thread]) => {
-            const [threadId, postId, nextPage] = [threadResponse.thread_id, threadResponse.post_id, threadResponse.next_page];
+        submitCreateThreadRequest(title5, content4).then(([response, _]) => {
+            const { thread_id: threadId, post_id: postId, next_page: nextPage } = response;
+
+            // Fetch the required API keys for the test
             getApiKey('student', 'student').then((studentApiKey) => {
                 getApiKey('instructor', 'instructor').then((instructorApiKey) => {
                     cy.wrap({ studentApiKey, instructorApiKey }).as('apiKeys');
@@ -499,29 +507,38 @@ describe('Should test WebSocket functionality', () => {
 
             // Visit the thread as instructor
             cy.visit(nextPage).then(() => {
-                // Get API key for 'student'
                 cy.get('@apiKeys').then(({ studentApiKey, instructorApiKey }) => {
                     // Like as 'student' via API
-                    submitToggleLikeRequest({ threadId, postId, currentUser: 'student', apiKey: studentApiKey }).then(() => {
-                        // Verify like count is 1, duck is grey, instructor-like badge is not visible
-                        cy.get(`[data-testid="like-count"]#likeCounter_${postId}`).should('have.text', '1');
-                        cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', 'light-mode-off-duck.svg');
-                        cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should('have.attr', 'style').and('include', 'display: none');
+                    submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
+                        likeCount: 1,
+                        likeIcon: 'light-mode-off-duck.svg',
+                        instructorLikeBadge: false,
+                    }).as('studentLike');
 
+                    cy.get('@studentLike').then(() => {
                         // Like as instructor via API
-                        submitToggleLikeRequest({ threadId, postId, currentUser: 'instructor', apiKey: instructorApiKey }).then(() => {
-                            // Verify like count is 2, duck is yellow, instructor-like badge is visible
-                            cy.get(`[data-testid="like-count"]#likeCounter_${postId}`).should('have.text', '2');
-                            cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', 'on-duck-button.svg');
-                            cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should('not.have.attr', 'style', 'display: none;');
+                        submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
+                            likeCount: 2,
+                            likeIcon: 'on-duck-button.svg',
+                            instructorLikeBadge: true,
+                        }).as('instructorLike');
+                    });
 
-                            // Unlike as 'student' via API
-                            submitToggleLikeRequest({ threadId, postId, currentUser: 'student', apiKey: studentApiKey }).then(() => {
-                                // Verify like count is 1, duck is yellow, instructor-like badge is still visible
-                                cy.get(`[data-testid="like-count"]#likeCounter_${postId}`).should('have.text', '1');
-                                cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', 'on-duck-button.svg');
-                                cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should('not.have.attr', 'style', 'display: none;');
-                            });
+                    cy.get('@instructorLike').then(() => {
+                        // Unlike as 'student' via API
+                        submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
+                            likeCount: 1,
+                            likeIcon: 'on-duck-button.svg',
+                            instructorLikeBadge: true,
+                        }).as('studentUnlike');
+                    });
+
+                    cy.get('@studentUnlike').then(() => {
+                        // Unlike as instructor via API
+                        submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
+                            likeCount: 0,
+                            likeIcon: 'light-mode-off-duck.svg',
+                            instructorLikeBadge: false,
                         });
                     });
                 });

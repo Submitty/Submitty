@@ -84,7 +84,7 @@ function formatRequestBody(body, contentType, csrfToken) {
         return formData;
     }
     else {
-        return { ...body, csrf_token: csrfToken };
+        return { ...body, csrf_token: csrfToken || undefined };
     }
 }
 
@@ -97,6 +97,7 @@ function formatRequestBody(body, contentType, csrfToken) {
  * @param {Object} body - The body of the request, which can be a FormData object or a JSON object
  * @param {Function} successCallback - The method to call for response and UI verification
  * @param {String} apiKey - The API key to use for the request Authorization header, if present
+
  */
 export function verifyWebSocketFunctionality(
     urlArray = [],
@@ -106,6 +107,7 @@ export function verifyWebSocketFunctionality(
     successCallback = () => {},
     apiKey = '',
 ) {
+    const url = buildUrl(urlArray, true);
     return cy.window().then(async (window) => {
         cy.request({
             headers: {
@@ -113,7 +115,7 @@ export function verifyWebSocketFunctionality(
                 'Authorization': apiKey || undefined,
             },
             method: method,
-            url: buildUrl(urlArray, true),
+            url: apiKey ? url.replace('courses/', 'api/courses/') : url,
             body: formatRequestBody(body, contentType, apiKey ? undefined : window.csrfToken),
         }).then((res) => {
             let response;
