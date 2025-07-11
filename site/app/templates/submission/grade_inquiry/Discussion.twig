@@ -63,17 +63,20 @@
                             {% set text_area_label_text = 'Add comment to grade inquiry:' %}
                         {% endif %}
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
-                        {% include "misc/MarkdownArea.twig" with {
-                            "markdown_area_id" : "reply-text-area-" ~ component.id,
-                            "markdown_area_name" : "replyTextArea",
-                            "markdown_area_value" : "",
-                            "placeholder" : "Enter response here...",
-                            "preview_div_id" : "inquiry_preview",
-                            "preview_div_name" : "inquiry_preview",
-                            "onclick" : "previewInquiryMarkdown",
-                            "render_header" : true,
-                            "min_height" : "100px",
-                            "other_textarea_attributes" : "required oninput=onReplyTextAreaKeyUp(this)"
+                        {% include "Vue.twig" with { "name" : "markdownArea",
+                            "type": "component",
+                            "args": {
+                                "markdownAreaId" : "reply-text-area-" ~ component.id,
+                                "markdownAreaName" : "replyTextArea",
+                                "markdownAreaValue" : "",
+                                "placeholder" : "Enter response here...",
+                                "previewDivId" : "inquiry_preview",
+                                "previewDivName" : "inquiry_preview",
+                                "onclick" : "previewInquiryMarkdown",
+                                "renderHeader" : true,
+                                "minHeight" : "100px",
+                                "otherTextareaAttributes" : "required oninput=onReplyTextAreaKeyUp(this)"
+                            }
                         } only %}
                         <div id="grade-inquiry-actions" class="row" style="justify-content: flex-end" data-testid="grade-inquiry-actions">
                             {% if grade_inquiries[component.id] is not defined%}
