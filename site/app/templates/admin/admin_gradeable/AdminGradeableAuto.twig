@@ -88,7 +88,7 @@
     <div class="settings">
         <div>
             <div class="drop-down" id="config-drop-down">
-                <select name="autograding_config_path" id="autograding_config_selector" onchange="configSelectorChange()">
+                <select name="autograding_config_path" id="autograding_config_selector">
                     <option>{{ gradeable.getAutogradingConfigPath() }}</option>
                     {% for path in all_config_paths %}
                         <option value={{path.1}}>{{path.0}}</option>
