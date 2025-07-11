@@ -43,7 +43,6 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "1.0.0",
     "php-mock/php-mock-phpunit": "2.13.0",
-    "nikic/php-parser": "v5.5.0",
     "phpstan/phpstan": "2.1.17",
     "phpstan/phpstan-deprecation-rules": "2.0.3",
     "phpstan/phpstan-doctrine": "2.0.3",
