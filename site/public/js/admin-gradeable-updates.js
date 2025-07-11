@@ -1161,7 +1161,9 @@ function openFilePickerAndUpload(targetFolderPath, g_id) {
     const input = document.getElementById('hidden-config-file-input');
     input.onchange = function (event) {
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file) {
+            return;
+        }
 
         const destination = targetFolderPath || '/';
         uploadConfigFile(destination, file, g_id);
@@ -1191,7 +1193,8 @@ function uploadConfigFile(destination, file, g_id) {
             if (json.status === 'success') {
                 displaySuccessMessage('File successfully added.');
                 location.reload();
-            } else {
+            }
+            else {
                 displayErrorMessage(json.message || 'Failed to add file.');
             }
         },
@@ -1200,7 +1203,6 @@ function uploadConfigFile(destination, file, g_id) {
         },
     });
 }
-
 
 function removeFiles(g_id) {
     const confirmed = confirm('Are you sure you want to delete the selected items? NOTE: If a folder is selected, all of its contents will be deleted. This action cannot be undone.');
