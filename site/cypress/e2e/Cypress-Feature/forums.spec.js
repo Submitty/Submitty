@@ -319,7 +319,8 @@ const submitToggleLikeRequest = (currentUser, apiKey, threadId, postId, expected
         'application/json',
         body,
         () => {
-            cy.get(`[data-testid="like-count"]#likeCounter_${postId}`).should('have.text', likeCount);
+            cy.get(`.thread_box [data-testid="thread-like-count"]#Thread_likeCounter_${threadId}`).should('have.text', likeCount); // thread list
+            cy.get(`.post_box [data-testid="like-count"]#likeCounter_${postId}`).should('have.text', likeCount); // thread page
             cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', likeIcon);
             cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should(instructorLikeBadge ? 'not.have.attr' : 'have.attr', 'style', 'display: none;');
         },
