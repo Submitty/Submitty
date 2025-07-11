@@ -294,9 +294,8 @@ $(document).ready(() => {
                 }
                 updateErrorMessage();
                 checkWarningBanners();
-                if (this.id === 'autograding_config_selector') {
+                if (this.id === 'autograding_config_selector' && response_data[0] === 'rebuild_queued') {
                     location.reload();
-                    return;
                 }
             }, updateGradeableErrorCallback);
     });
