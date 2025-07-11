@@ -388,7 +388,7 @@ jobs:
           fi
 
   ts-type-check:
-    name: Type Check (TypeScript + Vue)
+    name: Type Check
     runs-on: ubuntu-22.04
     defaults:
       run:
@@ -406,7 +406,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cache-node-modules-
       - run: npm ci
-      - name: Run Type Check
+      - name: Run Type Check (TypeScript + Vue)
         run: npm run type-check
 
   db-check:
