@@ -1014,10 +1014,6 @@ function loadGradeableEditor(g_id, file_path) {
     });
 }
 
-function configSelectorChange() {
-    location.reload();
-}
-
 function isUsingDefaultConfig() {
     const selector = document.getElementById('autograding_config_selector');
     const selectedPath = selector.value;
