@@ -112,17 +112,37 @@
     </div>
 
     <div class="raw-config-info">
-        <div class="option-title raw-config-info-header">Edit Uploaded Configuration:</div>
-        <p class="not-available-message" id="editor-not-available">Not available for provided configurations.</p>
-        <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
+    <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
+        <div class="option-title raw-config-info-header">
+            <span>Edit Uploaded Configuration:</span>
+            <p class="not-available-message" id="editor-not-available">
+                Not available for provided configurations.
+            </p>
+            <a class="btn btn-primary editor-toggle-btn" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">
+                Open Editor
+            </a>
+        </div>
         <div id="gradeable-config-structure">
-            <ul class="config-folder-view">
-                {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
-            </ul>
-            <div id="gradeable-config-edit-bar">
-                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
-                <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
-                <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+            <p class="config-editor-about">
+                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. By design, you cannot delete 
+                the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files within it!</i> This feature is intended 
+                for <i>small changes</i> to an existing configuration. For larger changes to the file structure, consider reuploading the full configuration.
+            </p>
+            <div>
+                <div class="config-editor-action-btns">
+                    <button class="btn btn-primary" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Root Folder</button>
+                    <button class="btn btn-primary" onClick="addIconHandler('{{ gradeable.getId() }}')">Add Root File</button>
+                </div>
+                <div>
+                    <ul class="config-folder-view">
+                        {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+                    </ul>
+                </div>
+                <div id="gradeable-config-edit-bar">
+                    <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
+                    <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
+                    <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+                </div>
             </div>
         </div>
     </div>
@@ -252,12 +272,17 @@
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         <li style="margin-left:{{ indent * 15 }}px">
             {% if file.files is defined %}
-                <span id="{{ id }}-span" class="fas fa-folder"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                <i class="fas fa-plus file-action-add" id="add-to-config" onClick""></i>
+                <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
+                <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
                 <ul id="{{ id }}" class="config-folder-view">
                     {{ _self.display_config_files(file.files, indent + 1, g_id) }}
                 </ul>
             {% else %}
-                <span class="fas fa-file"></span>
+                {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
+                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
+                {% endif %}
+                <span class="fas fa-file config-file-icon"></span>
                 <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
             {% endif %}
         </li>

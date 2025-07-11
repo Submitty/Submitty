@@ -938,6 +938,11 @@ let codeMirrorInstance = null;
 let current_g_id = null;
 let current_file_path = null;
 let isConfigEdited = false;
+let selectedFilePaths = [];
+function FilePath(path, type) {
+    this.path = path;
+    this.type = type;
+}
 
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
@@ -984,6 +989,7 @@ function loadGradeableEditor(g_id, file_path) {
                     $('#gradeable-config-edit-bar').show();
                 }
 
+                document.getElementById('add-to-config').disabled = true;
                 const configData = json['data'];
                 originalConfigContent = configData.config_content;
                 const editbox = $('textarea#gradeable-config-edit');
@@ -1102,6 +1108,130 @@ function saveGradeableConfigEdit(g_id) {
         error: function () {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
+    });
+}
+
+function addRootFolder(g_id) {
+    const folderName = prompt('Enter a name for the new folder:');
+    if (!folderName) {
+        return;
+    }
+
+    const folderPath = `/${folderName}`;
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'add_folder',
+            gradeable_id: g_id,
+            path: folderPath,
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Folder created successfully.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Failed to create folder.'),
+    });
+}
+
+function addIconHandler(g_id) {
+    if (!selectedFilePaths || selectedFilePaths.length === 0) {
+        openFilePickerAndUpload(null, g_id); // root
+        selectedFilePaths.length = 0;
+        return;
+    }
+    if (selectedFilePaths.length === 1) {
+        const path = selectedFilePaths[0].path.replace(/^.*config_upload\/\d+\//, '');
+        if (selectedFilePaths[0].type === 'folder') {
+            openFilePickerAndUpload(path, g_id); // folder
+            selectedFilePaths.length = 0;
+            return;
+        }
+    }
+}
+
+function openFilePickerAndUpload(targetFolderPath, g_id) {
+    const input = document.getElementById('hidden-config-file-input');
+    input.onchange = function (event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const destination = targetFolderPath || '/';
+        uploadConfigFile(destination, file, g_id);
+    };
+    input.click();
+}
+
+function uploadConfigFile(destination, file, g_id) {
+    const cleanedDestination = destination?.replace(/^\/+/, '') ?? '';
+    const relativePath = cleanedDestination ? `${cleanedDestination}/${file.name}` : file.name;
+
+    const formData = new FormData();
+    formData.append('action', 'add_file');
+    formData.append('gradeable_id', g_id);
+    formData.append('path', relativePath);
+    formData.append('file', file);
+    formData.append('csrf_token', csrfToken);
+
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            const json = JSON.parse(response);
+            if (json.status === 'success') {
+                displaySuccessMessage('File successfully added.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message || 'Failed to add file.');
+            }
+        },
+        error: function () {
+            displayErrorMessage('Something went wrong while uploading.');
+        },
+    });
+}
+
+function removeFiles(g_id) {
+    const confirmed = confirm('Are you sure you want delete this file / folder? This action cannot be undone.');
+    if (!confirmed) {
+        return;
+    }
+
+    const pathsToDelete = selectedFilePaths.map((f) => f.path);
+    selectedFilePaths.length = 0;
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'delete',
+            gradeable_id: g_id,
+            paths: JSON.stringify(pathsToDelete),
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Selected items deleted.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Error deleting files/folders.'),
     });
 }
 
