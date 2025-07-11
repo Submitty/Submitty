@@ -12,7 +12,7 @@
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
 
-        if ("serviceWorker" in navigator) {
+        if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("{{ service_worker_path }}")
@@ -47,7 +47,7 @@
     {% endfor %}
 
     {% for js_ref in js %}
-    <script src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}' type={{ '.mjs' in js_ref ? 'module' : '' }}></script>
     {% endfor %}
 
     {% if not content_only %}
