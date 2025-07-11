@@ -17,6 +17,7 @@ import {
     toggleCommonMark,
     toggleComponent as oldToggleComponent,
 } from './ta-grading-rubric';
+import { gotoNextStudent, gotoPrevStudent } from './ta-grading-toolbar';
 
 declare global {
     interface Window {
@@ -916,6 +917,13 @@ async function toggleComponent(component_id: number, saveChanges: boolean, edit_
 }
 
 $(() => {
+    // Navigate to the prev / next student buttons
+    registerKeyHandler({ name: 'Previous Student', code: 'ArrowLeft' }, () => {
+        gotoPrevStudent();
+    });
+    registerKeyHandler({ name: 'Next Student', code: 'ArrowRight' }, () => {
+        gotoNextStudent();
+    });
     // Key handler / shorthand for toggling in between panels
     registerKeyHandler({ name: 'Toggle Autograding Panel', code: 'KeyA' }, () => {
         $('#autograding_results_btn button').trigger('click');

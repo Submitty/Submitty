@@ -78,13 +78,13 @@ export const taLayoutDet: TaLayoutDet = {
 };
 
 // Various Ta-grading page selector for DOM manipulation
-export const leftSelector = '.two-panel-item.two-panel-left';
-export const verticalDragBarSelector = '.two-panel-drag-bar';
-export const leftHorizDragBarSelector
+const leftSelector = '.two-panel-item.two-panel-left';
+const verticalDragBarSelector = '.two-panel-drag-bar';
+const leftHorizDragBarSelector
     = '.panel-item-section-drag-bar.panel-item-left-drag';
-export const rightHorizDragBarSelector
+const rightHorizDragBarSelector
     = '.panel-item-section-drag-bar.panel-item-right-drag';
-export const panelsBucket: Record<string, string> = {
+const panelsBucket: Record<string, string> = {
     leftTopSelector: '.two-panel-item.two-panel-left .left-top',
     leftBottomSelector: '.two-panel-item.two-panel-left .left-bottom',
     rightTopSelector: '.two-panel-item.two-panel-right .right-top',
@@ -105,7 +105,7 @@ function saveRightResizedColsDimensions(updateValue: string, isHorizontalResize:
     saveTaLayoutDetails();
 }
 
-export function saveResizedColsDimensions(updateValue: string, isHorizontalResize: boolean) {
+function saveResizedColsDimensions(updateValue: string, isHorizontalResize: boolean) {
     if (isHorizontalResize) {
         taLayoutDet.bottomPanelHeight = updateValue;
     }
@@ -205,7 +205,7 @@ function updatePanelLayoutModes() {
     saveTaLayoutDetails();
 }
 
-export function initializeHorizontalTwoPanelDrag() {
+function initializeHorizontalTwoPanelDrag() {
     if (taLayoutDet.dividedColName === 'RIGHT') {
         initializeResizablePanels(
             panelsBucket.rightBottomSelector,
@@ -262,7 +262,7 @@ function checkForTwoPanelLayoutChange(
 
 // Exchanges positions of left and right panels
 export function exchangeTwoPanels() {
-    console.log(taLayoutDet);
+    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     if (+taLayoutDet.numOfPanelsEnabled === 2) {
         taLayoutDet.currentTwoPanels = {
             leftTop: taLayoutDet.currentTwoPanels.rightTop,
@@ -298,7 +298,7 @@ export function exchangeTwoPanels() {
     }
 };
 
-export function updatePanelOptions() {
+function updatePanelOptions() {
     if (taLayoutDet.numOfPanelsEnabled === 1) {
         return;
     }
@@ -426,7 +426,7 @@ export function setPanelsVisibilities(
     }
 }
 
-export function resetSinglePanelLayout() {
+function resetSinglePanelLayout() {
     // hide all the two-panel-mode related nodes
     $('.two-panel-cont').removeClass('active');
     $('#two-panel-exchange-btn').removeClass('active');
@@ -478,7 +478,7 @@ export function resetSinglePanelLayout() {
     }
 }
 
-export function togglePanelLayoutModes(forceVal = false) {
+function togglePanelLayoutModes(forceVal = false) {
     const twoPanelCont = $('.two-panel-cont');
     if (!forceVal) {
         taLayoutDet.numOfPanelsEnabled
@@ -576,7 +576,7 @@ export function togglePanelLayoutModes(forceVal = false) {
     updatePanelOptions();
 }
 
-export function toggleFullLeftColumnMode(forceVal = false) {
+function toggleFullLeftColumnMode(forceVal = false) {
     // toggle between the normal left and full left panel mode
     if (!forceVal) {
         taLayoutDet.isFullLeftColumnMode = !taLayoutDet.isFullLeftColumnMode;
@@ -640,6 +640,159 @@ function getSavedTaLayoutDetails() {
     return savedData ? (JSON.parse(savedData) as TaLayoutDet) : {} as TaLayoutDet;
 }
 
+function updateLayoutDimensions() {
+    // updates width of left columns (normal + full-left-col) with the last saved layout width
+    $('.two-panel-item.two-panel-left').css({
+        width: taLayoutDet.leftPanelWidth ? taLayoutDet.leftPanelWidth : '50%',
+    });
+    // updates width of left columns (normal + full-left-col) with the last saved layout width
+    const bottomRow
+        = taLayoutDet.dividedColName === 'RIGHT'
+            ? $('.panel-item-section.right-bottom')
+            : $('.panel-item-section.left-bottom');
+    bottomRow.css({
+        height: taLayoutDet.bottomPanelHeight
+            ? taLayoutDet.bottomPanelHeight
+            : '50%',
+    });
+
+    if (taLayoutDet.numOfPanelsEnabled === 4) {
+        $('.panel-item-section.right-bottom').css({
+            height: taLayoutDet.bottomFourPanelRightHeight
+                ? taLayoutDet.bottomFourPanelRightHeight
+                : '50%',
+        });
+    }
+}
+
+function readCookies() {
+    const silent_edit_enabled = window.Cookies.get('silent_edit_enabled') === 'true';
+
+    const autoscroll = window.Cookies.get('autoscroll') || '';
+    const opened_mark = window.Cookies.get('opened_mark') || '';
+    const scroll_pixel = parseFloat(window.Cookies.get('scroll_pixel') || '');
+
+    const testcases = window.Cookies.get('testcases') || '';
+
+    const files = window.Cookies.get('files') || '';
+
+    $('#silent-edit-id').prop('checked', silent_edit_enabled);
+
+    window.addEventListener('load', () => {
+        $(`#title-${opened_mark}`).trigger('click');
+        if (scroll_pixel > 0) {
+            const gradingRubric = document.getElementById(
+                'grading-rubric',
+            ) as HTMLElement;
+            gradingRubric.scrollTop = scroll_pixel;
+        }
+    });
+
+    if (autoscroll === 'on') {
+        ($('#autoscroll_id')[0] as HTMLInputElement).checked = true;
+        const files_array = JSON.parse(files) as string[];
+        files_array.forEach((element: string) => {
+            const file_path = element.split('#$SPLIT#$');
+            let current = $('#file-container');
+            for (let x = 0; x < file_path.length; x++) {
+                current.children().each(function () {
+                    if (x === file_path.length - 1) {
+                        $(this)
+                            .children('div[id^=file_viewer_]')
+                            .each(function () {
+                                if (
+                                    $(this)[0].dataset.file_name
+                                    === file_path[x]
+                                    && !$($(this)[0]).hasClass('open')
+                                ) {
+                                    openFrame(
+                                        $(this)[0].dataset.file_name!,
+                                        $(this)[0].dataset.file_url!,
+                                        $(this).attr('id')!.split('_')[2],
+                                    );
+                                }
+                            });
+                        $(this)
+                            .children('div[id^=div_viewer_]')
+                            .each(function () {
+                                if (
+                                    $(this)[0].dataset.file_name
+                                    === file_path[x]
+                                    && !$($(this)[0]).hasClass('open')
+                                ) {
+                                    openDiv($(this).attr('id')!.split('_')[2]);
+                                }
+                            });
+                    }
+                    else {
+                        $(this)
+                            .children('div[id^=div_viewer_]')
+                            .each(function () {
+                                if (
+                                    $(this)[0].dataset.file_name === file_path[x]
+                                ) {
+                                    current = $(this);
+                                    return false;
+                                }
+                            });
+                    }
+                });
+            }
+        });
+    }
+    for (let x = 0; x < testcases.length; x++) {
+        if (testcases[x] !== '[' && testcases[x] !== ']') {
+            openAutoGrading(testcases[x]);
+        }
+    }
+}
+
+function openAutoGrading(num: string) {
+    $(`#tc_${num}`).click();
+    // eslint-disable-next-line eqeqeq
+    if ($(`#testcase_${num}`)[0] != null) {
+        $(`#testcase_${num}`)[0].style.display = 'block';
+    }
+}
+
+export function initializeTaLayout() {
+    if (isMobileView) {
+        resetSinglePanelLayout();
+    }
+    else if (taLayoutDet.numOfPanelsEnabled) {
+        togglePanelLayoutModes(true);
+        if (taLayoutDet.isFullScreenMode && $('#silent-edit-id').length !== 0) {
+            toggleFullLeftColumnMode(true);
+        }
+        // initialize the layout\
+        initializeResizablePanels(
+            leftSelector,
+            verticalDragBarSelector,
+            false,
+            saveResizedColsDimensions,
+        );
+        initializeHorizontalTwoPanelDrag();
+    }
+    else {
+        if (taLayoutDet.currentOpenPanel) {
+            setPanelsVisibilities(taLayoutDet.currentOpenPanel);
+        }
+    }
+    if (taLayoutDet.isFullScreenMode) {
+        toggleFullScreenMode();
+    }
+    updateLayoutDimensions();
+    updatePanelOptions();
+    readCookies();
+}
+
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+    initializeTaLayout();
+    if (taLayoutDet.isFullLeftColumnMode) {
+        toggleFullLeftColumnMode(true);
+    }
+    if (taLayoutDet.isFullScreenMode) {
+        toggleFullScreenMode();
+    }
 });
