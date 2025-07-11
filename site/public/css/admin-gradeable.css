@@ -229,6 +229,11 @@ table#grader-history td {
     font-weight: bold;
 }
 
+#gradeable-notifications-message {
+    font-style: italic;
+    font-weight: bold;
+}
+
 #timezone-container {
     float: right;
 }
@@ -396,11 +401,22 @@ body::-webkit-scrollbar-track {
     margin-top: 0.5em;
 }
 
-#gradeable-config-edit {
+/* stylelint-disable-next-line selector-class-pattern */
+#gradeable-config-edit-bar .CodeMirror {
+    /* The below instances of !important are identical to those used in gradeable-notebook.css.
+    It appears to be the only way to override the CodeMirror styling */
+    /* stylelint-disable-next-line declaration-no-important */
+    background-color: var(--standard-input-background) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border: 1px solid var(--standard-light-gray) !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    border-radius: 4px !important;
+    /* stylelint-disable-next-line declaration-no-important */
+    vertical-align: middle !important;
     min-height: 500px;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    overflow: auto;
+    overflow: hidden;
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
     resize: vertical;
 }
 
@@ -411,13 +427,6 @@ body::-webkit-scrollbar-track {
 .not-available-message {
     display: none;
     color: var(--standard-vibrant-red);
-}
-
-.warning-banner {
-    display: none;
-    margin: 0 0 1em;
-    background-color: var(--standard-vibrant-yellow);
-    color: var(--default-black);
 }
 
 .date-warning {

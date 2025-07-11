@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
+use app\models\User;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\SqlToolboxController;
 use app\entities\db\Table;
@@ -29,7 +31,16 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         parent::setUp();
 
         $this->core = new Core();
-
+        $this->core->setUser(new User($this->core, [
+            'user_id' => 'test',
+            'user_givenname' => 'Test',
+            'user_familyname' => 'Person',
+            'user_pronouns' => '',
+            'display_pronouns' => false,
+            'user_email' => null,
+            'user_email_secondary' => '',
+            'user_email_secondary_notify' => false
+        ]));
         $this->controller = new SqlToolboxController($this->core);
     }
 
@@ -45,7 +56,22 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         unset($_POST['sql']);
     }
 
-    public function testShowToolbox(): void {
+    public function toolboxInstructorQueriesProvider() {
+        return [
+            [[]],
+            [['query' => 'SELECT * FROM foo', 'description' => 'Test Query']],
+            [['query' => 'SELECT * FROM bar', 'description' => 'Another Query']],
+            [
+                ['query' => 'SELECT * FROM baz', 'description' => 'Yet Another Query'],
+                ['query' => 'SELECT * FROM qux', 'description' => 'Final Query'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider toolboxInstructorQueriesProvider
+     */
+    public function testShowToolbox($query_list): void {
         $reflection = new ReflectionClass(Table::class);
         $tables = [
             $reflection->newInstanceWithoutConstructor(),
@@ -87,6 +113,10 @@ class SqlToolboxControllerTester extends BaseUnitTest {
 
         $this->core->setCourseEntityManager($entity_manager);
 
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getInstructorQueries')->willReturn($query_list);
+        $this->core->setQueries($database_queries);
+
         $table_data = [
             ['name' => 'bar', 'columns' => []],
             ['name' => 'foo', 'columns' => []]
@@ -96,7 +126,7 @@ class SqlToolboxControllerTester extends BaseUnitTest {
         $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertSame(SqlToolboxView::class, $response->view_class);
         $this->assertSame('showToolbox', $response->view_function);
-        $this->assertSame($response->parameters, [$table_data]);
+        $this->assertSame($response->parameters, [$table_data, $query_list]);
     }
 
     public function testRunQuery(): void {
