@@ -111,13 +111,14 @@ class RunAutoRainbowGrades(CourseJob):
 
         semester = self.job_details['semester']
         course = self.job_details['course']
+        source = self.job_details['source']
 
         path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
         debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
 
         try:
             with open(debug_output, "w") as file:
-                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+                subprocess.call(['python3', path, semester, course, source], stdout=file, stderr=file)
         except PermissionError:
             print("error, could not open "+file+" for writing")
 

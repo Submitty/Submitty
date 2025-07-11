@@ -3,7 +3,6 @@
 namespace app\models;
 
 use app\libraries\Core;
-use app\libraries\database\DatabaseQueries;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 
@@ -89,7 +88,7 @@ class RainbowCustomization extends AbstractModel {
             $this->bucket_counts[$bucket] = 0;
             $this->bucket_remove_lowest[$bucket] = 0;
         }
-
+        $gradeable_buckets = [];
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
         foreach ($gradeables as $gradeable) {
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
@@ -112,10 +111,10 @@ class RainbowCustomization extends AbstractModel {
 
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()) {
-                $last_index = count($this->customization_data[$bucket]) - 1;
                 $autograded_grading_points = $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
             $max_score = $manual_grading_points + $autograded_grading_points;
+            $gradeable_buckets[$gradeable->getId()] = $bucket;
             $this->customization_data[$bucket][] = [
                 "id" => $gradeable->getId(),
                 "title" => $gradeable->getTitle(),
@@ -126,7 +125,6 @@ class RainbowCustomization extends AbstractModel {
                 "override_percent" => false
             ];
         }
-
         // Determine which 'buckets' exist in the customization.json
         if (!is_null($this->RCJSON)) {
             $json_buckets = $this->RCJSON->getGradeables();
@@ -139,10 +137,16 @@ class RainbowCustomization extends AbstractModel {
                 // instructor entered value instead
                 $bucket = $json_bucket->type;
 
+                // Filter out removed gradeables or updated gradeable buckets
+                $this->customization_data[$bucket] = array_values(array_filter($this->customization_data[$bucket], function ($g) use ($gradeable_buckets, $json_bucket) {
+                    $removed = !isset($gradeable_buckets[$g['id']]);
+                    $swapped = !$removed && $gradeable_buckets[$g['id']] !== $json_bucket->type;
+                    return !$removed && !$swapped;
+                }));
+
                 if ($json_bucket->count > $this->bucket_counts[$bucket]) {
                     $this->bucket_counts[$bucket] = $json_bucket->count;
                 }
-
                 $this->bucket_remove_lowest[$bucket] = $json_bucket->remove_lowest ?? 0;
             }
 
@@ -277,7 +281,7 @@ class RainbowCustomization extends AbstractModel {
      *
      * If no curve values were found for gradeable_id then gradeable_id will not be present in the return array
      *
-     * @return array<string,array<string,array<float>>>
+     * @return array<string,array<string,array<string|float>>>
      */
     public function getPerGradeableCurves(): array {
         $retArray = [];
@@ -525,8 +529,7 @@ class RainbowCustomization extends AbstractModel {
      */
     public function getSectionsAndLabels(): object {
         // Get sections from db
-        $db = new DatabaseQueries($this->core);
-        $db_sections = $db->getRegistrationSections();
+        $db_sections = $this->core->getQueries()->getRegistrationSections();
 
         $sections = [];
 
@@ -613,14 +616,16 @@ class RainbowCustomization extends AbstractModel {
         return $this->RCJSON?->getPerformanceWarnings() ?? [];
     }
 
-    // This function handles processing the incoming post data
-    public function processForm(): void {
+    /**
+     * This function handles processing the incoming post data
+     *
+     * @param string $form The JSON string to process
+     */
+    public function processForm($form): void {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
-
-        $form_json = $_POST['json_string'];
-        $form_json = json_decode($form_json);
+        $form_json = json_decode($form);
 
         if (isset($form_json->display_benchmark)) {
             foreach ($form_json->display_benchmark as $benchmark) {
@@ -712,5 +717,25 @@ class RainbowCustomization extends AbstractModel {
             'rainbow_grades',
             'manual_customization.json'
         ));
+    }
+
+    /**
+     * Check if the manual customization is being used
+     *
+     * @return bool
+     */
+    public function usesManualCustomization(): bool {
+        if (!$this->doesManualCustomizationExist()) {
+            return false;
+        }
+
+        $customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'customization.json');
+        $manual_customization_dest = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'rainbow_grades', 'manual_customization.json');
+
+        $customization_json = json_encode(json_decode(file_get_contents($customization_dest), true), JSON_PRETTY_PRINT);
+        $manual_customization_json = json_encode(json_decode(file_get_contents($manual_customization_dest), true), JSON_PRETTY_PRINT);
+
+        // Manual or GUI JSON contents are copied to the main customization.json file for the build processes
+        return $customization_json === $manual_customization_json;
     }
 }
