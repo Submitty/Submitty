@@ -388,26 +388,26 @@ jobs:
           fi
 
   ts-type-check:
-    name: TypeScript Type Check
+    name: Type Check (TypeScript + Vue)
     runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: site
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-    - name: Cache Node Modules
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-cache-node-modules-
-    - run: npm ci
-    - name: Run TypeScript Type Check
-      run: npm run type-check
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-cache-node-modules-
+      - run: npm ci
+      - name: Run Type Check
+        run: npm run type-check
 
   db-check:
     name: DB Check
