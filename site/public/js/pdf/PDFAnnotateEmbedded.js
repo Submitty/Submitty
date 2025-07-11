@@ -395,15 +395,6 @@ function render(gradeable_id, user_id, grader_id, file_name, file_path, page_num
                                     $('#submission_browser').scrollTop(Math.max(page.offsetTop - $('#file-view > .sticky-file-info').first().height(), 0));
                                 }
                             }
-                            document.getElementById(`pageContainer${page_id}`).addEventListener('pointerdown', () => {
-                                const selected = $('.tool-selected');
-                                if (selected.length !== 0 && $(selected[0]).attr('value') !== 'cursor') {
-                                    $('#save_status').text('Changes not saved');
-                                    $('#save_status').css('color', 'red');
-                                    $('#save-pdf-btn').removeClass('btn-default');
-                                    $('#save-pdf-btn').addClass('btn-primary');
-                                }
-                            });
                         });
                     }
                 });
