@@ -19,7 +19,12 @@ interface Props {
     textareaMaxlength?: string | number;
     required?: boolean;
     isPreviewLoading?: boolean;
-    onKeyupCallback?: string;
+    textareaOnKeyup?: string;
+    textareaOnkeydown?: string;
+    textareaOnPaste?: string;
+    textareaOnChange?: string;
+    textareaOnInput?: string;
+    otherTextareaAttributes?: string;
 }
 
 const props = defineProps<Props>();
@@ -95,12 +100,11 @@ async function fetchPreviewContent() {
             previewContent.value = html;
         }
         else {
-            console.error('Failed to fetch markdown preview');
             previewContent.value = 'Error loading preview';
         }
     }
     catch (error) {
-        console.error('Error fetching markdown preview:', error);
+        console.log('Error fetching markdown preview:', error);
         previewContent.value = 'Error loading preview';
     }
     finally {
@@ -171,15 +175,66 @@ function addMarkdown(type: string) {
 
 function handleKeyup(event: Event) {
     emit('keyup', event);
-    console.log(props.onKeyupCallback);
 
     // Call global function if specified
     if (
-        props.onKeyupCallback
-        && window[props.onKeyupCallback as keyof Window]
+        props.textareaOnKeyup
+        && window[props.textareaOnKeyup as keyof Window]
     ) {
-        console.log(`Calling global function: ${props.onKeyupCallback}`);
-        (window[props.onKeyupCallback as keyof Window] as () => void).call(
+        (window[props.textareaOnKeyup as keyof Window] as () => void).call(
+            event.target,
+        );
+    }
+}
+
+function handleKeydown(event: Event) {
+    emit('keydown', event);
+
+    // Call global function if specified
+    if (
+        props.textareaOnkeydown
+        && window[props.textareaOnkeydown as keyof Window]
+    ) {
+        (window[props.textareaOnkeydown as keyof Window] as () => void).call(
+            event.target,
+        );
+    }
+}
+
+function handlePaste(event: Event) {
+    emit('paste', event);
+
+    // Call global function if specified
+    if (
+        props.textareaOnPaste
+        && window[props.textareaOnPaste as keyof Window]
+    ) {
+        (window[props.textareaOnPaste as keyof Window] as () => void).call(
+            event.target,
+        );
+    }
+}
+
+function handleChange(event: Event) {
+    emit('change', event);
+
+    // Call global function if specified
+    if (
+        props.textareaOnChange
+        && window[props.textareaOnChange as keyof Window]
+    ) {
+        (window[props.textareaOnChange as keyof Window] as () => void).call(
+            event.target,
+        );
+    }
+}
+
+function handleInput(event: Event) {
+    if (
+        props.textareaOnInput
+        && window[props.textareaOnInput as keyof Window]
+    ) {
+        (window[props.textareaOnInput as keyof Window] as () => void).call(
             event.target,
         );
     }
@@ -194,7 +249,6 @@ onMounted(async () => {
 
 <template>
   <div
-    class="markdown-area fill-available"
     :class="[rootClass]"
   >
     <div
@@ -314,10 +368,11 @@ onMounted(async () => {
         :maxlength="maxLength"
         :required="required"
         :data-previous-comment="dataPreviousComment"
-        @change="$emit('change', $event)"
         @keyup="handleKeyup"
-        @paste="$emit('paste', $event)"
-        @keydown="$emit('keydown', $event)"
+        @keydown="handleKeydown"
+        @paste="handlePaste"
+        @change="handleChange"
+        @input="handleInput"
       />
       <!-- eslint-disable vue/no-v-html -->
       <div

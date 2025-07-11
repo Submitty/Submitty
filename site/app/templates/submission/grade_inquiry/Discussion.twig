@@ -65,6 +65,7 @@
                         <label for="reply-text-area">{{ text_area_label_text }}</label>
                         {% include "Vue.twig" with { "name" : "markdownArea",
                             "type": "component",
+                            "class": "markdown-area fill-available",
                             "args": {
                                 "markdownAreaId" : "reply-text-area-" ~ component.id,
                                 "markdownAreaName" : "replyTextArea",
@@ -75,7 +76,8 @@
                                 "onclick" : "previewInquiryMarkdown",
                                 "renderHeader" : true,
                                 "minHeight" : "100px",
-                                "otherTextareaAttributes" : "required oninput=onReplyTextAreaKeyUp(this)"
+                                "required" : true,
+                                "textareaOnInput" : "onReplyTextAreaKeyUp",
                             }
                         } only %}
                         <div id="grade-inquiry-actions" class="row" style="justify-content: flex-end" data-testid="grade-inquiry-actions">
