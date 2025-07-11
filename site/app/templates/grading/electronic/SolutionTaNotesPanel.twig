@@ -33,19 +33,22 @@
         <div class="solution-cont" data-component_id="{{component_id}}" data-original-solution="{{ solution_notes|default('') }}">
             <div id="sol-textbox-cont-{{ component_id }}-edit">
                 <label for="textbox-solution-{{ component_id }}" tabIndex="0" class="screen-reader">Solution for {{ component_title }}</label>
-                {% include "misc/MarkdownArea.twig" with {
-                    "markdown_area_id" : "textbox-solution-" ~ component_id,
-                    "class" : "solution-ta-notes-textbox",
-                    "markdown_area_value" : solution_notes,
-                    "placeholder" : "Start writing the solution for " ~ component_title ~ " component.",
-                    "preview_div_id" : "solution_notes_preview_" ~ component_id,
-                    "onclick" : "previewSolutionNotesMarkdown",
-                    "render_header" : true,
-                    "min_height" : "150px",
-                    "max_height" : "400px",
-                    "no_maxlength" : true,
-                    "initialize_preview" : is_first_edit != true,
-                    "textarea_onkeyup" : "detectSolutionChange.call(this)"
+                {% include "Vue.twig" with {
+                    "name" : "markdownArea",
+                    "type": "component",
+                    "args": {
+                        "markdownAreaId" : "textbox-solution-" ~ component_id,
+                        "class" : "solution-ta-notes-textbox",
+                        "markdownAreaValue" : solution_notes,
+                        "placeholder" : "Start writing the solution for " ~ component_title ~ " component.",
+                        "previewDivId" : "solution_notes_preview_" ~ component_id,
+                        "renderHeader" : true,
+                        "minHeight" : "150px",
+                        "maxHeight" : "400px",
+                        "noMaxlength" : true,
+                        "initializePreview" : is_first_edit != true,
+                        "onKeyupCallback" : "detectSolutionChange"
+                    }
                 } only %}
                 <button type="primary" disabled
                         class="btn btn-primary solution-save-btn"

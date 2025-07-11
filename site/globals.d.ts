@@ -6,5 +6,6 @@ declare global {
         csrfToken: string;
         $: JQueryStatic;
         Twig: typeof Twig;
+        buildUrl: (args: string[]) => string;
     }
 }
