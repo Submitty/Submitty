@@ -11,8 +11,9 @@ Cypress-Gradeable is all the tests that ARE directly related to creating, editin
 
 Cypress-UI is all the tests that primarily focus on ensuring the correct UI is displayed to users.
 
-Cypress-Autograding is all the tests that has to do with autograding and the development courses.
+Cypress-Autograding-Development is all the tests that has to do with autograding and the Development course.
 
+Cypress-Autograding-Tutorial is all the tests that has to do with autograding and the Tutorial course.
 
 The spec files in these folders can be moved around at a later date if necessary. If the names of the folders need to change, you have to edit the name of the containers matrix in the ci.yml Github Actions file in the .github/workflows folder. 
 

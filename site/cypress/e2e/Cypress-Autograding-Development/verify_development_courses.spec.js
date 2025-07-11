@@ -4,11 +4,11 @@ const checkGradeable = (gradeable_id) => {
 
     if (gradeable_id === 'notebook_time_limit') {
         cy.get('[data-testid="load-message-accept"]').should('exist');
-        cy.get('[data-testid="load-gradeable-message"').contains('This gradeable is TIMED');
+        cy.get('[data-testid="load-gradeable-message"]').should('contain.text', 'This gradeable is TIMED');
         return;
     }
 
-    cy.get('[data-testid="new-submission-info"]').contains('New submission for');
+    cy.get('[data-testid="new-submission-info"]').should('contain.text', 'New submission for');
 };
 
 describe('Test course should exist', () => {
