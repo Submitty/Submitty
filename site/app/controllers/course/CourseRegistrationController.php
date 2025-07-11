@@ -4,6 +4,7 @@ namespace app\controllers\course;
 
 use app\controllers\AbstractController;
 use app\controllers\admin\ConfigurationController;
+use app\libraries\CourseUserManager;
 use app\libraries\response\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\Email;
@@ -63,6 +64,7 @@ class CourseRegistrationController extends AbstractController {
             $this->core->addErrorMessage('You cannot unregister from this course on your own.');
             return new RedirectResponse($this->core->buildCourseUrl());
         }
+        CourseUserManager::unregisterCourseUser($this->core, $this->core->getUser()->getId(), $term, $course);
         $this->core->getQueries()->unregisterCourseUser($this->core->getUser(), $term, $course);
         $this->core->addSuccessMessage('You have successfully unregistered from the course.');
         return new RedirectResponse($this->core->buildUrl(['home']));
@@ -76,13 +78,14 @@ class CourseRegistrationController extends AbstractController {
             return;
         }
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-        if ($this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
+        if (CourseUserManager::wasStudentEverInCourse($this->core, $user_id, $course, $term)) {
             $this->core->getUser()->setRegistrationSection($default_section);
+            CourseUserManager::updateCourseUser($this->core, $user, $term, $course);
             $this->core->getQueries()->updateUser($user, $term, $course);
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
-            $this->core->getQueries()->insertCourseUser($this->core->getUser(), $term, $course);
+            CourseUserManager::addCourseUser($this->core, $user, $term, $course);
         }
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);
