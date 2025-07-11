@@ -94,7 +94,7 @@ function formatRequestBody(body, contentType, csrfToken) {
  * @param {String[]} urlArray - The URL parts to string together using the buildUrl function including the base URL
  * @param {String} method - The HTTP method to use for the request
  * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
- * @param {Object} body - The body of the request, which can be a FormData object or a JSON object
+ * @param {Object} body - The body of the request, which should be a JSON object
  * @param {Function} successCallback - The method to call for response and UI verification
  * @param {String} apiKey - The API key to use for the request Authorization header, if present
 
