@@ -1205,7 +1205,7 @@ function uploadConfigFile(destination, file, g_id) {
 }
 
 function removeFiles(g_id) {
-    const confirmed = confirm('Are you sure you want to delete the selected items? NOTE: If a folder is selected, all of its contents will be deleted. This action cannot be undone.');
+    const confirmed = confirm('Are you sure you want delete this file / folder? This action cannot be undone.');
     if (!confirmed) {
         return;
     }
@@ -1233,94 +1233,6 @@ function removeFiles(g_id) {
         },
         error: () => displayErrorMessage('Error deleting files/folders.'),
     });
-}
-
-// Toggles between displaying the checkboxes and hiding them
-function toggleSelect() {
-    const selectButton = document.getElementById('select-files-toggle');
-    const folderCheckboxes = document.querySelectorAll('.folder-select-box');
-    const fileCheckboxes = document.querySelectorAll('.file-select-box');
-    const addButton = document.getElementById('add-to-config');
-    const folderButton = document.getElementById('add-root-folder');
-    const deleteButton = document.getElementById('delete-from-config');
-    const isSelecting = selectButton.innerText === 'SELECT';
-    selectButton.innerText = isSelecting ? 'DESELECT ALL' : 'SELECT';
-
-    folderCheckboxes.forEach((cb) => {
-        cb.style.display = isSelecting ? 'inline-block' : 'none';
-        if (!isSelecting) {
-            cb.checked = false;
-        }
-    });
-
-    fileCheckboxes.forEach((cb) => {
-        cb.style.display = isSelecting ? 'inline-block' : 'none';
-        if (!isSelecting) {
-            cb.checked = false;
-        }
-    });
-    // When checkboxes are reset, action buttons may change status
-    if (!isSelecting) {
-        folderButton.style.opacity = '0.5';
-        deleteButton.style.opacity = '0.5';
-        selectedFilePaths.length = 0;
-    }
-    addButton.style.opacity = '1';
-    addButton.style.pointerEvents = 'auto';
-    folderButton.style.opacity = '1';
-    folderButton.style.pointerEvents = 'auto';
-}
-
-// When a box is changed, add or delete it from the selected files array and update the action buttons
-function checkSelected(checkbox) {
-    const filePath = checkbox.getAttribute('data-path');
-    const fileType = checkbox.getAttribute('data-type');
-
-    // Add to the files array when checked
-    if (checkbox.checked) {
-        if (!selectedFilePaths.some((fp) => fp.path === filePath)) {
-            selectedFilePaths.push(new FilePath(filePath, fileType));
-        }
-    }
-    // Remove from files array when unchecked
-    else {
-        selectedFilePaths = selectedFilePaths.filter((p) => p.path !== filePath);
-    }
-    updateActionButtonState();
-}
-
-function updateActionButtonState() {
-    const folderButton = document.getElementById('add-root-folder');
-    const addButton = document.getElementById('add-to-config');
-    const deleteButton = document.getElementById('delete-from-config');
-
-    // Nothing selected: add to root allowed, delete disabled
-    if (selectedFilePaths.length === 0) {
-        folderButton.style.pointerEvents = 'auto';
-        folderButton.style.opacity = '1';
-        addButton.style.pointerEvents = 'auto';
-        addButton.style.opacity = '1';
-        deleteButton.style.opacity = '0.5';
-        deleteButton.style.pointerEvents = 'none';
-    }
-    // One folder selected: disable add folder - allow adding to that folder and allow that folder to be deleted
-    else if (selectedFilePaths.length === 1 && selectedFilePaths[0].type === 'folder') {
-        folderButton.style.pointerEvents = 'none';
-        folderButton.style.opacity = '0.5';
-        addButton.style.pointerEvents = 'auto';
-        addButton.style.opacity = '1';
-        deleteButton.style.opacity = '1';
-        deleteButton.style.pointerEvents = 'auto';
-    }
-    // Multiple folders or files: delete enabled, adding disabled
-    else {
-        folderButton.style.pointerEvents = 'none';
-        folderButton.style.opacity = '0.5';
-        addButton.style.pointerEvents = 'none';
-        addButton.style.opacity = '0.5';
-        deleteButton.style.opacity = '1';
-        deleteButton.style.pointerEvents = 'auto';
-    }
 }
 
 function loadCodeMirror() {

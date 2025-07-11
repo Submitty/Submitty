@@ -410,8 +410,8 @@ body::-webkit-scrollbar-track {
 }
 
 .config-editor-about {
-    padding-bottom: 16px;
-    width: 60%;
+    padding-bottom: 20px;
+    width: 50%;
 }
 
 .config-about-add {
@@ -434,6 +434,7 @@ body::-webkit-scrollbar-track {
     display: flex;
     align-items: center;
     gap: 20px;
+    padding-bottom: 16px;
 }
 
 .select-files-btn {
@@ -444,7 +445,7 @@ body::-webkit-scrollbar-track {
 
 .config-folder-view {
     list-style-type: none;
-    margin-top: 0.5em;
+    margin-bottom: 0.5em;
     margin-left: 0.5em;
 }
 
@@ -452,26 +453,23 @@ body::-webkit-scrollbar-track {
     display: none;
 }
 
-.file-action-folder {
-    opacity: 0.5;
-}
-
 .file-action-add {
-    font-size: 36px;
     font-weight: bold;
     color: var(--standard-vibrant-green);
 }
 
 .file-action-delete {
-    opacity: 0.5;
+    color: var(--standard-medium-dark-gray);
 }
 
+.file-action-folder:hover,
+.file-action-delete:hover,
 .file-action-add:hover {
-    color: var(--standard-dark-green);
+    transform: scale(1.10);
 }
 
 .config-file-icon {
-    margin-right: 3px;
+    margin-right: 6px;
 }
 
 /* stylelint-disable-next-line selector-class-pattern */

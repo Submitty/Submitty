@@ -124,18 +124,14 @@
         </div>
         <div id="gradeable-config-structure">
             <p class="config-editor-about">
-                Click on a file to view it in the gradeable editor. To add a folder to the root level, click <i class="fas fa-folder config-about-icon"></i> with nothing selected, 
-                and type the name you would like to use. To add a file to the root level, click <b class="config-about-add">+</b> with nothing selected. To add a 
-                file to a folder, select the folder, then click <b class="config-about-add">+</b>. Select any file or folder and <i class="fas fa-trash config-about-icon"></i> to remove it. 
-                By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files within it!</i> This feature is intended for
-                <i>small changes</i> to an existing configuration. For larger changes to the file structure, consider reuploading the configuration.
+                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. By design, you cannot delete 
+                the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files within it!</i> This feature is intended 
+                for <i>small changes</i> to an existing configuration. For larger changes to the file structure, consider reuploading the full configuration.
             </p>
             <div>
                 <div class="config-editor-action-btns">
-                    <a class="key_to_click select-files-btn" id="select-files-toggle" onClick="toggleSelect()">SELECT</a>
-                    <i class="fas fa-folder" class="file-action-folder" id="add-root-folder" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
-                    <a class="file-action-add" id="add-to-config" onClick="addIconHandler('{{ gradeable.getId() }}')">+</a>
-                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick="removeFiles('{{ gradeable.getId() }}')"></i>
+                    <button class="btn btn-primary" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Root Folder</button>
+                    <button class="btn btn-primary" onClick="addIconHandler('{{ gradeable.getId() }}')">Add Root File</button>
                 </div>
                 <div>
                     <ul class="config-folder-view">
@@ -276,14 +272,15 @@
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         <li style="margin-left:{{ indent * 15 }}px">
             {% if file.files is defined %}
-                <input type="checkbox" id="folder-select-box" data-path="{{ file.path }}" data-type="folder" class="folder-select-box config-contents-display" onchange="checkSelected(this)">
+                <i class="fas fa-plus file-action-add" id="add-to-config" onClick""></i>
+                <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
                 <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
                 <ul id="{{ id }}" class="config-folder-view">
                     {{ _self.display_config_files(file.files, indent + 1, g_id) }}
                 </ul>
             {% else %}
                 {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
-                    <input type="checkbox" id="file-select-box" data-path="{{ file.path }}" data-type="file" class="file-select-box config-contents-display" onchange="checkSelected(this)">
+                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
                 {% endif %}
                 <span class="fas fa-file config-file-icon"></span>
                 <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
