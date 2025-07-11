@@ -29,7 +29,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell1.*",
+          "source" : "cell1*.*",
           "destination" : "./"
         }
       ], 
@@ -38,8 +38,14 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "cell1.txt",
+          "actual_file": "cell1_output.txt",
           "expected_string" : "hello world!"
+        },
+        {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "cell1_source.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         },
         {
           "method" : "errorIfNotEmpty",
@@ -54,7 +60,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell2.*",
+          "source" : "cell2*.*",
           "destination" : "./"
         }
       ], 
@@ -79,7 +85,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell3.*",
+          "source" : "cell3*.*",
           "destination" : "./"
         }
       ], 
@@ -96,6 +102,12 @@
           "show_expected": "always"
         },
         {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "cell3_source.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        },
+        {
           "method" : "errorIfNotEmpty",
 		      "actual_file" : "cell3.err",
 		      "show_actual" : "always",
@@ -108,7 +120,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell4.*",
+          "source" : "cell4*.*",
           "destination" : "./"
         }
       ], 
@@ -125,6 +137,12 @@
           "show_expected": "always"
         },
         {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "cell4_source.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
+        },
+        {
           "method" : "errorIfNotEmpty",
 		      "actual_file" : "cell4.err",
 		      "show_actual" : "always",
@@ -137,7 +155,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "cell6.*",
+          "source" : "cell6*.*",
           "destination" : "./"
         }
       ], 
@@ -152,6 +170,12 @@
           "show_difference_image" : "always",
           "show_actual": "always",
           "show_expected": "always"
+        },
+        {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "cell6_source.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         },
         {
           "method" : "errorIfNotEmpty",

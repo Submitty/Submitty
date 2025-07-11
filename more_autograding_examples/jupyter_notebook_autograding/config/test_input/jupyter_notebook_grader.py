@@ -62,15 +62,20 @@ def save_output(cell_idx, cell):
         cell_txt.write_text(cell.source.strip(), encoding='utf-8')
 
     elif cell.cell_type == 'code':
+        source_code = cell.source.strip()
+        if source_code:
+            cell_txt = Path(f"{file_name}_source.txt")
+            cell_txt.write_text(source_code, encoding='utf-8')
+
         for output in cell.get('outputs', []):
             if output.output_type == 'stream':
-                cell_txt = Path(f"{file_name}.txt")
+                cell_txt = Path(f"{file_name}_output.txt")
                 cell_txt.write_text(output.text.strip(), encoding='utf-8')
 
             elif output.output_type == 'execute_result' or output.output_type == 'display_data':
                 data = output.get("data", {})
                 if "text/plain" in data:
-                    cell_txt = Path(f"{file_name}.txt")
+                    cell_txt = Path(f"{file_name}_output.txt")
                     cell_txt.write_text(data["text/plain"], encoding='utf-8')
 
                 if "image/png" in data:
