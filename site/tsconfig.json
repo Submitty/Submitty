@@ -1,14 +1,19 @@
 {
-    "include": ["./ts/**/*.ts", "./tests/**/*.ts", "globals.d.ts", "./public/js/**/*.js", "./vue/src/**/*.vue"],
-    "exclude": ["**/node_modules/**", "**/dist/**"],
+    "include": [
+        "globals.d.ts",
+        "./ts/**/*.ts",
+        "./tests/**/*.ts",
+        "./vue/src/**/*.vue",
+        "./public/js/**/*.js"
+    ],
     "compilerOptions": {
-      "baseUrl": ".",
+        "baseUrl": ".",
         "paths": {
             "@/*": ["vue/src/*"]
         },
+        "noEmit": true,
         "strict": true,
         "allowJs": true,
-        "noEmit": true,
         "incremental": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
