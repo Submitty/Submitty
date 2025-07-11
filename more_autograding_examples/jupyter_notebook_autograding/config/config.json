@@ -38,8 +38,14 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "cell1_output.txt",
+          "actual_file": "cell1_stdout.txt",
           "expected_string" : "hello world!"
+        },
+        {
+          "method" : "warnIfEmpty",
+		      "actual_file" : "cell1_stderr.txt",
+		      "show_actual" : "always",
+          "deduction" : 0.0
         },
         {
           "method" : "warnIfEmpty",

@@ -69,13 +69,18 @@ def save_output(cell_idx, cell):
 
         for output in cell.get('outputs', []):
             if output.output_type == 'stream':
-                cell_txt = Path(f"{file_name}_output.txt")
-                cell_txt.write_text(output.text.strip(), encoding='utf-8')
+                if output.name == 'stdout':
+                    cell_txt = Path(f"{file_name}_stdout.txt")
+                    cell_txt.write_text(output.text.strip(), encoding='utf-8')
+
+                if output.name == 'stderr':
+                    cell_txt = Path(f"{file_name}_stderr.txt")
+                    cell_txt.write_text(output.text.strip(), encoding='utf-8')
 
             elif output.output_type == 'execute_result' or output.output_type == 'display_data':
                 data = output.get("data", {})
                 if "text/plain" in data:
-                    cell_txt = Path(f"{file_name}_output.txt")
+                    cell_txt = Path(f"{file_name}_stdout.txt")
                     cell_txt.write_text(data["text/plain"], encoding='utf-8')
 
                 if "image/png" in data:
