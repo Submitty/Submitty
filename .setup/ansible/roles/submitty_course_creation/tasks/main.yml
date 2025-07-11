@@ -115,8 +115,8 @@
     chdir: /usr/local/submitty/sbin/
   become: true
   become_user: root
-  register: submitty_course_creation_
-  changed_when: submitty_course_creation_.rc != 0
+  register: submitty_course_creation_status
+  changed_when: submitty_course_creation_status.rc != 0
 
 - name: Restart PHP=FPM service.
   ansible.builtin.systemd:
