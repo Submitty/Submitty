@@ -632,8 +632,8 @@ user_id_requirements = {
     "require_name": False,
     "min_length": 6,
     "max_length": 25,
-    # Example for Alyssa Hacker : hackal -- If the user's name is shorter, then numbers will be added. 
-    # Example for Joseph Wo : wo11jo
+    # Example for Alyssa Hacker : hackal -- Allows for shorter names. If they are shorter, then it will just take the entire name. 
+    # Example for Joseph Wo : wojo
     "name_requirements": {
         "given_first": False,
         "given_name": 2,
