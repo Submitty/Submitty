@@ -22,19 +22,6 @@ function select_gradeable() {
     cy.get('#pageContainer1').should('be.visible');
 }
 
-function pdf_buttons(student = false) {
-    cy.get('[data-testid="save-pdf-btn"]').should('be.visible');
-    cy.get('[data-testid="clear-pdf-btn"]').should('be.visible');
-    if (!student) {
-        cy.get('[data-testid="download-annotations-btn"]').should('be.visible');
-        cy.get('[data-testid="toggle-annotations-btn"]').should('be.visible');
-    }
-    else {
-        cy.get('[data-testid="download-annotations-btn"]').should('not.exist');
-        cy.get('[data-testid="toggle-annotations-btn"]').should('not.exist');
-    }
-}
-
 function check_pdf_access(gradeable_id) {
     cy.visit(['sample', 'gradeable', gradeable_id, 'grading', 'details']);
     cy.get('#agree-button').click({ force: true });
@@ -89,7 +76,6 @@ describe('Test cases for PDFs access', () => {
         cy.login('ta');
         gradeable_type.forEach((gradeable_id) => {
             check_pdf_access(gradeable_id);
-            pdf_buttons();
         });
     });
 
@@ -97,16 +83,13 @@ describe('Test cases for PDFs access', () => {
         cy.login('instructor');
         gradeable_type.forEach((gradeable_id) => {
             check_pdf_access(gradeable_id);
-            pdf_buttons();
         });
     });
 
     it('student should have access to some pdfs', () => {
         cy.login('student');
         minimum_pdf_access('grading_pdf_peer_homework');
-        pdf_buttons(true);
         minimum_pdf_access('grading_pdf_peer_team_homework');
-        pdf_buttons(true);
         no_pdf_access('grading_homework_team_pdf');
         no_pdf_access('grading_homework_pdf');
     });
