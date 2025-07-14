@@ -65,10 +65,12 @@ function confirm() {
               <a
                 class="btn btn-default close-button"
                 @click="cancel"
+                data-testid="deny-team-override"
               >No</a>
               <a
                 class="btn btn-primary"
                 @click="confirm"
+                data-testid="confirm-team-override"
               >Yes</a>
             </div>
           </div>
