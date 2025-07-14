@@ -130,8 +130,8 @@
             </p>
             <div>
                 <div class="config-editor-action-btns">
-                    <button class="btn btn-primary" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Root Folder</button>
-                    <button class="btn btn-primary" onClick="addIconHandler('{{ gradeable.getId() }}')">Add Root File</button>
+                    <button class="btn btn-primary" type="button" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Root Folder</button>
+                    <button class="btn btn-primary" type="button" onClick="addFile('{{ gradeable.getId() }}', null)">Add Root File</button>
                 </div>
                 <div>
                     <ul class="config-folder-view">
@@ -272,15 +272,15 @@
         {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
         <li style="margin-left:{{ indent * 15 }}px">
             {% if file.files is defined %}
-                <i class="fas fa-plus file-action-add" id="add-to-config" onClick""></i>
-                <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
+                <i class="fas fa-plus file-action-add" id="add-to-config" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
+                <i class="fas fa-trash file-action-delete" id="delete-from-config" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
                 <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
                 <ul id="{{ id }}" class="config-folder-view">
                     {{ _self.display_config_files(file.files, indent + 1, g_id) }}
                 </ul>
             {% else %}
                 {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
-                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onClick=""></i>
+                    <i class="fas fa-trash file-action-delete" id="delete-from-config" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
                 {% endif %}
                 <span class="fas fa-file config-file-icon"></span>
                 <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
