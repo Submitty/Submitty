@@ -376,8 +376,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-    # pdf-annotate.js
-    cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
