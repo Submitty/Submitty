@@ -82,22 +82,8 @@ function getButtonId(button: Button): string | undefined {
   </ul>
 </template>
 <style scoped>
-.flex-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .flex-line {
     display: flex;
     align-items: center;
-}
-
-.notification-badge {
-    background-color: var(--danger-red);
-    padding: 1px 5px;
-    color: white;
-    font-weight: bold;
-    border-radius: 2px;
 }
 </style>
