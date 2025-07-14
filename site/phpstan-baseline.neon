@@ -11151,16 +11151,6 @@ parameters:
 			path: app/views/MarkdownView.php
 
 		-
-			message: "#^Method app\\\\views\\\\MarkdownView\\:\\:renderMarkdownArea\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
-			message: "#^Method app\\\\views\\\\MarkdownView\\:\\:renderMarkdownArea\\(\\) has parameter \\$data with no type specified\\.$#"
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
 			message: "#^Call to method app\\\\libraries\\\\Core\\:\\:getOutput\\(\\) with incorrect case\\: getoutput$#"
 			count: 3
 			path: app/views/MiscView.php
