@@ -57,7 +57,8 @@ class ConfigurationController extends AbstractController {
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
-            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled()
+            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled()
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -153,7 +154,8 @@ class ConfigurationController extends AbstractController {
                     'seating_only_for_instructor',
                     'queue_enabled',
                     'seek_message_enabled',
-                    'polls_enabled'
+                    'polls_enabled',
+                    'chat_enabled'
                 ]
             )
         ) {

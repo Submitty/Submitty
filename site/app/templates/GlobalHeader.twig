@@ -12,7 +12,7 @@
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
 
-        if ("serviceWorker" in navigator) {
+        if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("{{ service_worker_path }}")
@@ -47,7 +47,7 @@
     {% endfor %}
 
     {% for js_ref in js %}
-    <script src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}' type={{ '.mjs' in js_ref ? 'module' : '' }}></script>
     {% endfor %}
 
     {% if not content_only %}
@@ -92,9 +92,6 @@
                 }
             }
         }
-
-        var onAjaxInit;
-
 
         //determines if the user has a set theme
         function detectColorScheme(){
@@ -253,7 +250,8 @@
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
         {% include 'Vue.twig' with {
-            'component': 'performanceWarning',
+            'type': 'component',
+            'name': 'PerformanceWarning',
             'args': {
                 "performanceWarning": performance_warning,
                 "submittyQueries": submitty_queries,
@@ -288,7 +286,7 @@
                     </ul>
                 </aside>
             {% endif %}
-            <main id="main">
+            <main id="main" data-testid="content-main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button, mobile) %}

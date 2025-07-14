@@ -1,3 +1,4 @@
+{% import _self as self %}
 <div class="electronic_file">
 
     <div class="option-title">
@@ -110,6 +111,22 @@
         </div>
     </div>
 
+    <div class="raw-config-info">
+        <div class="option-title raw-config-info-header">Edit Uploaded Configuration:</div>
+        <p class="not-available-message" id="editor-not-available">Not available for provided configurations.</p>
+        <a class="btn btn-primary" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">Open Editor</a>
+        <div id="gradeable-config-structure">
+            <ul class="config-folder-view">
+                {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+            </ul>
+            <div id="gradeable-config-edit-bar">
+                <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
+                <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save</a>
+                <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+            </div>
+        </div>
+    </div>
+
     <div class="btn-container" id="rebuild-gradeable-button">
         <a class="btn btn-primary key_to_click" tabindex="0" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
@@ -140,6 +157,8 @@
     registerSelect2Widget("autograding_config_selector");
     
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
+    const ALL_NONUPLOADED_CONFIG_PATHS = {{ all_nonuploaded_config_paths|json_encode|raw }};
+    const NONUPLOADED_CONFIG_VALUES = ALL_NONUPLOADED_CONFIG_PATHS.map(pair => pair[1]);
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
@@ -227,3 +246,20 @@
         });
     });
 </script>
+
+{% macro display_config_files(files, indent, g_id) %}
+    {% for name, file in files %}
+        {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
+        <li style="margin-left:{{ indent * 15 }}px">
+            {% if file.files is defined %}
+                <span id="{{ id }}-span" class="fas fa-folder"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                <ul id="{{ id }}" class="config-folder-view">
+                    {{ _self.display_config_files(file.files, indent + 1, g_id) }}
+                </ul>
+            {% else %}
+                <span class="fas fa-file"></span>
+                <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+{% endmacro %}

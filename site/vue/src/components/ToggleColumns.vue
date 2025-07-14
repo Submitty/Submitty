@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
-import Popup from './popup.vue';
+import Popup from './Popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
 const { columns, labels, cookie, forced = [], format = 'bits', buttonWrapped } = defineProps<{
@@ -38,7 +38,7 @@ function loadColumns() {
 }
 function saveColumns() {
     if (format === 'json') {
-        const cookieData: Record<string, boolean> = {};
+        const cookieData: Record<string, boolean> = JSON.parse(decodeURIComponent(Cookies.get(cookie) ?? encodeURIComponent('{}'))) as Record<string, boolean>;
         columns.forEach((col, i) => {
             cookieData[col] = selected.value[i];
         });
