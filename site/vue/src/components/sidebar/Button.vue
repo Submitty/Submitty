@@ -1,16 +1,16 @@
 <script setup lang="ts">
 
 type Button = {
-    title: string;
+    title?: string | null;
     href?: string | null;
     class?: string;
-    id?: string;
+    id?: string | null;
     icon?: string | null;
-    badge?: number;
-    prefix?: string;
+    badge?: number | null;
+    prefix?: string | null;
 };
 
-const props = defineProps<{
+const { buttons, mobile } = defineProps<{
     buttons: Button[];
     mobile?: boolean;
 }>();
@@ -19,7 +19,7 @@ function getButtonId(button: Button): string | undefined {
     if (!button.id) {
         return undefined;
     }
-    return (props.mobile ? 'mobile-' : '') + button.id;
+    return (mobile ? 'mobile-' : '') + button.id;
 }
 </script>
 
