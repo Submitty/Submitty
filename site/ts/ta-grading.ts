@@ -677,7 +677,12 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
-                $('#file-content').append(data);
+                // Remove duplicate script imports from the response data
+                const content = data.replace(
+                    /<script[^>]+(?:pdf\.min\.mjs|pdf_viewer\.mjs|pdf\.worker\.min\.mjs|PDFAnnotateEmbedded\.js)[^>]*><\/script>/g,
+                    '',
+                );
+                $('#file-content').append(content);
             },
         });
     }
