@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Cookies from 'js-cookie';
 import { onMounted, ref } from 'vue';
-import Popup from './popup.vue';
+import Popup from './Popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
 const { columns, labels, cookie, hiddenColumns = [], forced = [], format = 'bits', buttonWrapped } = defineProps<{
