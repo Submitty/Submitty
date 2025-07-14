@@ -105,7 +105,7 @@ class GradeOverrideController extends AbstractController {
 
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team' => true,
-                    'component' => 'overrideTeamPopup',
+                    'component' => 'OverrideTeamPopup',
                     'args' => [
                         'memberList' => $team_members,
                         'isDelete' => false,
@@ -120,27 +120,29 @@ class GradeOverrideController extends AbstractController {
     }
 
     /**
-     * Helper to extract team member IDs from a team object
+     * @param object $team  An object with getMemberList(): string
+     * @return string[]     An array of member-ID strings
      */
     private function getTeamMemberIds(object $team): array {
         return explode(", ", $team->getMemberList());
     }
 
     /**
-     * Helper to render the team prompt popup
+     * @param object       $team      An object with getMemberList(): string
+     * @param bool         $is_delete
+     * @return array<string,mixed>    The payload for the popup
      */
     private function renderTeamPrompt(object $team, bool $is_delete): array {
         $team_members = [];
         foreach ($this->getTeamMemberIds($team) as $member_id) {
             $member = $this->core->getQueries()->getUserById($member_id);
-            $team_members[$member_id] = $member->getDisplayedGivenName()
-                                        . " "
-                                        . $member->getDisplayedFamilyName();
+            $team_members[$member_id] =
+                $member->getDisplayedGivenName() . ' ' . $member->getDisplayedFamilyName();
         }
 
         return [
             'is_team'   => true,
-            'component' => 'overrideTeamPopup',
+            'component' => 'OverrideTeamPopup',
             'args'      => [
                 'memberList' => $team_members,
                 'isDelete'   => $is_delete,
