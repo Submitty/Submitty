@@ -10,6 +10,7 @@ use app\libraries\routers\AccessControl;
 use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
+use Nette\Utils\Json;
 
 /**
  * @AccessControl(level="SUPERUSER")
@@ -78,6 +79,15 @@ class SuperuserEmailController extends AbstractController {
                 "data" => json_encode($active_user_ids)
             ]);
         }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/api/superuser/email/sent", methods: ["PUT"])]
+    public function updateEmailSent(): JsonResponse {
+        $this->core->getQueries()->updateEmailSent($_POST['subject']);
+        return JsonResponse::getSuccessResponse();
     }
 
     /**

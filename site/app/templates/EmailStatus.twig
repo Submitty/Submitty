@@ -30,7 +30,7 @@
                             <div class="status-message">Time Sent: Not Sent</div>
                             <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
                             <div class="status-message">
-                                Error: {{ row.error }}
+                                Error: {{ row.getError() }}
                             </div>
                         </li>
                     {% endfor %}
@@ -50,6 +50,9 @@
                             }}</div>
                             <div class="status-message">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
                             <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                            {% if row.getError() != '' %}
+                                <div class="status-message">Error: {{row.getError()}}</div>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

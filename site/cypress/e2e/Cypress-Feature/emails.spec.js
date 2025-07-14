@@ -9,7 +9,7 @@ const extractUserCount = (text) => {
     return match ? parseInt(match[1], 10) : 0;
 };
 
-describe('Test case involving the superuser email all functionality', () => {
+describe('Test cases involving the superuser email all functionality', () => {
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
 
@@ -137,7 +137,7 @@ describe('Test case involving the superuser email all functionality', () => {
         });
     });
 
-    it('sends an email via Email All and verifies existing email errors', () => {
+    it('sends an email via Email All and verifies emails that are queued, failed to send, and have been sent', () => {
         cy.login('superuser');
 
         cy.get('[data-testid="sidebar"]')
@@ -153,6 +153,7 @@ describe('Test case involving the superuser email all functionality', () => {
             .contains('Email Status')
             .click();
 
+        // Mock an email error
         uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
         cy.contains('.button-container', uniqueSubject)
             .closest('.status-container')
@@ -196,7 +197,8 @@ describe('Test case involving the superuser email all functionality', () => {
                                                 .then(($msgs) => {
                                                     const texts = [...$msgs].map((el) => el.textContent.trim());
                                                     expect(texts[0]).to.match(/^Recipient: .+/);
-                                                    expect(texts[1]).to.match(/^Time Sent: Not Sent$/); // TODO: could be flaky as the email may be sent before the reload
+                                                    // Email may be sent by the system before setting an existing error
+                                                    expect(texts[1]).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
                                                     expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
                                                     expect(texts[3]).to.equal('Error: This is a test error message');
                                                 });
@@ -205,10 +207,125 @@ describe('Test case involving the superuser email all functionality', () => {
                         });
                     });
                 });
-            });
-    });
+            }).as('email-error');
 
-    it('sends an email via Email All and verifies existing email sent', () => {
-        // TODO: Implement this test case
+        // Mock an email sent
+        cy.get('@email-error').then(() => {
+            getApiKey('superuser', 'superuser').then((apiKey) => {
+                cy.request({
+                    method: 'PUT',
+                    url: `${Cypress.config('baseUrl')}/api/superuser/email/sent`,
+                    headers: {
+                        'Authorization': apiKey,
+                        'Content-Type': 'application/json',
+                    },
+                    body: {
+                        subject: uniqueSubject,
+                    },
+                }).then((res) => {
+                    // Verify the server response is successful
+                    expect(res.status).to.eq(200);
+                    expect(res.body).to.have.property('status', 'success');
+                    expect(res.body).to.have.property('data', null);
+
+                    // Verify the email sent is displayed after a full page reload
+                    cy.reload().then(() => {
+                        cy.contains('.button-container', uniqueSubject)
+                            .within(() => {
+                                cy.get('button.status-btn.btn-success') // btn-success implies email sent
+                                    .contains(/Show Details|Hide Details/)
+                                    .click();
+                            });
+
+                        cy.get('#collapse1')
+                            .should('exist')
+                            .within(() => {
+                                cy.get('li.status.status-success')
+                                    .each(($li) => {
+                                        cy.wrap($li)
+                                            .find('.status-message')
+                                            .should('have.length', 4)
+                                            .then(($msgs) => {
+                                                const texts = [...$msgs].map((el) => el.textContent.trim());
+                                                expect(texts[0]).to.match(/^Recipient: .+/);
+                                                // Email sent time should be set
+                                                expect(texts[1]).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                                expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
+                                                // Error should be propagated from the email error mock
+                                                expect(texts[3]).to.equal('Error: This is a test error message');
+                                            });
+                                    });
+                            });
+                    });
+                });
+            });
+        });
+    });
+});
+
+describe('Test cases involving instructor send email via thread announcement functionality', () => {
+    it('sends an email via thread announcement and verifies the email is queued or sent', () => {
+        cy.login('instructor');
+        cy.visit(['sample', 'forum', 'threads', 'new']);
+
+        const announcement = 'This is a test announcement';
+        const content = 'This is a test content';
+
+        // Enter the thread announcement details
+        cy.get('[data-testid="title"]').type(announcement);
+        cy.get('[data-testid="reply_box_1"]').type(content);
+
+        // Pick an arbitrary category
+        cy.get('[data-testid="categories-pick-list"] .cat-buttons').first().click({ force: true });
+
+        // Ensure the announcement checkbox is checked
+        cy.get('#Announcement').click();
+
+        // Pin thread should automatically be checked based on the announcement checkbox selection
+        cy.get('#pinThread').should('be.checked');
+
+        // Submit the thread announcement
+        cy.get('[data-testid="forum-publish-thread"]').click({ force: true });
+
+        // Expect a redirection
+        cy.url().should('not.include', '/sample/forum/threads/new').then(() => {
+            cy.visit(['sample', 'email_status']).then(() => {
+                // Verify the email was sent or is queued without any prefix
+                const uniqueSubject = `New Announcement: ${announcement}`;
+                cy.contains('.button-container', uniqueSubject)
+                    .within(() => {
+                        cy.get('button.status-btn')
+                            .should('exist')
+                            .and(($btn) => {
+                                const classList = $btn[0].classList;
+                                const isQueued = classList.contains('btn-primary');
+                                const hasBeenSent = classList.contains('btn-success');
+                                const hasError = classList.contains('btn-danger');
+                                expect((isQueued || hasBeenSent) && !hasError).to.be.true;
+
+                                return $btn;
+                            })
+                            .contains(/Show Details|Hide Details/)
+                            .click();
+                    });
+
+                cy.get('#collapse1')
+                    .should('exist')
+                    .within(() => {
+                        cy.get('li.status')
+                            .each(($li) => {
+                                cy.wrap($li)
+                                    .find('.status-message')
+                                    .should('have.length', 3)
+                                    .then(($msgs) => {
+                                        const texts = [...$msgs].map((el) => el.textContent.trim());
+                                        expect(texts[0]).to.match(/^Recipient: .+/);
+                                        expect(texts[1]).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+                                        expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
+                                    });
+                            });
+                    });
+            });
+        });
     });
 });
