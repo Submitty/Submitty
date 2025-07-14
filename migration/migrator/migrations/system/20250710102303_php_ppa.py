@@ -36,7 +36,7 @@ def up(config):
                 installed_php_extensions.append(module)
 
     # Remove existing PHP packages
-    os.system("apt-get remove -qqy " + " ".join(installed_php_packages))
+    os.system("apt-get remove -qqy php " + " ".join(installed_php_packages))
 
     # Add PHP PPA
     os.system("add-apt-repository -y ppa:ondrej/php")
@@ -45,7 +45,7 @@ def up(config):
     # Install PHP 8.1 versions of the previously installed packages
     if installed_php_extensions:
         packages_to_install = " ".join([f"php8.1-{module}" for module in installed_php_extensions])
-        os.system(f"apt-get install -qqy {packages_to_install}")
+        os.system(f"apt-get install -qqy php8.1 {packages_to_install}")
 
 
 def down(config):
@@ -70,7 +70,7 @@ def down(config):
             installed_modules.append(module)
 
     # Remove PHP 8.1 packages
-    os.system("apt-get remove -qqy php8.1-*")
+    os.system("apt-get remove -qqy php8.1*")
 
     # Remove PHP PPA
     os.system("add-apt-repository -r -y ppa:ondrej/php")
