@@ -57,8 +57,8 @@ class HomePageView extends AbstractView {
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('Vue.twig', [
-            "type" => "component",
-            "name" => "homePage",
+            "type" => "page",
+            "name" => "HomePage",
             "args" => [
                 "statuses" => $statuses,
             ]
