@@ -2145,7 +2145,7 @@ class AdminGradeableController extends AbstractController {
                 return;
 
             case 'add_file':
-                if ( !isset($_FILES['file']['tmp_name']) || $_FILES['file']['tmp_name'] === '' ) {
+                if (!isset($_FILES['file']['tmp_name']) || $_FILES['file']['tmp_name'] === '') {
                     $this->core->getOutput()->renderJsonFail("No file uploaded.");
                     return;
                 }
