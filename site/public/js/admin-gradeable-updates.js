@@ -991,7 +991,6 @@ function loadGradeableEditor(g_id, file_path) {
                     $('#gradeable-config-edit-bar').show();
                 }
 
-                document.getElementById('add-to-config').disabled = true;
                 const configData = json['data'];
                 originalConfigContent = configData.config_content;
                 const editbox = $('textarea#gradeable-config-edit');
