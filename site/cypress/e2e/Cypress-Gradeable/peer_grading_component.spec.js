@@ -48,6 +48,7 @@ describe('Peer Grading Component testing', () => {
                 cy.get('[data-testid="table-wrapper"]').should('contain', 'aphacker');
             }
         });
+        cy.visit('/');
         cy.logout();
         cy.login('student');
         ['grading_homework', 'grading_homework_pdf'].forEach((option) => {
