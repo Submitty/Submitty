@@ -26,6 +26,7 @@ run_css_style() {
 }
 
 run_php_unit() {
+    COMPOSER_ALLOW_SUPERUSER=1 composer install
     sudo -u submitty_php php vendor/bin/phpunit
 }
 
