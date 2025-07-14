@@ -12,4 +12,4 @@ const src = `import '${absoluteUrl}';`;
 const blob = new Blob([src], { type: 'application/javascript' });
 const blobUrl = URL.createObjectURL(blob);
 
-pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(blobUrl, { type: 'module' })
+pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(blobUrl, { type: 'module' });
