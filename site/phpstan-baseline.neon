@@ -730,7 +730,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @var with type app\\\\repositories\\\\poll\\\\OptionRepository is not subtype of type app\\\\repositories\\\\poll\\\\OptionRepository\\<app\\\\entities\\\\poll\\\\Option\\>\\.$#"
-			count: 2
+			count: 1
 			path: app/controllers/PollController.php
 
 		-
@@ -1525,22 +1525,6 @@ parameters:
 			path: app/controllers/admin/StudentActivityDashboardController.php
 
 		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 2
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -1622,11 +1606,6 @@ parameters:
 
 		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:uploadUserList\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -2853,11 +2832,6 @@ parameters:
 			path: app/controllers/student/LeaderboardController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/RainbowGradesController.php
-
-		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 3
 			path: app/controllers/student/SubmissionController.php
@@ -3669,26 +3643,6 @@ parameters:
 			message: "#^Method app\\\\libraries\\\\CourseMaterialsUtils\\:\\:insertCourseMaterialAccess\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/CourseMaterialsUtils.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:__construct\\(\\) has parameter \\$baseRenderer with no type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\CustomCodeBlockRenderer\\:\\:addLineNumbers\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$block of method League\\\\CommonMark\\\\Block\\\\Renderer\\\\FencedCodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Block\\\\Element\\\\FencedCode\\|League\\\\CommonMark\\\\Block\\\\Element\\\\IndentedCode, League\\\\CommonMark\\\\Block\\\\Element\\\\AbstractBlock given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeBlockRenderer.php
-
-		-
-			message: "#^Parameter \\#1 \\$inline of method League\\\\CommonMark\\\\Inline\\\\Renderer\\\\CodeRenderer\\:\\:render\\(\\) expects League\\\\CommonMark\\\\Inline\\\\Element\\\\Code, League\\\\CommonMark\\\\Inline\\\\Element\\\\AbstractInline given\\.$#"
-			count: 1
-			path: app/libraries/CustomCodeInlineRenderer.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
@@ -10882,61 +10836,6 @@ parameters:
 			path: app/repositories/SessionRepository.php
 
 		-
-			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 4
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getEmailsByPage\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageNum\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageNum\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$course with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$page with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) has parameter \\$semester with no type specified\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
-			message: "#^Method app\\\\repositories\\\\email\\\\EmailRepository\\:\\:getPageSubjects\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/repositories/email/EmailRepository.php
-
-		-
 			message: "#^Method app\\\\repositories\\\\poll\\\\OptionRepository\\:\\:findByPollWithResponseCounts\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: app/repositories/poll/OptionRepository.php
@@ -12350,31 +12249,6 @@ parameters:
 			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
 			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
