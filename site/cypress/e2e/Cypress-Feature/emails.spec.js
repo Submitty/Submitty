@@ -1,4 +1,4 @@
-import { getApiKey } from '../../support/utils.js';
+import { getCurrentSemester, getApiKey } from '../../support/utils.js';
 
 const normalizeText = (text) => {
     return text.trim().replace(/\s+/g, ' ');
@@ -112,7 +112,12 @@ describe('Test cases involving the superuser email all functionality', () => {
             uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
             cy.contains('.button-container', uniqueSubject)
                 .should('contain', `(${totalRecipients})`)
+                .closest('.status-container')
                 .within(() => {
+                    cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
+                    cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                    cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+
                     cy.get('button.status-btn.btn-primary') // btn-primary implies awaiting to be sent
                         .contains(/Show Details|Hide Details/)
                         .click();
@@ -180,7 +185,12 @@ describe('Test cases involving the superuser email all functionality', () => {
                         // Verify the email error is displayed after a full page reload
                         cy.reload().then(() => {
                             cy.contains('.button-container', uniqueSubject)
+                                .closest('.status-container')
                                 .within(() => {
+                                    cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
+                                    cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                    cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+
                                     cy.get('button.status-btn.btn-danger') // btn-danger implies email error
                                         .contains(/Show Details|Hide Details/)
                                         .click();
@@ -231,7 +241,12 @@ describe('Test cases involving the superuser email all functionality', () => {
                     // Verify the email sent is displayed after a full page reload
                     cy.reload().then(() => {
                         cy.contains('.button-container', uniqueSubject)
+                            .closest('.status-container')
                             .within(() => {
+                                cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
+                                cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+
                                 cy.get('button.status-btn.btn-success') // btn-success implies email sent
                                     .contains(/Show Details|Hide Details/)
                                     .click();
@@ -305,8 +320,16 @@ describe('Test cases involving instructor send email via thread announcement fun
 
                                 return $btn;
                             })
-                            .contains(/Show Details|Hide Details/)
-                            .click();
+                            .closest('.status-container')
+                            .within(() => {
+                                cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
+                                cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                cy.get('[data-testid="email-source"]').should('contain', `Course: ${getCurrentSemester()} sample`);
+
+                                cy.get('button.status-btn')
+                                    .contains(/Show Details|Hide Details/)
+                                    .click();
+                            });
                     });
 
                 cy.get('#collapse1')
@@ -319,6 +342,7 @@ describe('Test cases involving instructor send email via thread announcement fun
                                     .should('have.length', 3)
                                     .then(($msgs) => {
                                         const texts = [...$msgs].map((el) => el.textContent.trim());
+                                        // TODO: convert these to data-testid (all occurrences)
                                         expect(texts[0]).to.match(/^Recipient: .+/);
                                         expect(texts[1]).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
                                         expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
@@ -327,5 +351,11 @@ describe('Test cases involving instructor send email via thread announcement fun
                     });
             });
         });
+    });
+});
+
+describe('Test cases involving instructor email pagination functionality', () => {
+    it('verifies the email status page pagination', () => {
+
     });
 });

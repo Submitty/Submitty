@@ -3,12 +3,12 @@
         <div class="status-container">
             <div class = "button-container">
                 <div>
-                    <div> Email Subject: {{subject[0:-28]}} </div>
-                    <div> Time Created: {{subject[-26:-7]}}</div>
+                    <div data-testid="email-subject"> Email Subject: {{subject[0:-28]}} </div>
+                    <div data-testid="email-time-created"> Time Created: {{subject[-26:-7]}}</div>
                     {% if courses is defined and courses[subject] is defined and courses[subject] is not null %}
-                        <div> Course: {{courses[subject]}}</div>
+                        <div data-testid="email-source"> Course: {{courses[subject]}}</div>
                     {% else %}
-                        <div> Submitty Administrator Email </div>
+                        <div data-testid="email-source"> Submitty Administrator Email </div>
                     {% endif %}
                 </div>
                 {% if errors[subject]|length == 0 and pending[subject]|length == 0 %}
@@ -26,32 +26,32 @@
                 <ul>
                     {% for row in errors[subject] %}
                         <li class="status status-error">
-                            <div class="status-message">Recipient: {{row.getUserId()}}</div>
-                            <div class="status-message">Time Sent: Not Sent</div>
-                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                            <div class="status-message" data-testid="email-recipient">Recipient: {{row.getUserId()}}</div>
+                            <div class="status-message" data-testid="email-time-sent">Time Sent: Not Sent</div>
+                            <div class="status-message" data-testid="email-address">Email Address: {{row.getEmailAddress()}} </div>
                             <div class="status-message">
-                                Error: {{ row.getError() }}
+                                <div data-testid="email-error">Error: {{ row.getError() }}</div>
                             </div>
                         </li>
                     {% endfor %}
                     {% for row in pending[subject] %}
                         <li class="status status-warning">
-                            <div class="status-message">Recipient: {{
+                            <div class="status-message" data-testid="email-recipient">Recipient: {{
                                 row.isToSubmittyUser() ? row.getUserId() : row.getToName()
                             }}</div>
-                            <div class="status-message">Time Sent: Not Sent</div>
-                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                            <div class="status-message" data-testid="email-time-sent">Time Sent: Not Sent</div>
+                            <div class="status-message" data-testid="email-address">Email Address: {{row.getEmailAddress()}} </div>
                         </li>
                     {% endfor %}
                     {% for row in successes[subject] %}
-                        <li class="status status-success"> 
-                            <div class="status-message">Recipient: {{
+                        <li class="status status-success">
+                            <div class="status-message" data-testid="email-recipient">Recipient: {{
                                 row.isToSubmittyUser() ? row.getUserId() : row.getToName()
                             }}</div>
-                            <div class="status-message">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
-                            <div class="status-message">Email Address: {{row.getEmailAddress()}} </div>
+                            <div class="status-message" data-testid="email-time-sent">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
+                            <div class="status-message" data-testid="email-address">Email Address: {{row.getEmailAddress()}} </div>
                             {% if row.getError() != '' %}
-                                <div class="status-message">Error: {{row.getError()}}</div>
+                                <div class="status-message" data-testid="email-error">Error: {{row.getError()}}</div>
                             {% endif %}
                         </li>
                     {% endfor %}
