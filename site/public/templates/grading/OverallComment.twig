@@ -42,7 +42,6 @@ Required Parameters:
                 "previewDivId" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
                 "previewDivName" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
                 "previewButtonId" : "overall-comment-markdown-preview-button",
-                "onClick" : "previewOverallCommentMarkdown.bind(this, '" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ~ "')",
                 "renderHeader" : true,
                 "minHeight" : "100px",
                 "maxHeight" : "150px",
