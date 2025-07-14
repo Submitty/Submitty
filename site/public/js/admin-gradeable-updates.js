@@ -1157,7 +1157,9 @@ function openFilePickerAndUpload(targetFolderPath, g_id) {
 
     input.onchange = (event) => {
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file) {
+            return;
+        }
 
         const dest = (targetFolderPath || '').replace(/^\/+/, ''); // '' ⇒ root
         const relativePath = dest ? `${dest}/${file.name}` : file.name;
@@ -1170,32 +1172,38 @@ function openFilePickerAndUpload(targetFolderPath, g_id) {
 
 function uploadFile(relativePath, file, g_id) {
     const formData = new FormData();
-    formData.append('action',       'add_file');
+    formData.append('action', 'add_file');
     formData.append('gradeable_id', g_id);
-    formData.append('path',         relativePath);
-    formData.append('file',         file);
-    formData.append('csrf_token',   csrfToken);
+    formData.append('path', relativePath);
+    formData.append('file', file);
+    formData.append('csrf_token', csrfToken);
 
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
         method: 'POST',
         data: formData,
         processData: false,
-        contentType: false
+        contentType: false,
     })
-    .done((raw) => {
-        let res;
-        try { res = JSON.parse(raw); }
-        catch { displayErrorMessage('Unexpected server response.'); return; }
+        .done((raw) => {
+            let res;
+            try {
+                res = JSON.parse(raw);
+            }
+            catch {
+                displayErrorMessage('Unexpected server response.');
+                return;
+            }
 
-        if (res.status === 'success') {
-        displaySuccessMessage('File successfully added.');
-        location.reload();
-        } else {
-        displayErrorMessage(res.message ?? 'Failed to add file.');
-        }
-    })
-    .fail(() => displayErrorMessage('Something went wrong while uploading.'));
+            if (res.status === 'success') {
+                displaySuccessMessage('File successfully added.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(res.message ?? 'Failed to add file.');
+            }
+        })
+        .fail(() => displayErrorMessage('Something went wrong while uploading.'));
 }
 
 function removeFile(g_id, path, isFolder) {
@@ -1204,7 +1212,7 @@ function removeFile(g_id, path, isFolder) {
         confirmed = confirm('Are you sure you want delete this folder? This action cannot be undone.');
     }
     else {
-        confirmed = confirm('Are you sure you want delete this file? This action cannot be undone.');    
+        confirmed = confirm('Are you sure you want delete this file? This action cannot be undone.');
     }
     if (!confirmed) {
         return;

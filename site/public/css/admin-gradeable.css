@@ -465,7 +465,7 @@ body::-webkit-scrollbar-track {
 .file-action-folder:hover,
 .file-action-delete:hover,
 .file-action-add:hover {
-    transform: scale(1.10);
+    transform: scale(1.1);
 }
 
 .config-file-icon {

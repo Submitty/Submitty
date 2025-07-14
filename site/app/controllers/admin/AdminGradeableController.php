@@ -2088,7 +2088,8 @@ class AdminGradeableController extends AbstractController {
             // ── NORMALIZE to a relative path inside $base_path ──
             if (str_starts_with($incoming_path, $base_path)) {
                 $relative_path = ltrim(substr($incoming_path, strlen($base_path)), '/');
-            } else {
+            }
+            else {
                 $relative_path = ltrim($incoming_path, '/');
             }
 
@@ -2104,7 +2105,8 @@ class AdminGradeableController extends AbstractController {
             // Delete
             if (is_dir($full_path)) {
                 FileUtils::recursiveRmdir($full_path);
-            } else {
+            }
+            else {
                 unlink($full_path);
             }
 
