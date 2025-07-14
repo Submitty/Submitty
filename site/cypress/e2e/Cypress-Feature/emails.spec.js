@@ -1,3 +1,5 @@
+import { getApiKey } from '../../support/utils.js';
+
 const normalizeText = (text) => {
     return text.trim().replace(/\s+/g, ' ');
 };
@@ -97,7 +99,7 @@ describe('Test case involving the superuser email all functionality', () => {
             cy.get('[data-testid="email-subject"]').should('be.visible');
             cy.get('[data-testid="email-content"]').should('be.visible');
 
-            const uniqueSubject = `Test Email - ${Date.now()}`;
+            let uniqueSubject = `Test Email - ${Date.now()}`;
             cy.get('[data-testid="email-subject"]').type(uniqueSubject);
             cy.get('[data-testid="email-content"]').type('This is a test email body.');
             cy.get('[data-testid="send-email"]').click();
@@ -106,18 +108,21 @@ describe('Test case involving the superuser email all functionality', () => {
                 .contains('Email Status')
                 .click();
 
-            // Verify the email subject and content fields are present
+            // Verify the email subject and content fields are present with the proper subject prefix
+            uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
             cy.contains('.button-container', uniqueSubject)
                 .should('contain', `(${totalRecipients})`)
                 .within(() => {
-                    cy.get('button.status-btn').contains(/Show Details|Hide Details/).click();
+                    cy.get('button.status-btn.btn-primary') // btn-primary implies awaiting to be sent
+                        .contains(/Show Details|Hide Details/)
+                        .click();
                 });
 
             // Verify each recipient is properly rendered
             cy.get('#collapse1')
                 .should('exist')
                 .within(() => {
-                    cy.get('li.status').should('have.length', totalRecipients).each(($li) => {
+                    cy.get('li.status.status-warning').should('have.length', totalRecipients).each(($li) => {
                         cy.wrap($li)
                             .find('.status-message')
                             .should('have.length', 3)
@@ -130,5 +135,80 @@ describe('Test case involving the superuser email all functionality', () => {
                     });
                 });
         });
+    });
+
+    it('sends an email via Email All and verifies existing email errors', () => {
+        cy.login('superuser');
+
+        cy.get('[data-testid="sidebar"]')
+            .contains('Email All')
+            .click();
+
+        let uniqueSubject = `Test Email - ${Date.now()}`;
+        cy.get('[data-testid="email-subject"]').type(uniqueSubject);
+        cy.get('[data-testid="email-content"]').type('This is a test email body.');
+        cy.get('[data-testid="send-email"]').click();
+
+        cy.get('[data-testid="sidebar"]')
+            .contains('Email Status')
+            .click();
+
+        uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
+        cy.contains('.button-container', uniqueSubject)
+            .closest('.status-container')
+            .then(() => {
+                getApiKey('superuser', 'superuser').then((apiKey) => {
+                    // Add the testing error message to the email
+                    cy.request({
+                        method: 'PUT',
+                        url: `${Cypress.config('baseUrl')}/api/superuser/email/error`,
+                        headers: {
+                            'Authorization': apiKey,
+                            'Content-Type': 'application/json',
+                        },
+                        body: {
+                            subject: uniqueSubject,
+                            message: 'This is a test error message',
+                        },
+                    }).then((res) => {
+                        // Verify the server response is successful
+                        expect(res.status).to.eq(200);
+                        expect(res.body).to.have.property('status', 'success');
+                        expect(res.body).to.have.property('data', null);
+
+                        // Verify the email error is displayed after a full page reload
+                        cy.reload().then(() => {
+                            cy.contains('.button-container', uniqueSubject)
+                                .within(() => {
+                                    cy.get('button.status-btn.btn-danger') // btn-danger implies email error
+                                        .contains(/Show Details|Hide Details/)
+                                        .click();
+                                });
+
+                            cy.get('#collapse1')
+                                .should('exist')
+                                .within(() => {
+                                    cy.get('li.status.status-error')
+                                        .each(($li) => {
+                                            cy.wrap($li)
+                                                .find('.status-message')
+                                                .should('have.length', 4)
+                                                .then(($msgs) => {
+                                                    const texts = [...$msgs].map((el) => el.textContent.trim());
+                                                    expect(texts[0]).to.match(/^Recipient: .+/);
+                                                    expect(texts[1]).to.match(/^Time Sent: Not Sent$/); // TODO: could be flaky as the email may be sent before the reload
+                                                    expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
+                                                    expect(texts[3]).to.equal('Error: This is a test error message');
+                                                });
+                                        });
+                                });
+                        });
+                    });
+                });
+            });
+    });
+
+    it('sends an email via Email All and verifies existing email sent', () => {
+        // TODO: Implement this test case
     });
 });

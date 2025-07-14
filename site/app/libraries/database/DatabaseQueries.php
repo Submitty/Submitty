@@ -7473,6 +7473,18 @@ AND gc_id IN (
     }
 
     /**
+     * Updates the error message for an email, where an emtpy string, '', implies no error
+     *
+     * @param string $subject
+     * @param string $message
+     * @return bool
+     */
+    public function updateEmailError(string $subject, string $message): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$message, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {

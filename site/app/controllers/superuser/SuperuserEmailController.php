@@ -79,4 +79,13 @@ class SuperuserEmailController extends AbstractController {
             ]);
         }
     }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/api/superuser/email/error", methods: ["PUT"])]
+    public function updateEmailError(): JsonResponse {
+        $this->core->getQueries()->updateEmailError($_POST['subject'], $_POST['message'] ?? '');
+        return JsonResponse::getSuccessResponse();
+    }
 }
