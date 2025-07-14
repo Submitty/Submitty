@@ -120,19 +120,16 @@ class GradeOverrideController extends AbstractController {
     }
 
     /**
-     * @param object{getMemberList():string} $team
-     * @return string[]                 List of member IDs
+     * Helper to extract team member IDs from a team object
      */
-    private function getTeamMemberIds($team): array {
+    private function getTeamMemberIds(object $team): array {
         return explode(", ", $team->getMemberList());
     }
 
     /**
-     * @param object{getMemberList():string} $team
-     * @param bool                          $is_delete
-     * @return array<string,mixed>         payload for the popup
+     * Helper to render the team prompt popup
      */
-    private function renderTeamPrompt($team, bool $is_delete): array {
+    private function renderTeamPrompt(object $team, bool $is_delete): array {
         $team_members = [];
         foreach ($this->getTeamMemberIds($team) as $member_id) {
             $member = $this->core->getQueries()->getUserById($member_id);

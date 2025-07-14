@@ -27,7 +27,7 @@ describe('testing grade override', () => {
                 cy.get('[data-testid="grade-button"]').eq(12).click();
                 cy.get('[data-testid="bar-banner"]').should('contain', 'Overridden grades');
             }
-            
+
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
             if (gradeable === 'grading_homework') {
