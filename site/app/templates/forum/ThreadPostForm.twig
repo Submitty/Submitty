@@ -100,14 +100,13 @@
                 "class" : "post_content_reply thread_post_content",
                 "placeholder" : post_content_placeholder,
                 "previewDivId" : "preview_box_" ~ post_box_id,
-                "previewDivName" : "preview_box_" ~ post_box_id,
                 "renderHeader" : render_markdown is defined and render_markdown ? render_markdown : false,
                 "markdownHeaderId" : "markdown_header_" ~ post_box_id,
                 "minHeight" : min_height,
                 "required" :  false,
                 "textareaMaxlength" : post_content_limit is defined ? post_content_limit : null,
                 "textareaOnkeydown" : "submitNearestForm(event,$(this))",
-                "textareaOnpaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
+                "textareaOnPaste" : "pasteImageFromClipboard(event, $(this), " ~ post_box_id  ~ ")"
             }
         } only %}
     </div>

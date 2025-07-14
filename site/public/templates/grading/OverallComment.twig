@@ -30,7 +30,7 @@ Required Parameters:
         </div>
     </div>
     <div class="row" id="overall-comments">
-        {% include "Vue.twig" with { "name" : "markdownArea",
+        {% include "../misc/Vue.twig" with { "name" : "markdownArea",
             "type": "component",
             "class": "markdown-area fill-available",
             "args": {
@@ -40,7 +40,6 @@ Required Parameters:
                 "rootClass" : "general-comment-entry",
                 "placeholder" : "Overall message for student about the gradeable...",
                 "previewDivId" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
-                "previewDivName" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
                 "previewButtonId" : "overall-comment-markdown-preview-button",
                 "renderHeader" : true,
                 "minHeight" : "100px",
