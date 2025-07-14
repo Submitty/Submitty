@@ -262,7 +262,7 @@ class MiscController extends AbstractController {
 
         $mime_type = mime_content_type($path);
         if ($mime_type === 'text/plain') {
-            if (str_ends_with($path, '.js')) {
+            if (str_ends_with($path, '.js') || str_ends_with($path, '.mjs')) {
                 $mime_type = 'application/javascript';
             }
             elseif (str_ends_with($path, '.css')) {
@@ -270,9 +270,6 @@ class MiscController extends AbstractController {
             }
             elseif (str_ends_with($path, '.html')) {
                 $mime_type = 'text/html';
-            }
-            elseif (str_ends_with($path, '.mjs')) {
-                $mime_type = 'application/javascript';
             }
         }
         header('Content-type: ' . $mime_type);
