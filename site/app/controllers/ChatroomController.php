@@ -52,7 +52,7 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
-        $chatrooms = $repo->findBy([], ['id' => 'ASC']);
+        $chatrooms = $repo->findBy(['is_deleted' => 'FALSE'], ['id' => 'ASC']);
 
         return new WebResponse(
             'Chatroom',
@@ -105,7 +105,7 @@ class ChatroomController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatroom = $repo->find($chatroom_id);
 
-        if ($chatroom === null) {
+        if ($chatroom === null || $chatroom->chatDeleted()) {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
@@ -143,7 +143,7 @@ class ChatroomController extends AbstractController {
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
-        $em->remove($chatroom);
+        $chatroom->deleteChat();
         $em->flush();
         return JsonResponse::getSuccessResponse();
     }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Popup from '@/components/popup.vue';
+import Popup from '@/components/Popup.vue';
 import { saveSqlQuery, type ServerResponse } from '@/ts/sql-toolbox';
 
 const data = defineModel<{
