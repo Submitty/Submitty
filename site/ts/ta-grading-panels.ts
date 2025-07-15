@@ -9,16 +9,16 @@ declare global {
 }
 
 // Panel elements info to be used for layout designs
-type PanelElement =
-    | 'autograding_results'
-    | 'grading_rubric'
-    | 'submission_browser'
-    | 'solution_ta_notes'
-    | 'student_info'
-    | 'grade_inquiry_info'
-    | 'discussion_browser'
-    | 'peer_info'
-    | 'notebook-view';
+type PanelElement
+    = | 'autograding_results'
+        | 'grading_rubric'
+        | 'submission_browser'
+        | 'solution_ta_notes'
+        | 'student_info'
+        | 'grade_inquiry_info'
+        | 'discussion_browser'
+        | 'peer_info'
+        | 'notebook-view';
 
 let panelElements: Array<{ str: PanelElement; icon: string }> = [
     { str: 'autograding_results', icon: '.grading_toolbar .fa-list' },
@@ -779,7 +779,7 @@ export function initializeTaLayout() {
         }
     }
     if (taLayoutDet.isFullScreenMode) {
-        toggleFullScreenMode();
+        $('main#main').addClass('full-screen-mode');
     }
     updateLayoutDimensions();
     updatePanelOptions();
@@ -789,10 +789,4 @@ export function initializeTaLayout() {
 $(() => {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     initializeTaLayout();
-    if (taLayoutDet.isFullLeftColumnMode) {
-        toggleFullLeftColumnMode(true);
-    }
-    if (taLayoutDet.isFullScreenMode) {
-        toggleFullScreenMode();
-    }
 });
