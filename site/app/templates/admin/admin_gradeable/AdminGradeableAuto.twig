@@ -124,14 +124,15 @@
         </div>
         <div id="gradeable-config-structure">
             <p class="config-editor-about">
-                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. By design, you cannot delete 
-                the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files within it!</i> This feature is intended 
-                for <i>small changes</i> to an existing configuration. For larger changes to the file structure, consider reuploading the full configuration.
+                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. 
+                By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files 
+                within it!</i> This feature is intended for <i>small changes</i> to an existing configuration. For larger changes 
+                to the file structure, consider reuploading the full configuration.
             </p>
             <div>
                 <div class="config-editor-action-btns">
-                    <button class="btn btn-primary" type="button" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Root Folder</button>
-                    <button class="btn btn-primary" type="button" onClick="addFile('{{ gradeable.getId() }}', null)">Add Root File</button>
+                    <button class="btn btn-primary" type="button" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Folder</button>
+                    <button class="btn btn-primary" type="button" onClick="addFile('{{ gradeable.getId() }}', null)">Add File</button>
                 </div>
                 <div>
                     <ul class="config-folder-view">
