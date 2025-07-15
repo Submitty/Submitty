@@ -1437,6 +1437,10 @@ end of styles used in the admin gradeable page
         1px 1px 0 var(--text-black);
 }
 
+.grader-active {
+    color: var(--standard-vibrant-red);
+}
+
 /* styles for the colors for the electronic grader details page */
 
 /* color for no grader (PEER) */
