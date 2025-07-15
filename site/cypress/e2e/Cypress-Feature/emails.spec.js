@@ -9,6 +9,35 @@ const extractUserCount = (text) => {
     return match ? parseInt(match[1], 10) : 0;
 };
 
+const verifyEmail = (subject, source) => {
+    cy.get('[data-testid="email-subject"]')
+        .invoke('text')
+        .then((text) => expect(text.trim()).to.equal(`Email Subject: ${subject}`));
+    cy.get('[data-testid="email-time-created"]')
+        .invoke('text')
+        .then((text) => expect(text.trim()).to.match(/Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/));
+    cy.get('[data-testid="email-source"]')
+        .invoke('text')
+        .then((text) => expect(text.trim()).to.equal(source));
+};
+
+const verifyEmailRecipient = (email, error = false) => {
+    // Use jQuery's native methods to improve text parsing performance on large lists
+    const $email = Cypress.$(email);
+    const recipientText = $email.find('[data-testid="email-recipient"]').text();
+    const timeSentText = $email.find('[data-testid="email-time-sent"]').text();
+    const emailAddressText = $email.find('[data-testid="email-address"]').text();
+
+    expect(recipientText.trim()).to.match(/^Recipient: .+/);
+    expect(timeSentText.trim()).to.match(/Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+    expect(emailAddressText.trim()).to.match(/^Email Address: .+@.+\..+$/);
+
+    if (error) {
+        const errorText = $email.find('[data-testid="email-error"]').text();
+        expect(errorText.trim()).to.equal('Error: This is a test error message');
+    }
+};
+
 describe('Test cases involving the superuser email all functionality', () => {
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
@@ -114,9 +143,7 @@ describe('Test cases involving the superuser email all functionality', () => {
                 .should('contain', `(${totalRecipients})`)
                 .closest('.status-container')
                 .within(() => {
-                    cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
-                    cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                    cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+                    verifyEmail(uniqueSubject, 'Submitty Administrator Email');
 
                     cy.get('button.status-btn.btn-primary') // btn-primary implies awaiting to be sent
                         .contains(/Show Details|Hide Details/)
@@ -127,22 +154,13 @@ describe('Test cases involving the superuser email all functionality', () => {
             cy.get('#collapse1')
                 .should('exist')
                 .within(() => {
-                    cy.get('li.status.status-warning').should('have.length', totalRecipients).each(($li) => {
-                        cy.wrap($li)
-                            .within(() => {
-                                cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
-                                    expect(text.trim()).to.match(/^Recipient: .+/);
-                                });
-
-                                cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
-                                    expect(text.trim()).to.match(/^Time Sent: Not Sent$/);
-                                });
-
-                                cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
-                                    expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
-                                });
+                    cy.get('li.status.status-warning')
+                        .should('have.length', totalRecipients)
+                        .then(($emails) => {
+                            $emails.each((_, email) => {
+                                verifyEmailRecipient(email);
                             });
-                    });
+                        });
                 });
         });
     });
@@ -192,9 +210,7 @@ describe('Test cases involving the superuser email all functionality', () => {
                             cy.contains('.button-container', uniqueSubject)
                                 .closest('.status-container')
                                 .within(() => {
-                                    cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
-                                    cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                    cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+                                    verifyEmail(uniqueSubject, 'Submitty Administrator Email');
 
                                     cy.get('button.status-btn.btn-danger') // btn-danger implies email error
                                         .contains(/Show Details|Hide Details/)
@@ -205,23 +221,11 @@ describe('Test cases involving the superuser email all functionality', () => {
                                 .should('exist')
                                 .within(() => {
                                     cy.get('li.status.status-error')
-                                        .each(($li) => {
-                                            cy.wrap($li)
-                                                .within(() => {
-                                                    cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
-                                                        expect(text.trim()).to.match(/^Recipient: .+/);
-                                                    });
-                                                    // Emails may be sent by the system before setting an existing error
-                                                    cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
-                                                        expect(text.trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                                    });
-                                                    cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
-                                                        expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
-                                                    });
-                                                    cy.get('[data-testid="email-error"]').invoke('text').then((text) => {
-                                                        expect(text.trim()).to.equal('Error: This is a test error message');
-                                                    });
-                                                });
+                                        .then(($emails) => {
+                                            $emails.each((_, email) => {
+                                                // Email could have been sent during the error update, so we need to check for both potential states
+                                                verifyEmailRecipient(email, true);
+                                            });
                                         });
                                 });
                         });
@@ -253,9 +257,7 @@ describe('Test cases involving the superuser email all functionality', () => {
                         cy.contains('.button-container', uniqueSubject)
                             .closest('.status-container')
                             .within(() => {
-                                cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
-                                cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                cy.get('[data-testid="email-source"]').should('contain', 'Submitty Administrator Email');
+                                verifyEmail(uniqueSubject, 'Submitty Administrator Email');
 
                                 cy.get('button.status-btn.btn-success') // btn-success implies email sent
                                     .contains(/Show Details|Hide Details/)
@@ -266,19 +268,10 @@ describe('Test cases involving the superuser email all functionality', () => {
                             .should('exist')
                             .within(() => {
                                 cy.get('li.status.status-success')
-                                    .each(($li) => {
-                                        cy.wrap($li)
-                                            .within(() => {
-                                                cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
-                                                    expect(text.trim()).to.match(/^Recipient: .+/);
-                                                });
-                                                cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
-                                                    expect(text.trim()).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                                });
-                                                cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
-                                                    expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
-                                                });
-                                            });
+                                    .then(($emails) => {
+                                        $emails.each((_, email) => {
+                                            verifyEmailRecipient(email);
+                                        });
                                     });
                             });
                     });
@@ -332,9 +325,7 @@ describe('Test cases involving instructor send email via thread announcement fun
                             })
                             .closest('.status-container')
                             .within(() => {
-                                cy.get('[data-testid="email-subject"]').should('contain', uniqueSubject);
-                                cy.get('[data-testid="email-time-created"]').invoke('text').should('match', /Time Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                cy.get('[data-testid="email-source"]').should('contain', `Course: ${getCurrentSemester()} sample`);
+                                verifyEmail(uniqueSubject, `Course: ${getCurrentSemester()} sample`);
 
                                 cy.get('button.status-btn')
                                     .contains(/Show Details|Hide Details/)
@@ -346,19 +337,10 @@ describe('Test cases involving instructor send email via thread announcement fun
                     .should('exist')
                     .within(() => {
                         cy.get('li.status')
-                            .each(($li) => {
-                                cy.wrap($li)
-                                    .within(() => {
-                                        cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
-                                            expect(text.trim()).to.match(/^Recipient: .+/);
-                                        });
-                                        cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
-                                            expect(text.trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                        });
-                                        cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
-                                            expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
-                                        });
-                                    });
+                            .then(($emails) => {
+                                $emails.each((_, email) => {
+                                    verifyEmailRecipient(email);
+                                });
                             });
                     });
             });
