@@ -2788,14 +2788,10 @@ class Gradeable extends AbstractModel {
 
     /**
      * Sets the discussion thread id for this gradeable
-     * @param array<string>|array<int>|int|string $discussion_thread_id
+     * @param array<int> $discussion_thread_id
      */
     public function setDiscussionThreadId($discussion_thread_id): void {
-        # If $discussion_thread_id is json encoded, decode it
-        if (is_string($discussion_thread_id) && is_array(json_decode($discussion_thread_id, true))) {
-            $discussion_thread_id = json_decode($discussion_thread_id, true);
-        }
-        $this->discussion_thread_id = array_map('intval', (array) $discussion_thread_id);
+        $this->discussion_thread_id = $discussion_thread_id;
         $this->modified = true;
     }
 
