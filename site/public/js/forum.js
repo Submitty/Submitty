@@ -2496,7 +2496,7 @@ function setupForumAutosave() {
         $(replyBox).find('input.thread-anon-checkbox').change(() => saveReplyBoxToLocal(replyBox));
     });
 
-    setupDisableReplyThreadForm();
+    $(setupDisableReplyThreadForm);
 }
 
 const CREATE_THREAD_DEFER_KEY = 'create-thread';
