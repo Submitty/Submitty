@@ -129,12 +129,18 @@ describe('Test cases involving the superuser email all functionality', () => {
                 .within(() => {
                     cy.get('li.status.status-warning').should('have.length', totalRecipients).each(($li) => {
                         cy.wrap($li)
-                            .find('.status-message')
-                            .should('have.length', 3)
-                            .then(($msgs) => {
-                                expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
-                                expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: Not Sent$/);
-                                expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
+                            .within(() => {
+                                cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
+                                    expect(text.trim()).to.match(/^Recipient: .+/);
+                                });
+
+                                cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
+                                    expect(text.trim()).to.match(/^Time Sent: Not Sent$/);
+                                });
+
+                                cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
+                                    expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                });
                             });
                     });
                 });
@@ -201,14 +207,20 @@ describe('Test cases involving the superuser email all functionality', () => {
                                     cy.get('li.status.status-error')
                                         .each(($li) => {
                                             cy.wrap($li)
-                                                .find('.status-message')
-                                                .should('have.length', 4)
-                                                .then(($msgs) => {
-                                                    expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
+                                                .within(() => {
+                                                    cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
+                                                        expect(text.trim()).to.match(/^Recipient: .+/);
+                                                    });
                                                     // Emails may be sent by the system before setting an existing error
-                                                    expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                                    expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
-                                                    expect($msgs.find('[data-testid="email-error"]').text().trim()).to.equal('Error: This is a test error message');
+                                                    cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
+                                                        expect(text.trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+                                                    });
+                                                    cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
+                                                        expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                                    });
+                                                    cy.get('[data-testid="email-error"]').invoke('text').then((text) => {
+                                                        expect(text.trim()).to.equal('Error: This is a test error message');
+                                                    });
                                                 });
                                         });
                                 });
@@ -256,12 +268,16 @@ describe('Test cases involving the superuser email all functionality', () => {
                                 cy.get('li.status.status-success')
                                     .each(($li) => {
                                         cy.wrap($li)
-                                            .find('.status-message')
-                                            .should('have.length', 3)
-                                            .then(($msgs) => {
-                                                expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
-                                                expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                                expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                            .within(() => {
+                                                cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
+                                                    expect(text.trim()).to.match(/^Recipient: .+/);
+                                                });
+                                                cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
+                                                    expect(text.trim()).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                                });
+                                                cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
+                                                    expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                                });
                                             });
                                     });
                             });
@@ -332,12 +348,16 @@ describe('Test cases involving instructor send email via thread announcement fun
                         cy.get('li.status')
                             .each(($li) => {
                                 cy.wrap($li)
-                                    .find('.status-message')
-                                    .should('have.length', 3)
-                                    .then(($msgs) => {
-                                        expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
-                                        expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                        expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                    .within(() => {
+                                        cy.get('[data-testid="email-recipient"]').invoke('text').then((text) => {
+                                            expect(text.trim()).to.match(/^Recipient: .+/);
+                                        });
+                                        cy.get('[data-testid="email-time-sent"]').invoke('text').then((text) => {
+                                            expect(text.trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+                                        });
+                                        cy.get('[data-testid="email-address"]').invoke('text').then((text) => {
+                                            expect(text.trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                        });
                                     });
                             });
                     });
