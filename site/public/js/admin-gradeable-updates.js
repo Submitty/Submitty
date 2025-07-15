@@ -294,6 +294,9 @@ $(document).ready(() => {
                 }
                 updateErrorMessage();
                 checkWarningBanners();
+                if (this.id === 'autograding_config_selector' && response_data[0] === 'rebuild_queued') {
+                    location.reload();
+                }
             }, updateGradeableErrorCallback);
     });
 
@@ -1008,10 +1011,6 @@ function loadGradeableEditor(g_id, file_path) {
             }
         },
     });
-}
-
-function configSelectorChange() {
-    location.reload();
 }
 
 function isUsingDefaultConfig() {
