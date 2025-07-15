@@ -396,7 +396,7 @@ class GlobalController extends AbstractController {
         // ALL USERS
         $sidebar_buttons[] = new NavButton($this->core, [
             "href" => $this->core->buildUrl(['home']),
-            "title" => "My Courses",
+            "title" => "Activity Dashboard",
             "icon" => "fa-book-reader"
         ]);
 
