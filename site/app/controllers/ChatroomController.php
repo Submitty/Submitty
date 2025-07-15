@@ -46,7 +46,6 @@ class ChatroomController extends AbstractController {
         }
         catch (WebSocket\ConnectionException $e) {
             $this->core->addNoticeMessage("WebSocket Server is down, page won't load dynamically.");
-            throw $e; // Re-throw to allow caller to handle the failure
         }
     }
 
