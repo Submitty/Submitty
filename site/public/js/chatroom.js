@@ -58,9 +58,7 @@ function appendMessage(displayName, role, ts, content, msgID) {
         message.classList.add('admin-message');
     }
     message.setAttribute('data-testid', 'message-container');
-    if (msgID) {
-        message.setAttribute('data-message-id', msgID);
-    }
+    message.setAttribute('id', msgID);
 
     const messageHeader = document.createElement('div');
     messageHeader.classList.add('message-header');
