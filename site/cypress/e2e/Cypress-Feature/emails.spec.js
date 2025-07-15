@@ -350,6 +350,50 @@ describe('Test cases involving instructor send email via thread announcement fun
 
 describe('Test cases involving instructor email pagination functionality', () => {
     it('verifies the email status page pagination', () => {
+        let page = 1;
+        let lastPage = -1; // TODO: visit all pages?
+        // Superuser and instructor pagination share the same backend logic, so we can use the same test case
+        cy.login('instructor');
+        cy.visit(['sample', 'email_status']);
 
+        cy.get('.pagination').children().eq(-2).then(($lastPage) => {
+            lastPage = parseInt($lastPage.text(), 10);
+        }).as('lastPage');
+
+        cy.get('@lastPage').then(() => {
+            let collapse = 1;
+
+            getApiKey('instructor', 'instructor').then((apiKey) => {
+                cy.request({
+                    method: 'GET',
+                    url: `${Cypress.config('baseUrl')}/api/courses/${getCurrentSemester()}/sample/email/email_status_page?page=${page}&format=json`,
+                    headers: {
+                        Authorization: apiKey,
+                    },
+                }).then((res) => {
+                    const response = JSON.parse(res.body);
+
+                    expect(response.status).to.eq('success');
+                    cy.get('.status-container')
+                        .should('have.length', response.data.length)
+                        .then(($emails) => {
+                            $emails.each((index, email) => {
+                                const subject = email.querySelector('[data-testid="email-subject"]').textContent.trim();
+                                const timeCreated = email.querySelector('[data-testid="email-time-created"]').textContent.trim();
+                                const source = email.querySelector('[data-testid="email-source"]').textContent.trim();
+
+                                expect(subject).to.equal(`Email Subject: ${response.data[index].subject}`);
+                                expect(timeCreated).to.equal(`Time Created: ${response.data[index].created}`);
+                                expect(source).to.equal(`Course: ${getCurrentSemester()} sample`);
+                            });
+                        });
+
+                    cy.get('.expand').should('have.length', response.data.length);
+                    collapse++;
+                });
+
+                page++;
+            });
+        });
     });
 });
