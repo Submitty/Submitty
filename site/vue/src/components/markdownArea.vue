@@ -4,7 +4,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 interface Props {
     markdownAreaId: string;
     markdownAreaValue: string;
-    customClass?: string;
+    class?: string;
     dataPreviousComment?: string;
     initializePreview?: boolean;
     markdownAreaName?: string;
@@ -360,7 +360,7 @@ onMounted(async () => {
         v-model="content"
         :data-testid="markdownAreaId"
         class="markdown-textarea fill-available"
-        :class="[customClass]"
+        :class="[props.class]"
         :name="markdownAreaName"
         :placeholder="placeholder"
         rows="10"
