@@ -1839,12 +1839,6 @@ ol.full-list {
     padding-left: 40px;
 }
 
-ul.bare-list,
-ol.bare-list {
-    list-style: none;
-    padding: 0;
-}
-
 .std-margin {
     margin: 1em 0;
 }
