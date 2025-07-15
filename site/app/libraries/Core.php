@@ -13,7 +13,6 @@ use app\models\User;
 use app\entities\Session;
 use app\repositories\SessionRepository;
 use Doctrine\ORM\EntityManager;
-use app\libraries\TermManager;
 use Doctrine\ORM\ORMSetup;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
@@ -39,9 +38,6 @@ class Core {
 
     /** @var AbstractDatabase */
     private $course_db = null;
-
-    /** @var object[] */
-    private array $entity_managers = [];
 
     /** @var EntityManager */
     private $submitty_entity_manager;
@@ -151,14 +147,6 @@ class Core {
         }
     }
 
-    public function getEntityManager(string $manager_class) {
-        if (in_array($manager_class, $this->entity_managers)) {
-            return $this->entity_managers[$manager_class];
-        }
-        $manager_class =  'app\libraries\\' . $manager_class;
-        $this->entity_managers[$manager_class] = new $manager_class($this);
-        return $this->entity_managers[$manager_class];
-    }
 
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
