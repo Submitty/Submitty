@@ -132,10 +132,9 @@ describe('Test cases involving the superuser email all functionality', () => {
                             .find('.status-message')
                             .should('have.length', 3)
                             .then(($msgs) => {
-                                const texts = [...$msgs].map((el) => el.textContent.trim());
-                                expect(texts[0]).to.match(/^Recipient: .+/);
-                                expect(texts[1]).to.match(/^Time Sent: Not Sent$/);
-                                expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
+                                expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
+                                expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: Not Sent$/);
+                                expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
                             });
                     });
                 });
@@ -205,12 +204,11 @@ describe('Test cases involving the superuser email all functionality', () => {
                                                 .find('.status-message')
                                                 .should('have.length', 4)
                                                 .then(($msgs) => {
-                                                    const texts = [...$msgs].map((el) => el.textContent.trim());
-                                                    expect(texts[0]).to.match(/^Recipient: .+/);
-                                                    // Email may be sent by the system before setting an existing error
-                                                    expect(texts[1]).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                                    expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
-                                                    expect(texts[3]).to.equal('Error: This is a test error message');
+                                                    expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
+                                                    // Emails may be sent by the system before setting an existing error
+                                                    expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+                                                    expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
+                                                    expect($msgs.find('[data-testid="email-error"]').text().trim()).to.equal('Error: This is a test error message');
                                                 });
                                         });
                                 });
@@ -259,15 +257,11 @@ describe('Test cases involving the superuser email all functionality', () => {
                                     .each(($li) => {
                                         cy.wrap($li)
                                             .find('.status-message')
-                                            .should('have.length', 4)
+                                            .should('have.length', 3)
                                             .then(($msgs) => {
-                                                const texts = [...$msgs].map((el) => el.textContent.trim());
-                                                expect(texts[0]).to.match(/^Recipient: .+/);
-                                                // Email sent time should be set
-                                                expect(texts[1]).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
-                                                expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
-                                                // Error should be propagated from the email error mock
-                                                expect(texts[3]).to.equal('Error: This is a test error message');
+                                                expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
+                                                expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+                                                expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
                                             });
                                     });
                             });
@@ -341,11 +335,9 @@ describe('Test cases involving instructor send email via thread announcement fun
                                     .find('.status-message')
                                     .should('have.length', 3)
                                     .then(($msgs) => {
-                                        const texts = [...$msgs].map((el) => el.textContent.trim());
-                                        // TODO: convert these to data-testid (all occurrences)
-                                        expect(texts[0]).to.match(/^Recipient: .+/);
-                                        expect(texts[1]).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
-                                        expect(texts[2]).to.match(/^Email Address: .+@.+\..+$/);
+                                        expect($msgs.find('[data-testid="email-recipient"]').text().trim()).to.match(/^Recipient: .+/);
+                                        expect($msgs.find('[data-testid="email-time-sent"]').text().trim()).to.match(/^Time Sent: (Not Sent|\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
+                                        expect($msgs.find('[data-testid="email-address"]').text().trim()).to.match(/^Email Address: .+@.+\..+$/);
                                     });
                             });
                     });
