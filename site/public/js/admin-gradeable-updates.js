@@ -166,8 +166,7 @@ $(document).ready(() => {
     };
 
     ajaxCheckBuildStatus();
-    // eslint-disable-next-line @stylistic/max-statements-per-line
-    setTimeout(() => { checkWarningBanners(); }, 0);
+    checkWarningBanners();
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
@@ -352,13 +351,6 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
-
-    // early return if grade inquiry dates are not visible or disabled
-    if (!($('#date_grade_inquiry_start').is(':visible') && $('#date_grade_inquiry_due').is(':visible')
-        && !$('#date_grade_inquiry_start').is(':disabled') && !$('#date_grade_inquiry_due').is(':disabled'))) {
-        return;
-    }
-
     if ($('#yes_grade_inquiry_allowed').is(':checked')) {
         const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();

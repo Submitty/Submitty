@@ -9491,7 +9491,7 @@ ORDER BY
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
         $row = $this->submitty_db->row();
-        if ($row) {
+        if ($row === []) {
             return false;
         }
         return $row['user_id'] ?? '';
