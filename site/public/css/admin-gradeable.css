@@ -414,6 +414,14 @@ body::-webkit-scrollbar-track {
     width: 50%;
 }
 
+.main-folder {
+    padding-bottom: 0.5em;
+}
+
+.main-folder-contents {
+    margin-left: 4px;
+}
+
 .config-about-add {
     color: var(--standard-vibrant-green);
 }

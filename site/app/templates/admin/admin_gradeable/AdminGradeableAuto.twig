@@ -130,12 +130,15 @@
                 to the file structure, consider reuploading the full configuration.
             </p>
             <div>
-                <div class="config-editor-action-btns">
-                    <button class="btn btn-primary" type="button" onClick="addRootFolder('{{ gradeable.getId() }}')">Add Folder</button>
-                    <button class="btn btn-primary" type="button" onClick="addFile('{{ gradeable.getId() }}', null)">Add File</button>
-                </div>
                 <div>
                     <ul class="config-folder-view">
+                        <li class="main-folder">
+                            <i class="fas fa-folder-plus file-action-add" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
+                            <i class="fas fa-plus file-action-add config-file-icon" onClick="addFile('{{ gradeable.getId() }}', null)"></i>
+                            {% set parts = selected_autograding_configuration_path|split('/') %}
+                            {% set displayFolder = parts|slice(-2)|join('/') %}
+                            <a class="key_to_click" tabindex="0">{{ displayFolder }}</a>
+                        </li>
                         {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
                     </ul>
                 </div>
@@ -269,23 +272,26 @@
 </script>
 
 {% macro display_config_files(files, indent, g_id) %}
-    {% for name, file in files %}
-        {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
-        <li style="margin-left:{{ indent * 15 }}px">
-            {% if file.files is defined %}
-                <i class="fas fa-plus file-action-add" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
-                <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
-                <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span><a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
-                <ul id="{{ id }}" class="config-folder-view">
-                    {{ _self.display_config_files(file.files, indent + 1, g_id) }}
-                </ul>
-            {% else %}
-                {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
-                    <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
+    <div class="main-folder-contents">
+        {% for name, file in files %}
+            {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
+            <li style="margin-left:{{ indent * 15 }}px">
+                {% if file.files is defined %}
+                    <i class="fas fa-plus file-action-add" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
+                    <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
+                    <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span>
+                    <a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                    <ul id="{{ id }}" class="config-folder-view">
+                        {{ _self.display_config_files(file.files, indent + 1, g_id) }}
+                    </ul>
+                {% else %}
+                    {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
+                        <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
+                    {% endif %}
+                    <span class="fas fa-file config-file-icon"></span>
+                    <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
                 {% endif %}
-                <span class="fas fa-file config-file-icon"></span>
-                <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
-            {% endif %}
-        </li>
-    {% endfor %}
+            </li>
+        {% endfor %}
+    </div>
 {% endmacro %}

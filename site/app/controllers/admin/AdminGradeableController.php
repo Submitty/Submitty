@@ -594,6 +594,7 @@ class AdminGradeableController extends AbstractController {
             'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
+            'selected_autograding_configuration_path' => $gradeable->getAutogradingConfigPath(),
 
             'timezone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
 
