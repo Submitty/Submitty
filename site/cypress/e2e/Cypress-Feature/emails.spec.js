@@ -351,7 +351,7 @@ describe('Test cases involving instructor send email via thread announcement fun
 describe('Test cases involving instructor email pagination functionality', () => {
     it('verifies the email status page pagination', () => {
         let page = 1;
-        let lastPage = -1; // TODO: visit all pages?
+        let lastPage = -1;
         // Superuser and instructor pagination share the same backend logic, so we can use the same test case
         cy.login('instructor');
         cy.visit(['sample', 'email_status']);
@@ -360,9 +360,7 @@ describe('Test cases involving instructor email pagination functionality', () =>
             lastPage = parseInt($lastPage.text(), 10);
         }).as('lastPage');
 
-        cy.get('@lastPage').then(() => {
-            let collapse = 1;
-
+        const verifyPage = () => {
             getApiKey('instructor', 'instructor').then((apiKey) => {
                 cy.request({
                     method: 'GET',
@@ -385,15 +383,30 @@ describe('Test cases involving instructor email pagination functionality', () =>
                                 expect(subject).to.equal(`Email Subject: ${response.data[index].subject}`);
                                 expect(timeCreated).to.equal(`Time Created: ${response.data[index].created}`);
                                 expect(source).to.equal(`Course: ${getCurrentSemester()} sample`);
+                                cy.get(`#collapse${index + 1} li`).should('have.length', response.data[index].count); // Drop down for current email recipients
                             });
                         });
 
-                    cy.get('.expand').should('have.length', response.data.length);
-                    collapse++;
+                    cy.get('.expand').should('have.length', response.data.length); // Total email drop-downs on the page
                 });
 
                 page++;
+
+                if (page > lastPage) {
+                    return;
+                }
+
+                // Verify the next page pagination
+                cy.get(`#${page}`).click({ force: true });
+                cy.get('.page-btn.selected').then(($selected) => {
+                    expect($selected.attr('id')).to.equal(page.toString());
+                    verifyPage();
+                });
             });
+        };
+
+        cy.get('@lastPage').then(() => {
+            verifyPage();
         });
     });
 });
