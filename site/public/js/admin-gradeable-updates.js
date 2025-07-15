@@ -166,7 +166,8 @@ $(document).ready(() => {
     };
 
     ajaxCheckBuildStatus();
-    checkWarningBanners();
+    // eslint-disable-next-line @stylistic/max-statements-per-line
+    setTimeout(() => { checkWarningBanners(); }, 0);
     $('input:not(#random-peer-graders-list,#number_to_peer_grade),select,textarea').change(function () {
         if ($(this).hasClass('date-radio') && is_electronic) {
             updateDueDate();
@@ -351,33 +352,36 @@ $(document).ready(() => {
 
 function checkWarningBanners() {
     $('#gradeable-dates-warnings-banner').hide();
-    // show banners only if we can see the grade inquiry dates and theyre not disabled
-    if ($('#date_grade_inquiry_start').is(':visible') && $('#date_grade_inquiry_due').is(':visible')
-        && !$('#date_grade_inquiry_start').is(':disabled') && !$('#date_grade_inquiry_due').is(':disabled')) {
-        if ($('#yes_grade_inquiry_allowed').is(':checked')) {
-            const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
-            const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
 
-            // hide/show the element when the start date is before/after the due date respectfully
-            if (grade_inquiry_start_date > grade_inquiry_due_date) {
-                $('#grade-inquiry-dates-warning').show();
-                $('#gradeable-dates-warnings-banner').show();
-            }
-            else {
-                $('#grade-inquiry-dates-warning').hide();
-            }
+    // early return if grade inquiry dates are not visible or disabled
+    if (!($('#date_grade_inquiry_start').is(':visible') && $('#date_grade_inquiry_due').is(':visible')
+        && !$('#date_grade_inquiry_start').is(':disabled') && !$('#date_grade_inquiry_due').is(':disabled'))) {
+        return;
+    }
+
+    if ($('#yes_grade_inquiry_allowed').is(':checked')) {
+        const grade_inquiry_start_date = $('#date_grade_inquiry_start').val();
+        const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
+
+        // hide/show the element when the start date is before/after the due date respectfully
+        if (grade_inquiry_start_date > grade_inquiry_due_date) {
+            $('#grade-inquiry-dates-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
         }
+        else {
+            $('#grade-inquiry-dates-warning').hide();
+        }
+    }
 
-        if ($('#has_release_date_yes').is(':visible')) {
-            const release_date = $('#date_released').val();
-            const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
-            if (release_date > grade_inquiry_due_date) {
-                $('#no-grade-inquiry-warning').show();
-                $('#gradeable-dates-warnings-banner').show();
-            }
-            else {
-                $('#release-dates-warning').hide();
-            }
+    if ($('#has_release_date_yes').is(':checked')) {
+        const release_date = $('#date_released').val();
+        const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
+        if (release_date > grade_inquiry_due_date) {
+            $('#no-grade-inquiry-warning').show();
+            $('#gradeable-dates-warnings-banner').show();
+        }
+        else {
+            $('#release-dates-warning').hide();
         }
     }
 }
