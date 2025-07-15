@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Popup from '@/components/popup.vue';
+import Popup from '@/components/Popup.vue';
 import { displayErrorMessage, displaySuccessMessage } from '../../../../ts/utils/server';
 import { ref } from 'vue';
 import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '@/ts/sql-toolbox';
