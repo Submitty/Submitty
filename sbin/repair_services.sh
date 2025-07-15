@@ -33,11 +33,9 @@ log_service_restart() {
 }
 
 repair_autograding() {
-    local restart=false
     local components=("shipper" "worker")
     local targets=("primary" "perform_on_all_workers")
     local status_script="/usr/local/submitty/sbin/shipper_utils/systemctl_wrapper.py"
-    local restart_script="/usr/local/submitty/sbin/restart_shipper_and_all_workers.py"
     local workers
     workers=$(jq 'keys | length' /usr/local/submitty/config/autograding_workers.json)
 
@@ -51,10 +49,13 @@ repair_autograding() {
             local cmd=()
 
             if [[ "${target}" == "primary" ]]; then
-                cmd=(sudo python3 "${status_script}" --daemon "${component}" --target "${target}" status)
+                cmd=(sudo python3 "${status_script}" --daemon "${component}" --target "${target}" status --restart-on-failure)
             else
-                cmd=(sudo -u submitty_daemon python3 "${status_script}" --daemon "${component}" --target "${target}" status)
+                cmd=(sudo -u submitty_daemon python3 "${status_script}" --daemon "${component}" --target "${target}" status --restart-on-failure)
             fi
+
+            local last_status
+            last_status=$(sudo systemctl status "submitty_autograding_${component}")
 
             local output
             output=$("${cmd[@]}")
@@ -64,7 +65,7 @@ repair_autograding() {
                 local source
 
                 if [[ "${target}" == "primary" ]]; then
-                    source="local"
+                    source="primary"
                 else
                     source="remote"
                 fi
@@ -78,20 +79,12 @@ repair_autograding() {
                     spacing="\n\n"
                 fi
 
-                local last_status
-                last_status=$(sudo systemctl status "submitty_autograding_${component}")
-
                 log_service_restart "autograding" \
-                    "Failure detected within the autograding ${component} for ${source} machine(s)" \
+                    "Failure detected within the autograding ${component} for the ${source} machine(s)" \
                     "${output}${spacing}${last_status}"
-                restart=true
             fi
         done
     done
-
-    if [[ "${restart}" == true ]]; then
-        sudo python3 "${restart_script}"
-    fi
 }
 
 repair_systemctl_service() {
