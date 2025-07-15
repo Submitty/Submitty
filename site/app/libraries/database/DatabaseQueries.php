@@ -9574,4 +9574,24 @@ ORDER BY
         );
         return $this->submitty_db->getRowCount() > 0;
     }
+
+    /**
+     * Gets the active graders for a given gradeable.
+     * @return array<array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>
+     */
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
 }
