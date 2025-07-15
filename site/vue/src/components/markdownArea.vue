@@ -181,8 +181,9 @@ function handleKeyup(event: Event) {
         props.textareaOnKeyup
         && window[props.textareaOnKeyup as keyof Window]
     ) {
-        (window[props.textareaOnKeyup as keyof Window] as () => void).call(
+        (window[props.textareaOnKeyup as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
+            textareaRef.value,
         );
     }
 }
@@ -195,8 +196,9 @@ function handleKeydown(event: Event) {
         props.textareaOnkeydown
         && window[props.textareaOnkeydown as keyof Window]
     ) {
-        (window[props.textareaOnkeydown as keyof Window] as () => void).call(
+        (window[props.textareaOnkeydown as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
+            textareaRef.value,
         );
     }
 }
@@ -209,8 +211,9 @@ function handlePaste(event: Event) {
         props.textareaOnPaste
         && window[props.textareaOnPaste as keyof Window]
     ) {
-        (window[props.textareaOnPaste as keyof Window] as () => void).call(
+        (window[props.textareaOnPaste as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
+            textareaRef.value,
         );
     }
 }
@@ -223,8 +226,9 @@ function handleChange(event: Event) {
         props.textareaOnChange
         && window[props.textareaOnChange as keyof Window]
     ) {
-        (window[props.textareaOnChange as keyof Window] as () => void).call(
+        (window[props.textareaOnChange as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
+            textareaRef.value,
         );
     }
 }
@@ -234,8 +238,9 @@ function handleInput(event: Event) {
         props.textareaOnInput
         && window[props.textareaOnInput as keyof Window]
     ) {
-        (window[props.textareaOnInput as keyof Window] as () => void).call(
+        (window[props.textareaOnInput as keyof Window] as (el: HTMLTextAreaElement | null) => void).call(
             event.target,
+            textareaRef.value,
         );
     }
 }
