@@ -36,7 +36,7 @@ Required Parameters:
             "args": {
                 "markdownAreaId" : "overall-comment-" ~ (overall_comment["logged_in_user"]["user_id"]|escape) ,
                 "markdownAreaName" : '',
-                "markdownAreaValue" : (overall_comment["logged_in_user"]["comment"]|escape),
+                "markdownAreaValue" : overall_comment["logged_in_user"]["comment"],
                 "rootClass" : "general-comment-entry",
                 "placeholder" : "Overall message for student about the gradeable...",
                 "previewDivId" : "overall-comment-markdown-preview-" ~ (overall_comment["logged_in_user"]["user_id"]|escape),
@@ -44,8 +44,8 @@ Required Parameters:
                 "renderHeader" : true,
                 "minHeight" : "100px",
                 "maxHeight" : "150px",
-                "textareaOnChange" : grading_disabled ? '' : 'onChangeOverallComment()',
-                "dataPreviousComment" : (overall_comment["logged_in_user"]["comment"]|escape)
+                "textareaOnChange" : grading_disabled ? '' : 'onChangeOverallComment',
+                "dataPreviousComment" : overall_comment["logged_in_user"]["comment"]
             }
         } only %}
         {% for user, comment in overall_comment["other_graders"] %}
