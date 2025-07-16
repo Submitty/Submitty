@@ -365,7 +365,7 @@ function checkWarningBanners() {
         }
     }
 
-    if ($('#has_release_date_yes').is(':checked')) {
+    if ($('#yes_grade_inquiry_allowed').is(':checked') && $('#has_release_date_yes').is(':checked')) {
         const release_date = $('#date_released').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
         if (release_date > grade_inquiry_due_date) {
@@ -373,7 +373,7 @@ function checkWarningBanners() {
             $('#gradeable-dates-warnings-banner').show();
         }
         else {
-            $('#release-dates-warning').hide();
+            $('#no-grade-inquiry-warning').hide();
         }
     }
 }

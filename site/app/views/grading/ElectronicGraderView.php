@@ -1258,6 +1258,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
@@ -1545,9 +1546,10 @@ HTML;
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),

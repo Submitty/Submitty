@@ -9490,10 +9490,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
