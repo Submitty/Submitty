@@ -778,7 +778,7 @@ export function initializeTaLayout() {
             setPanelsVisibilities(taLayoutDet.currentOpenPanel);
         }
     }
-    if (taLayoutDet.isFullScreenMode) {
+    if (taLayoutDet.isFullScreenMode && $('#silent-edit-id').length !== 0) {
         $('main#main').addClass('full-screen-mode');
     }
     updateLayoutDimensions();
