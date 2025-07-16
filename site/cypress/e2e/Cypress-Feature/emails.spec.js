@@ -85,12 +85,18 @@ describe('Test cases involving the superuser Email All functionality', () => {
                 });
         };
 
-        verifyDefaultRecipients('#email-faculty', 'faculty', /^Email all Faculty and all Superusers \(\d+ users\)$/);
-        verifyDefaultRecipients('#email-instructor', 'instructor', /^Email all Instructors of Active\/Non-Archived Courses \(\d+ users\)$/);
-        verifyDefaultRecipients('#email-full-access', 'fullAccess', /^Email all Full Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/);
-        verifyDefaultRecipients('#email-limited-access', 'limitedAccess', /^Email all Limited Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/);
-        verifyDefaultRecipients('#email-student', 'student', /^Email all Students in Active\/Non-Archived Courses \(\d+ users\)$/);
-        verifyDefaultRecipients('#email-to-secondary', 'secondary', /^Send email to each user's primary and secondary email addresses, regardless of the user's notification selection$/);
+        const defaultRecipients = {
+            faculty: ['#email-faculty', /^Email all Faculty and all Superusers \(\d+ users\)$/],
+            instructor: ['#email-instructor', /^Email all Instructors of Active\/Non-Archived Courses \(\d+ users\)$/],
+            fullAccess: ['#email-full-access', /^Email all Full Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/],
+            limitedAccess: ['#email-limited-access', /^Email all Limited Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/],
+            student: ['#email-student', /^Email all Students in Active\/Non-Archived Courses \(\d+ users\)$/],
+            secondary: ['#email-to-secondary', /^Send email to each user's primary and secondary email addresses, regardless of the user's notification selection$/],
+        };
+
+        Object.entries(defaultRecipients).forEach(([recipient, [input, expected]]) => {
+            verifyDefaultRecipients(input, recipient, expected);
+        });
 
         // Wait for the total recipients count to be fully parsed
         cy.then(() => {
