@@ -4,7 +4,7 @@ import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/t
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
-import { exchangeTwoPanels, toggleFullScreenMode } from '../../../../ts/ta-grading-panels';
+import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     homeUrl: string;
@@ -12,12 +12,19 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     nextStudentUrl: string;
     progress: number;
 }>();
+
+// need to assign because ta-grading-panels-init.ts is not called
+Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+if (taLayoutDet.isFullScreenMode) {
+    toggleFullScreenMode();
+}
+const fullScreened = taLayoutDet.isFullScreenMode;
 </script>
 
 <template>
   <NavigationButton
     :on-click="gotoMainPage"
-    :icons="['fa-home']"
+    visible-icon="fa-home"
     button-id="main-page"
     title="Go to the main page"
     :optional-href="homeUrl"
@@ -25,7 +32,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
 
   <NavigationButton
     :on-click="gotoPrevStudent"
-    :icons="['fa-caret-left']"
+    visible-icon="fa-caret-left"
     button-id="prev-student"
     title="Previous Student"
     :optional-href="prevStudentUrl"
@@ -35,7 +42,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
 
   <NavigationButton
     :on-click="gotoNextStudent"
-    :icons="['fa-caret-right']"
+    visible-icon="fa-caret-right"
     button-id="next-student"
     title="Next Student"
     :optional-href="nextStudentUrl"
@@ -45,14 +52,16 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
 
   <NavigationButton
     :on-click="toggleFullScreenMode"
-    :icons="['fa-compress', 'fa-expand']"
+    visible-icon="fa-expand"
+    hidden-icon="fa-compress"
+    :display-hidden="fullScreened"
     button-id="fullscreen-btn"
     title="Toggle the full screen mode"
     optional-spanid="fullscreen-btn-cont"
   />
   <NavigationButton
     :on-click="() => togglePanelSelectorModal(true)"
-    :icons="['fa-columns']"
+    visible-icon="fa-columns"
     button-id="two-panel-mode-btn"
     title="Toggle the two panel mode"
     optional-spanid="two-panel-mode-btn"
@@ -60,7 +69,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
 
   <NavigationButton
     :on-click="exchangeTwoPanels"
-    :icons="['fa-exchange-alt']"
+    visible-icon="fa-exchange-alt"
     button-id="two-panel-exchange-button"
     title="Exchange the panel positions"
     optional-spanid="two-panel-exchange-btn"
@@ -68,7 +77,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
 
   <NavigationButton
     :on-click="showSettings"
-    :icons="['fa-wrench']"
+    visible-icon="fa-wrench"
     button-id="grading-setting-btn"
     title="Show Grading Settings"
     optional-spanid="grading-setting-btn"

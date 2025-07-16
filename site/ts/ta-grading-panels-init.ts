@@ -13,7 +13,6 @@ import {
     isMobileView,
     changeMobileView,
     getSavedTaLayoutDetails,
-    toggleFullScreenMode,
 } from './ta-grading-panels';
 
 // Grading Panel header width
@@ -149,9 +148,6 @@ function initializeTaLayout() {
         if (taLayoutDet.currentOpenPanel) {
             setPanelsVisibilities(taLayoutDet.currentOpenPanel);
         }
-    }
-    if (taLayoutDet.isFullScreenMode) {
-        toggleFullScreenMode();
     }
     updateLayoutDimensions();
     updatePanelOptions();

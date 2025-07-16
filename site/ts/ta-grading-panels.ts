@@ -124,7 +124,6 @@ export function saveResizedColsDimensions(updateValue: string, isHorizontalResiz
 export function toggleFullScreenMode() {
     Object.assign(taLayoutDet, getSavedTaLayoutDetails());
     $('main#main').toggleClass('full-screen-mode');
-    $('#fullscreen-btn-cont').toggleClass('active');
     taLayoutDet.isFullScreenMode = $('main#main').hasClass('full-screen-mode');
 
     // update the dragging event for two panels
