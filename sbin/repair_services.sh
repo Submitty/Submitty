@@ -49,7 +49,7 @@ repair_autograding() {
         restart_output=$(sudo python3 "${restart_script}" 2>&1 /dev/null)
 
         log_service_restart "autograding" \
-            "Failure detected within the autograding shipper" \
+            "Failure detected within the Autograding Shipper" \
             "${status_output}\n\n${restart_output}\n\n${last_status}"
     fi
 }
