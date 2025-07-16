@@ -7,7 +7,7 @@ declare -A services=(
     ["nginx"]="Nginx Server"
     ["apache2"]="Web Server"
     ["postgresql"]="Database Server"
-    ["autograding"]="Autograding Shipper/Workers"
+    ["autograding"]="Autograding Shipper"
     ["submitty_websocket_server"]="WebSocket Server"
     ["submitty_daemon_jobs_handler"]="Daemon Jobs Handler"
 )
@@ -33,58 +33,34 @@ log_service_restart() {
 }
 
 repair_autograding() {
-    local components=("shipper" "worker")
-    local targets=("primary" "perform_on_all_workers")
     local status_script="/usr/local/submitty/sbin/shipper_utils/systemctl_wrapper.py"
-    local workers
-    workers=$(jq 'keys | length' /usr/local/submitty/config/autograding_workers.json)
+    local restart_script="/usr/local/submitty/sbin/restart_shipper_and_all_workers.py"
 
-    for component in "${components[@]}"; do
-        for target in "${targets[@]}"; do
-            # Ignore remote health checks if there are no remote workers configured
-            if [[ "${target}" == "perform_on_all_workers" && "${workers}" -le 1 ]]; then
-                continue
-            fi
+    cmd=(sudo python3 "${status_script}" --daemon "shipper" --target "primary" status)
+    local status_output
+    status_output=$("${cmd[@]}" 2>/dev/null)
+    local status=$?
 
-            local cmd=()
+    if [[ "${status}" -ne 1 ]]; then
+        local last_status
+        last_status=$(sudo systemctl status "submitty_autograding_shipper")
 
-            if [[ "${target}" == "primary" ]]; then
-                cmd=(sudo python3 "${status_script}" --daemon "${component}" --target "${target}" status --restart-on-failure)
-            else
-                cmd=(sudo -u submitty_daemon python3 "${status_script}" --daemon "${component}" --target "${target}" status --restart-on-failure)
-            fi
+        # Restart all autograding shippers and workers in the proper order
+        restart_output=$(sudo python3 "${restart_script}" 2>&1 /dev/null)
 
-            local last_status
-            last_status=$(sudo systemctl status "submitty_autograding_${component}")
+        local spacing
 
-            local output
-            output=$("${cmd[@]}")
-            local status=$?
+        # No need for a newline between the message and the status for empty output
+        if [[ -z "${status_output}" ]]; then
+            spacing=""
+        else
+            spacing="\n\n"
+        fi
 
-            if [[ "${status}" -ne 1 ]]; then
-                local source
-
-                if [[ "${target}" == "primary" ]]; then
-                    source="primary"
-                else
-                    source="remote"
-                fi
-
-                local spacing
-
-                # No need for a newline between the message and the status for empty output
-                if [[ -z "${output}" ]]; then
-                    spacing=""
-                else
-                    spacing="\n\n"
-                fi
-
-                log_service_restart "autograding" \
-                    "Failure detected within the autograding ${component} for the ${source} machine(s)" \
-                    "${output}${spacing}${last_status}"
-            fi
-        done
-    done
+        log_service_restart "autograding" \
+            "Failure detected within the autograding shipper" \
+            "${status_output}\n\n${restart_output}${spacing}${last_status}"
+    fi
 }
 
 repair_systemctl_service() {
@@ -93,7 +69,9 @@ repair_systemctl_service() {
     if ! sudo systemctl is-active --quiet "${service}"; then
         local last_status
         last_status=$(sudo systemctl status "${service}")
-        log_service_restart "${service}" "Failure detected within the ${services["${service}"]}" "${last_status}"
+        log_service_restart "${service}" \
+            "Failure detected within the ${services["${service}"]}" \
+            "${last_status}"
         sudo systemctl restart "${service}"
     fi
 }

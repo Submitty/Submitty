@@ -34,8 +34,7 @@ EXIT_CODES = {
   'active'    : 1,
   'failure'   : 2,
   'bad_arguments' : 3,
-  'io_error': 4,
-  'restart_on_failure': 5
+  'io_error': 4
 }
 
 # valid commands that can be passed to this script. If you add more, update
@@ -58,43 +57,6 @@ def print_status_message(status_code, mode, daemon, machine):
   else:
     print("{0}Received unknown status code {1} when attempting to {2} the \
       {3} daemon".format(prefix, status_code, mode, daemon))
-
-# A method to check all remote workers and restart any that are not currently active.
-def restart_broken_workers(daemon):
-    greatest_status = 0
-
-    # Iterate over all workers defined in the configuration file
-    for target in WORKERS.keys():
-        # Skip the primary machine and any local workers
-        if target == 'primary' or WORKERS[target]['address'] == 'localhost':
-            continue
-
-        # Skip workers that are manually disabled
-        if WORKERS[target]['enabled'] == False:
-            print (f"INFO: Skipping disabled worker {target}")
-            continue
-
-        # Check the current status of the daemon on the worker
-        status = perform_systemctl_command_on_worker(daemon, 'status', target)
-
-        if status == EXIT_CODES['active']:
-            print(f"INFO: {target} worker is already active. No action needed.")
-            continue
-
-        # Any other status implies inactive, failure, or I/O error
-        print(f"WARNING: The {target} worker is not active (status code: {status}). Attempting restart...")
-
-        # Perform the restart on the broken worker
-        print(f"INFO: Restarting the {target} worker...")
-        restart_status = perform_systemctl_command_on_worker(daemon, 'restart', target)
-
-        # Log any potential issues with the restart
-        verify_systemctl_status_code(restart_status, 'restart', daemon, target)
-
-        # Update the greatest status to the worst of the current status or the restart status
-        greatest_status = max(greatest_status, restart_status)
-
-    return greatest_status
 
 # A wrapper for perform_systemctl_command_on_worker that iterates over all workers.
 def perform_systemctl_command_on_all_workers(daemon, mode):
@@ -203,11 +165,10 @@ def parse_arguments():
     specified, the command will be processed on all worker machines. If not specified, the status of this machine is checked.")
   parser.add_argument("mode", metavar="MODE", type=str.lower, help="Valid modes are status, start, restart, and stop",
     choices=VALID_MODES)
-  parser.add_argument("--restart-on-failure", action='store_true', help="When used with 'status' mode, attempts to restart any non-active daemons.")
 
   return parser.parse_args()
 
-def main(daemon, target, mode, restart_on_failure):
+def main(daemon, target, mode):
   if daemon == None:
     daemon = 'worker'
 
@@ -231,20 +192,8 @@ def main(daemon, target, mode, restart_on_failure):
     status = EXIT_CODES['active'] if (text == 'active') else EXIT_CODES['inactive']
     # verifies that after performing the 'mode' command, the resulting status is correct.
     verify_systemctl_status_code(status, mode, daemon, target, disable_on_failure=False)
-    if status != EXIT_CODES['active'] and restart_on_failure:
-      print(f"INFO: Restarting the the autograding {daemon} on the {target} worker")
-      command = "sudo systemctl restart submitty_autograding_{0}".format(daemon)
-      exit_code = os.system(command)
-
-      if os.WEXITSTATUS(exit_code) != 0:
-        print(f"ERROR: Failed to restart the autograding {daemon} on the {target} worker")
-      else:
-        print(f"INFO: Successfully restarted the autograding {daemon} on the {target} worker")
-
-      status = EXIT_CODES['restart_on_failure']
-    else:
-        # local is a keyword which causes print_status_message to print no machine prefix.
-        print_status_message(status, mode, daemon, 'local')
+    # local is a keyword which causes print_status_message to print no machine prefix.
+    print_status_message(status, mode, daemon, 'local')
   else:
     if WORKERS == None:
       print("ERROR: the autograding_workers.json was not found on your machine. Please make sure you are installed\
@@ -258,12 +207,7 @@ def main(daemon, target, mode, restart_on_failure):
     # perform_on_all_workers is a keyword that causes us to run the command on every worker machine.
     #   This is helpful for performing start all or stop all commands.
     if target.lower() == "perform_on_all_workers":
-        if restart_on_failure:
-            # Potentially restart individual workers to prevent uniform restarts for a single remote machine failure
-            status = restart_broken_workers(daemon)
-        else:
-            # Fetch the status of all workers and return the greatest status code
-            status = perform_systemctl_command_on_all_workers(daemon, mode)
+      status = perform_systemctl_command_on_all_workers(daemon, mode)
     else:
       status = perform_systemctl_command_on_worker(daemon, mode, target)
       # verifies that after performing the 'mode' command, the resulting status is correct.
@@ -275,4 +219,4 @@ def main(daemon, target, mode, restart_on_failure):
 
 if __name__ == "__main__":
   args = parse_arguments()
-  main(args.daemon, args.target, args.mode, args.restart_on_failure if args.mode == 'status' else False)
+  main(args.daemon, args.target, args.mode)
