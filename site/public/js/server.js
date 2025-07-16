@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
@@ -768,17 +768,6 @@ function validateHtml() {
     d.outerHTML = '';
 }
 
-/**
- * Remove an alert message from display. This works for successes, warnings, or errors to the
- * user
- * @param elem
- */
-function removeMessagePopup(elem) {
-    $(`#${elem}`).fadeOut('slow', () => {
-        $(`#${elem}`).remove();
-    });
-}
-
 function gradeableChange(url, sel) {
     url = url + sel.value;
     window.location.href = url;
@@ -1186,12 +1175,6 @@ $(() => {
             $('html, body').animate({ scrollTop: ($(window.location.hash).offset().top - minus) }, 800);
         }
     }
-
-    for (const elem of document.getElementsByClassName('alert-success')) {
-        setTimeout(() => {
-            $(elem).fadeOut();
-        }, 5000);
-    }
 });
 
 function getFileExtension(filename) {
@@ -1207,41 +1190,6 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.document.write(elem_html);
     my_window.document.close();
     my_window.focus();
-}
-
-let messages = 0;
-
-function displayErrorMessage(message) {
-    displayMessage(message, 'error');
-}
-
-function displaySuccessMessage(message) {
-    displayMessage(message, 'success');
-}
-
-function displayWarningMessage(message) {
-    displayMessage(message, 'warning');
-}
-
-/**
- * Display a toast message after an action.
- *
- * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
- *
- * @param {string} message
- * @param {string} type either 'error', 'success', or 'warning'
- */
-function displayMessage(message, type) {
-    const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" data-testid="popup-message" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
-    $('#messages').append(message);
-    $('#messages').fadeIn('slow');
-    if (type === 'success' || type === 'warning') {
-        setTimeout(() => {
-            $(`#${id}`).fadeOut();
-        }, 5000);
-    }
-    messages++;
 }
 
 /**
