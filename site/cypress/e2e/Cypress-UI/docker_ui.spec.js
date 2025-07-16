@@ -111,6 +111,10 @@ describe('Docker UI Test', () => {
     });
 
     it('Should link existed image to a new tag', () => {
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('.status')
+            .should('contain.text', 'Up-to-Date');
+
         // Check empty tag list, should have `et-cetera'
         cy.get('#capabilities-list')
             .contains('et-cetera');
@@ -129,6 +133,10 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
 
+        // Verify DockerUI status has changed to "Changes Pending"
+        cy.get('.status')
+            .should('contain.text', 'Changes Pending');
+
         // Update the machine to link existing image to a new tag
         cy.get('#update-machines').click();
         cy.get('.alert-success')
@@ -136,6 +144,10 @@ describe('Docker UI Test', () => {
 
         // Allow the system to update the info and reload
         cy.reload();
+
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('.status')
+            .should('contain.text', 'Up-to-Date');
 
         // Check the empty tag list
         cy.get('#capabilities-list')
@@ -163,6 +175,10 @@ describe('Docker UI Test', () => {
     it('Should add new image and remove it', () => {
         cy.intercept('POST', '**/admin/add_image').as('addImage');
 
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('.status')
+            .should('contain.text', 'Up-to-Date');
+
         // Add a new image
         cy.get('#capability-form')
             .select('python');
@@ -173,6 +189,10 @@ describe('Docker UI Test', () => {
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
+
+        // Verify DockerUI status has changed to "Changes Pending"
+        cy.get('.status')
+            .should('contain.text', 'Changes Pending');
 
         // Wait for the add image request to complete
         cy.wait('@addImage');
@@ -197,6 +217,10 @@ describe('Docker UI Test', () => {
 
         cy.reload();
 
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('.status')
+            .should('contain.text', 'Up-to-Date');
+
         // Check if the image can be removed
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('contain.text', 'Remove');
@@ -210,6 +234,10 @@ describe('Docker UI Test', () => {
 
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
+
+        // Verify DockerUI status has changed to "Changes Pending"
+        cy.get('.status')
+            .should('contain.text', 'Changes Pending');
 
         // Wait for the remove image request to complete
         cy.wait('@removeImage');
@@ -232,6 +260,10 @@ describe('Docker UI Test', () => {
         }, 60000, 500);
 
         cy.reload();
+
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('.status')
+            .should('contain.text', 'Up-to-Date');
 
         // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
