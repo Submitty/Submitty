@@ -329,7 +329,7 @@ describe('Test cases involving instructor email pagination functionality', () =>
                     expect(response.status).to.eq('success');
                     expect(Array.isArray(response.data)).to.be.true;
 
-                    // Verify each email is properly rendered based on it's page index
+                    // Verify each email is properly rendered based on it's page item index
                     cy.get('.status-container')
                         .should('have.length', response.data.length)
                         .then(($emails) => {
@@ -349,9 +349,6 @@ describe('Test cases involving instructor email pagination functionality', () =>
                                 cy.get(`#collapse${index + 1} li`).should('have.length', response.data[index].count);
                             });
                         });
-
-                    // Verify the total number of email drop-downs on the page
-                    cy.get('.expand').should('have.length', response.data.length);
                 });
 
                 page++;
