@@ -51,7 +51,6 @@ const verifyEmailRecipient = (email, error = false) => {
 };
 
 describe('Test cases involving the superuser Email All functionality', () => {
-    return;
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
 
@@ -303,7 +302,6 @@ describe('Test cases involving the superuser Email All functionality', () => {
 });
 
 describe('Test cases involving instructor send email via thread announcement functionality', () => {
-    return;
     it('sends an email via thread announcement and verifies the email is queued or sent', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', 'new']);
@@ -367,6 +365,13 @@ describe('Test cases involving instructor send email via thread announcement fun
                                 });
                             });
                     });
+
+                // Clean up the test thread
+                cy.visit(['sample', 'forum', 'threads']).then(() => {
+                    cy.get('[data-testid="thread-list-item"]').contains(announcement).click();
+                    cy.get('[data-testid="thread-dropdown"]').first().click();
+                    cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
+                });
             });
         });
     });

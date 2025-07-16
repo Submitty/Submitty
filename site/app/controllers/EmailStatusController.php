@@ -59,8 +59,10 @@ class EmailStatusController extends AbstractController {
             $subjectCounts = [];
             foreach ($result as $emailIterable) {
                 foreach ($emailIterable as $email) {
-                    // Emails are uniquely identified by their subject and creation date
-                    $key = $email->getSubject() . '.' . $email->getCreated()->format('Y-m-d H:i:s');
+                    // Emails are uniquely identified by their subject and creation date with milliseconds precision for e2e testing
+                    $created = $email->getCreated();
+                    $timestamp = $created->format('Y-m-d H:i:s.') . substr($created->format('u'), 0, 3);
+                    $key = $email->getSubject() . '.' . $timestamp;
                     if (!isset($subjectCounts[$key])) {
                         $subjectCounts[$key] = 0;
                     }
