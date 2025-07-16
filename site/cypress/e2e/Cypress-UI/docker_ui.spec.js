@@ -104,7 +104,7 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
 
-        cy.get('.alert-error')
+        cy.get('[data-testid="popup-message"]')
             .should('have.text', 'submitty/invalid-image not found on DockerHub');
     });
 
