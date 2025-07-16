@@ -1,5 +1,7 @@
 import { getCurrentSemester, getApiKey } from '../../support/utils.js';
 
+const errorMessage = 'This is a test error message';
+
 const normalizeText = (text) => {
     return text.trim().replace(/\s+/g, ' ');
 };
@@ -42,7 +44,7 @@ const verifyEmailRecipient = (email, error = false) => {
 
     if (error) {
         expect($email.find('[data-testid="email-error"]').text().trim()).to.equal(
-            'Error: This is a test error message',
+            `Error: ${errorMessage}`,
         );
     }
     else {
@@ -98,22 +100,18 @@ describe('Test cases involving the superuser Email All functionality', () => {
             let uniqueSubject = `Test Email - ${Date.now()}`;
             cy.get('[data-testid="email-subject"]').type(uniqueSubject);
             cy.get('[data-testid="email-content"]').type('This is a test email body.');
-
             cy.get('[data-testid="send-email"]').click();
-
             cy.get('[data-testid="sidebar"]')
                 .contains('Email Status')
                 .click();
 
-            // Verify the email subject email prefix addition and total recipients count
+            // Verify the automatic email subject prefix insertion and total recipients count
             uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
             cy.contains('.button-container', uniqueSubject)
                 .should('contain', `(${totalRecipients})`)
                 .closest('.status-container')
                 .within(() => {
                     verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-
-                    // btn-primary (blue) implies awaiting to be sent
                     cy.get('button.status-btn.btn-primary')
                         .contains(/Show Details|Hide Details/)
                         .click();
@@ -145,16 +143,15 @@ describe('Test cases involving the superuser Email All functionality', () => {
         cy.get('[data-testid="email-subject"]').type(uniqueSubject);
         cy.get('[data-testid="email-content"]').type('This is a test email body.');
         cy.get('[data-testid="send-email"]').click();
-
         cy.get('[data-testid="sidebar"]')
             .contains('Email Status')
             .click();
 
-        // Apply an email error for testing purposes
         uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
         cy.contains('.button-container', uniqueSubject)
             .closest('.status-container')
             .then(() => {
+                // Apply an email error for testing purposes
                 getApiKey('superuser', 'superuser').then((apiKey) => {
                     cy.request({
                         method: 'PUT',
@@ -165,22 +162,19 @@ describe('Test cases involving the superuser Email All functionality', () => {
                         },
                         body: {
                             subject: uniqueSubject,
-                            error: 'This is a test error message',
+                            error: errorMessage,
                         },
                     }).then((res) => {
-                        // Verify the server response is successful
                         expect(res.status).to.eq(200);
                         expect(res.body).to.have.property('status', 'success');
                         expect(res.body).to.have.property('data', null);
 
-                        // Verify the email error is displayed after a full page reload
+                        // Verify the email error status is displayed after a full page reload
                         cy.reload().then(() => {
                             cy.contains('.button-container', uniqueSubject)
                                 .closest('.status-container')
                                 .within(() => {
                                     verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-
-                                    // btn-danger (red) implies email error
                                     cy.get('button.status-btn.btn-danger')
                                         .contains(/Show Details|Hide Details/)
                                         .click();
@@ -201,8 +195,8 @@ describe('Test cases involving the superuser Email All functionality', () => {
                 });
             }).as('email-error');
 
-        // Set an email as sent for testing purposes
         cy.get('@email-error').then(() => {
+            // Set an email as sent for testing purposes
             getApiKey('superuser', 'superuser').then((apiKey) => {
                 cy.request({
                     method: 'PUT',
@@ -215,7 +209,6 @@ describe('Test cases involving the superuser Email All functionality', () => {
                         subject: uniqueSubject,
                     },
                 }).then((res) => {
-                    // Verify the server response is successful
                     expect(res.status).to.eq(200);
                     expect(res.body).to.have.property('status', 'success');
                     expect(res.body).to.have.property('data', null);
@@ -226,8 +219,6 @@ describe('Test cases involving the superuser Email All functionality', () => {
                             .closest('.status-container')
                             .within(() => {
                                 verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-
-                                // btn-success (green) implies email sent
                                 cy.get('button.status-btn.btn-success')
                                     .contains(/Show Details|Hide Details/)
                                     .click();
@@ -261,23 +252,19 @@ describe('Test cases involving instructor send email via thread announcement fun
         // Enter the thread announcement details
         cy.get('[data-testid="title"]').type(announcement);
         cy.get('[data-testid="reply_box_1"]').type(content);
-
         // Pick an arbitrary category
         cy.get('[data-testid="categories-pick-list"] .cat-buttons').first().click({ force: true });
-
         // Ensure the announcement checkbox is checked
         cy.get('#Announcement').click();
-
         // Pin thread should automatically be checked based on the announcement checkbox selection
         cy.get('#pinThread').should('be.checked');
-
         // Submit the thread announcement
         cy.get('[data-testid="forum-publish-thread"]').click({ force: true });
 
-        // Expect a redirection
+        // Expect a redirection to the forum threads page
         cy.url().should('not.include', '/sample/forum/threads/new').then(() => {
             cy.visit(['sample', 'email_status']).then(() => {
-                // Verify the email was sent or is queued with the proper prefix
+                // Verify the email status is awaiting to be sent or has been sent
                 const uniqueSubject = `New Announcement: ${announcement}`;
                 cy.contains('.button-container', uniqueSubject)
                     .within(() => {
@@ -290,14 +277,12 @@ describe('Test cases involving instructor send email via thread announcement fun
                                 const hasBeenSent = classList.contains('btn-success');
                                 const hasError = classList.contains('btn-danger');
                                 expect((isQueued || hasBeenSent) && !hasError).to.be.true;
-
                                 // Return for further verification within the Cypress command chain
                                 return $btn;
                             })
                             .closest('.status-container')
                             .within(() => {
                                 verifyEmail(uniqueSubject, `Course: ${getCurrentSemester()} sample`);
-
                                 cy.get('button.status-btn')
                                     .contains(/Show Details|Hide Details/)
                                     .click();
@@ -315,7 +300,7 @@ describe('Test cases involving instructor send email via thread announcement fun
                             });
                     });
 
-                // Clean up the test thread
+                // Clean up the testing thread
                 cy.visit(['sample', 'forum', 'threads']).then(() => {
                     cy.get('[data-testid="thread-list-item"]').contains(announcement).click();
                     cy.get('[data-testid="thread-dropdown"]').first().click();
@@ -328,13 +313,13 @@ describe('Test cases involving instructor send email via thread announcement fun
 
 describe('Test cases involving instructor email pagination functionality', () => {
     it('verifies the email status page pagination', () => {
-        // Superuser and instructor pagination share the same backend logic, so we can use the same test case
+        // Superuser and instructor pagination share the same pagination logic
         cy.login('instructor');
         cy.visit(['sample', 'email_status']);
 
         let page = 1;
         let lastPage = -1;
-        // The last DOM child represents the last page button (>>), so fetch the second to last child
+        // The last DOM child represents the last page button (>>), so target the second to last child
         cy.get('.pagination').children().eq(-2).then(($lastPage) => {
             lastPage = parseInt($lastPage.text(), 10);
         }).as('lastPage');
@@ -350,8 +335,10 @@ describe('Test cases involving instructor email pagination functionality', () =>
                     },
                 }).then((res) => {
                     const response = JSON.parse(res.body);
-                    console.log(response);
                     expect(response.status).to.eq('success');
+                    expect(Array.isArray(response.data)).to.be.true;
+
+                    // Verify each email is properly rendered based on it's page index
                     cy.get('.status-container')
                         .should('have.length', response.data.length)
                         .then(($emails) => {
@@ -367,12 +354,12 @@ describe('Test cases involving instructor email pagination functionality', () =>
                                 expect($email.find('[data-testid="email-source"]').text().trim()).to.equal(
                                     `Course: ${getCurrentSemester()} sample`,
                                 );
-                                // Total recipients for the current email drop-down
+                                // Verify the total recipients for the current email drop-down
                                 cy.get(`#collapse${index + 1} li`).should('have.length', response.data[index].count);
                             });
                         });
 
-                    // Total email drop-downs on the page
+                    // Verify the total number of email drop-downs on the page
                     cy.get('.expand').should('have.length', response.data.length);
                 });
 
@@ -382,7 +369,7 @@ describe('Test cases involving instructor email pagination functionality', () =>
                     return;
                 }
 
-                // Visit the next page via the next pagination button
+                // Visit the next page via the pagination buttons
                 cy.get(`#${page}`).click({ force: true });
                 cy.get('.page-btn.selected').then(($selected) => {
                     expect($selected.attr('id')).to.equal(page.toString());
