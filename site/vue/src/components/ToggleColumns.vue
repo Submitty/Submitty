@@ -4,10 +4,11 @@ import { onMounted, ref } from 'vue';
 import Popup from './Popup.vue';
 export type ColumnFormats = 'bits' | 'json';
 
-const { columns, labels, cookie, forced = [], format = 'bits', buttonWrapped } = defineProps<{
+const { columns, labels, cookie, hiddenColumns = [], forced = [], format = 'bits', buttonWrapped } = defineProps<{
     columns: string[];
     labels: string[];
     cookie: string;
+    hiddenColumns?: string[];
     forced?: string[];
     format?: ColumnFormats;
     buttonWrapped?: boolean;
@@ -25,7 +26,7 @@ function loadColumns() {
             }
         }
         for (const col of columns) {
-            if (cookieData[col] === undefined) {
+            if (cookieData[col] === undefined && !hiddenColumns.includes(col)) {
                 selected.value[columns.indexOf(col)] = true;
             }
         }
