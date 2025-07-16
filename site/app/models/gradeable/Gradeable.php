@@ -335,7 +335,9 @@ class Gradeable extends AbstractModel {
             $this->setGradeInquiryAllowedInternal($details['grade_inquiry_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased($details['discussion_based']);
-            $this->setDiscussionThreadId($details['discussion_thread_ids']);
+            if (is_string($details['discussion_thread_ids']) && strlen($details['discussion_thread_ids']) > 0) {
+                $this->setDiscussionThreadId(json_decode($details['discussion_thread_ids'], true));
+            }
             $this->setAllowCustomMarks($details['allow_custom_marks']);
             $this->setAllowedMinutes($details['allowed_minutes'] ?? null);
             $this->setDependsOn($details['depends_on']);
