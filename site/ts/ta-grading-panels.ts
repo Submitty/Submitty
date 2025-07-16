@@ -121,6 +121,23 @@ export function saveResizedColsDimensions(updateValue: string, isHorizontalResiz
     saveTaLayoutDetails();
 }
 
+export function toggleFullScreenMode() {
+    Object.assign(taLayoutDet, getSavedTaLayoutDetails());
+    $('main#main').toggleClass('full-screen-mode');
+    $('#fullscreen-btn-cont').toggleClass('active');
+    taLayoutDet.isFullScreenMode = $('main#main').hasClass('full-screen-mode');
+
+    // update the dragging event for two panels
+    initializeResizablePanels(
+        leftSelector,
+        verticalDragBarSelector,
+        false,
+        saveResizedColsDimensions,
+    );
+    // Save the taLayoutDetails in LS
+    saveTaLayoutDetails();
+}
+
 // Keep only those panels which are part of the two panel layout
 function setMultiPanelModeVisiblities() {
     panelElements.forEach((panel) => {

@@ -4,8 +4,7 @@ import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/t
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
-import { toggleFullScreenMode } from '@/ts/ta-grading-layout';
-import { exchangeTwoPanels } from '../../../../ts/ta-grading-panels';
+import { exchangeTwoPanels, toggleFullScreenMode } from '../../../../ts/ta-grading-panels';
 
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     homeUrl: string;
