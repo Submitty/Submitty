@@ -542,12 +542,12 @@ describe('Should test WebSocket functionality', () => {
                             likeIcon: 'light-mode-off-duck.svg',
                             instructorLikeBadge: false,
                         });
+                    }).then(() => {
+                        // Cleanup to prevent conflicts with upduck_forum.spec.js
+                        removeThread(title5);
                     });
                 });
             });
         });
-
-        // Cleanup to prevent conflicts with upduck_forum.spec.js
-        removeThread(title5);
     });
 });
