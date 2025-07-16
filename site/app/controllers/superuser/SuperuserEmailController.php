@@ -95,7 +95,7 @@ class SuperuserEmailController extends AbstractController {
      */
     #[Route("/api/superuser/email/error", methods: ["PUT"])]
     public function updateEmailError(): JsonResponse {
-        $this->core->getQueries()->updateEmailError($_POST['subject'], $_POST['message'] ?? '');
+        $this->core->getQueries()->updateEmailError($_POST['subject'], $_POST['error'] ?? '');
         return JsonResponse::getSuccessResponse();
     }
 }

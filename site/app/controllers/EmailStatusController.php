@@ -57,10 +57,9 @@ class EmailStatusController extends AbstractController {
 
         if (isset($_GET['format']) && $_GET['format'] === 'json') {
             $subjectCounts = [];
-
             foreach ($result as $emailIterable) {
                 foreach ($emailIterable as $email) {
-                    // Emails are grouped by subject and created date
+                    // Emails are uniquely identified by their subject and creation date
                     $key = $email->getSubject() . '.' . $email->getCreated()->format('Y-m-d H:i:s');
                     if (!isset($subjectCounts[$key])) {
                         $subjectCounts[$key] = 0;
@@ -69,17 +68,17 @@ class EmailStatusController extends AbstractController {
                 }
             }
 
-            $flattened = [];
-
+            $emails = [];
             foreach ($subjectCounts as $key => $count) {
                 $parts = explode('.', $key);
-                $flattened[] = [
+                $emails[] = [
                     'subject' => $parts[0],
                     'created' => $parts[1],
                     'count' => $count,
                 ];
             }
-            return JsonResponse::getSuccessResponse($flattened);
+
+            return JsonResponse::getSuccessResponse($emails);
         }
         else{
             return new WebResponse(

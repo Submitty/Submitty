@@ -49,9 +49,7 @@
                                 row.isToSubmittyUser() ? row.getUserId() : row.getToName()
                             }}</div>
                             <div class="status-message" data-testid="email-time-sent">Time Sent: {{row.getSent().format('Y-m-d H:i:s')|slice(0,19)}}</div>
-                            {% if row.getEmailAddress() | length > 0 %}
-                                <div class="status-message" data-testid="email-address">Email Address: {{row.getEmailAddress()}} </div>
-                            {% endif %}
+                            <div class="status-message" data-testid="email-address">Email Address: {{row.getEmailAddress()}} </div>
                         </li>
                     {% endfor %}
                 </ul>

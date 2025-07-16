@@ -7473,7 +7473,7 @@ AND gc_id IN (
     }
 
     /**
-     * Updates the sent timestamp for an email, and clears the error message for testing purposes
+     * Updates the sent timestamp for an email and clears the error message
      *
      * @param string $subject
      * @return bool
@@ -7485,14 +7485,14 @@ AND gc_id IN (
     }
 
     /**
-     * Updates the error message for an email, where an emtpy string, '', implies no error for testing purposes
+     * Updates the error message for an email, where an empty string implies no error
      *
      * @param string $subject
-     * @param string $message
+     * @param string $error
      * @return bool
      */
-    public function updateEmailError(string $subject, string $message): bool {
-        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$message, $subject]);
+    public function updateEmailError(string $subject, string $error): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
         return $this->submitty_db->getRowCount() > 0;
     }
 
