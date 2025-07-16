@@ -25,11 +25,17 @@ run_css_style() {
     npm run css-stylelint
 }
 
+run_php_unit() {
+    COMPOSER_ALLOW_SUPERUSER=1 composer install
+    sudo -u submitty_php php vendor/bin/phpunit
+}
+
 if [ -z "$1" ] || [ "$1" == "help" ]; then
     echo "
           phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
           phpcs   : php CodeSniffer
           php-lint: phpcs & phpstan
+          php-unit: run php unit tests
           js-lint : eslint
           css-lint: css-stylelint
           "
@@ -40,13 +46,15 @@ elif [ "$1" == "phpcs" ]; then
 elif [ "$1" == "php-lint" ]; then
     run_php_cs
     run_php_stan "$@"
+elif [ "$1" == "php-unit" ]; then
+    run_php_unit
 elif [ "$1" == "js-lint" ]; then
     run_js_es
 elif [ "$1" == "css-lint" ]; then
     run_css_style
 else
     echo "Unknown test type: $1
-        use phpstan, phpcs, php-lint, js-lint, css-lint
+        use phpstan, phpcs, php-lint, php-unit, js-lint, css-lint
         or help for detail"
 fi
 

@@ -36,7 +36,7 @@ describe('testing grade override', () => {
             else {
                 cy.get('[data-testid="grade-override-delete"]').first().click();
             }
-            cy.get('#success-js-0').should('contain', 'Overridden Grades deleted.');
+            cy.get('[data-testid="popup-message"]').should('contain', 'Overridden Grades deleted.');
         });
     });
 });
