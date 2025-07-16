@@ -6,7 +6,7 @@ import { toggleFullScreenMode, exchangeTwoPanels } from '../../../../ts/ta-gradi
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 
-const { homeUrl, prevStudentUrl, nextStudentUrl } = defineProps<{
+const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     homeUrl: string;
     prevStudentUrl: string;
     nextStudentUrl: string;
