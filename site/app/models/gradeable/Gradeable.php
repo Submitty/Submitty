@@ -1889,6 +1889,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Gets the percent of grading complete for the provided user for this gradeable
+     * Automatically excludes any withdrawn users
      * @param User $grader
      * @param bool $include_null_section
      * @param bool $include_bad_submissions

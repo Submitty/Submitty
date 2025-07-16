@@ -305,10 +305,11 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
-        $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $gradeable_id = $gradeable->getId();
+        $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
-            "gradeable_id" => $gradeable->getId(),
+            "gradeable_id" => $gradeable_id,
             "semester" => $this->core->getConfig()->getTerm(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable_title" => $gradeable->getTitle(),
@@ -363,16 +364,17 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "grade_inquiries" => $grade_inquiries,
             "graders_of_inquiries" => $graders_of_inquiries,
-            "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
-            "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
+            "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'download_zip']),
+            "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'bulk_stats']),
             "details_url" => $details_url,
-            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade']),
             "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
             "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
             "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
             "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
+            "include_withdrawn_students" => array_key_exists('include_withdrawn_students__' . $gradeable_id, $_COOKIE) ? $_COOKIE['include_withdrawn_students__' . $gradeable_id] : 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])

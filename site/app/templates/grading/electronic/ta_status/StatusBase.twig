@@ -452,6 +452,20 @@
             Cookies.set(cookie_string, "omit", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
         }
     }    
+    
+    function filter_withdrawn_student() {
+        let bad_submissions_status = '{{ include_withdrawn_students }}';
+        if (bad_submissions_status == 'omit') {
+            const cookie_string = "include_withdrawn_students__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "include", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
+            bad_submissions_status = "include";
+        }
+        else {
+            const cookie_string = "include_withdrawn_students__{{ gradeable_id }}";
+            Cookies.set(cookie_string, "omit", { path: "/courses/" + '{{ semester }}' + "/" + '{{ course }}', expires: 365 });
+            bad_submissions_status = "omit";
+        }
+    }    
 
     function applyfilters() {
         location.reload();
