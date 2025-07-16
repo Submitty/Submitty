@@ -306,7 +306,7 @@ const submitMergeThreadRequest = (threadId, childThreadId) => {
 };
 
 const submitToggleLikeRequest = (currentUser, apiKey, threadId, postId, expected) => {
-    const { likeCount, likeIcon, instructorLikeBadge } = expected;
+    const { postLikes, totalLikes, likeIcon, instructorLikeBadge } = expected;
     const body = {
         thread_id: threadId,
         post_id: postId,
@@ -319,8 +319,8 @@ const submitToggleLikeRequest = (currentUser, apiKey, threadId, postId, expected
         'application/json',
         body,
         () => {
-            cy.get(`.thread_box [data-testid="thread-like-count"]#Thread_likeCounter_${threadId}`).should('have.text', likeCount); // thread list
-            cy.get(`.post_box [data-testid="like-count"]#likeCounter_${postId}`).should('have.text', likeCount); // thread page
+            cy.get(`.thread_box [data-testid="thread-like-count"]#Thread_likeCounter_${threadId}`).should('have.text', totalLikes);
+            cy.get(`.post_box [data-testid="like-count"]#likeCounter_${postId}`).should('have.text', postLikes);
             cy.get(`img#likeIcon_${postId}`).should('have.attr', 'src').and('include', likeIcon);
             cy.get(`[data-testid="instructor-like"]#likedByInstructor_${postId}`).should(instructorLikeBadge ? 'not.have.attr' : 'have.attr', 'style', 'display: none;');
         },
@@ -509,10 +509,25 @@ describe('Should test WebSocket functionality', () => {
 
             // Visit the thread as instructor
             cy.visit(nextPage).then(() => {
+                // Submit a reply to the thread
+                let replyId;
+                submitCreatePostRequest(threadId, postId, reply5).then(([replyResponse, reply]) => {
+                    replyId = replyResponse.post_id;
+                    cy.wrap(expectPostHierarchy(reply, {
+                        threadId,
+                        postId: replyId,
+                        parentPostId: postId,
+                        level: 2,
+                        content: reply5,
+                        nextPage: replyResponse.next_page,
+                    })).as('reply');
+                });
+
                 cy.get('@apiKeys').then(({ studentApiKey, instructorApiKey }) => {
                     // Like as 'student' via API
                     submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
-                        likeCount: 1,
+                        postLikes: 1,
+                        totalLikes: 1,
                         likeIcon: 'light-mode-off-duck.svg',
                         instructorLikeBadge: false,
                     }).as('studentLike');
@@ -520,16 +535,28 @@ describe('Should test WebSocket functionality', () => {
                     cy.get('@studentLike').then(() => {
                         // Like as 'instructor' via API
                         submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
-                            likeCount: 2,
+                            postLikes: 2,
+                            totalLikes: 2,
                             likeIcon: 'on-duck-button.svg',
                             instructorLikeBadge: true,
-                        }).as('instructorLike');
+                        }).then(() => {
+                            // Like the reply to test overall post vs. thread like counts
+                            cy.get('@reply').then(() => {
+                                submitToggleLikeRequest('instructor', instructorApiKey, threadId, replyId, {
+                                    postLikes: 1,
+                                    totalLikes: 3,
+                                    likeIcon: 'on-duck-button.svg',
+                                    instructorLikeBadge: true,
+                                }).as('instructorLike');
+                            });
+                        });
                     });
 
                     cy.get('@instructorLike').then(() => {
                         // Unlike as 'student' via API
                         submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
-                            likeCount: 1,
+                            postLikes: 1,
+                            totalLikes: 2,
                             likeIcon: 'on-duck-button.svg',
                             instructorLikeBadge: true,
                         }).as('studentUnlike');
@@ -538,7 +565,8 @@ describe('Should test WebSocket functionality', () => {
                     cy.get('@studentUnlike').then(() => {
                         // Unlike as 'instructor' via API
                         submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
-                            likeCount: 0,
+                            postLikes: 0,
+                            totalLikes: 1,
                             likeIcon: 'light-mode-off-duck.svg',
                             instructorLikeBadge: false,
                         });
