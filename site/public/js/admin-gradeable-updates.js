@@ -1,7 +1,7 @@
 /* global csrfToken, buildCourseUrl, NONUPLOADED_CONFIG_VALUES, displayErrorMessage, displaySuccessMessage, gradeable_max_autograder_points,
           is_electronic, onHasReleaseDate, reloadInstructorEditRubric, getItempoolOptions,
           isItempoolAvailable, getGradeableId, closeAllComponents, onHasDueDate, setPdfPageAssignment,
-          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage */
+          PDF_PAGE_INSTRUCTOR, PDF_PAGE_STUDENT, PDF_PAGE_NONE, displayWarningMessage, CodeMirror */
 /* exported showBuildLog, ajaxRebuildGradeableButton, onPrecisionChange, onItemPoolOptionChange, updatePdfPageSettings,
           loadGradeableEditor, saveGradeableConfigEdit */
 
@@ -294,6 +294,9 @@ $(document).ready(() => {
                 }
                 updateErrorMessage();
                 checkWarningBanners();
+                if (this.id === 'autograding_config_selector' && response_data[0] === 'rebuild_queued') {
+                    location.reload();
+                }
             }, updateGradeableErrorCallback);
     });
 
@@ -933,28 +936,29 @@ function hideBuildLog() {
     $('#close-build-log').hide();
 }
 
-// Register beforeunload listener once
+let originalConfigContent = null;
+let codeMirrorInstance = null;
+let current_g_id = null;
+let current_file_path = null;
+let isConfigEdited = false;
+
 window.addEventListener('beforeunload', (event) => {
-    const isEdited = $('#gradeable-config-edit').data('edited');
-    if (isEdited) {
+    if (isConfigEdited) {
         event.preventDefault();
-        event.return = '';
     }
 });
 
-let originalConfigContent = null;
-
 // When the text editor opens, the user shouldn't have to manually scroll to see the contents
 function scrollToBottom() {
-    window.scrollTo({ top: 800, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 935, left: 0, behavior: 'smooth' });
 }
 
-let current_g_id = null;
-let current_file_path = null;
-
 function updateGradeableEditor(g_id, file_path) {
-    // If no file has been selected yet or it is not the currently selected one
-    if ((current_g_id === null && current_file_path === null) || (current_g_id !== g_id || current_file_path !== file_path)) {
+    if ((current_g_id !== g_id || current_file_path !== file_path)) {
+        $('#gradeable-config-edit').data('edited', false);
+
+        closeCodeMirrorInstance();
+
         current_g_id = g_id;
         current_file_path = file_path;
         loadGradeableEditor(g_id, file_path);
@@ -979,7 +983,9 @@ function loadGradeableEditor(g_id, file_path) {
                     return;
                 }
 
-                $('#gradeable-config-edit-bar').show();
+                if (!$('#gradeable-config-edit-bar').is(':visible')) {
+                    $('#gradeable-config-edit-bar').show();
+                }
 
                 const configData = json['data'];
                 originalConfigContent = configData.config_content;
@@ -997,6 +1003,7 @@ function loadGradeableEditor(g_id, file_path) {
 
                 editbox.data('edited', false);
                 editbox.data('file-path', file_path);
+                loadCodeMirror();
                 scrollToBottom();
             }
             catch {
@@ -1004,10 +1011,6 @@ function loadGradeableEditor(g_id, file_path) {
             }
         },
     });
-}
-
-function configSelectorChange() {
-    location.reload();
 }
 
 function isUsingDefaultConfig() {
@@ -1052,12 +1055,22 @@ function toggleGradeableConfigEdit() {
 function cancelGradeableConfigEdit() {
     $('#gradeable-config-edit-bar').hide();
     $('#gradeable-config-edit').data('edited', false);
+    isConfigEdited = false;
     current_g_id = null;
     current_file_path = null;
+
+    closeCodeMirrorInstance();
+}
+
+function closeCodeMirrorInstance() {
+    if (codeMirrorInstance) {
+        codeMirrorInstance.toTextArea(); // Replace CodeMirror with original <textarea>
+        codeMirrorInstance = null;
+    }
 }
 
 function saveGradeableConfigEdit(g_id) {
-    const content = $('textarea#gradeable-config-edit').val();
+    const content = codeMirrorInstance?.getValue() || $('textarea#gradeable-config-edit').val();
     $.ajax({
         url: buildCourseUrl(['gradeable', 'edit', 'save']),
         type: 'POST',
@@ -1088,5 +1101,23 @@ function saveGradeableConfigEdit(g_id) {
         error: function () {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
+    });
+}
+
+function loadCodeMirror() {
+    codeMirrorInstance = CodeMirror.fromTextArea(
+        document.getElementById('gradeable-config-edit'),
+        {
+            mode: { name: 'json', json: true },
+            theme: localStorage.theme === 'light' ? 'eclipse' : 'monokai',
+            lineNumbers: false,
+            tabSize: 2,
+            indentUnit: 2,
+            lineWrapping: true,
+        },
+    );
+    codeMirrorInstance.on('change', () => {
+        const currentContent = codeMirrorInstance.getValue();
+        isConfigEdited = currentContent !== originalConfigContent;
     });
 }

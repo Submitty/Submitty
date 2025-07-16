@@ -49,7 +49,7 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.33.0
+    - uses: shivammathur/setup-php@2.34.1
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -135,7 +135,7 @@ runs:
     - name: Install third party dependencies
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh "config=/usr/local/submitty/config"
       shell: bash
 
     - name: Configure Test suite

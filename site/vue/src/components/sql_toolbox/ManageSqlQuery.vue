@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Popup from './popup.vue';
-import { displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
+import Popup from '@/components/Popup.vue';
+import { displayErrorMessage, displaySuccessMessage } from '../../../../ts/utils/server';
 import { ref } from 'vue';
-import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '../../../ts/sql-toolbox';
+import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '@/ts/sql-toolbox';
 
 const { queries } = defineProps<{
     queries: QueryListEntry[];
