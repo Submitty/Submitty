@@ -9,6 +9,8 @@ use app\libraries\response\WebResponse;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Doctrine\Common\Annotations\PsrCachedReader;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\Dumper\CompiledUrlMatcherDumper;
@@ -394,23 +396,20 @@ class WebRouter {
      * @throws \ReflectionException
      */
     private function accessCheck() {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $access_control = $this->reader->getMethodAnnotation(
-            new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']),
-            AccessControl::class
-        );
+        $method = new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']);
+        $attributes = $method->getAttributes(AccessControl::class);
 
-        if (is_null($access_control)) {
+        if (count($attributes) === 0) {
             /** @noinspection PhpUnhandledExceptionInspection */
-            $access_control = $this->reader->getClassAnnotation(
-                new \ReflectionClass($this->parameters['_controller']),
-                AccessControl::class
-            );
+            $class = new \ReflectionClass($this->parameters['_controller']);
+            $attributes = $class->getAttributes(AccessControl::class);
         }
 
-        if (is_null($access_control)) {
+        if (count($attributes) === 0) {
             return true;
         }
+
+        $access_control = $attributes[0]->newInstance();
 
         $user = $this->core->getUser();
         $access = true;

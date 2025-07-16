@@ -2,6 +2,8 @@
 
 namespace app\libraries\routers;
 
+use Attribute;
+
 /**
  * Attribute class for #[AccessControl()].
  *
