@@ -15,10 +15,10 @@ describe('testing grade override', () => {
             if (!(gradeable === 'grading_homework')) {
                 cy.get('[data-testid="confirm-team-override"]').click();
             }
-            cy.get('#success-js-0').should('contain', `Updated overridden Grades for ${gradeable}`);
+            cy.get('[data-testid="popup-message"]').should('contain', `Updated overridden Grades for ${gradeable}`);
             cy.get('[data-testid="load-overridden-grades"]').should('contain', 'student');
             cy.get('[data-testid="load-overridden-grades"]').should('contain', `Overridden Grades for ${gradeable}`);
-
+            // When the same functionaliy for teams added,then remove the if block with adding some additional test
             if (gradeable === 'grading_homework') {
                 cy.visit(['sample', 'gradeable', gradeable, 'grading', 'details']);
                 cy.get('[data-testid="view-sections"]').click();
@@ -27,7 +27,6 @@ describe('testing grade override', () => {
                 cy.get('[data-testid="grade-button"]').eq(12).click();
                 cy.get('[data-testid="bar-banner"]').should('contain', 'Overridden grades');
             }
-
             cy.visit(['sample', 'grade_override']);
             cy.get('[data-testid="grade-override-select-gradeable"]').select(selectGradeable);
             if (gradeable === 'grading_homework') {
