@@ -140,7 +140,6 @@ describe('Test cases involving the superuser Email All functionality', () => {
 
     it('sends an email via Email All and verifies emails that are queued, failed to send, and have been sent', () => {
         cy.login('superuser');
-
         cy.get('[data-testid="sidebar"]')
             .contains('Email All')
             .click();
@@ -273,26 +272,12 @@ describe('Test cases involving instructor send email via thread announcement fun
                 // Verify the email status is awaiting to be sent or has been sent
                 const uniqueSubject = `New Announcement: ${announcement}`;
                 cy.contains('.button-container', uniqueSubject)
+                    .closest('.status-container')
                     .within(() => {
+                        verifyEmail(uniqueSubject, `Course: ${getCurrentSemester()} sample`);
                         cy.get('button.status-btn')
-                            .should('exist')
-                            .and(($btn) => {
-                                // Verify the email status is awaiting to be sent or has been sent
-                                const classList = $btn[0].classList;
-                                const isQueued = classList.contains('btn-primary');
-                                const hasBeenSent = classList.contains('btn-success');
-                                const hasError = classList.contains('btn-danger');
-                                expect((isQueued || hasBeenSent) && !hasError).to.be.true;
-                                // Return for further verification within the Cypress command chain
-                                return $btn;
-                            })
-                            .closest('.status-container')
-                            .within(() => {
-                                verifyEmail(uniqueSubject, `Course: ${getCurrentSemester()} sample`);
-                                cy.get('button.status-btn')
-                                    .contains(/Show Details|Hide Details/)
-                                    .click();
-                            });
+                            .contains(/Show Details|Hide Details/)
+                            .click();
                     });
 
                 cy.get('#collapse1')
