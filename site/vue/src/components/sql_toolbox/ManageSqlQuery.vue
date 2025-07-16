@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Popup from '@/components/Popup.vue';
-import { displayErrorMessage, displaySuccessMessage } from '../../../../ts/utils/server';
 import { ref } from 'vue';
 import { deleteSqlQuery, type QueryListEntry, type ServerResponse } from '@/ts/sql-toolbox';
 
@@ -36,11 +35,11 @@ const handleDeletion = async (id: number) => {
 
     if (response.status === 'success') {
         emit('deleteSavedQuery', id);
-        displaySuccessMessage('Query deleted successfully!');
+        window.displaySuccessMessage('Query deleted successfully!');
     }
     else {
         console.error('Error deleting query:', response.message);
-        displayErrorMessage(`Error deleting query: ${response.message}`);
+        window.displayErrorMessage(`Error deleting query: ${response.message}`);
     }
 };
 

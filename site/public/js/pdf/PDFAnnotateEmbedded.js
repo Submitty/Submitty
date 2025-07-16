@@ -166,8 +166,6 @@ function renderPage(pageNumber, renderOptions) {
     });
 }
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
-
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
 }
