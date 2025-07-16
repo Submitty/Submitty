@@ -10,7 +10,6 @@ use app\libraries\routers\AccessControl;
 use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
-use Nette\Utils\Json;
 
 /**
  * @AccessControl(level="SUPERUSER")

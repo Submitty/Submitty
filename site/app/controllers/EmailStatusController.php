@@ -82,7 +82,7 @@ class EmailStatusController extends AbstractController {
 
             return JsonResponse::getSuccessResponse($emails);
         }
-        else{
+        else {
             return new WebResponse(
                 EmailStatusView::class,
                 'renderStatusPage',
