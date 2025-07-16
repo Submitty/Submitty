@@ -18,6 +18,7 @@ describe('testing grade override', () => {
             cy.get('[data-testid="popup-message"]').should('contain', `Updated overridden Grades for ${gradeable}`);
             cy.get('[data-testid="load-overridden-grades"]').should('contain', 'student');
             cy.get('[data-testid="load-overridden-grades"]').should('contain', `Overridden Grades for ${gradeable}`);
+            // Verify that override was successful. TODO: Logic for verifying team override after PR to enhance feedback
             if (gradeable === 'grading_homework') {
                 cy.visit(['sample', 'gradeable', gradeable, 'grading', 'details']);
                 cy.get('[data-testid="view-sections"]').click();
