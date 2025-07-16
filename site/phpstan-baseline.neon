@@ -1252,8 +1252,13 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 5
+			count: 9
 			path: app/controllers/admin/LateController.php
 
 		-

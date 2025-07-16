@@ -47,13 +47,10 @@ function updateHomeworkExtension() {
 }
 
 function deleteHomeworkExtension(user) {
-    const confirm = window.confirm('Are you sure you would like to delete this entry?');
-    if (confirm) {
-        $('#user_id').val(user);
-        $('#late-days').val(0);
-        $('#reason-for-exception').val('');
-        updateHomeworkExtension();
-    }
+    $('#user_id').val(user);
+    $('#late-days').val(0);
+    $('#reason-for-exception').val('');
+    updateHomeworkExtension();
 }
 
 function clearDate() {
@@ -70,7 +67,7 @@ function setLateDays() {
 }
 
 function confirmExtension(option) {
-    $('.popup-form').hide();
+    $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
     updateHomeworkExtension();
     $('input[name="option"]').val(-1);
@@ -84,6 +81,6 @@ function extensionPopup(json) {
     // It is escaped in Twig which should mean its escaped in JS too.
     // eslint-disable-next-line no-unsanitized/property
     form[0].outerHTML = json['data']['popup'];
-    $('#extension_team_popup').css('display', 'block');
+    $('#more_extension_popup').css('display', 'block');
     $('#team-extension-cancel').focus();
 }
