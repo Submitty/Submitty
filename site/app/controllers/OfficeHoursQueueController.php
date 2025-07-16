@@ -14,11 +14,7 @@ use app\libraries\socket\Client;
 use app\libraries\Logger;
 use WebSocket;
 
-/**
- * Class OfficeHoursQueueController
- *
- * @Enabled("queue")
- */
+#[Enabled(feature: "queue")]
 class OfficeHoursQueueController extends AbstractController {
     /**
      * @return MultiResponse

@@ -27,9 +27,8 @@ use DateTime;
  *
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
- *
- * @Enabled("forum")
  */
+#[Enabled(feature: "forum")]
 class ForumController extends AbstractController {
     /**
      * ForumHomeController constructor.
