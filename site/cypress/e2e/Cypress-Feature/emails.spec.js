@@ -53,7 +53,6 @@ const verifyEmailRecipient = (email, error = false) => {
 describe('Test cases involving the superuser Email All functionality', () => {
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
-
         cy.get('[data-testid="sidebar"]')
             .contains('Email All')
             .click();
@@ -70,76 +69,26 @@ describe('Test cases involving the superuser Email All functionality', () => {
             faculty: 0,
         };
 
-        cy.get('#email-faculty')
-            .should('be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                recipientCounts.faculty = extractUserCount(normalized);
-                expect(normalized).to.match(
-                    /^Email all Faculty and all Superusers \(\d+ users\)$/,
-                );
-            });
+        const verifyDefaultRecipients = (input, key, expected) => {
+            cy.get(input)
+                .should(key === 'secondary' ? 'not.be.checked' : 'be.checked')
+                .parent()
+                .invoke('text')
+                .then((text) => {
+                    const normalized = normalizeText(text);
+                    if (key !== 'secondary') {
+                        recipientCounts[key] = extractUserCount(normalized);
+                    }
+                    expect(normalized).to.match(expected);
+                });
+        };
 
-        cy.get('#email-instructor')
-            .should('be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                recipientCounts.instructor = extractUserCount(normalized);
-                expect(normalized).to.match(
-                    /^Email all Instructors of Active\/Non-Archived Courses \(\d+ users\)$/,
-                );
-            });
-
-        cy.get('#email-full-access')
-            .should('be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                recipientCounts.fullAccess = extractUserCount(normalized);
-                expect(normalized).to.match(
-                    /^Email all Full Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/,
-                );
-            });
-
-        cy.get('#email-limited-access')
-            .should('be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                recipientCounts.limitedAccess = extractUserCount(normalized);
-                expect(normalized).to.match(
-                    /^Email all Limited Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/,
-                );
-            });
-
-        cy.get('#email-student')
-            .should('be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                recipientCounts.student = extractUserCount(normalized);
-                expect(normalized).to.match(
-                    /^Email all Students in Active\/Non-Archived Courses \(\d+ users\)$/,
-                );
-            });
-
-        cy.get('#email-to-secondary')
-            .should('not.be.checked')
-            .parent()
-            .invoke('text')
-            .then((text) => {
-                const normalized = normalizeText(text);
-                expect(normalized).to.match(
-                    /^Send email to each user's primary and secondary email addresses, regardless of the user's notification selection$/,
-                );
-            });
+        verifyDefaultRecipients('#email-faculty', 'faculty', /^Email all Faculty and all Superusers \(\d+ users\)$/);
+        verifyDefaultRecipients('#email-instructor', 'instructor', /^Email all Instructors of Active\/Non-Archived Courses \(\d+ users\)$/);
+        verifyDefaultRecipients('#email-full-access', 'fullAccess', /^Email all Full Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/);
+        verifyDefaultRecipients('#email-limited-access', 'limitedAccess', /^Email all Limited Access Graders of Active\/Non-Archived Courses \(\d+ users\)$/);
+        verifyDefaultRecipients('#email-student', 'student', /^Email all Students in Active\/Non-Archived Courses \(\d+ users\)$/);
+        verifyDefaultRecipients('#email-to-secondary', 'secondary', /^Send email to each user's primary and secondary email addresses, regardless of the user's notification selection$/);
 
         // Wait for the total recipients count to be fully parsed
         cy.then(() => {
