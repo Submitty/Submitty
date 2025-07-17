@@ -123,7 +123,7 @@ class Config extends AbstractModel {
     protected $user_id_requirements = [];
 
     /** @prop
-     * @var array<mixed> */
+     * @var array<string> */
     protected $accepted_emails = [];
 
     /**
@@ -452,7 +452,7 @@ class Config extends AbstractModel {
         if (isset($submitty_json['user_create_account'])) {
             $this->user_create_account = $submitty_json['user_create_account'];
             $this->user_id_requirements = $submitty_json['user_id_requirements'];
-            $this->accepted_emails = $submitty_json['accepted_emails'];
+            $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
         }
 
         if (isset($submitty_json['timezone'])) {

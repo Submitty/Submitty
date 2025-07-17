@@ -664,12 +664,13 @@ user_id_requirements = {
         "whole_email": False,
         "whole_prefix": False,
         "prefix_count": 6
-    }
+    },
+    "accepted_emails": [
+        "gmail.com"
+    ]
 }
 
-accepted_emails = [
-    "gmail.com"
-]
+
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
@@ -693,7 +694,6 @@ if not args.worker:
     config['duck_special_effects'] = False
     config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
     config['user_create_account'] = USER_CREATE_ACCOUNT
-    config['accepted_emails'] = accepted_emails
     config['user_id_requirements'] = user_id_requirements
     
 config['worker'] = True if args.worker == 1 else False
