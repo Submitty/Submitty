@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineProps, ref } from 'vue';
 import MarkdownArea from './MarkdownArea.vue';
-import { buildCourseUrl, displayErrorMessage, displaySuccessMessage } from '../../../ts/utils/server';
+import { buildCourseUrl } from '../../../ts/utils/server';
 
 type Component = {
     id: string;
@@ -38,7 +38,7 @@ const detectSolutionChange = (componentId: string, newValue: string) => {
 function updateSolutionTaNotes(gradeable_id: string, component_id: string, itempool_item: string) {
     const component = solutionComponents.value.find((c) => c.id === component_id);
     if (!component) {
-        displayErrorMessage('Component not found');
+        window.displayErrorMessage('Component not found');
         return;
     }
     const data = {
@@ -54,7 +54,7 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
         success: function (res: string) {
             const response = JSON.parse(res) as SolutionTaNotesResponse;
             if (response.status === 'success') {
-                displaySuccessMessage('Solution has been updated successfully');
+                window.displaySuccessMessage('Solution has been updated successfully');
                 // Dom manipulation after the Updating/adding the solution note
                 solutionComponents.value = solutionComponents.value.map((comp) => {
                     if (comp.id === component_id) {
@@ -69,7 +69,7 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
                 });
             }
             else {
-                displayErrorMessage('Something went wrong while updating the solution');
+                window.displayErrorMessage('Something went wrong while updating the solution');
             }
         },
         error: function (err) {
