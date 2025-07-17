@@ -405,7 +405,6 @@ class CourseMaterialsController extends AbstractController {
         $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
         $course_material->setLastEditBy($this->core->getUser()->getId());
         $course_material->setLastEditDate(DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()));
-        $this->core->getCourseEntityManager()->persist($course_material);
 
         if (isset($_POST['file_path']) || isset($_POST['title'])) {
             $path = $course_material->getPath();
