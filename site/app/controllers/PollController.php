@@ -154,9 +154,7 @@ class PollController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["GET"])]
     public function showNewPollPage(): WebResponse {
         return new WebResponse(
@@ -165,10 +163,7 @@ class PollController extends AbstractController {
         );
     }
 
-
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/newPoll", methods: ["POST"])]
     public function addNewPoll(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -278,9 +273,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/editPoll/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*", ])]
     public function editPoll($poll_id) {
         if (!isset($poll_id)) {
@@ -302,9 +297,7 @@ class PollController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/editPoll/submitEdits", methods: ["POST"])]
     public function submitEdits(): RedirectResponse {
         $returnUrl = $this->core->buildCourseUrl(['polls']);
@@ -491,9 +484,7 @@ class PollController extends AbstractController {
         return new RedirectResponse($returnUrl);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setOpen", methods: ["POST"])]
     public function openPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
@@ -606,9 +597,7 @@ class PollController extends AbstractController {
         return JsonResponse::getSuccessResponse(["message" => "Successfully removed custom response"]);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods: ["POST"])]
     public function endPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
@@ -632,9 +621,7 @@ class PollController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setClosed", methods: ["POST"])]
     public function closePoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
@@ -719,9 +706,7 @@ class PollController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['polls']));
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/deletePoll", methods: ["POST"])]
     public function deletePoll(): JsonResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
@@ -755,9 +740,9 @@ class PollController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return RedirectResponse|WebResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/viewResults/{poll_id}", methods: ["GET"], requirements: ["poll_id" => "\d*"])]
     public function viewResults($poll_id) {
         if (!isset($poll_id)) {
@@ -776,9 +761,7 @@ class PollController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/hasAnswers", methods: ["POST"])]
     public function hasAnswers() {
         $option_id  = (int) $_POST['option_id'];
@@ -793,9 +776,7 @@ class PollController extends AbstractController {
         return JsonResponse::getSuccessResponse($option->hasUserResponses());
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/export", methods: ["GET"])]
     public function getPollExportData() {
         /** @var Poll[] */
@@ -813,9 +794,7 @@ class PollController extends AbstractController {
         $this->core->getOutput()->renderString($data);
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/import", methods: ["POST"])]
     public function importPollsFromJSON(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();

@@ -7585,16 +7585,6 @@ parameters:
 			path: app/libraries/routers/AccessControl.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\AccessControl\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/routers/AccessControl.php
-
-		-
-			message: "#^Variable method call on \\$this\\(app\\\\libraries\\\\routers\\\\AccessControl\\)\\.$#"
-			count: 1
-			path: app/libraries/routers/AccessControl.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/routers/AnnotatedRouteLoader.php
