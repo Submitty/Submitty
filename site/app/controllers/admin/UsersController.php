@@ -22,8 +22,8 @@ use app\controllers\SelfRejoinController;
 /**
  * Class UsersController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class UsersController extends AbstractController {
     /**
      * @return MultiResponse
