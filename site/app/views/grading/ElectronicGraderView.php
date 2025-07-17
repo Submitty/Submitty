@@ -1702,7 +1702,6 @@ HTML;
      * @return string
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
-        $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         $is_student = $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
@@ -1712,24 +1711,28 @@ HTML;
                 $solution_components[] = [
                     'id' => $id,
                     'title' => $value->getTitle(),
-                    'is_first_edit' => !isset($solution_array[$id]),
+                    'isFirstEdit' => !isset($solution_array[$id]),
                     'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
-                    'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
-                    'edited_at' => isset($solution_array[$id])
+                    'solutionNotes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
+                    'editedAt' => isset($solution_array[$id])
                         ? DateUtils::convertTimeStamp(
                             $this->core->getUser(),
                             $solution_array[$id]['edited_at'],
                             $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
                         ) : null,
-                    'is_itempool_linked' => $value->getIsItempoolLinked(),
-                    'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
+                    'isItempoolLinked' => $value->getIsItempoolLinked(),
+                    'itempoolItem' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
                 ];
             }
         }
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
-            'gradeable_id' => $gradeable->getId(),
-            'solution_components' => $solution_components,
-            'current_user_id' => $this->core->getUser()->getId(),
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            'type' => 'component',
+            'name' => 'SolutionPanel',
+            'args' => [
+                'gradeableId' => $gradeable->getId(),
+                'solutionComponents' => $solution_components,
+                'currentUserId' => $this->core->getUser()->getId(),
+            ]
         ]);
     }
 
