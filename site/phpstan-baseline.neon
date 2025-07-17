@@ -1667,7 +1667,7 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 4
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-

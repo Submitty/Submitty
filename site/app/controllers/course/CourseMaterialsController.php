@@ -24,9 +24,10 @@ use app\libraries\routers\AccessControl;
 const DIR = 2;
 
 class CourseMaterialsController extends AbstractController {
-    private const DEFAULT_FUTURE_RELEASE_DATE = '9999-12-31 23:59:59';
     private const MAX_PATH_LENGTH = 255;
     private const DEFAULT_PRIORITY = 0.0;
+    private const DEFAULT_HIDE_FROM_STUDENTS = false;
+    private const DEFAULT_FUTURE_RELEASE_DATE = '9999-12-31 23:59:59';
 
     #[Route("/courses/{_semester}/{_course}/course_materials")]
     public function viewCourseMaterialsPage(): WebResponse {
@@ -377,7 +378,6 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
-        //* if the course material is a directory
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
                 $course_material->setPriority($_POST['sort_priority']);
@@ -423,7 +423,6 @@ class CourseMaterialsController extends AbstractController {
             else {
                 $file_name = basename($new_path);
             }
-
             if ($path !== $new_path) {
                 if (!FileUtils::ValidPath($new_path)) {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
@@ -535,7 +534,7 @@ class CourseMaterialsController extends AbstractController {
             $expand_zip = $_POST['expand_zip'];
         }
 
-        //configure upload path & requested path
+        // Configure upload and requested paths
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
         $details['path'][0] = $this->getRequestedPath($upload_path, $_POST['requested_path']);
@@ -796,8 +795,8 @@ class CourseMaterialsController extends AbstractController {
                 $value,
                 $details['path'][$key],
                 new \DateTime(self::DEFAULT_FUTURE_RELEASE_DATE),
-                false, //hide_from_students
-                self::DEFAULT_PRIORITY, //priority
+                self::DEFAULT_HIDE_FROM_STUDENTS,
+                self::DEFAULT_PRIORITY,
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
                 uploaded_by: $this->core->getUser()->getId(),
@@ -881,7 +880,7 @@ class CourseMaterialsController extends AbstractController {
     }
 
     /**
-     * @param array<string, mixed> $post_data
+     * @param array<string, mixed> $post_data The POST data to process.
      * @return array{
      * 'success': bool,
      * 'error': string|null,
@@ -915,20 +914,21 @@ class CourseMaterialsController extends AbstractController {
                 // Populate result with exploded sections
                 $result['sections'] = $sections;
 
-                // Handle section addition and removal
-                $keep_ids = $sections;
-                $partial_sections = isset($post_data['partial_sections']) ? explode(",", $post_data['partial_sections']) : [];
+                // Handle section addition and removal with keeping, removing, and overall section sets
+                $keep_ids = array_fill_keys($sections, true);
+                $section_ids = array_fill_keys(array_map(fn($s) => $s->getSectionId(), $course_material->getSections()->toArray()), true);
+                $partial_sections = isset($post_data['partial_sections']) ? array_fill_keys(explode(",", $post_data['partial_sections']), true) : [];
 
                 // Add new sections to course material
                 foreach ($sections as $section) {
-                    if (!$this->sectionExists($course_material, $section)) {
+                    if (!isset($section_ids[$section])) {
                         $course_material->addSection(new CourseMaterialSection($section, $course_material));
                     }
                 }
 
                 // Remove sections that are no longer valid
                 foreach ($course_material->getSections() as $section) {
-                    if (!in_array($section->getSectionId(), $keep_ids) && !in_array($section->getSectionId(), $partial_sections)) {
+                    if (!isset($keep_ids[$section->getSectionId()]) && !isset($partial_sections[$section->getSectionId()])) {
                         $course_material->removeSection($section);
                     }
                 }
@@ -942,26 +942,17 @@ class CourseMaterialsController extends AbstractController {
         return $result;
     }
 
-    // Helper function to check if a section exists
     /**
-     * @return bool
-     */
-    private function sectionExists(CourseMaterial $course_material, string $section_id) {
-        foreach ($course_material->getSections() as $course_section) {
-            if ($course_section->getSectionId() === $section_id) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
+     * Helper function to get the requested path.
+     *
+     * @param string $upload_path The path to the upload directory.
+     * @param string|null $path The requested path from the POST data.
      * @return string|JsonResponse
      */
-    private function getRequestedPath(string $upload_path, string|null $post_requested_path) {
+    private function getRequestedPath(string $upload_path, string|null $path) {
         $requested_path = "";
-        if (isset($post_requested_path) && $post_requested_path !== "") {
-            $requested_path = $post_requested_path;
+        if (isset($path) && $path !== "") {
+            $requested_path = $path;
             $tmp_path = $upload_path . "/" . $requested_path;
             $dirs = explode("/", $tmp_path);
             for ($i = 1; $i < count($dirs); $i++) {
