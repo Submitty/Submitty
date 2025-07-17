@@ -352,10 +352,15 @@ class CourseMaterialsController extends AbstractController {
             // Third condition prevents cases where two folders are "name" and "name_plus_more_text".
             if ($same_start && $not_same_file && $course_material_path[strlen($main_path)] === '/') {
                 if ($course_material->isDir()) {
+                    $_POST['id'] = $course_material->getId();
+                    $_POST['folder_update'] = 'false'; // Update the current directory without recursive updates
+                    $this->ajaxEditCourseMaterialsFiles(true);
+                    $_POST['folder_update'] = 'true';
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
+                    $_POST['id'] = $course_material->getId();
+                    $this->ajaxEditCourseMaterialsFiles(true);
                 }
             }
         }
