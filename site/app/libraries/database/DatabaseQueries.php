@@ -9630,6 +9630,10 @@ ORDER BY
         $this->course_db->beginTransaction();
         $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
 
+        if (count($redactions) === 0) {
+            $this->course_db->commit();
+            return;
+        }
         $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
         $params = [];
 

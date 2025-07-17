@@ -1,4 +1,5 @@
 import os
+from time import sleep
 import traceback
 from typing import List, Sequence
 
@@ -20,12 +21,6 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
     # Ensure the output directory exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    # Delete any existing images that match the pattern
-    for filename in os.listdir(output_dir):
-        filename_prefix = os.path.basename(pdf_file_path)[:-4]
-        is_matching_file = filename.startswith(filename_prefix) and filename.endswith(".jpg")
-        if is_matching_file:
-            os.remove(os.path.join(output_dir, filename))
     try:
         pdfPages = PdfReader(pdf_file_path, strict=False)
         with open(pdf_file_path, "rb") as open_file:
@@ -42,10 +37,7 @@ def main(pdf_file_path: str, output_dir: str, redactions: List[Redaction]):
                 + str(page_number + 1).zfill(2)
                 + ".jpg",
             )
-            imagePages[page_number].save(
-                image_filename, "JPEG", quality=20, optimize=True
-            )
-            img = Image.open(image_filename)
+            img = imagePages[page_number]
             draw = ImageDraw.Draw(img)
             for redaction in redactions:
                 # Add 1 to page_number because redactions are 1-indexed
