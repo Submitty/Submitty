@@ -38,8 +38,14 @@ class ImageView extends AbstractView {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
-        // Add markerjs resources
+        // Add markerjs3 core library first (dependency for markerjs-ui)
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('markerjs3', 'markerjs3.js'), 'vendor');
+        // Add markerjs-ui resources
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.cjs'), 'vendor');
+        // Add image annotation JavaScript
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('img', 'ImageAnnotationEmbedded.js'), 'js');
+
+        $this->core->addNoticeMessage("About to render twig template"); 
         
         try {
             
