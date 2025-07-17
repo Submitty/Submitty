@@ -381,7 +381,6 @@ class CourseMaterialsController extends AbstractController {
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
                 $course_material->setPriority($_POST['sort_priority']);
-                unset($_POST['sort_priority']);
             }
             if (
                 (isset($_POST['sections_lock'])
@@ -537,7 +536,11 @@ class CourseMaterialsController extends AbstractController {
         // Configure upload and requested paths
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
 
-        $details['path'][0] = $this->getRequestedPath($upload_path, $_POST['requested_path']);
+        $path = $this->getRequestedPath($upload_path, $_POST['requested_path']);
+        if ($path === null) {
+            return JsonResponse::getErrorResponse("Invalid requested path");
+        }
+        $details['path'][0] = $path;
         $requested_path = $details['path'][0];
 
         $overwrite_all = false;
@@ -947,7 +950,7 @@ class CourseMaterialsController extends AbstractController {
      *
      * @param string $upload_path The path to the upload directory.
      * @param string|null $path The requested path from the POST data.
-     * @return string|JsonResponse
+     * @return string|null
      */
     private function getRequestedPath(string $upload_path, string|null $path) {
         $requested_path = "";
@@ -957,7 +960,7 @@ class CourseMaterialsController extends AbstractController {
             $dirs = explode("/", $tmp_path);
             for ($i = 1; $i < count($dirs); $i++) {
                 if ($dirs[$i] === "") {
-                    return JsonResponse::getErrorResponse("Invalid requested path");
+                    return null;
                 }
             }
         }
