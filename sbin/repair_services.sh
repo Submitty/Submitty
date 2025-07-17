@@ -33,15 +33,9 @@ log_service_restart() {
 }
 
 repair_autograding() {
-    local status_script="/usr/local/submitty/sbin/shipper_utils/systemctl_wrapper.py"
     local restart_script="/usr/local/submitty/sbin/restart_shipper_and_all_workers.py"
 
-    cmd=(sudo python3 "${status_script}" --daemon "shipper" --target "primary" status)
-    local status_output
-    status_output=$("${cmd[@]}" 2>/dev/null)
-    local status=$?
-
-    if [[ "${status}" -ne 1 ]]; then
+    if ! sudo systemctl is-active --quiet "submitty_autograding_shipper"; then
         local last_status
         last_status=$(sudo systemctl status "submitty_autograding_shipper")
 
@@ -50,7 +44,7 @@ repair_autograding() {
 
         log_service_restart "autograding" \
             "Failure detected within the Autograding Shipper" \
-            "${status_output}\n\n${restart_output}\n\n${last_status}"
+            "${restart_output}\n\n${last_status}"
     fi
 }
 
