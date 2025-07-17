@@ -346,14 +346,9 @@ class CourseMaterialsController extends AbstractController {
             $course_material_path = $course_material->getPath();
             $is_descendant = str_starts_with($course_material_path, $main_path . '/');
 
-            if ($is_descendant && $course_material_path !== $main_path) {
-                if ($course_material->isDir()) {
-                    $this->recursiveEditFolder($course_materials, $course_material);
-                }
-                else {
-                    $_POST['id'] = $course_material->getId();
-                    $this->ajaxEditCourseMaterialsFiles(false);
-                }
+            if ($is_descendant) {
+                $this->handleSectionLock($course_material, $_POST);
+                $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
             }
         }
     }
