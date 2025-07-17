@@ -677,38 +677,69 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
+                console.log(data);
                 $('#file-content').append(data);
             },
         });
     }
     else {
+        // Check if the file is an image
+        const isImage = isImageFile(name);
         $(fileFullPanelOptions[panel]['pdfAnnotationBar']).hide();
-        $(fileFullPanelOptions[panel]['saveStatus']).hide();
-        $(fileFullPanelOptions[panel]['fileContent']).append(
-            `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            '',
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_name',
-            name,
-        );
-        $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
-            'data-file_url',
-            path,
-        );
-        openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
-        $(
-            `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
-        ).css('max-height', '1200px');
-        // $("#file_viewer_" + fileFullPanelOptions[panel]["fullPanel"] + "_iframe").height("100%");
+
+        if (isImage) {
+            // For images, use server-side annotation system
+            const gradeable_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.gradeableId;
+            const anon_submitter_id = document.getElementById(
+                fileFullPanelOptions[panel]['panel'].substring(1),
+            )!.dataset.anonSubmitterId;
+            $(fileFullPanelOptions[panel]['saveStatus']).show();
+            
+            return $.ajax({
+                type: 'POST',
+                url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'img']),
+                data: {
+                    user_id: anon_submitter_id,
+                    filename: name,
+                    file_path: path,
+                    is_anon: true,
+                    csrf_token: window.csrfToken,
+                },
+                success: function (data: string) {
+                    console.log(data);
+                    $('#file-content').append(data);
+                },
+            });
+        } else {
+            $(fileFullPanelOptions[panel]['saveStatus']).hide();
+            // For other file types, use the original iframe approach
+            $(fileFullPanelOptions[panel]['fileContent']).append(
+                `<div id="file_viewer_${fileFullPanelOptions[panel]['fullPanel']}" class="full_panel" data-file_name="" data-file_url=""></div>`,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).empty();
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                '',
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_name',
+                name,
+            );
+            $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).attr(
+                'data-file_url',
+                path,
+            );
+            openFrame(name, path, fileFullPanelOptions[panel]['fullPanel'], false);
+            $(
+                `#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}_iframe`,
+            ).css('max-height', '1200px');
+        }
     }
 }
 window.loadPDF = loadPDF;
@@ -717,6 +748,9 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     const panel: FileFullPanelOptions = rawPanel as FileFullPanelOptions;
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    // Also remove image annotation containers
+    $(`#image_annotation_container_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
         if ($('#pdf_annotation_bar').is(':visible')) {
@@ -877,3 +911,10 @@ window.deleteAttachment = function (target: string, file_name: string) {
         });
     }
 };
+
+// Utility function to check if a file extension is an image
+function isImageFile(filename: string): boolean {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff', 'tif'];
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return extension ? imageExtensions.includes(extension) : false;
+}
