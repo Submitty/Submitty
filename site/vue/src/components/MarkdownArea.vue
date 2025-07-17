@@ -26,6 +26,8 @@ interface Props {
     textareaOnChange?: string;
     textareaOnInput?: string;
     otherTextareaAttributes?: string;
+    renderMarkdown?: boolean;
+    toggleButtonId?: string;
 }
 
 const props = defineProps<Props>();
@@ -251,19 +253,49 @@ onMounted(async () => {
         await setMode('preview');
     }
 });
+const showHeader = ref<boolean>(false);
 </script>
 
 <template>
   <div
-    :class="[rootClass]"
+    v-if="props.renderHeader === false"
+    class="button-row"
   >
     <div
-      v-if="renderHeader"
+      :id="toggleButtonId"
+      role="button"
+      class="markdown-toggle key_to_click"
+      :class="[
+        showHeader ? 'markdown-active' : 'markdown-inactive'
+      ]"
+      tabindex="0"
+      title="Render markdown"
+      @click="showHeader = !showHeader;"
+    >
+      <i class="fab fa-markdown fa-2x" />
+    </div>
+    <a
+      target="_blank"
+      href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/"
+      aria-label="Markdown Info"
+    ><i
+      style="font-style:normal;"
+      class="far fa-question-circle disabled"
+    /></a>
+  </div>
+  <div
+    :class="[rootClass]"
+    class="markdown-area fill-available"
+  >
+    <div
+      v-if="props.renderHeader || showHeader"
       :id="markdownHeaderId ?? undefined"
       class="markdown-area-header"
       :data-mode="mode"
     >
-      <div class="markdown-mode-buttons">
+      <div
+        class="markdown-mode-buttons"
+      >
         <button
           title="Edit Markdown"
           type="button"
