@@ -23,6 +23,14 @@ declare global {
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
+        // Image annotation functions
+        initImageAnnotation(): void;
+        addAnnotations(): void;
+        saveAnnotations(): void;
+        clearAnnotations(): void;
+        viewAllAnnotations(): void;
+        downloadImage(): void;
+        showAnnotationPalette(): void;
     }
     interface JQueryStatic {
         active: number;

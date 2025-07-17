@@ -2,11 +2,15 @@
 .image-annotation-container {
     position: relative;
     width: 100%;
-    height: auto;
+    height: 100%;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
     background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .annotation-toolbar {
@@ -18,6 +22,9 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    width: 100%;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .annotation-toolbar .btn {
@@ -26,12 +33,35 @@
 }
 
 #annotatable-image {
-    max-width: 100%;
+    max-width: 90%;
+    max-height: calc(100% - 120px); /* Account for toolbar and padding */
     height: auto;
     display: block;
     border: 1px solid #ccc;
     border-radius: 3px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 0 auto;
+    object-fit: contain;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+#image-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#image-viewer {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 
 #annotation-status {
@@ -113,13 +143,51 @@
     }
 }
 
-/* MarkerJS integration styles */
+/* MarkerJS-UI integration styles */
 .marker-area {
     border: 2px solid #007bff;
 }
 
 .marker-area-selected {
     border-color: #28a745;
+}
+
+/* MarkerJS-UI web component styles */
+#annotation-editor-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+mjsui-annotation-editor {
+    width: 90vw;
+    height: 90vh;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+mjsui-annotation-viewer {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments for markerjs-ui */
+@media (max-width: 768px) {
+    mjsui-annotation-editor {
+        width: 95vw;
+        height: 95vh;
+    }
 }
 
 /* Button styles to match existing Submitty theme */

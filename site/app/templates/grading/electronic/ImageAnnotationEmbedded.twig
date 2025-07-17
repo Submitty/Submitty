@@ -9,36 +9,35 @@
     <div id="image-viewer" class="imageViewer">
         <div id="image-error-message" style="display: none; color: red; font-weight: bold; padding: 10px; text-align: center;"></div>
         
-        <div class="image-annotation-container" style="position: relative; width: 100%; height: auto;">
+        <div class="image-annotation-container">
             <img id="annotatable-image" 
                  src="{{ display_file_url }}?dir={{ directory }}&file={{ filename | url_encode }}&path={{ file_path | url_encode }}&ta_grading=true&gradeable_id={{ gradeable_id }}" 
-                 style="max-width: 100%; height: auto; display: block;" 
                  alt="{{ filename }}" />
             
-            <div class="annotation-toolbar" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; background-color: #f5f5f5;">
-                <button id="add-annotations-btn" class="btn btn-primary" style="margin-right: 10px;">
-                    <i class="fas fa-edit"></i> Add Annotations
+            <div class="annotation-toolbar">
+                <button id="add-annotations-btn" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit Annotations
                 </button>
-                <button id="save-annotations-btn" class="btn btn-success" style="margin-right: 10px;">
+                <button id="save-annotations-btn" class="btn btn-success">
                     <i class="fas fa-save"></i> Save Annotations
                 </button>
-                <button id="clear-annotations-btn" class="btn btn-warning" style="margin-right: 10px;">
+                <button id="clear-annotations-btn" class="btn btn-warning">
                     <i class="fas fa-eraser"></i> Clear Annotations
                 </button>
                 
                 {% if not student_popup and can_download %}
-                    <button id="view-all-annotations-btn" class="btn btn-info" style="margin-right: 10px;">
+                    <button id="view-all-annotations-btn" class="btn btn-info">
                         <i class="fas fa-eye"></i> View All Annotations
                     </button>
                 {% endif %}
                 
                 {% if can_download %}
-                    <button id="download-image-btn" class="btn btn-secondary" style="margin-right: 10px;">
+                    <button id="download-image-btn" class="btn btn-secondary">
                         <i class="fas fa-download"></i> Download Image
                     </button>
                 {% endif %}
                 
-                <span id="annotation-status" style="margin-left: 20px; font-weight: bold;"></span>
+                <span id="annotation-status"></span>
             </div>
             
             <!-- Hidden data elements -->
@@ -56,188 +55,3 @@
         </div>
     </div>
 </div>
-
-<script>
-$(document).ready(function() {
-    let markerArea = null;
-    let currentAnnotations = null;
-    const targetImg = document.getElementById("annotatable-image");
-    const gradeableId = $("#gradeable-id").val();
-    const userId = $("#user-id").val();
-    const graderId = $("#grader-id").val();
-    const filename = $("#filename").val();
-    const filePath = $("#file-path").val();
-    const csrfToken = $("#csrf-token").val();
-    const isStudent = $("#is-student").val() === 'true';
-    
-    // Load existing annotations
-    const existingAnnotations = $("#existing-annotations").val();
-    if (existingAnnotations && existingAnnotations !== "[]") {
-        try {
-            currentAnnotations = JSON.parse(existingAnnotations);
-            renderAnnotationsOnImage();
-        } catch (e) {
-            console.error("Error loading existing annotations:", e);
-        }
-    }
-    
-    // Add annotations button
-    $("#add-annotations-btn").on("click", function() {
-        if (targetImg && targetImg.complete) {
-            try {
-                markerArea = new MarkerArea();
-                markerArea.targetImage = targetImg;
-                
-                // Load existing annotations if available
-                if (currentAnnotations) {
-                    markerArea.restoreState(currentAnnotations);
-                }
-                
-                markerArea.addEventListener("close", function(event) {
-                    if (event && event.detail) {
-                        if (event.detail.state) {
-                            currentAnnotations = event.detail.state;
-                            console.log("Annotations updated");
-                            $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
-                        }
-                        if (event.detail.resultImage) {
-                            targetImg.src = event.detail.resultImage;
-                        }
-                    }
-                });
-                
-                // Try to show the marker area
-                if (typeof markerArea.show === "function") {
-                    markerArea.show();
-                } else if (typeof markerArea.open === "function") {
-                    markerArea.open();
-                } else {
-                    console.error("Could not find method to open MarkerArea");
-                }
-            } catch (error) {
-                console.error("Error opening marker area:", error);
-                $("#annotation-status").text("Error opening annotation editor: " + error.message).css("color", "red");
-            }
-        }
-    });
-    
-    // Save annotations button
-    $("#save-annotations-btn").on("click", function() {
-        if (currentAnnotations) {
-            saveAnnotations();
-        } else {
-            alert("No annotations to save. Please create annotations first.");
-        }
-    });
-    
-    // Clear annotations button
-    $("#clear-annotations-btn").on("click", function() {
-        if (confirm("Are you sure you want to clear all annotations?")) {
-            currentAnnotations = null;
-            // Reset image to original
-            const originalSrc = targetImg.src.split("?")[0] + "?" + targetImg.src.split("?")[1];
-            targetImg.src = originalSrc;
-            $("#annotation-status").text("Annotations cleared (not saved)").css("color", "red");
-        }
-    });
-    
-    // View all annotations button
-    $("#view-all-annotations-btn").on("click", function() {
-        const allAnnotations = JSON.parse($("#all-annotations").val() || "{}");
-        showAllAnnotations(allAnnotations);
-    });
-    
-    // Download image button
-    $("#download-image-btn").on("click", function() {
-        const link = document.createElement('a');
-        link.href = targetImg.src;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-    
-    function renderAnnotationsOnImage() {
-        if (currentAnnotations && targetImg) {
-            try {
-                const renderer = new Renderer();
-                renderer.targetImage = targetImg;
-                
-                if (typeof renderer.render === "function") {
-                    renderer.render(currentAnnotations).then(function(result) {
-                        if (result && result.image) {
-                            targetImg.src = result.image;
-                            $("#annotation-status").text("Annotations loaded").css("color", "green");
-                        }
-                    }).catch(function(error) {
-                        console.error("Error rendering annotations:", error);
-                        $("#annotation-status").text("Error rendering annotations").css("color", "red");
-                    });
-                }
-            } catch (error) {
-                console.error("Error creating renderer:", error);
-            }
-        }
-    }
-    
-    function saveAnnotations() {
-        const annotationData = {
-            user_id: userId,
-            grader_id: graderId,
-            filename: filename,
-            file_path: filePath,
-            annotations: JSON.stringify(currentAnnotations),
-            csrf_token: csrfToken
-        };
-        
-        $.ajax({
-            url: "/courses/" + window.location.pathname.split("/")[2] + "/" + window.location.pathname.split("/")[3] + "/gradeable/" + gradeableId + "/img/annotations",
-            type: "POST",
-            data: annotationData,
-            dataType: "json",
-            success: function(response) {
-                if (response.status === "success") {
-                    $("#annotation-status").text("Annotations saved successfully!").css("color", "green");
-                } else {
-                    $("#annotation-status").text("Error saving annotations: " + (response.message || "Unknown error")).css("color", "red");
-                }
-            },
-            error: function(xhr, status, error) {
-                $("#annotation-status").text("Error saving annotations: " + error).css("color", "red");
-            }
-        });
-    }
-    
-    function showAllAnnotations(allAnnotations) {
-        let html = '<div style="padding: 10px;"><h4>All Annotations for this Image:</h4>';
-        
-        if (Object.keys(allAnnotations).length === 0) {
-            html += '<p>No annotations found for this image.</p>';
-        } else {
-            for (const [grader, annotations] of Object.entries(allAnnotations)) {
-                html += '<div style="margin-bottom: 10px; padding: 5px; border: 1px solid #ccc;"><strong>Grader: ' + grader + '</strong></div>';
-            }
-        }
-        
-        html += '</div>';
-        
-        // Create a modal or popup to show all annotations
-        if ($("#annotation-modal").length === 0) {
-            $("body").append('<div id="annotation-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; max-width: 80%; max-height: 80%; overflow: auto;"><button id="close-annotation-modal" style="float: right; margin-bottom: 10px;">&times;</button><div id="annotation-modal-content"></div></div></div>');
-            
-            $("#close-annotation-modal").on("click", function() {
-                $("#annotation-modal").hide();
-            });
-        }
-        
-        $("#annotation-modal-content").html(html);
-        $("#annotation-modal").show();
-    }
-    
-    // Handle image load errors
-    targetImg.onerror = function() {
-        console.error('Failed to load image:', filePath);
-        $("#image-error-message").text("Error loading image: " + filename).show();
-    };
-});
-</script>
