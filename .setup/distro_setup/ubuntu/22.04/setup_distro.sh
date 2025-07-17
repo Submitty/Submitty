@@ -20,7 +20,7 @@ fi
 # Need to change this otherwise it will hang the script in interactive mode
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf
 
-add-apt-repository ppa:ondrej/php
+add-apt-repository -y ppa:ondrej/php
 apt-get -qqy update
 
 apt-get install -qqy apt-transport-https ca-certificates curl software-properties-common
