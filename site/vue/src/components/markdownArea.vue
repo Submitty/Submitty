@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { buildUrl } from '../../../ts/utils/server';
 
 interface Props {
     markdownAreaId: string;
@@ -84,7 +85,7 @@ async function fetchPreviewContent() {
 
     isLoadingPreview.value = true;
     try {
-        const response = await fetch(window.buildUrl(['markdown']), {
+        const response = await fetch(buildUrl(['markdown']), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
