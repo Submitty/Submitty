@@ -355,8 +355,7 @@ class CourseMaterialsController extends AbstractController {
                     $this->recursiveEditFolder($course_materials, $course_material);
                 }
                 else {
-                    $_POST['id'] = $course_material->getId();
-                    $this->ajaxEditCourseMaterialsFiles(false);
+                    $this->updateCourseMaterial($course_material, $_POST['hide_from_students'] ?? null, $_POST['sort_priority'] ?? null, $_POST['release_time'] ?? null);
                 }
             }
         }
@@ -863,17 +862,17 @@ class CourseMaterialsController extends AbstractController {
 
     private function updateCourseMaterial(CourseMaterial $course_material, ?string $hide_from_students, ?string $sort_priority, ?string $release_time = null): void {
         // Update visibility
-        if (isset($hide_from_students)) {
+        if ($hide_from_students !== null) {
             $course_material->setHiddenFromStudents($hide_from_students === 'on');
         }
 
         // Update sorting priority
-        if (isset($sort_priority)) {
+        if ($sort_priority !== null) {
             $course_material->setPriority((float) $sort_priority);
         }
 
         // Update release time if provided
-        if (isset($release_time) && $release_time !== '') {
+        if ($release_time !== null && $release_time !== '') {
             $date_time = DateUtils::parseDateTime($release_time, $this->core->getDateTimeNow()->getTimezone());
             $course_material->setReleaseDate($date_time);
         }
