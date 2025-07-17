@@ -381,6 +381,7 @@ class CourseMaterialsController extends AbstractController {
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
                 $course_material->setPriority($_POST['sort_priority']);
+                unset($_POST['sort_priority']);
             }
             if (
                 (isset($_POST['sections_lock'])
