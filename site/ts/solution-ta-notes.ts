@@ -1,5 +1,3 @@
-import { displayErrorMessage, displaySuccessMessage } from './utils/server';
-
 interface SolutionTaNotesResponse {
     status: string;
     data: {
@@ -30,7 +28,7 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
         success: function (res: string) {
             const response = JSON.parse(res) as SolutionTaNotesResponse;
             if (response.status === 'success') {
-                displaySuccessMessage('Solution has been updated successfully');
+                window.displaySuccessMessage('Solution has been updated successfully');
                 // Dom manipulation after the Updating/adding the solution note
                 $(`#solution-box-${component_id}`).attr('data-first-edit', '0');
 
@@ -48,7 +46,7 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
                 save_button.prop('disabled', true);
             }
             else {
-                displayErrorMessage('Something went wrong while updating the solution');
+                window.displayErrorMessage('Something went wrong while updating the solution');
             }
         },
         error: function (err) {
@@ -71,3 +69,5 @@ function detectSolutionChange(this: HTMLTextAreaElement) {
     }
 }
 window.detectSolutionChange = detectSolutionChange;
+
+export {};
