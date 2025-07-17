@@ -42,7 +42,7 @@
             <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
-        {% include "Vue.twig" with { "name" : "markdownArea",
+        {% include "Vue.twig" with { "name" : "MarkdownArea",
             "type": "component",
             "args": {
                 "markdownAreaId" : "create-thread-message",
@@ -73,7 +73,7 @@
             </span>
         </label>
         {% include "Vue.twig" with {
-            "name" : "markdownArea",
+            "name" : "MarkdownArea",
             "type": "component",
             "args": {
                 "markdownAreaId" : "queue-message",
@@ -118,7 +118,7 @@
             </span>
         </label>
         {% include "Vue.twig" with {
-            "name" : "markdownArea",
+            "name" : "MarkdownArea",
             "type": "component",
             "args": {
                 "markdownAreaId" : "upload-message",

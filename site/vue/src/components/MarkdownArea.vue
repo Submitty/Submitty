@@ -12,7 +12,7 @@ interface Props {
     markdownHeaderId?: string | null;
     maxHeight?: string;
     minHeight?: string;
-    noMaxlength?: boolean;
+    noMaxlength?: boolean; // If true, sets maxlength to 524288
     placeholder?: string;
     previewDivId?: string | null;
     renderHeader?: boolean;
@@ -348,12 +348,7 @@ onMounted(async () => {
       <div
         v-if="isPreviewLoading || isLoadingPreview"
         class="markdown-preview-load-spinner"
-      >
-        <div />
-        <div />
-        <div />
-        <div />
-      </div>
+      />
       <label
         :for="markdownAreaId"
         tabindex="-1"

@@ -34,7 +34,7 @@
             <div id="sol-textbox-cont-{{ component_id }}-edit">
                 <label for="textbox-solution-{{ component_id }}" tabIndex="0" class="screen-reader">Solution for {{ component_title }}</label>
                 {% include "Vue.twig" with {
-                    "name" : "markdownArea",
+                    "name" : "MarkdownArea",
                     "type": "component",
                     "args": {
                         "markdownAreaId" : "textbox-solution-" ~ component_id,
