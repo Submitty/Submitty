@@ -44,7 +44,8 @@ class NotebookUtils {
                                         $log_message = 'Image skipped: exceeds size limit of ' . $img_size_limit . ' bytes.';
                                         $markdown = $markdown . PHP_EOL . $log_message;
                                     }
-                                } else {
+                                }
+                                else {
                                     $log_message = 'Image skipped: image type not supported.';
                                     $markdown = $markdown . PHP_EOL . $log_message;
                                 }
@@ -106,7 +107,8 @@ class NotebookUtils {
                                         'height' => 0,
                                         'alt_text' => $output_text,
                                     ];
-                                } else {
+                                }
+                                else {
                                     $log_message = 'Image skipped: exceeds size limit of ' . $img_size_limit . ' bytes.';
                                     $cells[] = [
                                         'type' => 'output',

@@ -167,7 +167,7 @@ class AutoGradingView extends AbstractView {
                     ])
                 ];
             }
-            else if (substr($file_path, strlen($file_path) - 6, 6) == ".ipynb") {
+            elseif (substr($file_path, strlen($file_path) - 6, 6) == ".ipynb") {
                 $public = $autocheck->getPublic();
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
