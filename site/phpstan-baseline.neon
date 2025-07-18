@@ -7774,12 +7774,6 @@ parameters:
 			path: app/libraries/routers/Enabled.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: app/libraries/routers/FeatureFlag.php
-
-		-
 			message: '''
 				#^Call to deprecated method JsonOnlyResponse\(\) of class app\\libraries\\response\\MultiResponse\:
 				should not be used, just return JsonResponse directly$#
@@ -12092,16 +12086,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/views/superuser/SuperuserEmailView.php
-
-		-
-			message: '''
-				#^Call to deprecated method registerLoader\(\) of class Doctrine\\Common\\Annotations\\AnnotationRegistry\:
-				This method is deprecated and will be removed in
-				            doctrine/annotations 2\.0\. Annotations will be autoloaded in 2\.0\.$#
-			'''
-			identifier: staticMethod.deprecated
-			count: 1
-			path: public/index.php
 
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'

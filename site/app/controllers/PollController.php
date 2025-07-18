@@ -19,9 +19,7 @@ use app\libraries\socket\Client;
 use WebSocket;
 use DateInterval;
 
-/**
- * @Enabled("polls")
- */
+#[Enabled(feature: "polls")]
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
