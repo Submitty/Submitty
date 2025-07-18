@@ -31,7 +31,7 @@ class MarkdownWidget extends Widget {
 
         const markdownArea = document.createElement('div');
         interactive_area.appendChild(markdownArea);
-        window.submitty.render(markdownArea, 'component', 'markdownArea', {
+        window.submitty.render(markdownArea, 'component', 'MarkdownArea', {
             markdownAreaId: `notebook-builder-markdown-${NUM_MARKDOWN}`,
             markdownAreaName: '',
             markdownAreaValue: this.state.markdown_string,

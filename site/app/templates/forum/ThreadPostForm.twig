@@ -77,24 +77,16 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large is defined and post_textarea_large ? "40vmin":"100px") %}
-        <div class="button-row">
-            <div role="button" id="markdown_toggle_{{ post_box_id }}"
-             class="markdown-toggle {{ render_markdown is defined and render_markdown ? "markdown-active":"markdown-inactive" }} key_to_click" tabindex="0"
-             title="Render markdown" onclick="toggleMarkdown.call(this, {{ post_box_id }});"
-            >
-                <i class="fab fa-markdown fa-2x"></i>
-            </div>
-            <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/" aria-label="Markdown Info"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
-        </div>
         {% if first_post_id is defined %}
             <a class="skip-btn skip-first-post" href="#{{ first_post_id }}">Skip to first post</a>
         {% endif %}
         {% include "Vue.twig" with {
             "name" : "MarkdownArea",
             "type": "component",
-            "class": "markdown-area fill-available",
+            "class": "fill-available",
             "args": {
                 "markdownAreaId" : "reply_box_" ~ post_box_id,
+                "toggleButtonId" : "markdown_toggle_" ~ post_box_id,
                 "markdownAreaName" : "thread_post_content",
                 "markdownAreaValue" : "",
                 "class" : "post_content_reply thread_post_content",

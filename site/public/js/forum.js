@@ -1947,34 +1947,6 @@ function markPostUnread(thread_id, post_id, last_viewed_timestamp) {
     });
 }
 
-function toggleMarkdown(post_box_id, triggered) {
-    if (post_box_id === undefined) {
-        post_box_id = '';
-    }
-    // display/hide the markdown header
-    $(`#markdown_header_${post_box_id}`).toggle();
-    $(this).toggleClass('markdown-active markdown-inactive');
-    // if markdown has just been turned off, make sure we exit preview mode if it is active
-    if ($(this).hasClass('markdown-inactive')) {
-        const markdown_header = $(`#markdown_header_${post_box_id}`);
-        const edit_button = markdown_header.find('.markdown-write-mode');
-        if (markdown_header.attr('data-mode') === 'preview') {
-            edit_button.trigger('click');
-        }
-    }
-    // trigger this event for all other markdown toggle buttons (since the setting should be persistent)
-    if (!triggered) {
-        $('.markdown-toggle').not(this).each(function () {
-            toggleMarkdown.call(this, this.id.split('_')[2], true);
-        });
-    }
-    // set various settings related to new markdown state
-    // eslint-disable-next-line eqeqeq
-    $(`#markdown_input_${post_box_id}`).val($(`#markdown_input_${post_box_id}`).val() == 0 ? '1' : '0');
-    $(`#markdown-info-${post_box_id}`).toggleClass('disabled');
-    Cookies.set('markdown_enabled', $(`#markdown_input_${post_box_id}`).val(), { path: '/', expires: 365 });
-}
-
 function checkInputMaxLength(obj) {
     // eslint-disable-next-line eqeqeq
     if ($(obj).val().length == $(obj).attr('maxLength')) {
