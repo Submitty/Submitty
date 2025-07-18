@@ -1194,11 +1194,6 @@ parameters:
 			path: app/controllers/admin/EmailRoomSeatingController.php
 
 		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 1
-			path: app/controllers/admin/GradeOverrideController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\GradeOverrideController\\:\\:deleteOverriddenGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/GradeOverrideController.php
