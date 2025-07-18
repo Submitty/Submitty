@@ -1362,17 +1362,6 @@ parameters:
 			count: 2
 			path: app/controllers/admin/ConfigurationController.php
 
-		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: app/controllers/admin/GradeOverrideController.php
-
-		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/GradeOverrideController.php
 
 		-
 			message: '#^Method app\\controllers\\admin\\GradeOverrideController\:\:deleteOverriddenGrades\(\) has no return type specified\.$#'

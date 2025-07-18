@@ -46,19 +46,66 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById([$_POST['user_id']]));
-        if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
-            $error = "Invalid Student ID";
-            return $this->core->getOutput()->renderJsonFail($error);
+        $user_id = $_POST['user_id']   ?? '';
+        $marks   = $_POST['marks']     ?? '';
+        $comment = $_POST['comment']   ?? '';
+        $option  = intval($_POST['option'] ?? -1);
+
+        $user = $this->core->getQueries()->getSubmittyUser($user_id);
+        if ($user === null || $user->getId() !== $user_id) {
+            return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
         }
 
-        if (((!isset($_POST['marks'])) || $_POST['marks'] == "" || is_float($_POST['marks']))) {
-            $error = "Marks be a integer";
-            return $this->core->getOutput()->renderJsonFail($error);
+        if ($marks === '' || !ctype_digit($marks)) {
+            return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
+        }
+        $marks = (int) $marks;
+
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
+
+        if ($team !== null && $team->getSize() > 1) {
+            if ($option === 0) {
+                $this->core->getQueries()
+                    ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            elseif ($option === 1) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
+                    $this->core->getQueries()
+                        ->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
+                }
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            else {
+                $member_ids  = $this->getTeamMemberIds($team);
+                $all_members = $this->core->getQueries()->getUsersById($member_ids);
+                $team_members = [];
+                foreach ($all_members as $id => $member) {
+                    $team_members[$id] = $member->getDisplayedGivenName()
+                                         . " "
+                                         . $member->getDisplayedFamilyName();
+                }
+                return $this->core->getOutput()->renderJsonSuccess([
+                    'is_team'   => true,
+                    'component' => 'OverrideTeamPopup',
+                    'args'      => [
+                        'memberList' => $team_members,
+                        'isDelete'   => false,
+                    ],
+                ]);
+            }
         }
 
-        $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
-        $this->getOverriddenGrades($gradeable_id);
+        $this->core->getQueries()
+            ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
+        return $this->getOverriddenGrades($gradeable_id);
+    }
+
+    /**
+     * @param object $team  An object with getMemberList(): string
+     * @return string[]     An array of member-ID strings
+     */
+    private function getTeamMemberIds(object $team): array {
+        return explode(", ", $team->getMemberList());
     }
 }

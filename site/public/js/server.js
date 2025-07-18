@@ -1259,6 +1259,10 @@ function updateGradeOverride() {
                 displayErrorMessage(json['message']);
                 return;
             }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
@@ -1317,9 +1321,9 @@ function refreshOnResponseOverriddenGrades(json) {
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
-    const url = buildCourseUrl(['grade_override', g_id, 'delete']);
-    const confirm = window.confirm('Are you sure you would like to delete this entry?');
+function deleteOverriddenGrades(user_id, option) {
+    const url = buildCourseUrl(['grade_override', $('#g_id').val(), 'delete']);
+    const confirm = option > -1 ? true : window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
         $.ajax({
             url: url,
@@ -1327,11 +1331,17 @@ function deleteOverriddenGrades(user_id, g_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1343,6 +1353,36 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val(-1);
+    }
+}
+
+function overridePopup(json) {
+    $('.popup-form').hide();
+    $('#override_team_popup').remove();
+
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args,
+    );
 }
 
 /**
