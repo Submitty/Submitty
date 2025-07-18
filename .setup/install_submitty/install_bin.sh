@@ -60,6 +60,25 @@ chmod o+rx ${SUBMITTY_INSTALL_DIR}/bin/comment_count.py
 
 #####################################
 
+echo -e "Copy the custom grading scripts"
+
+# make the directory (has a different name)
+mkdir -p ${SUBMITTY_INSTALL_DIR}/grading_bin
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/grading_bin
+chmod 755 ${SUBMITTY_INSTALL_DIR}/grading_bin
+
+# copy all of the files
+rsync -rtz  ${SUBMITTY_REPOSITORY}/grading_bin/*   ${SUBMITTY_INSTALL_DIR}/grading_bin/
+
+# COURSE_BUILDERS, DAEMON_USER, and others (container untrusted user) need access to these scripts
+array=( jupyter_notebook_grader.py )
+for i in "${array[@]}"; do
+    chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/grading_bin/${i}
+    chmod 555 ${SUBMITTY_INSTALL_DIR}/grading_bin/${i}
+done
+
+#####################################
+
 echo -e "Copy the non-user scripts"
 
 # make the directory (has a different name)
