@@ -221,6 +221,10 @@ def send_notifications(course, course_db, master_db, lists):
         LOG_FILE.write(m)
         print(m)
 
+def send_submission_notifications(course, course_db, master_db):
+    """Send pending gradeable submission notifications for the current course."""
+    pass
+
 
 def send_pending_notifications():
     """Send pending gradeable notifications for all active courses."""
@@ -233,7 +237,7 @@ def send_pending_notifications():
         course_db = connect_db(f"submitty_{term}_{course}")
 
         # Retrieve all fully graded gradeables with pending notifications
-        pending = course_db.execute(
+        scores_available = course_db.execute(
             """
             WITH gradeables AS (
                 SELECT DISTINCT
@@ -301,11 +305,29 @@ def send_pending_notifications():
             """
         )
 
-        if pending:
-            lists = construct_notifications(term, course, pending)
+        if scores_available:
+            lists = construct_notifications(term, course, scores_available)
             send_notifications(course, course_db, master_db, lists)
             notified += len(lists[0])
 
+        submission_available = course_db.execute(
+            """
+            SELECT
+                g.g_id AS g_id,
+                g.g_title AS g_title,
+                COALESCE(ns.all_gradeable_submissions, TRUE) AS site_enabled,
+                COALESCE(ns.all_gradeable_submissions_email, FALSE) AS email_enabled
+            FROM electronic_gradeable eg
+            INNER JOIN gradeable AS g
+                ON eg.g_id = g.g_id
+            INNER JOIN users AS u
+                ON u.user_group = 4
+            LEFT JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
+            WHERE eg.eg_submission_notification_sent IS FALSE
+                AND eg.eg_submission_open_date >= NOW()
+            """
+        )
         course_db.close()
 
     master_db.close()

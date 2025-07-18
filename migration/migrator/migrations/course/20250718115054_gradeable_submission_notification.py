@@ -20,12 +20,13 @@ def up(config, database, semester, course):
         ADD COLUMN IF NOT EXISTS all_gradeable_submissions BOOLEAN DEFAULT TRUE NOT NULL,
         ADD COLUMN IF NOT EXISTS all_gradeable_submissions_email BOOLEAN DEFAULT FALSE NOT NULL;
 
-        ALTER TABLE gradeable
-        ADD COLUMN IF NOT EXISTS g_submission_notification_sent BOOLEAN DEFAULT FALSE NOT NULL;
+        ALTER TABLE electronic_gradeable
+        ADD COLUMN IF NOT EXISTS eg_submission_notification_sent BOOLEAN DEFAULT FALSE NOT NULL;
 
-        UPDATE gradeable
-        SET g_submission_notification_sent = TRUE
-        WHERE g_grade_released_date < NOW();
+        UPDATE electronic_gradeable eg
+        SET eg_submission_notification_sent = TRUE
+        FROM gradeable g
+        WHERE eg.g_id = g.g_id AND g.g_grade_released_date < NOW();
         """
     )
 

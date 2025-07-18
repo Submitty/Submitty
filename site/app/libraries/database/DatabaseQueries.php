@@ -6909,7 +6909,8 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?
+                  g_allow_custom_marks=?,
+                  g_submission_notification_sent=?
                 WHERE g_id=?",
                 $params
             );
@@ -6948,6 +6949,7 @@ AND gc_id IN (
                     $gradeable->getHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
+                    $gradeable->isSubmissionNotificationSent() ? $gradeable->isSubmissionOpen() : false,
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
