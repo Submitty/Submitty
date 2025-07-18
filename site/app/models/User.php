@@ -59,7 +59,7 @@ use Egulias\EmailValidator\Validation\RFCValidation;
  * @method bool getEnforceSingleSession()
  * @method string getRegistrationSubsection()
  */
-class User extends AbstractModel {
+class User extends AbstractModel implements \JsonSerializable {
     /**
      * Access groups, lower is more access
      */
@@ -764,5 +764,13 @@ class User extends AbstractModel {
      */
     public function hasMultipleTeamInvites(string $gradeable_id): bool {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
+    }
+
+    public function jsonSerialize(): array {
+        return [
+            'id' => $this->getId(),
+            'displayedGivenName' => $this->getDisplayedGivenName(),
+            'displayedFamilyName' => $this->getDisplayedFamilyName(),
+        ];
     }
 }

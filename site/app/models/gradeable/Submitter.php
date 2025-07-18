@@ -14,7 +14,7 @@ use app\models\User;
  * A trivial wrapper around a Team or a User instance so the GradedGradeable can
  *  have either and access it in a consistent way.
  */
-class Submitter extends AbstractModel {
+class Submitter extends AbstractModel implements \JsonSerializable {
     /** @var Team|User The internal team or user instance */
     private $team_or_user;
 
@@ -122,5 +122,13 @@ class Submitter extends AbstractModel {
      */
     public function getRotatingSection() {
         return $this->team_or_user->getRotatingSection();
+    }
+
+    public function jsonSerialize(): mixed {
+        return [
+            'id' => $this->getId(),
+            'user' => $this->getUser(),
+            'team' => $this->getTeam(),
+        ];
     }
 }
