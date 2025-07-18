@@ -112,7 +112,7 @@ describe('Docker UI Test', () => {
 
     it('Should link existed image to a new tag', () => {
         // Verify DockerUI status is "Up-to-Date"
-        cy.get('.status')
+        cy.get('[data-testid="docker-status"]')
             .should('contain.text', 'Up-to-Date');
 
         // Check empty tag list, should have `et-cetera'
@@ -139,12 +139,10 @@ describe('Docker UI Test', () => {
         cy.get('.alert-success')
             .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
 
-        cy.reload();
-
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('.status')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Changes Pending');
@@ -159,7 +157,7 @@ describe('Docker UI Test', () => {
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('.status')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Up-to-Date');
@@ -191,7 +189,7 @@ describe('Docker UI Test', () => {
     //       Currently, using one of the smaller images submitty/prolog:8.
     it('Should add new image and remove it', () => {
         // Verify DockerUI status is "Up-to-Date"
-        cy.get('.status')
+        cy.get('[data-testid="docker-status"]')
             .should('contain.text', 'Up-to-Date');
 
         cy.intercept('POST', '**/admin/add_image').as('addImage');
@@ -217,7 +215,7 @@ describe('Docker UI Test', () => {
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('.status')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Changes Pending');
@@ -241,7 +239,7 @@ describe('Docker UI Test', () => {
         cy.reload();
 
         // Verify DockerUI status is "Up-to-Date"
-        cy.get('.status')
+        cy.get('[data-testid="docker-status"]')
             .should('contain.text', 'Up-to-Date');
 
         // Check if the image can be removed
@@ -269,7 +267,7 @@ describe('Docker UI Test', () => {
         // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('.status')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Changes Pending');
@@ -295,7 +293,7 @@ describe('Docker UI Test', () => {
         // Wait until the system updates
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('.status')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
                     return text.includes('Up-to-Date');

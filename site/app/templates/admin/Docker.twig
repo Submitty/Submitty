@@ -21,9 +21,9 @@
     {% endif %}
     <button class="btn btn-primary" id="update-machines" onclick=updateImage("{{admin_url}}/update_docker") style="margin-top: 1em"> Update dockers and machines</button>
     {% if update_needed %}
-        <span class="btn btn-danger status" style="margin-top: 1em">Changes Pending</span>
+        <span class="btn btn-danger status" data-testid="docker-status" style="margin-top: 1em">Changes Pending</span>
     {% else %}
-        <span class="btn btn-success status" style="margin-top: 1em">Up-to-Date</span>
+        <span class="btn btn-success status" data-testid="docker-status" style="margin-top: 1em">Up-to-Date</span>
     {% endif %}
 </div>
 
