@@ -133,11 +133,12 @@ class GradeOverrideController extends AbstractController {
      * @return array<string,mixed>    The payload for the popup
      */
     private function renderTeamPrompt(object $team, bool $is_delete): array {
+        $member_ids = $this->getTeamMemberIds($team);
+        $users = $this->core->getQueries()->getUsersById($member_ids);
         $team_members = [];
-        foreach ($this->getTeamMemberIds($team) as $member_id) {
-            $member = $this->core->getQueries()->getUserById($member_id);
-            $team_members[$member_id] =
-                $member->getDisplayedGivenName() . ' ' . $member->getDisplayedFamilyName();
+        foreach ($users as $user) {
+            $team_members[$user->getId()] =
+                $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName();
         }
 
         return [
