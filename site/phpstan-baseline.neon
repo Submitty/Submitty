@@ -2293,14 +2293,9 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
-<<<<<<< HEAD
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 18
-=======
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 19
->>>>>>> main
+			count: 18
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
