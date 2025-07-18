@@ -13,7 +13,7 @@
   "testcases": [
     {
       "title": "Executes successfully",
-      "command": "python3 jupyter_notebook_grader.py",
+      "command": "python3 /grading_bin/jupyter_notebook_grader.py",
       "points": 1,
       "validation": [
         {
