@@ -1271,7 +1271,6 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
 
