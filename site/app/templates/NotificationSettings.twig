@@ -160,7 +160,7 @@
             {% endif %}
 
             <div class="heading row-spacing">
-                <h2>Grades</h2>
+                <h2>Gradeables</h2>
                 <hr>
             </div>
 
@@ -175,6 +175,20 @@
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification Grade Release" name="all_released_grades" id="all_released_grades" {% if notification_saves['all_released_grades'] %}checked="checked"{% endif %}></div>
                 {% if email_enabled %}
                     <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Release" name="all_released_grades_email" id="all_released_grades_email" {% if notification_saves['all_released_grades_email'] %} checked="checked" {% endif %}></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <span>
+                        <span class="option-title">Submissions Available</span>
+                        <br>
+                        <span class="option-alt">Alert me when submissions are available to be made for a gradeable</span>
+                    </span>
+                </div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" aria-label="Notification All Gradeable Submissions" name="all_gradeable_submissions" id="all_gradeable_submissions" {% if notification_saves['all_gradeable_submissions'] %}checked="checked"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All Gradeable Submissions" name="all_gradeable_submissions_email" id="all_gradeable_submissions_email" {% if notification_saves['all_gradeable_submissions_email'] %}checked="checked"{% endif %}></div>
                 {% endif %}
             </div>
 

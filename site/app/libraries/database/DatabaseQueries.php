@@ -5221,6 +5221,7 @@ AND gc_id IN (
             'team_member_submission',
             'self_notification',
             'all_released_grades',
+            'all_gradeable_submissions',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -5231,7 +5232,8 @@ AND gc_id IN (
             'team_member_submission_email',
             'self_registration_email',
             'self_notification_email',
-            'all_released_grades_email'
+            'all_released_grades_email',
+            'all_gradeable_submissions_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -8953,12 +8955,12 @@ WHERE current_state IN
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
-                 ns.self_notification, ns.all_released_grades,
+                 ns.self_notification, ns.all_released_grades, ns.all_gradeable_submissions,
                  ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
-                 ns.self_notification_email, ns.all_released_grades_email,
+                 ns.self_notification_email, ns.all_released_grades_email, ns.all_gradeable_submissions_email,
                  sr.grading_registration_sections
 
             FROM users u

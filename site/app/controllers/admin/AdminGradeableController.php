@@ -385,7 +385,8 @@ class AdminGradeableController extends AbstractController {
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
             'notifications_sent' => 0,
-            'notifications_pending' => 0
+            'notifications_pending' => 0,
+            'notification_submissions_sent' => false
         ]);
     }
 
@@ -613,7 +614,8 @@ class AdminGradeableController extends AbstractController {
             'rainbow_grades_summary' => $this->core->getConfig()->displayRainbowGradesSummary(),
             'config_files' => $config_files,
             'notifications_sent' => $gradeable->getNotificationsSent(),
-            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId())
+            'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId()),
+            'notification_submissions_sent' => $gradeable->getNotificationSubmissionsSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
