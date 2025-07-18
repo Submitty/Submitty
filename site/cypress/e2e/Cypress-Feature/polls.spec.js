@@ -351,7 +351,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.url().should('include', 'sample/polls/editPoll');
         cy.get('#breadcrumbs > :nth-child(7) > span').should('have.text', 'Edit Poll');
         cy.get('[data-testid="poll-name"]').invoke('val').should('eq', 'Poll Cypress Test');
-        cy.get('[data-testid="poll-question"]').contains('Question goes here...?');
+        cy.get('[data-testid="poll-question"]').should('have.value', '# Question goes here...?');
         cy.get('#poll-type-single-response-single-correct').should('not.be.checked');
         cy.get('#poll-type-single-response-multiple-correct').should('be.checked');
         cy.get('#poll-type-single-response-survey').should('not.be.checked');

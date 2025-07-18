@@ -17,17 +17,16 @@
         <br/> <br/>
 
         <p class="option-title">Question:</p>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "poll-question",
-            "markdown_area_query" : "$('#poll-question')",
-            "markdown_area_name" : "question",
-            "markdown_area_value" : poll is not null ? poll.getQuestion()  : "",
-            "placeholder" : "Enter question here...",
-            "preview_div_id" : "poll_preview",
-            "preview_div_name" : "poll_preview",
-            "onclick" : "previewPollMarkdown.call(this)",
-            "render_buttons" : true,
-            "min_height" : "100px"
+        {% include "Vue.twig" with { "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "poll-question",
+                "markdownAreaName" : "question",
+                "markdownAreaValue" : poll is not null ? poll.getQuestion()  : "",
+                "placeholder" : "Enter question here...",
+                "previewDivId" : "poll_preview",
+                "minHeight" : "100px"
+            }
         } only %}
         <br/><br/>
 
