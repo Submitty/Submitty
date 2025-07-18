@@ -77,12 +77,13 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
-                $member_ids   = $this->getTeamMemberIds($team);
-                $all_members  = $this->core->getQueries()->getUsersById($member_ids);
+                $member_ids  = $this->getTeamMemberIds($team);
+                $all_members = $this->core->getQueries()->getUsersById($member_ids);
                 $team_members = [];
-                foreach ($member_ids as $id) {
-                    $u = $all_members[$id];
-                    $team_members[$id] = $u->getDisplayedGivenName() . ' ' . $u->getDisplayedFamilyName();
+                foreach ($all_members as $id => $member) {
+                    $team_members[$id] = $member->getDisplayedGivenName()
+                                         . " " 
+                                         . $member->getDisplayedFamilyName();
                 }
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team'   => true,
