@@ -354,7 +354,8 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for creating and deleting a new thread', () => {
-        submitCreateThreadRequest(title5, content4).then(([response, thread]) => {
+        submitCreateThreadRequest(title5, content4).as('createThread');
+        cy.get('@createThread').then(([response, thread]) => {
             cy.wrap(thread).as('thread');
 
             // Verify all the inner-thread components
@@ -374,121 +375,120 @@ describe('Should test WebSocket functionality', () => {
                 expect(response.next_page).to.equal(nextPage);
                 cy.get('@thread').click();
 
-                return cy.url().should('include', nextPage).then(() => {
-                    cy.get('.first_post').should('exist').then((post) => {
-                        // Verify the inserted initial post ID
-                        expect(Number(post.attr('id'))).to.equal(response.post_id);
+                cy.url().should('include', nextPage);
+                cy.get('.first_post').then((post) => {
+                    // Verify the inserted initial post ID
+                    const postId = Number(post.attr('id'));
+                    expect(response.post_id).to.equal(postId);
 
-                        // Verify the thread page content and initial reply level
-                        cy.get('[data-testid="create-post-head"]').should('contain', title5);
-                        cy.get('.post_content').should('contain', content4);
-                        expect(Number(post.attr('data-reply_level'))).to.equal(1);
-                    });
-                });
-            }).then(() => {
-                submitDeletePostRequest(title5, response.thread_id, response.post_id, true);
+                    // Verify the thread page content and initial reply level
+                    cy.get('[data-testid="create-post-head"]').should('contain', title5);
+                    cy.get('.post_content').should('contain', content4);
+                    expect(Number(post.attr('data-reply_level'))).to.equal(1);
+
+                    return cy.wrap([threadId, postId]);
+                }).as('visitThread');
             });
+        });
+        cy.get('@visitThread').then(([threadId, postId]) => {
+            submitDeletePostRequest(title5, threadId, postId, true);
         });
     });
 
     it('Should verify WebSocket functionality for incoming and deleting posts with the correct reply level', () => {
-        submitCreateThreadRequest(title5, content4).then(([response, _]) => {
+        submitCreateThreadRequest(title5, content4).as('createThread');
+        cy.get('@createThread').then(([response, _]) => {
             const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
+            cy.visit(nextPage);
+            submitCreatePostRequest(threadId, parentPostId, reply4).as('createFirstPost');
 
-            cy.visit(nextPage).then(() => {
-                submitCreatePostRequest(threadId, parentPostId, reply4).then(([firstPostResponse, firstPost]) => {
-                    const firstPostId = firstPostResponse.post_id;
-                    cy.wrap(expectPostHierarchy(firstPost, {
-                        threadId,
-                        postId: firstPostId,
-                        parentPostId,
-                        level: 2, // Reply to the original parent post
-                        content: reply4,
-                        nextPage: firstPostResponse.next_page,
-                    })).as('firstPost');
-
-                    let secondPostId;
-                    cy.get('@firstPost').then(() => {
-                        submitCreatePostRequest(threadId, firstPostId, reply5).then(([secondPostResponse, secondPost]) => {
-                            secondPostId = secondPostResponse.post_id;
-                            cy.wrap(expectPostHierarchy(secondPost, {
-                                threadId,
-                                postId: secondPostId,
-                                parentPostId: firstPostId,
-                                level: 3, // Reply to the post above
-                                content: reply5,
-                                nextPage: secondPostResponse.next_page,
-                            })).as('secondPost');
-                        });
-                    });
-
-                    cy.get('@secondPost').then(() => {
-                        // Verify the thread tree from the first post is deleted, but the parent post is still remains
-                        submitDeletePostRequest(title5, threadId, firstPostId, false).then(() => {
-                            cy.get(`#${parentPostId}`).should('exist');
-                            cy.get(`#${firstPostId}`).should('not.exist');
-                            cy.get(`#${secondPostId}`).should('not.exist');
-                        });
-                    });
+            cy.get('@createFirstPost').then(([firstPostResponse, firstPost]) => {
+                const firstPostId = firstPostResponse.post_id;
+                expectPostHierarchy(firstPost, {
+                    threadId,
+                    postId: firstPostId,
+                    parentPostId,
+                    level: 2, // Reply to the original parent post
+                    content: reply4,
+                    nextPage: firstPostResponse.next_page,
                 });
+
+                submitCreatePostRequest(threadId, firstPostId, reply5).as('createSecondPost');
+                cy.get('@createSecondPost').then(([secondPostResponse, secondPost]) => {
+                    const secondPostId = secondPostResponse.post_id;
+                    expectPostHierarchy(secondPost, {
+                        threadId,
+                        postId: secondPostId,
+                        parentPostId: firstPostId,
+                        level: 3, // Reply to the post above
+                        content: reply5,
+                        nextPage: secondPostResponse.next_page,
+                    });
+                    return cy.wrap([threadId, parentPostId, firstPostId, secondPostId]).as('ids');
+                });
+            });
+        });
+        cy.get('@ids').then(([threadId, parentPostId, firstPostId, secondPostId]) => {
+            // Verify the thread tree from the first post is deleted, but the parent post is still remains
+            submitDeletePostRequest(title5, threadId, firstPostId, false).then(() => {
+                cy.get(`#${parentPostId}`).should('exist');
+                cy.get(`#${firstPostId}`).should('not.exist');
+                cy.get(`#${secondPostId}`).should('not.exist');
             });
         });
     });
 
     it('Should verify WebSocket functionality for merging threads', () => {
-        // Remove the merging thread title once during the entire testing file to avoid redundant calls
+        // Remove the merging thread once during the entire testing process to avoid redundant calls with the beforeEach block
         removeThread(title6);
 
-        // Create the base thread
-        submitCreateThreadRequest(title5, content4).then(([baseResponse, _]) => {
-            const { thread_id: baseThreadId, post_id: basePostId, next_page: baseNextPage } = baseResponse;
+        // Create the base and merging threads
+        submitCreateThreadRequest(title5, content4).as('createBaseThread');
+        cy.get('@createBaseThread').then(([baseResponse, _]) => {
+            const { thread_id: baseThreadId, post_id: baseParentPostId, next_page: baseNextPage } = baseResponse;
 
             // Create the merging thread
-            submitCreateThreadRequest(title6, content5).then(([mergingResponse, _]) => {
-                let replyId;
-                const { thread_id: mergingThreadId, post_id: mergingPostId, next_page: mergingNextPage } = mergingResponse;
+            submitCreateThreadRequest(title6, content5).as('createMergingThread');
 
-                // Visit the merging thread
-                cy.visit(mergingNextPage).then(() => {
-                    // Submit a reply to the merging thread
-                    submitCreatePostRequest(mergingThreadId, mergingPostId, reply5).then(([replyResponse, reply]) => {
-                        const { post_id, next_page: replyNextPage } = replyResponse;
-                        replyId = post_id;
+            cy.get('@createMergingThread').then(([mergingResponse, _]) => {
+                const { thread_id: mergingThreadId, post_id: mergingParentPostId, next_page: mergingNextPage } = mergingResponse;
 
-                        return cy.wrap(null).then(() => {
-                            expectPostHierarchy(reply, {
-                                threadId: mergingThreadId,
-                                postId: replyId,
-                                parentPostId: mergingPostId,
-                                level: 2, // Reply to the merging thread parent post
-                                content: reply5,
-                                nextPage: replyNextPage,
-                            });
+                // Submit a post to the merging thread
+                cy.visit(mergingNextPage);
+                submitCreatePostRequest(mergingThreadId, mergingParentPostId, reply5).then(([firstPostResponse, firstPost]) => {
+                    const { post_id: mergingThreadFirstPostId, next_page: mergingThreadFirstPostNextPage } = firstPostResponse;
+                    expectPostHierarchy(firstPost, {
+                        threadId: mergingThreadId,
+                        postId: mergingThreadFirstPostId,
+                        parentPostId: mergingParentPostId,
+                        level: 2, // Reply to the merging thread parent post
+                        content: reply5,
+                        nextPage: mergingThreadFirstPostNextPage,
+                    });
 
-                            return cy.wrap(replyId);
-                        });
-                    }).then((replyId) => {
-                        // Submit the merge request
-                        submitMergeThreadRequest(baseThreadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
-                            expect(mergeResponse.redirect).to.equal(baseNextPage);
-                            expectPostHierarchy(mergedPost, {
-                                threadId: mergingThreadId,
-                                postId: mergingPostId,
-                                parentPostId: basePostId,
-                                level: 2, // Reply to the base thread parent post
-                                content: merged3,
-                            });
-                            // Refetch the reply container to verify the reply level is correct
-                            cy.get(`#${replyId}`).then((reply) => {
-                                expectPostHierarchy(reply, {
-                                    threadId: mergingThreadId,
-                                    postId: replyId,
-                                    parentPostId: mergingPostId,
-                                    level: 3, // Reply to the merging thread parent post
-                                    content: reply5,
-                                });
-                            });
-                        });
+                    return cy.wrap({ baseThreadId, baseParentPostId, baseNextPage, mergingThreadId, mergingParentPostId, mergingThreadFirstPostId }).as('threads');
+                });
+            });
+        });
+        // Submit the merge thread request
+        cy.get('@threads').then(({ baseThreadId, baseParentPostId, baseNextPage, mergingThreadId, mergingParentPostId, mergingThreadFirstPostId }) => {
+            submitMergeThreadRequest(baseThreadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
+                expect(mergeResponse.redirect).to.equal(baseNextPage);
+                expectPostHierarchy(mergedPost, {
+                    threadId: mergingThreadId,
+                    postId: mergingParentPostId,
+                    parentPostId: baseParentPostId,
+                    level: 2, // Reply to the base thread parent post
+                    content: merged3,
+                });
+                // Refetch the merging thread first post to verify the reply level is correct
+                cy.get(`#${mergingThreadFirstPostId}`).then((mergingThreadFirstPost) => {
+                    expectPostHierarchy(mergingThreadFirstPost, {
+                        threadId: mergingThreadId,
+                        postId: mergingThreadFirstPostId,
+                        parentPostId: mergingParentPostId,
+                        level: 3, // Reply to the merging thread parent post
+                        content: reply5,
                     });
                 });
             });
@@ -496,86 +496,91 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for liking and unliking posts via API', () => {
-        // Create a thread as instructor
-        submitCreateThreadRequest(title5, content4).then(([response, _]) => {
-            const { thread_id: threadId, post_id: postId, next_page: nextPage } = response;
+        // Fetch the required API keys for the API calls
+        getApiKey('student', 'student').then((studentApiKey) => {
+            getApiKey('instructor', 'instructor').then((instructorApiKey) => {
+                cy.wrap({ studentApiKey, instructorApiKey }).as('apiKeys');
+            });
+        });
 
-            // Fetch the required API keys for the test
-            getApiKey('student', 'student').then((studentApiKey) => {
-                getApiKey('instructor', 'instructor').then((instructorApiKey) => {
-                    cy.wrap({ studentApiKey, instructorApiKey }).as('apiKeys');
+        cy.get('@apiKeys').then(({ studentApiKey, instructorApiKey }) => {
+            // Create a thread as instructor
+            submitCreateThreadRequest(title5, content4).as('createThread');
+            cy.get('@createThread').then(([response, _]) => {
+                const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
+
+                // Visit the thread as instructor and create a reply
+                cy.visit(nextPage);
+                submitCreatePostRequest(threadId, parentPostId, reply5).as('createFirstPost');
+
+                cy.get('@createFirstPost').then(([firstPostResponse, firstPost]) => {
+                    const { post_id: firstPostId, next_page: firstPostNextPage } = firstPostResponse;
+                    expectPostHierarchy(firstPost, {
+                        threadId,
+                        postId: firstPostId,
+                        parentPostId,
+                        level: 2,
+                        content: reply5,
+                        nextPage: firstPostNextPage,
+                    });
+
+                    return cy.wrap([threadId, parentPostId, firstPostId]).as('ids');
                 });
             });
 
-            // Visit the thread as instructor
-            cy.visit(nextPage).then(() => {
-                // Submit a reply to the thread
-                let replyId;
-                submitCreatePostRequest(threadId, postId, reply5).then(([replyResponse, reply]) => {
-                    replyId = replyResponse.post_id;
-                    cy.wrap(expectPostHierarchy(reply, {
-                        threadId,
-                        postId: replyId,
-                        parentPostId: postId,
-                        level: 2,
-                        content: reply5,
-                        nextPage: replyResponse.next_page,
-                    })).as('reply');
+            // Test upduck functionality from external API calls
+            cy.get('@ids').then(([threadId, parentPostId, firstPostId]) => {
+                // Like as 'student' via API
+                submitToggleLikeRequest('student', studentApiKey, threadId, parentPostId, {
+                    postLikes: 1,
+                    totalLikes: 1,
+                    likeIcon: 'light-mode-off-duck.svg',
+                    instructorLikeBadge: false,
+                }).as('studentLike');
+
+                cy.get('@studentLike').then(() => {
+                    // Like as 'instructor' via API
+                    submitToggleLikeRequest('instructor', instructorApiKey, threadId, parentPostId, {
+                        postLikes: 2,
+                        totalLikes: 2,
+                        likeIcon: 'on-duck-button.svg',
+                        instructorLikeBadge: true,
+                    }).then(() => {
+                        // Like the reply to test overall post vs. thread like counts
+                        submitToggleLikeRequest('instructor', instructorApiKey, threadId, firstPostId, {
+                            postLikes: 1,
+                            totalLikes: 3,
+                            likeIcon: 'on-duck-button.svg',
+                            instructorLikeBadge: true,
+                        }).as('instructorLike');
+                    });
                 });
 
-                cy.get('@apiKeys').then(({ studentApiKey, instructorApiKey }) => {
-                    // Like as 'student' via API
-                    submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
+                cy.get('@instructorLike').then(() => {
+                    // Unlike as 'student' via API
+                    submitToggleLikeRequest('student', studentApiKey, threadId, parentPostId, {
                         postLikes: 1,
+                        totalLikes: 2,
+                        likeIcon: 'on-duck-button.svg',
+                        instructorLikeBadge: true,
+                    }).as('studentUnlike');
+                });
+
+                cy.get('@studentUnlike').then(() => {
+                    // Unlike as 'instructor' via API
+                    submitToggleLikeRequest('instructor', instructorApiKey, threadId, parentPostId, {
+                        postLikes: 0,
                         totalLikes: 1,
                         likeIcon: 'light-mode-off-duck.svg',
                         instructorLikeBadge: false,
-                    }).as('studentLike');
-
-                    cy.get('@studentLike').then(() => {
-                        // Like as 'instructor' via API
-                        submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
-                            postLikes: 2,
-                            totalLikes: 2,
-                            likeIcon: 'on-duck-button.svg',
-                            instructorLikeBadge: true,
-                        }).then(() => {
-                            // Like the reply to test overall post vs. thread like counts
-                            cy.get('@reply').then(() => {
-                                submitToggleLikeRequest('instructor', instructorApiKey, threadId, replyId, {
-                                    postLikes: 1,
-                                    totalLikes: 3,
-                                    likeIcon: 'on-duck-button.svg',
-                                    instructorLikeBadge: true,
-                                }).as('instructorLike');
-                            });
-                        });
-                    });
-
-                    cy.get('@instructorLike').then(() => {
-                        // Unlike as 'student' via API
-                        submitToggleLikeRequest('student', studentApiKey, threadId, postId, {
-                            postLikes: 1,
-                            totalLikes: 2,
-                            likeIcon: 'on-duck-button.svg',
-                            instructorLikeBadge: true,
-                        }).as('studentUnlike');
-                    });
-
-                    cy.get('@studentUnlike').then(() => {
-                        // Unlike as 'instructor' via API
-                        submitToggleLikeRequest('instructor', instructorApiKey, threadId, postId, {
-                            postLikes: 0,
-                            totalLikes: 1,
-                            likeIcon: 'light-mode-off-duck.svg',
-                            instructorLikeBadge: false,
-                        });
-                    }).then(() => {
-                        // Cleanup to prevent conflicts with upduck_forum.spec.js
-                        removeThread(title5);
-                    });
+                    }).as('finalLike');
                 });
             });
+        });
+
+        // Cleanup to prevent conflicts with other test data, such as upduck_forum.spec.js
+        cy.get('@finalLike').then(() => {
+            removeThread(title5);
         });
     });
 });
