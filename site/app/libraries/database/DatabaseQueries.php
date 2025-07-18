@@ -5364,6 +5364,17 @@ AND gc_id IN (
     }
 
     /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Returns notifications for a user
      *
      * @param  string $user_id
@@ -7470,6 +7481,14 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
