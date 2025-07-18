@@ -716,7 +716,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
+                if ($key === "NULL" && ($_COOKIE['include_null_section'] ?? 'omit') === 'omit') {
                     continue;
                 }
                 $total_submissions += $value;
@@ -724,7 +724,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users_who_submitted as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
+                if ($key === "NULL" && ($_COOKIE['include_null_section'] ?? 'omit') === 'omit') {
                     continue;
                 }
                 $total_who_submitted += $value;
@@ -1890,7 +1890,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
 
-            if (array_key_exists('include_bad_submissions', $_COOKIE) && $_COOKIE['include_bad_submissions'] === 'include') {
+            if (($_COOKIE["include_bad_submissions"] ?? 'omit') === 'include') {
                 $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
             }
         }
