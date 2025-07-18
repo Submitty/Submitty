@@ -685,10 +685,10 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
-                $cookie_string = "include_bad_submissions__" . $gradeable->getId();
+                $cookie_string = "include_bad_submissions";
                 $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
 
-                $cookie_string = "include_null_section__" . $gradeable->getId();
+                $cookie_string = "include_null_section";
                 $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
 
                 $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
