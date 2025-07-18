@@ -93,9 +93,4 @@ class HomePageView extends AbstractView {
             "latest_tag" => $this->core->getConfig()->getLatestTag()
         ]);
     }
-
-    public function showTestPage(): string {
-        $this->output->addBreadcrumb("Test Page");
-        return $this->output->renderTwigTemplate('TestPage.twig', ["cookies" => $_COOKIE]);
-    }
 }

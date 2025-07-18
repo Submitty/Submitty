@@ -684,9 +684,9 @@ class ElectronicGraderController extends AbstractController {
                 $team_users = [];
                 $individual_viewed_grade = 0;
             }
-            $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
-            $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
-            $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
+            $override_cookie = $_COOKIE['include_grade_override'] ?? 'omit';
+            $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
+            $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
@@ -1890,7 +1890,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
 
-            if (array_key_exists('include_bad_submissions', $_COOKIE) && $_COOKIE['include_bad_submissions'] == 'include') {
+            if (array_key_exists('include_bad_submissions', $_COOKIE) && $_COOKIE['include_bad_submissions'] === 'include') {
                 $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
             }
         }
