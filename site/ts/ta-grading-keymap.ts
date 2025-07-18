@@ -157,12 +157,13 @@ function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
 }
 
-window.showSettings = function () {
+export function showSettings() {
     generateSettingList();
     generateHotkeysList();
     $('#settings-popup').show();
     captureTabInModal('settings-popup');
-};
+}
+window.showSettings = showSettings;
 
 window.restoreAllHotkeys = function () {
     keymap.forEach((hotkey, index) => {
