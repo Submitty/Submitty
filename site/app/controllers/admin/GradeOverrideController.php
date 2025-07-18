@@ -40,8 +40,32 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods: ["POST"])]
     public function deleteOverriddenGrades($gradeable_id) {
-        $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
-        return $this->getOverriddenGrades($gradeable_id);
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
+        //0 is for single submission, 1 is for team submission
+        $option = $_POST['option'] ?? -1;
+        if ($team !== null && $team->getSize() > 1) {
+            if (intval($option) === 0) {
+                $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            elseif (intval($option) === 1) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
+                    $this->core->getQueries()->deleteOverriddenGrades($member_id, $gradeable_id);
+                }
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            else {
+                $popup_html = $this->renderTeamPrompt($team, true);
+                return $this->core->getOutput()->renderJsonSuccess([
+                    'is_team' => true,
+                    'popup' => $popup_html
+                ]);
+            }
+        }
+        else {
+            $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+            return $this->getOverriddenGrades($gradeable_id);
+        }
     }
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
@@ -59,55 +83,40 @@ class GradeOverrideController extends AbstractController {
         }
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
-
-        // if it is a team, generate the popup
+        //0 is for single submission, 1 is for team submission
+        $option = $_POST['option'] ?? -1;
         if ($team !== null && $team->getSize() > 1) {
-            $team_members = [];
-            foreach ($this->getTeamMemberIds($team) as $member_id) {
-                $member = $this->core->getQueries()->getUserById($member_id);
-                $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
+            if (intval($option) === 0) {
+                $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
+                return $this->getOverriddenGrades($gradeable_id);
             }
+            elseif (intval($option) === 1) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
+                    $this->core->getQueries()->updateGradeOverride($member_id, $gradeable_id, $_POST['marks'], $_POST['comment']);
+                }
+                return $this->getOverriddenGrades($gradeable_id);
+            }
+            else {
+                $team_members = [];
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
+                    $member = $this->core->getQueries()->getUserById($member_id);
+                    $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
+                }
 
-            return $this->core->getOutput()->renderJsonSuccess([
-                'is_team' => true,
-                'component' => 'OverrideTeamPopup',
-                'args' => [
-                    'userId' => $_POST['user_id'],
-                    'memberList' => $team_members,
-                ],
-            ]);
+                return $this->core->getOutput()->renderJsonSuccess([
+                    'is_team' => true,
+                    'component' => 'OverrideTeamPopup',
+                    'args' => [
+                        'memberList' => $team_members,
+                        'isDelete' => false,
+                    ],
+                ]);
+            }
         }
-        // not a team, just single override
         else {
             $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
             return $this->getOverriddenGrades($gradeable_id);
         }
-    }
-
-    #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update_team", methods: ["POST"])]
-    public function updateTeamOverriddenGrades($gradeable_id) {
-        $members = json_decode($_POST['members'] ?? '[]', true);
-
-        // Which button did they click? 0 = solo, 1 = apply to all
-        $members  = json_decode($_POST['members'] ?? '[]', true);
-        $fullTeam = filter_var($_POST['full_team'] ?? '0', FILTER_VALIDATE_BOOLEAN);
-        $marks    = (int) ($_POST['marks']   ?? 0);
-        $comment  =           ($_POST['comment'] ?? '');
-        $userId   =           ($_POST['user_id'] ?? '');
-
-        if ($fullTeam) {
-            // User selects yes: Update the entire team
-            foreach (array_keys($members) as $member_id) {
-                $this->core->getQueries()->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
-            }
-        }
-        else {
-            // User selects no: Only update original student
-            $user_id = $_POST['user_id'];
-            $this->core->getQueries()->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
-        }
-
-        return $this->getOverriddenGrades($gradeable_id);
     }
 
     /**
@@ -120,9 +129,10 @@ class GradeOverrideController extends AbstractController {
 
     /**
      * @param object       $team      An object with getMemberList(): string
+     * @param bool         $is_delete
      * @return array<string,mixed>    The payload for the popup
      */
-    private function renderTeamPrompt(object $team): array {
+    private function renderTeamPrompt(object $team, bool $is_delete): array {
         $team_members = [];
         foreach ($this->getTeamMemberIds($team) as $member_id) {
             $member = $this->core->getQueries()->getUserById($member_id);
@@ -135,6 +145,7 @@ class GradeOverrideController extends AbstractController {
             'component' => 'OverrideTeamPopup',
             'args'      => [
                 'memberList' => $team_members,
+                'isDelete'   => $is_delete,
             ],
         ];
     }

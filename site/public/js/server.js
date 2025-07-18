@@ -1237,16 +1237,8 @@ function confirmBypass(str, redirect) {
 }
 
 function updateGradeOverride() {
-    const $form = $('#gradeOverrideForm');
-    const fd    = new FormData($form.get(0));
-    // if 'members' exists, use update_team
-    const route = fd.get('members') ? 'update_team' : 'update';
-    const url   = buildCourseUrl([
-        'grade_override',
-        $('#g_id').val(),
-        route
-    ]);
-
+    const fd = new FormData($('#gradeOverrideForm').get(0));
+    const url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);
     $.ajax({
         url: url,
         type: 'POST',
@@ -1254,34 +1246,33 @@ function updateGradeOverride() {
         processData: false,
         cache: false,
         contentType: false,
-        success(data) {
-        let json;
-        try {
-            json = JSON.parse(data);
-        } catch {
-            displayErrorMessage('Error parsing data. Please try again.');
-            return;
-        }
-        if (json.status === 'fail') {
-            displayErrorMessage(json.message);
-            return;
-        }
-        if (json.data?.is_team) {
-            overridePopup(json);
-            return;
-        }
-        refreshOnResponseOverriddenGrades(json);
-        // clear fields (including members/full_team if present)
-        $('#user_id, #marks, #comment, input[name="full_team"], input[name="members"]').val('');
-        displaySuccessMessage(
-            `Updated overridden Grades for ${json.data.gradeable_id}`
-        );
+        success: function (data) {
+            let json = {};
+            try {
+                json = JSON.parse(data);
+            }
+            catch (err) {
+                displayErrorMessage('Error parsing data. Please try again.');
+                return;
+            }
+            if (json['status'] === 'fail') {
+                displayErrorMessage(json['message']);
+                return;
+            }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
+            refreshOnResponseOverriddenGrades(json);
+            $('#user_id').val(this.defaultValue);
+            $('#marks').val(this.defaultValue);
+            $('#comment').val(this.defaultValue);
+            displaySuccessMessage(`Updated overridden Grades for ${json['data']['gradeable_id']}`);
         },
-        error() {
-        window.alert('Something went wrong. Please try again.');
+        error: function () {
+            window.alert('Something went wrong. Please try again.');
         },
     });
-
     return false;
 }
 
@@ -1364,16 +1355,17 @@ function deleteOverriddenGrades(user_id, option) {
     return false;
 }
 
-function confirmOverride(userId, memberList, fullTeam) {
-    $('input[name="user_id"]').val(userId);
-    $('input[name="full_team"]').val(fullTeam ? '1' : '0');
-    $('input[name="members"]').val(JSON.stringify(memberList));
-
-    updateGradeOverride();
-
-    $('input[name="user_id"]').val('');
-    $('input[name="full_team"]').val('');
-    $('input[name="members"]').val('');
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val(-1);
+    }
 }
 
 function overridePopup(json) {
