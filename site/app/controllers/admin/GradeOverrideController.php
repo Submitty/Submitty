@@ -46,20 +46,20 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $user_id = $_POST['user_id']   ?? '';
-        $marks   = $_POST['marks']     ?? '';
-        $comment = $_POST['comment']   ?? '';
+        $user_id = $_POST['user_id'] ?? '';
+        $marks   = $_POST['marks']   ?? '';
+        $comment = $_POST['comment'] ?? '';
         $option  = intval($_POST['option'] ?? -1);
 
-        $users = $this->core->getQueries()->getUsersById([$user_id]);
-        if ($user_id === '' || empty($users) || !isset($users[$user_id])) {
+        $user = $this->core->getQueries()->getSubmittyUser($user_id);
+        if (!$user || $user->getId() !== $user_id) {
             return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
         }
 
         if ($marks === '' || !ctype_digit($marks)) {
             return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
         }
-        $marks = (int) $marks;
+        $marks = (int)$marks;
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 
@@ -106,28 +106,5 @@ class GradeOverrideController extends AbstractController {
      */
     private function getTeamMemberIds(object $team): array {
         return explode(", ", $team->getMemberList());
-    }
-
-    /**
-     * @param object       $team      An object with getMemberList(): string
-     * @param bool         $is_delete
-     * @return array<string,mixed>    The payload for the popup
-     */
-    private function renderTeamPrompt(object $team, bool $is_delete): array {
-        $member_ids = $this->getTeamMemberIds($team);
-        $users = $this->core->getQueries()->getUsersById($member_ids);
-        $team_members = [];
-        foreach ($users as $user) {
-            $team_members[$user->getId()] =
-                $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName();
-        }
-        return [
-            'is_team'   => true,
-            'component' => 'OverrideTeamPopup',
-            'args'      => [
-                'memberList' => $team_members,
-                'isDelete'   => $is_delete,
-            ],
-        ];
     }
 }
