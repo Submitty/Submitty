@@ -70,23 +70,22 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $post    = $this->core->getRequest()->request;
-        $user_id = $post->get('user_id', '');
+        $user_id = $_POST['user_id']   ?? '';
+        $marks   = $_POST['marks']     ?? '';
+        $comment = $_POST['comment']   ?? '';
+        $option  = intval($_POST['option'] ?? -1);
 
         $users = $this->core->getQueries()->getUsersById([$user_id]);
         if ($user_id === '' || empty($users) || !isset($users[$user_id])) {
             return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
         }
 
-        $marks = $post->get('marks');
         if ($marks === '' || !ctype_digit($marks)) {
             return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
         }
-        $marks   = (int)$marks;
-        $comment = $post->get('comment', '');
+        $marks = (int)$marks;
 
-        $team   = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
-        $option = intval($post->get('option', -1));
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 
         if ($team !== null && $team->getSize() > 1) {
             if ($option === 0) {
@@ -95,19 +94,18 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             elseif ($option === 1) {
-                $member_ids = $this->getTeamMemberIds($team);
-                foreach ($member_ids as $member_id) {
+                foreach ($this->getTeamMemberIds($team) as $member_id) {
                     $this->core->getQueries()
                         ->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
                 }
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
-                $member_ids = $this->getTeamMemberIds($team);
-                $members     = $this->core->getQueries()->getUsersById($member_ids);
+                $member_ids   = $this->getTeamMemberIds($team);
+                $all_members  = $this->core->getQueries()->getUsersById($member_ids);
                 $team_members = [];
                 foreach ($member_ids as $id) {
-                    $u = $members[$id];
+                    $u = $all_members[$id];
                     $team_members[$id] = $u->getDisplayedGivenName() . ' ' . $u->getDisplayedFamilyName();
                 }
                 return $this->core->getOutput()->renderJsonSuccess([
@@ -121,7 +119,6 @@ class GradeOverrideController extends AbstractController {
             }
         }
 
-        // 5) Not a team (or team of one) → single override
         $this->core->getQueries()
             ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
         return $this->getOverriddenGrades($gradeable_id);
