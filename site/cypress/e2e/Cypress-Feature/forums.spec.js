@@ -267,7 +267,7 @@ const submitDeletePostRequest = (title, threadId, postId, isFirstPost = false) =
         body,
         (response) => {
             if (isFirstPost) {
-                // Verify thread deletion
+                // Verify server and client-side thread deletion
                 const redirectPage = buildUrl(['sample', 'forum'], true);
                 expect(response.type).to.equal('thread');
                 cy.get('[data-testid="thread-list-item"]').contains(title).should('not.exist');
@@ -418,11 +418,11 @@ describe('Should test WebSocket functionality', () => {
                         content: reply5,
                         nextPage: secondPostResponse.next_page,
                     });
-                    return cy.wrap([threadId, parentPostId, firstPostId, secondPostId]).as('ids');
+                    return cy.wrap({ threadId, parentPostId, firstPostId, secondPostId }).as('ids');
                 });
             });
         });
-        cy.get('@ids').then(([threadId, parentPostId, firstPostId, secondPostId]) => {
+        cy.get('@ids').then(({ threadId, parentPostId, firstPostId, secondPostId }) => {
             // Verify the thread tree from the first post is deleted, but the parent post is still remains
             submitDeletePostRequest(title5, threadId, firstPostId, false).then(() => {
                 cy.get(`#${parentPostId}`).should('exist');
@@ -433,7 +433,7 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for merging threads', () => {
-        // Remove the merging thread once during the entire testing process to avoid redundant calls with the beforeEach block
+        // Remove the merging thread once during the entire testing process to avoid redundant calls with the beforeEach hook
         removeThread(title6);
 
         // Create the base and merging threads
@@ -443,7 +443,6 @@ describe('Should test WebSocket functionality', () => {
 
             // Create the merging thread
             submitCreateThreadRequest(title6, content5).as('createMergingThread');
-
             cy.get('@createMergingThread').then(([mergingResponse, _]) => {
                 const { thread_id: mergingThreadId, post_id: mergingParentPostId, next_page: mergingNextPage } = mergingResponse;
 
@@ -506,7 +505,6 @@ describe('Should test WebSocket functionality', () => {
                 // Visit the thread as instructor and create a reply
                 cy.visit(nextPage);
                 submitCreatePostRequest(threadId, parentPostId, reply5).as('createFirstPost');
-
                 cy.get('@createFirstPost').then(([firstPostResponse, firstPost]) => {
                     const { post_id: firstPostId, next_page: firstPostNextPage } = firstPostResponse;
                     expectPostHierarchy(firstPost, {
@@ -518,12 +516,12 @@ describe('Should test WebSocket functionality', () => {
                         nextPage: firstPostNextPage,
                     });
 
-                    return cy.wrap([threadId, parentPostId, firstPostId]).as('ids');
+                    return cy.wrap({ threadId, parentPostId, firstPostId }).as('ids');
                 });
             });
 
             // Test upduck functionality from external API calls
-            cy.get('@ids').then(([threadId, parentPostId, firstPostId]) => {
+            cy.get('@ids').then(({ threadId, parentPostId, firstPostId }) => {
                 // Like as 'student' via API
                 submitToggleLikeRequest('student', studentApiKey, threadId, parentPostId, {
                     postLikes: 1,
