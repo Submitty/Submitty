@@ -61,8 +61,7 @@ http://localhost
 
 sysadmin@example.com
 https://example.com
-2
-y
+1
 
 
 y
@@ -87,5 +86,8 @@ systemctl start submitty_autograding_shipper
 systemctl start submitty_autograding_worker
 systemctl start submitty_websocket_server
 systemctl start submitty_daemon_jobs_handler
+
+echo 'Copying some autograding files'
+cp -R ${SUBMITTY_REPOSITORY}/more_autograding_examples ${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples
 
 echo 'Finished setup.'
