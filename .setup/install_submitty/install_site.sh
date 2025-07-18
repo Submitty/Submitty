@@ -11,9 +11,12 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-# This script has two command-line arguments:
+# This script has five command-line arguments:
 #   Required argument: config=<config dir>.
 #   Optional argument: browscap
+#   Optional argument: skip-vendor
+#   Optional argument: skip-node
+#   Optional argument: skip-npm-build
 
 set_permissions () {
     local fullpath=$1
@@ -59,6 +62,7 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
+DEBUG_MODE=$(jq -r '.debugging_enabled' ${SUBMITTY_INSTALL_DIR}/config/database.json)
 PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
@@ -76,12 +80,18 @@ do
         SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
     elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
+    elif [[ $cli_arg == "skip-vendor" ]]; then
+        SKIP_VENDOR=true
+    elif [[ $cli_arg == "skip-node" ]]; then
+        SKIP_NODE=true
+    elif [[ $cli_arg == "skip-npm-build" ]]; then
+        SKIP_NPM_BUILD=true
     fi
 done
 
 if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     echo "ERROR: This script requires a config dir argument"
-    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap] [skip-vendor] [skip-node] [skip-npm-build]"
     exit 1
 fi
 
@@ -114,15 +124,18 @@ chmod 755 ${SUBMITTY_DATA_DIR}/run
 chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
 chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 
-# Delete all typescript code to prevent deleted files being left behind and potentially
-# causing compilation errors
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
-fi
 
-# Delete all vue code to prevent deleted vue files from being rendered
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
+if [[ -z "${SKIP_NPM_BUILD}" ]]; then
+    # Delete all typescript code to prevent deleted files being left behind and potentially
+    # causing compilation errors
+    if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
+        rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
+    fi
+
+    # Delete all vue code to prevent deleted vue files from being rendered
+    if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
+        rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
+    fi
 fi
 
 # copy the website from the repo. We don't need the tests directory in production and then
@@ -195,12 +208,6 @@ fi
 # create lang cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
 
-if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
-    rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
-fi
-# create output dir for esbuild
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
@@ -209,8 +216,6 @@ done
 
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
-
-chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # set the mask for composer so that it'll run properly and be able to delete/modify
 # files under it
@@ -238,7 +243,7 @@ for entry in "${result_array[@]}"; do
     fi
 done
 
-if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
+if [ -z "${SKIP_VENDOR}" ]; then
     # install composer dependencies and generate classmap
     if [ ${VAGRANT} == 1 ]; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --dev --prefer-dist --optimize-autoloader"
@@ -246,20 +251,15 @@ if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
-else
-    if [ ${VAGRANT} == 1 ]; then
-        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
-    else
-        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
-    fi
-    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
+
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 fi
 
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
-
 # create doctrine proxy classes
-php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+if [ $DEBUG_MODE != true ]; then
+    php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
+fi
 
 # load lang files
 php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
@@ -280,7 +280,7 @@ NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
-if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
+if [[ -z "${SKIP_NODE}" ]]; then
     # Install JS dependencies and then copy them into place
     # We need to create the node_modules folder initially if it
     # doesn't exist, or else submitty_php won't be able to make it
@@ -410,23 +410,33 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
-echo "Running esbuild"
-chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
-chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
-chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
-chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
-su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
-chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
-chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
-chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
-chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+if [[ -z "${SKIP_NPM_BUILD}" ]]; then
+    if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
+        rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
+    fi
+    # create output dir for esbuild
+    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+    chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
-chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+
+    echo "Running esbuild"
+    chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+    chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+    chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+    chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
+    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+    chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
+    chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+    chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+    chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+    chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+    chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+
+    chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+    set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+fi
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
