@@ -1,6 +1,55 @@
 import { viewFileFullPanel } from './ta-grading';
 import { openMarkConflictPopup } from './ta-grading-rubric-conflict';
 
+declare global {
+    interface Window {
+        reloadGradingRubric: (gradeable_id: string, anon_id: string | undefined) => Promise<void>;
+        showVerifyComponent(graded_component: ComponentGradeInfo | undefined, grader_id: string): boolean;
+        onAddNewMark(me: HTMLElement): Promise<void>;
+        onRestoreMark(me: HTMLElement): void;
+        onDeleteMark(me: HTMLElement): void;
+        onDeleteComponent(me: HTMLElement): Promise<void>;
+        importComponentsFromFile(me: HTMLElement): Promise<void>;
+        onAddComponent(peer: boolean): Promise<void>;
+        onMarkPointsChange(me: HTMLElement): Promise<void>;
+        onGetMarkStats(me: HTMLElement): Promise<void>;
+        onClickComponent(me: HTMLElement, edit_mode?: boolean): Promise<void>;
+        onCancelEditRubricComponent(me: HTMLElement): void;
+        onChangeOverallComment(me: HTMLElement): Promise<void>;
+        onCancelComponent(me: HTMLElement): Promise<void>;
+        onCustomMarkChange(me: HTMLElement): Promise<void>;
+        onToggleMark(me: HTMLElement): Promise<void>;
+        onToggleCustomMark(me: HTMLElement): Promise<void>;
+        onVerifyAll(me: HTMLElement): Promise<void>;
+        onVerifyComponent(me: HTMLElement): Promise<void>;
+        onClickCountUp(me: HTMLElement): void;
+        onClickCountDown(me: HTMLElement): void;
+        onComponentPointsChange(me: HTMLElement): Promise<void>;
+        onComponentTitleChange(me: HTMLElement): void;
+        onComponentPageNumberChange(me: HTMLElement): void;
+        onMarkPublishChange(me: HTMLElement): void;
+        setPdfPageAssignment(page: number): Promise<void>;
+        reloadPeerRubric(gradeable_id: string, anon_id: string): Promise<void>;
+        open_overall_comment_tab(user: string): void;
+        updateAllComponentVersions(): Promise<void>;
+        closeAllComponents(save_changes: boolean | undefined, edit_mode: boolean | undefined): Promise<void>;
+        reloadInstructorEditRubric(gradeable_id: string, itempool_available: boolean, itempool_options: Record<string, string[]>): Promise<void>;
+        canVerifyGraders(): boolean;
+        isItempoolAvailable(): string;
+        getItempoolOptions(parsed?: boolean): string | Record<string, string[]>;
+        toggleCustomMark(component_id: number): Promise<void>;
+        onToggleEditMode(): Promise<void>;
+        addComponent(peer: boolean): Promise<string | undefined>;
+        deleteComponent(component_id: number): Promise<string | undefined>;
+        addNewMark(component_id: number): Promise<void>;
+        getGradeableId(): string | undefined;
+
+        PDF_PAGE_NONE: number;
+        PDF_PAGE_STUDENT: number;
+        PDF_PAGE_INSTRUCTOR: number;
+    }
+}
+
 /**
  *  Notes: Some variables have 'domElement' in their name, but they may be jquery objects
  */
@@ -19,14 +68,14 @@ type Gradeable = {
     precision: number;
     components: Component[];
 };
-export type Component = {
+type Component = {
     id: number; title: string; ta_comment: string; student_comment: string; page: number; lower_clamp: number; default: number; max_value: number; upper_clamp: number; is_itempool_linked: boolean; itempool_option: string; peer: boolean;
     marks: Mark[];
 };
 interface GradedComponent extends Component, ComponentGradeInfo {
     component_id: number;
 }
-export type ComponentGradeInfo = {
+type ComponentGradeInfo = {
     comment: string;
     score: number;
     custom_mark_selected: boolean;
@@ -150,9 +199,8 @@ const COUNT_DIRECTION_DOWN = -1;
  * Pdf Page settings for components
  * @type {int}
  */
-// eslint-disable-next-line no-unused-vars, no-var
+
 window.PDF_PAGE_NONE = 0;
-// eslint-disable-next-line no-var
 window.PDF_PAGE_STUDENT = -1;
 window.PDF_PAGE_INSTRUCTOR = -2;
 
@@ -891,7 +939,6 @@ async function ajaxChangeGradedVersion(gradeable_id: string | undefined, anon_id
         return response.data;
     }
 }
-window.ajaxChangeGradedVersion = ajaxChangeGradedVersion;
 
 /**
  * Gets if the 'verify' button should show up for a component
@@ -929,7 +976,6 @@ window.getGradeableId = getGradeableId;
 export function getAnonId(): string {
     return $('#anon-id').attr('data-anon_id')!;
 }
-window.getAnonId = getAnonId;
 
 /**
  * Gets the id of the grader
@@ -953,7 +999,7 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#grader-info').attr('data-can_verify') === 'true';
+    return $('#grader-info').attr('data-can_verify') === '1';
 }
 window.canVerifyGraders = canVerifyGraders;
 
@@ -1008,7 +1054,6 @@ function updateEditModeEnabled() {
  * @return {boolean}
  */
 export function isSilentEditModeEnabled() {
-    // noinspection JSValidateTypes
     return $('#silent-edit-id').is(':checked');
 }
 
@@ -1044,7 +1089,6 @@ function getComponentIdFromDOMElement(me: HTMLElement) {
     }
     return parseInt($(me).parents('.component').attr('data-component_id')!);
 }
-window.getComponentIdFromDOMElement = getComponentIdFromDOMElement;
 
 /**
  * Gets the mark id of a DOM element inside a mark
@@ -1113,7 +1157,7 @@ function getItempoolOptions(parsed = false): string | Record<string, string[]> {
             return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')!) as Record<string, string[]> : {};
         }
         catch {
-            displayErrorMessage('Something went wrong retrieving itempool options');
+            window.displayErrorMessage('Something went wrong retrieving itempool options');
             return {};
         }
     }
@@ -1158,7 +1202,7 @@ function setupSortableMarks(component_id: number) {
 function setupSortableComponents() {
     const componentList = $('#component-list');
     componentList.sortable({
-        update: void onComponentOrderChange,
+        update: () => void onComponentOrderChange(),
         handle: '.reorder-component-container',
     });
     componentList.on('keydown', keyPressHandler);
@@ -1204,6 +1248,7 @@ function setComponentHeaderContents(component_id: number, contents: string | Ele
  * @param {string} contents
  */
 function setTotalScoreBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#total-score-container').html(contents);
 }
 
@@ -1212,6 +1257,7 @@ function setTotalScoreBoxContents(contents: string | Element | DocumentFragment 
  * @param contents
  */
 function setRubricTotalBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#rubric-total-container').html(contents);
 }
 
@@ -1250,7 +1296,6 @@ function getAllComponentsFromDOM() {
     });
     return components;
 }
-window.getAllComponentsFromDOM = getAllComponentsFromDOM;
 
 /**
  * Gets the page number assigned to a component
@@ -1895,7 +1940,7 @@ window.onRestoreMark = function (me: HTMLElement) {
 window.onDeleteComponent = async function (me: HTMLElement) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
-        displayErrorMessage('Cannot delete the only component.');
+        window.displayErrorMessage('Cannot delete the only component.');
         return;
     }
 
@@ -2464,7 +2509,6 @@ function loadComponentData(gradeable: Gradeable, graded_gradeable: typeof GRADED
     for (const component of gradeable.components) {
         COMPONENT_RUBRIC_LIST[component.id] = component;
         if (graded_gradeable!.active_graders[component.id]) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ACTIVE_GRADERS_LIST[component.id] = graded_gradeable!.active_graders[component.id].map((grader, index) => {
                 const graderAge = window.luxon.DateTime.fromISO(graded_gradeable!.active_graders_timestamps[component.id.toString()][index]).toRelative();
                 return `${grader} (${graderAge})`;

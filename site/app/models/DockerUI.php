@@ -258,21 +258,27 @@ class DockerUI extends AbstractModel {
         // Read next three lines for additional details
         $image = $this->readImageDetails();
 
-        //take the first name in the list of name:tags and use that as the primary
+        // take the first name in the list of name:tags and use that as the primary
         $image->primary_name = array_shift($image_array);
         $image->aliases = $image_array;
+
+        // Duplicate images from workers are not added to the list again
+        if (isset($this->docker_images[$image->primary_name])) {
+            return;
+        }
+
         if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
             $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
 
-        $this->docker_images[] = $image;
+        $this->docker_images[$image->primary_name] = $image;
     }
 
     /** Collect the details of an image and return them in a map, in the future a class should represent the return */
     private function readImageDetails(): DockerImage {
         $log_lines = [];
 
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $line = strtok("\n");
             if ($line === false) {
                 throw new DockerLogParseException("Unexpected end of log while reading image details.");
@@ -331,17 +337,17 @@ class DockerUI extends AbstractModel {
             }
 
             $is_match = preg_match("/Worker Service: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["worker"] = $matches[1];
             }
 
             $is_match = preg_match("/Shipper Service: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["shipper"] = $matches[1];
             }
 
             $is_match = preg_match("/Daemon Job Handler: (.+)/", $buffer, $matches);
-            if ($is_match === 1 && $matches[1] !== "Service Not Found") {
+            if ($is_match === 1) {
                 $machine_system_details[$current_machine]["daemon"] = $matches[1];
             }
 

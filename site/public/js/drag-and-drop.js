@@ -2,7 +2,7 @@
             handleSubmission, handleRegrade, handleBulk, deleteSplitItem, submitSplitItem, displayPreviousSubmissionOptions
             displaySubmissionMessage, validateUserId, openFile, handle_input_keypress, addFilesFromInput,
             dropWithMultipleZips, initMaxNoFiles, setUsePrevious, readPrevious, createArray, initializeDragAndDrop setButtonStatus */
-/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage */
+/* global buildCourseUrl, buildUrl, getFileExtension, csrfToken, removeMessagePopup, newOverwriteCourseMaterialForm, displayErrorMessage, displayMessage, escapeSpecialChars */
 
 /*
 References:
@@ -139,7 +139,7 @@ function progress(e) {
         progressBar.max = e.total;
         progressBar.value = e.loaded;
         const perc = (e.loaded * 100) / e.total;
-        $('#loading-bar-percentage').html(`${perc.toFixed(2)} %`);
+        $('#loading-bar-percentage').text(`${perc.toFixed(2)} %`);
     }
 }
 
@@ -414,8 +414,8 @@ function addLabel(filename, filesize, part, previous) {
     const fileTrashElement = document.createElement('td');
     fileTrashElement.setAttribute('class', 'file-trash');
 
-    fileDataElement.innerHTML = filename;
-    fileTrashElement.innerHTML = `${filesize}KB  <i aria-label='Press enter to remove file ${filename}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
+    fileDataElement.innerText = filename;
+    fileTrashElement.innerHTML = `${escapeSpecialChars(filesize.toString())}KB  <i aria-label='Press enter to remove file ${escapeSpecialChars(filename.toString())}' tabindex='0' class='fas fa-trash custom-focus'></i>`;
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
@@ -493,6 +493,10 @@ function isValidSubmission() {
         return true;
     }
 
+    if (Object.prototype.hasOwnProperty.call(window, 'is_vcs')) {
+        return true;
+    }
+
     return false;
 }
 
@@ -534,22 +538,11 @@ function validateUserId(csrf_token, gradeable_id, user_id) {
 // @param index used for id
 // function to display pop-up notification after bulk submission/delete
 function displaySubmissionMessage(json) {
-    // let the id be the date to prevent closing the wrong message
-    const d = new Date();
-    const t = String(d.getTime());
-
-    const class_str = `class="inner-message alert ${json['status'] === 'success' ? 'alert-success' : 'alert-error'}"`;
-    const close_btn = `<a class="fas fa-times message-close" onclick="removeMessagePopup(${t});"></a>`;
-    const fa_icon = `<i class="${json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle'}"></i>`;
-    const response = (json['status'] === 'success' ? json['data'] : json['message']);
-
-    const message = `<div id="${t}"${class_str}>${fa_icon}${response}${close_btn}</div>`;
-    $('#messages').append(message);
-
     if (json['status'] === 'success') {
-        setTimeout(() => {
-            removeMessagePopup(t);
-        }, 5000);
+        displayMessage(json['data'], 'success');
+    }
+    else {
+        displayMessage(json['message'], 'error');
     }
 }
 

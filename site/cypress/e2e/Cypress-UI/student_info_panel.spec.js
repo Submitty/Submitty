@@ -6,7 +6,7 @@ describe('Test cases involving the files panel', () => {
     beforeEach(() => {
         cy.visit(['sample', 'gradeable', 'grading_homework', 'grading', 'details']);
         cy.login('instructor');
-        cy.get('.btn').contains('View All').click();
+        cy.get('[data-testid="view-sections"]').click();
         cy.get('#details-table').contains('mccule').siblings().eq(6).click();
         cy.get('#student_info_btn').click();
         cy.get('.rubric-title').as('rubricTitle'); // Alias for rubric title

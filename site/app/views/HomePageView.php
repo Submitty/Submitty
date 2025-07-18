@@ -54,12 +54,14 @@ class HomePageView extends AbstractView {
             $statuses[$course_type_name] = $ranks;
         }
 
-        $this->output->addInternalCss('homepage.css');
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
-        return $this->output->renderTwigTemplate('HomePage.twig', [
-            "user" => $user,
-            "statuses" => $statuses,
+        return $this->output->renderTwigTemplate('Vue.twig', [
+            "type" => "page",
+            "name" => "HomePage",
+            "args" => [
+                "statuses" => $statuses,
+            ]
         ]);
     }
 

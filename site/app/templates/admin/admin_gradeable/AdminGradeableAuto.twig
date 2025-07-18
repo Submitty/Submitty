@@ -1,3 +1,4 @@
+{% import _self as self %}
 <div class="electronic_file">
 
     <div class="option-title">
@@ -110,6 +111,46 @@
         </div>
     </div>
 
+    <div class="raw-config-info">
+    <input type="file" id="hidden-config-file-input" class="hidden-file-input" />
+        <div class="option-title raw-config-info-header">
+            <span>Edit Uploaded Configuration:</span>
+            <p class="not-available-message" id="editor-not-available">
+                Not available for provided configurations.
+            </p>
+            <a class="btn btn-primary editor-toggle-btn" tabindex="0" id="open-config-editor" onclick="toggleGradeableConfigEdit()">
+                Open Editor
+            </a>
+        </div>
+        <div id="gradeable-config-structure">
+            <p class="config-editor-about">
+                Click on a file to view it in the gradeable editor.  You can add or delete individual files and folders as needed. 
+                By design, you cannot delete the config.json file. <i class="config-about-warning"><b>NOTE:</b> deleting a folder deletes all files 
+                within it!</i> This feature is intended for <i>small changes</i> to an existing configuration. For larger changes 
+                to the file structure, consider reuploading the full configuration.
+            </p>
+            <div>
+                <div>
+                    <div class="config-folder-view">
+                        <div class="main-folder">
+                            <i class="fas fa-folder-plus file-action-add" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
+                            <i class="fas fa-plus file-action-add config-file-icon" onClick="addFile('{{ gradeable.getId() }}', null)"></i>
+                            {% set parts = selected_autograding_configuration_path|split('/') %}
+                            {% set displayFolder = parts|slice(-2)|join('/') %}
+                            <a class="key_to_click" tabindex="0">{{ displayFolder }}</a>
+                        </div>
+                        {{ _self.display_config_files(config_files, 1, gradeable.getId()) }}
+                    </div>
+                </div>
+                <div id="gradeable-config-edit-bar">
+                    <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
+                    <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
+                    <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="btn-container" id="rebuild-gradeable-button">
         <a class="btn btn-primary key_to_click" tabindex="0" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
@@ -140,6 +181,8 @@
     registerSelect2Widget("autograding_config_selector");
     
     var gradeable_max_autograder_points = {{ gradeable_max_points|json_encode|raw }}
+    const ALL_NONUPLOADED_CONFIG_PATHS = {{ all_nonuploaded_config_paths|json_encode|raw }};
+    const NONUPLOADED_CONFIG_VALUES = ALL_NONUPLOADED_CONFIG_PATHS.map(pair => pair[1]);
 
     function onPdfChange() {
         if($('#yes_pdf_page').is(':checked')) {
@@ -227,3 +270,28 @@
         });
     });
 </script>
+
+{% macro display_config_files(files, indent, g_id) %}
+    <div class="main-folder-contents">
+        {% for name, file in files %}
+            {% set id = file.path | trim('/', 'right') | replace({'/': '_', '.': '_'}) %}
+            <div style="margin-left:{{ indent * 15 }}px">
+                {% if file.files is defined %}
+                    <i class="fas fa-plus file-action-add" onClick="addFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}')"></i>
+                    <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', true)"></i>
+                    <span id="{{ id }}-span" class="fas fa-folder config-file-icon"></span>
+                    <a class="key_to_click" tabindex="0" onclick="openDiv('{{ id }}');">{{ name }}</a>
+                    <div id="{{ id }}" class="config-folder-view">
+                        {{ _self.display_config_files(file.files, indent + 1, g_id) }}
+                    </div>
+                {% else %}
+                    {% if not (file.path ends with '/config.json' or file.path == 'config.json') %}
+                        <i class="fas fa-trash file-action-delete" onclick="removeFile('{{ g_id|e('js') }}', '{{ file.path|e('js') }}', false)"></i>
+                    {% endif %}
+                    <span class="fas fa-file config-file-icon"></span>
+                    <a class="key_to_click" onclick="updateGradeableEditor('{{ g_id }}', '{{ file.path }}')">{{ name }}</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}

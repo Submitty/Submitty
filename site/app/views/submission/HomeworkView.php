@@ -527,15 +527,11 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-light.css');
         $this->core->getOutput()->addInternalCss('highlightjs/atom-one-dark.css');
-        $this->core->getOutput()->addInternalJs('submit-box.js');
+        $this->core->getOutput()->addInternalJs('submitbox-button-status.js');
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('highlight.js', 'highlight.min.js'));
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
         CodeMirrorUtils::loadDefaultDependencies($this->core);
 
-        $has_overridden_grades = false;
-        if (!is_null($graded_gradeable)) {
-            $graded_gradeable->hasOverriddenGrades();
-        }
         $vcs_partial_path = '';
         $vcs_partial_path = $gradeable->getVcsPartialPath();
         $vcs_partial_path = str_replace('{$vcs_type}', $this->core->getConfig()->getVcsType(), $vcs_partial_path);
@@ -622,7 +618,9 @@ class HomeworkView extends AbstractView {
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            'has_overridden_grades' => $has_overridden_grades,
+            'has_overridden_grades' => $graded_gradeable !== null && $graded_gradeable->hasOverriddenGrades(),
+            'rainbow_grades_active' => $this->core->getConfig()->displayRainbowGradesSummary(),
+            'rainbow_grades_url' => $this->core->buildCourseUrl(['grades']),
             'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
             'max_post_size' => Utils::returnBytes(ini_get('post_max_size')),
             'max_file_uploads' => ini_get('max_file_uploads'),
@@ -1030,16 +1028,8 @@ class HomeworkView extends AbstractView {
                     'results' => 0,
                 ]);
             }
-
-            if ($version_instance->isQueued()) {
-                $param = array_merge($param, [
-                    'queue_pos' => $version_instance->getQueuePosition(),
-                    'queue_total' => $this->core->getGradingQueue()->getQueueCount()
-                ]);
-            }
         }
 
-        $check_refresh_submission_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
 
@@ -1078,7 +1068,6 @@ class HomeworkView extends AbstractView {
             'hide_test_details' => $gradeable->getAutogradingConfig()->getHideTestDetails(),
             'incomplete_autograding' => $version_instance !== null ? !$version_instance->isAutogradingComplete() : false,
             'display_version' => $display_version,
-            'check_refresh_submission_url' => $check_refresh_submission_url,
             'show_testcases' => $show_testcases,
             'show_incentive_message' => $show_incentive_message
         ]);

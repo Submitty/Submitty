@@ -30,8 +30,8 @@ use app\exceptions\ValidationException;
 /**
  * Class ReportController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class ReportController extends AbstractController {
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
@@ -691,6 +691,7 @@ class ReportController extends AbstractController {
                 'display' => $customization->getDisplay(),
                 'display_description' => $customization->getDisplayDescription(),
                 'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
+                'omit_section_from_statistics' => $customization->getOmittedSections(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'plagiarism' => $customization->getPlagiarism(),
@@ -931,8 +932,8 @@ class ReportController extends AbstractController {
 
     /**
      * Generate full rainbow grades view for instructors
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradebook")]
     public function displayGradebook() {
         $grade_path = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/output.html";
