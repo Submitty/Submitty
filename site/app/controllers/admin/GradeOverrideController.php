@@ -70,53 +70,61 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-        $isUserNotInCourse = empty($this->core->getQueries()->getUsersById([$_POST['user_id']]));
-        if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
-            $error = "Invalid Student ID";
-            return $this->core->getOutput()->renderJsonFail($error);
+        $post    = $this->core->getRequest()->request;
+        $user_id = $post->get('user_id', '');
+
+        $users = $this->core->getQueries()->getUsersById([$user_id]);
+        if ($user_id === '' || empty($users) || !isset($users[$user_id])) {
+            return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
         }
 
-        if (((!isset($_POST['marks'])) || $_POST['marks'] == "" || is_float($_POST['marks']))) {
-            $error = "Marks must be an integer";
-            return $this->core->getOutput()->renderJsonFail($error);
+        $marks = $post->get('marks');
+        if ($marks === '' || !ctype_digit($marks)) {
+            return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
         }
+        $marks   = (int)$marks;
+        $comment = $post->get('comment', '');
 
-        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
-        //0 is for single submission, 1 is for team submission
-        $option = $_POST['option'] ?? -1;
+        $team   = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
+        $option = intval($post->get('option', -1));
+
         if ($team !== null && $team->getSize() > 1) {
-            if (intval($option) === 0) {
-                $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
+            if ($option === 0) {
+                $this->core->getQueries()
+                    ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
                 return $this->getOverriddenGrades($gradeable_id);
             }
-            elseif (intval($option) === 1) {
-                foreach ($this->getTeamMemberIds($team) as $member_id) {
-                    $this->core->getQueries()->updateGradeOverride($member_id, $gradeable_id, $_POST['marks'], $_POST['comment']);
+            elseif ($option === 1) {
+                $member_ids = $this->getTeamMemberIds($team);
+                foreach ($member_ids as $member_id) {
+                    $this->core->getQueries()
+                        ->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
                 }
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
+                $member_ids = $this->getTeamMemberIds($team);
+                $members     = $this->core->getQueries()->getUsersById($member_ids);
                 $team_members = [];
-                foreach ($this->getTeamMemberIds($team) as $member_id) {
-                    $member = $this->core->getQueries()->getUserById($member_id);
-                    $team_members[$member_id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
+                foreach ($member_ids as $id) {
+                    $u = $members[$id];
+                    $team_members[$id] = $u->getDisplayedGivenName() . ' ' . $u->getDisplayedFamilyName();
                 }
-
                 return $this->core->getOutput()->renderJsonSuccess([
-                    'is_team' => true,
+                    'is_team'   => true,
                     'component' => 'OverrideTeamPopup',
-                    'args' => [
+                    'args'      => [
                         'memberList' => $team_members,
-                        'isDelete' => false,
+                        'isDelete'   => false,
                     ],
                 ]);
             }
         }
-        else {
-            $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
-            return $this->getOverriddenGrades($gradeable_id);
-        }
+
+        // 5) Not a team (or team of one) → single override
+        $this->core->getQueries()
+            ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
+        return $this->getOverriddenGrades($gradeable_id);
     }
 
     /**
@@ -140,7 +148,6 @@ class GradeOverrideController extends AbstractController {
             $team_members[$user->getId()] =
                 $user->getDisplayedGivenName() . ' ' . $user->getDisplayedFamilyName();
         }
-
         return [
             'is_team'   => true,
             'component' => 'OverrideTeamPopup',
