@@ -685,13 +685,10 @@ class NavigationView extends AbstractView {
             }
 
             if (!$gradeable->hasDueDate()) {
-                $cookie_string = "include_bad_submissions";
-                $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+                $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
+                $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
 
-                $cookie_string = "include_null_section";
-                $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
-
-                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
+                $progress_bar = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section);
                 if ($progress_bar === 0) {
                     $progress_bar = 0.01;
                 }
@@ -740,13 +737,10 @@ class NavigationView extends AbstractView {
 
             if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
                 if ($gradeable->isTaGrading()) {
-                    $cookie_string = "include_bad_submissions__" . $gradeable->getId();
-                    $bad_submissions = ($_COOKIE[$cookie_string] ?? '') === "include";
+                    $include_bad_submissions = ($_COOKIE["include_bad_submissions"] ?? 'omit') === "include";
+                    $include_null_section = ($_COOKIE["include_null_section"] ?? 'omit') === "include";
 
-                    $cookie_string = "include_null_section__" . $gradeable->getId();
-                    $null_section = ($_COOKIE[$cookie_string] ?? '') === "include";
-
-                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $bad_submissions, $null_section);
+                    $TA_percent = $gradeable->getTaGradingProgress($this->core->getUser(), $include_bad_submissions, $include_null_section);
 
                     if ($TA_percent === 1) {
                         //If they're done, change the text to REGRADE
