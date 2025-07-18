@@ -134,14 +134,12 @@ const checkAnon = (title, expectedAnon) => {
 };
 
 const createChatroom = (title, description, isAnon) => {
-    cy.get('[data-testid="new-chatroom-btn"]');
     cy.get('[data-testid="new-chatroom-btn"]').click();
     cy.get('[data-testid="chatroom-name-entry"]').type(title, { force: true });
     cy.get('[data-testid="chatroom-description-entry"]').type(description, { force: true });
     if (!isAnon) {
         cy.get('[data-testid="enable-disable-anon"]').click();
     }
-    cy.get('[data-testid="submit-chat-creation"]');
     cy.get('[data-testid="submit-chat-creation"]').click({ force: true });
     checkChatExists(title);
     checkDescription(title, description);
@@ -183,21 +181,19 @@ const getLastMessageId = () => {
 };
 
 const sendChatMessage = (text, sender, expectedId, action = 'click') => {
-    cy.get('[data-testid="msg-input"]').should('exist');
     cy.get('[data-testid="msg-input"]').type(text);
     if (action === 'enter') {
         cy.get('[data-testid="msg-input"]').type('{enter}');
         checkChatMessage(text, sender, expectedId);
     }
     else {
-        cy.get('[data-testid="send-btn"]').should('exist');
         cy.get('[data-testid="send-btn"]').click();
         checkChatMessage(text, sender, expectedId);
     }
 };
 
 const generateBaseMessageID = () => {
-    return cy.get('[data-testid="msg-input"]').should('exist').then(() => {
+    return cy.get('[data-testid="msg-input"]').then(() => {
         return cy.get('[data-testid="msg-input"]').type('grabid');
     }).then(() => {
         return cy.get('[data-testid="msg-input"]').type('{enter}');
@@ -239,7 +235,7 @@ describe('Tests for enabling Live Chat', () => {
             cy.get('body').then(($body) => {
                 expect($body.find('[class="icon-title"]').text()).includes('Live Chat');
             });
-            cy.get('[data-testid="new-chatroom-btn"]').should('exist');
+            cy.get('[data-testid="new-chatroom-btn"]');
         }).then(() => {
             toggleLiveChat(false).then(() => {
                 cy.visit(['sample', 'chat']);
