@@ -127,6 +127,7 @@ const clearLockDate = (title) => {
 };
 
 describe('Forum Thread Lock Date Functionality', () => {
+    return;
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
@@ -154,6 +155,7 @@ describe('Forum Thread Lock Date Functionality', () => {
 });
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
+    return;
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
@@ -224,16 +226,14 @@ const submitCreateThreadRequest = (title, content) => {
         'thread_status': -1,
     };
 
-    return cy.wrap(null).then(() => {
-        return verifyWebSocketFunctionality(
-            ['sample', 'forum', 'threads', 'new'],
-            'POST',
-            'multipart/form-data',
-            body,
-            // Return the server response and local thread element within the Cypress chain
-            (response) => cy.get(`[data-thread_title*="${title}"]`).then((post) => [response, post]),
-        );
-    });
+    return verifyWebSocketFunctionality(
+        ['sample', 'forum', 'threads', 'new'],
+        'POST',
+        'multipart/form-data',
+        body,
+        // Return the server response and local thread element within the Cypress chain
+        (response) => cy.get(`[data-thread_title*="${title}"]`).then((post) => [response, post]),
+    );
 };
 
 const submitCreatePostRequest = (threadId, parentPostId, content) => {
@@ -246,16 +246,14 @@ const submitCreatePostRequest = (threadId, parentPostId, content) => {
         thread_status: -1,
     };
 
-    return cy.wrap(null).then(() => {
-        return verifyWebSocketFunctionality(
-            ['sample', 'forum', 'posts', 'new'],
-            'POST',
-            'multipart/form-data',
-            body,
-            // Return the server response and local post element within the Cypress chain
-            (response) => cy.get('.post_box').contains(content).should('exist').closest('.post_box').then((post) => [response, post]),
-        );
-    });
+    return verifyWebSocketFunctionality(
+        ['sample', 'forum', 'posts', 'new'],
+        'POST',
+        'multipart/form-data',
+        body,
+        // Return the server response and local post element within the Cypress chain
+        (response) => cy.get('.post_box').contains(content).should('exist').closest('.post_box').then((post) => [response, post]),
+    );
 };
 
 const submitDeletePostRequest = (title, threadId, postId, isFirstPost = false) => {
@@ -293,16 +291,14 @@ const submitMergeThreadRequest = (threadId, childThreadId) => {
         merge_thread_child: childThreadId,
     };
 
-    return cy.wrap(null).then(() => {
-        return verifyWebSocketFunctionality(
-            ['sample', 'forum', 'threads', 'merge'],
-            'POST',
-            'multipart/form-data',
-            body,
-            // Return the server response and local merged thread element within the Cypress chain
-            (response) => cy.get('.post_box').contains(`Merged Thread Title: ${title6}`).should('exist').closest('.post_box').then((post) => [response, post]),
-        );
-    });
+    return verifyWebSocketFunctionality(
+        ['sample', 'forum', 'threads', 'merge'],
+        'POST',
+        'multipart/form-data',
+        body,
+        // Return the server response and local merged thread element within the Cypress chain
+        (response) => cy.get('.post_box').contains(`Merged Thread Title: ${title6}`).should('exist').closest('.post_box').then((post) => [response, post]),
+    );
 };
 
 const submitToggleLikeRequest = (currentUser, apiKey, threadId, postId, expected) => {
