@@ -146,6 +146,7 @@ function filterWithdrawnUpdate() {
 window.addEventListener('DOMContentLoaded', () => {
     const inquiryFilterStatus = Cookies.get('inquiry_status');
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    withdrawnFilterElements.hide();
     // Instructors and TAs have access to all toggles
     if (full_access_grader_permission) {
         // Only Assigned Sections

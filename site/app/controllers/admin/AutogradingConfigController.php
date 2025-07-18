@@ -14,8 +14,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AutogradingConfigController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class AutogradingConfigController extends AbstractController {
     /**
      * @param string $g_id gradeable Id

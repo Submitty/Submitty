@@ -55,6 +55,7 @@ use app\libraries\FileUtils;
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
  * @method string getCourseEmail()
+ * @method bool isUserCreateAccount()
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
@@ -62,6 +63,8 @@ use app\libraries\FileUtils;
  * @method void setRoomSeatingGradeableId(string $gradeable_id)
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method array getAcceptedEmails()
+ * @method array getUserIdRequirements()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
@@ -114,6 +117,14 @@ class Config extends AbstractModel {
     /** @prop
      * @var array */
     protected $course_json = [];
+
+    /** @prop
+     * @var array<mixed> */
+    protected $user_id_requirements = [];
+
+    /** @prop
+     * @var array<string> */
+    protected $accepted_emails = [];
 
     /**
      * Indicates whether a course config has been successfully loaded.
@@ -304,6 +315,9 @@ class Config extends AbstractModel {
      * @var bool */
     protected $seating_only_for_instructor;
     /** @prop
+     * @var bool */
+    protected $user_create_account = false;
+    /** @prop
      * @var string|null */
     protected $room_seating_gradeable_id;
     /** @prop
@@ -434,6 +448,12 @@ class Config extends AbstractModel {
 
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
+
+        if (isset($submitty_json['user_create_account'])) {
+            $this->user_create_account = $submitty_json['user_create_account'];
+            $this->user_id_requirements = $submitty_json['user_id_requirements'];
+            $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
+        }
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
