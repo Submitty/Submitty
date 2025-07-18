@@ -310,8 +310,8 @@ describe('Test cases involving instructor email pagination functionality', () =>
 
         let page = 1;
         let lastPage = -1;
-        // The last DOM child represents the last page button (>>), so target the second to last child
-        cy.get('.pagination').children().eq(-2).then(($lastPage) => {
+
+        cy.get('.pagination [data-testid="page-num-button"]').last().then(($lastPage) => {
             lastPage = parseInt($lastPage.text(), 10);
         }).as('lastPage');
 
