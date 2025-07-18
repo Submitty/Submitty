@@ -15,9 +15,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
+#[AccessControl(level: "SUPERUSER")]
 class BannerController extends AbstractController {
     /**
      *
