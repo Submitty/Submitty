@@ -1,13 +1,5 @@
 import { closeAllComponents, getFirstOpenComponentId, getGradeableId, NO_COMPONENT_ID } from './ta-grading-rubric';
 
-declare global {
-    interface Window {
-        gotoMainPage(): void;
-        gotoPrevStudent(): void;
-        gotoNextStudent(): void;
-    }
-}
-
 function waitForAllAjaxToComplete(callback: { (): void }) {
     const checkAjax = () => {
         if ($.active > 0) {
@@ -20,7 +12,7 @@ function waitForAllAjaxToComplete(callback: { (): void }) {
     checkAjax();
 }
 
-window.gotoMainPage = function () {
+export function gotoMainPage() {
     const window_location = $('#main-page')[0].dataset.href!;
 
     if (getGradeableId() !== '') {
@@ -120,7 +112,6 @@ export function gotoPrevStudent() {
         window.location.href = window_location;
     }
 };
-window.gotoPrevStudent = gotoPrevStudent;
 
 export function gotoNextStudent() {
     let filter;
@@ -197,4 +188,3 @@ export function gotoNextStudent() {
         window.location.href = window_location;
     }
 }
-window.gotoNextStudent = gotoNextStudent;
