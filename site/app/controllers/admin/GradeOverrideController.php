@@ -40,32 +40,8 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods: ["POST"])]
     public function deleteOverriddenGrades($gradeable_id) {
-        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $_POST['user_id']);
-        //0 is for single submission, 1 is for team submission
-        $option = $_POST['option'] ?? -1;
-        if ($team !== null && $team->getSize() > 1) {
-            if (intval($option) === 0) {
-                $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
-                return $this->getOverriddenGrades($gradeable_id);
-            }
-            elseif (intval($option) === 1) {
-                foreach ($this->getTeamMemberIds($team) as $member_id) {
-                    $this->core->getQueries()->deleteOverriddenGrades($member_id, $gradeable_id);
-                }
-                return $this->getOverriddenGrades($gradeable_id);
-            }
-            else {
-                $popup_html = $this->renderTeamPrompt($team, true);
-                return $this->core->getOutput()->renderJsonSuccess([
-                    'is_team' => true,
-                    'popup' => $popup_html
-                ]);
-            }
-        }
-        else {
-            $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
-            return $this->getOverriddenGrades($gradeable_id);
-        }
+        $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+        return $this->getOverriddenGrades($gradeable_id);
     }
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
@@ -83,7 +59,7 @@ class GradeOverrideController extends AbstractController {
         if ($marks === '' || !ctype_digit($marks)) {
             return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
         }
-        $marks = (int)$marks;
+        $marks = (int) $marks;
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 
