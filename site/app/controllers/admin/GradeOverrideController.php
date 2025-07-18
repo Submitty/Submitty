@@ -82,7 +82,7 @@ class GradeOverrideController extends AbstractController {
                 $team_members = [];
                 foreach ($all_members as $id => $member) {
                     $team_members[$id] = $member->getDisplayedGivenName()
-                                         . " " 
+                                         . " "
                                          . $member->getDisplayedFamilyName();
                 }
                 return $this->core->getOutput()->renderJsonSuccess([
