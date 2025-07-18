@@ -394,8 +394,8 @@ describe('Should test WebSocket functionality', () => {
         cy.get('@createThread').then(([response, _]) => {
             const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
             cy.visit(nextPage);
-            submitCreatePostRequest(threadId, parentPostId, reply4).as('createFirstPost');
 
+            submitCreatePostRequest(threadId, parentPostId, reply4).as('createFirstPost');
             cy.get('@createFirstPost').then(([firstPostResponse, firstPost]) => {
                 const firstPostId = firstPostResponse.post_id;
                 expectPostHierarchy(firstPost, {
@@ -418,6 +418,7 @@ describe('Should test WebSocket functionality', () => {
                         content: reply5,
                         nextPage: secondPostResponse.next_page,
                     });
+
                     return cy.wrap({ threadId, parentPostId, firstPostId, secondPostId }).as('ids');
                 });
             });
@@ -489,7 +490,7 @@ describe('Should test WebSocket functionality', () => {
     });
 
     it('Should verify WebSocket functionality for liking and unliking posts via API', () => {
-        // Fetch the required API keys for the API calls
+        // Fetch the required API keys for both users
         getApiKey('student', 'student').then((studentApiKey) => {
             getApiKey('instructor', 'instructor').then((instructorApiKey) => {
                 cy.wrap({ studentApiKey, instructorApiKey }).as('apiKeys');
@@ -497,12 +498,10 @@ describe('Should test WebSocket functionality', () => {
         });
 
         cy.get('@apiKeys').then(({ studentApiKey, instructorApiKey }) => {
-            // Create a thread as instructor
             submitCreateThreadRequest(title5, content4).as('createThread');
             cy.get('@createThread').then(([response, _]) => {
-                const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
-
                 // Visit the thread as instructor and create a reply
+                const { thread_id: threadId, post_id: parentPostId, next_page: nextPage } = response;
                 cy.visit(nextPage);
                 submitCreatePostRequest(threadId, parentPostId, reply5).as('createFirstPost');
                 cy.get('@createFirstPost').then(([firstPostResponse, firstPost]) => {
@@ -565,13 +564,13 @@ describe('Should test WebSocket functionality', () => {
                         totalLikes: 1,
                         likeIcon: 'light-mode-off-duck.svg',
                         instructorLikeBadge: false,
-                    }).as('finalLike');
+                    }).as('instructorUnlike');
                 });
             });
         });
 
         // Cleanup to prevent conflicts with other test data, such as upduck_forum.spec.js
-        cy.get('@finalLike').then(() => {
+        cy.get('@instructorUnlike').then(() => {
             removeThread(title5);
         });
     });
