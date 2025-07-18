@@ -10,8 +10,7 @@ declare global {
     }
 }
 
-const fullCourseUrl = document.body.dataset.courseUrl ?? '';
-const coursePath = new URL(fullCourseUrl).pathname;
+const coursePath = document.body.dataset.coursePath ?? '';
 
 window.filter_overriden_grades = () => {
     const override_status = window.Cookies.get('include_grade_override') ?? 'omit';

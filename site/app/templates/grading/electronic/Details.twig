@@ -777,8 +777,7 @@
     const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
     const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     const is_student = {{ is_student ? 'true' : 'false' }};
-    const fullCourseUrl = document.body.dataset.courseUrl ?? '';
-    const coursePath = new URL(fullCourseUrl).pathname;
+    const coursePath = document.body.dataset.coursePath ?? '';
 
     function changeAnon(gradeable_id) {
         Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on', { path: coursePath, expires: 365 });
