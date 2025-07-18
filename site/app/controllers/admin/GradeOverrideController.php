@@ -46,13 +46,13 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $user_id = $_POST['user_id'] ?? '';
-        $marks   = $_POST['marks']   ?? '';
-        $comment = $_POST['comment'] ?? '';
+        $user_id = $_POST['user_id']   ?? '';
+        $marks   = $_POST['marks']     ?? '';
+        $comment = $_POST['comment']   ?? '';
         $option  = intval($_POST['option'] ?? -1);
 
         $user = $this->core->getQueries()->getSubmittyUser($user_id);
-        if (!$user || $user->getId() !== $user_id) {
+        if ($user === null || $user->getId() !== $user_id) {
             return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
         }
 
