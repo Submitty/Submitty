@@ -7513,7 +7513,7 @@ AND gc_id IN (
     public function updateEmailError(string $subject, string $error): bool {
         $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
         return $this->submitty_db->getRowCount() > 0;
-    }    
+    }
 
     /**
      * Gives true if thread is locked
