@@ -127,7 +127,6 @@ const clearLockDate = (title) => {
 };
 
 describe('Forum Thread Lock Date Functionality', () => {
-    return;
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
@@ -155,7 +154,6 @@ describe('Forum Thread Lock Date Functionality', () => {
 });
 
 describe('Should test creating, replying, merging, removing, and upducks in forum', () => {
-    return;
     beforeEach(() => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
