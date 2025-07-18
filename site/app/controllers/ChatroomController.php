@@ -52,7 +52,7 @@ class ChatroomController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/chat", methods: ["GET"])]
     public function showChatroomsPage(): WebResponse {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
-        $chatrooms = $repo->findBy([], ['id' => 'ASC']);
+        $chatrooms = $repo->findBy(['is_deleted' => 'FALSE'], ['id' => 'ASC']);
 
         return new WebResponse(
             'Chatroom',
@@ -61,9 +61,7 @@ class ChatroomController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/new", methods:["POST"])]
     public function addChatroom(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -105,7 +103,7 @@ class ChatroomController extends AbstractController {
         $repo = $this->core->getCourseEntityManager()->getRepository(Chatroom::class);
         $chatroom = $repo->find($chatroom_id);
 
-        if ($chatroom === null) {
+        if ($chatroom === null || $chatroom->chatDeleted()) {
             $this->core->addErrorMessage("Chatroom not found");
             return new RedirectResponse($this->core->buildCourseUrl(['chat']));
         }
@@ -129,9 +127,7 @@ class ChatroomController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/delete", methods: ["POST"])]
     public function deleteChatroom(): JsonResponse {
         $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
@@ -143,14 +139,12 @@ class ChatroomController extends AbstractController {
         if ($chatroom === null) {
             return JsonResponse::getFailResponse('Invalid Chatroom ID');
         }
-        $em->remove($chatroom);
+        $chatroom->deleteChat();
         $em->flush();
         return JsonResponse::getSuccessResponse();
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", methods: ["POST"])]
     public function editChatroom(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -176,9 +170,7 @@ class ChatroomController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function toggleChatroomActiveStatus(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();

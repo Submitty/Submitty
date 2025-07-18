@@ -196,6 +196,7 @@ class Course_create_gradeables:
                                 os.system("mkdir -p " + os.path.join(submission_path, str(version)))
                                 submitted = True
                                 submission_count += 1
+                                g_notification_sent = gradeable.has_release_date and gradeable.grade_released_date <= dateutils.get_current_time()
                                 current_time_string = dateutils.write_submitty_date(gradeable.submission_due_date - timedelta(days=random_days+version/versions_to_submit))
                                 if team_id is not None:
                                     self.conn.execute(insert(self.electronic_gradeable_data),
@@ -206,7 +207,7 @@ class Course_create_gradeables:
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version),
-                                            { "g_id": gradeable.id, "user_id": None, "team_id": team_id, "active_version": active_version }
+                                            { "g_id": gradeable.id, "user_id": None, "team_id": team_id, "active_version": active_version, "g_notification_sent": g_notification_sent }
                                         )
                                         self.conn.commit()
                                     json_history["team_history"] = json_team_history[team_id]
@@ -219,7 +220,7 @@ class Course_create_gradeables:
                                     if version == versions_to_submit:
                                         self.conn.execute(
                                             insert(self.electronic_gradeable_version),
-                                            { "g_id": gradeable.id, "user_id": user.id, "active_version": active_version }
+                                            { "g_id": gradeable.id, "user_id": user.id, "active_version": active_version, "g_notification_sent": g_notification_sent }
                                         )
                                         self.conn.commit()
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})

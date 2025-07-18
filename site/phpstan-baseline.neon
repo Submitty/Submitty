@@ -1530,22 +1530,6 @@ parameters:
 			path: app/controllers/admin/StudentActivityDashboardController.php
 
 		-
-			message: """
-				#^Call to deprecated method RedirectOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return RedirectResponse directly$#
-			"""
-			count: 2
-			path: app/controllers/admin/UsersController.php
-
-		-
-			message: """
-				#^Call to deprecated method webOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
-				should not be used, just return WebResponse directly$#
-			"""
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Call to function array_search\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -1631,11 +1615,6 @@ parameters:
 			path: app/controllers/admin/UsersController.php
 
 		-
-			message: "#^Method app\\\\controllers\\\\admin\\\\UsersController\\:\\:viewStudentGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/admin/UsersController.php
-
-		-
 			message: "#^Parameter \\#1 \\$url of method app\\\\libraries\\\\Core\\:\\:redirect\\(\\) expects string, null given\\.$#"
 			count: 1
 			path: app/controllers/admin/UsersController.php
@@ -1688,7 +1667,7 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 4
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -1703,12 +1682,12 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 3
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 11
+			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -2856,11 +2835,6 @@ parameters:
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
 			count: 1
 			path: app/controllers/student/LeaderboardController.php
-
-		-
-			message: "#^Method app\\\\controllers\\\\student\\\\RainbowGradesController\\:\\:run\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/controllers/student/RainbowGradesController.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
@@ -7611,16 +7585,6 @@ parameters:
 			path: app/libraries/routers/AccessControl.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\AccessControl\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/routers/AccessControl.php
-
-		-
-			message: "#^Variable method call on \\$this\\(app\\\\libraries\\\\routers\\\\AccessControl\\)\\.$#"
-			count: 1
-			path: app/libraries/routers/AccessControl.php
-
-		-
 			message: "#^Method app\\\\libraries\\\\routers\\\\AnnotatedRouteLoader\\:\\:configureRoute\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/libraries/routers/AnnotatedRouteLoader.php
@@ -12280,31 +12244,6 @@ parameters:
 			message: "#^Strict comparison using \\!\\=\\= between mixed and null will always evaluate to true\\.$#"
 			count: 2
 			path: app/views/submission/HomeworkView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showGrades\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$grade_file with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
-
-		-
-			message: "#^Method app\\\\views\\\\submission\\\\RainbowGradesView\\:\\:showStudentToInstructor\\(\\) has parameter \\$user with no type specified\\.$#"
-			count: 1
-			path: app/views/submission/RainbowGradesView.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"

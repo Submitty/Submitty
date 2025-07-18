@@ -204,13 +204,24 @@ describe('Test Rainbow Grading', () => {
                 checkRainbowGradesOption();
             }
         });
+
+        // turn off rainbow grades and view pages
         cy.logout();
         cy.login('instructor2');
         cy.visit(['testing', 'config']);
         cy.get('[data-testid="display-rainbow-grades-summary"]').uncheck();
         cy.get('[data-testid="display-rainbow-grades-summary"]').should('not.be.checked');
         cy.visit(['testing', 'grades']);
-        cy.get('[data-testid="rainbow-grades"]').should('contain', 'No grades are available...');
+
+        // rainbow grades should be visible to the instructor
+        cy.get('[data-testid="rainbow-grades"]').should('not.contain.text', 'No grades are available...');
+        cy.get('[data-testid="rainbow-grades-not-active-banner"]').should('be.visible');
+
+        // rainbow grades should not be visible to the student
+        cy.logout();
+        cy.login('student');
+        cy.visit(['testing', 'grades']);
+        cy.get('[data-testid="popup-message"]').should('contain.text', 'Rainbow Grades are not enabled for this course.');
     });
 });
 describe('Test Automatic Nightly Processing for Rainbow Grades', () => {

@@ -14,7 +14,7 @@ opencv-python-headless==4.11.0.86
 # Docker gets broken with 2.32.0 current release (before a hotfix is applied)
 requests==2.32.4
 python-pam==2.0.2
-ruamel.yaml==0.18.12
+ruamel.yaml==0.18.14
 psycopg2-binary==2.9.10
 sqlalchemy==2.0.41
 psutil==7.0.0

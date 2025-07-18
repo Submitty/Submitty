@@ -5364,6 +5364,17 @@ AND gc_id IN (
     }
 
     /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Returns notifications for a user
      *
      * @param  string $user_id
@@ -7473,6 +7484,14 @@ AND gc_id IN (
     }
 
     /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
@@ -9490,10 +9509,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
@@ -9573,5 +9593,25 @@ ORDER BY
             [$user_id, $query_id]
         );
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Gets the active graders for a given gradeable.
+     * @return array<array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>
+     */
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
     }
 }

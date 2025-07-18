@@ -22,8 +22,8 @@ use app\controllers\SelfRejoinController;
 /**
  * Class UsersController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class UsersController extends AbstractController {
     /**
      * @return MultiResponse
@@ -1294,43 +1294,5 @@ class UsersController extends AbstractController {
 
         $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
         $this->core->redirect($return_url);
-    }
-
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     **/
-    #[Route("/courses/{_semester}/{_course}/users/view_grades", methods: ["POST"])]
-    public function viewStudentGrades() {
-        if (!isset($_POST["student_id"])) {
-            $this->core->addErrorMessage("No student ID provided");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['users']))
-            );
-        }
-        $student_id = $_POST["student_id"];
-        $user = $this->core->getQueries()->getUserById($student_id);
-        if ($user === null) {
-            $this->core->addErrorMessage("Invalid Student ID \"" . $_POST["student_id"] . "\"");
-            return MultiResponse::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['users']))
-            );
-        }
-
-        $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
-            . $student_id . "_summary.html";
-
-        $grade_file = null;
-        if (file_exists($grade_path)) {
-            $grade_file = file_get_contents($grade_path);
-        }
-
-        return MultiResponse::webOnlyResponse(
-            new WebResponse(
-                ['submission', 'RainbowGrades'],
-                'showStudentToInstructor',
-                $user,
-                $grade_file
-            )
-        );
     }
 }

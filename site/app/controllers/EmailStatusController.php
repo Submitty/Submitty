@@ -16,10 +16,10 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
     #[Route("/courses/{_semester}/{_course}/email_status", methods: ["GET"])]
+    #[AccessControl(role: "INSTRUCTOR")]
     public function getEmailStatusPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
         $course = $this->core->getConfig()->getCourse();
@@ -37,9 +37,9 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @AccessControl(role="INSTRUCTOR")
      * @return WebResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/email_status_page", methods: ["GET"])]
     public function getEmailStatusesByPage(): WebResponse {
         $semester = $this->core->getConfig()->getTerm();
@@ -60,9 +60,9 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
+    #[AccessControl(level: "SUPERUSER")]
     #[Route("/superuser/email_status", methods: ["GET"])]
     public function getSuperuserEmailStatusPage(): WebResponse {
         /** @var EmailRepository $repository */
@@ -79,9 +79,9 @@ class EmailStatusController extends AbstractController {
     }
 
     /**
-     * @AccessControl(level="SUPERUSER")
      * @return WebResponse
      */
+    #[AccessControl(level: "SUPERUSER")]
     #[Route("/superuser/email_status_page", methods: ["GET"])]
     public function getSuperuserEmailStatusesByPage(): WebResponse {
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
