@@ -12,7 +12,7 @@
                 <h3 class='label' id="submission_header">Select Submission Version:</h3>
                 {% include 'Vue.twig' with({
                     'type': 'component',
-                    'component': 'VersionChoice',
+                    'name': 'VersionChoice',
                     'args': {
                         'on_change': "versionChange('" ~ view_version_url ~ "', this)"
                     }

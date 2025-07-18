@@ -219,10 +219,13 @@ class Team extends AbstractModel implements \JsonSerializable {
         return $this->assignment_settings ?: ["team_history" => null];
     }
 
+    /**
+     * @return array{id: string, name: string, members: User[]}
+     */
     public function jsonSerialize(): mixed {
         return [
             'id' => $this->getId(),
-            'name' => $this->getName(),
+            'name' => $this->getTeamName(),
             'members' => $this->getMemberUsersSorted(),
         ];
     }

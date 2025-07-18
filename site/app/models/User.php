@@ -766,7 +766,10 @@ class User extends AbstractModel implements \JsonSerializable {
         return $this->core->getQueries()->getUserMultipleTeamInvites($gradeable_id, $this->id);
     }
 
-    public function jsonSerialize(): array {
+    /**
+     * @return array{id: string, displayedGivenName: string, displayedFamilyName: string}
+     */
+    public function jsonSerialize(): mixed {
         return [
             'id' => $this->getId(),
             'displayedGivenName' => $this->getDisplayedGivenName(),

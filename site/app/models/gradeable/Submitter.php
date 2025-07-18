@@ -124,6 +124,9 @@ class Submitter extends AbstractModel implements \JsonSerializable {
         return $this->team_or_user->getRotatingSection();
     }
 
+    /**
+     * @return array{id: string, user: User|null, team: Team|null}
+     */
     public function jsonSerialize(): mixed {
         return [
             'id' => $this->getId(),
