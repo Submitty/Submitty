@@ -8,7 +8,7 @@ use app\libraries\Core;
  * Represents a button to display on the page
  * @package app\models
  */
-class Button extends AbstractModel {
+class Button extends AbstractModel implements \JsonSerializable {
     /** @prop
      * @var string|null $title */
     protected $title;
@@ -188,5 +188,47 @@ class Button extends AbstractModel {
     }
     public function setIcon(?string $icon): void {
         $this->icon = $icon;
+    }
+
+    /**
+     * Serializes the Button object to an array for JSON representation.
+     * @return array{
+     * title: string|null,
+     * subtitle: string|null,
+     * name: string|null,
+     * date: string|null,
+     * href: string|null,
+     * onclick: string|null,
+     * class: string,
+     * id: string|null,
+     * disabled: bool,
+     * prerequisite: string|null,
+     * progress: float|null,
+     * title_on_hover: bool,
+     * aria_label: string|null,
+     * badge: string|null,
+     * icon: string|null,
+     * prefix: string|null
+     * }
+     */
+    public function jsonSerialize(): array {
+        return [
+            'title' => $this->title,
+            'subtitle' => $this->subtitle,
+            'name' => $this->name,
+            'date' => $this->date !== null ? $this->date->format('Y-m-d H:i:s') : null,
+            'href' => $this->href,
+            'onclick' => $this->onclick,
+            'class' => $this->class,
+            'id' => $this->id,
+            'disabled' => $this->disabled,
+            'prerequisite' => $this->prerequisite,
+            'progress' => $this->progress,
+            'title_on_hover' => $this->title_on_hover,
+            'aria_label' => $this->aria_label,
+            'badge' => $this->badge,
+            'icon' => $this->icon,
+            'prefix' => $this->prefix
+        ];
     }
 }
