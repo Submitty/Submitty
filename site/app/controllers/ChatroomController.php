@@ -14,9 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use WebSocket;
 
-/**
- * @Enabled("chat")
- */
+#[Enabled(feature: "chat")]
 class ChatroomController extends AbstractController {
     /**
      * Send a message over WebSocket.
