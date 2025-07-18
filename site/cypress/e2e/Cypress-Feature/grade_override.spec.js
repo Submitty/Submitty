@@ -12,7 +12,7 @@ describe('testing grade override', () => {
             cy.get('[data-testid="grade-override-score"]').click();
             cy.get('[data-testid="grade-override-score"]').type('10');
             cy.get('[data-testid="grade-override-submit"]').click();
-            cy.get('#success-js-0').should('contain', `Updated overridden Grades for ${gradeable}`);
+            cy.get('[data-testid="popup-message"]').should('contain', `Updated overridden Grades for ${gradeable}`);
             cy.get('[data-testid="load-overridden-grades"]').should('contain', 'student');
             cy.get('[data-testid="load-overridden-grades"]').should('contain', `Overridden Grades for ${gradeable}`);
             // When the same functionaliy for teams added,then remove the if block with adding some additional test
@@ -32,7 +32,7 @@ describe('testing grade override', () => {
             else {
                 cy.get('[data-testid="grade-override-delete"]').first().click();
             }
-            cy.get('#success-js-0').should('contain', 'Overridden Grades deleted.');
+            cy.get('[data-testid="popup-message"]').should('contain', 'Overridden Grades deleted.');
         });
     });
 });

@@ -49,7 +49,7 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.33.0
+    - uses: shivammathur/setup-php@2.34.1
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap

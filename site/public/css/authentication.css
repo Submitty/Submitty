@@ -51,3 +51,54 @@
 #saml-login {
     color: var(--btn-text-white);
 }
+
+.hidden-helper {
+    display: none;
+    padding: 10px;
+    font-size: small;
+}
+
+.display-box input {
+    display: block;
+    width: 100%;
+}
+
+.display-box {
+    margin-bottom: 1em;
+}
+
+.requirements-button {
+    display: inline-block;
+    font-weight: 400;
+    color: var(--standard-medium-dark-gray);
+    text-align: center;
+    vertical-align: text-top;
+    background-color: transparent;
+    border: 1px solid;
+    padding: 0.2rem;
+    font-size: x-small;
+    line-height: 1;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.signup-btn {
+    width: 100%;
+}
+
+.requirements-list {
+    margin-left: 15px;
+}
+
+.verify-email {
+    display: flex;
+    justify-content: center;
+    flex-direction: column; /* Stack input and button vertically */
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.verify-input {
+    min-height: 34px;
+    box-sizing: border-box;
+}
