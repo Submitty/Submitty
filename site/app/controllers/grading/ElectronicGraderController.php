@@ -221,9 +221,8 @@ class ElectronicGraderController extends AbstractController {
     }
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
-     *
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods: ["POST"])]
     public function RandomizePeers($gradeable_id) {
         /* How does this function work?
@@ -424,9 +423,8 @@ class ElectronicGraderController extends AbstractController {
      * Route for verifying the grader of a graded component
      * @param string $gradeable_id verify all components or not
      * @param bool $verify_all false be default
-     *
-     * @AccessControl(permission="grading.electronic.verify_grader")
      */
+    #[AccessControl(permission: "grading.electronic.verify_grader")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods: ["POST"])]
     public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
         $anon_id = $_POST['anon_id'] ?? '';
@@ -505,8 +503,8 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")]
     public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1532,8 +1530,8 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Handle requests to create individual teams via the AdminTeamForm
-     * @AccessControl(permission="grading.electronic.submit_team_form")
      */
+    #[AccessControl(permission: "grading.electronic.submit_team_form")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/new", methods: ["POST"])]
     public function adminTeamSubmit($gradeable_id) {
         $new_team = ($_POST['new_team'] ?? '') === 'true';
@@ -3775,9 +3773,7 @@ class ElectronicGraderController extends AbstractController {
         return true;
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods: ["POST"])]
     public function ajaxClearPeerMarks($gradeable_id) {
         $submitter_id = $_POST['submitter_id'] ?? '';

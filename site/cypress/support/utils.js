@@ -60,3 +60,90 @@ export function buildUrl(parts = [], include_base = false) {
 
     return `${url}courses/${getCurrentSemester()}/${parts.join('/')}`;
 }
+
+/**
+ * Formats the request body based on the content type and presence of a CSRF token
+ *
+ * @param {Object} body - The body of the request, which can be a FormData or JSON object
+ * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
+ * @param {String} csrfToken - The CSRF token to be added to the request, if present
+ * @returns {Object} - The formatted request body
+ */
+function formatRequestBody(body, contentType, csrfToken) {
+    if (contentType === 'multipart/form-data') {
+        const formData = new FormData();
+
+        if (csrfToken) {
+            formData.append('csrf_token', csrfToken);
+        }
+
+        for (const [key, value] of Object.entries(body)) {
+            formData.append(key, value);
+        }
+
+        return formData;
+    }
+    else {
+        return { ...body, csrf_token: csrfToken || undefined };
+    }
+}
+
+/**
+ * Verifies the WebSocket functionality of a given request
+ *
+ * @param {String[]} urlArray - The URL parts to string together using the buildUrl function including the base URL
+ * @param {String} method - The HTTP method to use for the request
+ * @param {String} contentType - The content type of the request, which can be 'multipart/form-data' or 'application/json'
+ * @param {Object} body - The body of the request, which should be a JSON object
+ * @param {Function} successCallback - The method to call for response and UI verification
+ * @param {String} apiKey - The API key to use for the request Authorization header, if present
+
+ */
+export function verifyWebSocketFunctionality(
+    urlArray = [],
+    method = 'GET',
+    contentType = 'application/json',
+    body = {},
+    successCallback = () => {},
+    apiKey = '',
+) {
+    const url = buildUrl(urlArray, true);
+    return cy.window().then(async (window) => {
+        cy.request({
+            headers: {
+                'Content-Type': contentType,
+                'Authorization': apiKey || undefined,
+            },
+            method: method,
+            url: apiKey ? url.replace('courses/', 'api/courses/') : url,
+            body: formatRequestBody(body, contentType, apiKey ? undefined : window.csrfToken),
+        }).then((res) => {
+            let response;
+
+            if (res.redirects && Array.isArray(res.redirects)) {
+                // Redirects are in typically in the form "302: http://localhost:1511/courses/s21/foo/bar"
+                const index = res.redirects[0].indexOf('http');
+                const redirect = res.redirects[0].slice(index).trim();
+                response = {
+                    status: 'success',
+                    data: { redirect },
+                };
+            }
+            else {
+                // Cypress response body is formatted as an array buffer, so we need to convert it to a valid JSON representation
+                response = JSON.parse(Cypress.Blob.arrayBufferToBinaryString(res.body) || '{}');
+            }
+
+            if (Object.keys(response).length > 0) {
+                // Validate server-side formatted JSON responses or redirects
+                expect(response.status).to.equal('success');
+                successCallback(response.data);
+            }
+            else {
+                // Validate responses with no required data
+                expect(res.status).to.equal(200);
+                successCallback(response);
+            }
+        });
+    });
+}
