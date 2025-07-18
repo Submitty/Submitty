@@ -336,7 +336,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => 'Some system message',
             'user_create_account' => false,
             'user_id_requirements' => [],
-            'accepted_emails' => [],
+            'accepted_emails' => null,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
