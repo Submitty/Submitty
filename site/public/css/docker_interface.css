@@ -119,3 +119,8 @@
     padding: 1em;
     background: var(--standard-light-gray);
 }
+
+.status {
+    pointer-events: none;
+    cursor: default;
+}
