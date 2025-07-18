@@ -18,7 +18,9 @@
 
     <form id="gradeOverrideForm" method="post" enctype="multipart/form-data" onsubmit="return updateGradeOverride($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <input type="hidden" name="option" value="-1" />
+        <input type="hidden" name="user_id" value="" />
+        <input type="hidden" name="full_team" value="" />
+        <input type="hidden" name="members" value="" />
         <div class="option">
             <label for="g_id" class="option-title">Select Gradeable:</label>
             <select name="g_id" id="g_id" data-testid="grade-override-select-gradeable">
