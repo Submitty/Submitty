@@ -1667,7 +1667,7 @@ parameters:
 
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
-			count: 4
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -1682,12 +1682,12 @@ parameters:
 
 		-
 			message: "#^Loose comparison via \"\\!\\=\" is not allowed\\.$#"
-			count: 3
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
 			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 11
+			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -7582,16 +7582,6 @@ parameters:
 		-
 			message: "#^Call to function in_array\\(\\) requires parameter \\#3 to be set\\.$#"
 			count: 2
-			path: app/libraries/routers/AccessControl.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\AccessControl\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/routers/AccessControl.php
-
-		-
-			message: "#^Variable method call on \\$this\\(app\\\\libraries\\\\routers\\\\AccessControl\\)\\.$#"
-			count: 1
 			path: app/libraries/routers/AccessControl.php
 
 		-
