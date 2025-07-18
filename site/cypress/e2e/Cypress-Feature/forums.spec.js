@@ -384,6 +384,7 @@ describe('Should test WebSocket functionality', () => {
                 }).as('visitThread');
             });
         });
+
         cy.get('@visitThread').then(([threadId, postId]) => {
             submitDeletePostRequest(title5, threadId, postId, true);
         });
@@ -423,6 +424,7 @@ describe('Should test WebSocket functionality', () => {
                 });
             });
         });
+
         cy.get('@ids').then(({ threadId, parentPostId, firstPostId, secondPostId }) => {
             // Verify the thread tree from the first post is deleted, but the parent post is still remains
             submitDeletePostRequest(title5, threadId, firstPostId, false).then(() => {
@@ -464,6 +466,7 @@ describe('Should test WebSocket functionality', () => {
                 });
             });
         });
+
         // Submit the merge thread request
         cy.get('@threads').then(({ baseThreadId, baseParentPostId, baseNextPage, mergingThreadId, mergingParentPostId, mergingThreadFirstPostId }) => {
             submitMergeThreadRequest(baseThreadId, mergingThreadId).then(([mergeResponse, mergedPost]) => {
