@@ -307,6 +307,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
             "gradeable_id" => $gradeable->getId(),
             "semester" => $this->core->getConfig()->getTerm(),
@@ -921,6 +922,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,

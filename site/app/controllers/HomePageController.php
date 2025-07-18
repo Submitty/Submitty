@@ -376,4 +376,15 @@ class HomePageController extends AbstractController {
             $this->core->getCsrfToken()
         );
     }
+
+    /**
+     * @return WebResponse
+     */
+    #[Route("/courses/{_semester}/{_course}/courseCookies", methods: ["GET"])]
+    public function testPage() {
+        return new WebResponse(
+            'HomePage',
+            'showTestPage',
+        );
+    }
 }
