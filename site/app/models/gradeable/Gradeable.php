@@ -435,6 +435,10 @@ class Gradeable extends AbstractModel {
                 $this->setHiddenFiles($details['hidden_files']);
             }
         }
+        else {
+            $this->setGradeInquiryAllowedInternal(false);
+            $this->setGradeInquiryPerComponentAllowed(false);
+        }
 
         $this->setActiveGradeInquiriesCount($details['active_grade_inquiries_count'] ?? 0);
 

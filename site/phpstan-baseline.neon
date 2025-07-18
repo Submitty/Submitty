@@ -1809,7 +1809,7 @@ parameters:
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
-			count: 4
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -1827,13 +1827,13 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
-			count: 3
+			count: 2
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 11
+			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
@@ -7753,12 +7753,6 @@ parameters:
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 2
-			path: app/libraries/routers/AccessControl.php
-
-		-
-			message: '#^Variable method call on \$this\(app\\libraries\\routers\\AccessControl\)\.$#'
-			identifier: method.dynamicName
-			count: 1
 			path: app/libraries/routers/AccessControl.php
 
 		-
