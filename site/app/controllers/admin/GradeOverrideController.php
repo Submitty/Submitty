@@ -59,7 +59,7 @@ class GradeOverrideController extends AbstractController {
         if ($marks === '' || !ctype_digit($marks)) {
             return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
         }
-        $marks = (int)$marks;
+        $marks = (int) $marks;
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 
