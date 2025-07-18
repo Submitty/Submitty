@@ -1,6 +1,10 @@
 import { getCurrentSemester, getApiKey } from '../../support/utils.js';
 
+const emailContent = 'This is a test email body.';
 const errorMessage = 'This is a test error message';
+
+const threadAnnouncement = 'This is a test announcement';
+const threadContent = 'This is a test content';
 
 const normalizeText = (text) => {
     return text.trim().replace(/\s+/g, ' ');
@@ -50,6 +54,24 @@ const verifyEmailRecipient = (email, error = false) => {
     else {
         expect($email.find('[data-testid="email-error"]').length).to.equal(0);
     }
+};
+
+const verifyEmails = (status = '', error = false, length = null) => {
+    cy.get('#collapse1')
+        .should('exist')
+        .within(() => {
+            if (length !== null) {
+                cy.get(`li.status${status}`)
+                    .should('have.length', length);
+            }
+
+            cy.get(`li.status${status}`)
+                .then(($emails) => {
+                    $emails.each((_, email) => {
+                        verifyEmailRecipient(email, error);
+                    });
+                });
+        });
 };
 
 describe('Test cases involving the superuser Email All functionality', () => {
@@ -105,7 +127,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
 
             let uniqueSubject = `Test Email - ${Date.now()}`;
             cy.get('[data-testid="email-subject"]').type(uniqueSubject);
-            cy.get('[data-testid="email-content"]').type('This is a test email body.');
+            cy.get('[data-testid="email-content"]').type(emailContent);
             cy.get('[data-testid="send-email"]').click();
             cy.get('[data-testid="sidebar"]')
                 .contains('Email Status')
@@ -124,17 +146,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
                 });
 
             // Verify each recipient is properly rendered
-            cy.get('#collapse1')
-                .should('exist')
-                .within(() => {
-                    cy.get('li.status.status-warning')
-                        .should('have.length', totalRecipients)
-                        .then(($emails) => {
-                            $emails.each((_, email) => {
-                                verifyEmailRecipient(email);
-                            });
-                        });
-                });
+            verifyEmails('.status-warning', false, totalRecipients);
         });
     });
 
@@ -146,7 +158,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
 
         let uniqueSubject = `Test Email - ${Date.now()}`;
         cy.get('[data-testid="email-subject"]').type(uniqueSubject);
-        cy.get('[data-testid="email-content"]').type('This is a test email body.');
+        cy.get('[data-testid="email-content"]').type(emailContent);
         cy.get('[data-testid="send-email"]').click();
         cy.get('[data-testid="sidebar"]')
             .contains('Email Status')
@@ -185,16 +197,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
                                         .click();
                                 });
 
-                            cy.get('#collapse1')
-                                .should('exist')
-                                .within(() => {
-                                    cy.get('li.status.status-error')
-                                        .then(($emails) => {
-                                            $emails.each((_, email) => {
-                                                verifyEmailRecipient(email, true);
-                                            });
-                                        });
-                                });
+                            verifyEmails('.status-error', true);
                         });
                     });
                 });
@@ -229,16 +232,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
                                     .click();
                             });
 
-                        cy.get('#collapse1')
-                            .should('exist')
-                            .within(() => {
-                                cy.get('li.status.status-success')
-                                    .then(($emails) => {
-                                        $emails.each((_, email) => {
-                                            verifyEmailRecipient(email);
-                                        });
-                                    });
-                            });
+                        verifyEmails('.status-success');
                     });
                 });
             });
@@ -251,12 +245,9 @@ describe('Test cases involving instructor send email via thread announcement fun
         cy.login('instructor');
         cy.visit(['sample', 'forum', 'threads', 'new']);
 
-        const announcement = 'This is a test announcement';
-        const content = 'This is a test content';
-
         // Enter the thread announcement details
-        cy.get('[data-testid="title"]').type(announcement);
-        cy.get('[data-testid="reply_box_1"]').type(content);
+        cy.get('[data-testid="title"]').type(threadAnnouncement);
+        cy.get('[data-testid="reply_box_1"]').type(threadContent);
         // Pick an arbitrary category
         cy.get('[data-testid="categories-pick-list"] .cat-buttons').first().click({ force: true });
         // Ensure the announcement checkbox is checked
@@ -270,7 +261,7 @@ describe('Test cases involving instructor send email via thread announcement fun
         cy.url().should('not.include', '/sample/forum/threads/new').then(() => {
             cy.visit(['sample', 'email_status']).then(() => {
                 // Verify the email status is awaiting to be sent or has been sent
-                const uniqueSubject = `New Announcement: ${announcement}`;
+                const uniqueSubject = `New Announcement: ${threadAnnouncement}`;
                 cy.contains('.button-container', uniqueSubject)
                     .closest('.status-container')
                     .within(() => {
@@ -280,20 +271,11 @@ describe('Test cases involving instructor send email via thread announcement fun
                             .click();
                     });
 
-                cy.get('#collapse1')
-                    .should('exist')
-                    .within(() => {
-                        cy.get('li.status')
-                            .then(($emails) => {
-                                $emails.each((_, email) => {
-                                    verifyEmailRecipient(email);
-                                });
-                            });
-                    });
+                verifyEmails();
 
                 // Clean up the testing thread
                 cy.visit(['sample', 'forum', 'threads']).then(() => {
-                    cy.get('[data-testid="thread-list-item"]').contains(announcement).click();
+                    cy.get('[data-testid="thread-list-item"]').contains(threadAnnouncement).click();
                     cy.get('[data-testid="thread-dropdown"]').first().click();
                     cy.get('[data-testid="delete-post-button"]').first().click({ force: true });
                 });
