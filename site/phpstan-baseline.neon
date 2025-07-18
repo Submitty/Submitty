@@ -7600,21 +7600,6 @@ parameters:
 			path: app/libraries/routers/Enabled.php
 
 		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\Enabled\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/routers/Enabled.php
-
-		-
-			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
-			count: 1
-			path: app/libraries/routers/FeatureFlag.php
-
-		-
-			message: "#^Method app\\\\libraries\\\\routers\\\\FeatureFlag\\:\\:__construct\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: app/libraries/routers/FeatureFlag.php
-
-		-
 			message: """
 				#^Call to deprecated method JsonOnlyResponse\\(\\) of class app\\\\libraries\\\\response\\\\MultiResponse\\:
 				should not be used, just return JsonResponse directly$#
@@ -12294,15 +12279,6 @@ parameters:
 			message: "#^Method app\\\\views\\\\superuser\\\\SuperuserEmailView\\:\\:showEmailPage\\(\\) has parameter \\$num_student with no type specified\\.$#"
 			count: 1
 			path: app/views/superuser/SuperuserEmailView.php
-
-		-
-			message: """
-				#^Call to deprecated method registerLoader\\(\\) of class Doctrine\\\\Common\\\\Annotations\\\\AnnotationRegistry\\:
-				This method is deprecated and will be removed in
-				            doctrine/annotations 2\\.0\\. Annotations will be autoloaded in 2\\.0\\.$#
-			"""
-			count: 1
-			path: public/index.php
 
 		-
 			message: "#^Construct empty\\(\\) is not allowed\\. Use more strict comparison\\.$#"
