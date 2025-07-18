@@ -23,6 +23,7 @@
     --hover-light-border-actionable-blue: #2e6da4;
     --hover-border-actionable-blue: #204d74;
     --hover-dark-border-actionable-blue: #122b40;
+    --home-panel-gray: #e6f3f9;
     --standard-lightskyblue: #87cefa;
     --standard-mediumorchid: #ba55d3;
     --info-blue: #5bc0de;
@@ -275,6 +276,7 @@
     --btn-default-active: #6d6d6d;
     --btn-default-white: #515151;
     --btn-default-hover: #595959;
+    --home-panel-gray: #3d3d3d;
     --standard-hover-light-gray: #2b2b2b;
     --standard-light-gray: #757575;
     --standard-medium-gray: #a3a3a3;

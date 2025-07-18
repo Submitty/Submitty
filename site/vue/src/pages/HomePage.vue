@@ -124,12 +124,12 @@ const buildCourseUrl = (course: Course) => {
 
 <style scoped>
 .grid-container {
-  display: grid; /* Enables CSS Grid layout */
-  grid-template-columns: 1fr 1fr; /* Creates two columns of equal width */
-  grid-gap: 30px; /* Adds a 20px gap between the columns */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 30px;
 }
 .div1 {
-  grid-column: 1; /* Places Div 1 in the first column */
+  grid-column: 1;
 }
 .course-list li {
     margin: 3px 0;
