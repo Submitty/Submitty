@@ -255,7 +255,7 @@ function initImageAnnotation() {
         console.log("markerjsUI.AnnotationEditor available:", typeof markerjsUI.AnnotationEditor);
         console.log("markerjsUI.AnnotationViewer available:", typeof markerjsUI.AnnotationViewer);
     } else {
-        console.error("markerjsUI is not defined - ensure markerjs3.js and markerjs-ui.umd.cjs are loaded in correct order");
+        console.error("markerjsUI is not defined - ensure markerjs3.js and markerjs-ui.umd.js are loaded in correct order");
     }
     
     // Load existing annotations

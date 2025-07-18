@@ -922,7 +922,7 @@ window.deleteAttachment = function (target: string, file_name: string) {
 
 // Utility function to check if a file extension is an image
 function isImageFile(filename: string): boolean {
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff', 'tif'];
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'tiff', 'tif'];
     const extension = filename.split('.').pop()?.toLowerCase();
     return extension ? imageExtensions.includes(extension) : false;
 }
