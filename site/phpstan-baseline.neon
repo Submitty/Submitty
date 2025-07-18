@@ -1199,11 +1199,6 @@ parameters:
 			path: app/controllers/admin/GradeOverrideController.php
 
 		-
-			message: "#^Loose comparison via \"\\=\\=\" is not allowed\\.$#"
-			count: 2
-			path: app/controllers/admin/GradeOverrideController.php
-
-		-
 			message: "#^Method app\\\\controllers\\\\admin\\\\GradeOverrideController\\:\\:deleteOverriddenGrades\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: app/controllers/admin/GradeOverrideController.php
