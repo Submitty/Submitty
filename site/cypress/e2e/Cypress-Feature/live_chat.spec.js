@@ -216,7 +216,7 @@ const enterChat = (title, anonymous = false) => {
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
     }
-}
+};
 
 const visitLiveChat = (user) => {
     cy.logout();
@@ -326,7 +326,7 @@ describe('Tests for creating, editing and using tests', () => {
             checkHost(title1, name1);
             getChatroom(title1);
             // Add new messages, check for chat message
-            enterChat(title1)
+            enterChat(title1);
             checkChatMessage(chatMsg3, name1, instructorMsg2Id);
             sendChatMessage(chatMsg2, name2, studentMsg1Id);
             // Check for message existence after reload, check that clicking enter sends a message
