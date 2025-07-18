@@ -223,7 +223,7 @@ DB_COURSE_PASSWORD=submitty_dbuser
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
 
-bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh"
+bash "${SUBMITTY_REPOSITORY}/.setup/update_system.sh" "config=${SUBMITTY_DIRECTORY}"
 
 #################################################################
 # STACK SETUP
@@ -633,7 +633,7 @@ fi
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 #################
 
-/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh "config=${SUBMITTY_INSTALL_DIR}/config"
 
 if [ $? -eq 1 ]; then
     echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
@@ -705,12 +705,14 @@ ${DB_COURSE_USER}
 ${DB_COURSE_PASSWORD}
 America/New_York
 en_US
+100
 ${SUBMISSION_URL}
 
 
 sysadmin@example.com
 https://example.com
 1
+y
 submitty-admin
 y
 

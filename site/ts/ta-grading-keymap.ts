@@ -5,15 +5,22 @@
 
 // -----------------------------------------------------------------------------
 // Keyboard shortcut handling
+declare global {
+    interface Window {
+        showSettings(): void;
+        restoreAllHotkeys(): void;
+        removeAllHotkeys(): void;
+        remapHotkey(i: number): void;
+        remapUnset(i: number): void;
+    }
+}
 
-// eslint-disable-next-line no-var
-var keymap: KeymapEntry<unknown>[] = [];
-// eslint-disable-next-line no-var
-var remapping = {
+const keymap: KeymapEntry<unknown>[] = [];
+const remapping = {
     active: false,
     index: 0,
 };
-export type KeymapEntry<T> = {
+type KeymapEntry<T> = {
     name: string;
     code: string;
     fn?: (e: KeyboardEvent, options?: T) => void;
@@ -150,18 +157,13 @@ function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
 }
 
-window.showSettings = function () {
+export function showSettings() {
     generateSettingList();
     generateHotkeysList();
     $('#settings-popup').show();
     captureTabInModal('settings-popup');
-};
-
-window.Twig.twig({
-    id: 'HotkeyList',
-    href: '/templates/grading/settings/HotkeyList.twig',
-    async: true,
-});
+}
+window.showSettings = showSettings;
 
 window.restoreAllHotkeys = function () {
     keymap.forEach((hotkey, index) => {
@@ -180,7 +182,6 @@ function generateHotkeysList() {
     const parent = $('#hotkeys-list');
 
     parent.replaceWith(window.Twig.twig({
-        // @ts-expect-error @types/twig is not compatible with the current version of twig
         ref: 'HotkeyList',
     }).render({
         keymap: keymap.map((hotkey) => ({
@@ -190,12 +191,6 @@ function generateHotkeysList() {
     }));
 }
 
-window.Twig.twig({
-    id: 'GeneralSettingList',
-    href: '/templates/grading/settings/GeneralSettingList.twig',
-    async: true,
-});
-
 /**
  * Generate list of settings on the ui
  */
@@ -204,7 +199,6 @@ function generateSettingList() {
     loadTAGradingSettingData();
 
     parent.replaceWith(window.Twig.twig({
-        // @ts-expect-error @types/twig is not compatible with the current version of twig
         ref: 'GeneralSettingList',
     }).render({
         settings: settingsData,

@@ -49,7 +49,7 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.33.0
+    - uses: shivammathur/setup-php@2.34.1
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap
@@ -126,13 +126,6 @@ runs:
         sudo apt-get update
         sudo apt-get install libseccomp-dev
         sudo apt-get install libboost-all-dev
-        sudo apt-get install apache2
-        sudo apt-get install apache2-suexec-custom
-        sudo apt-get install libapache2-mod-authnz-external
-        sudo apt-get install libapache2-mod-authz-unixgroup
-        sudo apt-get install libapache2-mod-wsgi-py3
-        sudo apt-get install nginx
-        sudo apt-get install php${PHP_VER}-fpm
         sudo apt-get install poppler-utils
         sudo apt-get install valgrind
         sudo apt-get install ca-certificates
@@ -142,7 +135,7 @@ runs:
     - name: Install third party dependencies
       run: |
         cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh
+        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh "config=/usr/local/submitty/config"
       shell: bash
 
     - name: Configure Test suite
@@ -171,8 +164,29 @@ runs:
         sudo -E env "PATH=$PATH" bash .setup/testing/setup_test_suite.sh
       shell: bash
 
+    - name: Set up nginx
+      run: |
+        sudo apt-get install nginx
+        cd $SUBMITTY_REPOSITORY
+        sudo mkdir /etc/systemd/system/nginx.service.d
+        sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
+        sudo systemctl daemon-reload
+        sudo rm -rf /etc/nginx/sites-available/*
+        sudo rm -rf /etc/nginx/sites-enabled/*
+        sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
+        sudo chmod 644 /etc/nginx/sites-available/submitty.conf
+        sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
+        sudo service nginx restart
+      shell: bash
+
     - name: Set up apache
       run: |
+        sudo apt-get install apache2
+        sudo apt-get install apache2-suexec-custom
+        sudo apt-get install libapache2-mod-authnz-external
+        sudo apt-get install libapache2-mod-authz-unixgroup
+        sudo apt-get install libapache2-mod-wsgi-py3
+        sudo apt-get install php${PHP_VER}-fpm
         cd $SUBMITTY_REPOSITORY
         sudo a2enmod include rewrite actions cgi alias headers suexec authnz_external headers proxy_fcgi proxy_http proxy_wstunnel ssl
         sudo cp .setup/php-fpm/pool.d/submitty.conf /etc/php/$PHP_VER/fpm/php-fpm.conf
@@ -191,20 +205,6 @@ runs:
         sudo apache2ctl -t
         sudo service php${PHP_VER}-fpm restart
         sudo service apache2 restart
-      shell: bash
-
-    - name: Set up nginx
-      run: |
-        cd $SUBMITTY_REPOSITORY
-        sudo mkdir /etc/systemd/system/nginx.service.d
-        sudo printf "[Service]\nExecStartPost=/bin/sleep 0.1\n" | sudo tee /etc/systemd/system/nginx.service.d/override.conf
-        sudo systemctl daemon-reload
-        sudo rm -rf /etc/nginx/sites-available/*
-        sudo rm -rf /etc/nginx/sites-enabled/*
-        sudo cp -f .setup/nginx/submitty.conf /etc/nginx/sites-available/submitty.conf
-        sudo chmod 644 /etc/nginx/sites-available/submitty.conf
-        sudo ln -s /etc/nginx/sites-available/submitty.conf /etc/nginx/sites-enabled/submitty.conf
-        sudo service nginx restart
       shell: bash
 
     - name: Run git tests

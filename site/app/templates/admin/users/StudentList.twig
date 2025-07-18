@@ -4,7 +4,8 @@
         <div class="btn-wrapper">
             {# Need 'flex: 1' to preserve the space given by parent div #}
             {% include 'Vue.twig' with {
-                'component': 'toggleColumns',
+                'type': 'component',
+                'name': 'ToggleColumns',
                 'style': 'flex: 1', 
                 'args': {
                     'buttonWrapped': true,

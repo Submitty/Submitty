@@ -55,7 +55,7 @@ apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-externa
 apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml php-ds php-imagick php-intl
 
 if [ ${DEV_VM} == 1 ]; then
-    apt-get install -qqy php-xdebug
+    apt-get install -qqy php-xdebug php-sqlite3
 fi
 
 #Add the scrot screenshotting program

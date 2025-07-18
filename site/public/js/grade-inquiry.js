@@ -248,6 +248,7 @@ function newDiscussionRender(discussion) {
     }
     // student
     else {
+        // eslint-disable-next-line no-restricted-syntax
         $('#gradeInquiryBoxSection').html(discussion).hide().fadeIn('slow');
     }
 }

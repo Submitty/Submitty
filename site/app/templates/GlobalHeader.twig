@@ -12,7 +12,7 @@
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
 
-        if ("serviceWorker" in navigator) {
+        if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("{{ service_worker_path }}")
@@ -47,7 +47,7 @@
     {% endfor %}
 
     {% for js_ref in js %}
-    <script src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}' type={{ '.mjs' in js_ref ? 'module' : '' }}></script>
     {% endfor %}
 
     {% if not content_only %}
@@ -92,9 +92,6 @@
                 }
             }
         }
-
-        var onAjaxInit;
-
 
         //determines if the user has a set theme
         function detectColorScheme(){
@@ -253,31 +250,21 @@
             sysadmin at <a href='mailto:{{ sysadmin_email }}'>{{ sysadmin_email }}</a>.{% endif %}
         </div>
         {% include 'Vue.twig' with {
-            'component': 'performanceWarning',
+            'type': 'component',
+            'name': 'PerformanceWarning',
             'args': {
                 "performanceWarning": performance_warning,
                 "submittyQueries": submitty_queries,
                 "courseQueries": course_queries
             }
         } %}
-        <div id='messages'>
-            <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
-            {% for message in messages %}
-                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}" data-testid="popup-message">
-                    <span>
-                        {% if message.type == "error" %}
-                        <i class="fas fa-times-circle"></i>
-                        {% elseif message.type == "success" %}
-                        <i class="fas fa-check-circle"></i>
-                        {% else %}
-                        <i class="fas fa-circle-exclamation"></i>
-                        {% endif %}
-                        {{ message.error | nl2br }}
-                    </span>
-                    <a class="fas fa-times key_to_click" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                </div>
-            {% endfor %}
-        </div>
+        {% include 'Vue.twig' with {
+            'name': 'Toasts',
+            'type': 'component',
+            'args': {
+                "messages": messages,
+            }
+        } %}
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
                 <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
@@ -288,7 +275,7 @@
                     </ul>
                 </aside>
             {% endif %}
-            <main id="main">
+            <main id="main" data-testid="content-main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
 {% macro render_sidebar_button(button, mobile) %}

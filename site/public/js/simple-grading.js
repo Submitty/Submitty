@@ -1,4 +1,4 @@
-/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon */
+/* global WebSocketClient, registerKeyHandler, student_full, csrfToken, buildCourseUrl, submitAJAX, captureTabInModal, luxon, full_grader_access */
 /* exported setupSimpleGrading, checkpointRollTo, showSimpleGraderStats */
 
 function updateVisibility() {
@@ -921,10 +921,16 @@ function setupSimpleGrading(action) {
     $('#student-search-input').on('keydown', () => {
         highlightOnSingleMatch(false);
     });
-    $('#student-search').on('DOMSubtreeModified', () => {
-        highlightOnSingleMatch(true);
-    });
-
+    const studentSearch = document.querySelector('#student-search');
+    if (studentSearch) {
+        const observer = new MutationObserver(() => {
+            highlightOnSingleMatch(true);
+        });
+        observer.observe(studentSearch, {
+            childList: true,
+            subtree: true,
+        });
+    }
     // clear the input field when it is focused
     $('#student-search-input').on('focus', function () {
         $(this).val('');
@@ -1014,3 +1020,37 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
         }
     }
 }
+
+function updateFilterWithdrawn() {
+    const withdrawnFilterBox = document.getElementById('filter-withdrawn');
+    const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
+
+    if (withdrawnFilterBox.checked) {
+        withdrawnFilterElements.hide();
+        Cookies.set('filter_withdrawn_student', 'true');
+    }
+    else {
+        withdrawnFilterElements.show();
+        Cookies.set('filter_withdrawn_student', 'false');
+    }
+}
+
+// Withdrawn filter checkbox should remain the same on reload
+window.addEventListener('DOMContentLoaded', () => {
+    const withdrawnFilterBox = document.getElementById('filter-withdrawn');
+    const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
+    const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+    if (full_grader_access) {
+        if (withdrawnFilterStatus === 'false') {
+            withdrawnFilterBox.checked = false;
+            withdrawnFilterElements.show();
+        }
+        else {
+            withdrawnFilterBox.checked = true;
+            withdrawnFilterElements.hide();
+        }
+    }
+    else {
+        withdrawnFilterElements.hide();
+    }
+});
