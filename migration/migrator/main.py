@@ -511,7 +511,7 @@ def load_triggers(args, output=True):
                 print('DONE')
 
         elif environment == 'course':
-            courses = masterdb.execute('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;').all()
+            courses = masterdb.execute('SELECT * FROM courses WHERE status=1 OR status=2 ORDER BY term, course;').mappings().all()
             masterdb.close()
             first_err = True  # make sure first error appears on new line
             for course in courses:
