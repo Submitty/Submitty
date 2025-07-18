@@ -21,8 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AdminGradeableController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class AdminGradeableController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods: ["GET"])]
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
@@ -625,8 +625,8 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
      *  the grader's new students.
      * @param String $gradeable_id
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods: ["POST"])]
     public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
@@ -660,8 +660,8 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
      * database with the grader's new students.
      * @param String $gradeable_id
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods: ["POST"])]
     public function newGraderPeerSubmit($gradeable_id) {
         $new_grader_id = $_POST['new_grader_id'];
