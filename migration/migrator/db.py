@@ -78,9 +78,7 @@ class Database:
         :type query: str
         :rtype: sqlalchemy.engine.ResultProxy
         """
-        response = self.session.execute(text(query))
-        self.inspector.clear_cache()
-        return response
+        return self.session.execute(text(query))
 
     def commit(self):
         """Run commit on the current session."""
@@ -99,6 +97,7 @@ class Database:
         :param table_name: Name of table to check for
         :type table_name: str
         """
+        self.inspector.clear_cache()
         return self.inspector.has_table(table_name)
 
     def table_has_column(self, table, search_column):
@@ -111,6 +110,7 @@ class Database:
         :type search_column: str
         :rtype: bool
         """
+        self.inspector.clear_cache()
         for column in self.inspector.get_columns(table):
             if search_column == column['name']:
                 return True
