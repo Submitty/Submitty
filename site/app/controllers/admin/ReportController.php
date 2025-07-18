@@ -614,11 +614,11 @@ class ReportController extends AbstractController {
     /**
      * Writes to the rainbow grades customization file
      *
-     * @return array<string, mixed>
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
     #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization_save", methods: ["POST"])]
-    public function writeToCustomization(): array {
+    public function writeToCustomization(): JsonResponse {
         // Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -626,7 +626,7 @@ class ReportController extends AbstractController {
         if (isset($_POST["json_string"])) {
             try {
                 $customization->processForm($_POST['json_string']);
-                return $this->core->getOutput()->renderJsonSuccess();
+                return JsonResponse::getSuccessResponse();
             }
             catch (\Exception $e) {
                 $msg = 'Error processing form';
@@ -636,18 +636,18 @@ class ReportController extends AbstractController {
             $msg = 'No JSON string provided';
         }
 
-        return $this->core->getOutput()->renderJsonError($msg);
+        return JsonResponse::getErrorResponse($msg);
     }
 
     /**
      * Generates the rainbow grades customization page or writes to the customization file
      * based on the existence of the "json_string" request body.
      *
-     * @return array<string, mixed>|null
+     * @return JsonResponse|null
      */
     #[Route("/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["GET"])]
     #[Route("/api/courses/{_semester}/{_course}/reports/rainbow_grades_customization", methods: ["POST"])]
-    public function generateCustomization(): array| null {
+    public function generateCustomization(): JsonResponse|null {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -658,15 +658,15 @@ class ReportController extends AbstractController {
                 $customization->processForm($_POST['json_string']);
 
                 // Finally, send the requester back the information
-                return $this->core->getOutput()->renderJsonSuccess("Successfully wrote gui_customization.json file");
+                return JsonResponse::getSuccessResponse("Successfully wrote gui_customization.json file");
             }
             catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
-                return $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+                return JsonResponse::getErrorResponse('See "data" for details', $e->getDetails());
             }
             catch (\Exception $e) {
                 //Catches any other exceptions, should be "unexpected" issues
-                return $this->core->getOutput()->renderJsonError($e->getMessage());
+                return JsonResponse::getErrorResponse($e->getMessage());
             }
         }
         else {
