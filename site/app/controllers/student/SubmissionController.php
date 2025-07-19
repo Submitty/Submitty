@@ -265,11 +265,15 @@ class SubmissionController extends AbstractController {
         //filter out empty, null strings
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //If no user id's were submitted, give a graceful error.
@@ -309,7 +313,9 @@ class SubmissionController extends AbstractController {
                     $teams[] = $tmp->getId();
                 }
             }
-            $teams = array_unique(array_filter($teams));
+            $teams = array_unique(array_filter($teams, function ($team) {
+                return $team !== '';
+            }));
             $inconsistent_teams = count($teams) > 1;
         }
 
@@ -341,9 +347,8 @@ class SubmissionController extends AbstractController {
      * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
      * size entered and places in the uploads/split_pdf folder.
      * Its error checking has overlap with ajaxUploadSubmission.
-     *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods: ["POST"])]
     public function ajaxBulkUpload($gradeable_id) {
         $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
@@ -529,9 +534,9 @@ class SubmissionController extends AbstractController {
      * to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      * Has overlap with ajaxUploadSubmission
      *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      * @return boolean
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods: ["POST"])]
     public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
         // check for whether the item should be merged with previous submission
@@ -557,11 +562,15 @@ class SubmissionController extends AbstractController {
 
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
@@ -836,9 +845,9 @@ class SubmissionController extends AbstractController {
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it succeeded or not.
      *
-     * @AccessControl(role="FULL_ACCESS_GRADER")
      * @return boolean
      */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods: ["POST"])]
     public function ajaxDeleteSplitItem($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -892,9 +901,9 @@ class SubmissionController extends AbstractController {
     }
     /**
      * function for counting the number of submissions to be regraded
-     * @AccessControl(role="INSTRUCTOR")
      * @return JsonResponse
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/count", methods: ["POST"])]
     public function ajaxCountRegrade(): JsonResponse {
         $gradeable = $this->tryGetElectronicGradeable($_POST['gradeable_id']);
@@ -922,9 +931,9 @@ class SubmissionController extends AbstractController {
 
     /**
      * Function for regrading submissions
-     * @AccessControl(role="INSTRUCTOR")
      * @return array
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/regrade", methods: ["POST"])]
     public function ajaxRegrade($gradeable_id): array {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
@@ -1485,7 +1494,15 @@ class SubmissionController extends AbstractController {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[$i]["name"][$j] . ".", false);
                             }
                             $uploaded_files[$i]["is_zip"][$j] = true;
-                            $file_size += FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $reported_size = FileUtils::getZipSize($uploaded_files[$i]["tmp_name"][$j]);
+                            $file_size += $reported_size;
+                            # Check size on each zip to ensure validation will not decompress a zip file that is too large
+                            if ($file_size > $max_size) {
+                                return $this->uploadResult("File(s) uploaded too large.  Maximum size is " . ($max_size / 1000) . " kb. Uploaded file(s) was " . ($file_size / 1000) . " kb.", false);
+                            }
+                            if (!FileUtils::validateZipFileSize($uploaded_files[$i]["tmp_name"][$j])) {
+                                return $this->uploadResult("Corrupted ZIP file for " . $uploaded_files[$i]["name"][$j] . ".", false);
+                            }
                         }
                         else {
                             if (FileUtils::isValidFileName($uploaded_files[$i]["name"][$j]) === false) {
@@ -2079,9 +2096,7 @@ class SubmissionController extends AbstractController {
         return JsonResponse::getSuccessResponse($has_results);
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")]
     public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();

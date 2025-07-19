@@ -32,28 +32,35 @@
                     <i class="fas fa-circle grader-double"></i>
                     Component double-graded by a full access grader or instructor
                 </li>
+                <li>
+                    <i class="fas fa-circle grader-active"></i>
+                    Component actively being graded
+                </li>
             </ul>
 
-            <div class="action-btn-cont">
+            <div class="row-wrapper">
                 {% if show_all_sections_button %}
-                <button class="btn btn-default" data-testid="view-sections" onclick="changeSections()">
-                    {{ view_all ? "View Your Sections" : "View All" }}
-                </button>
+                <label for="toggle-view-sections" data-testid="view-sections-label" class="column-wrapper" > Only Assigned Sections
+                    <input type="checkbox" id="toggle-view-sections" data-testid="view-sections" onchange="changeSections()">
+                </label>
                 {% endif %}
-                <button class="btn btn-default" data-testid="random-default-order"
-                   onclick="changeSortOrder()">
-                    {{ sort == 'random' ? "Switch to Default Order" : "Switch to Random Order" }}
-                </button>
+                <label for="toggle-random-order" data-testid="random-order-label" class="column-wrapper" > Randomize Order
+                    <input type="checkbox" id="toggle-random-order" data-testid="random-order-checkbox" onchange="changeSortOrder()">
+                </label>
                 {% if toggle_anon_button %}
-                <button class="btn btn-default" id="toggle-anon-button" data-testid="toggle-anon-button"
-                    onclick="changeAnon('{{ gradeable.getId() }}')">
-                    {{ anon_mode ? "Disable Anonymous Mode" : "Enable Anonymous Mode" }}
-                </button>
+                <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
+                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon('{{ gradeable.getId() }}')">
+                </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
-                <button class="btn btn-default" id="inquiryButton" data-testid="toggle-grade-inquiry" onclick="change_inquiry()">
-                    {{ inquiry_status ? "Grade Inquiry Only: Off" : "Grade Inquiry Only: On" }}
-                </button>
+                <label for="toggle-inquiry-only" data-testid="inquiry-only-label" class="column-wrapper"> Grade Inquiries Only
+                    <input type="checkbox" id="toggle-inquiry-only" data-testid="inquiry-only-checkbox" onchange="changeInquiry()">
+                </label>
+                {% endif %}
+                {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
+                <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
+                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filterWithdrawnUpdate()">
+                </label>
                 {% endif %}
             </div>
         </div>
@@ -78,33 +85,13 @@
     <button type="button" class="btn btn-primary" onclick="collapseAllSections()" data-testid="collapse-all-sections">Collapse All Sections</button>
     <button type="button" class="btn btn-primary" onclick="expandAllSections()" data-testid="expand-all-sections">Expand All Sections</button>
     {% include 'Vue.twig' with {
-        'component': 'toggleColumns',
+        'type': 'component',
+        'name': 'ToggleColumns',
         'style': 'display: inline;',
         'args': {
-            'columns': [
-                "index",
-                "section",
-                "user_id",
-                "user_given",
-                "user_family",
-                "autograding",
-                "graded_questions",
-                "total",
-                "grading",
-                "active_version"
-            ],
-            'labels': [
-                "# / Count / Index",
-                "Section",
-                "User ID",
-                "User Given",
-                "User Family",
-                "Autograding",
-                "Graded Questions",
-                "Total",
-                "Grading",
-                "Active Version"
-            ],
+            'columns': all_columns|map(column => column.function),
+            'labels': all_columns|map(column => column.title),
+            'hiddenColumns': default_hidden_columns,
             'forced': [
                 'grading'
             ],
@@ -216,7 +203,7 @@
                 <tbody class="details-content panel-content-active"{% if section.title in collapsed_sections %} style="display: none"{% endif %}>
                     {% if section.rows is defined %}
                         {% for info in section.rows %}
-                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) }}
+                            {{ _self.render_student(_context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) }}
                         {% endfor %}
                     {% endif %}
                     {% if section.teamless_users is defined %}
@@ -271,10 +258,15 @@
     </table>
 </div>
 
-{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length) %}
+{% macro render_student(context, section, graded_gradeable, index, info, columns, team_gradeable_view_history, overrides, anon_ids, max_team_name_length, active_graders) %}
     <tr class="grade-table" data-testid="grade-table"
         {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().accessGrading() %}
             style='background: #7bd0f7;'
+        {% endif %}
+        {% if not graded_gradeable.getSubmitter().isTeam() and graded_gradeable.getSubmitter().getUser().getRegistration_type() == "withdrawn" %}
+            data-student="electronic-grade-withdrawn"
+        {% else %}
+            data-student="electronic-grade-active"
         {% endif %}
     >
         {% for column in context.columns %}
@@ -289,7 +281,7 @@
             {% elseif column.function == "autograding_peer" %}
                 {{ _self.render_column_autograding_peer(context, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "graded_questions" %}
-                {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column) }}
+                {{ _self.render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) }}
             {% elseif column.function == "grading" %}
                 {{ _self.render_column_grading(context, section, graded_gradeable, index, info, column, overrides, anon_ids) }}
             {% elseif column.function == "grading_blind" %}
@@ -420,13 +412,19 @@
 {% endmacro %}
 
 {# Graded Questions #}
-{% macro render_column_graded_questions(context, section, graded_gradeable, index, info, column) %}
+{% macro render_column_graded_questions(context, section, graded_gradeable, index, info, column, active_graders) %}
     <td class="td-graded-questions" style="text-align: center">
         <span>
             {%- for index in 0..info.graded_groups|length-1 -%}
             {# Non-Peer View for Stoplights #}
             {% if core.getUser().accessGrading() %}
-                    {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
+                    {% set user_id = graded_gradeable.getSubmitter().getId() %}
+                    {% set user_graders = active_graders[user_id] is defined ? active_graders[user_id] : {} %}
+                    {% set component_graders = user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] is defined ? user_graders[graded_gradeable.getGradeable().getComponents()[index].getId()] : {} %}
+
+                    {% if component_graders is not empty %}
+                        <i title="Currently being graded by: {{ component_graders | map(grader => grader.grader_id) | join(', ') }}" class="fas fa-circle grader-active"></i>
+                    {%  elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0%}
                         <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
                     {% else %}
                         {% if info.graded_groups[index] =="peer-null"   %}
@@ -773,9 +771,13 @@
 {# /Column functions #}
 <script>
     {% if grade_inquiry_only_button %}
-        inquiry_update();
+        inquiryUpdate();
     {% endif %}
-    
+
+    const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
+    const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
+    const is_student = {{ is_student ? 'true' : 'false' }};
+
     function changeSections() {
         const status = {{ view_all ? 1 : 0 }};
         if (status) {
@@ -790,6 +792,7 @@
 
     function changeAnon(gradeable_id) {
         Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
+        Cookies.set('current_gradeable_path', gradeable_id);
         const status = {{ anon_mode ? 1 : 0}};
         if (status) {
             Cookies.set(`anon_mode_${gradeable_id}`, 'off');
@@ -800,12 +803,11 @@
         location.reload();
     }
 
-    function change_inquiry() {
+    function changeInquiry() {
         Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
         location.reload();
     }
 
-    
     function changeSortOrder() {
         if ({{ sort == 'random' ? "true" : "false" }}) {
             Cookies.set('sort', 'id');

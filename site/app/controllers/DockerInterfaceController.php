@@ -113,7 +113,6 @@ class DockerInterfaceController extends AbstractController {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $return_str = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $code_success = !$http_code == 200;
         if (curl_errno($ch) || $http_code !== 200) {
             return JsonResponse::getErrorResponse($image_arr[0] . ' not found on DockerHub');
         }
@@ -158,10 +157,8 @@ class DockerInterfaceController extends AbstractController {
                 $json
             );
 
-            if (!$this->updateDocker()) {
-                return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-            }
-            return JsonResponse::getSuccessResponse($_POST['image'] . ' found on DockerHub and queued to be added!');
+            return JsonResponse::getSuccessResponse($_POST['image'] . ' has been added to the configuration! 
+                                                                            Click \'Update dockers and machines\' to apply changes.');
         }
         else {
             return JsonResponse::getFailResponse($_POST['image'] . ' not found on DockerHub');
@@ -232,7 +229,7 @@ class DockerInterfaceController extends AbstractController {
             "config",
             "autograding_containers.json"
         );
-        $json = json_decode(file_get_contents($jsonFilePath), true);
+        $json = FileUtils::readJsonFile($jsonFilePath);
 
         foreach ($json as $capability_key => $capability) {
             if (($key = array_search($image, $capability, true)) !== false) {
@@ -245,10 +242,7 @@ class DockerInterfaceController extends AbstractController {
             $json,
         );
 
-        if (!$this->updateDocker()) {
-            return JsonResponse::getFailResponse("Could not update docker images, please try again later.");
-        }
-
-        return JsonResponse::getSuccessResponse($image . ' removed from docker images!');
+        return JsonResponse::getSuccessResponse($image . ' has been removed from the configuration. 
+                                                            Click \'Update dockers and machines\' to apply changes.');
     }
 }

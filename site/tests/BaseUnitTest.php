@@ -49,6 +49,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getTerm')->willReturn($config_values['semester']);
         }
 
+        if (isset($config_values['accepted_emails'])) {
+            $config->method('getAcceptedEmails')->willReturn($config_values['accepted_emails']);
+        }
+
         if (isset($config_values['course'])) {
             $config->method('getCourse')->willReturn($config_values['course']);
         }
@@ -70,6 +74,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         $config->method('isDebug')->willReturn($config_values['debug'] ?? true);
+        $config->method('getCourseMaterialFileUploadLimitMb')->willReturn($config_values['course_material_file_upload_limit_mb'] ?? 100);
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
         DateUtils::setTimezone($config->getTimezone());

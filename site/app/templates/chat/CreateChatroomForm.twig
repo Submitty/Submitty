@@ -1,0 +1,32 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}create-chatroom-form{% endblock %}
+{% block title %}Create Chatroom{% endblock %}
+{% block body %}
+    <form id="chatroom-create-form" action="{{ base_url }}/new" method="post">
+        <div class="flex-col flex-col-space">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <label for="create-chatroom-title">
+                Chatroom Title:
+            </label>
+            <input type="text" name="title" id="create-chatroom-title" data-testid="chatroom-name-entry" placeholder="Enter name here..."/>
+            <label for="create-chatroom-description">
+                Description:
+            </label>
+            <input type="text" name="description" id="create-chatroom-description" data-testid="chatroom-description-entry" placeholder="Enter description here...">
+            <label for="chatroom-allow-anon" id="allow-anon-label">
+                Allow people to join anonymously?
+                <input type="checkbox" name="allow-anon" id="chatroom-allow-anon" data-testid="enable-disable-anon">
+            </label>
+        </div>
+    </form>
+    <script>
+        function create_room() {
+            let form = document.getElementById("chatroom-create-form");
+            form.submit();
+        }
+    </script>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input type="submit" class="btn btn-primary submit-create-chatroom" data-testid="submit-chat-creation" onclick="create_room()">
+{% endblock %}

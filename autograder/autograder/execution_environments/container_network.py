@@ -112,7 +112,7 @@ class Container():
                     name=self.full_name
                 )
         except docker.errors.ImageNotFound:
-            self.log_docker_error(f'image could not be created in {self.full_name}')
+            self.log_docker_error('image is not available')
             self.log_function(f'ERROR: The image {self.image} is not available on this worker')
             client.close()
             raise
@@ -131,8 +131,19 @@ class Container():
         client.close()
 
     def log_docker_error(self, message):
+        untrusted = self.full_name.split("_")[0]
         docker_error_path = os.path.join(
-                '/var/local/submitty/autograding_tmp', self.full_name.split("_")[0], 'tmp/TMP_SUBMISSION/tmp_logs')
+                '/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/tmp_logs')
+
+        queue_file = os.path.join('/var/local/submitty/autograding_tmp', untrusted, 'tmp/TMP_SUBMISSION/queue_file.json')
+
+        machine = 'unknown'
+        with open(queue_file, 'r') as f:
+            try:
+                queue_file = json.load(f)
+                machine = queue_file["which_machine"]
+            except json.JSONDecodeError:
+                queue_file = {}
 
         docker_error_file = os.path.join(docker_error_path, "docker_error.json")
         docker_error_data = []
@@ -147,8 +158,8 @@ class Container():
 
         error_log = {
             "image": f'{self.image}',
-            "machine": f'{self.full_name.split("_")[0]}',
-            "error": message,
+            "machine": f'{machine}',
+            "error": f'{message} on machine {machine}',
         }
 
         if error_log not in docker_error_data:

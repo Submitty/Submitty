@@ -8,11 +8,11 @@
   ansible.builtin.apt:
     name: php
     state: present
-  register: apt_action
+  register: submitty_install_apt_action
   retries: 100
-  until: apt_action is success or
-    ('Failed to lock apt for exclusive operation' not in apt_action.msg and
-    '/var/lib/dpkg/lock' not in apt_action.msg)
+  until: submitty_install_apt_action is success or
+    ('Failed to lock apt for exclusive operation' not in submitty_install_apt_action.msg and
+    '/var/lib/dpkg/lock' not in submitty_install_apt_action.msg)
 
 - name: Create submitty git directory if none exists
   ansible.builtin.file:
@@ -42,9 +42,12 @@
         {{ submitty_install_submitty_course_dbuser_password }}
         {{ submitty_install_timezone }}
         {{ submitty_install_language }}
+        {{ submitty_install_course_materials_file_upload_limit_mb }}
         {{ 'https' if submitty_install_ssl_enabled else 'http' }}://{{ submitty_install_submitty_url }}
         {{ submitty_install_vcs_url }}
         {{ submitty_install_institution_name }}
+        {{ submitty_install_institution_url }}
+        {{ submitty_install_self_account_creation }}
         {{ submitty_install_sysadmin_email }}
         {{ submitty_install_submitty_email }}
         {{ submitty_install_institution_url }}

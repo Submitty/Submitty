@@ -30,7 +30,7 @@
 
 .docker-table th,
 .machine-table th {
-    text-align: left;
+    text-align: center;
 }
 
 .docker-table td,
@@ -118,4 +118,9 @@
     white-space: normal;
     padding: 1em;
     background: var(--standard-light-gray);
+}
+
+.status {
+    pointer-events: none;
+    cursor: default;
 }

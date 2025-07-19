@@ -58,7 +58,7 @@ function checkForumFileExtensions(post_box_id, files) {
 }
 
 function resetForumFileUploadAfterError(displayPostId) {
-    $(`#file_name${displayPostId}`).html('');
+    $(`#file_name${displayPostId}`).text('');
     document.getElementById(`file_input_label${displayPostId}`).style.border = '2px solid red';
     document.getElementById(`file_input${displayPostId}`).value = null;
 }
@@ -75,6 +75,7 @@ function checkNumFilesForumUpload(input, post_id) {
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
+        // eslint-disable-next-line no-restricted-syntax
         $(`#file_name${displayPostId}`).html(`<p style="display:inline-block;">${input.files.length} files selected.</p>`);
         $('#messages').fadeOut();
         document.getElementById(`file_input_label${displayPostId}`).style.border = '';
@@ -215,6 +216,8 @@ function publishFormWithAttachments(form, test_category, error_message, is_threa
 
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    // re-enable the submit button for users to try again
+                    form.find('[type=submit]').prop('disabled', false);
                     return;
                 }
             }
@@ -852,19 +855,14 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
             const anon = json.anon;
             const change_anon = json.change_anon;
             const user_id = escapeSpecialChars(json.user);
-            const validIsoString = json.post_time.replace(' ', 'T');
-            let time = DateTime.fromISO(json.validIsoString, { zone: 'local' });
-            if (!time.isValid) {
-                // Timezone suffix ":00" might be missing
-                time = DateTime.fromISO(`${validIsoString}:00`, { zone: 'local' });
-            }
+            const time = DateTime.fromISO(json.post_time, { zone: 'local' });
             const categories_ids = json.categories_ids;
             const date = time.toLocaleString(DateTime.DATE_SHORT);
             const timeString = time.toLocaleString(DateTime.TIME_SIMPLE);
             const contentBox = form.find('[name=thread_post_content]')[0];
             contentBox.style.height = lines * 14;
             const editUserPrompt = document.getElementById('edit_user_prompt');
-            editUserPrompt.innerHTML = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
+            editUserPrompt.innerText = `Editing a post by: ${user_id} on ${date} at ${timeString}`;
             contentBox.value = post_content;
             document.getElementById('edit_post_id').value = post_id;
             document.getElementById('edit_thread_id').value = thread_id;
@@ -899,8 +897,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 const thread_title = json.title;
                 const thread_lock_date = json.lock_thread_date;
                 const thread_status = json.thread_status;
-                let expiration = json.expiration.replace('-', '/');
-                expiration = expiration.replace('-', '/');
+                const expiration = json.expiration;
                 $('#title').prop('disabled', false);
                 $('.edit_thread').show();
                 $('#label_lock_thread').show();
@@ -910,7 +907,7 @@ function showEditPostForm(post_id, thread_id, shouldEditThread, render_markdown,
                 if (Date.parse(expiration) > new Date()) {
                     $('#pin-expiration-date').show();
                 }
-                $('#expirationDate').val(json.expiration);
+                $('#expirationDate').val(expiration);
                 // Categories
                 $('.cat-buttons').removeClass('btn-selected');
                 $.each(categories_ids, (index, category_id) => {
@@ -1691,7 +1688,7 @@ function refreshCategories() {
         order.forEach((category) => {
             const category_visible_date = category[4];
             const category_diff = category[3];
-            if (category_visible_date === '' || category_diff > 0) {
+            if (category_visible_date === '' || category_diff >= 0) {
                 const category_id = category[0];
                 const category_desc = category[1];
                 const category_color = category[2];
@@ -2022,14 +2019,14 @@ function sortTable(sort_element_index, reverse = false) {
         const reverse_index = headers[i].innerHTML.indexOf(' ↑');
 
         if (index > -1 || reverse_index > -1) {
-            headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
+            headers[i].innerHTML = escapeSpecialChars(headers[i].innerHTML.slice(0, -2));
         }
     }
     if (reverse) {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↑`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↑`);
     }
     else {
-        headers[sort_element_index].innerHTML = `${headers[sort_element_index].innerHTML} ↓`;
+        headers[sort_element_index].innerHTML = escapeSpecialChars(`${headers[sort_element_index].innerHTML} ↓`);
     }
 }
 
@@ -2390,6 +2387,7 @@ function updateSelectedThreadContent(selected_thread_first_post_id) {
             }
 
             json = json['data'];
+            // eslint-disable-next-line no-restricted-syntax
             $('#thread-content').html(json['post']);
             if (json.markdown === true) {
                 $('#thread-content').addClass('markdown-active');

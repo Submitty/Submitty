@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\entities\forum\Category;
 use app\exceptions\FileReadException;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
@@ -16,8 +17,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ConfigurationController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class ConfigurationController extends AbstractController {
     const NO_SELF_REGISTER = 0; // Self registration disabled
     const REQUEST_SELF_REGISTER = 1; // Self registration allowed, users request and instructors can approve
@@ -56,7 +57,8 @@ class ConfigurationController extends AbstractController {
             'seek_message_enabled'           => $this->core->getConfig()->isSeekMessageEnabled(),
             'seek_message_instructions'      => $this->core->getConfig()->getSeekMessageInstructions(),
             'queue_announcement_message'     => $this->core->getConfig()->getQueueAnnouncementMessage(),
-            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled()
+            'polls_enabled'                  => $this->core->getConfig()->isPollsEnabled(),
+            'chat_enabled'                   => $this->core->getConfig()->isChatEnabled()
         ];
         $seating_options = $this->getGradeableSeatingOptions();
         $admin_in_course = false;
@@ -152,7 +154,8 @@ class ConfigurationController extends AbstractController {
                     'seating_only_for_instructor',
                     'queue_enabled',
                     'seek_message_enabled',
-                    'polls_enabled'
+                    'polls_enabled',
+                    'chat_enabled'
                 ]
             )
         ) {
@@ -181,8 +184,9 @@ class ConfigurationController extends AbstractController {
         }
 
         if ($name === 'forum_enabled' && $entry == 1) {
+            $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
             // Only create default categories when there is no existing categories (only happens when first enabled)
-            if (empty($this->core->getQueries()->getCategories())) {
+            if (count($repo->getCategories()) === 0) {
                 $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
                 foreach ($categories as $rank => $category) {
                     $this->core->getQueries()->addNewCategory($category, $rank);

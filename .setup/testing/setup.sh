@@ -55,12 +55,14 @@ submitty_course_dbuser
 submitty_course_dbuser
 America/New_York
 en_US
+100
 http://localhost
 
 
 sysadmin@example.com
 https://example.com
-1
+2
+y
 
 
 y
