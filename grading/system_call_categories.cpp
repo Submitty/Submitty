@@ -499,10 +499,9 @@ void allow_system_calls(scmp_filter_ctx sc, const std::set<std::string> &categor
   // RESTRICTED : UNKNOWN_REMAP_PAGES
   ALLOW_SYSCALL(remap_file_pages, "RESTRICTED:UNKNOWN_REMAP_PAGES");
 
-  
   // RESTRICTED : CUSTOM_SYSTEM_CALLS
   ALLOW_SYSCALL_BY_NUMBER(0x3f0, "RESTRICTED:rrcall_check_presence", "RESTRICTED:CUSTOM_SYSTEM_CALLS"); // Julia invokes; gets ENOSYS.
 
-  
+
   // ================================================================================
 }

@@ -49,7 +49,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
     if (line.find("ALLOW_SYSCALL_BY_NUMBER(") != std::string::npos) {
       continue;
     }
-    
+
     // if it's a system call
     if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
       int startpoint = line.find("ALLOW_SYSCALL(");
@@ -280,7 +280,6 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
     std::map<std::string,std::string>::const_iterator cat_itr = categories.find(c);
     assert (cat_itr != categories.end());
 
-    
     if (cat_itr->second != type) continue;
     
     // the first category (if any) prints a little information blurb
@@ -326,7 +325,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
       std::string c = itr->first.substr(pos+1,itr->first.size()-pos-1);
       std::map<std::string,std::string>::const_iterator cat_itr = categories.find(c);
       assert (cat_itr != categories.end());
-      
+
       if (cat_itr->second != "RESTRICTED") continue;
       std::cout << "        \"" << c << "\"";
       if (restricted_count > 1) std::cout << ",";
