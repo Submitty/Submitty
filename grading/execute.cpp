@@ -884,13 +884,12 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile,
   set_environment_variables(whole_config.value("environment_variables",nlohmann::json()));
 
   my_path = getenv("PATH");
-
   // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
 
   // print this out here (before losing our output)
   if (SECCOMP_ENABLED != 0) {
-    std::cout << "going to install syscall filter for " << my_program << std::endl;
+    //std::cout << "going to install syscall filter for " << my_program << std::endl;
   }
 
   /*************************************************
