@@ -17,8 +17,7 @@
         "PROCESS_CONTROL_NEW_PROCESS_THREAD",
         "PROCESS_CONTROL_SCHEDULING"
     ],
-    
-    // use the verilog container for grading
+
     "container_options": {
         "container_image": "submitty/julia:latest"
     },

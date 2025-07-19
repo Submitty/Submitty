@@ -889,7 +889,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile,
 
   // print this out here (before losing our output)
   if (SECCOMP_ENABLED != 0) {
-     std::cout << "going to install syscall filter for " << my_program << std::endl;
+    //std::cout << "going to install syscall filter for " << my_program << std::endl;
   }
 
   /*************************************************

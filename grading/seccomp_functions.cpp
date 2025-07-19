@@ -261,13 +261,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
                            const nlohmann::json &whole_config, const nlohmann::json &test_case_config) {
  
   int res;
-<<<<<<< HEAD
-  scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
-  //scmp_filter_ctx sc = seccomp_init(SCMP_ACT_LOG);
-=======
   scmp_filter_ctx sc = seccomp_init(SCMP_ACT_ALLOW);
 
->>>>>>> 4eac4e5fe032c6d91f5eb810eeda163d5b37aa50
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
   if (seccomp_arch_native() != target_arch) {
     res = seccomp_arch_add(sc, target_arch);
