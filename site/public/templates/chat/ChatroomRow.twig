@@ -1,0 +1,69 @@
+{% if isAdmin %}
+    <tr id="chatroom-row-{{ id|e('html_attr') }}">
+        <td>
+            <a href='javascript:editChatroomForm("{{ id|e('js') }}", "{{ baseUrl|e('js') }}", "{{ title|e('js') }}", "{{ description|e('js') }}", {{ isAllowAnon ? 'true' : 'false' }});' class="fas fa-pencil-alt black-btn"></a>
+        </td>
+        <td>
+            {% if not isActive %}
+                <a href='javascript:deleteChatroomForm("{{ id|e('js') }}", "{{ title|e('js') }}", "{{ baseUrl|e('js') }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
+            {% endif %}
+        </td>
+        <td>
+            <span title="{{ title|e('html_attr') }}">
+                {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
+            </span>
+        </td>
+        <td>
+            <span title="{{ description|e('html_attr') }}">
+                {{ (description|length > 45 ? description|slice(0, 45) ~ '...' : description)|e }}
+            </span>
+        </td>
+        <td>
+            <form id="chatroom_toggle_form_{{ id|e('html_attr') }}" action="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}/toggleActiveStatus" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token|e('html_attr') }}"/>
+            </form>
+            {% if not isActive %}
+                <button class="btn btn-primary" onclick="toggleChatroom('{{ id|e('js') }}', false)">
+                    Start Session
+                </button>
+            {% else %}
+                <button class="btn btn-danger" onclick="toggleChatroom('{{ id|e('js') }}', true)">
+                    <i class="fas fa-pause"></i>
+                    End Session
+                </button>
+            {% endif %}
+        </td>
+        <td>
+            <a href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
+            {% if isAllowAnon %}
+                <i> or </i>
+                <a href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
+            {% endif %}
+        </td>
+    </tr>
+{% else %}
+    {% if isActive %} <!--students only have access to active chat rooms-->
+        <tr id="chatroom-row-{{ id|e('html_attr') }}">
+            <td>
+                <span class="display-short" title="{{ title|e('html_attr') }}">
+                    {{ (title|length > 30 ? title|slice(0, 30) ~ '...' : title)|e }}
+                </span>
+            </td>
+            <td>
+                {{ hostName|e }}
+            </td>
+            <td>
+                <span class="display-short" title="{{ description|e('html_attr') }}">
+                    {{ (description|length > 45 ? description|slice(0, 45) ~ '...' : description)|e }}
+                </span>
+            </td>
+            <td>
+                <a href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}" class="btn btn-primary">Join</a>
+                {% if isAllowAnon %}
+                    <i> or </i>
+                    <a href="{{ baseUrl|e('html_attr') }}/{{ id|e('url') }}/anonymous" class="btn btn-default">Join As Anon.</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+{% endif %}

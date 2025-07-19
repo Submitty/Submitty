@@ -24,52 +24,28 @@
                         <th scope="col" style="text-align: right"></th>
                     </tr>
                 </thead>
-                <tbody data-testid="chatroom-list-item">
-                    {% for chatroom in chatrooms %}
-                        <tr>
-                            <td>
-                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn"></a>
-                            </td>
-                            <td>
-                                {% if not chatroom.isActive() %}
-                                    <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}", "{{ base_url }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span title="{{ chatroom.getTitle() }}">
-                                    {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
-                                </span>
-                            </td>
-                            <td>
-                                <span title="{{ chatroom.getDescription() }}">
-                                    {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
-                                </span>
-                            </td>
-                            <td>
-                                <form id="chatroom_toggle_form_{{ chatroom.getId() }}" action="{{ base_url }}/{{ chatroom.getId() }}/toggleActiveStatus" method="post">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                </form>
-                                {% if not chatroom.isActive() %}
-                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)">
-                                        Start Session
-                                    </button>
-                                {% else %}
-                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)">
-                                        <i class="fas fa-pause"></i>
-                                        End Session
-                                    </button>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
-                                {% if chatroom.isAllowAnon() %}
-                                    <i> or </i>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
+                <tbody id="chatroom-list" data-testid="chatroom-list-item">
+                    <!-- Vue will render the rows here -->
                 </tbody>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Fetch chatroom data from existing JSON script tag
+                        const allData = JSON.parse(document.getElementById('all-chatroom-data').textContent);
+                        const chatrooms = allData.chatrooms;
+                        
+                        // Mount Vue component for each chatroom
+                        const targetSelector = allData.user_admin ? "#chatroom-list" : "#chatroom-list-student";
+                        chatrooms.forEach(chatroom => {
+                            window.submitty.render(
+                                targetSelector,
+                                "component",
+                                "chat/ChatroomRow",
+                                chatroom,
+                                true // append mode
+                            );
+                        });
+                    });
+                </script>
             {% else %} <!--student's view-->
                 <col style="width: 25%">
                 <col style="width: 25%">
@@ -83,37 +59,35 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for chatroom in chatrooms %}
-                        {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr>
-                                <td>
-                                    <span class="display-short" title="{{ chatroom.getTitle() }}">
-                                        {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {{ chatroom.getHostName() }}
-                                </td>
-                                <td>
-                                    <span class="display-short" title="{{ chatroom.getDescription() }}">
-                                        {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
-                                    {% if chatroom.isAllowAnon() %}
-                                        <i> or </i>
-                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">Join As Anon.</a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
+                <tbody id="chatroom-list-student">
+                    <!-- Vue will render the rows here -->
                 </tbody>
             {% endif %}
         </table>
     </div>
 </div>
+<script type="application/json" id="all-chatroom-data">
+    {
+        "user_admin": {{ user_admin ? 'true' : 'false' }},
+        "base_url": {{ base_url | json_encode() | raw() }},
+        "chatrooms": [
+            {% for chatroom in chatrooms %}
+            {% if user_admin or chatroom.isActive() %}
+            {
+                "id": {{ chatroom.getId() }},
+                "description": {{ chatroom.getDescription() | json_encode() | raw() }},
+                "title": {{ chatroom.getTitle() | json_encode() | raw() }},
+                "hostName": {{ chatroom.getHostName() | json_encode() | raw() }},
+                "isAllowAnon": {{ chatroom.isAllowAnon() ? 'true' : 'false' }},
+                "isAdmin": {{ user_admin ? 'true' : 'false' }},
+                "isActive": {{ chatroom.isActive() ? 'true' : 'false' }},
+                "baseUrl": {{ base_url | json_encode() | raw() }},
+                "csrfToken": {{ csrf_token | json_encode() | raw() }}
+            }{% if not loop.last %},{% endif %}
+            {% endif %}
+            {% endfor %}
+        ]
+    }
+</script>
 {% include('chat/CreateChatroomForm.twig') %}
 {% include('chat/EditChatroomForm.twig') %}
