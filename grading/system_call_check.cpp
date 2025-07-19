@@ -154,8 +154,8 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
       // something unexpected...
       else {
-        std::cout << "LINE '" << line << "'" << std::endl;
-        exit(0);
+        std::cout << "UNKNOWN LINE '" << line << "'" << std::endl;
+        //exit(0);
       }
     }
   }
