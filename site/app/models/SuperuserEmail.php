@@ -10,7 +10,6 @@ class SuperuserEmail extends Email {
         $this->setSubject($this->formatSubject($details["subject"]));
     }
     private function formatSubject(string $subject): string {
-        $course = $this->core->getConfig()->getCourse();
         return "[Submitty Admin Announcement]: " . $subject;
     }
 }

@@ -143,6 +143,7 @@ class User extends AbstractModel {
     /** @prop
      * @var string The secondary email of the user */
     protected $secondary_email;
+
     /** @prop
      * @var string Determines whether or not user chose to receive emails to secondary email */
     protected $email_both;
@@ -242,7 +243,9 @@ class User extends AbstractModel {
             $this->setPreferredGivenName($details['user_preferred_givenname']);
         }
 
-        $this->setPronouns($details['user_pronouns']);
+        if (isset($details['user_pronouns'])) {
+            $this->setPronouns($details['user_pronouns']);
+        }
 
         if (isset($details['display_name_order'])) {
             $this->setDisplayNameOrder($details['display_name_order']);
@@ -263,8 +266,8 @@ class User extends AbstractModel {
         }
 
         $this->email = $details['user_email'];
-        $this->secondary_email = $details['user_email_secondary'];
-        $this->email_both = $details['user_email_secondary_notify'];
+        $this->secondary_email = $details['user_email_secondary'] ?? '';
+        $this->email_both = $details['user_email_secondary_notify'] ?? '';
         $this->group = isset($details['user_group']) ? intval($details['user_group']) : 4;
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
@@ -733,6 +736,7 @@ class User extends AbstractModel {
         $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
@@ -743,6 +747,7 @@ class User extends AbstractModel {
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
         $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
         return $notification_settings;
     }
 

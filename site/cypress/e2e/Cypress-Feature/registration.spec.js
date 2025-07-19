@@ -9,14 +9,14 @@ const no_access_message = 'You don\'t have access to this course.';
 
 function register(message) {
     cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
-    cy.get('[data-testid="testing-button"]').click();
+    cy.get('[data-testid="testing-button"]').last().click();
     cy.get('[data-testid="no-access-message"]').should('contain', message)
         .and('contain', selectMessage)
         .and('contain', notifiedMessage);
     cy.get('[data-testid="register-button"]').click();
     cy.get('[data-testid="open_homework"]').should('exist');
     cy.visit();
-    cy.get('[data-testid="testing-button"]').should('contain', 'Section 5');
+    cy.get('[data-testid="testing-button"]').first().should('contain', 'Section 5');
 }
 
 describe('Tests for self registering for courses', () => {
@@ -76,7 +76,7 @@ describe('Tests for self registering for courses', () => {
         cy.login('gutmal');
         cy.visit();
         cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="testing-button"]').click();
+        cy.get('[data-testid="testing-button"]').last().click();
         cy.get('[data-testid="no-access-message"]').should('contain', openMessage)
             .and('contain', selectMessage)
             .and('contain', notifiedMessage);
@@ -112,7 +112,7 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="unregister-button"]').click();
         cy.get('[data-testid="unregister-confirm"]').click();
         cy.get('[data-testid="courses-list"]').should('contain', 'Courses Available for Self Registration');
-        cy.get('[data-testid="testing-button"]').should('exist');
+        cy.get('[data-testid="testing-button"]').last().should('exist');
         cy.logout();
     });
 });

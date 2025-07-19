@@ -76,34 +76,6 @@ $( document ).ready(function() {
         </div>
         {% endif %}
 
-        {% if uploaded_pdfs|length >= 1 %}
-            <div class = "no-border-box">
-                {% if annotated_file_names|length > 0 %}
-                    <div class="row">
-                        <div class="no-border-box">
-                            <b>Annotated Feedback</b>
-                        </div>
-                    </div>
-                    {% for file in uploaded_pdfs %}
-                        {% if file.encoded_name in annotated_file_names %}
-                            <div class="row" style="flex-wrap: nowrap;">
-                                <div class="no-border-box md-4 file-annotation">
-                                    <p>{{ file.relative_name }}</p>
-                                </div>
-                                <div class="no-border-box md-4">
-                                    <div class="btn-annotation">
-                                        <a class="btn btn-success key_to_click" style="margin-right:20px;" tabindex="0" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}')">View Popup <i class="fas fa-window-restore"></i></a>
-                                        <button class = 'btn btn-default' style="margin-right:20px;" onclick='downloadStudentAnnotations("{{ student_pdf_download_url }}?filename={{ file.name }}&path={{ file.path|url_encode }}&anon_path={{ file.anon_path|url_encode }}&student_id={{ user_id }}", "{{file.path|url_encode}}", "annotated_pdfs")' aria-label="Download the file"> Download  
-                                        <i class="fas fa-download" title="Download the file"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    {##}
-                {% endif %}
-            </div>
-        {% endif %}
         {# /Overview #}
         </div>
         {# Overview #}
