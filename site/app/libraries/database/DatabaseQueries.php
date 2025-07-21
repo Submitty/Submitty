@@ -6949,7 +6949,7 @@ AND gc_id IN (
                     $gradeable->getHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
-                    $gradeable->getReleaseNotificationSent() ? $gradeable->isSubmissionOpen() : false,
+                    $gradeable->getReleaseNotificationsSent() ? $gradeable->isSubmissionOpen() : false,
                     $gradeable->getId()
                 ];
                 $this->course_db->query(

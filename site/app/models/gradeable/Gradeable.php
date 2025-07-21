@@ -112,8 +112,8 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setAllowCustomMarks($allow_custom_marks)
  * @method void setScoreNotificationsSent($score_notification_sent)
  * @method int getScoreNotificationsSent()
- * @method void setReleaseNotificationSent($release_notifications_sent)
- * @method bool getReleaseNotificationSent()
+ * @method void setReleaseNotificationsSent($release_notifications_sent)
+ * @method bool getReleaseNotificationsSent()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -436,7 +436,7 @@ class Gradeable extends AbstractModel {
             $this->setDependsOn($details['depends_on']);
             $this->setDependsOnPoints($details['depends_on_points']);
             $this->setScoreNotificationsSent($details['score_notifications_sent'] ?? 0);
-            $this->setReleaseNotificationSent($details['release_notifications_sent'] ?? false);
+            $this->setReleaseNotificationsSent($details['release_notifications_sent'] ?? false);
             if (array_key_exists('hidden_files', $details)) {
                 $this->setHiddenFiles($details['hidden_files']);
             }

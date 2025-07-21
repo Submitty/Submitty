@@ -615,7 +615,7 @@ class AdminGradeableController extends AbstractController {
             'config_files' => $config_files,
             'score_notifications_sent' => $gradeable->getScoreNotificationsSent(),
             'score_notifications_pending' => $this->core->getQueries()->getPendingGradeableScoreNotifications($gradeable->getId()),
-            'release_notifications_sent' => $gradeable->getReleaseNotificationSent()
+            'release_notifications_sent' => $gradeable->getReleaseNotificationsSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');
