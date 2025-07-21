@@ -8,7 +8,7 @@ import argparse
 import json
 from os import path
 import subprocess
-from sqlalchemy import create_engine, MetaData, Table, bindparam, insert, select
+from sqlalchemy import create_engine, MetaData, Table, bindparam, insert, select, update
 
 from submitty_utils import db_utils
 
@@ -78,7 +78,6 @@ def main():
     users_table = Table('users', metadata, autoload_with=engine)
     select_query = select(users_table).where(users_table.c.user_id == bindparam('user_id'))
     user = connection.execute(select_query, {"user_id": user_id}).fetchone()
-    print(user, user_id)
     defaults = {
         'user_givenname': None,
         'user_preferred_givenname': None,
@@ -101,7 +100,7 @@ def main():
     familyname = get_input('User familyname', defaults['user_familyname'])
     email = get_input('User email', defaults['user_email'], True)
 
-    update = {
+    update_data = {
         'user_givenname': givenname,
         'user_preferred_givenname': preferred,
         'user_familyname': familyname,
@@ -120,14 +119,14 @@ def main():
             break
 
     if user is not None:
-        query = users_table.update(values=update).where(
+        query = update(users_table).where(
             users_table.c.user_id == bindparam('b_user_id')
-        )
-        connection.execute(query, b_user_id=user_id)
+        ).values(update_data)
+        connection.execute(query, { "b_user_id": user_id })
     else:
-        update['user_id'] = user_id
+        update_data['user_id'] = user_id
         query = insert(users_table)
-        connection.execute(query, update)
+        connection.execute(query, update_data)
         connection.commit()
 
 
