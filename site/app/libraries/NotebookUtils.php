@@ -31,11 +31,11 @@ class NotebookUtils {
                 case 'markdown':
                     $markdown = is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'];
                     // Render attachment images (not HTML)
-                    if (!empty($cell['attachments'])) {
+                    if (isset($cell['attachments']) && count($cell['attachments']) > 0) {
                         foreach ($cell['attachments'] as $filename => $attachment) {
                             foreach ($attachment as $mime => $base64) {
                                 $log_message = '';
-                                if (in_array($mime, $mime_types)) {
+                                if (in_array($mime, $mime_types, true)) {
                                     if (strlen($base64) <= $img_size_limit) {
                                         $data_uri = 'data:' . $mime . ";base64," . $base64;
                                         $markdown = str_replace("attachment:$filename", $data_uri, $markdown);
