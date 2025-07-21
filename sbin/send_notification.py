@@ -110,7 +110,7 @@ def construct_gradeable_notifications(term, course, pending, variant):
         gradeable = {
             "id": notification['g_id'],
             "title": notification['g_title'],
-            "team_id": notification['team_id'] if variant == "score" else '',
+            "team_id": notification['team_id'] if variant == "grades" else '',
             "user_id": notification['user_id'],
             "user_email": notification['user_email'],
             # Potentially send via the notification page
@@ -129,8 +129,8 @@ def construct_gradeable_notifications(term, course, pending, variant):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        subject = ("Grade" if variant == "score" else "Gradeable") + " Released"
-        identifier = "Your grade" if variant == "score" else "Submissions"
+        subject = ("Grade" if variant == "grades" else "Gradeable") + " Released"
+        identifier = "Grades" if variant == "grades" else "Submissions"
         notification_content = subject + ": " + gradeable["title"]
         email_subject = subject + ": " + gradeable["title"]
         email_body = (
@@ -198,7 +198,7 @@ def send_gradeable_notifications(course, course_db, master_db, lists, variant):
             )
 
         if gradeables:
-            if variant == "score":
+            if variant == "grades":
                 course_db.execute(
                     """
                     UPDATE electronic_gradeable_version
@@ -245,7 +245,7 @@ def send_pending_notifications():
         course_db = connect_db(f"submitty_{term}_{course}")
 
         # Retrieve all fully graded gradeables with pending notifications
-        scores_available = course_db.execute(
+        grades_available = course_db.execute(
             """
             WITH gradeables AS (
                 SELECT DISTINCT
@@ -313,9 +313,9 @@ def send_pending_notifications():
             """
         )
 
-        if scores_available:
-            lists = construct_gradeable_notifications(term, course, scores_available, "score")
-            send_gradeable_notifications(course, course_db, master_db, lists, "score")
+        if grades_available:
+            lists = construct_gradeable_notifications(term, course, grades_available, "grades")
+            send_gradeable_notifications(course, course_db, master_db, lists, "grades")
             notified += len(lists[0])
 
         release_available = course_db.execute(
