@@ -116,7 +116,7 @@ def main():
             (queue_entries_table.c.user_id == row["user_id"]) &
             (queue_entries_table.c.time_in == row["time_in"]))
         conn.execute(update_query)
-        conn.commit()
+    conn.commit()
 
     # Hardcoding options that we could use
     queue_current_states = ["done", "being_helped", "waiting"]

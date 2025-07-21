@@ -123,37 +123,34 @@ class Course_data:
 
         # make two sample queues
         self.conn.execute(
-            insert(queues_table),
-            {"open": True, "code": "Lab Help", "token": "lab"}
+            insert(queues_table).values(open=True, code="Lab Help", token="lab")
         )
         self.conn.execute(
-            insert(queues_table),
-            {"open": True, "code": "Homework Debugging", "token": "hw_debug"}
+            insert(queues_table).values(open=True, code="Homework Debugging", token="hw_debug")
         )
         self.conn.commit()
 
         # add, help, remove, pause, etc. students in the queue
         for queue_entry in queue_data["queue_entries"]:
             self.conn.execute(
-                insert(queue_entries_table),
-                {
-                    "current_state": queue_entry["current_state"],
-                    "removal_type": queue_entry["removal_type"],
-                    "queue_code": queue_entry["queue_code"],
-                    "user_id": queue_entry["user_id"],
-                    "name": queue_entry["name"],
-                    "time_in": queue_entry["time_in"],
-                    "time_out": queue_entry["time_out"],
-                    "added_by": queue_entry["added_by"],
-                    "help_started_by": queue_entry["help_started_by"],
-                    "removed_by": queue_entry["removed_by"],
-                    "contact_info": queue_entry["contact_info"],
-                    "last_time_in_queue": queue_entry["last_time_in_queue"],
-                    "time_help_start": queue_entry["time_help_start"],
-                    "paused": queue_entry["paused"],
-                    "time_paused": queue_entry["time_paused"],
-                    "time_paused_start": queue_entry["time_paused_start"],
-                }
+                insert(queue_entries_table).values(
+                    current_state=queue_entry["current_state"],
+                    removal_type=queue_entry["removal_type"],
+                    queue_code=queue_entry["queue_code"],
+                    user_id=queue_entry["user_id"],
+                    name=queue_entry["name"],
+                    time_in=queue_entry["time_in"],
+                    time_out=queue_entry["time_out"],
+                    added_by=queue_entry["added_by"],
+                    help_started_by=queue_entry["help_started_by"],
+                    removed_by=queue_entry["removed_by"],
+                    contact_info=queue_entry["contact_info"],
+                    last_time_in_queue=queue_entry["last_time_in_queue"],
+                    time_help_start=queue_entry["time_help_start"],
+                    paused=queue_entry["paused"],
+                    time_paused=queue_entry["time_paused"],
+                    time_paused_start=queue_entry["time_paused_start"],
+                )
             )
             self.conn.commit()
 
@@ -195,28 +192,26 @@ class Course_data:
 
         for poll in polls_data:
             self.conn.execute(
-                insert(polls_table),
-                {
-                    "name": poll["name"],
-                    "question": poll["question"],
-                    "end_time": poll["end_time"],
-                    "is_visible": poll["is_visible"],
-                    "release_date": poll["release_date"],
-                    "image_path": poll["image_path"],
-                    "question_type": poll["question_type"],
-                    "release_histogram": poll["release_histogram"],
-                }
+                insert(polls_table).values(
+                    name=poll["name"],
+                    question=poll["question"],
+                    end_time=poll["end_time"],
+                    is_visible=poll["is_visible"],
+                    release_date=poll["release_date"],
+                    image_path=poll["image_path"],
+                    question_type=poll["question_type"],
+                    release_histogram=poll["release_histogram"],
+                )
             )
             self.conn.commit()
             for i in range(len(poll["responses"])):
                 self.conn.execute(
-                    insert(poll_options_table),
-                    {
-                        "order_id": i,
-                        "poll_id": poll["id"],
-                        "response": poll["responses"][i],
-                        "correct": (i in poll["correct_responses"]),
-                    }
+                    insert(poll_options_table).values(
+                        order_id=i,
+                        poll_id=poll["id"],
+                        response=poll["responses"][i],
+                        correct=(i in poll["correct_responses"]),
+                    )
                 )
                 self.conn.commit()
 
@@ -255,12 +250,11 @@ class Course_data:
         # add responses to DB
         for response in poll_responses_data:
             self.conn.execute(
-                insert(poll_responses_table),
-                {
-                    "poll_id": response["poll_id"],
-                    "student_id": response["student_id"],
-                    "option_id": response["option_id"],
-                }
+                insert(poll_responses_table).values(
+                    poll_id=response["poll_id"],
+                    student_id=response["student_id"],
+                    option_id=response["option_id"],
+                )
             )
             self.conn.commit()
 
@@ -286,36 +280,33 @@ class Course_data:
 
         for catData in f_data[2]:
             self.conn.execute(
-                insert(forum_cat_list),
-                {
-                    "category_desc": catData[0],
-                    "rank": catData[1],
-                    "color": catData[2],
-                }
+                insert(forum_cat_list).values(
+                    category_desc=catData[0],
+                    rank=catData[1],
+                    color=catData[2],
+                )
             )
-            self.conn.commit()
+        self.conn.commit()
 
         for thread_id, threadData in enumerate(f_data[1], start=1):
             self.conn.execute(
-                insert(forum_threads),
-                {
-                    "title": threadData[0],
-                    "created_by": threadData[1],
-                    "pinned": True if threadData[2] == "t" else False,
-                    "deleted": True if threadData[3] == "t" else False,
-                    "merged_thread_id": threadData[4],
-                    "merged_post_id": threadData[5],
-                    "is_visible": True if threadData[6] == "t" else False,
-                }
+                insert(forum_threads).values(
+                    title=threadData[0],
+                    created_by=threadData[1],
+                    pinned=True if threadData[2] == "t" else False,
+                    deleted=True if threadData[3] == "t" else False,
+                    merged_thread_id=threadData[4],
+                    merged_post_id=threadData[5],
+                    is_visible=True if threadData[6] == "t" else False,
+                )
             )
             self.conn.execute(
-                insert(forum_thread_cat),
-                {
-                    "thread_id": thread_id,
-                    "category_id": threadData[7],
-                }
+                insert(forum_thread_cat).values(
+                    thread_id=thread_id,
+                    category_id=threadData[7],
+                )
             )
-            self.conn.commit()
+        self.conn.commit()
         counter = 1
         for postData in f_data[0]:
             if postData[10] != "f" and postData[10] != "":
@@ -337,18 +328,18 @@ class Course_data:
                     os.path.join(attachment_path, postData[10]),
                 )
             counter += 1
-            self.conn.execute(insert(forum_posts), {
-                "thread_id": postData[0],
-                "parent_id": postData[1],
-                "author_user_id": postData[2],
-                "content": postData[3],
-                "timestamp": postData[4],
-                "anonymous": True if postData[5] == "t" else False,
-                "deleted": True if postData[6] == "t" else False,
-                "endorsed_by": postData[7],
-                "resolved": True if postData[8] == "t" else False,
-                "type": postData[9],
-                "has_attachment": True if postData[10] != "f" else False,
-                "render_markdown": True if postData[11] == "t" else False,
-            })
-            self.conn.commit()
+            self.conn.execute(insert(forum_posts).values(
+                thread_id=postData[0],
+                parent_id=postData[1],
+                author_user_id=postData[2],
+                content=postData[3],
+                timestamp=postData[4],
+                anonymous=True if postData[5] == "t" else False,
+                deleted=True if postData[6] == "t" else False,
+                endorsed_by=postData[7],
+                resolved=True if postData[8] == "t" else False,
+                type=postData[9],
+                has_attachment=True if postData[10] != "f" else False,
+                render_markdown=True if postData[11] == "t" else False,
+            ))
+        self.conn.commit()

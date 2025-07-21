@@ -1,5 +1,6 @@
 """Migration for the Submitty master database."""
 from pathlib import Path
+from sqlalchemy import text
 import os
 
 def up(config, database):
@@ -33,7 +34,7 @@ def up(config, database):
                 'g': course_group,
                 'o': course_owner
             }
-            database.session.execute(query, params)
+            database.session.execute(text(query), params)
     # we should be able to force the not null constraint now
     database.execute("UPDATE courses SET group_name='root' WHERE group_name IS NULL;")
     database.execute("UPDATE courses SET owner_name='root' WHERE owner_name IS NULL;")

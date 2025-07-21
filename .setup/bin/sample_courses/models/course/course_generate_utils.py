@@ -299,12 +299,11 @@ class Course_generate_utils:
                     res = self.conn.execute(members_in_team)
                     if res.rowcount < gradeable.max_team_size:
                         self.conn.execute(
-                            insert(teams_table),
-                            {
-                                "team_id": team_in_section["team_id"],
-                                "user_id": user.get_detail(self.code, "id"),
-                                "state": 1,
-                            }
+                            insert(teams_table).values(
+                                team_id=team_in_section["team_id"],
+                                user_id=user.get_detail(self.code, "id"),
+                                state=1,
+                            )
                         )
                         self.conn.commit()
                         team_id_section = team_in_section["team_id"]
@@ -323,22 +322,20 @@ class Course_generate_utils:
             if not added:
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(
-                    insert(gradeable_teams_table),
-                    {
-                        "team_id": unique_team_id,
-                        "anon_id": anon_team_id,
-                        "g_id": gradeable.id,
-                        "registration_section": str(reg_section),
-                        "rotating_section": str(random.randint(1, self.rotating_sections)),
-                    }
+                    insert(gradeable_teams_table).values(
+                        team_id=unique_team_id,
+                        anon_id=anon_team_id,
+                        g_id=gradeable.id,
+                        registration_section=str(reg_section),
+                        rotating_section=str(random.randint(1, self.rotating_sections)),
+                    )
                 )
                 self.conn.execute(
-                    insert(teams_table),
-                    {
-                        "team_id": unique_team_id,
-                        "user_id": user.get_detail(self.code, "id"),
-                        "state": 1,
-                    }
+                    insert(teams_table).values(
+                        team_id=unique_team_id,
+                        user_id=user.get_detail(self.code, "id"),
+                        state=1,
+                    )
                 )
                 self.conn.commit()
                 json_team_history[unique_team_id] = [

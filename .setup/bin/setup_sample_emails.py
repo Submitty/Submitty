@@ -72,36 +72,34 @@ def main():
             emails = generateRandomSuperuserEmail(users["superuser"])
             for email in emails:
                 submitty_conn.execute(
-                    insert(email_table),
-                    {
-                        "user_id": email["user_id"],
-                        "subject": email["subject"],
-                        "body": email["body"],
-                        "created": email["created"],
-                        "email_address": email["email_address"],
-                        "term": email["term"],
-                        "course": email["course"]
-                    }
+                    insert(email_table).values(
+                        user_id=email["user_id"],
+                        subject=email["subject"],
+                        body=email["body"],
+                        created=email["created"],
+                        email_address=email["email_address"],
+                        term=email["term"],
+                        course=email["course"]
+                    )
                 )
-                submitty_conn.commit()
+            submitty_conn.commit()
         # course email
         else:
             course = courses[course_selected]
             emails = generateRandomCourseEmail(users[course.course + ' ' + course.term], course)
             for email in emails:
                 submitty_conn.execute(
-                    insert(email_table),
-                    {
-                        "user_id": email["user_id"],
-                        "subject": email["subject"],
-                        "body": email["body"],
-                        "created": email["created"],
-                        "email_address": email["email_address"],
-                        "term": email["term"],
-                        "course": email["course"]
-                    }
+                    insert(email_table).values(
+                        user_id=email["user_id"],
+                        subject=email["subject"],
+                        body=email["body"],
+                        created=email["created"],
+                        email_address=email["email_address"],
+                        term=email["term"],
+                        course=email["course"]
+                    )
                 )
-                submitty_conn.commit()
+            submitty_conn.commit()
 
 
 def generateRandomSuperuserEmail(recipients):

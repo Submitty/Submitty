@@ -1,4 +1,5 @@
 from pathlib import Path
+from sqlalchemy import text
 import os
 import json
 

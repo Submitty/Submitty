@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from sqlalchemy import insert
 
 def up(config, database, semester, course):
     """

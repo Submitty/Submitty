@@ -90,16 +90,14 @@ def main():
     ).fetchone()
     # does this user have a row in courses_users for this semester and course?
     if row is None:
-        query = insert(courses_u_table)
         connection.execute(
-            query,
-            {
-                "user_id": user_id,
-                "term": semester,
-                "course": course,
-                "user_group": user_group,
-                "registration_section": registration_section
-            }
+            insert(courses_u_table).values(
+                user_id=user_id,
+                term=semester,
+                course=course,
+                user_group=user_group,
+                registration_section=registration_section
+            )
         )
     else:
         query = update(courses_u_table).where(

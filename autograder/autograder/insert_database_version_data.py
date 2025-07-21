@@ -130,34 +130,29 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     will need to handle the active version afterwards.
     """   # noqa: B018
     if is_team is True:
-        result = db.execute(select([func.count()]).select_from(data_table)
+        result = db.execute(select(func.count()).select_from(data_table)
                             .where(data_table.c.g_id == bindparam('g_id'))
                             .where(data_table.c.team_id == bindparam('team_id'))
                             .where(data_table.c.g_version == bindparam('g_version')),
-                            g_id=gradeable_id,  team_id=team_id, g_version=version)
+                            {'g_id': gradeable_id, 'team_id': team_id, 'g_version': version})
         row = result.fetchone()
         result.close()
-        query_type = data_table.insert()
+        query_type = insert(data_table)
         if row[0] > 0:
-            query_type = data_table\
-                .update(
-                    values={
-                        data_table.c.autograding_non_hidden_non_extra_credit:
-                            bindparam("autograding_non_hidden_non_extra_credit"),
-                        data_table.c.autograding_non_hidden_extra_credit:
-                            bindparam("autograding_non_hidden_extra_credit"),
-                        data_table.c.autograding_hidden_non_extra_credit:
-                            bindparam("autograding_hidden_non_extra_credit"),
-                        data_table.c.autograding_hidden_extra_credit:
-                            bindparam("autograding_hidden_extra_credit"),
-                        data_table.c.autograding_complete:
-                            bindparam("autograding_complete"),
-                        data_table.c.submission_time:
-                            bindparam("submission_time")
-                    })\
-                .where(data_table.c.g_id == bindparam('u_g_id'))\
-                .where(data_table.c.team_id == bindparam('u_team_id'))\
+            query_type = (
+                update(data_table)
+                .values(
+                    autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),
+                    autograding_non_hidden_extra_credit=bindparam("autograding_non_hidden_extra_credit"),
+                    autograding_hidden_non_extra_credit=bindparam("autograding_hidden_non_extra_credit"),
+                    autograding_hidden_extra_credit=bindparam("autograding_hidden_extra_credit"),
+                    autograding_complete=bindparam("autograding_complete"),
+                    submission_time=bindparam("submission_time")
+                )
+                .where(data_table.c.g_id == bindparam('u_g_id'))
+                .where(data_table.c.team_id == bindparam('u_team_id'))
                 .where(data_table.c.g_version == bindparam('u_g_version'))
+            )
             # we bind "u_g_id" (and others) as we cannot use "g_id" in the where clause for an
             # update. Passing this as an argument to db.execute doesn't cause any issue when we
             # use the insert query (that doesn't have u_g_id)
@@ -187,10 +182,10 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             .where(data_table.c.g_version == bindparam('g_version')),
             {"g_id": gradeable_id, "user_id": user_id, "g_version": version}
         )
-        row = result.fetchone()
+        count = result.scalar_one()
         result.close()
         query_type = insert(data_table)
-        if row[0] > 0:
+        if count > 0:
             query_type = update(data_table)\
                 .values(
                         autograding_non_hidden_non_extra_credit=bindparam("autograding_non_hidden_non_extra_credit"),

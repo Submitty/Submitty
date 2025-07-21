@@ -134,7 +134,7 @@ def main():
                             gradeable_anon.c.g_id == bindparam('b_g_id')
                         )
                         print(f"  Update: {user_id} for gradeable: {gradeable_id}")
-                        conn.execute(update_query, b_user_id=user_id, b_g_id=gradeable_id)
+                        conn.execute(update_query, {"b_user_id": user_id, "b_g_id": gradeable_id})
                         conn.commit()
                         num_rows += 1
         conn.close()

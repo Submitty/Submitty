@@ -127,7 +127,7 @@ def main():
         update_data['user_id'] = user_id
         query = insert(users_table)
         connection.execute(query, update_data)
-        connection.commit()
+    connection.commit()
 
 
 if __name__ == '__main__':

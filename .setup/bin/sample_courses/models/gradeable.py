@@ -334,23 +334,22 @@ class Gradeable(object):
         mark_table,
     ) -> None:
         conn.execute(
-            insert(gradeable_table),
-            {
-                "g_id": self.id,
-                "g_title": self.title,
-                "g_instructions_url": self.instructions_url,
-                "g_overall_ta_instructions": self.overall_ta_instructions,
-                "g_gradeable_type": self.type,
-                "g_grader_assignment_method": self.grader_assignment_method,
-                "g_ta_view_start_date": self.ta_view_date,
-                "g_grade_start_date": self.grade_start_date,
-                "g_grade_due_date": self.grade_due_date,
-                "g_grade_released_date": self.grade_released_date,
-                "g_syllabus_bucket": self.syllabus_bucket,
-                "g_allow_custom_marks": self.allow_custom_marks,
-                "g_min_grading_group": self.min_grading_group,
-                "g_closed_date": None,
-            },
+            insert(gradeable_table).values(
+                g_id=self.id,
+                g_title=self.title,
+                g_instructions_url=self.instructions_url,
+                g_overall_ta_instructions=self.overall_ta_instructions,
+                g_gradeable_type=self.type,
+                g_grader_assignment_method=self.grader_assignment_method,
+                g_ta_view_start_date=self.ta_view_date,
+                g_grade_start_date=self.grade_start_date,
+                g_grade_due_date=self.grade_due_date,
+                g_grade_released_date=self.grade_released_date,
+                g_syllabus_bucket=self.syllabus_bucket,
+                g_allow_custom_marks=self.allow_custom_marks,
+                g_min_grading_group=self.min_grading_group,
+                g_closed_date=None,
+            )
         )
         conn.commit()
 

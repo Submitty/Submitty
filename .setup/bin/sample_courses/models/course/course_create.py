@@ -109,12 +109,11 @@ class Course_create:
         for section in range(1, self.registration_sections + 1):
             print(f"Create section {section}")
             submitty_conn.execute(
-                insert(table),
-                {
-                    "term": self.semester,
-                    "course": self.code,
-                    "registration_section_id": str(section),
-                }
+                insert(table).values(
+                    term=self.semester,
+                    course=self.code,
+                    registration_section_id=str(section)
+                )
             )
             submitty_conn.commit()
         table = Table("courses", submitty_metadata, autoload_with=submitty_engine)
@@ -132,7 +131,7 @@ class Course_create:
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections + 1):
             print(f"Create section {section}")
-            self.conn.execute(insert(table), {"sections_rotating_id": section})
+            self.conn.execute(insert(table).values(sections_rotating_id=section))
             self.conn.commit()
 
         print("Create users ", end="")
@@ -158,18 +157,17 @@ class Course_create:
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
             submitty_conn.execute(
-                insert(submitty_users),
-                {
-                    "term": self.semester,
-                    "course": self.code,
-                    "user_id": user.get_detail(self.code, "id"),
-                    "user_group": user.get_detail(self.code, "group"),
-                    "registration_section": reg_section,
-                    "manual_registration": user.get_detail(self.code, "manual"),
-                }
+                insert(submitty_users).values(
+                    term=self.semester,
+                    course=self.code,
+                    user_id=user.get_detail(self.code, "id"),
+                    user_group=user.get_detail(self.code, "group"),
+                    registration_section=reg_section,
+                    manual_registration=user.get_detail(self.code, "manual")
+                )
             )
             submitty_conn.commit()
-            update_query = users_table.update().where(
+            update_query = update(users_table).where(
                 users_table.c.user_id == bindparam("b_user_id")
             ).values(
                 rotating_section=bindparam("rotating_section")
@@ -192,11 +190,10 @@ class Course_create:
                     grading_registration_sections = []
                 for grading_registration_section in grading_registration_sections:
                     self.conn.execute(
-                        insert(reg_table),
-                        {
-                            "user_id": user.get_detail(self.code, "id"),
-                            "sections_registration_id": str(grading_registration_section),
-                        }
+                        insert(reg_table).values(
+                            user_id=user.get_detail(self.code, "id"),
+                            sections_registration_id=str(grading_registration_section),
+                        )
                     )
                     self.conn.commit()
 
