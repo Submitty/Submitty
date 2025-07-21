@@ -122,7 +122,7 @@ def main():
         query = update(users_table).where(
             users_table.c.user_id == bindparam('b_user_id')
         ).values(update_data)
-        connection.execute(query, { "b_user_id": user_id })
+        connection.execute(query, {"b_user_id": user_id})
     else:
         update_data['user_id'] = user_id
         query = insert(users_table)
