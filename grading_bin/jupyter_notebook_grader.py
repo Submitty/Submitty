@@ -92,7 +92,7 @@ def save_output(cell_idx, cell):
                   or output.output_type == 'display_data'):
                 data = output.get("data", {})
                 if "text/plain" in data:
-                    cell_txt = Path(f"{file_name}_stdout.txt")
+                    cell_txt = Path(f"{file_name}_result.txt")
                     cell_txt.write_text(data["text/plain"], encoding='utf-8')
 
                 if "image/png" in data:
