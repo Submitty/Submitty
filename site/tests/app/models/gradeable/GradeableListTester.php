@@ -815,7 +815,7 @@ class GradeableListTester extends BaseUnitTest {
             'allow_custom_marks' => true,
             'any_manual_grades' => false,
             'score_notifications_sent' => 0,
-            'release_notification_sent' => false
+            'release_notifications_sent' => false
         ];
 
         return new Gradeable($core, $details);

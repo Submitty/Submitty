@@ -213,7 +213,7 @@ def send_notifications(course, course_db, master_db, lists, variant):
                 course_db.execute(
                     """
                     UPDATE electronic_gradeable
-                    SET eg_release_notification_sent = TRUE
+                    SET eg_release_notifications_sent = TRUE
                     WHERE g_id = :g_id;
                     """, gradeables
                 )
@@ -336,7 +336,7 @@ def send_pending_notifications():
                 ON u.user_group = 4 -- strictly target students
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
-            WHERE eg.eg_release_notification_sent IS FALSE
+            WHERE eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
             """
         )

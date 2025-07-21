@@ -6055,7 +6055,7 @@ AND gc_id IN (
                   eg_hidden_files as hidden_files,
                   eg_depends_on as depends_on,
                   eg_depends_on_points as depends_on_points,
-                  eg_release_notification_sent as release_notification_sent
+                  eg_release_notifications_sent as release_notifications_sent
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
                 LEFT JOIN (
@@ -6988,7 +6988,7 @@ AND gc_id IN (
                       eg_hidden_files=?,
                       eg_depends_on=?,
                       eg_depends_on_points=?,
-                      eg_release_notification_sent=?
+                      eg_release_notifications_sent=?
                     WHERE g_id=?",
                     $params
                 );
