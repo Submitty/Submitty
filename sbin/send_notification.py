@@ -108,15 +108,15 @@ def construct_gradeable_notifications(term, course, pending, variant):
 
     for notification in pending:
         gradeable = {
-            "id": notification[0],
-            "title": notification[1],
-            "team_id": notification[2],
-            "user_id": notification[3],
-            "user_email": notification[4],
+            "id": notification['g_id'],
+            "title": notification['g_title'],
+            "team_id": notification['team_id'] if variant == "score" else '',
+            "user_id": notification['user_id'],
+            "user_email": notification['user_email'],
             # Potentially send via the notification page
-            "site_enabled": notification[5],
+            "site_enabled": notification['site_enabled'],
             # Potentially send via email
-            "email_enabled": notification[6]
+            "email_enabled": notification['email_enabled']
         }
 
         timestamp = timestamps.setdefault(
@@ -361,7 +361,9 @@ def send_pending_notifications():
 def main():
     """Driver method to release course notifications"""
     try:
-        notified = send_pending_notifications()
+        notified = send_pending_notifications(
+        ) 
+        # TODO: fix this success message
         m = (f"[{datetime.datetime.now()}] Successfully updated notification "
              f"status for {notified} submission{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
