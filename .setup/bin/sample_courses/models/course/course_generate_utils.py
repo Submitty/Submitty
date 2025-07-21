@@ -262,7 +262,7 @@ class Course_generate_utils:
         teams_table = Table("teams", self.metadata, autoload_with=self.conn)
         ucounter = self.conn.execute(
             select(func.count()).select_from(gradeable_teams_table)
-        ).scalar()
+        ).scalar() or 0
         anon_team_ids = []
         for user in self.users:
             # the unique team id is made up of 5 digits, an underline, and the

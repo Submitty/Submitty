@@ -182,7 +182,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
             .where(data_table.c.g_version == bindparam('g_version')),
             {"g_id": gradeable_id, "user_id": user_id, "g_version": version}
         )
-        count = result.scalar_one()
+        count = result.scalar() or 0
         result.close()
         query_type = insert(data_table)
         if count > 0:

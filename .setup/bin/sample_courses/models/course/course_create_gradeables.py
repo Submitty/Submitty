@@ -119,7 +119,7 @@ class Course_create_gradeables:
                             anon_team_id = temp[0][1]
                             previous_submission = select(func.count()).select_from(self.electronic_gradeable_version).where(
                                 self.electronic_gradeable_version.c.team_id == team_id)
-                            rows = self.conn.execute(previous_submission).scalar()
+                            rows = self.conn.execute(previous_submission).scalar() or 0
                             if rows > 0:
                                 continue
                             submission_path = os.path.join(gradeable_path, team_id)
