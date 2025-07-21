@@ -235,7 +235,7 @@ $(document).ready(() => {
         $('input[name="peer_panel"]').each(function () {
             data[$(this).attr('id')] = $(this).is(':checked');
         });
-        const notifications_sent = Number(document.querySelector('#container-rubric').dataset.notifications_sent);
+        const score_notifications_sent = Number(document.querySelector('#container-rubric').dataset.score_notifications_sent);
         const addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
                 return;
@@ -244,7 +244,7 @@ $(document).ready(() => {
                 $(val).val('0');
             }
             // Ask for confirmation if the release is delegated to the future and notifications have been sent already
-            if (notifications_sent > 0 && val.name === 'grade_released_date') {
+            if (score_notifications_sent > 0 && val.name === 'grade_released_date') {
                 const updating = new Date($(val).val());
                 const original = new Date($(val).attr('data-original'));
 
@@ -255,7 +255,7 @@ $(document).ready(() => {
                         + 'students when the new grades release date is reached?',
                     );
 
-                    data['notifications_sent'] = resend ? 0 : notifications_sent;
+                    data['score_notifications_sent'] = resend ? 0 : score_notifications_sent;
                 }
             }
             data[val.name] = $(val).val();
@@ -287,9 +287,9 @@ $(document).ready(() => {
                     if (Object.prototype.hasOwnProperty.call(data, key)) {
                         clearError(key);
                     }
-                    if (key === 'grade_released_date' && data['notifications_sent'] === 0) {
+                    if (key === 'grade_released_date' && data['score_notifications_sent'] === 0) {
                         document.getElementById('gradeable-notifications-message').remove();
-                        document.querySelector('#container-rubric').dataset.notifications_sent = '0';
+                        document.querySelector('#container-rubric').dataset.score_notifications_sent = '0';
                     }
                 }
                 updateErrorMessage();

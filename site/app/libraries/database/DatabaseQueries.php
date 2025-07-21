@@ -5796,12 +5796,12 @@ AND gc_id IN (
     }
 
     /**
-     * Get pending gradeable notifications for a given gradeable id
+     * Get pending gradeable score notifications for a given gradeable id
      *
      * @param string $g_id the gradeable id to get notifications for
      * @return int
      */
-    public function getPendingGradeableNotifications($g_id): int {
+    public function getPendingGradeableScoreNotifications($g_id): int {
         /*
         TODO: This query is a variation of a similar query found within `/sbin/send_notification.py`.
         ElectronicGraderController.showStatus() and ElectronicGraderView.statusPage() should be refactored
@@ -5880,7 +5880,7 @@ AND gc_id IN (
         return count($this->course_db->rows());
     }
 
-    public function resetGradeableNotifications(Gradeable $gradeable): void {
+    public function resetGradeableScoreNotifications(Gradeable $gradeable): void {
         $this->course_db->query("
             UPDATE electronic_gradeable_version
             SET g_notification_sent = FALSE
@@ -6017,7 +6017,7 @@ AND gc_id IN (
                     WHERE g_id = g.g_id AND g_notification_sent IS TRUE
                     GROUP BY user_id, team_id
                 ) AS distinct_submissions
-            ) AS notifications_sent
+            ) AS score_notifications_sent
             FROM gradeable g
               LEFT JOIN (
                 SELECT

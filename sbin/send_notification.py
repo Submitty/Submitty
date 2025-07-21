@@ -322,7 +322,7 @@ def send_pending_notifications():
 
         release_available = course_db.execute(
             """
-            SELECT
+            SELECT DISTINCT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 u.user_id AS user_id,
