@@ -129,12 +129,14 @@ def construct_gradeable_notifications(term, course, pending, variant):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        subject = ("Grade" if variant == "grades" else "Gradeable") + " Released"
-        identifier = "Grades" if variant == "grades" else "Submissions"
-        notification_content = subject + ": " + gradeable["title"]
-        email_subject = subject + ": " + gradeable["title"]
-        email_body = (
-            f"{identifier} are now available for {gradeable['title']} "
+        if variant == "grades":
+            email_subject = f"Grades Released: {gradeable['title']}"
+            email_body = f"Grades are now available for {gradeable['title']} "
+        else:
+            email_subject = f"Gradeable Released: {gradeable['title']}"
+            email_body = f"Submissions are now open for {gradeable['title']} "
+
+        email_body += (
             f"in course \n{get_full_course_name(term, course)}.\n\n"
             f"Click here for more info: {gradeable_url}"
         )
@@ -143,7 +145,7 @@ def construct_gradeable_notifications(term, course, pending, variant):
             site.append({
                 "component": "grading",
                 "metadata": metadata,
-                "content": notification_content,
+                "content": email_subject,
                 "created_at": timestamp,
                 "from_user_id": "submitty-admin",
                 "to_user_id": gradeable['user_id']
