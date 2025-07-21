@@ -125,7 +125,7 @@ chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
 chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 
 
-if [[ -z "${SKIP_NPM_BUILD}" ]]; then
+if [[ -z "${SKIP_NODE}" ]]; then
     # Delete all typescript code to prevent deleted files being left behind and potentially
     # causing compilation errors
     if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
