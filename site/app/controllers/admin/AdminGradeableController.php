@@ -386,7 +386,7 @@ class AdminGradeableController extends AbstractController {
             'csrf_token' => $this->core->getCsrfToken(),
             'notifications_sent' => 0,
             'notifications_pending' => 0,
-            'notification_submissions_sent' => false
+            'release_notification_sent' => false
         ]);
     }
 
@@ -615,7 +615,7 @@ class AdminGradeableController extends AbstractController {
             'config_files' => $config_files,
             'notifications_sent' => $gradeable->getNotificationsSent(),
             'notifications_pending' => $this->core->getQueries()->getPendingGradeableNotifications($gradeable->getId()),
-            'notification_submissions_sent' => $gradeable->getNotificationSubmissionsSent()
+            'release_notification_sent' => $gradeable->getReleaseNotificationSent()
         ]);
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupStudents');
         $this->core->getOutput()->renderOutput(['grading', 'ElectronicGrader'], 'popupMarkConflicts');

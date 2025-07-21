@@ -6054,7 +6054,8 @@ AND gc_id IN (
                   eg_precision AS precision,
                   eg_hidden_files as hidden_files,
                   eg_depends_on as depends_on,
-                  eg_depends_on_points as depends_on_points
+                  eg_depends_on_points as depends_on_points,
+                  eg_release_notification_sent as release_notification_sent
                 FROM electronic_gradeable
               ) AS eg ON g.g_id=eg.eg_g_id
                 LEFT JOIN (
@@ -6909,8 +6910,7 @@ AND gc_id IN (
                   g_grade_released_date=?,
                   g_min_grading_group=?,
                   g_syllabus_bucket=?,
-                  g_allow_custom_marks=?,
-                  g_submission_notification_sent=?
+                  g_allow_custom_marks=?
                 WHERE g_id=?",
                 $params
             );
@@ -6949,7 +6949,7 @@ AND gc_id IN (
                     $gradeable->getHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
-                    $gradeable->isSubmissionNotificationSent() ? $gradeable->isSubmissionOpen() : false,
+                    $gradeable->isReleaseNotificationSent() ? $gradeable->isSubmissionOpen() : false,
                     $gradeable->getId()
                 ];
                 $this->course_db->query(
@@ -6987,7 +6987,8 @@ AND gc_id IN (
                       eg_has_discussion=?,
                       eg_hidden_files=?,
                       eg_depends_on=?,
-                      eg_depends_on_points=?
+                      eg_depends_on_points=?,
+                      eg_release_notification_sent=?
                     WHERE g_id=?",
                     $params
                 );

@@ -221,8 +221,8 @@ def send_notifications(course, course_db, master_db, lists):
         LOG_FILE.write(m)
         print(m)
 
-def send_submission_notifications(course, course_db, master_db):
-    """Send pending gradeable submission notifications for the current course."""
+def send_gradeable_release_notifications(course, course_db, master_db):
+    """Send pending gradeable release notifications for the current course."""
     pass
 
 
@@ -310,22 +310,24 @@ def send_pending_notifications():
             send_notifications(course, course_db, master_db, lists)
             notified += len(lists[0])
 
-        submission_available = course_db.execute(
+        release_available = course_db.execute(
             """
             SELECT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
                 COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
                 COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled
             FROM electronic_gradeable eg
             INNER JOIN gradeable AS g
                 ON eg.g_id = g.g_id
             INNER JOIN users AS u
-                ON u.user_group = 4
+                ON u.user_group = 4 -- strictly target students
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
             WHERE eg.eg_release_notification_sent IS FALSE
-                AND eg.eg_submission_open_date >= NOW()
+                AND eg.eg_submission_open_date <= NOW()
             """
         )
         course_db.close()
