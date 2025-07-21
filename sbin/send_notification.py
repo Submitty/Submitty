@@ -334,6 +334,7 @@ def send_pending_notifications():
                 ON eg.g_id = g.g_id
             INNER JOIN users AS u
                 ON u.user_group = 4 -- strictly target students
+                AND u.registration_type <> 'withdrawn'
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
             WHERE eg.eg_release_notifications_sent IS FALSE
