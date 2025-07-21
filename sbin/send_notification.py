@@ -129,11 +129,12 @@ def construct_notifications(term, course, pending, variant):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
+        identifier = "Grade" if variant == "grades" else "Gradeable"
+        subject = f"{identifier} Released: {gradeable['title']}"
+
         if variant == "grades":
-            subject = f"Grade Released: {gradeable['title']}"
             body = f"Your grade is now available for {gradeable['title']} "
         else:
-            subject = f"Gradeable Released: {gradeable['title']}"
             body = f"Submissions are now open for {gradeable['title']} "
 
         body += (
