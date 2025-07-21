@@ -348,7 +348,6 @@ class Gradeable(object):
                 g_syllabus_bucket=self.syllabus_bucket,
                 g_allow_custom_marks=self.allow_custom_marks,
                 g_min_grading_group=self.min_grading_group,
-                g_closed_date=None,
             )
         )
         conn.commit()
