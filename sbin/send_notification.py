@@ -130,8 +130,8 @@ def construct_notifications(term, course, pending, variant):
 
         # Notification-related content
         if variant == "grades":
-            subject = f"Grades Released: {gradeable['title']}"
-            body = f"Grades are now available for {gradeable['title']} "
+            subject = f"Grade Released: {gradeable['title']}"
+            body = f"Your grade is now available for {gradeable['title']} "
         else:
             subject = f"Gradeable Released: {gradeable['title']}"
             body = f"Submissions are now open for {gradeable['title']} "
