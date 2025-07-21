@@ -362,10 +362,9 @@ def main():
     """Driver method to release course notifications"""
     try:
         notified = send_pending_notifications(
-        ) 
-        # TODO: fix this success message
+        )
         m = (f"[{datetime.datetime.now()}] Successfully updated notification "
-             f"status for {notified} submission{'s' if notified != 1 else ''}")
+             f"status for {notified} gradeable{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
         LOG_FILE.close()
     except (IOError, DatabaseError) as notification_error:
