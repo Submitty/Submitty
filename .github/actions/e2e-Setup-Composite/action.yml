@@ -132,12 +132,6 @@ runs:
         sudo apt-get install moreutils
       shell: bash
 
-    - name: Install third party dependencies
-      run: |
-        cd $SUBMITTY_REPOSITORY
-        sudo -E env "PATH=$PATH" bash .setup/testing/autograder.sh "config=/usr/local/submitty/config"
-      shell: bash
-
     - name: Configure Test suite
       run: |
         cd $SUBMITTY_REPOSITORY
