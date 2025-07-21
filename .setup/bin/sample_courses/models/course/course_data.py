@@ -337,7 +337,6 @@ class Course_data:
                 anonymous=True if postData[5] == "t" else False,
                 deleted=True if postData[6] == "t" else False,
                 endorsed_by=postData[7],
-                resolved=True if postData[8] == "t" else False,
                 type=postData[9],
                 has_attachment=True if postData[10] != "f" else False,
                 render_markdown=True if postData[11] == "t" else False,
