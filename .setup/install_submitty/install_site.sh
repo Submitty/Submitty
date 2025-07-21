@@ -62,7 +62,6 @@ CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../config
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
-DEBUG_MODE=$(jq -r '.debugging_enabled' ${SUBMITTY_INSTALL_DIR}/config/database.json)
 PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
@@ -80,12 +79,6 @@ do
         SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
     elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
-    elif [[ $cli_arg == "skip-vendor" ]]; then
-        SKIP_VENDOR=true
-    elif [[ $cli_arg == "skip-node" ]]; then
-        SKIP_NODE=true
-    elif [[ $cli_arg == "skip-npm-build" ]]; then
-        SKIP_NPM_BUILD=true
     fi
 done
 
@@ -243,7 +236,7 @@ for entry in "${result_array[@]}"; do
     fi
 done
 
-if [ -z "${SKIP_VENDOR}" ]; then
+if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
     if [ ${VAGRANT} == 1 ]; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --dev --prefer-dist --optimize-autoloader"
@@ -251,15 +244,20 @@ if [ -z "${SKIP_VENDOR}" ]; then
         su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
     fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
-
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
-    find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
+else
+    if [ ${VAGRANT} == 1 ]; then
+        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
+    else
+        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
+    fi
+    chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
+
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type d -exec chmod 551 {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/vendor -type f -exec chmod 440 {} \;
 
 # create doctrine proxy classes
-if [ $DEBUG_MODE != true ]; then
-    php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
-fi
+php "${SUBMITTY_INSTALL_DIR}/sbin/doctrine.php" "orm:generate-proxies"
 
 # load lang files
 php "${SUBMITTY_INSTALL_DIR}/sbin/load_lang.php" "${SUBMITTY_REPOSITORY}/../Localization/lang" "${SUBMITTY_INSTALL_DIR}/site/cache/lang"
@@ -280,7 +278,7 @@ NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 
 chmod 440 ${SUBMITTY_INSTALL_DIR}/site/composer.lock
 
-if [[ -z "${SKIP_NODE}" ]]; then
+if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # Install JS dependencies and then copy them into place
     # We need to create the node_modules folder initially if it
     # doesn't exist, or else submitty_php won't be able to make it
@@ -410,33 +408,23 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
-if [[ -z "${SKIP_NPM_BUILD}" ]]; then
-    if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
-        rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
-    fi
-    # create output dir for esbuild
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-    chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+echo "Running esbuild"
+chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
+chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
+su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
+chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
+chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
+chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
+chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
-
-    echo "Running esbuild"
-    chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
-    chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
-    chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
-    chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-    chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-    chmod +w "${SUBMITTY_INSTALL_DIR}/site/vue"
-    su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
-    chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
-    chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
-    chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
-    chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-    chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
-    chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
-
-    chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-    set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
-fi
+chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+set_mjs_permission ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
