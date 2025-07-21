@@ -8,6 +8,7 @@
 #include <elf.h>
 #include <algorithm>
 #include <cassert>
+#include <iomanip>
 
 // COMPILATION NOTE: Must pass -lseccomp to build
 #ifndef __NR_rseq
@@ -19,6 +20,7 @@
 #endif
 #include <seccomp.h>
 #include <set>
+#include <map>
 #include <string>
 #include <seccomp.h>
 #include <iostream>
@@ -26,18 +28,55 @@
 #include <vector>
 #include <string>
 
+
 #define SUBMITTY_INSTALL_DIRECTORY  std::string("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__")
 
-#define ALLOW_SYSCALL(name)  allow_syscall(sc,SCMP_SYS(name),#name,execute_logfile)
+#define ALLOW_SYSCALL(name, which_category)  allow_syscall(sc,SCMP_SYS(name),#name,execute_logfile, which_category,categories)
+#define ALLOW_SYSCALL_BY_NUMBER(num, name, which_category)  allow_syscall(sc,num,name,execute_logfile, which_category,categories)
 
-static int total_allowed_system_calls = 0;
+static std::map<int,std::pair<std::string,bool> > allowed_system_calls;
 
-inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string, std::ofstream &execute_logfile) {
-  total_allowed_system_calls++;
-  //execute_logfile << "allow " << total_allowed_system_calls << " " << syscall_string << std::endl;
-  int res = seccomp_rule_add(sc, SCMP_ACT_ALLOW, syscall, 0);
-  if (res < 0) {
-    execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << syscall_string << std::endl;
+
+inline void allow_syscall(scmp_filter_ctx sc, int syscall, const std::string &syscall_string, std::ofstream &execute_logfile,
+                          const std::string &which_category, const std::set<std::string> &categories) {
+  bool allowed = false;
+  if (which_category.find("SAFELIST:") != std::string::npos)
+    allowed = true;
+  else if (which_category.find("FORBIDDEN:") != std::string::npos)
+    allowed = false;
+  else {
+    assert (which_category.find("RESTRICTED:") != std::string::npos);
+    if (categories.find(which_category.substr(11,which_category.size()-11)) != categories.end()) {
+      allowed = true;
+    }
+  }
+  allowed_system_calls.insert(std::make_pair(syscall,std::make_pair(syscall_string,allowed)));
+}
+
+void process_allow_system_calls(scmp_filter_ctx sc, std::ofstream &execute_logfile) {
+  for (std::map<int,std::pair<std::string,bool> >::iterator itr = allowed_system_calls.begin(); itr != allowed_system_calls.end(); itr++) {
+    if (itr->second.second == false) {
+      //execute_logfile << "              DISALLOWED " << itr->first << " " << itr->second.first << std::endl;
+      int res = seccomp_rule_add(sc, SCMP_ACT_KILL, itr->first, 0);
+      if (res < 0) {
+        //execute_logfile << "WARNING:  Errno " << res << " installing seccomp rule for " << itr->first << std::endl;
+      }
+    } else {
+      // do nothing - allowed by default
+      //execute_logfile << "allowed                  " << itr->first << " " << itr->second.first << std::endl;
+    }
+  }
+  //execute_logfile << std::endl;
+}
+
+void scan_allowed_system_calls(scmp_filter_ctx sc, std::ofstream &execute_logfile) {
+  for (int i = 0; i < 1100; i++) {
+    execute_logfile << "BY NUMBER " << i << " ";
+    if (allowed_system_calls.find(i) != allowed_system_calls.end()) {
+      execute_logfile << " ... already added " << std::endl;
+    } else {
+      execute_logfile << "                            MISSING THIS ONE" << std::endl;
+    }
   }
 }
 
@@ -220,10 +259,10 @@ std::set<std::string> system_call_categories_based_on_program
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &execute_logfile,
                            const nlohmann::json &whole_config, const nlohmann::json &test_case_config) {
-  total_allowed_system_calls = 0;
  
   int res;
-  scmp_filter_ctx sc = seccomp_init(SCMP_ACT_KILL);
+  scmp_filter_ctx sc = seccomp_init(SCMP_ACT_ALLOW);
+
   int target_arch = is_32 ? SCMP_ARCH_X86 : SCMP_ARCH_X86_64;
   if (seccomp_arch_native() != target_arch) {
     res = seccomp_arch_add(sc, target_arch);
@@ -276,7 +315,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     "COMMUNICATIONS_AND_NETWORKING_KILL",
     "UNKNOWN",
     "UNKNOWN_MODULE",
-    "UNKNOWN_REMAP_PAGES"
+    "UNKNOWN_REMAP_PAGES",
+    "CUSTOM_SYSTEM_CALLS"
   };
 
   std::set<std::string> forbidden_categories = {
@@ -322,15 +362,14 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     }
   }
 
-  //execute_logfile << "categories " << categories.size() << std::endl;
-
   // make sure all categories are valid
   for_each(categories.begin(),categories.end(),
            [restricted_categories](const std::string &s){
              assert (restricted_categories.find(s) != restricted_categories.end()); });
 
   allow_system_calls(sc,categories,execute_logfile);
-  //execute_logfile << "system call filter configured with " << total_allowed_system_calls << " allowed system calls" << std::endl;
+  process_allow_system_calls(sc,execute_logfile);
+  //scan_allowed_system_calls(sc,execute_logfile);
   
   if (seccomp_load(sc) < 0)
     return 1; // failure
