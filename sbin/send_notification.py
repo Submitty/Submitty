@@ -324,7 +324,7 @@ def send_pending_notifications():
                 ON u.user_group = 4
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
-            WHERE eg.eg_submission_notification_sent IS FALSE
+            WHERE eg.eg_release_notification_sent IS FALSE
                 AND eg.eg_submission_open_date >= NOW()
             """
         )
