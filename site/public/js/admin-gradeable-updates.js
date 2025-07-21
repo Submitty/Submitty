@@ -376,6 +376,9 @@ $(document).ready(() => {
                 }
                 updateErrorMessage();
                 checkWarningBanners();
+                if (this.id === 'autograding_config_selector' && response_data[0] === 'rebuild_queued') {
+                    location.reload();
+                }
             }, updateGradeableErrorCallback);
     });
 
@@ -444,7 +447,7 @@ function checkWarningBanners() {
         }
     }
 
-    if ($('#has_release_date_yes').is(':checked')) {
+    if ($('#yes_grade_inquiry_allowed').is(':checked') && $('#has_release_date_yes').is(':checked')) {
         const release_date = $('#date_released').val();
         const grade_inquiry_due_date = $('#date_grade_inquiry_due').val();
         if (release_date > grade_inquiry_due_date) {
@@ -452,7 +455,7 @@ function checkWarningBanners() {
             $('#gradeable-dates-warnings-banner').show();
         }
         else {
-            $('#release-dates-warning').hide();
+            $('#no-grade-inquiry-warning').hide();
         }
     }
 }
@@ -1020,6 +1023,10 @@ let codeMirrorInstance = null;
 let current_g_id = null;
 let current_file_path = null;
 let isConfigEdited = false;
+function FilePath(path, type) {
+    this.path = path;
+    this.type = type;
+}
 
 window.addEventListener('beforeunload', (event) => {
     if (isConfigEdited) {
@@ -1090,10 +1097,6 @@ function loadGradeableEditor(g_id, file_path) {
             }
         },
     });
-}
-
-function configSelectorChange() {
-    location.reload();
 }
 
 function isUsingDefaultConfig() {
@@ -1184,6 +1187,136 @@ function saveGradeableConfigEdit(g_id) {
         error: function () {
             window.alert('Something went wrong while saving the gradeable config. Please try again.');
         },
+    });
+}
+
+function addRootFolder(g_id) {
+    const folderName = prompt('Enter a name for the new folder:');
+    if (!folderName) {
+        return;
+    }
+
+    const folderPath = `/${folderName}`;
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'add_folder',
+            gradeable_id: g_id,
+            path: folderPath,
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Folder created successfully.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Failed to create folder.'),
+    });
+}
+
+function addFile(g_id, path) {
+    if (!path) {
+        openFilePickerAndUpload(null, g_id); // add to root
+        return;
+    }
+
+    const cleaned = path.replace(/^.*config_upload\/\d+\//, '');
+    openFilePickerAndUpload(cleaned, g_id); // add to folder
+}
+
+function openFilePickerAndUpload(targetFolderPath, g_id) {
+    const input = document.getElementById('hidden-config-file-input');
+    input.value = '';
+    input.onchange = null;
+
+    input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const dest = (targetFolderPath || '').replace(/^\/+/, ''); // '' ⇒ root
+        const relativePath = dest ? `${dest}/${file.name}` : file.name;
+
+        uploadFile(relativePath, file, g_id);
+    };
+
+    input.click();
+}
+
+function uploadFile(relativePath, file, g_id) {
+    const formData = new FormData();
+    formData.append('action', 'add_file');
+    formData.append('gradeable_id', g_id);
+    formData.append('path', relativePath);
+    formData.append('file', file);
+    formData.append('csrf_token', csrfToken);
+
+    $.ajax({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+    })
+        .done((raw) => {
+            let res;
+            try {
+                res = JSON.parse(raw);
+            }
+            catch {
+                displayErrorMessage('Unexpected server response.');
+                return;
+            }
+
+            if (res.status === 'success') {
+                displaySuccessMessage('File successfully added.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(res.message ?? 'Failed to add file.');
+            }
+        })
+        .fail(() => displayErrorMessage('Something went wrong while uploading.'));
+}
+
+function removeFile(g_id, path, isFolder) {
+    let confirmed;
+    if (isFolder) {
+        confirmed = confirm('Are you sure you want delete this folder? This action cannot be undone.');
+    }
+    else {
+        confirmed = confirm('Are you sure you want delete this file? This action cannot be undone.');
+    }
+    if (!confirmed) {
+        return;
+    }
+
+    $.post({
+        url: buildCourseUrl(['gradeable', 'edit', 'modify_structure']),
+        data: {
+            action: 'delete',
+            gradeable_id: g_id,
+            path: path,
+            csrf_token: csrfToken,
+        },
+        success: (res) => {
+            const json = JSON.parse(res);
+            if (json.status === 'success') {
+                displaySuccessMessage('Selected item deleted.');
+                location.reload();
+            }
+            else {
+                displayErrorMessage(json.message);
+            }
+        },
+        error: () => displayErrorMessage('Error deleting files/folders.'),
     });
 }
 
