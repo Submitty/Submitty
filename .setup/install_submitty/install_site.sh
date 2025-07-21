@@ -11,12 +11,9 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-# This script has five command-line arguments:
+# This script has two command-line arguments:
 #   Required argument: config=<config dir>.
 #   Optional argument: browscap
-#   Optional argument: skip-vendor
-#   Optional argument: skip-node
-#   Optional argument: skip-npm-build
 
 set_permissions () {
     local fullpath=$1
@@ -84,7 +81,7 @@ done
 
 if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     echo "ERROR: This script requires a config dir argument"
-    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap] [skip-vendor] [skip-node] [skip-npm-build]"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
     exit 1
 fi
 
@@ -117,18 +114,15 @@ chmod 755 ${SUBMITTY_DATA_DIR}/run
 chown ${PHP_USER}:www-data ${SUBMITTY_DATA_DIR}/run/websocket
 chmod 2750 ${SUBMITTY_DATA_DIR}/run/websocket
 
+# Delete all typescript code to prevent deleted files being left behind and potentially
+# causing compilation errors
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
+fi
 
-if [[ -z "${SKIP_NODE}" ]]; then
-    # Delete all typescript code to prevent deleted files being left behind and potentially
-    # causing compilation errors
-    if [ -d "${SUBMITTY_INSTALL_DIR}/site/ts" ]; then
-        rm -r "${SUBMITTY_INSTALL_DIR}/site/ts"
-    fi
-
-    # Delete all vue code to prevent deleted vue files from being rendered
-    if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
-        rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
-    fi
+# Delete all vue code to prevent deleted vue files from being rendered
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/vue" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/vue"
 fi
 
 # copy the website from the repo. We don't need the tests directory in production and then
@@ -201,6 +195,12 @@ fi
 # create lang cache directory
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/cache/lang
 
+if [ -d "${SUBMITTY_INSTALL_DIR}/site/public/mjs" ]; then
+    rm -r "${SUBMITTY_INSTALL_DIR}/site/public/mjs"
+fi
+# create output dir for esbuild
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/mjs
+
 # Update ownership to PHP_USER for affected files and folders
 chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site
 for entry in "${result_array[@]}"; do
@@ -209,6 +209,8 @@ done
 
 # Update ownership for cgi-bin to CGI_USER
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
+
+chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/public/mjs
 
 # set the mask for composer so that it'll run properly and be able to delete/modify
 # files under it

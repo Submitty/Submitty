@@ -134,27 +134,8 @@ if [ "${IS_WORKER}" == 0 ]; then
     fi
 fi
 
-
-################################################################################################################
-################################################################################################################
-# INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
-
 echo -e "Install python_submitty_utils"
-
-rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
-pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
-
-pip3 install .
-# Setting the permissions are necessary as pip uses the umask of the user/system, which
-# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
-# This gets run here in case we make any python package changes.
-find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
-
-popd > /dev/null
-
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_python.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -202,157 +183,18 @@ chown -R  root:root "${SUBMITTY_INSTALL_DIR}/vendor"
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type d -exec chmod 555 {} \;
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
 
-
-########################################################################################################################
-########################################################################################################################
-# COPY THE CORE GRADING CODE (C++ files) & BUILD THE SUBMITTY GRADING LIBRARY
-
 echo -e "Copy the grading code"
-
-# copy the files from the repo
-rsync -rtz "${SUBMITTY_REPOSITORY}/grading" "${SUBMITTY_INSTALL_DIR}/src"
-
-# copy the allowed_autograding_commands_default.json to config
-rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_default.json" "${SUBMITTY_INSTALL_DIR}/config"
-
-# replace filling variables
-sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
-
-# # change permissions of allowed_autograding_commands_default.json
-chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
-chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_default.json"
-
-# create allowed_autograding_commands_custom.json if doesnt exist
-if [[ ! -e "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json" ]]; then
-    rsync -tz "${SUBMITTY_REPOSITORY}/grading/allowed_autograding_commands_custom.json" "${SUBMITTY_INSTALL_DIR}/config"
-fi
-
-# replace filling variables
-sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
-
-# # change permissions of allowed_autograding_commands_custom.json
-chown "root":"root" "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
-chmod 644 "${SUBMITTY_INSTALL_DIR}/config/allowed_autograding_commands_custom.json"
-
-#replace necessary variables
-array=( Sample_CMakeLists.txt CMakeLists.txt system_call_check.cpp seccomp_functions.cpp execute.cpp load_config_json.cpp )
-for i in "${array[@]}"; do
-    replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/src/grading/${i}"
-done
-
-# building the autograding library
-mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
-pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
-cmake ..
-set +e
-make
-if [ "$?" -ne 0 ] ; then
-    echo "ERROR BUILDING AUTOGRADING LIBRARY"
-    exit 1
-fi
-set -e
-popd > /dev/null
-
-# root will be owner & group of these files
-chown -R  root:root "${SUBMITTY_INSTALL_DIR}/src"
-# "other" can cd into & ls all subdirectories
-find "${SUBMITTY_INSTALL_DIR}/src" -type d -exec chmod 555 {} \;
-# "other" can read all files
-find "${SUBMITTY_INSTALL_DIR}/src" -type f -exec chmod 444 {} \;
-
-chgrp submitty_daemon "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py"
-chmod g+wrx           "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py"
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_grading.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 
 #Set up sample files if not in worker mode.
 if [ "${IS_WORKER}" == 0 ]; then
-    ########################################################################################################################
-    ########################################################################################################################
-    # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
-
-    echo -e "Copy the sample files"
-
-    # copy the files from the repo
-    rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
-
-    # copy more_autograding_examples in order to make cypress autograding work
-    if [ "${VAGRANT}" == 1 ]; then 
-        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-    fi
-
-    # root will be owner & group of these files
-    chown -R  root:root "${SUBMITTY_INSTALL_DIR}/more_autograding_examples"
-    # but everyone can read all that files & directories, and cd into all the directories
-    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type d -exec chmod 555 {} \;
-    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
-fi
-########################################################################################################################
-########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
-
-if [ -x "$(command -v javac)" ] &&
-   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
-    echo -e "Build the junit test runner"
-
-    # copy the file from the repo
-    rsync -rtz "${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java" "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java"
-
-    pushd "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit" > /dev/null
-    # root will be owner & group of the source file
-    chown  root:root  TestRunner.java
-    # everyone can read this file
-    chmod  444 TestRunner.java
-
-    # compile the executable using the javac we use in the execute.cpp safelist
-    /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
-
-    # everyone can read the compiled file
-    chown root:root TestRunner.class
-    chmod 444 TestRunner.class
-
-    popd > /dev/null
-
-
-    # fix all java_tools permissions
-    chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
-    chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
-else
-    echo -e "Skipping build of the junit test runner"
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_sample_autograding.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
 
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_junit.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
-#################################################################
-# DRMEMORY SETUP
-#################
-
-# Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
-
-# FIXME: Use of this tool should eventually be moved to containerized
-# autograding and not installed on the native primary and worker
-# machines by default
-
-# FIXME: DrMemory is initially installed in install_system.sh
-# It is re-installed here (on every Submitty software update) in case of version updates.
-
-pushd /tmp > /dev/null
-
-echo "Updating DrMemory..."
-
-rm -rf /tmp/DrMemory*
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
-rm -rf /tmp/DrMemory*
-
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
-
-
-
-echo "...DrMemory ${DRMEMORY_TAG} update complete."
-
-popd > /dev/null
-
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/update_drmemory.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
@@ -360,45 +202,7 @@ popd > /dev/null
 
 bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
-# build the helper program for strace output and restrictions by system call categories
-g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
-
-# build the helper program for calculating early submission incentive extensions
-g++ "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.cpp" -lboost_system -lboost_filesystem -std=c++11 -Wall -g -o "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
-
-GRADINGCODE="${SUBMITTY_INSTALL_DIR}/src/grading"
-JSONCODE="${SUBMITTY_INSTALL_DIR}/vendor/include"
-
-# Create the complete/build config using main_configure
-g++ "${GRADINGCODE}/main_configure.cpp" \
-    "${GRADINGCODE}/load_config_json.cpp" \
-    "${GRADINGCODE}/execute.cpp" \
-    "${GRADINGCODE}/TestCase.cpp" \
-    "${GRADINGCODE}/error_message.cpp" \
-    "${GRADINGCODE}/window_utils.cpp" \
-    "${GRADINGCODE}/dispatch.cpp" \
-    "${GRADINGCODE}/change.cpp" \
-    "${GRADINGCODE}/difference.cpp" \
-    "${GRADINGCODE}/tokenSearch.cpp" \
-    "${GRADINGCODE}/tokens.cpp" \
-    "${GRADINGCODE}/clean.cpp" \
-    "${GRADINGCODE}/execute_limits.cpp" \
-    "${GRADINGCODE}/seccomp_functions.cpp" \
-    "${GRADINGCODE}/empty_custom_function.cpp" \
-    "${GRADINGCODE}/allowed_autograding_commands.cpp" \
-    "-I${JSONCODE}" \
-    -pthread -std=c++11 -lseccomp -o "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
-
-# set the permissions
-chown "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
-chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
-
-chown "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
-chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
-
-chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/configure.out
-
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_system_call_check.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ###############################################
 # scripts used only by root for setup only
