@@ -101,7 +101,7 @@ def connect_db(db_name):
     return db
 
 
-def construct_gradeable_notifications(term, course, pending, variant):
+def construct_notifications(term, course, pending, variant):
     """Construct pending gradeable notifications for the current course."""
     timestamps = {}
     gradeables, site, email = [], [], []
@@ -171,7 +171,7 @@ def construct_gradeable_notifications(term, course, pending, variant):
     return gradeables, site, email
 
 
-def send_gradeable_notifications(course, course_db, master_db, lists, variant):
+def send_notifications(course, course_db, master_db, lists, variant):
     """Send pending gradeable notifications for the current course."""
     gradeables, site, email = lists
     timestamp = datetime.datetime.now()
@@ -316,8 +316,8 @@ def send_pending_notifications():
         )
 
         if grades_available:
-            lists = construct_gradeable_notifications(term, course, grades_available, "grades")
-            send_gradeable_notifications(course, course_db, master_db, lists, "grades")
+            lists = construct_notifications(term, course, grades_available, "grades")
+            send_notifications(course, course_db, master_db, lists, "grades")
             notified += len(lists[0])
 
         release_available = course_db.execute(
@@ -342,8 +342,8 @@ def send_pending_notifications():
         )
 
         if release_available:
-            lists = construct_gradeable_notifications(term, course, release_available, "release")
-            send_gradeable_notifications(course, course_db, master_db, lists, "release")
+            lists = construct_notifications(term, course, release_available, "release")
+            send_notifications(course, course_db, master_db, lists, "release")
             notified += len(lists[0])
 
         course_db.close()
@@ -356,10 +356,9 @@ def send_pending_notifications():
 def main():
     """Driver method to release course notifications"""
     try:
-        notified = send_pending_notifications(
-        )
-        m = (f"[{datetime.datetime.now()}] Successfully updated notification "
-             f"status for {notified} gradeable{'s' if notified != 1 else ''}")
+        notified = send_pending_notifications()
+        m = (f"[{datetime.datetime.now()}] Successfully released "
+             f"{notified} notification{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
         LOG_FILE.close()
     except (IOError, DatabaseError) as notification_error:
