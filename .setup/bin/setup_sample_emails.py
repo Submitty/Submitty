@@ -44,7 +44,7 @@ def main():
     submitty_metadata = MetaData()
     email_table = Table('emails', submitty_metadata, autoload_with=submitty_engine)
 
-    courses = list(submitty_conn.execute("SELECT term, course FROM courses"))
+    courses = list(submitty_conn.execute(text("SELECT term, course FROM courses")))
     users = {}
 
     for course in courses:
