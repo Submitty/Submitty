@@ -36,7 +36,7 @@ SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR}/subm
 # These variables specify the minimum version necessary for
 # dependencies between versions.
 
-source ${MY_PATH}/versions.sh
+source ${SUBMITTY_REPOSITORY}/.setup/bin/versions.sh
 
 ########################################################################
 # Helper function requires 2 args, the short name of the repository,

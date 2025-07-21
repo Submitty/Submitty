@@ -83,55 +83,8 @@ if [ $? -eq 1 ]; then
 fi
 set -e
 
-
-################################################################################################################
-################################################################################################################
-# RUN THE SYSTEM AND DATABASE MIGRATIONS
-
 if [ "${IS_WORKER}" == 0 ]; then
-    echo -e 'Checking for system and database migrations'
-
-    mkdir -p "${SUBMITTY_INSTALL_DIR}/migrations"
-
-    rsync -rtz "${SUBMITTY_REPOSITORY}/migration/migrator/migrations" "${SUBMITTY_INSTALL_DIR}"
-    chown root:root "${SUBMITTY_INSTALL_DIR}/migrations"
-    chmod 550 -R "${SUBMITTY_INSTALL_DIR}/migrations"
-
-    python3 "${SUBMITTY_REPOSITORY}/migration/run_migrator.py" -e system -e master -e course migrate
-fi
-
-
-################################################################################################################
-################################################################################################################
-# VALIDATE DATABASE SUPERUSERS
-
-if [ "${IS_WORKER}" == 0 ]; then
-    DATABASE_FILE="$SUBMITTY_INSTALL_DIR/config/database.json"
-    DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
-    DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
-    GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
-    GLOBAL_DBUSER_PASS=$(jq -r '.database_password' $DATABASE_FILE)
-    COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
-
-    DB_CONN="-h ${DATABASE_HOST} -U ${GLOBAL_DBUSER}"
-    if [ ! -d "${DATABASE_HOST}" ]; then
-        DB_CONN="${DB_CONN} -p ${DATABASE_PORT}"
-    fi
-
-
-    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'"`
-
-    if [ "$CHECK" == "f" ]; then
-        echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
-        exit
-    fi
-
-    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'"`
-
-    if [ "$CHECK" == "t" ]; then
-        echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
-        exit
-    fi
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_database.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
 
 echo -e "Install python_submitty_utils"
@@ -225,31 +178,7 @@ cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 
-########################################################################################################################
-########################################################################################################################
-# PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
-
-# copy the file
-rsync -rtz  "${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c"   "${SUBMITTY_INSTALL_DIR}/.setup/"
-# replace necessary variables
-replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c"
-
-# SUID (Set owner User ID up on execution), allows the $DAEMON_USER
-# to run this executable as sudo/root, which is necessary for the
-# "switch user" to untrusted as part of the sandbox.
-
-pushd "${SUBMITTY_INSTALL_DIR}/.setup/" > /dev/null
-# set ownership/permissions on the source code
-chown root:root untrusted_execute.c
-chmod 500 untrusted_execute.c
-# compile the code
-g++ -static untrusted_execute.c -o "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-# change permissions & set suid: (must be root)
-chown root           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-chgrp "$DAEMON_USER" "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-chmod 4550           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-popd > /dev/null
-
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_untrusted_execute.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ################################################################################################################
 ################################################################################################################
@@ -262,94 +191,6 @@ chmod o+r "${SUBMITTY_INSTALL_DIR}/config/version.json"
 if [ "${IS_WORKER}" == 0 ]; then
     bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh" browscap "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
-
-################################################################################################################
-################################################################################################################
-# COMPILE AND INSTALL ANALYSIS TOOLS
-
-echo -e "Compile and install analysis tools"
-
-mkdir -p "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-
-pushd "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
-    for b in count plagiarism diagnostics;
-        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${AnalysisTools_Version}/${b}" -O ${b}
-    done
-
-    echo "${AnalysisTools_Version}" > VERSION
-fi
-popd > /dev/null
-
-# change permissions
-chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-chmod -R 555                                       "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-
-# NOTE: These variables must match the same variables in install_system.sh
-clangsrc="${SUBMITTY_INSTALL_DIR}/clang-llvm/src"
-clangbuild="${SUBMITTY_INSTALL_DIR}/clang-llvm/build"
-# note, we are not running 'ninja install', so this path is unused.
-clanginstall="${SUBMITTY_INSTALL_DIR}/clang-llvm/install"
-
-ANALYSIS_TOOLS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools"
-
-# copying commonAST scripts
-mkdir -p "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
-mkdir -p "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/"
-
-array=( astMatcher.py commonast.py unionToolRunner.py jsonDiff.py utils.py refMaps.py match.py eqTag.py context.py \
-        removeTokens.py jsonDiffSubmittyRunner.py jsonDiffRunner.py jsonDiffRunnerRunner.py createAllJson.py )
-for i in "${array[@]}"; do
-    rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/${i}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-done
-
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp"       "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/"
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt"      "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp"      "${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/"
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt" "${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt"
-
-#copying tree visualization scrips
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt"        "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-rsync -rtz "${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt"        "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-
-#building commonAST excecutable
-pushd "${ANALYSIS_TOOLS_REPO}"
-g++ commonAST/parser.cpp commonAST/traversal.cpp -o "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/commonASTCount.out"
-g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out"
-popd > /dev/null
-
-# FIXME: skipping this step as it has errors, and we don't use the output of it yet
-
-# building clang ASTMatcher.cpp
-# mkdir -p ${clanginstall}
-# mkdir -p ${clangbuild}
-# pushd ${clangbuild}
-# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
-# cmake .
-#ninja ASTMatcher UnionTool
-# popd > /dev/null
-
-# cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-# cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/ASTMatcher
-# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
-
-
-# change permissions
-chown -R "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-chmod -R 555 "${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools"
-
-################################################################################################################
-################################################################################################################
-# BUILD AND INSTALL ANALYSIS TOOLS TS
-
-echo -e "Build and install analysis tools ts"
-
-ANALYSIS_TOOLS_TS_REPO="${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisToolsTS/"
-
-# # build project
-/bin/bash "${ANALYSIS_TOOLS_TS_REPO}/install_analysistoolsts.sh"
 
 #####################################
 # Add read & traverse permissions for RainbowGrades and vendor repos
