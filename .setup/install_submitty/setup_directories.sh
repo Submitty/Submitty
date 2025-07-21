@@ -121,6 +121,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/docker"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/daemon_job_queue"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
+    mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/notifications"
 fi
 # ------------------------------------------------------------------------
 
@@ -167,7 +168,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/docker"
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/daemon_job_queue"
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
-
+    chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/notifications"
     # php & daemon needs to be able to read workers & containers config
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"

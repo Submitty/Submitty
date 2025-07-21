@@ -101,7 +101,7 @@ def connect_db(db_name):
     return db
 
 
-def construct_notifications(term, course, pending):
+def construct_gradeable_notifications(term, course, pending, variant):
     """Construct pending gradeable notifications for the current course."""
     timestamps = {}
     gradeables, site, email = [], [], []
@@ -129,12 +129,22 @@ def construct_notifications(term, course, pending):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        notification_content = "Grade Released: " + gradeable["title"]
-        email_subject = f"Grade Released: {gradeable['title']}"
-        email_body = (f"Your grade is now available for {gradeable['title']} "
-                      f"in course \n{get_full_course_name(term, course)}.\n\n"
-                      f"Click here for more info: {gradeable_url}"
-                      )
+        if variant == "score":
+            notification_content = "Grade Released: " + gradeable["title"]
+            email_subject = f"Grade Released: {gradeable['title']}"
+            email_body = (
+                f"Your grade is now available for {gradeable['title']} "
+                f"in course \n{get_full_course_name(term, course)}.\n\n"
+                f"Click here for more info: {gradeable_url}"
+            )
+        else:
+            notification_content = "Gradeable Released: " + gradeable["title"]
+            email_subject = f"Gradeable Released: {gradeable['title']}"
+            email_body = (
+                f"The gradeable {gradeable['title']} is now available for submission "
+                f"in course \n{get_full_course_name(term, course)}.\n\n"
+                f"Click here for more info: {gradeable_url}"
+            )
 
         if gradeable["site_enabled"] is True:
             site.append({
@@ -166,7 +176,7 @@ def construct_notifications(term, course, pending):
     return gradeables, site, email
 
 
-def send_notifications(course, course_db, master_db, lists):
+def send_gradeable_notifications(course, course_db, master_db, lists, variant):
     """Send pending gradeable notifications for the current course."""
     gradeables, site, email = lists
     timestamp = datetime.datetime.now()
@@ -195,14 +205,23 @@ def send_notifications(course, course_db, master_db, lists):
             )
 
         if gradeables:
-            course_db.execute(
-                """
-                UPDATE electronic_gradeable_version
-                SET g_notification_sent = TRUE
-                WHERE (g_id = :g_id AND user_id = :user_id)
-                OR (g_id = :g_id AND team_id = :team_id);
-                """, gradeables
-            )
+            if variant == "score":
+                course_db.execute(
+                    """
+                    UPDATE electronic_gradeable_version
+                    SET g_notification_sent = TRUE
+                    WHERE (g_id = :g_id AND user_id = :user_id)
+                    OR (g_id = :g_id AND team_id = :team_id);
+                    """, gradeables
+                )
+            else:
+                course_db.execute(
+                    """
+                    UPDATE electronic_gradeable
+                    SET eg_release_notification_sent = TRUE
+                    WHERE g_id = :g_id;
+                    """, gradeables
+                )
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
@@ -220,10 +239,6 @@ def send_notifications(course, course_db, master_db, lists):
              f"{str(notification_error)}\n")
         LOG_FILE.write(m)
         print(m)
-
-def send_gradeable_release_notifications(course, course_db, master_db):
-    """Send pending gradeable release notifications for the current course."""
-    pass
 
 
 def send_pending_notifications():
@@ -306,8 +321,8 @@ def send_pending_notifications():
         )
 
         if scores_available:
-            lists = construct_notifications(term, course, scores_available)
-            send_notifications(course, course_db, master_db, lists)
+            lists = construct_gradeable_notifications(term, course, scores_available, "score")
+            send_gradeable_notifications(course, course_db, master_db, lists, "score")
             notified += len(lists[0])
 
         release_available = course_db.execute(
@@ -330,6 +345,12 @@ def send_pending_notifications():
                 AND eg.eg_submission_open_date <= NOW()
             """
         )
+
+        if release_available:
+            lists = construct_gradeable_notifications(term, course, release_available, "release")
+            send_gradeable_notifications(course, course_db, master_db, lists, "release")
+            notified += len(lists[0])
+
         course_db.close()
 
     master_db.close()
