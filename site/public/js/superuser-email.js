@@ -104,6 +104,22 @@ function updateSuperuserEmailOptions(which) {
     }
 }
 
+function sendNotifications(url) {
+    $.ajax({
+        url: url + "/send_notifications",
+        type: 'POST',
+        data: {
+            csrf_token: window.csrfToken
+        },
+        success: function(res) {
+            console.log(res);
+        },
+        error: function(err) {
+            console.log(err);
+        }
+    });
+}
+
 $(document).ready(() => {
     $('#email-warning').hide();
 });

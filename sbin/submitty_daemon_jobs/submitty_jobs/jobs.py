@@ -428,3 +428,11 @@ class UpdateSystemInfo(AbstractJob):
 
     def cleanup_job(self):
         pass
+
+class CourseNotifications(AbstractJob):
+    def run_job(self):
+        path = os.path.join("/usr/local/submitty/sbin", 'send_notification.py')
+        subprocess.call(['python3', path])
+
+    def cleanup_job(self):
+        pass

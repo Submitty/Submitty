@@ -77,4 +77,19 @@ class SuperuserEmailController extends AbstractController {
             ]);
         }
     }
+
+    #[Route("/superuser/email/send/send_notifications", methods: ["POST"])]
+    public function sendNotifications(): JsonResponse {
+        $job_json = ['job' => 'CourseNotifications'];
+        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
+        $path = '/var/local/submitty/daemon_job_queue/course_notifications_' . (new \DateTime())->format('Y-m-d_H-i-s') . '.json';
+        file_put_contents($path, $job_json);
+
+        if (is_file($path)) {
+            return JsonResponse::getSuccessResponse('Entire path file content = ' . file_get_contents($path));
+        }
+        else {
+            return JsonResponse::getFailResponse("Failed to write job to queue.");
+        }
+    }
 }
