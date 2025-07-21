@@ -848,7 +848,7 @@ class SubmissionController extends AbstractController {
                 },
                 $gradeable->getRedactions()
             ),
-            "output_dir" => str_replace("submissions", "results", $version_path),
+            "output_dir" => str_replace("submissions", "submissions_processed", $version_path),
         ];
 
         $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");

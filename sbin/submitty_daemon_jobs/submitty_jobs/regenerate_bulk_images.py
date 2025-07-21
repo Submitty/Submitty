@@ -27,7 +27,7 @@ def main(folder, redactions):
                 continue
             # Run the generate_pdf_images job on the active version
             pdf_path = active_version_path / "upload.pdf"
-            results_path = str(active_version_path).replace("submissions", "results")
+            results_path = str(active_version_path).replace("submissions", "submissions_processed")
             generate_pdf_images.main(
                 str(pdf_path),
                 results_path,
