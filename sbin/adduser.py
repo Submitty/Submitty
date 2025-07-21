@@ -77,7 +77,7 @@ def main():
     metadata = MetaData()
     users_table = Table('users', metadata, autoload_with=engine)
     select_query = select(users_table).where(users_table.c.user_id == bindparam('user_id'))
-    user = connection.execute(select_query, {"user_id": user_id}).fetchone()
+    user = connection.execute(select_query, {"user_id": user_id}).mappings().fetchone()
     defaults = {
         'user_givenname': None,
         'user_preferred_givenname': None,
