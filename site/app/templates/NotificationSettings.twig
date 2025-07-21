@@ -164,7 +164,6 @@
                 <hr>
             </div>
 
-            {% if core.getUser().getGroup() == 4 %}
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <span>
@@ -178,8 +177,8 @@
                     <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email Grade Release" name="all_released_grades_email" id="all_released_grades_email" {% if notification_saves['all_released_grades_email'] %} checked="checked" {% endif %}></div>
                 {% endif %}
             </div>
-            {% endif %}
 
+            {% if core.getUser().getGroup() == 4 %}
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <span>
@@ -193,6 +192,7 @@
                     <div class="option-input col-md-5 email-setting-input"><input type="checkbox" aria-label="Email All Gradeable Submissions" name="all_gradeable_releases_email" id="all_gradeable_releases_email" {% if notification_saves['all_gradeable_releases_email'] %}checked="checked"{% endif %}></div>
                 {% endif %}
             </div>
+            {% endif %}
 
             <div class="heading row-spacing">
                 <h2 class="notification-settings-header">Grade Inquiry</h2>
