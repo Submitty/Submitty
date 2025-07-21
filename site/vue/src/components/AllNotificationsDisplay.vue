@@ -1,30 +1,65 @@
-<script>
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 
+interface Notification {
+    id: number;
+    component: string;
+    metadata: string;
+    content: string;
+    seen: boolean;
+    elapsed_time: number;
+    created_at: string;
+    notify_time: string,
+    semester: string;
+    course: string;
+    notification_url: string;
+}
+
+const props = defineProps<{
+    notifications: Notification[];
+}>();
+
+const showingMore = ref(false);
+const visibleCount = computed(() => showingMore.value ? 10 : 5);
+
+const visibleNotifications = computed(() =>
+    props.notifications.slice(0, visibleCount.value)
+);
 </script>
 <template>
     <div class="notification-body">
         <h1 class="notifications-header">Notifications</h1>
-        <!--<p class="no-recent" id="no-recent-notifications">No recent notifications.</p>-->
-        <div id="recent-notifications">
-            <div class="notification" v-for="n in 12" :key="n">
+        <p class="no-recent" id="no-recent-notifications" v-if="notifications.length === 0">No recent notifications.</p>
+        <div id="recent-notifications" v-else>
+            <div class="notification" v-for="n in visibleNotifications" :key="n.id" :class="{ unseen: !n.seen }">
                     <i class="fas fa-comments notification-type" title="Forum"></i>
                 <div class="notification-content">
                         <div class="notification-contents">
                             <div class="notification-content">
-                                This is the content of the notification
+                                <a class="notification-link" href="{{ n.notification_url }}/{{ n.id }}?seen={{ n.seen ? 1 : 0 }}">
+                                    {{ n.content }}
+                                </a>
                             </div>
                         </div>
                     <div class="notification-time">
-                        41 minutes ago
+                        {{ n.course }} - {{ n.notify_time }}
                     </div>
                 </div>
-                <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen">
-                    <i class="fas fa-external-link"></i>
-                </a>
-                <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen">
-                    <i class="far fa-envelope-open"></i>
-                </a>
             </div>
+            <a
+                v-if="props.notifications.length > 5 && !showingMore"
+                @click="showingMore = true"
+                class="show-more"
+                >
+                Show More
+            </a>
+            <a
+                v-else-if="props.notifications.length > 5 && showingMore"
+                @click="showingMore = false"
+                class="show-more"
+                >
+                Show Less
+            </a>
         </div>
     </div>
 </template>
@@ -34,15 +69,15 @@
 }
 
 .notification-body {
-  background-color: var(--home-panel-gray);
-  padding: 20px;
-  max-height: 500px;
-  overflow-y: scroll;
+    background-color: var(--home-panel-gray);
+    padding: 20px;
+    height: auto;
 }
 
 .no-recent {
     padding-top: 10px;
     font-style: italic;
+    margin-bottom: 30px;
 }
 
 #notifications {
@@ -56,9 +91,15 @@
     border-bottom: 1px solid var(--standard-light-gray);
     padding: 9px 0;
     align-items: center;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-.notification:nth-last-child(1) {
+.notification.unseen {
+    background-color: var(--viewed-content);
+}
+
+div.notification:last-of-type {
     border-bottom: none;
 }
 
@@ -92,5 +133,10 @@
     text-align: center;
     flex: 0 0 auto;
     padding: 10px 16px;
+}
+
+a.show-more {
+    display: inline-block;
+    margin-top: 10px;
 }
 </style>

@@ -3,6 +3,20 @@ import { defineProps } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
 
+interface Notification {
+    id: number;
+    component: string;
+    metadata: string;
+    content: string;
+    seen: boolean;
+    elapsed_time: number;
+    created_at: string;
+    notify_time: string,
+    semester: string;
+    course: string;
+    notification_url: string;
+}
+
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
 type Rank = {
     title: string;
@@ -18,6 +32,7 @@ type Course = {
 
 interface Props {
     statuses: { [key in Status]: { [key: string]: Rank } };
+    notifications: Notification[];
 }
 
 type SemesterCourses = {
@@ -118,7 +133,7 @@ const buildCourseUrl = (course: Course) => {
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay/>
+    <AllNotificationsDisplay  :notifications="notifications" />
   </div>
 </template>
 
@@ -126,6 +141,8 @@ const buildCourseUrl = (course: Course) => {
 .grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-auto-rows: auto;
+  align-items: start; 
   grid-gap: 30px;
 }
 .div1 {
