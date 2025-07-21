@@ -513,6 +513,16 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable,
+                "grades"
+            );
+            return;
+        }
+
         // Make sure this gradeable is an electronic file gradeable
         if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             $this->core->addErrorMessage('This gradeable is not an electronic file gradeable');
