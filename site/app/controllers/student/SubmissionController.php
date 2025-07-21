@@ -1722,6 +1722,45 @@ class SubmissionController extends AbstractController {
         }
 
 
+        $has_docx = false;
+        if ($vcs_checkout === false) {
+            for ($i = 1; $i <= $num_parts; $i++) {
+                if (isset($uploaded_files[$i])) {
+                    for ($j = 0; $j < $count[$i]; $j++) {
+                        if (strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "docx") {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($has_docx) {
+            // Add to queue to convert Word documents to PDF files for viewing
+            $doc_queue_data = [
+                "job" => "DocToPDF",
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "user" => $user_id,
+                "version" => $new_version
+            ];
+
+            $doc_queue_file_helper = implode("__", ["doc_to_pdf", $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
+            $gradeable->getId(), $who_id, $new_version]);
+            $doc_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "daemon_job_queue",
+                $doc_queue_file_helper
+            );
+
+            if (@file_put_contents($doc_queue_file, FileUtils::encodeJson($doc_queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for pdf generation queue.", false);
+            }
+        }
+
+
         $queue_file_helper = [$this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version];
         $queue_file_helper = implode("__", $queue_file_helper);
