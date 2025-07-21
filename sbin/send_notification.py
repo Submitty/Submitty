@@ -315,8 +315,8 @@ def send_pending_notifications():
             SELECT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
-                COALESCE(ns.all_gradeable_submissions, TRUE) AS site_enabled,
-                COALESCE(ns.all_gradeable_submissions_email, FALSE) AS email_enabled
+                COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
+                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled
             FROM electronic_gradeable eg
             INNER JOIN gradeable AS g
                 ON eg.g_id = g.g_id

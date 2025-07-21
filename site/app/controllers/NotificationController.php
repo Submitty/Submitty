@@ -26,7 +26,7 @@ class NotificationController extends AbstractController {
         'team_member_submission',
         'self_notification',
         'all_released_grades',
-        'all_gradeable_submissions'
+        'all_gradeable_releases'
     ];
 
     const EMAIL_SELECTIONS = [
@@ -41,7 +41,7 @@ class NotificationController extends AbstractController {
         'self_notification_email',
         'self_registration_email',
         'all_released_grades_email',
-        'all_gradeable_submissions_email'
+        'all_gradeable_releases_email'
     ];
 
     protected $selections;

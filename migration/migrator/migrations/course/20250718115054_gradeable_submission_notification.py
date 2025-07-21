@@ -17,8 +17,8 @@ def up(config, database, semester, course):
     database.execute(
         """
         ALTER TABLE notification_settings
-        ADD COLUMN IF NOT EXISTS all_gradeable_submissions BOOLEAN DEFAULT TRUE NOT NULL,
-        ADD COLUMN IF NOT EXISTS all_gradeable_submissions_email BOOLEAN DEFAULT FALSE NOT NULL;
+        ADD COLUMN IF NOT EXISTS all_gradeable_releases BOOLEAN DEFAULT TRUE NOT NULL,
+        ADD COLUMN IF NOT EXISTS all_gradeable_releases_email BOOLEAN DEFAULT FALSE NOT NULL;
 
         ALTER TABLE electronic_gradeable
         ADD COLUMN IF NOT EXISTS eg_submission_notification_sent BOOLEAN DEFAULT FALSE NOT NULL;
