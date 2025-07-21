@@ -57,7 +57,7 @@ def delete_old_emails(db, days_to_preserve, maximum_to_delete):
     query = """SELECT count(*) FROM emails WHERE sent is not NULL
     AND sent < :format AND error = '';"""
     result = db.execute(text(query), {"format": last_week})
-    after = result.scalar()
+    after = result.scalar_one()
     print(f"email to delete after count: {after}")
 
     print(f"deleted email count {before-after}\n")

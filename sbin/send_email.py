@@ -183,8 +183,8 @@ def get_external_queue(db, num):
 
 def mark_sent(email_id, db):
     """Mark an email as sent in the database."""
-    query_string = "UPDATE emails SET sent=NOW() WHERE id = {};".format(email_id)
-    db.execute(query_string)
+    query_string = text("UPDATE emails SET sent=NOW() WHERE id = :email_id")
+    db.execute(query_string, {"email_id": email_id})
     db.commit()
 
 
