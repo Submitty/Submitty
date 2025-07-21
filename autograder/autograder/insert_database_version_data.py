@@ -121,7 +121,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         non_hidden_non_ec += nonhidden_diff
         # hidden_non_ec += hidden_diff
 
-    data_table = Table('electronic_gradeable_data', metadata, autoload=True)
+    data_table = Table('electronic_gradeable_data', metadata, autoload_with=db)
 
     """
     The data row should have been inserted by PHP when the student uploads the submission, requiring
