@@ -352,7 +352,7 @@ class Gradeable extends AbstractModel {
      * @var bool will instructors have blind peer grading enabled*/
     protected $instructor_blind = 1;
     /** @prop
-     * @var int total gradeable notifications sent tied to scores */
+     * @var int total gradeable score notifications sent */
     protected $score_notifications_sent = 0;
     /** @prop
      * @var bool if gradeable release notifications have been sent*/
