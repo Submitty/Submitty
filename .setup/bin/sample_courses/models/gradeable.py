@@ -403,7 +403,6 @@ class Gradeable(object):
                     eg_config_path=self.config_path,
                     eg_late_days=self.late_days,
                     eg_precision=self.precision,
-                    eg_peer_grading=self.peer_grading,
                     eg_grade_inquiry_start_date=self.grade_inquiry_start_date,
                     eg_grade_inquiry_due_date=self.grade_inquiry_due_date,
                     eg_depends_on=self.depends_on,
