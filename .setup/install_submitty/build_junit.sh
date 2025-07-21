@@ -14,14 +14,15 @@ if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     exit 1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
-source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")
+# shellcheck disable=SC1091
+source "${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 ########################################################################################################################
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
 if [ -x "$(command -v javac)" ] &&
-   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
+   [ -d "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit" ]; then
     echo -e "Build the junit test runner"
 
     # copy the file from the repo

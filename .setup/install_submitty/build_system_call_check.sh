@@ -14,8 +14,9 @@ if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     exit 1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
-source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")
+# shellcheck disable=SC1091
+source "${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 # build the helper program for strace output and restrictions by system call categories
 g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
 
@@ -52,5 +53,5 @@ chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/system_call_c
 chown "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
 chmod 550                             "${SUBMITTY_INSTALL_DIR}/bin/calculate_extensions.out"
 
-chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
-chmod 550 ${SUBMITTY_INSTALL_DIR}/bin/configure.out
+chown "${DAEMON_USER}:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/bin/configure.out"
+chmod 550 "${SUBMITTY_INSTALL_DIR}/bin/configure.out"

@@ -14,8 +14,9 @@ if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     exit 1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
-source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")
+# shellcheck disable=SC1091
+source "${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 ################################################################################################################
 ################################################################################################################
 # INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS

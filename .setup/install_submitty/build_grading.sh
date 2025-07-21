@@ -14,8 +14,9 @@ if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
     exit 1
 fi
 
-SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
-source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")
+# shellcheck disable=SC1091
+source "${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 ########################################################################################################################
 ########################################################################################################################
 # COPY THE CORE GRADING CODE (C++ files) & BUILD THE SUBMITTY GRADING LIBRARY
@@ -55,13 +56,10 @@ done
 mkdir -p "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 pushd "${SUBMITTY_INSTALL_DIR}/src/grading/lib"
 cmake ..
-set +e
-make
-if [ "$?" -ne 0 ] ; then
+if ! make; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
-set -e
 popd > /dev/null
 
 # root will be owner & group of these files
