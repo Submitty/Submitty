@@ -130,15 +130,3 @@ chmod  444 TestRunner.java
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
 popd
-
-#################################################################
-# CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
-#################
-
-/bin/bash "${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
-
-if [ $? -eq 1 ]; then
-    echo -n "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
-    echo -n "Exiting autograder.sh"
-    exit 1
-fi
