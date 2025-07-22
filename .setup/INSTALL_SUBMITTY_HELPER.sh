@@ -202,9 +202,6 @@ chown -R  root:root "${SUBMITTY_INSTALL_DIR}/vendor"
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type d -exec chmod 555 {} \;
 find "${SUBMITTY_INSTALL_DIR}/vendor" -type f -exec chmod 444 {} \;
 
-echo -e "Copy the grading code"
-bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_grading.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
-
 
 #Set up sample files if not in worker mode.
 if [ "${IS_WORKER}" == 0 ]; then
@@ -301,6 +298,10 @@ popd > /dev/null
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
 bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
+
+echo -e "Copy the grading code"
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_grading.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
+
 
 ###############################################
 # scripts used only by root for setup only
