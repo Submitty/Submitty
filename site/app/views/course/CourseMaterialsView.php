@@ -102,13 +102,33 @@ class CourseMaterialsView extends AbstractView {
             $path_to_place = &$final_structure;
             $path = "";
             foreach ($dirs as $dir) {
+                // Create the directory if it doesn't exist
+                if (!isset($path_to_place[$dir])) {
+                    $this->core->addErrorMessage($dir . " is broken, ask a system admin to remove the broken directory from the database.");
+                    $path_to_place[$dir] = [];
+                    // Also add to directories array with a default priority if it doesn't exist
+                    $current_relative_path = empty($path) ? $dir : FileUtils::joinPaths($path, $dir);
+                    $current_full_path = FileUtils::joinPaths($base_course_material_path, $current_relative_path);
+                    
+                    if (!isset($directories[$current_relative_path])) {
+                        // We don't actually add to $directories since that's for real directories
+                        // But we add to the other arrays for the template
+                        $directory_priorities[$current_full_path] = 0; // Default priority
+                        $folder_ids[$current_full_path] = 0; // Default ID
+                    }
+                }
                 $path_to_place = &$path_to_place[$dir];
                 $path = FileUtils::joinPaths($path, $dir);
             }
             $index = 0;
             foreach ($path_to_place as $key => $value) {
                 if (is_array($value)) {
-                    $priority = $directories[FileUtils::joinPaths($path, $key)]->getPriority();
+                    $relative_dir_path = FileUtils::joinPaths($path, $key);
+                    if (isset($directories[$relative_dir_path])) {
+                        $priority = $directories[$relative_dir_path]->getPriority();
+                    } else {
+                        $priority = 0; // Default priority for dynamically created directories
+                    }
                 }
                 else {
                     $priority = $value->getPriority();
