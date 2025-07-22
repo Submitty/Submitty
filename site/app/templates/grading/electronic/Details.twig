@@ -792,12 +792,6 @@
         location.reload();
     }
 
-    function sortTableByColumn(sort_type = 'id', direction) {
-        Cookies.set('sort', sort_type, { path: coursePath, expires: 365 });
-        Cookies.set('direction', direction, { path: coursePath, expires: 365 });
-        location.reload();
-    }
-
     //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
     function ajaxCountRegrade(choice,e,confirmMessage) {
         const submit_url = buildCourseUrl(['gradeable', "{{ gradeable.getId }}", 'regrade', 'count']);

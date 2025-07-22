@@ -50,3 +50,9 @@ window.changeSortOrder = () => {
     window.Cookies.set('sort', window.Cookies.get('sort') === 'random' ? 'id' : 'random', { path: coursePath, expires: 365 });
     location.reload();
 };
+
+window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
+    window.Cookies.set('sort', sort_type, { path: coursePath, expires: 365 });
+    window.Cookies.set('direction', direction, { path: coursePath, expires: 365 });
+    location.reload();
+};
