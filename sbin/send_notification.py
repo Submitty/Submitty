@@ -123,7 +123,7 @@ def parse_column(row, column):
 
 def format_timestamp(timestamp):
     """Format a timestamp into a readable string."""
-    return timestamp.strftime("%Y-%m-%d %I:%M:%S %p") if timestamp else "TBA"
+    return timestamp.strftime("%B %d, %Y at %I:%M %p") if timestamp else "TBA"
 
 
 def format_late_days(late_days):
@@ -164,27 +164,33 @@ def construct_notifications(term, course, pending, notification_type):
 
         # Notification-related content
         if notification_type == "gradeable_release":
-            subject = f"Submission Open: {gradeable['title']}"
-            body = (
-                f"Submissions are now being accepted for {gradeable['title']}, "
-                f"where the final deadline is {format_timestamp(gradeable['submission_due_date'])} "
-                f"with up to {format_late_days(gradeable['max_late_days'])} allowed, "
-                f"and you have {format_late_days(gradeable['remaining_late_days'])} available "
+            email_subject = f"Submissions Open: {gradeable['title']}"
+            site_content = (
+                f"{email_subject} (Due {format_timestamp(gradeable['submission_due_date'])} - "
+                f"{format_late_days(gradeable['max_late_days'])} allowed, "
+                f"{format_late_days(gradeable['remaining_late_days'])} remaining)"
+            )
+            email_body = (
+                f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
+                f"{get_full_course_name(term, course)}.\n"
+                f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
+                f"Late Days: {format_late_days(gradeable['max_late_days'])} allowed, "
+                f"{format_late_days(gradeable['remaining_late_days'])} remaining"
             )
         else:
-            subject = f"Grade Released: {gradeable['title']}"
-            body = f"Your grade is now available for {gradeable['title']} "
+            site_content = email_subject = f"Grade Released: {gradeable['title']}"
+            email_body = (
+                f"Your grade is now available for \"{gradeable['title']}\" in course "
+                f"{get_full_course_name(term, course)}."
+            )
 
-        body += (
-            f"in course \n{get_full_course_name(term, course)}.\n\n"
-            f"Click here for more info: {gradeable_url}"
-        )
+        email_body += f"\n\nClick here for more info: {gradeable_url}"
 
         if gradeable["site_enabled"] is True:
             site.append({
                 "component": "grading",
                 "metadata": metadata,
-                "content": subject,
+                "content": site_content,
                 "created_at": timestamp,
                 "from_user_id": "submitty-admin",
                 "to_user_id": gradeable['user_id']
@@ -192,8 +198,8 @@ def construct_notifications(term, course, pending, notification_type):
 
         if gradeable["email_enabled"] is True:
             email.append({
-                "subject": subject,
-                "body": body,
+                "subject": email_subject,
+                "body": email_body,
                 "created": timestamp,
                 "user_id": gradeable['user_id'],
                 "email_address": gradeable['user_email'],
