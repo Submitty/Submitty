@@ -36,16 +36,27 @@ def up(config):
                 installed_php_extensions.append(module)
 
     # Remove existing PHP packages
-    os.system("apt-get remove -qqy php " + " ".join(installed_php_packages))
+    env = os.environ.copy()
+    env['DEBIAN_FRONTEND'] = 'noninteractive'
+    subprocess.run(
+        ["apt-get", "remove", "-qqy", "php"] + installed_php_packages,
+        env=env
+    )
 
     # Add PHP PPA
-    os.system("add-apt-repository -y ppa:ondrej/php")
-    os.system("apt-get update")
+    subprocess.run(
+        ["add-apt-repository", "-y", "ppa:ondrej/php"],
+        env=env
+    )
+    subprocess.run(["apt-get", "update", "-qq"], env=env)
 
     # Install PHP 8.1 versions of the previously installed packages
     if installed_php_extensions:
-        packages_to_install = " ".join([f"php8.1-{module}" for module in installed_php_extensions])
-        os.system(f"apt-get install -qqy php8.1 {packages_to_install}")
+        packages_to_install = [f"php8.1-{module}" for module in installed_php_extensions]
+        subprocess.run(
+            ["apt-get", "install", "-qqy", "php8.1"] + packages_to_install,
+            env=env
+        )
 
 
 def down(config):
@@ -70,13 +81,21 @@ def down(config):
             installed_modules.append(module)
 
     # Remove PHP 8.1 packages
-    os.system("apt-get remove -qqy php8.1*")
+    env = os.environ.copy()
+    env['DEBIAN_FRONTEND'] = 'noninteractive'
+    subprocess.run(["apt-get", "remove", "-qqy", "php8.1*"], env=env)
 
     # Remove PHP PPA
-    os.system("add-apt-repository -r -y ppa:ondrej/php")
-    os.system("apt-get update")
+    subprocess.run(
+        ["add-apt-repository", "-r", "-y", "ppa:ondrej/php"],
+        env=env
+    )
+    subprocess.run(["apt-get", "update", "-qq"], env=env)
 
     # Reinstall generic PHP packages
     if installed_modules:
-        packages_to_install = " ".join([f"php-{module}" for module in installed_modules])
-        os.system(f"apt-get install -qqy {packages_to_install}")
+        packages_to_install = [f"php-{module}" for module in installed_modules]
+        subprocess.run(
+            ["apt-get", "install", "-qqy"] + packages_to_install,
+            env=env
+        )
