@@ -404,8 +404,6 @@ cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 
-bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_untrusted_execute.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
-
 ################################################################################################################
 ################################################################################################################
 
