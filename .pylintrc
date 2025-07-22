@@ -15,7 +15,6 @@ ignore-paths=
     bin/make_assignments_txt_file.py,
     bin/generate_repos.py,
     bin/config_syntax_check.py,
-    grading_bin/jupyter_notebook_grader.py,
     autograder/submitty_autograding_shipper.py,
     autograder/submitty_autograding_worker.py,
     autograder/autograder/insert_database_version_data.py,

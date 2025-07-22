@@ -13,7 +13,8 @@
   "testcases": [
     {
       "title": "Executes successfully",
-      "command": "python3 /grading_bin/jupyter_notebook_grader.py",
+      // Although wildcard is used, the grader will only expect one notebook file. Use if filename cannot be determined.
+      "command": "python3 /grading_bin/jupyter_notebook_grader.py -i *.ipynb -o executed.ipynb",
       "points": 1,
       "validation": [
         {
