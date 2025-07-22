@@ -239,16 +239,7 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
             )
 
         if gradeables:
-            if notification_type == "grades":
-                course_db.execute(
-                    """
-                    UPDATE electronic_gradeable_version
-                    SET g_notification_sent = TRUE
-                    WHERE (g_id = :g_id AND user_id = :user_id)
-                    OR (g_id = :g_id AND team_id = :team_id);
-                    """, gradeables
-                )
-            else:
+            if notification_type == "gradeable_release":
                 course_db.execute(
                     """
                     UPDATE electronic_gradeable
@@ -256,6 +247,15 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
                     WHERE g_id = :g_id;
                     """, gradeables
                 )
+            else:
+                course_db.execute(
+                    """
+                    UPDATE electronic_gradeable_version
+                    SET g_notification_sent = TRUE
+                    WHERE (g_id = :g_id AND user_id = :user_id)
+                    OR (g_id = :g_id AND team_id = :team_id);
+                    """, gradeables
+                )                
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
@@ -356,8 +356,8 @@ def send_pending_notifications():
         )
 
         if grades_available:
-            lists = construct_notifications(term, course, grades_available, "grades")
-            send_notifications(course, course_db, master_db, lists, "grades")
+            lists = construct_notifications(term, course, grades_available, "grades_release")
+            send_notifications(course, course_db, master_db, lists, "grades_release")
             notified += len(lists[0])
 
         release_available = course_db.execute(
