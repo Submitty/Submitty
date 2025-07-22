@@ -16,6 +16,7 @@ from nbconvert.preprocessors import ClearOutputPreprocessor
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors import CellExecutionError
 
+
 # Execution API: https://nbconvert.readthedocs.io/en/latest/execute_api.html
 def execute_notebook(notebook_path, output_path, timeout=600):
     """
@@ -58,6 +59,7 @@ def execute_notebook(notebook_path, output_path, timeout=600):
 
     for cell_idx, cell in enumerate(nb.cells):
         save_output(cell_idx, cell)
+
 
 def save_code_output_cell(output, file_name):
     """
