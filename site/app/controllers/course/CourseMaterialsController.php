@@ -363,7 +363,7 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
-        if (str_contains($_POST['title'], '/')) {
+        if (isset($_POST['title']) && $_POST['title'] != null && str_contains($_POST['title'], '/')) {
             return JsonResponse::getErrorResponse("Slash in file title");
         }
 

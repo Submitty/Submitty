@@ -1389,10 +1389,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         if (window.isValidFileName(file_name)) {
             formData.append('file_path', file_path);
         }
-        else {
-            alert('Invalid filename');
-            return;
-        }
     }
 
     if (title !== null && window.isValidFileName(title)) {
@@ -1401,9 +1397,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
-    } else {
-        alert('Invalid filename');
-        return;
     }
 
     if (overwrite !== null) {
