@@ -302,8 +302,6 @@ popd > /dev/null
 
 bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
-bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_system_call_check.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
-
 ###############################################
 # scripts used only by root for setup only
 mkdir -p        "${SUBMITTY_INSTALL_DIR}/.setup/bin"
