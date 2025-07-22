@@ -615,7 +615,6 @@ HTML;
             }
             else {
                 $columns[] = ["title" => "Grading", "function" => "grading"];
-                $columns[] = ["title" => "Active Graders", "function" => "active_graders"];
             }
             $columns[] = ["title" => "Total", "function" => "total"];
             $columns[] = ["title" => "Active Version", "function" => "active_version"];
