@@ -135,26 +135,8 @@ if [ "${IS_WORKER}" == 0 ]; then
 fi
 
 
-################################################################################################################
-################################################################################################################
-# INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
-
 echo -e "Install python_submitty_utils"
-
-rsync -rtz "${SUBMITTY_REPOSITORY}/python_submitty_utils" "${SUBMITTY_INSTALL_DIR}"
-pushd "${SUBMITTY_INSTALL_DIR}/python_submitty_utils"
-
-pip3 install .
-# Setting the permissions are necessary as pip uses the umask of the user/system, which
-# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
-# This gets run here in case we make any python package changes.
-find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
-find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
-
-popd > /dev/null
-
+/bin/bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_python.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ########################################################################################################################
 ########################################################################################################################
