@@ -266,26 +266,9 @@ chmod g+wrx           "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_route
 
 #Set up sample files if not in worker mode.
 if [ "${IS_WORKER}" == 0 ]; then
-    ########################################################################################################################
-    ########################################################################################################################
-    # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
-
-    echo -e "Copy the sample files"
-
-    # copy the files from the repo
-    rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples" "${SUBMITTY_INSTALL_DIR}"
-
-    # copy more_autograding_examples in order to make cypress autograding work
-    if [ "${VAGRANT}" == 1 ]; then 
-        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-    fi
-
-    # root will be owner & group of these files
-    chown -R  root:root "${SUBMITTY_INSTALL_DIR}/more_autograding_examples"
-    # but everyone can read all that files & directories, and cd into all the directories
-    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type d -exec chmod 555 {} \;
-    find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_sample_autograding.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
+
 ########################################################################################################################
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
