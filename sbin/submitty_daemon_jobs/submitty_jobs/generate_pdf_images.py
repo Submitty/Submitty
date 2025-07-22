@@ -1,10 +1,9 @@
 import os
-from time import sleep
 import traceback
 from typing import List, Sequence
 
 from pdf2image import convert_from_bytes
-from PIL import Image, ImageDraw
+from PIL import ImageDraw
 from PyPDF2 import PdfReader
 
 
