@@ -172,7 +172,7 @@ def construct_notifications(term, course, pending, notification_type):
             )
             email_body = (
                 f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
-                f"{get_full_course_name(term, course)}.\n"
+                f"{get_full_course_name(term, course)}.\n\n"
                 f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
                 f"Late Days: {format_late_days(gradeable['max_late_days'])} allowed, "
                 f"{format_late_days(gradeable['remaining_late_days'])} remaining"
