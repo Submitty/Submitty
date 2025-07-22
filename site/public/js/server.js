@@ -1312,18 +1312,18 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
             const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
+            $('#grade-override-table tbody').append(bits.join('</td><td class="align-left">'));
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');
     }
 }
 
-function deleteOverriddenGrades(user_id, option) {
-    const url = buildCourseUrl(['grade_override', $('#g_id').val(), 'delete']);
-    const confirm = option > -1 ? true : window.confirm('Are you sure you would like to delete this entry?');
+function deleteOverriddenGrades(user_id, g_id, option) {
+    const url = buildCourseUrl(['grade_override', g_id, 'delete']);
+    const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
         $.ajax({
             url: url,
@@ -1358,13 +1358,13 @@ function deleteOverriddenGrades(user_id, option) {
 function confirmOverride(option, isDelete) {
     $('.popup-form').hide();
     if (isDelete) {
-        deleteOverriddenGrades($('#user_id').val(), option);
+        deleteOverriddenGrades($('#user_id').val(), $('#g_id').val(), option);
         $('#user_id').val('');
     }
     else {
         $('input[name="option"]').val(option);
         updateGradeOverride();
-        $('input[name="option"]').val(-1);
+        $('input[name="option"]').val('');
     }
 }
 
@@ -1372,6 +1372,9 @@ function overridePopup(json) {
     $('.popup-form').hide();
     $('#override_team_popup').remove();
 
+    // Generate a unique mount ID for the dynamic Vue app.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time
+    // until we implement a uniform Vue framework to manage mounting.
     const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
     const mount_el = document.createElement('div');
     mount_el.id = mount_id;

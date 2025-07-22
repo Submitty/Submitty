@@ -46,30 +46,27 @@ class GradeOverrideController extends AbstractController {
 
     #[Route("/courses/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods: ["POST"])]
     public function updateOverriddenGrades($gradeable_id) {
-        $user_id = $_POST['user_id']   ?? '';
-        $marks   = $_POST['marks']     ?? '';
-        $comment = $_POST['comment']   ?? '';
-        $option  = intval($_POST['option'] ?? -1);
+        $user_id = $_POST['user_id'] ?? '';
+        $marks   = $_POST['marks'] ?? '';
+        $comment = $_POST['comment'] ?? '';
+        $option  = $_POST['option'] ?? '';
 
         $user = $this->core->getQueries()->getSubmittyUser($user_id);
-        if ($user === null || $user->getId() !== $user_id) {
-            return $this->core->getOutput()->renderJsonFail("Invalid Student ID");
-        }
 
         if ($marks === '' || !ctype_digit($marks)) {
-            return $this->core->getOutput()->renderJsonFail("Marks must be an integer");
+            return $this->core->getOutput()->renderJsonFail("Marks must be at least 0");
         }
         $marks = (int) $marks;
 
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $user_id);
 
         if ($team !== null && $team->getSize() > 1) {
-            if ($option === 0) {
+            if ($option === 'single') {
                 $this->core->getQueries()
                     ->updateGradeOverride($user_id, $gradeable_id, $marks, $comment);
                 return $this->getOverriddenGrades($gradeable_id);
             }
-            elseif ($option === 1) {
+            elseif ($option === 'batch') {
                 foreach ($this->getTeamMemberIds($team) as $member_id) {
                     $this->core->getQueries()
                         ->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
@@ -81,9 +78,7 @@ class GradeOverrideController extends AbstractController {
                 $all_members = $this->core->getQueries()->getUsersById($member_ids);
                 $team_members = [];
                 foreach ($all_members as $id => $member) {
-                    $team_members[$id] = $member->getDisplayedGivenName()
-                                         . " "
-                                         . $member->getDisplayedFamilyName();
+                    $team_members[$id] = $member->getDisplayedGivenName()." ". $member->getDisplayedFamilyName();
                 }
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team'   => true,

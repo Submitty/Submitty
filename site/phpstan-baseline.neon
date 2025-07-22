@@ -1403,7 +1403,7 @@ parameters:
 			identifier: equal.notAllowed
 			count: 2
 			path: app/controllers/admin/ConfigurationController.php
- 
+
 		-
 			message: '#^Method app\\controllers\\admin\\ConfigurationController\:\:getGradeableSeatingOptions\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue

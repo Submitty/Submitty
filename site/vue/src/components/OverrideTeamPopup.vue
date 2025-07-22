@@ -1,7 +1,7 @@
 <script setup lang="ts">
 declare global {
     interface Window {
-        confirmOverride?: (option: 0 | 1, isDelete: boolean) => void;
+        confirmOverride?: (option: string, isDelete: boolean) => void;
     }
 }
 const { memberList, isDelete } = defineProps<{
@@ -10,11 +10,11 @@ const { memberList, isDelete } = defineProps<{
 }>();
 
 function cancel() {
-    window.confirmOverride?.(0, isDelete);
+    window.confirmOverride?.('single', isDelete);
 }
 
 function confirm() {
-    window.confirmOverride?.(1, isDelete);
+    window.confirmOverride?.('batch', isDelete);
 }
 </script>
 
