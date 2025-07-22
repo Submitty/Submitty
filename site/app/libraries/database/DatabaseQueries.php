@@ -6949,6 +6949,7 @@ AND gc_id IN (
                     $gradeable->getHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
+                    // Reset the release notification state if the submission open date has changed to a future date
                     $gradeable->getReleaseNotificationsSent() ? $gradeable->isSubmissionOpen() : false,
                     $gradeable->getId()
                 ];

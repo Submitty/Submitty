@@ -97,7 +97,7 @@ def get_late_day_defaults(term, course):
         default_hw_late_days = course_details.get('default_hw_late_days', 0)
         default_student_late_days = course_details.get('default_student_late_days', 0)
 
-        return (default_hw_late_days, default_student_late_days)
+        return default_hw_late_days, default_student_late_days
 
 
 def connect_db(db_name):
@@ -116,7 +116,7 @@ def connect_db(db_name):
 
 
 def parse_column(row, column):
-    """Parse a database column from a row for variable notification types."""
+    """Parse a database column from a SQLAlchemy row for variable notification types."""
     # pylint: disable=protected-access
     return row._mapping.get(column, None)
 
@@ -148,7 +148,7 @@ def construct_notifications(term, course, pending, notification_type):
             "site_enabled": parse_column(notification, 'site_enabled'),
             # Potentially send via email
             "email_enabled": parse_column(notification, 'email_enabled'),
-            # Late day info for gradeable available notifications
+            # Unique late day info for submissions available notifications
             "max_late_days": parse_column(notification, 'max_late_days'),
             "remaining_late_days": parse_column(notification, 'remaining_late_days')
         }
@@ -165,7 +165,7 @@ def construct_notifications(term, course, pending, notification_type):
         # Notification-related content
         if notification_type == "gradeable_release":
             email_subject = f"Submissions Open: {gradeable['title']}"
-            site_content = (
+            notification_content = (
                 f"{email_subject} (Due {format_timestamp(gradeable['submission_due_date'])} - "
                 f"{format_late_days(gradeable['max_late_days'])} allowed, "
                 f"{format_late_days(gradeable['remaining_late_days'])} remaining)"
@@ -178,7 +178,7 @@ def construct_notifications(term, course, pending, notification_type):
                 f"{format_late_days(gradeable['remaining_late_days'])} remaining"
             )
         else:
-            site_content = email_subject = f"Grade Released: {gradeable['title']}"
+            email_subject = notification_content = f"Grade Released: {gradeable['title']}"
             email_body = (
                 f"Your grade is now available for \"{gradeable['title']}\" in course "
                 f"{get_full_course_name(term, course)}."
@@ -190,7 +190,7 @@ def construct_notifications(term, course, pending, notification_type):
             site.append({
                 "component": "grading",
                 "metadata": metadata,
-                "content": site_content,
+                "content": notification_content,
                 "created_at": timestamp,
                 "from_user_id": "submitty-admin",
                 "to_user_id": gradeable['user_id']
@@ -292,7 +292,7 @@ def send_pending_notifications():
         course_db = connect_db(f"submitty_{term}_{course}")
         default_hw_late_days, default_student_late_days = get_late_day_defaults(term, course)
 
-        # Retrieve all fully graded gradeables with pending notifications
+        # Retrieve all fully graded gradeables with pending grade notifications
         grades_available = course_db.execute(
             """
             WITH gradeables AS (
@@ -366,6 +366,7 @@ def send_pending_notifications():
             send_notifications(course, course_db, master_db, lists, "grades_release")
             notified += len(lists[0])
 
+        # Retrieve all gradeables with pending release notifications
         release_available = course_db.execute(
             """
             SELECT DISTINCT
@@ -398,8 +399,7 @@ def send_pending_notifications():
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
                 ldc.late_days_remaining
-            """,
-            {
+            """, {
                 "default_hw_late_days": default_hw_late_days,
                 "default_student_late_days": default_student_late_days
             }
