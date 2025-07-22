@@ -84,7 +84,7 @@ fi
 set -e
 
 if [ "${IS_WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_database.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_migrator.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
 
 ################################################################################################################
