@@ -86,6 +86,18 @@ def get_full_course_name(term, course):
     return course_name
 
 
+def get_late_day_defaults(term, course):
+    """Retrieve default late day values from the course config file."""
+    course_config_path = os.path.join(
+        COURSE_DIR_PATH, term, course, 'config', 'config.json')
+    with open(course_config_path, 'r', encoding="utf-8") as f:
+        data = json.load(f)
+        course_details = data.get('course_details', {})
+        default_hw_late_days = course_details.get('default_hw_late_days', 0)
+        default_student_late_days = course_details.get('default_student_late_days', 0)
+        return (default_hw_late_days, default_student_late_days)
+
+
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
@@ -101,22 +113,32 @@ def connect_db(db_name):
     return db
 
 
-def construct_notifications(term, course, pending, variant):
+def parse_db_column(row, column):
+    """Parse a database column from a row."""
+    # pylint: disable=protected-access
+    return row._mapping.get(column, None)
+
+
+def construct_notifications(term, course, pending, notification_type):
     """Construct pending gradeable notifications for the current course."""
     timestamps = {}
     gradeables, site, email = [], [], []
 
     for notification in pending:
         gradeable = {
-            "id": notification['g_id'],
-            "title": notification['g_title'],
-            "team_id": notification['team_id'] if variant == "grades" else '',
-            "user_id": notification['user_id'],
-            "user_email": notification['user_email'],
+            "id": parse_db_column(notification, 'g_id'),
+            "title": parse_db_column(notification, 'g_title'),
+            "submission_due_date": parse_db_column(notification, 'submission_due_date'),
+            "team_id": parse_db_column(notification, 'team_id'),
+            "user_id": parse_db_column(notification, 'user_id'),
+            "user_email": parse_db_column(notification, 'user_email'),
             # Potentially send via the notification page
-            "site_enabled": notification['site_enabled'],
+            "site_enabled": parse_db_column(notification, 'site_enabled'),
             # Potentially send via email
-            "email_enabled": notification['email_enabled']
+            "email_enabled": parse_db_column(notification, 'email_enabled'),
+            # Late day info (only for gradeable available notifications)
+            "max_late_days": parse_db_column(notification, 'max_late_days'),
+            "remaining_late_days": parse_db_column(notification, 'remaining_late_days')
         }
 
         timestamp = timestamps.setdefault(
@@ -129,12 +151,21 @@ def construct_notifications(term, course, pending, variant):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        if variant == "grades":
-            subject = f"Grade Released: {gradeable['title']}"
-            body = f"Your grade is now available for {gradeable['title']} "
+        if notification_type == "grades":
+            subject = f"Submission open for {gradeable['title']}"
+            body = (
+                f"Submissions are now being accepted for {gradeable['title']}, "
+                f"where the final deadline is {gradeable['submission_due_date']} "
+                f"with up to {gradeable['max_late_days']} late days allowed, "
+                f"and you have {gradeable['remaining_late_days']} available late days"
+            )
         else:
             subject = f"Gradeable Available: {gradeable['title']}"
-            body = f"Submissions are now open for {gradeable['title']} "
+            body = (
+                f"Submissions are now open for {gradeable['title']} "
+                f"with up to {gradeable['max_late_days']} late days allowed, "
+                f"and you have {gradeable['remaining_late_days']} available late days"
+            )
 
         body += (
             f"in course \n{get_full_course_name(term, course)}.\n\n"
@@ -171,7 +202,7 @@ def construct_notifications(term, course, pending, variant):
     return gradeables, site, email
 
 
-def send_notifications(course, course_db, master_db, lists, variant):
+def send_notifications(course, course_db, master_db, lists, notification_type):
     """Send pending gradeable notifications for the current course."""
     gradeables, site, email = lists
     timestamp = datetime.datetime.now()
@@ -200,7 +231,7 @@ def send_notifications(course, course_db, master_db, lists, variant):
             )
 
         if gradeables:
-            if variant == "grades":
+            if notification_type == "grades":
                 course_db.execute(
                     """
                     UPDATE electronic_gradeable_version
@@ -245,6 +276,7 @@ def send_pending_notifications():
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
+        default_hw_late_days, default_student_late_days = get_late_day_defaults(term, course)
 
         # Retrieve all fully graded gradeables with pending notifications
         grades_available = course_db.execute(
@@ -325,21 +357,34 @@ def send_pending_notifications():
             SELECT DISTINCT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
+                eg.eg_submission_due_date AS submission_due_date,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
                 COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
-                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled
+                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled,
+                GREATEST(
+                    0, COALESCE(NULLIF(eg.eg_late_days, -1), :default_hw_late_days)
+                ) AS max_late_days,
+                COALESCE(ld.allowed_late_days, :default_student_late_days) AS remaining_late_days
             FROM electronic_gradeable eg
             INNER JOIN gradeable AS g
                 ON eg.g_id = g.g_id
             INNER JOIN users AS u
-                ON u.user_group = 4 -- strictly target students
-                AND u.registration_type <> 'withdrawn'
+                ON u.registration_type <> 'withdrawn'
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
+            LEFT JOIN late_days ld
+                ON u.user_id = ld.user_id
+                AND ld.since_timestamp <= eg.eg_submission_due_date
             WHERE eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
-            """
+            GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id,
+                u.user_email, ns.all_gradeable_releases, ns.all_gradeable_releases_email,
+                eg.eg_late_days, ld.allowed_late_days
+            """, {
+                "default_hw_late_days": default_hw_late_days,
+                "default_student_late_days": default_student_late_days
+            }
         )
 
         if release_available:
