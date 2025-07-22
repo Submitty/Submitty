@@ -255,7 +255,7 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
                     WHERE (g_id = :g_id AND user_id = :user_id)
                     OR (g_id = :g_id AND team_id = :team_id);
                     """, gradeables
-                )                
+                )
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
@@ -366,14 +366,14 @@ def send_pending_notifications():
                 g.g_id AS g_id,
                 g.g_title AS g_title,
                 eg.eg_submission_due_date AS submission_due_date,
-                u.user_id AS user_id,
-                u.user_email AS user_email,
-                COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
-                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled,
                 GREATEST(
                     0, COALESCE(NULLIF(eg.eg_late_days, -1), :default_hw_late_days)
                 ) AS max_late_days,
-                COALESCE(ld.allowed_late_days, :default_student_late_days) AS remaining_late_days
+                COALESCE(ld.allowed_late_days, :default_student_late_days) AS remaining_late_days,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
+                COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
+                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled
             FROM electronic_gradeable eg
             INNER JOIN gradeable AS g
                 ON eg.g_id = g.g_id
