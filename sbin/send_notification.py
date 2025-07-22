@@ -10,9 +10,9 @@ import datetime
 import sys
 import getpass
 from json import JSONDecodeError
-from sqlalchemy import create_engine  # pylint: disable=import-error
-from sqlalchemy.orm import Session  # pylint: disable=import-error
-from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import DatabaseError
 
 try:
     CONFIG_PATH = os.path.join(
@@ -173,36 +173,36 @@ def send_notifications(course, course_db, master_db, lists):
 
     try:
         if site:
-            course_db.execute(
+            course_db.execute(text(
                 """
                 INSERT INTO notifications
                 (component, metadata, content, created_at,
                  from_user_id, to_user_id)
                 VALUES (:component, :metadata, :content,
                         :created_at, :from_user_id, :to_user_id);
-                """, site
+                """), site
             )
 
         if email:
-            master_db.execute(
+            master_db.execute(text(
                 """
                 INSERT INTO emails
                 (subject, body, created, user_id, email_address,
                  term, course)
                  VALUES (:subject, :body, :created, :user_id,
                          :email_address, :term, :course);
-                """, email
+                """), email
             )
 
         if gradeables:
-            course_db.execute(
+            course_db.execute(text(
                 """
                 UPDATE electronic_gradeable_version
                 SET g_notification_sent = TRUE
                 WHERE (g_id = :g_id AND user_id = :user_id)
                 OR (g_id = :g_id AND team_id = :team_id);
                 """, gradeables
-            )
+            ))
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
@@ -227,13 +227,13 @@ def send_pending_notifications():
     notified = 0
     master_db = connect_db("submitty")
     active_courses = "SELECT term, course FROM courses WHERE status = '1';"
-    courses = master_db.execute(active_courses)
+    courses = master_db.execute(text(active_courses))
 
-    for term, course in courses:
+    for term, course in courses.mappings():
         course_db = connect_db(f"submitty_{term}_{course}")
 
         # Retrieve all fully graded gradeables with pending notifications
-        pending = course_db.execute(
+        pending = course_db.execute(text(
             """
             WITH gradeables AS (
                 SELECT DISTINCT
@@ -299,7 +299,7 @@ def send_pending_notifications():
                 COUNT(component) = COUNT(graded_component)
             );
             """
-        )
+        ))
 
         if pending:
             lists = construct_notifications(term, course, pending)
