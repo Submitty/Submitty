@@ -287,7 +287,6 @@ if [ "${IS_WORKER}" == 0 ]; then
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
 fi
 
-bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_junit.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 #################################################################
 # DRMEMORY SETUP
