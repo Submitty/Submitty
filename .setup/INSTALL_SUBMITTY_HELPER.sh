@@ -421,31 +421,7 @@ cp  "${SUBMITTY_REPOSITORY}/.setup/SUBMITTY_TEST.sh"        "${SUBMITTY_INSTALL_
 chown root:root "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 chmod 700       "${SUBMITTY_INSTALL_DIR}/.setup/SUBMITTY_TEST.sh"
 
-########################################################################################################################
-########################################################################################################################
-# PREPARE THE UNTRUSTED_EXEUCTE EXECUTABLE WITH SUID
-
-# copy the file
-rsync -rtz  "${SUBMITTY_REPOSITORY}/.setup/untrusted_execute.c"   "${SUBMITTY_INSTALL_DIR}/.setup/"
-# replace necessary variables
-replace_fillin_variables "${SUBMITTY_INSTALL_DIR}/.setup/untrusted_execute.c"
-
-# SUID (Set owner User ID up on execution), allows the $DAEMON_USER
-# to run this executable as sudo/root, which is necessary for the
-# "switch user" to untrusted as part of the sandbox.
-
-pushd "${SUBMITTY_INSTALL_DIR}/.setup/" > /dev/null
-# set ownership/permissions on the source code
-chown root:root untrusted_execute.c
-chmod 500 untrusted_execute.c
-# compile the code
-g++ -static untrusted_execute.c -o "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-# change permissions & set suid: (must be root)
-chown root           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-chgrp "$DAEMON_USER" "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-chmod 4550           "${SUBMITTY_INSTALL_DIR}/sbin/untrusted_execute"
-popd > /dev/null
-
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/build_untrusted_execute.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 ################################################################################################################
 ################################################################################################################
