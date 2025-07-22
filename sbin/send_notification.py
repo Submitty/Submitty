@@ -201,8 +201,8 @@ def send_notifications(course, course_db, master_db, lists):
                 SET g_notification_sent = TRUE
                 WHERE (g_id = :g_id AND user_id = :user_id)
                 OR (g_id = :g_id AND team_id = :team_id);
-                """, gradeables
-            ))
+                """), gradeables
+            )
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
@@ -229,7 +229,7 @@ def send_pending_notifications():
     active_courses = "SELECT term, course FROM courses WHERE status = '1';"
     courses = master_db.execute(text(active_courses))
 
-    for term, course in courses.mappings():
+    for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
 
         # Retrieve all fully graded gradeables with pending notifications
@@ -299,7 +299,8 @@ def send_pending_notifications():
                 COUNT(component) = COUNT(graded_component)
             );
             """
-        )).mappings().all()
+        ))
+
 
         if pending:
             lists = construct_notifications(term, course, pending)

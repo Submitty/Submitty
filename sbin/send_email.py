@@ -160,7 +160,7 @@ def get_external_queue(db, num):
     query = """SELECT COUNT(*) FROM emails WHERE sent >= (NOW() - INTERVAL '1 hour') AND
     email_address NOT SIMILAR TO :format"""
     domain_format = '%@(%.' + EMAIL_INTERNAL_DOMAIN + '|' + EMAIL_INTERNAL_DOMAIN + ')'
-    result = db.execute(text(query), format=domain_format)
+    result = db.execute(text(query), {"format": domain_format})
     query = """SELECT id, user_id, to_name, email_address, subject, body, term, course FROM emails
     WHERE sent is NULL AND email_address NOT SIMILAR TO :format AND
     error = '' ORDER BY id LIMIT :lim;"""
