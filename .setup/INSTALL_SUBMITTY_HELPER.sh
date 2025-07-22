@@ -286,40 +286,8 @@ if [ "${IS_WORKER}" == 0 ]; then
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type d -exec chmod 555 {} \;
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
 fi
-########################################################################################################################
-########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
 
-if [ -x "$(command -v javac)" ] &&
-   [ -d ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit ]; then
-    echo -e "Build the junit test runner"
-
-    # copy the file from the repo
-    rsync -rtz "${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java" "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java"
-
-    pushd "${SUBMITTY_INSTALL_DIR}/java_tools/JUnit" > /dev/null
-    # root will be owner & group of the source file
-    chown  root:root  TestRunner.java
-    # everyone can read this file
-    chmod  444 TestRunner.java
-
-    # compile the executable using the javac we use in the execute.cpp safelist
-    /usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
-
-    # everyone can read the compiled file
-    chown root:root TestRunner.class
-    chmod 444 TestRunner.class
-
-    popd > /dev/null
-
-
-    # fix all java_tools permissions
-    chown -R "root:${COURSE_BUILDERS_GROUP}" "${SUBMITTY_INSTALL_DIR}/java_tools"
-    chmod -R 755                             "${SUBMITTY_INSTALL_DIR}/java_tools"
-else
-    echo -e "Skipping build of the junit test runner"
-fi
-
+bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_sample_autograding.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 
 #################################################################
 # DRMEMORY SETUP
