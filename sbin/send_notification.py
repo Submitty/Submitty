@@ -164,7 +164,7 @@ def construct_notifications(term, course, pending, notification_type):
 
         # Notification-related content
         if notification_type == "gradeable_release":
-            subject = f"Submission open for {gradeable['title']}"
+            subject = f"Submission Open: {gradeable['title']}"
             body = (
                 f"Submissions are now being accepted for {gradeable['title']}, "
                 f"where the final deadline is {format_timestamp(gradeable['submission_due_date'])} "
@@ -386,6 +386,7 @@ def send_pending_notifications():
                 AND ld.since_timestamp <= eg.eg_submission_due_date
             WHERE eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
+                AND eg.eg_submission_due_date >= eg.eg_submission_open_date
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id,
                 u.user_email, ns.all_gradeable_releases, ns.all_gradeable_releases_email,
                 eg.eg_late_days, ld.allowed_late_days
