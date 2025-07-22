@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 interface Notification {
     id: number;
@@ -19,53 +19,89 @@ const props = defineProps<{
     notifications: Notification[];
 }>();
 
+const showUnseenOnly = ref(false);
+
+onMounted(() => {
+  const pref = localStorage.getItem('notification-preference');
+  if (pref === 'unseen') {
+    showUnseenOnly.value = true;
+  }
+});
+
+function toggleUnseenOnly() {
+  showUnseenOnly.value = !showUnseenOnly.value;
+  localStorage.setItem(
+    'notification-preference',
+    showUnseenOnly.value ? 'unseen' : 'all'
+  );
+}
+
 const showingMore = ref(false);
+
 const visibleCount = computed(() => showingMore.value ? 10 : 5);
 
+const filteredNotifications = computed(() =>
+  showUnseenOnly.value
+    ? props.notifications.filter(n => !n.seen)
+    : props.notifications
+);
+
 const visibleNotifications = computed(() =>
-    props.notifications.slice(0, visibleCount.value)
+  filteredNotifications.value.slice(0, visibleCount.value)
 );
 </script>
 <template>
-    <div class="notification-body">
-        <h1 class="notifications-header">Notifications</h1>
+    <div class="notification-body shadow">
+        <div class="notifications-header-container">
+            <h1 class="notifications-header">Notifications</h1>
+            <a class="notification-seen black-btn" title="See All" aria-label="See All"  @click="toggleUnseenOnly" v-if="!showUnseenOnly && notifications.length !== 0">
+                <i class="fas fa-eye"></i>
+            </a>
+            <a class="notification-seen black-btn" title="Unseen Only" aria-label="Unseen Only"  @click="toggleUnseenOnly" v-if="showUnseenOnly && notifications.length !== 0">
+                <i class="fas fa-eye-slash"></i>
+            </a>
+            <a class="btn btn-primary">
+                Mark all as seen
+            </a>
+        </div>
         <p class="no-recent" id="no-recent-notifications" v-if="notifications.length === 0">No recent notifications.</p>
         <div id="recent-notifications" v-else>
             <div class="notification" v-for="n in visibleNotifications" :key="n.id" :class="{ unseen: !n.seen }">
-                    <i class="fas fa-comments notification-type" title="Forum"></i>
+                    <i class="fas fa-comments notification-type" title="Forum" v-if="n.component === 'forum'"></i>
                 <div class="notification-content">
-                        <div class="notification-contents">
-                            <div class="notification-content">
-                                <a class="notification-link" href="{{ n.notification_url }}/{{ n.id }}?seen={{ n.seen ? 1 : 0 }}">
-                                    {{ n.content }}
-                                </a>
-                            </div>
-                        </div>
+                    <a class="notification-link" :href="`${n.notification_url}/?seen=${n.seen ? 1 : 0}`" v-if="n.notification_url">
+                        {{ n.content }}
+                    </a>
+                    <span class="notification-link" v-else>
+                        {{ n.content }}
+                    </span>
                     <div class="notification-time">
                         {{ n.course }} - {{ n.notify_time }}
                     </div>
                 </div>
+                <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
+                    <i class="far fa-envelope-open"></i>
+                </a>
             </div>
-            <a
-                v-if="props.notifications.length > 5 && !showingMore"
-                @click="showingMore = true"
-                class="show-more"
-                >
+            <a v-if="filteredNotifications.length > 5 && !showingMore" @click="showingMore = true" class="show-more">
                 Show More
             </a>
-            <a
-                v-else-if="props.notifications.length > 5 && showingMore"
-                @click="showingMore = false"
-                class="show-more"
-                >
+            <a v-else-if="filteredNotifications.length > 5 && showingMore" @click="showingMore = false" class="show-more">
                 Show Less
             </a>
         </div>
     </div>
 </template>
 <style scoped>
+.notifications-header-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start; 
+  margin-bottom: 5px;
+}
+
 .notifications-header {
-    padding-bottom: 5px;
+    flex-grow: 1;
 }
 
 .notification-body {

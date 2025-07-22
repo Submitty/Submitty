@@ -5425,7 +5425,7 @@ AND gc_id IN (
                 FROM notifications
                 WHERE to_user_id = ? AND created_at >= current_timestamp - INTERVAL '7 days'
                 ORDER BY created_at DESC
-                LIMIT 10;
+                LIMIT 5;
             ";
             $course_db->query($query, [$user_id]);
             $rows = $course_db->rows();
@@ -5452,7 +5452,12 @@ AND gc_id IN (
             );
 
             $this->core->loadCourseConfig($row['semester'], $row['course']);
-            $notification_url = $this->core->buildCourseUrl(['notifications', $row['id']]);
+            if ($row['metadata']) {
+                $notification_url = $this->core->buildCourseUrl(['notifications', $row['id']]);
+            }
+            else {
+                $notification_url = null;
+            }
 
             $results[] = [
                 'id' => $row['id'],
