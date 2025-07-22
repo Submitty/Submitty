@@ -264,11 +264,6 @@ chgrp submitty_daemon "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_route
 chmod g+wrx           "${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py"
 
 
-#Set up sample files if not in worker mode.
-if [ "${IS_WORKER}" == 0 ]; then
-    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_sample_autograding.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
-fi
-
 ########################################################################################################################
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file) if Java is installed on the machine
@@ -342,6 +337,12 @@ popd > /dev/null
 # COPY VARIOUS SCRIPTS USED BY INSTRUCTORS AND SYS ADMINS FOR COURSE ADMINISTRATION
 
 bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_bin.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
+
+#Set up sample files if not in worker mode.
+if [ "${IS_WORKER}" == 0 ]; then
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_sample_autograding.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
+fi
+
 
 # build the helper program for strace output and restrictions by system call categories
 g++ "${SUBMITTY_INSTALL_DIR}/src/grading/system_call_check.cpp" -o "${SUBMITTY_INSTALL_DIR}/bin/system_call_check.out"
