@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import Popup from './popup.vue';
-import { displaySuccessMessage } from '../../../ts/utils/server';
-import { saveSqlQuery, type ServerResponse } from '../../../ts/sql-toolbox';
+import Popup from '@/components/Popup.vue';
+import { saveSqlQuery, type ServerResponse } from '@/ts/sql-toolbox';
 
 const data = defineModel<{
     query_name: string;
@@ -35,7 +34,7 @@ const handleSave = async () => {
     const response = await saveSqlQuery(data.value.query_name, data.value.query) as ServerResponse<number>;
 
     if (response.status === 'success') {
-        displaySuccessMessage('Query saved successfully!');
+        window.displaySuccessMessage('Query saved successfully!');
         const insertedId: number = response.data;
         emit('addSavedQuery', insertedId, data.value.query_name, data.value.query);
         showPopup.value = false;
