@@ -90,11 +90,13 @@ def get_late_day_defaults(term, course):
     """Retrieve default late day values from the course config file."""
     course_config_path = os.path.join(
         COURSE_DIR_PATH, term, course, 'config', 'config.json')
+
     with open(course_config_path, 'r', encoding="utf-8") as f:
         data = json.load(f)
         course_details = data.get('course_details', {})
         default_hw_late_days = course_details.get('default_hw_late_days', 0)
         default_student_late_days = course_details.get('default_student_late_days', 0)
+
         return (default_hw_late_days, default_student_late_days)
 
 
@@ -114,7 +116,7 @@ def connect_db(db_name):
 
 
 def parse_column(row, column):
-    """Parse a database column from a row."""
+    """Parse a database column from a row for variable notification types."""
     # pylint: disable=protected-access
     return row._mapping.get(column, None)
 
@@ -161,7 +163,7 @@ def construct_notifications(term, course, pending, notification_type):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        if notification_type == "release":
+        if notification_type == "gradeable_release":
             subject = f"Submission open for {gradeable['title']}"
             body = (
                 f"Submissions are now being accepted for {gradeable['title']}, "
@@ -394,8 +396,8 @@ def send_pending_notifications():
         )
 
         if release_available:
-            lists = construct_notifications(term, course, release_available, "release")
-            send_notifications(course, course_db, master_db, lists, "release")
+            lists = construct_notifications(term, course, release_available, "gradeable_release")
+            send_notifications(course, course_db, master_db, lists, "gradeable_release")
             notified += len(lists[0])
 
         course_db.close()
