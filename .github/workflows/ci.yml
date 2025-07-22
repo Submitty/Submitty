@@ -850,7 +850,7 @@ jobs:
         if: ${{ matrix.containers == 'Autograding-Development' }}
         run: |
           cp -R ${{env.SUBMITTY_REPOSITORY}}/more_autograding_examples ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/copy_of_more_autograding_examples
-      
+
       - name: Copy sample files
         run: |
           cp -R ${{env.SUBMITTY_REPOSITORY}}/sample_files ${{env.SUBMITTY_REPOSITORY}}/site/cypress/fixtures/copy_of_sample_files
