@@ -363,6 +363,10 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
+        if (str_contains($_POST['title'], '/')) {
+            return JsonResponse::getErrorResponse("Slash in file title");
+        }
+
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
                 $course_material->setPriority($_POST['sort_priority']);
@@ -487,8 +491,10 @@ class CourseMaterialsController extends AbstractController {
                         $clash_resolution
                     );
                 }
-
-                rename($course_material->getPath(), $new_path);
+                
+                if (!rename($course_material->getPath(), $new_path)) {
+                    return JsonResponse::getErrorResponse("Failure to rename filepath, likely due to a folder with the same name as the file.");
+                }
                 $course_material->setPath($new_path);
                 if (isset($_POST['original_title'])) {
                     $course_material->setTitle($_POST['original_title']);
@@ -582,7 +588,9 @@ class CourseMaterialsController extends AbstractController {
                 return JsonResponse::getErrorResponse("The path is too long. Please reduce it by {$overflow} characters.");
             }
 
-            FileUtils::writeFile($details['path'][0], "");
+            if (!FileUtils::writeFile($details['path'][0], "")) {
+                return JsonResponse::getErrorResponse("Failure to write file");
+            }
         }
         else {
             $uploaded_files = [];
@@ -712,7 +720,9 @@ class CourseMaterialsController extends AbstractController {
                                 );
                             }
 
-                            $zip->extractTo($upload_path, $entries);
+                            if (!$zip->extractTo($upload_path, $entries)) {
+                                return JsonResponse::getErrorResponse('Failed to Extract zip');
+                            }
 
                             foreach ($zfiles as $zfile) {
                                 $path = FileUtils::joinPaths($upload_path, $zfile);
