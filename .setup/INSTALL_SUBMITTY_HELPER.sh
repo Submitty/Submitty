@@ -83,57 +83,9 @@ if [ $? -eq 1 ]; then
 fi
 set -e
 
-
-################################################################################################################
-################################################################################################################
-# RUN THE SYSTEM AND DATABASE MIGRATIONS
-
 if [ "${IS_WORKER}" == 0 ]; then
-    echo -e 'Checking for system and database migrations'
-
-    mkdir -p "${SUBMITTY_INSTALL_DIR}/migrations"
-
-    rsync -rtz "${SUBMITTY_REPOSITORY}/migration/migrator/migrations" "${SUBMITTY_INSTALL_DIR}"
-    chown root:root "${SUBMITTY_INSTALL_DIR}/migrations"
-    chmod 550 -R "${SUBMITTY_INSTALL_DIR}/migrations"
-
-    python3 "${SUBMITTY_REPOSITORY}/migration/run_migrator.py" -e system -e master -e course migrate
+    bash "${SUBMITTY_REPOSITORY}/.setup/install_submitty/setup_database.sh" "config=${SUBMITTY_CONFIG_DIR:?}"
 fi
-
-
-################################################################################################################
-################################################################################################################
-# VALIDATE DATABASE SUPERUSERS
-
-if [ "${IS_WORKER}" == 0 ]; then
-    DATABASE_FILE="$SUBMITTY_INSTALL_DIR/config/database.json"
-    DATABASE_HOST=$(jq -r '.database_host' $DATABASE_FILE)
-    DATABASE_PORT=$(jq -r '.database_port' $DATABASE_FILE)
-    GLOBAL_DBUSER=$(jq -r '.database_user' $DATABASE_FILE)
-    GLOBAL_DBUSER_PASS=$(jq -r '.database_password' $DATABASE_FILE)
-    COURSE_DBUSER=$(jq -r '.database_course_user' $DATABASE_FILE)
-
-    DB_CONN="-h ${DATABASE_HOST} -U ${GLOBAL_DBUSER}"
-    if [ ! -d "${DATABASE_HOST}" ]; then
-        DB_CONN="${DB_CONN} -p ${DATABASE_PORT}"
-    fi
-
-
-    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$GLOBAL_DBUSER'"`
-
-    if [ "$CHECK" == "f" ]; then
-        echo "ERROR: Database Superuser check failed! Master dbuser found to not be a superuser."
-        exit
-    fi
-
-    CHECK=`PGPASSWORD=${GLOBAL_DBUSER_PASS} psql ${DB_CONN} -d submitty -tAc "SELECT rolsuper FROM pg_authid WHERE rolname='$COURSE_DBUSER'"`
-
-    if [ "$CHECK" == "t" ]; then
-        echo "ERROR: Database Superuser check failed! Course dbuser found to be a superuser."
-        exit
-    fi
-fi
-
 
 ################################################################################################################
 ################################################################################################################
