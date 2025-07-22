@@ -299,7 +299,7 @@ def send_pending_notifications():
                 COUNT(component) = COUNT(graded_component)
             );
             """
-        ))
+        )).mappings().all()
 
         if pending:
             lists = construct_notifications(term, course, pending)
