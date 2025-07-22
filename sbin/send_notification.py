@@ -209,8 +209,8 @@ def send_notifications(course, course_db, master_db, lists):
             LOG_FILE.write(m)
 
             # Commit the changes to the individual databases
-            course_db.commit()
-            master_db.commit()
+        course_db.commit()
+        master_db.commit()
     except DatabaseError as notification_error:
         # Rollback the changes if an error occurs
         course_db.rollback()
