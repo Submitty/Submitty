@@ -953,6 +953,7 @@ CREATE TABLE public.electronic_gradeable (
     eg_vcs_subdirectory character varying(1024) DEFAULT ''::character varying NOT NULL,
     eg_using_subdirectory boolean DEFAULT false NOT NULL,
     eg_instructor_blind integer DEFAULT 1,
+    eg_release_notifications_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT eg_grade_inquiry_allowed_true CHECK (((eg_grade_inquiry_allowed IS TRUE) OR (eg_grade_inquiry_per_component_allowed IS FALSE))),
     CONSTRAINT eg_grade_inquiry_due_date_max CHECK ((eg_grade_inquiry_due_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
     CONSTRAINT eg_grade_inquiry_start_date_max CHECK ((eg_grade_inquiry_start_date <= '9999-03-01 00:00:00-05'::timestamp with time zone)),
@@ -1155,6 +1156,7 @@ CREATE TABLE public.gradeable (
     g_syllabus_bucket character varying(255) NOT NULL,
     g_allowed_minutes integer,
     g_allow_custom_marks boolean DEFAULT true NOT NULL,
+    g_submission_notification_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT g_grade_due_date CHECK ((g_grade_due_date <= g_grade_released_date)),
     CONSTRAINT g_grade_start_date CHECK ((g_grade_start_date <= g_grade_due_date)),
     CONSTRAINT g_ta_view_start_date CHECK ((g_ta_view_start_date <= g_grade_start_date))
@@ -1562,7 +1564,9 @@ CREATE TABLE public.notification_settings (
     self_notification_email boolean DEFAULT false NOT NULL,
     self_registration_email boolean DEFAULT true NOT NULL,
     all_released_grades boolean DEFAULT true NOT NULL,
-    all_released_grades_email boolean DEFAULT true NOT NULL
+    all_released_grades_email boolean DEFAULT true NOT NULL,
+    all_gradeable_releases boolean DEFAULT true NOT NULL,
+    all_gradeable_releases_email boolean DEFAULT false NOT NULL
 );
 
 
