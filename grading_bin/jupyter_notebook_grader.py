@@ -11,6 +11,7 @@ import base64
 import glob
 from pathlib import Path
 
+# pylint: disable=import-error
 import nbformat
 from nbconvert.preprocessors import ClearOutputPreprocessor
 from nbconvert.preprocessors import ExecutePreprocessor
