@@ -113,10 +113,20 @@ def connect_db(db_name):
     return db
 
 
-def parse_db_column(row, column):
+def parse_column(row, column):
     """Parse a database column from a row."""
     # pylint: disable=protected-access
     return row._mapping.get(column, None)
+
+
+def format_timestamp(timestamp):
+    """Format a timestamp into a readable string."""
+    return timestamp.strftime("%Y-%m-%d %I:%M:%S %p") if timestamp else "TBA"
+
+
+def format_late_days(late_days):
+    """Format a late day value into a readable string."""
+    return f"{late_days} late day{'s' if late_days != 1 else ''}"
 
 
 def construct_notifications(term, course, pending, notification_type):
@@ -126,19 +136,19 @@ def construct_notifications(term, course, pending, notification_type):
 
     for notification in pending:
         gradeable = {
-            "id": parse_db_column(notification, 'g_id'),
-            "title": parse_db_column(notification, 'g_title'),
-            "submission_due_date": parse_db_column(notification, 'submission_due_date'),
-            "team_id": parse_db_column(notification, 'team_id'),
-            "user_id": parse_db_column(notification, 'user_id'),
-            "user_email": parse_db_column(notification, 'user_email'),
+            "id": parse_column(notification, 'g_id'),
+            "title": parse_column(notification, 'g_title'),
+            "submission_due_date": parse_column(notification, 'submission_due_date'),
+            "team_id": parse_column(notification, 'team_id'),
+            "user_id": parse_column(notification, 'user_id'),
+            "user_email": parse_column(notification, 'user_email'),
             # Potentially send via the notification page
-            "site_enabled": parse_db_column(notification, 'site_enabled'),
+            "site_enabled": parse_column(notification, 'site_enabled'),
             # Potentially send via email
-            "email_enabled": parse_db_column(notification, 'email_enabled'),
-            # Late day info (only for gradeable available notifications)
-            "max_late_days": parse_db_column(notification, 'max_late_days'),
-            "remaining_late_days": parse_db_column(notification, 'remaining_late_days')
+            "email_enabled": parse_column(notification, 'email_enabled'),
+            # Late day info for gradeable available notifications
+            "max_late_days": parse_column(notification, 'max_late_days'),
+            "remaining_late_days": parse_column(notification, 'remaining_late_days')
         }
 
         timestamp = timestamps.setdefault(
@@ -151,21 +161,17 @@ def construct_notifications(term, course, pending, notification_type):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        if notification_type == "grades":
+        if notification_type == "release":
             subject = f"Submission open for {gradeable['title']}"
             body = (
                 f"Submissions are now being accepted for {gradeable['title']}, "
-                f"where the final deadline is {gradeable['submission_due_date']} "
-                f"with up to {gradeable['max_late_days']} late days allowed, "
-                f"and you have {gradeable['remaining_late_days']} available late days"
+                f"where the final deadline is {format_timestamp(gradeable['submission_due_date'])} "
+                f"with up to {format_late_days(gradeable['max_late_days'])} allowed, "
+                f"and you have {format_late_days(gradeable['remaining_late_days'])} available "
             )
         else:
-            subject = f"Gradeable Available: {gradeable['title']}"
-            body = (
-                f"Submissions are now open for {gradeable['title']} "
-                f"with up to {gradeable['max_late_days']} late days allowed, "
-                f"and you have {gradeable['remaining_late_days']} available late days"
-            )
+            subject = f"Grade Released: {gradeable['title']}"
+            body = f"Your grade is now available for {gradeable['title']} "
 
         body += (
             f"in course \n{get_full_course_name(term, course)}.\n\n"
