@@ -10,11 +10,27 @@
   "container_options": {
     "container_image": "submitty/jupyter:latest"
   },
+  "allow_system_calls": [
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "COMMUNICATIONS_AND_NETWORKING_KILL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_RARE",
+    "PROCESS_CONTROL_ADVANCED",
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_MEMORY_ADVANCED",
+    "PROCESS_CONTROL_SYNCHRONIZATION",
+    "PROCESS_CONTROL_SCHEDULING",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "UNKNOWN"
+  ],
   "testcases": [
     {
       "title": "Executes successfully",
       // Although wildcard is used, the grader will only expect one notebook file. Use if filename cannot be determined.
-      "command": "python3 /grading_bin/jupyter_notebook_grader.py -i *.ipynb -o executed.ipynb",
+      "command": "jupyter_notebook_grader -i *.ipynb -o executed.ipynb",
       "points": 1,
       "validation": [
         {

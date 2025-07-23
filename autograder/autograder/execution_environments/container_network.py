@@ -74,7 +74,7 @@ class Container():
                 'mode': 'rw'
             },
             '/usr/local/submitty/grading_bin': {
-                'bind': '/grading_bin',
+                'bind': '/usr/local/submitty/grading_bin',
                 'mode': 'ro'
             }
         }

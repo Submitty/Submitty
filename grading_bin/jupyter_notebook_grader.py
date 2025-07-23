@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
 Script to execute Jupyter notebooks and save their outputs, intended
 for automated grading of Jupyter notebook assignments.
