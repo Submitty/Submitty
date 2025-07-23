@@ -4540,7 +4540,10 @@ SQL;
         );
     }
 
-    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment) {
+    /**
+     * @param string[] $user_ids
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
         $values = [];
         $params = [];
 
