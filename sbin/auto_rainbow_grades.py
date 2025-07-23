@@ -59,6 +59,10 @@ if data['daemon_user'] != getpass.getuser():
 semester = sys.argv[1]
 course = sys.argv[2]
 source = sys.argv[3]
+
+if source not in ["submitty_gui", "submitty_daemon"]:
+    raise Exception('ERROR: Source must be either "submitty_gui" or "submitty_daemon"')
+
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
 courses_path = os.path.join(data_dir, 'courses')

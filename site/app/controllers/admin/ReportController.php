@@ -612,7 +612,14 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * Writes to the rainbow grades customization file
+     * Writes to the rainbow grades customization file. If the "nightly_save" parameter is set,
+     * the method will save the customization file to the course directory based on the most up-to-date
+     * database content and existing GUI customization file for courses not using manual customizations.
+     * If the "json_string" parameter is set, the method will process the form data based on the "json_string"
+     * parameter and save the customization file to the course directory.
+     *
+     * NOTE: Any changes to the expected customization.json structure and types should be reflected
+     * in the saveGUICustomizations() and processForm() methods for consistency across all API calls.
      *
      * @return JsonResponse
      */
@@ -623,7 +630,10 @@ class ReportController extends AbstractController {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
-        if (isset($_POST["json_string"])) {
+        if (isset($_POST["nightly_save"])) {
+            return $this->saveGUICustomizations();
+        }
+        elseif (isset($_POST["json_string"])) {
             try {
                 $customization->processForm($_POST['json_string']);
                 return JsonResponse::getSuccessResponse();
@@ -1013,7 +1023,6 @@ class ReportController extends AbstractController {
      *
      * @return JsonResponse
      */
-    #[Route("/api/courses/{_semester}/{_course}/reports/nightly_rainbow_grades_save", methods: ["POST"])]
     public function saveGUICustomizations(): JsonResponse {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();

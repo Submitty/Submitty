@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Script to trigger the generate grade summaries.
+Script to trigger the generation of grade summaries. Additionally, if <source> is "submitty_daemon", it will
+save the latest GUI customization file, crucial for courses not using manual customizations, before submitting
+the build process, ensuring Rainbow Grades Summaries are up to date for all users on the site.
 
 Usage:
 ./generate_grade_summaries.py <semester> <course> <source>
@@ -53,10 +55,11 @@ def save_and_build_rainbow_grades(semester, course, token):
     """Saves the latest GUI customization file, if applicable, and submits the build process"""
     option = "gui"
     save_response = requests.post(
-        '{}/api/courses/{}/{}/reports/nightly_rainbow_grades_save'.format(
+        '{}/api/courses/{}/{}/reports/rainbow_grades_customization_save'.format(
             base_url, semester, course
         ),
         headers={'Authorization': token},
+        data={'nightly_save': True}
     )
 
     if save_response.status_code == 200 and save_response.json()['status'] == 'success':
