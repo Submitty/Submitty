@@ -1,12 +1,12 @@
 /// <reference types= "cypress" />
 
 function checkGradeRow(user_id, expected) {
-  cy.get(`[data-testid="grade-row-${user_id}"]`).within(() => {
-    cy.get('[data-testid="student-id"]').should('contain', expected.user_id);
-    cy.get('[data-testid="given-name"]').should('contain', expected.given);
-    cy.get('[data-testid="family-name"]').should('contain', expected.family);
-    cy.get('[data-testid="marks"]').should('contain', expected.marks);
-  });
+    cy.get(`[data-testid="grade-row-${user_id}"]`).within(() => {
+        cy.get('[data-testid="student-id"]').should('contain', expected.user_id);
+        cy.get('[data-testid="given-name"]').should('contain', expected.given);
+        cy.get('[data-testid="family-name"]').should('contain', expected.family);
+        cy.get('[data-testid="marks"]').should('contain', expected.marks);
+    });
 }
 
 describe('testing grade override', () => {
@@ -32,12 +32,12 @@ describe('testing grade override', () => {
             cy.get('#grade-override-table thead [data-testid="marks"]').should('have.text', 'Marks');
             cy.get('#grade-override-table thead [data-testid="comments"]').should('have.text', 'Comments');
             cy.get('#grade-override-table thead [data-testid="delete"]').should('have.text', 'Delete');
-            
+
             checkGradeRow('student', {
                 user_id: 'student',
                 given: 'Joe',
                 family: 'Student',
-                marks: '10'
+                marks: '10',
             });
 
             if (gradeable !== 'grading_homework') {
@@ -45,7 +45,7 @@ describe('testing grade override', () => {
                     user_id: 'wisoza',
                     given: 'Adela',
                     family: 'Wisozk',
-                    marks: '10'
+                    marks: '10',
                 });
             }
 
