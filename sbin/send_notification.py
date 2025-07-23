@@ -10,9 +10,9 @@ import datetime
 import sys
 import getpass
 from json import JSONDecodeError
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy import create_engine, text  # pylint: disable=import-error
+from sqlalchemy.orm import Session  # pylint: disable=import-error
+from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
 
 try:
     CONFIG_PATH = os.path.join(
