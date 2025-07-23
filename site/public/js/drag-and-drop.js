@@ -1397,6 +1397,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
+    } else {
+        return;
     }
 
     if (overwrite !== null) {
@@ -1436,9 +1438,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Please copy the contents of your Javascript Console and '
-                    + 'send it to an administrator, as well as what you were doing and what files you were editing. - [handleEditCourseMaterials]');
-                console.log(data);
+                alert('Error parsing response from server. Message returned: ' + data);
             }
         },
         error: function () {
