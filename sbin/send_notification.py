@@ -301,7 +301,6 @@ def send_pending_notifications():
             """
         ))
 
-
         if pending:
             lists = construct_notifications(term, course, pending)
             send_notifications(course, course_db, master_db, lists)
