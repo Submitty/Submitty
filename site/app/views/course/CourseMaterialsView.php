@@ -107,7 +107,7 @@ class CourseMaterialsView extends AbstractView {
                     $this->core->addErrorMessage($dir . " is broken, ask a system admin to remove the broken directory from the database.");
                     $path_to_place[$dir] = [];
                     // Also add to directories array with a default priority if it doesn't exist
-                    $current_relative_path = empty($path) ? $dir : FileUtils::joinPaths($path, $dir);
+                    $current_relative_path = ($path === '') ? $dir : FileUtils::joinPaths($path, $dir);
                     $current_full_path = FileUtils::joinPaths($base_course_material_path, $current_relative_path);
 
                     if (!isset($directories[$current_relative_path])) {
@@ -121,34 +121,36 @@ class CourseMaterialsView extends AbstractView {
                 $path = FileUtils::joinPaths($path, $dir);
             }
             $index = 0;
-            foreach ($path_to_place as $key => $value) {
-                if (is_array($value)) {
-                    $relative_dir_path = FileUtils::joinPaths($path, $key);
-                    if (isset($directories[$relative_dir_path])) {
-                        $priority = $directories[$relative_dir_path]->getPriority();
-                    }
-                    else {
-                        $priority = 0; // Default priority for dynamically created directories
-                    }
-                }
-                else {
-                    $priority = $value->getPriority();
-                }
-                if ($course_material->getPriority() > $priority) {
-                    $index++;
-                }
-                elseif ($course_material->getPriority() === $priority) {
+            if (!empty($path_to_place)) {
+                foreach ($path_to_place as $key => $value) {
                     if (is_array($value)) {
-                        $index++;
-                    }
-                    else {
-                        if ($course_material->getPath() > $value->getPath()) {
-                            $index++;
+                        $relative_dir_path = FileUtils::joinPaths($path, $key);
+                        if (isset($directories[$relative_dir_path])) {
+                            $priority = $directories[$relative_dir_path]->getPriority();
+                        }
+                        else {
+                            $priority = 0; // Default priority for dynamically created directories
                         }
                     }
-                }
-                else {
-                    break;
+                    else {
+                        $priority = $value->getPriority();
+                    }
+                    if ($course_material->getPriority() > $priority) {
+                        $index++;
+                    }
+                    elseif ($course_material->getPriority() === $priority) {
+                        if (is_array($value)) {
+                            $index++;
+                        }
+                        else {
+                            if ($course_material->getPath() > $value->getPath()) {
+                                $index++;
+                            }
+                        }
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
             $path_to_place = array_slice($path_to_place, 0, $index, true) +
@@ -301,7 +303,7 @@ class CourseMaterialsView extends AbstractView {
         foreach ($course_materials as $name => $course_material) {
             if (is_array($course_material)) {
                 $inner_full_path = "";
-                if (empty($full_path)) {
+                if ($full_path === '') {
                     $inner_full_path = $name;
                 }
                 else {
