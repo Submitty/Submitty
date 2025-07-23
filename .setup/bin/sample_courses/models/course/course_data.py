@@ -152,7 +152,7 @@ class Course_data:
                     time_paused_start=queue_entry["time_paused_start"],
                 )
             )
-            self.conn.commit()
+        self.conn.commit()
 
     def add_sample_polls_data(self) -> None:
         # set sample course to have polls enabled by default
@@ -213,7 +213,7 @@ class Course_data:
                         correct=(i in poll["correct_responses"]),
                     )
                 )
-                self.conn.commit()
+            self.conn.commit()
 
         # generate responses to the polls
         poll_responses_data = []
@@ -256,7 +256,7 @@ class Course_data:
                     option_id=response["option_id"],
                 )
             )
-            self.conn.commit()
+        self.conn.commit()
 
     def add_sample_forum_data(self) -> None:
         # set sample course to have forum enabled by default

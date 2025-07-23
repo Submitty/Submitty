@@ -7,7 +7,7 @@ Contains function:
 from __future__ import print_function, division
 
 from sample_courses.models import generate_random_marks, Mark
-
+from sqlalchemy import insert
 
 class Component(object):
     def __init__(self, component, order) -> None:
@@ -52,7 +52,7 @@ class Component(object):
         self.key = None
 
     def create(self, g_id, conn, table, mark_table) -> None:
-        ins = table.insert().values(
+        ins = insert(table).values(
             g_id=g_id,
             gc_title=self.title,
             gc_ta_comment=self.ta_comment,
@@ -67,6 +67,7 @@ class Component(object):
             gc_page=self.page,
         )
         res = conn.execute(ins)
+        conn.commit()
         self.key = res.inserted_primary_key[0]
 
         for mark in self.marks:

@@ -72,6 +72,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         .where(autograding_metrics.c.g_version == bindparam('g_v')),
         {'u_id': user_id, 't_id': team_id, 'g_id': gradeable_id, 'g_v': version}
     )
+    db.commit()
 
     if len(testcases) != len(results['testcases']):
         print(f"ERROR!  mismatched # of testcases {len(testcases)} != {len(results['testcases'])}")
