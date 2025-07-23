@@ -26,14 +26,6 @@ from sample_courses.utils.dependent import add_to_group
 from sample_courses.utils.create_or_generate import create_group
 
 
-def pick_registration_type() -> str:
-    r = random.random()
-    if r < 0.01:
-        return "withdrawn"
-    elif r < 0.02:
-        return "audit"
-    else:
-        return "graded"
 
 
 class Course_create:
@@ -166,7 +158,6 @@ class Course_create:
                 course=self.code,
                 user_id=user.get_detail(self.code, "id"),
                 user_group=user.get_detail(self.code, "group"),
-                registration_type=pick_registration_type(),
                 registration_section=reg_section,
                 manual_registration=user.get_detail(self.code, "manual"),
             )
