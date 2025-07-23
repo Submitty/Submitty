@@ -9,6 +9,7 @@ declare global {
         changeSortOrder: () => void;
         sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
         changeAnon: () => void;
+        filterWithdrawnUpdate: () => void;
     }
 }
 
@@ -49,7 +50,8 @@ window.changeInquiry = () => {
 };
 
 window.changeSortOrder = () => {
-    window.Cookies.set('sort', window.Cookies.get('sort') === 'random' ? 'id' : 'random', { path: coursePath, expires: 365 });
+    const sort = window.Cookies.get('sort');
+    window.Cookies.set('sort', sort === 'random' ? 'id' : 'random', { path: coursePath, expires: 365 });
     location.reload();
 };
 
@@ -61,4 +63,19 @@ window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' 
 window.changeAnon = () => {
     window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', { path: coursePath, expires: 365 });
     location.reload();
+};
+
+window.filterWithdrawnUpdate = () => {
+    const filterCheckbox = document.getElementById('toggle-filter-withdrawn') as HTMLInputElement;
+    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
+
+    if (filterCheckbox.checked) {
+        withdrawnElements.hide();
+        window.Cookies.set('filter_withdrawn_student', 'true');
+    }
+    else {
+        withdrawnElements.show();
+        window.Cookies.set('filter_withdrawn_student', 'false');
+    }
+    window.displaySuccessMessage('Withdrawn students filter updated successfully.');
 };

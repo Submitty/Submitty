@@ -128,20 +128,6 @@ function inquiryUpdate() {
     }
 }
 
-function filterWithdrawnUpdate() {
-    const filterCheckbox = document.getElementById('toggle-filter-withdrawn');
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-
-    if (filterCheckbox.checked) {
-        withdrawnElements.hide();
-        Cookies.set('filter_withdrawn_student', 'true');
-    }
-    else {
-        withdrawnElements.show();
-        Cookies.set('filter_withdrawn_student', 'false');
-    }
-}
-
 // Ensures all filters and checkboxes remain the same on page reload.
 window.addEventListener('DOMContentLoaded', () => {
     const inquiryFilterStatus = Cookies.get('inquiry_status');
