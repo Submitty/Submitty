@@ -47,11 +47,32 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
     // ignore system call by number for now...
     if (line.find("ALLOW_SYSCALL_BY_NUMBER(") != std::string::npos) {
-      continue;
+      int startpoint = line.find("ALLOW_SYSCALL_BY_NUMBER(");
+      int midpoint = line.find(",");
+      std::string tmp = line.substr(midpoint+1,line.size()-midpoint-1);
+      int midpoint2 = line.size()-tmp.size() + tmp.find(",");
+      int endpoint = line.find(");");
+      assert (startpoint != std::string::npos);
+      assert (midpoint != std::string::npos);
+      assert (midpoint2 != std::string::npos);
+      assert (endpoint != std::string::npos);
+      assert (startpoint < midpoint);
+      assert (midpoint < midpoint2);
+      assert (midpoint2 < endpoint);
+      assert (category != "");
+      assert (line.size() == endpoint+2);
+      assert (endpoint-startpoint-24 > 1);
+      std::string system_call = line.substr(startpoint+24,midpoint-startpoint-24);
+      std::string category2 = line.substr(midpoint2+3,endpoint-midpoint2-3-1);
+      assert (restriction == "RESTRICTED");
+      assert ("RESTRICTED:"+category == category2);
+      // make sure there aren't duplicates
+      assert (all_system_calls.find(system_call) == all_system_calls.end());
+      all_system_calls[system_call] = category2;
     }
 
     // if it's a system call
-    if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
+    else if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
       int startpoint = line.find("ALLOW_SYSCALL(");
       int midpoint = line.find(",");
       int endpoint = line.find(");");
@@ -61,17 +82,17 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       assert (startpoint < midpoint);
       assert (midpoint < endpoint);
       assert (category != "");
-      //assert (restriction != "");
-      //assert (restriction == actual_restriction);
-      // there should be nothing else on this line
       assert (line.size() == endpoint+2);
       assert (endpoint-startpoint-14 > 1);
       std::string system_call = line.substr(startpoint+14,midpoint-startpoint-14);
-      std::string category = line.substr(midpoint+3,endpoint-midpoint-3-1);
-
+      std::string category2 = line.substr(midpoint+3,endpoint-midpoint-3-1);
+      assert (restriction == "SAFELIST" ||
+              restriction == "RESTRICTED" ||
+              restriction == "FORBIDDEN");
+      assert (restriction+":" +category == category2);
       // make sure there aren't duplicates
       assert (all_system_calls.find(system_call) == all_system_calls.end());
-      all_system_calls[system_call] = category;
+      all_system_calls[system_call] = category2;
     } 
     
     // ignore blank lines
@@ -155,14 +176,14 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
       // something unexpected...
       else {
         std::cout << "UNKNOWN LINE '" << line << "'" << std::endl;
-        //exit(0);
+        exit(0);
       }
     }
   }
 
   // verify that we have all of the linux system calls (32 & 64 bit)
   std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
-  assert (all_system_calls.size() == 399);
+  assert (all_system_calls.size() == 400);
 }
 
 
@@ -210,6 +231,11 @@ void parse_strace_output(std::ifstream &strace_output_file,
       //std::cout << "STRACE LINE '" << line << "'" << std::endl;
       //std::cout << "attempt " << full_name << std::endl;
 
+      if (itr == all_system_calls.end() && full_name.find("syscall_") != std::string::npos) {
+        std::string just_num = full_name.substr(8,full_name.size()-8);
+        itr = all_system_calls.find(just_num);
+      }
+
       if (line[0] == '<') {
         // skip lines like: '<... wait4 resumed> [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 2200'
         continue;
@@ -231,7 +257,7 @@ void parse_strace_output(std::ifstream &strace_output_file,
 
       if (itr == all_system_calls.end()) {
         std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
-        continue;
+        exit(0);
       }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;
