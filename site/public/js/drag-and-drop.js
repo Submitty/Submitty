@@ -1439,8 +1439,7 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                const error_msg = 'Error parsing response from server. Message returned: ' + data;
-                alert(error_msg);
+                alert(`Error parsing response from server. Message returned:\n${data}`);
             }
         },
         error: function () {
