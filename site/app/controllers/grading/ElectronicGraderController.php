@@ -947,7 +947,7 @@ class ElectronicGraderController extends AbstractController {
         // If nothing to grade, Instructor will see all sections
         $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
         $gradeable = $this->tryGetGradeable($gradeable_id);
-        $user = $this->core->getUser();
+        $current_user = $this->core->getUser();
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
@@ -960,7 +960,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
-        $peer = ($gradeable->hasPeerComponent() && $user->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -979,8 +979,8 @@ class ElectronicGraderController extends AbstractController {
         // Anon mode for limited access graders should be based on the limited access blind setting
         // For the instructor, they can choose to toggle anon mode, so check the cookie then the setting
         $anon_mode =
-            ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
-            ($user->getGroup() < 3 && (
+            ($current_user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+            ($current_user->getGroup() < 3 && (
                 (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
                 (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
             ));
@@ -1004,7 +1004,7 @@ class ElectronicGraderController extends AbstractController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = $view_all && $can_show_all;
 
-        $order = new GradingOrder($this->core, $gradeable, $user, $show_all);
+        $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
 
         $order->sort($sort, $direction);
 
@@ -1967,6 +1967,7 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
+        $user = $this->core->getUser();
         $anon_mode =
             ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
             ($user->getGroup() < 3 && (
