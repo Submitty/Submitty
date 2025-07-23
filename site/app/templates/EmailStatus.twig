@@ -1,7 +1,7 @@
 {% if not subjects|length == 0 %}
     {% for subject in subjects %}
-        <div class="status-container">
-            <div class = "button-container">
+        <div class="status-container" data-testid="email-status-container">
+            <div class = "button-container" data-testid="email-button-container">
                 <div>
                     <div data-testid="email-subject"> Email Subject: {{subject[0:-28]}} </div>
                     <div data-testid="email-time-created"> Time Created: {{subject[-26:-7]}}</div>
@@ -18,7 +18,7 @@
                 {% else %}
                     <button class="btn btn-primary  text-left status-btn"  data-target={{"#collapse"~loop.index}} onclick="onExpandButtonClick(this)" style="margin: 0;">
                 {% endif %}
-                        <div class="btn-text">Show Details</div>
+                        <div class="btn-text" data-testid="email-details-button">Show Details</div>
                         ({{errors[subject]|length + pending[subject]|length + successes[subject]|length}})
                     </button>
             </div>

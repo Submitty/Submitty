@@ -1,5 +1,7 @@
 import { getCurrentSemester, getApiKey } from '../../support/utils.js';
 
+const detailsButtonText = /Show Details|Hide Details/;
+
 const emailContent = 'This is a test email body.';
 const errorMessage = 'This is a test error message';
 
@@ -74,6 +76,25 @@ const verifyEmails = (status = '', error = false, length = null) => {
         });
 };
 
+const verifyEmailDetails = ({ subject, totalRecipients, source, status, error }) => {
+    cy.contains('[data-testid="email-button-container"]', subject)
+        .closest('[data-testid="email-status-container"]')
+        .within(() => {
+            if (totalRecipients !== null) {
+                cy.get('[data-testid="email-button-container"]')
+                    .should('contain', `(${totalRecipients})`);
+            }
+            // Verify the email subject and source and open the recipient list
+            verifyEmail(subject, source);
+            cy.get('[data-testid="email-details-button"]')
+                .contains(detailsButtonText)
+                .click({ force: true });
+        });
+
+    // Verify each recipient is properly rendered in the recipient list
+    verifyEmails(status, error, totalRecipients);
+};
+
 describe('Test cases involving the superuser Email All functionality', () => {
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
@@ -135,18 +156,13 @@ describe('Test cases involving the superuser Email All functionality', () => {
 
             // Verify the automatic email subject prefix insertion and total recipients count
             uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
-            cy.contains('.button-container', uniqueSubject)
-                .should('contain', `(${totalRecipients})`)
-                .closest('.status-container')
-                .within(() => {
-                    verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-                    cy.get('button.status-btn.btn-primary')
-                        .contains(/Show Details|Hide Details/)
-                        .click();
-                });
-
-            // Verify each recipient is properly rendered
-            verifyEmails('.status-warning', false, totalRecipients);
+            verifyEmailDetails({
+                subject: uniqueSubject,
+                totalRecipients,
+                source: 'Submitty Administrator Email',
+                status: '.status-warning',
+                error: false,
+            });
         });
     });
 
@@ -165,8 +181,8 @@ describe('Test cases involving the superuser Email All functionality', () => {
             .click();
 
         uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
-        cy.contains('.button-container', uniqueSubject)
-            .closest('.status-container')
+        cy.contains('[data-testid="email-button-container"]', uniqueSubject)
+            .closest('[data-testid="email-status-container"]')
             .then(() => {
                 // Apply an email error for testing purposes
                 getApiKey('superuser', 'superuser').then((apiKey) => {
@@ -185,19 +201,13 @@ describe('Test cases involving the superuser Email All functionality', () => {
                         expect(res.status).to.eq(200);
                         expect(res.body).to.have.property('status', 'success');
                         expect(res.body).to.have.property('data', null);
-
-                        // Verify the email error status is displayed after a full page reload
-                        cy.reload().then(() => {
-                            cy.contains('.button-container', uniqueSubject)
-                                .closest('.status-container')
-                                .within(() => {
-                                    verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-                                    cy.get('button.status-btn.btn-danger')
-                                        .contains(/Show Details|Hide Details/)
-                                        .click();
-                                });
-
-                            verifyEmails('.status-error', true);
+                        cy.reload();
+                        verifyEmailDetails({
+                            subject: uniqueSubject,
+                            totalRecipients: null,
+                            source: 'Submitty Administrator Email',
+                            status: '.status-error',
+                            error: true,
                         });
                     });
                 });
@@ -220,19 +230,13 @@ describe('Test cases involving the superuser Email All functionality', () => {
                     expect(res.status).to.eq(200);
                     expect(res.body).to.have.property('status', 'success');
                     expect(res.body).to.have.property('data', null);
-
-                    // Verify the email sent status is displayed after a full page reload
-                    cy.reload().then(() => {
-                        cy.contains('.button-container', uniqueSubject)
-                            .closest('.status-container')
-                            .within(() => {
-                                verifyEmail(uniqueSubject, 'Submitty Administrator Email');
-                                cy.get('button.status-btn.btn-success')
-                                    .contains(/Show Details|Hide Details/)
-                                    .click();
-                            });
-
-                        verifyEmails('.status-success');
+                    cy.reload();
+                    verifyEmailDetails({
+                        subject: uniqueSubject,
+                        totalRecipients: null,
+                        source: 'Submitty Administrator Email',
+                        status: '.status-success',
+                        error: false,
                     });
                 });
             });
@@ -262,16 +266,13 @@ describe('Test cases involving instructor send email via thread announcement fun
             cy.visit(['sample', 'email_status']).then(() => {
                 // Verify the email status is awaiting to be sent or has been sent
                 const uniqueSubject = `New Announcement: ${threadAnnouncement}`;
-                cy.contains('.button-container', uniqueSubject)
-                    .closest('.status-container')
-                    .within(() => {
-                        verifyEmail(uniqueSubject, `Course: ${getCurrentSemester()} sample`);
-                        cy.get('button.status-btn')
-                            .contains(/Show Details|Hide Details/)
-                            .click();
-                    });
-
-                verifyEmails();
+                verifyEmailDetails({
+                    subject: uniqueSubject,
+                    totalRecipients: null,
+                    source: `Course: ${getCurrentSemester()} sample`,
+                    status: '.status-warning',
+                    error: false,
+                });
 
                 // Clean up the testing thread
                 cy.visit(['sample', 'forum', 'threads']).then(() => {
@@ -312,7 +313,7 @@ describe('Test cases involving instructor email pagination functionality', () =>
                     expect(Array.isArray(response.data)).to.be.true;
 
                     // Verify each email is properly rendered based on it's page item index
-                    cy.get('.status-container')
+                    cy.get('[data-testid="email-status-container"]')
                         .should('have.length', response.data.length)
                         .then(($emails) => {
                             $emails.each((index, email) => {
