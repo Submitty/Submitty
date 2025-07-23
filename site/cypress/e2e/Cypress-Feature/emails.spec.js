@@ -84,14 +84,16 @@ const verifyEmailDetails = ({ subject, totalRecipients, source, status, error })
                 cy.get('[data-testid="email-button-container"]')
                     .should('contain', `(${totalRecipients})`);
             }
-            // Verify the email subject and source and open the recipient list
+            // Verify the email subject and source
             verifyEmail(subject, source);
-            cy.get('[data-testid="email-details-button"]')
+
+            // Open the details list
+            cy.get('[data-testid="email-button-container"]')
                 .contains(detailsButtonText)
                 .click({ force: true });
         });
 
-    // Verify each recipient is properly rendered in the recipient list
+    // Verify each recipient is properly rendered in the details list
     verifyEmails(status, error, totalRecipients);
 };
 
