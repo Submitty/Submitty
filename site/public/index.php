@@ -9,7 +9,6 @@ use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\ResponseInterface;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
 /*
@@ -29,7 +28,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 $loader = require_once(__DIR__ . '/../vendor/autoload.php');
-AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $request = Request::createFromGlobals();
 

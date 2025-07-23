@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
@@ -768,17 +768,6 @@ function validateHtml() {
     d.outerHTML = '';
 }
 
-/**
- * Remove an alert message from display. This works for successes, warnings, or errors to the
- * user
- * @param elem
- */
-function removeMessagePopup(elem) {
-    $(`#${elem}`).fadeOut('slow', () => {
-        $(`#${elem}`).remove();
-    });
-}
-
 function gradeableChange(url, sel) {
     url = url + sel.value;
     window.location.href = url;
@@ -1186,12 +1175,6 @@ $(() => {
             $('html, body').animate({ scrollTop: ($(window.location.hash).offset().top - minus) }, 800);
         }
     }
-
-    for (const elem of document.getElementsByClassName('alert-success')) {
-        setTimeout(() => {
-            $(elem).fadeOut();
-        }, 5000);
-    }
 });
 
 function getFileExtension(filename) {
@@ -1207,41 +1190,6 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.document.write(elem_html);
     my_window.document.close();
     my_window.focus();
-}
-
-let messages = 0;
-
-function displayErrorMessage(message) {
-    displayMessage(message, 'error');
-}
-
-function displaySuccessMessage(message) {
-    displayMessage(message, 'success');
-}
-
-function displayWarningMessage(message) {
-    displayMessage(message, 'warning');
-}
-
-/**
- * Display a toast message after an action.
- *
- * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
- *
- * @param {string} message
- * @param {string} type either 'error', 'success', or 'warning'
- */
-function displayMessage(message, type) {
-    const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
-    $('#messages').append(message);
-    $('#messages').fadeIn('slow');
-    if (type === 'success' || type === 'warning') {
-        setTimeout(() => {
-            $(`#${id}`).fadeOut();
-        }, 5000);
-    }
-    messages++;
 }
 
 /**
@@ -1864,8 +1812,6 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
-        $('.markdown-write-mode').removeClass('active');
-        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1919,71 +1865,6 @@ function renderMarkdown(markdownContainer, url, content) {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         },
     });
-}
-
-/**
- * Function to toggle markdown rendering preview
- *
- * @param {string} type string representing what type of markdown preset to insert.
- *                      * `'code'`
- *                      * `'link'`
- *                      * `'bold'`
- *                      * `'italic'`
- *                      * `'blockquote'`
- */
-function addMarkdownCode(type) {
-    const markdown_area = $(this).closest('.markdown-area');
-    const markdown_header = markdown_area.find('.markdown-area-header');
-
-    // Don't allow markdown insertion if we are in preview mode
-    if (markdown_header.attr('data-mode') === 'preview') {
-        return;
-    }
-
-    const start = $(this).prop('selectionStart');
-    const end = $(this).prop('selectionEnd');
-    const text = $(this).val();
-    let insert = '';
-    const selectedText = text.substring(start, end);
-
-    switch (type) {
-        case 'code':
-            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
-            break;
-        case 'link':
-            insert = `[${selectedText}](url)`;
-            break;
-        case 'bold':
-            insert = selectedText ? `__${selectedText}__` : '____';
-            break;
-        case 'italic':
-            insert = selectedText ? `_${selectedText}_` : '__';
-            break;
-        case 'blockquote':
-            insert = `> ${selectedText}\n\n`;
-            break;
-    }
-
-    if (!selectedText) {
-        // Insert the markdown with the cursor in between the symbols
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        if (type === 'bold') {
-            $(this)[0].setSelectionRange(start + 2, start + 2);
-        }
-        else if (type === 'code') {
-            $(this)[0].setSelectionRange(start + 4, start + 4);
-        }
-        else {
-            $(this)[0].setSelectionRange(start + 1, start + 1);
-        }
-    }
-    else {
-        // Insert the markdown with the selected text wrapped
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
-    }
 }
 
 /**

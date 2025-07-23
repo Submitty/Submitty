@@ -5364,6 +5364,17 @@ AND gc_id IN (
     }
 
     /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Returns notifications for a user
      *
      * @param  string $user_id
@@ -7473,6 +7484,14 @@ AND gc_id IN (
     }
 
     /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
@@ -9490,10 +9509,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
