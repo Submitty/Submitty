@@ -262,8 +262,8 @@ Vagrant.configure(2) do |config|
       end
     end
 
-    qe.memory = "6G"
-    qe.smp = 4
+    qe.memory = "2G"
+    qe.smp = 2
 
     qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
 
