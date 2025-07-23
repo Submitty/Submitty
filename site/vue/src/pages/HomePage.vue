@@ -153,7 +153,7 @@ const buildCourseUrl = (course: Course) => {
 }
 
 .courses-header {
-  margin-bottom: 5px;
+    margin-bottom: 5px !important; /* Override submitty-vue.css */
 }
 .div1 {
   grid-column: 1;

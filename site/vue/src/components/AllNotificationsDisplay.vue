@@ -89,7 +89,7 @@ function goToNotificationLink(notification_url: string) {
       id="no-recent-notifications"
       class="no-recent"
     >
-      No recent notifications.
+      No notifications to view.
     </p>
     <div
       v-else
@@ -179,7 +179,7 @@ function goToNotificationLink(notification_url: string) {
 
 .notification:hover {
     cursor: pointer;
-    background-color: var(--hover-notification) !important; /* Override seen and normal notification on hover */
+    background-color: var(--hover-notification) !important; /* Override seen/unseen bg on hover */
 }
 
 .notification.unseen {
