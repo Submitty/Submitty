@@ -28,9 +28,9 @@ from sample_courses.utils.create_or_generate import create_group
 
 def pick_registration_type() -> str:
     r = random.random()
-    if r < 0.02:
+    if r < 0.01:
         return "withdrawn"
-    elif r < 0.04:
+    elif r < 0.02:
         return "audit"
     else:
         return "graded"
