@@ -487,7 +487,7 @@ class CourseMaterialsController extends AbstractController {
                         $clash_resolution
                     );
                 }
-                
+
                 if (!rename($course_material->getPath(), $new_path)) {
                     return JsonResponse::getErrorResponse("Failure to rename filepath, likely due to a folder with the same name as the file.");
                 }

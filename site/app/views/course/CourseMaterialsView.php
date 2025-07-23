@@ -109,7 +109,7 @@ class CourseMaterialsView extends AbstractView {
                     // Also add to directories array with a default priority if it doesn't exist
                     $current_relative_path = empty($path) ? $dir : FileUtils::joinPaths($path, $dir);
                     $current_full_path = FileUtils::joinPaths($base_course_material_path, $current_relative_path);
-                    
+
                     if (!isset($directories[$current_relative_path])) {
                         // We don't actually add to $directories since that's for real directories
                         // But we add to the other arrays for the template
@@ -126,7 +126,8 @@ class CourseMaterialsView extends AbstractView {
                     $relative_dir_path = FileUtils::joinPaths($path, $key);
                     if (isset($directories[$relative_dir_path])) {
                         $priority = $directories[$relative_dir_path]->getPriority();
-                    } else {
+                    }
+                    else {
                         $priority = 0; // Default priority for dynamically created directories
                     }
                 }

@@ -1397,7 +1397,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             title = encodeURIComponent(`link-${title}`);
         }
         formData.append('title', title);
-    } else {
+    }
+    else {
         return;
     }
 
@@ -1438,7 +1439,8 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
                 }
             }
             catch (e) {
-                alert('Error parsing response from server. Message returned: ' + data);
+                const error_msg = 'Error parsing response from server. Message returned: ' + data;
+                alert(error_msg);
             }
         },
         error: function () {
