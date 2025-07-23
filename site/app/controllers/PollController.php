@@ -19,9 +19,7 @@ use app\libraries\socket\Client;
 use WebSocket;
 use DateInterval;
 
-/**
- * @Enabled("polls")
- */
+#[Enabled(feature: "polls")]
 class PollController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -465,11 +463,11 @@ class PollController extends AbstractController {
         }
         elseif ($_POST["question_type"] === "single-response-single-correct" && $answers > 1) {
             $this->core->addErrorMessage("Polls of type 'single-response-single-correct' must have exactly one correct response");
-            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
         elseif ((($_POST["question_type"] === "single-response-survey") || ($_POST["question_type"] === "multiple-response-survey")) && $answers !== count($poll->getOptions())) {
             $this->core->addErrorMessage("All responses of polls of type 'survey' must be marked at correct responses");
-            new RedirectResponse($this->core->buildCourseUrl(['polls']));
+            return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
 
         $em->flush();

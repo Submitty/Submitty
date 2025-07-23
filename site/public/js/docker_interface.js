@@ -82,8 +82,8 @@ function removeImage(url, id) {
         success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
-                // eslint-disable-next-line no-undef
-                displaySuccessMessage(json.data);
+                sessionStorage.setItem('successMessage', json.data);
+                location.reload();
             }
             else {
                 // eslint-disable-next-line no-undef
@@ -113,8 +113,8 @@ function addImage(url) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                // eslint-disable-next-line no-undef
-                displaySuccessMessage(json.data);
+                sessionStorage.setItem('successMessage', json.data);
+                location.reload();
             }
             else {
                 // eslint-disable-next-line no-undef
@@ -249,5 +249,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedSort) {
         applySort(savedSort, savedDirection);
         updateSortIcons(savedSort, savedDirection);
+    }
+
+    const successMessage = sessionStorage.getItem('successMessage');
+    if (successMessage) {
+        // eslint-disable-next-line no-undef
+        displaySuccessMessage(successMessage);
+
+        // Clear the message from sessionStorage so it doesn't show again
+        sessionStorage.removeItem('successMessage');
     }
 });
