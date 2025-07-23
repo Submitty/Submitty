@@ -76,7 +76,7 @@ const verifyEmails = (status = '', error = false, length = null) => {
         });
 };
 
-const verifyEmailDetails = ({ subject, totalRecipients, source, status, error }) => {
+const verifyEmailDetails = (subject, source, status, error, totalRecipients = null) => {
     cy.contains('[data-testid="email-button-container"]', subject)
         .closest('[data-testid="email-status-container"]')
         .within(() => {
@@ -158,13 +158,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
 
             // Verify the automatic email subject prefix insertion and total recipients count
             uniqueSubject = `[Submitty Admin Announcement]: ${uniqueSubject}`;
-            verifyEmailDetails({
-                subject: uniqueSubject,
-                totalRecipients,
-                source: 'Submitty Administrator Email',
-                status: '.status-warning',
-                error: false,
-            });
+            verifyEmailDetails(uniqueSubject, 'Submitty Administrator Email', '.status-warning', false, totalRecipients);
         });
     });
 
@@ -204,13 +198,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
                         expect(res.body).to.have.property('status', 'success');
                         expect(res.body).to.have.property('data', null);
                         cy.reload();
-                        verifyEmailDetails({
-                            subject: uniqueSubject,
-                            totalRecipients: null,
-                            source: 'Submitty Administrator Email',
-                            status: '.status-error',
-                            error: true,
-                        });
+                        verifyEmailDetails(uniqueSubject, 'Submitty Administrator Email', '.status-error', true);
                     });
                 });
             }).as('email-error');
@@ -233,13 +221,7 @@ describe('Test cases involving the superuser Email All functionality', () => {
                     expect(res.body).to.have.property('status', 'success');
                     expect(res.body).to.have.property('data', null);
                     cy.reload();
-                    verifyEmailDetails({
-                        subject: uniqueSubject,
-                        totalRecipients: null,
-                        source: 'Submitty Administrator Email',
-                        status: '.status-success',
-                        error: false,
-                    });
+                    verifyEmailDetails(uniqueSubject, 'Submitty Administrator Email', '.status-success', false);
                 });
             });
         });
@@ -268,13 +250,7 @@ describe('Test cases involving instructor send email via thread announcement fun
             cy.visit(['sample', 'email_status']).then(() => {
                 // Verify the email status is awaiting to be sent or has been sent
                 const uniqueSubject = `New Announcement: ${threadAnnouncement}`;
-                verifyEmailDetails({
-                    subject: uniqueSubject,
-                    totalRecipients: null,
-                    source: `Course: ${getCurrentSemester()} sample`,
-                    status: '.status-warning',
-                    error: false,
-                });
+                verifyEmailDetails(uniqueSubject, `Course: ${getCurrentSemester()} sample`, '.status-warning', false);
 
                 // Clean up the testing thread
                 cy.visit(['sample', 'forum', 'threads']).then(() => {
