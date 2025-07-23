@@ -16,10 +16,7 @@ interface Props {
     placeholder?: string;
     previewDivId?: string | null;
     renderHeader?: boolean;
-<<<<<<< HEAD
-=======
     showToggle?: boolean;
->>>>>>> origin/main
     rootClass?: string;
     textareaMaxlength?: string | number;
     required?: boolean;
@@ -257,24 +254,16 @@ onMounted(async () => {
         await setMode('preview');
     }
 });
-<<<<<<< HEAD
-const showHeader = ref<boolean>(false);
-=======
 const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
 function toggleHeader() {
     showHeader.value = !showHeader.value;
     window.Cookies.set('markdown_enabled', showHeader.value ? '1' : '0', { path: '/', expires: 365 });
 }
->>>>>>> origin/main
 </script>
 
 <template>
   <div
-<<<<<<< HEAD
-    v-if="props.renderHeader === false"
-=======
     v-if="showToggle"
->>>>>>> origin/main
     class="button-row"
   >
     <div
@@ -286,11 +275,7 @@ function toggleHeader() {
       ]"
       tabindex="0"
       title="Render markdown"
-<<<<<<< HEAD
-      @click="showHeader = !showHeader;"
-=======
       @click="toggleHeader"
->>>>>>> origin/main
     >
       <i class="fab fa-markdown fa-2x" />
     </div>
@@ -339,14 +324,10 @@ function toggleHeader() {
           Preview
         </button>
       </div>
-<<<<<<< HEAD
-      <div class="markdown-area-toolbar">
-=======
       <div
         v-if="mode === 'edit'"
         class="markdown-area-toolbar"
       >
->>>>>>> origin/main
         <a
           target="_blank"
           href="https://submitty.org/student/communication/markdown"

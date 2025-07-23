@@ -13864,12 +13864,8 @@ parameters:
 			path: app/views/MarkdownView.php
 
 		-
-<<<<<<< HEAD
-			message: "#^Call to method app\\\\libraries\\\\Core\\:\\:getOutput\\(\\) with incorrect case\\: getoutput$#"
-=======
 			message: '#^Call to method app\\libraries\\Core\:\:getOutput\(\) with incorrect case\: getoutput$#'
 			identifier: method.nameCase
->>>>>>> origin/main
 			count: 3
 			path: app/views/MiscView.php
 
