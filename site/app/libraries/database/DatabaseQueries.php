@@ -4542,6 +4542,9 @@ SQL;
 
     /**
      * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
      */
     public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
         $values = [];

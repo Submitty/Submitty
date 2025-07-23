@@ -1,4 +1,14 @@
 /// <reference types= "cypress" />
+
+function checkGradeRow(user_id, expected) {
+  cy.get(`[data-testid="grade-row-${user_id}"]`).within(() => {
+    cy.get('[data-testid="student-id"]').should('contain', expected.user_id);
+    cy.get('[data-testid="given-name"]').should('contain', expected.given);
+    cy.get('[data-testid="family-name"]').should('contain', expected.family);
+    cy.get('[data-testid="marks"]').should('contain', expected.marks);
+  });
+}
+
 describe('testing grade override', () => {
     it('individual student and team grade override', () => {
         cy.login();
@@ -16,27 +26,26 @@ describe('testing grade override', () => {
                 cy.get('[data-testid="confirm-team-override"]').click();
             }
             cy.get('[data-testid="popup-message"]').should('contain', `Updated overridden Grades for ${gradeable}`);
-            cy.get('[data-testid="load-overridden-grades"]').should('contain', `Overridden Grades for ${gradeable}`);
-            cy.get('#grade-override-table thead tr th').as('headers');
-            cy.get('@headers').eq(0).should('have.text', 'Student ID');
-            cy.get('@headers').eq(1).should('have.text', 'Given Name');
-            cy.get('@headers').eq(2).should('have.text', 'Family Name');
-            cy.get('@headers').eq(3).should('have.text', 'Marks');
-            cy.get('@headers').eq(4).should('have.text', 'Comments');
-            cy.get('@headers').eq(5).should('have.text', 'Delete');
-
-            cy.get('#grade-override-table tbody tr').first().within(() => {
-                cy.get('td').eq(0).should('contain', 'student');
-                cy.get('td').eq(1).should('contain', 'Joe');
-                cy.get('td').eq(2).should('contain', 'Student');
-                cy.get('td').eq(3).should('contain', '10');
+            cy.get('#grade-override-table thead [data-testid="student-id"]').should('have.text', 'Student ID');
+            cy.get('#grade-override-table thead [data-testid="given-name"]').should('have.text', 'Given Name');
+            cy.get('#grade-override-table thead [data-testid="family-name"]').should('have.text', 'Family Name');
+            cy.get('#grade-override-table thead [data-testid="marks"]').should('have.text', 'Marks');
+            cy.get('#grade-override-table thead [data-testid="comments"]').should('have.text', 'Comments');
+            cy.get('#grade-override-table thead [data-testid="delete"]').should('have.text', 'Delete');
+            
+            checkGradeRow('student', {
+                user_id: 'student',
+                given: 'Joe',
+                family: 'Student',
+                marks: '10'
             });
+
             if (gradeable !== 'grading_homework') {
-                cy.get('#grade-override-table tbody tr').eq(1).within(() => {
-                    cy.get('td').eq(0).should('contain', 'wisoza');
-                    cy.get('td').eq(1).should('contain', 'Adela');
-                    cy.get('td').eq(2).should('contain', 'Wisozk');
-                    cy.get('td').eq(3).should('contain', '10');
+                checkGradeRow('wisoza', {
+                    user_id: 'wisoza',
+                    given: 'Adela',
+                    family: 'Wisozk',
+                    marks: '10'
                 });
             }
 

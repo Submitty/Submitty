@@ -1313,8 +1313,17 @@ function refreshOnResponseOverriddenGrades(json) {
     else {
         json['data']['users'].forEach((elem) => {
             const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
-            const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table tbody').append(bits.join('</td><td class="align-left">'));
+            const row = `
+                <tr data-testid="grade-row-${elem['user_id']}">
+                    <td class="align-left" data-testid="student-id">${elem['user_id']}</td>
+                    <td class="align-left" data-testid="given-name">${elem['user_givenname']}</td>
+                    <td class="align-left" data-testid="family-name">${elem['user_familyname']}</td>
+                    <td class="align-left" data-testid="marks">${elem['marks']}</td>
+                    <td class="align-left" data-testid="comment">${elem['comment']}</td>
+                    <td class="align-left">${delete_button}</td>
+                </tr>
+            `;
+            $('#grade-override-table').append(row);
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');

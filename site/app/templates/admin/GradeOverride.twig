@@ -53,16 +53,15 @@
             <table id="grade-override-table" class="table table-striped table-bordered persist-area mobile-table">
                 <caption id="title"></caption>
                 <thead>
-                    <tr>
-                        <th>Student ID</th>
-                        <th>Given Name</th>
-                        <th>Family Name</th>
-                        <th>Marks</th>
-                        <th>Comments</th>
-                        <th>Delete</th>
+                    <tr data-testid="grade-row-<?= $user_id ?>">
+                        <th data-testid="student-id">Student ID</th>
+                        <th data-testid="given-name">Given Name</th>
+                        <th data-testid="family-name">Family Name</th>
+                        <th data-testid="marks">Marks</th>
+                        <th data-testid="comments">Comments</th>
+                        <th data-testid="delete">Delete</th>
                     </tr>
                 </thead>
-                <tbody></tbody>
             </table>
         </div>
     </form>
