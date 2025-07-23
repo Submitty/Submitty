@@ -67,10 +67,8 @@ class GradeOverrideController extends AbstractController {
                 return $this->getOverriddenGrades($gradeable_id);
             }
             elseif ($option === 'batch') {
-                foreach ($this->getTeamMemberIds($team) as $member_id) {
-                    $this->core->getQueries()
-                        ->updateGradeOverride($member_id, $gradeable_id, $marks, $comment);
-                }
+                $team_member_ids = $this->getTeamMemberIds($team);
+                $this->core->getQueries()->updateGradeOverrideBatch($team_member_ids, $gradeable_id, $marks, $comment);
                 return $this->getOverriddenGrades($gradeable_id);
             }
             else {
@@ -78,7 +76,7 @@ class GradeOverrideController extends AbstractController {
                 $all_members = $this->core->getQueries()->getUsersById($member_ids);
                 $team_members = [];
                 foreach ($all_members as $id => $member) {
-                    $team_members[$id] = $member->getDisplayedGivenName()." ". $member->getDisplayedFamilyName();
+                    $team_members[$id] = $member->getDisplayedGivenName() . " " . $member->getDisplayedFamilyName();
                 }
                 return $this->core->getOutput()->renderJsonSuccess([
                     'is_team'   => true,

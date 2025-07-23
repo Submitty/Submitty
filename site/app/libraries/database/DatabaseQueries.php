@@ -4540,6 +4540,28 @@ SQL;
         );
     }
 
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment) {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
+        }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
+    }
+
     /**
      * Delete a given overridden grades for specific user for specific gradeable
      *

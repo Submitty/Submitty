@@ -1372,9 +1372,8 @@ function overridePopup(json) {
     $('.popup-form').hide();
     $('#override_team_popup').remove();
 
-    // Generate a unique mount ID for the dynamic Vue app.
-    // This is necessary to ensure the app can mount to a fresh DOM element each time
-    // until we implement a uniform Vue framework to manage mounting.
+    // Generate a unique mount ID for the dynamic Vue app until we implement a uniform Vue framework to manage mounting.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time.
     const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
     const mount_el = document.createElement('div');
     mount_el.id = mount_id;

@@ -31,8 +31,16 @@ describe('testing grade override', () => {
                 cy.get('td').eq(2).should('contain', 'Student');
                 cy.get('td').eq(3).should('contain', '10');
             });
+            if (gradeable !== 'grading_homework') {
+                cy.get('#grade-override-table tbody tr').eq(1).within(() => {
+                    cy.get('td').eq(0).should('contain', 'wisoza');
+                    cy.get('td').eq(1).should('contain', 'Adela');
+                    cy.get('td').eq(2).should('contain', 'Wisozk');
+                    cy.get('td').eq(3).should('contain', '10');
+                });
+            }
 
-            // Only test grades page for non-team gradeables because it does not yet show team overrides
+            // Only test grades page for non-team gradeables because team overrides are not yet shown there.
             if (gradeable === 'grading_homework') {
                 cy.visit(['sample', 'gradeable', gradeable, 'grading', 'details']);
                 cy.get('[data-testid="view-sections"]').click();
