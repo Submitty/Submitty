@@ -727,6 +727,23 @@ class User extends AbstractModel {
 
     public static function constructNotificationSettings($details) {
         $notification_settings = [];
+        // Defaults not found in the notification settings table tied to the the forum and grade inquiries
+        $notification_settings['all_announcements'] = true;
+        $notification_settings['all_announcements_email'] = true;
+        $notification_settings['all_reply_thread'] = true;
+        $notification_settings['all_reply_thread_email'] = true;
+        $notification_settings['all_my_post_altered'] = true;
+        $notification_settings['all_my_post_altered_email'] = true;
+
+        $notification_settings['grade_inquiry_submitted'] = true;
+        $notification_settings['grade_inquiry_submitted_email'] = true;
+        $notification_settings['grade_inquiry_post'] = true;
+        $notification_settings['grade_inquiry_post_email'] = true;
+        $notification_settings['grade_inquiry_resolved'] = true;
+        $notification_settings['grade_inquiry_resolved_email'] = true;
+        $notification_settings['grade_inquiry_resolved_reopened'] = true;
+        $notification_settings['grade_inquiry_resolved_reopened_email'] = true;
+
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
         $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
         $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
