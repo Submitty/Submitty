@@ -11,7 +11,7 @@ interface Notification {
     seen: boolean;
     elapsed_time: number;
     created_at: string;
-    notify_time: string,
+    notify_time: string;
     semester: string;
     course: string;
     notification_url: string;
@@ -76,10 +76,11 @@ const buildCourseUrl = (course: Course) => {
 
 <template>
   <div
-    class="content grid-container">
+    class="home-content grid-container"
+  >
     <div
       id="courses"
-      class="div1"
+      class="div1 shadow"
       data-testid="courses-list"
     >
       <template
@@ -90,7 +91,7 @@ const buildCourseUrl = (course: Course) => {
           <br v-if="index > 0" />
           <br v-if="index > 0" />
 
-          <h1 data-testid="courses-header">
+          <h1 class="courses-header" data-testid="courses-header">
             {{ getCourseTypeHeader(course_type) }}
           </h1>
 
@@ -133,20 +134,31 @@ const buildCourseUrl = (course: Course) => {
         </div>
       </template>
     </div>
-    <AllNotificationsDisplay  :notifications="notifications" />
+    <AllNotificationsDisplay :notifications="notifications" />
   </div>
 </template>
 
 <style scoped>
+.home-content {
+    padding: 20px;
+    margin: 10px;
+}
+
 .grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  grid-auto-rows: auto;
-  align-items: start; 
-  grid-gap: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: auto;
+    align-items: start;
+    grid-gap: 30px;
+}
+
+.courses-header {
+  margin-bottom: 5px;
 }
 .div1 {
   grid-column: 1;
+  padding: 20px;
+  background-color: var(--default-white);
 }
 .course-list li {
     margin: 3px 0;

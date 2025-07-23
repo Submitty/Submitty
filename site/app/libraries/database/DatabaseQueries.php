@@ -5425,7 +5425,7 @@ AND gc_id IN (
                 FROM notifications
                 WHERE to_user_id = ? AND created_at >= current_timestamp - INTERVAL '7 days'
                 ORDER BY created_at DESC
-                LIMIT 5;
+                LIMIT 10;
             ";
             $course_db->query($query, [$user_id]);
             $rows = $course_db->rows();

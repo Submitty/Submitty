@@ -9,7 +9,7 @@ interface Notification {
     seen: boolean;
     elapsed_time: number;
     created_at: string;
-    notify_time: string,
+    notify_time: string;
     semester: string;
     course: string;
     notification_url: string;
@@ -22,18 +22,18 @@ const props = defineProps<{
 const showUnseenOnly = ref(false);
 
 onMounted(() => {
-  const pref = localStorage.getItem('notification-preference');
-  if (pref === 'unseen') {
-    showUnseenOnly.value = true;
-  }
+    const pref = localStorage.getItem('notification-preference');
+    if (pref === 'unseen') {
+        showUnseenOnly.value = true;
+    }
 });
 
 function toggleUnseenOnly() {
-  showUnseenOnly.value = !showUnseenOnly.value;
-  localStorage.setItem(
-    'notification-preference',
-    showUnseenOnly.value ? 'unseen' : 'all'
-  );
+    showUnseenOnly.value = !showUnseenOnly.value;
+    localStorage.setItem(
+        'notification-preference',
+        showUnseenOnly.value ? 'unseen' : 'all',
+    );
 }
 
 const showingMore = ref(false);
@@ -41,73 +41,119 @@ const showingMore = ref(false);
 const visibleCount = computed(() => showingMore.value ? 10 : 5);
 
 const filteredNotifications = computed(() =>
-  showUnseenOnly.value
-    ? props.notifications.filter(n => !n.seen)
-    : props.notifications
+    showUnseenOnly.value
+        ? props.notifications.filter((n) => !n.seen)
+        : props.notifications,
 );
 
 const visibleNotifications = computed(() =>
-  filteredNotifications.value.slice(0, visibleCount.value)
+    filteredNotifications.value.slice(0, visibleCount.value),
 );
+
+function goToNotificationLink(notification_url: string) {
+    window.location.href = notification_url;
+}
 </script>
 <template>
-    <div class="notification-body shadow">
-        <div class="notifications-header-container">
-            <h1 class="notifications-header">Notifications</h1>
-            <a class="notification-seen black-btn" title="See All" aria-label="See All"  @click="toggleUnseenOnly" v-if="!showUnseenOnly && notifications.length !== 0">
-                <i class="fas fa-eye"></i>
-            </a>
-            <a class="notification-seen black-btn" title="Unseen Only" aria-label="Unseen Only"  @click="toggleUnseenOnly" v-if="showUnseenOnly && notifications.length !== 0">
-                <i class="fas fa-eye-slash"></i>
-            </a>
+  <div class="notification-panel shadow">
+    <div class="notifications-header-container">
+      <h1 class="notifications-header">
+        Notifications
+      </h1>
+      <a
+        v-if="!showUnseenOnly && notifications.length !== 0"
+        class="notification-seen black-btn"
+        title="See All"
+        aria-label="See All"
+        @click="toggleUnseenOnly"
+      >
+        <i class="fas fa-eye" />
+      </a>
+      <a
+        v-if="showUnseenOnly && notifications.length !== 0"
+        class="notification-seen black-btn"
+        title="Unseen Only"
+        aria-label="Unseen Only"
+        @click="toggleUnseenOnly"
+      >
+        <i class="fas fa-eye-slash" />
+      </a>
+      <!-- FUTURE FEATURE: mark all notifications on the home page as seen
             <a class="btn btn-primary">
                 Mark all as seen
             </a>
+        -->
+    </div>
+    <p
+      v-if="notifications.length === 0"
+      id="no-recent-notifications"
+      class="no-recent"
+    >
+      No recent notifications.
+    </p>
+    <div
+      v-else
+      id="recent-notifications"
+    >
+      <div
+        v-for="n in visibleNotifications"
+        :key="n.id"
+        class="notification"
+        :class="{ unseen: !n.seen }"
+        @click="n.notification_url && goToNotificationLink(`${n.notification_url}/?seen=${n.seen ? 1 : 0}`)"
+      >
+        <i
+          v-if="n.component === 'forum'"
+          class="fas fa-comments notification-type"
+          title="Forum"
+        />
+        <div class="notification-content">
+          <span class="notification-link">
+            {{ n.content }}
+          </span>
+          <div class="notification-time">
+            {{ n.course }} - {{ n.notify_time }}
+          </div>
         </div>
-        <p class="no-recent" id="no-recent-notifications" v-if="notifications.length === 0">No recent notifications.</p>
-        <div id="recent-notifications" v-else>
-            <div class="notification" v-for="n in visibleNotifications" :key="n.id" :class="{ unseen: !n.seen }">
-                    <i class="fas fa-comments notification-type" title="Forum" v-if="n.component === 'forum'"></i>
-                <div class="notification-content">
-                    <a class="notification-link" :href="`${n.notification_url}/?seen=${n.seen ? 1 : 0}`" v-if="n.notification_url">
-                        {{ n.content }}
-                    </a>
-                    <span class="notification-link" v-else>
-                        {{ n.content }}
-                    </span>
-                    <div class="notification-time">
-                        {{ n.course }} - {{ n.notify_time }}
-                    </div>
-                </div>
+        <!-- FUTURE FEATURE: individual mark as seen
                 <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
                     <i class="far fa-envelope-open"></i>
                 </a>
-            </div>
-            <a v-if="filteredNotifications.length > 5 && !showingMore" @click="showingMore = true" class="show-more">
-                Show More
-            </a>
-            <a v-else-if="filteredNotifications.length > 5 && showingMore" @click="showingMore = false" class="show-more">
-                Show Less
-            </a>
-        </div>
+            -->
+      </div>
+      <a
+        v-if="filteredNotifications.length > 5 && !showingMore"
+        class="show-more"
+        @click="showingMore = true"
+      >
+        Show More
+      </a>
+      <a
+        v-else-if="filteredNotifications.length > 5 && showingMore"
+        class="show-more"
+        @click="showingMore = false"
+      >
+        Show Less
+      </a>
     </div>
+  </div>
 </template>
 <style scoped>
+.notification-panel {
+    background-color: var(--default-white);
+    height: auto;
+    padding: 20px
+}
+
 .notifications-header-container {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start; 
+  align-items: flex-start;
   margin-bottom: 5px;
 }
 
 .notifications-header {
     flex-grow: 1;
-}
-
-.notification-body {
-    background-color: var(--home-panel-gray);
-    padding: 20px;
-    height: auto;
 }
 
 .no-recent {
@@ -129,6 +175,11 @@ const visibleNotifications = computed(() =>
     align-items: center;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+.notification:hover {
+    cursor: pointer;
+    background-color: var(--hover-notification) !important; /* Override seen and normal notification on hover */
 }
 
 .notification.unseen {
