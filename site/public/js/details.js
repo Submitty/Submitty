@@ -154,12 +154,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const assignedFilterStatus = Cookies.get('view');
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
-        // Anonymous Mode
-        const anonFilterBox = document.getElementById('toggle-anon-students');
-        const currentGradeableCookiePath = `anon_mode_${Cookies.get('current_gradeable_path')}`;
-        const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
-        anonFilterBox.checked = (anonFilterStatus === 'on');
-
         // Withdrawn Students
         const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');

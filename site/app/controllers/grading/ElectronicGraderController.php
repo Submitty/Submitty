@@ -947,6 +947,7 @@ class ElectronicGraderController extends AbstractController {
         // If nothing to grade, Instructor will see all sections
         $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        $user = $this->core->getUser();
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
@@ -959,7 +960,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
-        $peer = ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $user->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -975,12 +976,14 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $anon_mode = $gradeable->getInstructorBlind() - 1;
-        $anon_mode_enabled = "anon_mode_" . $gradeable_id;
-        $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
-        if (isset($_COOKIE[$anon_mode_override]) && $_COOKIE[$anon_mode_override] === 'on') {
-            $anon_mode = (isset($_COOKIE[$anon_mode_enabled]) && $_COOKIE[$anon_mode_enabled] === 'on');
-        }
+        // Anon mode for limited access graders should be based on the limited access blind setting
+        // For the instructor, they can choose to toggle anon mode, so check the cookie then the setting
+        $anon_mode =
+            ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+            ($user->getGroup() < 3 && (
+                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+            ));
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
 
@@ -1001,7 +1004,7 @@ class ElectronicGraderController extends AbstractController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = $view_all && $can_show_all;
 
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        $order = new GradingOrder($this->core, $gradeable, $user, $show_all);
 
         $order->sort($sort, $direction);
 
@@ -1964,12 +1967,12 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $anon_mode = $gradeable->getInstructorBlind() - 1;
-        $anon_mode_enabled = "anon_mode_" . $gradeable_id;
-        $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
-        if (isset($_COOKIE[$anon_mode_override]) && $_COOKIE[$anon_mode_override] === 'on') {
-            $anon_mode = (isset($_COOKIE[$anon_mode_enabled]) && $_COOKIE[$anon_mode_enabled] === 'on');
-        }
+        $anon_mode =
+            ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+            ($user->getGroup() < 3 && (
+                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+            ));
 
         $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];

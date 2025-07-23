@@ -7,6 +7,8 @@ declare global {
         changeSections: () => void;
         changeInquiry: () => void;
         changeSortOrder: () => void;
+        sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
+        changeAnon: () => void;
     }
 }
 
@@ -54,5 +56,9 @@ window.changeSortOrder = () => {
 window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' = 'ASC') => {
     window.Cookies.set('sort', sort_type, { path: coursePath, expires: 365 });
     window.Cookies.set('direction', direction, { path: coursePath, expires: 365 });
+};
+
+window.changeAnon = () => {
+    window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', { path: coursePath, expires: 365 });
     location.reload();
 };

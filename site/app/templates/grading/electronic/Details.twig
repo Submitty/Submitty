@@ -49,7 +49,7 @@
                 </label>
                 {% if toggle_anon_button %}
                 <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
-                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon('{{ gradeable.getId() }}')">
+                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
@@ -777,20 +777,6 @@
     const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
     const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     const is_student = {{ is_student ? 'true' : 'false' }};
-    const coursePath = document.body.dataset.coursePath ?? '';
-
-    function changeAnon(gradeable_id) {
-        Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on', { path: coursePath, expires: 365 });
-        Cookies.set('current_gradeable_path', gradeable_id, { path: coursePath, expires: 365 });
-        const status = {{ anon_mode ? 1 : 0}};
-        if (status) {
-            Cookies.set(`anon_mode_${gradeable_id}`, 'off', { path: coursePath, expires: 365 });
-        }
-        else {
-            Cookies.set(`anon_mode_${gradeable_id}`, 'on', { path: coursePath, expires: 365 });
-        }
-        location.reload();
-    }
 
     //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
     function ajaxCountRegrade(choice,e,confirmMessage) {
