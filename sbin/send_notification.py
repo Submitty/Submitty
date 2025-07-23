@@ -115,15 +115,9 @@ def connect_db(db_name):
     return db
 
 
-def parse_column(row, column):
-    """Parse a database column from a SQLAlchemy row for variable notification types."""
-    # pylint: disable=protected-access
-    return row._mapping.get(column, None)
-
-
 def format_timestamp(timestamp):
     """Format a timestamp into a readable string."""
-    return timestamp.strftime("%B %d, %Y at %I:%M %p") if timestamp else "TBA"
+    return timestamp.strftime("%B %d, %Y at %I:%M %p")
 
 
 def format_late_days(late_days):
@@ -136,21 +130,21 @@ def construct_notifications(term, course, pending, notification_type):
     timestamps = {}
     gradeables, site, email = [], [], []
 
-    for notification in pending:
+    for notification in pending.mappings():
         gradeable = {
-            "id": parse_column(notification, 'g_id'),
-            "title": parse_column(notification, 'g_title'),
-            "submission_due_date": parse_column(notification, 'submission_due_date'),
-            "team_id": parse_column(notification, 'team_id'),
-            "user_id": parse_column(notification, 'user_id'),
-            "user_email": parse_column(notification, 'user_email'),
+            "id": notification.get('g_id'),
+            "title": notification.get('g_title'),
+            "submission_due_date": notification.get('submission_due_date'),
+            "team_id": notification.get('team_id'),
+            "user_id": notification.get('user_id'),
+            "user_email": notification.get('user_email'),
             # Potentially send via the notification page
-            "site_enabled": parse_column(notification, 'site_enabled'),
+            "site_enabled": notification.get('site_enabled'),
             # Potentially send via email
-            "email_enabled": parse_column(notification, 'email_enabled'),
+            "email_enabled": notification.get('email_enabled'),
             # Unique late day info for submissions available notifications
-            "max_late_days": parse_column(notification, 'max_late_days'),
-            "remaining_late_days": parse_column(notification, 'remaining_late_days')
+            "max_late_days": notification.get('max_late_days'),
+            "remaining_late_days": notification.get('remaining_late_days')
         }
 
         timestamp = timestamps.setdefault(
@@ -394,7 +388,9 @@ def send_pending_notifications():
                 ORDER BY late_day_date DESC
                 LIMIT 1
             ) ldc ON TRUE
-            WHERE eg.eg_release_notifications_sent IS FALSE
+            WHERE eg.eg_student_view IS TRUE
+                AND eg.eg_student_submit IS TRUE
+                AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
