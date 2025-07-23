@@ -13,6 +13,7 @@ from sample_courses.utils.checks import user_exists
 from sample_courses.utils.dependent import add_to_group
 from sqlalchemy import insert
 
+
 class Mark(object):
     def __init__(self, mark, order) -> None:
         self.note = mark["gcm_note"]

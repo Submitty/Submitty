@@ -9,6 +9,7 @@ from __future__ import print_function, division
 from sample_courses.models import generate_random_marks, Mark
 from sqlalchemy import insert
 
+
 class Component(object):
     def __init__(self, component, order) -> None:
         self.title = component["gc_title"]
