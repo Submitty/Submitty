@@ -14,8 +14,6 @@ parameters:
     ignoreErrors:
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$resourceId\.#'
         - '#Access to an undefined property Ratchet\\ConnectionInterface::\$httpRequest\.#'
-        - identifier: missingType.generics
-        - identifier: missingType.iterableValue
     reportAlwaysTrueInLastCondition: true
     level: 6
     doctrine:
