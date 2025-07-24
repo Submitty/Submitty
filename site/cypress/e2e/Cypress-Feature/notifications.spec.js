@@ -19,8 +19,11 @@ describe('Test cases revolving around notification settings', () => {
         // Test subscribing to all site notifications
         cy.get('[data-testid="subscribe-all-notifications"]').should('be.enabled').click();
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all notifications').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
 
-        cy.get('[data-testid="popup-message"]').should('contain', 'Notification settings have been saved.');
         cy.get('.notification-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
@@ -30,29 +33,72 @@ describe('Test cases revolving around notification settings', () => {
         // Unsubscribe from all optional notifications
         cy.get('[data-testid="unsubscribe-all-optional-notifications"]').should('be.enabled').click();
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Unsubscribe from all optional notifications').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
+
         cy.get('.notification-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
-                // TODO: twig template should set this to true
-                if ($el.attr('data-default-checked') !== '1') {
-                    expect($el.prop('checked')).to.be.false;
-                }
+                // Required notification checkboxes are disabled
+                expect($el.prop('checked') === $el.prop('disabled')).to.be.true;
             });
 
-        // TODO: test reset notification settings (i.e., missing else block above)
+        // Reset notification settings
+        cy.get('[data-testid="reset-notification-settings"]').should('be.enabled').click();
+        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Reset notification settings').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
+
+        cy.get('.notification-checkbox [data-testid="notification-checkbox-input"]')
+            .should('have.length.greaterThan', 0)
+            .each(($el) => {
+                expect($el.attr('data-default-checked') === 'true' ? $el.prop('checked') : !$el.prop('checked')).to.be.true;
+            });
 
         // Test subscribing to all emails
         cy.get('[data-testid="subscribe-all-emails"]').should('be.enabled').click();
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all emails').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
 
-        cy.get('[data-testid="popup-message"]').should('contain', 'Notification settings have been saved.');
         cy.get('.email-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
                 expect($el.prop('checked')).to.be.true;
             });
 
-        // Test unsubscribing from all site notifications
-        // TODO: understand default checked
+        // Unsubscribe from all optional emails
+        cy.get('[data-testid="unsubscribe-all-optional-emails"]').should('be.enabled').click();
+        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Unsubscribe from all optional emails').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
+
+        cy.get('.email-checkbox [data-testid="notification-checkbox-input"]')
+            .should('have.length.greaterThan', 0)
+            .each(($el) => {
+                expect($el.prop('checked') === $el.prop('disabled')).to.be.true;
+            });
+
+        // Reset email settings
+        cy.get('[data-testid="reset-email-settings"]').should('be.enabled').click();
+        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Reset email settings').click();
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .click();
+
+        cy.get('.email-checkbox [data-testid="notification-checkbox-input"]')
+            .should('have.length.greaterThan', 0)
+            .each(($el) => {
+                expect($el.attr('data-default-checked') === 'true' ? $el.prop('checked') : !$el.prop('checked')).to.be.true;
+            });
     });
 });
