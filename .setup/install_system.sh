@@ -712,7 +712,6 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
-y
 submitty-admin
 y
 
