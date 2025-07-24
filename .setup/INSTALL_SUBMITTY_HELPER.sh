@@ -280,6 +280,22 @@ if [ "${IS_WORKER}" == 0 ]; then
     # but everyone can read all that files & directories, and cd into all the directories
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type d -exec chmod 555 {} \;
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
+
+    # Install cypress related files that are elsewhere in the repository
+    # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
+    if [ "${IS_VAGRANT}" == 1 ]; then
+        copy_cmd="rsync -rtz"
+    elif [ "${CI}" == 1 ]; then
+        copy_cmd="cp -r"
+    else
+        copy_cmd=""
+    fi
+
+    if [ -n "$copy_cmd" ]; then
+        echo -e "Install cypress related files"
+        $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+    fi
 fi
 ########################################################################################################################
 ########################################################################################################################
@@ -870,24 +886,4 @@ else
     chmod 750 "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh"
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateSystemInfo
-fi
-
-################################################################################################################
-################################################################################################################
-# Install cypress related files if not in worker mode
-if [ "${IS_WORKER}" == 0 ]; then
-    # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
-    if [ "${IS_VAGRANT}" == 1 ]; then
-        copy_cmd="rsync -rtz"
-    elif [ "${CI}" == 1 ]; then
-        copy_cmd="cp -r"
-    else
-        copy_cmd=""
-    fi
-
-    if [ -n "$copy_cmd" ]; then
-        echo -e "Install cypress related files"
-        $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-        $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
-    fi
 fi
