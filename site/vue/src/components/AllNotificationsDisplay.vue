@@ -19,7 +19,7 @@ const props = defineProps<{
     notifications: Notification[];
 }>();
 
-const showUnseenOnly = ref(false);
+const showUnseenOnly = ref(true);
 
 onMounted(() => {
     const pref = localStorage.getItem('notification-preference');
@@ -36,9 +36,7 @@ function toggleUnseenOnly() {
     );
 }
 
-const showingMore = ref(false);
-
-const visibleCount = computed(() => showingMore.value ? 10 : 5);
+const visibleCount = 10;
 
 const filteredNotifications = computed(() =>
     showUnseenOnly.value
@@ -47,7 +45,7 @@ const filteredNotifications = computed(() =>
 );
 
 const visibleNotifications = computed(() =>
-    filteredNotifications.value.slice(0, visibleCount.value),
+    filteredNotifications.value.slice(0, visibleCount),
 );
 
 function goToNotificationLink(notification_url: string) {
@@ -91,6 +89,13 @@ function goToNotificationLink(notification_url: string) {
     >
       No notifications to view.
     </p>
+    <p
+      v-if="filteredNotifications.length === 0"
+      id="no-recent-notifications"
+      class="no-recent"
+    >
+      No unseen notifications.
+    </p>
     <div
       v-else
       id="recent-notifications"
@@ -121,20 +126,6 @@ function goToNotificationLink(notification_url: string) {
                 </a>
             -->
       </div>
-      <a
-        v-if="filteredNotifications.length > 5 && !showingMore"
-        class="show-more"
-        @click="showingMore = true"
-      >
-        Show More
-      </a>
-      <a
-        v-else-if="filteredNotifications.length > 5 && showingMore"
-        class="show-more"
-        @click="showingMore = false"
-      >
-        Show Less
-      </a>
     </div>
   </div>
 </template>

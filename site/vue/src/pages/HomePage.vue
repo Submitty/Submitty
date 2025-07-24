@@ -91,7 +91,10 @@ const buildCourseUrl = (course: Course) => {
           <br v-if="index > 0" />
           <br v-if="index > 0" />
 
-          <h1 class="courses-header" data-testid="courses-header">
+          <h1
+            class="courses-header"
+            data-testid="courses-header"
+          >
             {{ getCourseTypeHeader(course_type) }}
           </h1>
 
