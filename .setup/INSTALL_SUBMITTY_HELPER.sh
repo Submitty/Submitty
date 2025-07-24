@@ -874,9 +874,9 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# Install cypress fixtures if not in worker mode
+# Install cypress related files if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
-    echo -e "Install cypress fixtures"
+    echo -e "Install cypress related files"
     # rsync if we are on vagrant
     if [ "${VAGRANT}" == 1 ]; then
         rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
