@@ -546,6 +546,9 @@ function openFrame(
         if (url_file.includes('user_assignment_settings.json')) {
             directory = 'submission_versions';
         }
+        else if (url_file.includes('submissions_processed')) {
+            directory = 'submissions_processed';
+        }
         else if (url_file.includes('submissions')) {
             directory = 'submissions';
         }

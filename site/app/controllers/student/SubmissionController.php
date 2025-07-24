@@ -16,6 +16,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
 use app\models\User;
@@ -463,10 +464,11 @@ class SubmissionController extends AbstractController {
                     "qr_suffix" => $qr_suffix,
                     "filename"  => $uploaded_file["name"][$i],
                     "is_qr"     => true,
-                    "use_ocr"   => $use_ocr
+                    "use_ocr"   => $use_ocr,
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . $uploaded_file["name"][$i] . ".json");
 
                 //add new job to queue
                 if (!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT))) {
@@ -489,10 +491,11 @@ class SubmissionController extends AbstractController {
                     "timestamp" => $current_time,
                     "filename"  => $uploaded_file["name"][$i],
                     "num"       => $num_pages,
-                    "is_qr"     => false
+                    "is_qr"     => false,
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json";
+                $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+                $bulk_upload_job  = FileUtils::joinPaths($daemon_job_queue_path, "bulk_upload_" . rawurlencode($uploaded_file["name"][$i]) . ".json");
 
                 // exec() and similar functions are disabled by security policy,
                 // so we are using a python script via CGI to validate whether file is divisible by num_page or not.
@@ -731,10 +734,6 @@ class SubmissionController extends AbstractController {
         //do the same thing for images
         $i = 1;
         foreach ($image_files as $image) {
-            // copy over the uploaded image
-            if (!@copy($image, FileUtils::joinPaths($version_path, ".upload_page_" . sprintf("%02d", $i) . "." . $image_extension))) {
-                return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
-            }
             if (!@unlink($image)) {
                 return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
             }
@@ -836,6 +835,29 @@ class SubmissionController extends AbstractController {
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
+        }
+        $generate_images_data = [
+            "job" => "GeneratePdfImages",
+            "pdf_file_path" => FileUtils::joinPaths($version_path, $uploaded_file_base_name),
+            "redactions" => array_map(
+                function (Redaction $redaction) {
+                    return [
+                        'page_number' => $redaction->getPageNumber(),
+                        'coordinates' => [$redaction->getX1(), $redaction->getY1(), $redaction->getX2(), $redaction->getY2()],
+                    ];
+                },
+                $gradeable->getRedactions()
+            ),
+            "output_dir" => str_replace("submissions", "submissions_processed", $version_path),
+        ];
+
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $generate_images_job  = FileUtils::joinPaths($daemon_job_queue_path, "generate_images_" . $who_id . "_" . $new_version . ".json");
+
+        //add new job to queue
+        if (!file_put_contents($generate_images_job, json_encode($generate_images_data, JSON_PRETTY_PRINT))) {
+            $this->core->getOutput()->renderJsonFail("Failed to write GeneratePdfImages job");
+            return $this->uploadResult("Failed to write GeneratePdfImages job", false);
         }
 
         return $this->uploadResult("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
@@ -1697,6 +1719,45 @@ class SubmissionController extends AbstractController {
 
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz . "\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
+        }
+
+
+        $has_docx = false;
+        if ($vcs_checkout === false) {
+            for ($i = 1; $i <= $num_parts; $i++) {
+                if (isset($uploaded_files[$i])) {
+                    for ($j = 0; $j < $count[$i]; $j++) {
+                        if (strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "docx") {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($has_docx) {
+            // Add to queue to convert Word documents to PDF files for viewing
+            $doc_queue_data = [
+                "job" => "DocToPDF",
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "user" => $user_id,
+                "version" => $new_version
+            ];
+
+            $doc_queue_file_helper = implode("__", ["doc_to_pdf", $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
+            $gradeable->getId(), $who_id, $new_version]);
+            $doc_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "daemon_job_queue",
+                $doc_queue_file_helper
+            );
+
+            if (@file_put_contents($doc_queue_file, FileUtils::encodeJson($doc_queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for pdf generation queue.", false);
+            }
         }
 
 

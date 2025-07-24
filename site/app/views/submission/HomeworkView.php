@@ -1112,6 +1112,10 @@ class HomeworkView extends AbstractView {
             }
 
             $files = $version_instance->getFiles();
+            $processed_files = $version_instance->getProcessedFiles();
+            if (is_null($processed_files)) {
+                $processed_files = [];
+            }
 
             $param = array_merge($param, [
                 'is_notebook' => $autograding_config->isNotebookGradeable(),
@@ -1119,6 +1123,7 @@ class HomeworkView extends AbstractView {
                 'days_late' => $version_instance->getDaysLate(),
                 'num_autogrades' => $version_instance->getHistoryCount(),
                 'files' => array_merge($files['submissions'], $files['checkout']),
+                'processed_files' => $processed_files,
                 'display_version_days_late' => $version_instance->getDaysLate(),
                 'autograder_machine' => $version_instance->getAutograderMachine(),
             ]);
