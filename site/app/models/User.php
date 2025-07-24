@@ -728,13 +728,13 @@ class User extends AbstractModel {
     /**
      * Construct the notification settings for a user.
      *
-     * @param array $details
-     * @return array<bool>
+     * @param array<string, bool> $details
+     * @return array<string, bool>
      */
     public static function constructNotificationSettings($details): array {
         $notification_settings = [];
 
-        /* Required  */
+        /* Required */
         $notification_settings['all_announcements'] = true;
         $notification_settings['all_announcements_email'] = true;
         $notification_settings['all_reply_thread'] = true;
@@ -751,7 +751,7 @@ class User extends AbstractModel {
         $notification_settings['grade_inquiry_resolved_reopened'] = true;
         $notification_settings['grade_inquiry_resolved_reopened_email'] = true;
 
-        /* Optional  */
+        /* Optional */
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
         $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;

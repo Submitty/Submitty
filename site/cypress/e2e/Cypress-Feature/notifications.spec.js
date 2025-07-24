@@ -36,8 +36,8 @@ const verifyIndividualNotificationUpdates = (name, reload = false, state = {}) =
 
     cy.get('input[data-testid="checkbox-input"]').each(($el) => {
         const inputName = $el.attr('name');
-        const currentChecked = $el.prop('checked');
         const isDisabled = $el.prop('disabled');
+        const currentChecked = $el.prop('checked');
         const previousChecked = state[inputName];
 
         if (!isDisabled && name === inputName) {
