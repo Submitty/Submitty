@@ -774,8 +774,8 @@ class User extends AbstractModel {
         $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
 
         $notification_settings['self_notification'] = $details['self_notification'] ?? false;
-        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
+        $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
 
         return $notification_settings;
     }
