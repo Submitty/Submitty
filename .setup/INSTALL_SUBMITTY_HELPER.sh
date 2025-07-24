@@ -877,13 +877,11 @@ fi
 # Install cypress related files if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
     echo -e "Install cypress related files"
-    # rsync if we are on vagrant
-    if [ "${VAGRANT}" == 1 ]; then
-        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-        rsync -rtz "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
-    # copy if we are on CI and not vagrant
-    elif [ "${IS_CI}" == 1 ]; then
-        cp -r "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-        cp -r "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+    
+    # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
+    copy_cmd=$([ "$IS_VAGRANT" == 1 ] && echo "rsync -rtz" || { [ "$IS_CI" == 1 ] && echo "cp -r"; })
+    if [ -n "$copy_cmd" ]; then
+        $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
     fi
 fi
