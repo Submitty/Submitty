@@ -147,7 +147,7 @@ describe('Test cases revolving around notification/email settings', () => {
         verifyBatchNotificationUpdates('reset-email-settings', 'Reset email settings', 'email', 'reset');
     });
 
-    it('Should allow the user to subscribe, unsubscribe, and reset notification/email settings for individual inputs', () => {
+    it('Should allow the user to subscribe and unsubscribe to individual notification/email inputs', () => {
         cy.get('input[data-testid="checkbox-input"]')
             .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
