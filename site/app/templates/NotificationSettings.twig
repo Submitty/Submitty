@@ -52,9 +52,9 @@
                         <span class="option-alt">Alert me when an instructor posts a new announcement</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification New Announcement" name="announcement" id="announcement" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_announcements'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification New Announcement" name="announcement" id="announcement" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_announcements'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email New Announcement" name="announcement_email" id="announcement_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_announcements_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email New Announcement" name="announcement_email" id="announcement_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_announcements_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -66,9 +66,9 @@
                         <span class="option-alt">Alert me when a reply is posted in a thread that I created</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Reply to My Thread" name="reply_thread" id="reply_thread" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_reply_thread'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Reply to My Thread" name="reply_thread" id="reply_thread" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_reply_thread'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Reply to My Thread" name="reply_thread_email" id="reply_thread_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_reply_thread_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Reply to My Thread" name="reply_thread_email" id="reply_thread_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_reply_thread_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -80,9 +80,9 @@
                         <span class="option-alt">Alert me when one of my posts is edited, deleted, or merged</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification My Post was Modified" name="my_post_altered" id="my_post_altered" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_my_post_altered'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification My Post was Modified" name="my_post_altered" id="my_post_altered" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_my_post_altered'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email My Post was Modified" name="my_post_altered_email" id="my_post_altered_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_my_post_altered_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email My Post was Modified" name="my_post_altered_email" id="my_post_altered_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['all_my_post_altered_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -94,10 +94,10 @@
                         <span class="option-alt">Alert me when a reply is posted in a thread in which I also posted</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Reply in Participating Thread" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['reply_in_post_thread'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Reply in Participating Thread" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['reply_in_post_thread'] ? 'true' : 'false' }}"></div>
 
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Reply in Participating Thread" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['reply_in_post_thread_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Reply in Participating Thread" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['reply_in_post_thread_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -109,9 +109,9 @@
                         <span class="option-alt">Alert me when a thread is merged</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Merged Thread" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Merged Thread" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['merge_threads_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Merged Thread" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['merge_threads_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -123,9 +123,9 @@
                         <span class="option-alt">Alert me when a thread is created</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Threads" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_new_threads'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Threads" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_threads'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All New Threads" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_new_threads_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All New Threads" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_threads_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -137,9 +137,9 @@
                         <span class="option-alt">Alert me when a post is created</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Posts" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_new_posts'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All New Posts" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_posts'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All New Posts" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_new_posts_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All New Posts" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_new_posts_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -152,9 +152,9 @@
                             <span class="option-alt">Alert me when a thread/post has been edited, deleted, or restored</span>
                         </span>
                     </div>
-                    <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All Modified Threads & Posts" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_modifications_forum'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification All Modified Threads & Posts" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_modifications_forum'] ? 'true' : 'false' }}"></div>
                     {% if email_enabled %}
-                        <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All Modified Threads & Posts" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_modifications_forum_email'] ? 'true' : 'false' }}"></div>
+                        <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email All Modified Threads & Posts" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_modifications_forum_email'] ? 'true' : 'false' }}"></div>
                     {% endif %}
                 </div>
             {% endif %}
@@ -172,9 +172,9 @@
                         <span class="option-alt">Alert me when manual/TA grades are released for a gradeable in this course</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Release" name="all_released_grades" id="all_released_grades" {% if notification_saves['all_released_grades'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_released_grades'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Release" name="all_released_grades" id="all_released_grades" {% if notification_saves['all_released_grades'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_released_grades'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Release" name="all_released_grades_email" id="all_released_grades_email" {% if notification_saves['all_released_grades_email'] %} checked="checked" {% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['all_released_grades_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Release" name="all_released_grades_email" id="all_released_grades_email" {% if notification_saves['all_released_grades_email'] %} checked="checked" {% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['all_released_grades_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -192,9 +192,9 @@
                         <span class="option-alt">{{ notification_setting_text }}</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Submitted" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_submitted'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Submitted" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_submitted'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Submitted" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_submitted_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Submitted" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_submitted_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -207,9 +207,9 @@
                         <span class="option-alt">{{ notification_setting_text }}</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Post" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_post'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Post" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_post'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Post" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_post_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Post" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_post_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -222,9 +222,9 @@
                         <span class="option-alt">{{ notification_setting_text }}</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Resolved" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Resolved" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Resolved" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Resolved" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -237,9 +237,9 @@
                         <span class="option-alt">{{ notification_setting_text }}</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Re-Opened" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_reopened'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Grade Inquiry Re-Opened" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_reopened'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Re-Opened" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked data-testid="notification-checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_reopened_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Grade Inquiry Re-Opened" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked data-testid="checkbox-input" data-default-checked="{{ defaults['grade_inquiry_resolved_reopened_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -256,9 +256,9 @@
                         <span class="option-alt">Alert me when I get an invitation to join a team</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Team Invitation" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_invite'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification Team Invitation" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_invite'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Team Invitation" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_invite_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Team Invitation" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_invite_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -270,9 +270,9 @@
                         <span class="option-alt">Alert me when a new team member joins my team</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification New Team Member" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_joined'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification New Team Member" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_joined'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email New Team Member" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_joined_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email New Team Member" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_joined_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -284,9 +284,9 @@
                         <span class="option-alt">Alert me when a team member makes a submission to the gradeable</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="TNotification eam Member Submission" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_member_submission'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="TNotification eam Member Submission" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_member_submission'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Team Member Submission" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['team_member_submission_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email Team Member Submission" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['team_member_submission_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
 
@@ -299,9 +299,9 @@
                         <span class="option-alt">Alert me when I perform the actions selected above</span>
                     </span>
                 </div>
-                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification My Actions/Updates" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['self_notification'] ? 'true' : 'false' }}"></div>
+                <div class="option-input col-md-3 notification-setting-input notification-checkbox"><input type="checkbox" aria-label="Notification My Actions/Updates" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['self_notification'] ? 'true' : 'false' }}"></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email My Actions/Updates" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="checked"{% endif %} data-testid="notification-checkbox-input" data-default-checked="{{ defaults['self_notification_email'] ? 'true' : 'false' }}"></div>
+                    <div class="option-input col-md-5 email-setting-input email-checkbox"><input type="checkbox" aria-label="Email My Actions/Updates" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="checked"{% endif %} data-testid="checkbox-input" data-default-checked="{{ defaults['self_notification_email'] ? 'true' : 'false' }}"></div>
                 {% endif %}
             </div>
         
@@ -333,7 +333,7 @@
                                     name="self_registration_email" 
                                     id="self-registration-email" 
                                     {% if notification_saves['self_registration_email'] %} checked {% endif %}
-                                    data-testid="notification-checkbox-input"
+                                    data-testid="checkbox-input"
                                     data-default-checked="{{ defaults['self_registration_email'] ? 'true' : 'false' }}"
                                 >
                         </div>

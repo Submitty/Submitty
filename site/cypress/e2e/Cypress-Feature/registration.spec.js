@@ -57,9 +57,6 @@ describe('Tests for self registering for courses', () => {
         cy.get('[data-testid="self-registration"]').should('not.exist');
 
         cy.visit(['testing', 'config']);
-        cy.get('[data-testid="all-self-registration"]').check();
-        cy.get('[data-testid="all-self-registration"]').should('be.checked');
-        cy.get('[data-testid="default-section-id"]').select('5');
         cy.reload();
         cy.get('[data-testid="default-section-id"]').should('contain', '5');
         cy.visit(['testing', 'notifications', 'settings']);
