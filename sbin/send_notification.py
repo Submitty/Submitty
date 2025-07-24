@@ -161,15 +161,15 @@ def construct_notifications(term, course, pending, notification_type):
             email_subject = f"Submissions Open: {gradeable['title']}"
             notification_content = (
                 f"{email_subject} (Due {format_timestamp(gradeable['submission_due_date'])} - "
-                f"{format_late_days(gradeable['max_late_days'])} allowed, "
-                f"{format_late_days(gradeable['remaining_late_days'])} remaining)"
+                f"{format_late_days(gradeable['remaining_late_days'])} remaining, "
+                f"{format_late_days(gradeable['max_late_days'])} allowed)"
             )
             email_body = (
                 f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
                 f"{get_full_course_name(term, course)}.\n\n"
                 f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
-                f"Late Days: {format_late_days(gradeable['max_late_days'])} allowed, "
-                f"{format_late_days(gradeable['remaining_late_days'])} remaining"
+                f"Late Days: {format_late_days(gradeable['remaining_late_days'])} remaining, "
+                f"{format_late_days(gradeable['max_late_days'])} allowed"
             )
         else:
             email_subject = notification_content = f"Grade Released: {gradeable['title']}"
@@ -371,15 +371,17 @@ def send_pending_notifications():
                 u.user_email AS user_email,
                 COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
                 COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled,
-                GREATEST(
-                    0, COALESCE(NULLIF(eg.eg_late_days, -1), :default_hw_late_days)
-                ) AS max_late_days,
+                COALESCE(NULLIF(eg.eg_late_days, -1), :default_hw_late_days) AS max_late_days,
                 COALESCE(ldc.late_days_remaining, :default_student_late_days) AS remaining_late_days
             FROM electronic_gradeable eg
             INNER JOIN gradeable AS g
                 ON eg.g_id = g.g_id
             INNER JOIN users AS u
                 ON u.registration_type <> 'withdrawn'
+                AND (
+                    u.registration_section IS NOT NULL
+                    OR u.user_group < 4
+                )
             LEFT JOIN notification_settings AS ns
                 ON u.user_id = ns.user_id
             LEFT JOIN LATERAL (
