@@ -1399,7 +1399,10 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
         formData.append('title', title);
     }
     else {
-        return;
+        if (title !== null) {
+            alert("Invalid file name.")
+            return;
+        }
     }
 
     if (overwrite !== null) {
