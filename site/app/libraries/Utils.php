@@ -120,6 +120,87 @@ class Utils {
     }
 
     /**
+     * Check if password has at least one of the following, Upper case letter, Lower case letter, Special character, and number
+     */
+    public static function isValidPassword(string $password): bool {
+        $upperCase = preg_match('/[A-Z]/', $password);
+        $lowerCase = preg_match('/[a-z]/', $password);
+        $specialChar = preg_match('/[^A-Za-z0-9]/', $password);
+        $numericVal = preg_match('/[0-9]/', $password);
+        return $upperCase >= 1 &&
+            $lowerCase >= 1 &&
+            $specialChar >= 1 &&
+            $numericVal >= 1 &&
+            strlen($password) >= 12;
+    }
+
+    /**
+     * Check if the user ID meets requirements specified in the Submitty config file
+     *
+     * @param array<mixed> $requirements The user id requirements taken from the config file, like length, name requirements, etc.
+     */
+    public static function isAcceptedUserId(array $requirements, string $user_id, string $given_name, string $family_name, string $email): bool {
+        if (strlen($user_id) < $requirements['min_length'] || strlen($user_id) > $requirements['max_length']) {
+            return false;
+        }
+        // Allow any user ID, if it fits in the size restraints.
+        if ($requirements['any_user_id'] === true) {
+            return true;
+        }
+        if ($requirements['require_name'] === true) {
+            $name_requirements = $requirements['name_requirements'];
+            $given_first = $name_requirements['given_first'] === 'true';
+
+            $id_given_name = substr($user_id, ($given_first ? 0 : $name_requirements['family_name']), ($given_first ? $name_requirements['given_name'] : strlen($user_id)));
+            $id_family_name = substr($user_id, ($given_first ? $name_requirements['given_name'] : 0), ($given_first ? strlen($user_id) : $name_requirements['family_name']));
+            $is_given_name = (strtolower($id_given_name) === substr(strtolower($given_name), 0, $name_requirements['given_name']));
+            $is_family_name = (strtolower($id_family_name) === substr(strtolower($family_name), 0, $name_requirements['family_name']));
+            if ($is_family_name && $is_given_name) {
+                return true;
+            }
+            return false;
+        }
+        if ($requirements['require_email'] === true) {
+            if ($requirements['email_requirements']['whole_email']) {
+                return $user_id === $email;
+            }
+            elseif ($requirements['email_requirements']['whole_prefix']) {
+                $split_email = explode('@', $email);
+                $email_extension = array_pop($split_email);
+                return $user_id === implode('', $split_email);
+            }
+            else {
+                return substr($user_id, 0, $requirements['email_requirements']['prefix_count']) === substr($email, 0, $requirements['email_requirements']['prefix_count']);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if the email extension is in the accepted emails part of the Submitty config file
+     *
+     * @param array<string> $accepted_emails Array of accepted email extensions, like @gmail.com etc.
+     */
+    public static function isAcceptedEmail(array $accepted_emails, string $email): bool {
+        $split_email = explode('@', trim($email));
+        // No @ symbol found
+        if (count($split_email) < 2) {
+            return false;
+        }
+        return in_array($split_email[count($split_email) - 1], $accepted_emails, true);
+    }
+
+    /**
+     * @return array<mixed>
+     * Generates a random verification code for self account creation.
+     */
+    public static function generateVerificationCode(Core $core, bool $isDebug): array {
+        $code = $isDebug ? '00000000' : Utils::generateRandomString();
+        $timestamp = $core->getDateTimeNow()->modify('+15 minutes'); // 15 minutes from now, may eventually set this as a configurable value.
+        return ['code' => strval($code), 'expiration' => $timestamp];
+    }
+
+    /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
      * such that it should only be accessed via HTTPS (secure) as well as allow easily passing an array to set as
      * the cookie data. This will also set the value in the $_COOKIE superglobal so that it's available without a

@@ -12,6 +12,7 @@ submitty_install_language: en_US
 submitty_install_submitty_url: localhost
 submitty_install_vcs_url: git.localhost
 submitty_install_institution_name: Example University
+submitty_install_self_account_creation: n
 submitty_install_sysadmin_email: sysadmin@localhost
 submitty_install_submitty_email: submitty@localhost
 submitty_install_institution_url: localhost

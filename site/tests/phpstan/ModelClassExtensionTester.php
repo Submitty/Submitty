@@ -12,10 +12,10 @@ class ModelClassExtensionTester extends PHPStanTestCase {
         return [
             [Button::class, 'getOnclick', true],
             [Button::class, 'setOnclick', true],
-            [Button::class, 'isOnclick', true],
+            [Button::class, 'hasOnClick', true],
             [Button::class, 'getAriaLabel', true],
             [Button::class, 'setAriaLabel', true],
-            [Button::class, 'isOnclick', true],
+            [Button::class, 'hasOnclick', true],
             [Button::class, 'getFoo', false],
             [Button::class, 'setFoo', false],
             [Button::class, 'isFoo', false],
@@ -29,7 +29,7 @@ class ModelClassExtensionTester extends PHPStanTestCase {
      * @dataProvider methodDataProvider
      */
     public function testHasMethod(string $class, string $method, bool $expected): void {
-        $broker = $this->createBroker();
+        $broker = $this->createReflectionProvider();
         $extension = new ModelClassExtension();
         $reflection = $broker->getClass($class);
         $this->assertSame($expected, $extension->hasMethod($reflection, $method));
@@ -39,7 +39,7 @@ class ModelClassExtensionTester extends PHPStanTestCase {
      * @dataProvider methodDataProvider
      */
     public function testGetMethod(string $class, string $method, bool $expected): void {
-        $broker = $this->createBroker();
+        $broker = $this->createReflectionProvider();
         $extension = new ModelClassExtension();
         $reflection = $broker->getClass($class);
         $this->assertSame($method, $extension->getMethod($reflection, $method)->getName());

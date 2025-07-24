@@ -21,8 +21,8 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AdminGradeableController
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
+#[AccessControl(role: "INSTRUCTOR")]
 class AdminGradeableController extends AbstractController {
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods: ["GET"])]
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
@@ -594,6 +594,7 @@ class AdminGradeableController extends AbstractController {
             'all_nonuploaded_config_paths' => array_merge($default_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
+            'selected_autograding_configuration_path' => $gradeable->getAutogradingConfigPath(),
 
             'timezone_string' => $this->core->getUser()->getUsableTimeZone()->getName(),
 
@@ -624,8 +625,8 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Edit Students popup for peer matrix. Updates the database with
      *  the grader's new students.
      * @param String $gradeable_id
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/update_peer_assignment", methods: ["POST"])]
     public function editGraderPeerSubmit($gradeable_id) {
         $grader_id = $_POST['grader_id'];
@@ -659,8 +660,8 @@ class AdminGradeableController extends AbstractController {
      * Called when user presses submit on an Add New Grader to Matrix popup for peer matrix. Updates the
      * database with the grader's new students.
      * @param String $gradeable_id
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/new_peer_grader", methods: ["POST"])]
     public function newGraderPeerSubmit($gradeable_id) {
         $new_grader_id = $_POST['new_grader_id'];
@@ -2069,5 +2070,100 @@ class AdminGradeableController extends AbstractController {
         }
 
         $this->core->getOutput()->renderJsonSuccess();
+    }
+
+    /**
+     * Updates the saved config structure when the user adds or deletes.
+     */
+    #[Route("/courses/{_semester}/{_course}/gradeable/edit/modify_structure", methods: ["POST"])]
+    public function modifyStructure(): void {
+        $gradeable     = $this->tryGetGradeable($_POST['gradeable_id']);
+        $action        = $_POST['action'];
+        $incoming_path = $_POST['path'] ?? '';
+
+        // Permissions checks omitted for brevity
+
+        $base_path = $gradeable->getAutogradingConfigPath();
+
+        if ($action === 'delete') {
+            // ── NORMALIZE to a relative path inside $base_path ──
+            if (str_starts_with($incoming_path, $base_path)) {
+                $relative_path = ltrim(substr($incoming_path, strlen($base_path)), '/');
+            }
+            else {
+                $relative_path = ltrim($incoming_path, '/');
+            }
+
+            // ── REBUILD the full path ──
+            $full_path = FileUtils::joinPaths($base_path, $relative_path);
+
+            // Validation
+            if (!FileUtils::validPath($full_path) || !str_starts_with($full_path, $base_path)) {
+                $this->core->getOutput()->renderJsonFail("Invalid path: $incoming_path");
+                return;
+            }
+
+            // Delete
+            if (is_dir($full_path)) {
+                FileUtils::recursiveRmdir($full_path);
+            }
+            else {
+                unlink($full_path);
+            }
+
+            // Enqueue & respond
+            $result = $this->enqueueBuild($gradeable);
+            if ($result !== null) {
+                $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+                return;
+            }
+            $this->core->getOutput()->renderJsonSuccess("Deleted.");
+            return;
+        }
+
+        // ── PREPARE for add_folder / add_file ──
+        $relative_path = ltrim($incoming_path, '/');
+        $full_path     = FileUtils::joinPaths($base_path, $relative_path);
+
+        // Validation
+        if (!FileUtils::validPath($full_path) || !str_starts_with($full_path, $base_path)) {
+            $this->core->getOutput()->renderJsonFail("Invalid path.");
+            return;
+        }
+
+        switch ($action) {
+            case 'add_folder':
+                if (!FileUtils::createDir($full_path)) {
+                    $this->core->getOutput()->renderJsonFail("Could not create folder.");
+                    return;
+                }
+                $result = $this->enqueueBuild($gradeable);
+                if ($result !== null) {
+                    $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+                    return;
+                }
+                $this->core->getOutput()->renderJsonSuccess("Folder added.");
+                return;
+
+            case 'add_file':
+                if (!isset($_FILES['file']['tmp_name']) || $_FILES['file']['tmp_name'] === '') {
+                    $this->core->getOutput()->renderJsonFail("No file uploaded.");
+                    return;
+                }
+                $content = file_get_contents($_FILES['file']['tmp_name']);
+                if ($content === false || !FileUtils::writeFile($full_path, $content)) {
+                    $this->core->getOutput()->renderJsonFail("Could not create file.");
+                    return;
+                }
+                $result = $this->enqueueBuild($gradeable);
+                if ($result !== null) {
+                    $this->core->getOutput()->renderJsonFail("An error occurred queuing the gradeable for rebuild.");
+                    return;
+                }
+                $this->core->getOutput()->renderJsonSuccess("File added.");
+                return;
+        }
+
+        $this->core->getOutput()->renderJsonFail("Unknown action.");
     }
 }

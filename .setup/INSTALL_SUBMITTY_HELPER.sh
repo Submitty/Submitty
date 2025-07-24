@@ -278,6 +278,7 @@ if [ "${IS_WORKER}" == 0 ]; then
     # copy more_autograding_examples in order to make cypress autograding work
     if [ "${VAGRANT}" == 1 ]; then 
         rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        rsync -rtz "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
     fi
 
     # root will be owner & group of these files

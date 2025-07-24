@@ -12,7 +12,7 @@ class CategoryRepository extends EntityRepository {
      * @return Category[]
      */
     public function getCategories(): array {
-        $qb = $this->_em->createQueryBuilder();
+        $qb = $this->getEntityManager()->createQueryBuilder();
         $qb->select('category')
             ->from(Category::class, 'category')
             ->addOrderBy('category.rank', 'ASC')
