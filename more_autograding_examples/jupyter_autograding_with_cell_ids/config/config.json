@@ -13,7 +13,7 @@
   "testcases": [
     {
       "title": "Executes successfully",
-      "command": "python3 jupyter_notebook_grader.py",
+      "command": "jupyter_notebook_grader -i *.ipynb -o executed.ipynb",
       "points": 1,
       "validation": [
         {
