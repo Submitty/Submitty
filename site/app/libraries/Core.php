@@ -225,6 +225,9 @@ class Core {
         if (!$this->config->isCourseLoaded()) {
             return;
         }
+        if ($this->course_db !== null && $this->course_db->isConnected()) {
+            $this->course_db->disconnect();
+        }
         $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
         $this->course_db->connect($this->config->isDebug());
 

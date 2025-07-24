@@ -55,6 +55,8 @@ class HomePageView extends AbstractView {
         }
 
         $user_id = $this->core->getUser()->getId();
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $notifications = $this->core->getQueries()->getAllRecentUserNotifications($user_id, $courses);
 
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
@@ -63,7 +65,7 @@ class HomePageView extends AbstractView {
             "name" => "HomePage",
             "args" => [
                 "statuses" => $statuses,
-                "notifications" => $this->core->getQueries()->getAllRecentUserNotifications($user_id, $this->core->getQueries()->getCourseForUserId($user_id)),
+                "notifications" => $notifications,
             ]
         ]);
     }

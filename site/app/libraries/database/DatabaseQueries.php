@@ -5404,10 +5404,10 @@ AND gc_id IN (
     }
 
     /**
-    * Returns all notifications for a user in all non-archived courses in the last week.
-    * @param string $user_id
-    * 
-    */
+     * Get 10 most recent notifications in each unarchived course
+     * @param string $user_id
+     * @param array $courses
+     */
     public function getAllRecentUserNotifications($user_id, $courses) {
         $all_rows = [];
         $original_config = clone $this->core->getConfig();
