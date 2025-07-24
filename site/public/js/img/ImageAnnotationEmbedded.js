@@ -1,15 +1,15 @@
 /* global markerjsUI, $, csrfToken */
 /* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage */
 
-let currentAnnotations = null;
-let targetImg = null;
-let gradeableId = '';
-let userId = '';
-let graderId = '';
-let filename = '';
-let filePath = '';
-let csrfToken = '';
-let isStudent = false;
+var currentAnnotations = null;
+var targetImg = null;
+var gradeableId = '';
+var userId = '';
+var graderId = '';
+var filename = '';
+var filePath = '';
+var csrfToken = '';
+var isStudent = false;
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -129,6 +129,7 @@ function saveAnnotations() {
                 } else {
                     $("#annotation-status").text("Error saving annotations: " + (response.message || "Unknown error")).css("color", "red");
                 }
+                window.document.reload();
             },
             error: function(xhr, status, error) {
                 $("#annotation-status").text("Error saving annotations: " + error).css("color", "red");
@@ -154,11 +155,6 @@ function clearAnnotations() {
         targetImg.src = originalSrc;
         $("#annotation-status").text("Annotations cleared (not saved)").css("color", "red");
     }
-}
-
-function viewAllAnnotations() {
-    const allAnnotations = JSON.parse($("#all-annotations").val() || "{}");
-    showAllAnnotations(allAnnotations);
 }
 
 function downloadImage() {
@@ -212,82 +208,48 @@ function renderAnnotationsOnImage() {
     }
 }
 
-function showAllAnnotations(allAnnotations) {
-    let html = '<div style="padding: 10px;"><h4>All Annotations for this Image:</h4>';
+function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existingAnnotations) {
+    // Set global variables from parameters
+    gradeableId = gId;
+    userId = uId;
+    graderId = grId;
+    filename = fname;
+    filePath = fPath;
+    csrfToken = token;
+    isStudent = isStud;
     
-    if (Object.keys(allAnnotations).length === 0) {
-        html += '<p>No annotations found for this image.</p>';
-    } else {
-        for (const [grader, annotations] of Object.entries(allAnnotations)) {
-            html += '<div style="margin-bottom: 10px; padding: 5px; border: 1px solid #ccc;"><strong>Grader: ' + grader + '</strong></div>';
-        }
-    }
-    
-    html += '</div>';
-    
-    // Create a modal or popup to show all annotations
-    if ($("#annotation-modal").length === 0) {
-        $("body").append('<div id="annotation-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999;"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; max-width: 80%; max-height: 80%; overflow: auto;"><button id="close-annotation-modal" style="float: right; margin-bottom: 10px;">&times;</button><div id="annotation-modal-content"></div></div></div>');
+    // Wait for DOM to be ready
+    $(document).ready(function() {
+        // Get the target image element
+        targetImg = document.getElementById("annotatable-image");
         
-        $("#close-annotation-modal").on("click", function() {
-            $("#annotation-modal").hide();
-        });
-    }
-    
-    $("#annotation-modal-content").html(html);
-    $("#annotation-modal").show();
-}
-
-function initImageAnnotation() {
-    // Initialize variables from DOM
-    targetImg = document.getElementById("annotatable-image");
-    gradeableId = $("#gradeable-id").val();
-    userId = $("#user-id").val();
-    graderId = $("#grader-id").val();
-    filename = $("#filename").val();
-    filePath = $("#file-path").val();
-    csrfToken = $("#csrf-token").val();
-    isStudent = $("#is-student").val() === 'true';
-    
-    // Check if markerjsUI is available
-    console.log("markerjsUI available:", typeof markerjsUI);
-    if (typeof markerjsUI !== 'undefined') {
-        console.log("markerjsUI.AnnotationEditor available:", typeof markerjsUI.AnnotationEditor);
-        console.log("markerjsUI.AnnotationViewer available:", typeof markerjsUI.AnnotationViewer);
-    } else {
-        console.error("markerjsUI is not defined - ensure markerjs3.js and markerjs-ui.umd.js are loaded in correct order");
-    }
-    
-    // Load existing annotations
-    const existingAnnotations = $("#existing-annotations").val();
-    if (existingAnnotations && existingAnnotations !== "[]") {
-        try {
-            currentAnnotations = JSON.parse(existingAnnotations);
-            renderAnnotationsOnImage();
-        } catch (e) {
-            console.error("Error loading existing annotations:", e);
+        // Check if markerjsUI is available
+        console.log("markerjsUI available:", typeof markerjsUI);
+        if (typeof markerjsUI !== 'undefined') {
+            console.log("markerjsUI.AnnotationEditor available:", typeof markerjsUI.AnnotationEditor);
+            console.log("markerjsUI.AnnotationViewer available:", typeof markerjsUI.AnnotationViewer);
+        } else {
+            console.error("markerjsUI is not defined - ensure markerjs3.js and markerjs-ui.umd.js are loaded in correct order");
         }
-    }
-    
-    // Update the add annotations button to open the markerjs-ui editor
-    $("#add-annotations-btn").off('click').on("click", addAnnotations);
-    
-    // Bind other event handlers
-    $("#save-annotations-btn").on("click", saveAnnotations);
-    $("#clear-annotations-btn").on("click", clearAnnotations);
-    $("#view-all-annotations-btn").on("click", viewAllAnnotations);
-    $("#download-image-btn").on("click", downloadImage);
-    
-    // Handle image load errors
-    if (targetImg) {
-        targetImg.onerror = function() {
-            console.error('Failed to load image:', filePath);
-            $("#image-error-message").text("Error loading image: " + filename).show();
-        };
-    }
+        
+        // Handle image load errors
+        if (targetImg) {
+            targetImg.onerror = function() {
+                console.error('Failed to load image:', fPath);
+                $("#image-error-message").text("Error loading image: " + fname).show();
+            };
+        }
+        
+        // Load existing annotations if available
+        if (existingAnnotations && existingAnnotations.length > 0) {
+            try {
+                currentAnnotations = existingAnnotations;
+                renderAnnotationsOnImage();
+            } catch (e) {
+                console.error("Error loading existing annotations:", e);
+            }
+        }
+        
+        console.log("Image annotation system initialized with parameters");
+    });
 }
-
-// Initialize when document is ready
-$(document).ready(function() {
-    initImageAnnotation();
-});

@@ -23,14 +23,6 @@ declare global {
         rotateImage(url: string | undefined, rotateBy: string): void;
         loadPDF(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
         viewFileFullPanel(name: string, path: string, page_num: number, panelStr: string): JQueryXHR | undefined;
-        // Image annotation functions
-        initImageAnnotation(): void;
-        addAnnotations(): void;
-        saveAnnotations(): void;
-        clearAnnotations(): void;
-        viewAllAnnotations(): void;
-        downloadImage(): void;
-        showAnnotationPalette(): void;
     }
     interface JQueryStatic {
         active: number;
@@ -686,6 +678,8 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
             },
             success: function (data: string) {
                 console.log(data);
+                // Clear previous PDF content before appending new content
+                $('#file-content').empty();
                 $('#file-content').append(data);
             },
         });
@@ -717,7 +711,9 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 },
                 success: function (data: string) {
                     console.log(data);
-                    $('#file-content').append(data);
+                    // Clear previous image content before appending new content
+                    $(fileFullPanelOptions[panel]['fileContent']).empty();
+                    $(fileFullPanelOptions[panel]['fileContent']).append(data);
                 },
             });
         } else {
@@ -757,7 +753,7 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     // Removing these two to reset the full panel viewer.
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
     // Also remove image annotation containers
-    $(`#image_annotation_container_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
+    $(`${fileFullPanelOptions[panel]['fileContent']}`).empty();
     
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();

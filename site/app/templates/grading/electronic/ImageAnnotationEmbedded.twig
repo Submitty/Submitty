@@ -15,24 +15,24 @@
                  alt="{{ filename }}" />
             
             <div class="annotation-toolbar">
-                <button id="add-annotations-btn" class="btn btn-primary">
+                <button id="add-annotations-btn" class="btn btn-primary" onclick="if (typeof addAnnotations === 'function') addAnnotations();">
                     <i class="fas fa-edit"></i> Edit Annotations
                 </button>
-                <button id="save-annotations-btn" class="btn btn-success">
+                <button id="save-annotations-btn" class="btn btn-success" onclick="if (typeof saveAnnotations === 'function') saveAnnotations();">
                     <i class="fas fa-save"></i> Save Annotations
                 </button>
-                <button id="clear-annotations-btn" class="btn btn-warning">
+                <button id="clear-annotations-btn" class="btn btn-warning" onclick="if (typeof clearAnnotations === 'function') clearAnnotations();">
                     <i class="fas fa-eraser"></i> Clear Annotations
                 </button>
                 
                 {% if not student_popup and can_download %}
-                    <button id="view-all-annotations-btn" class="btn btn-info">
+                    <button id="view-all-annotations-btn" class="btn btn-info" onclick="if (typeof viewAllAnnotations === 'function') viewAllAnnotations();">
                         <i class="fas fa-eye"></i> View All Annotations
                     </button>
                 {% endif %}
                 
                 {% if can_download %}
-                    <button id="download-image-btn" class="btn btn-secondary">
+                    <button id="download-image-btn" class="btn btn-secondary" onclick="if (typeof downloadImage === 'function') downloadImage();">
                         <i class="fas fa-download"></i> Download Image
                     </button>
                 {% endif %}
@@ -55,3 +55,7 @@
         </div>
     </div>
 </div>
+
+<script>
+    initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons[grader_id] | default('[]') | raw }});
+</script>
