@@ -40,7 +40,7 @@ const verifyIndividualNotificationUpdates = (name, reload = false, state = {}) =
         const isDisabled = $el.prop('disabled');
         const previousChecked = state[inputName];
 
-        if (name === inputName && !isDisabled) {
+        if (!isDisabled && name === inputName) {
             // Checkboxes that are not mandatory should have been toggled
             expect(currentChecked).to.not.equal(previousChecked);
             // Persist the most recent state of the checkbox
@@ -57,7 +57,7 @@ const verifyIndividualNotificationUpdates = (name, reload = false, state = {}) =
         cy.reload().then(() => verifyIndividualNotificationUpdates(name, true, state));
     }
     else if (!state.reversed) {
-        // Perform the opposite action at most once
+        // Perform the opposite action at most once, restoring the original state
         state.reversed = true;
         cy.then(() => verifyIndividualNotificationUpdates(name, false, state));
     }
@@ -124,6 +124,7 @@ describe('Test cases revolving around notification/email settings', () => {
     });
 
     after(() => {
+        // Reset the self registration setting to its original state for the sample course
         toggleSelfRegistration(false);
     });
 
