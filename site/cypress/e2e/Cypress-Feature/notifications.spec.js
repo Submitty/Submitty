@@ -1,33 +1,37 @@
 import { buildUrl } from '../../support/utils';
 
-const verifyUpdateMessage = () => {
-    cy.get('[data-testid="popup-message"]')
-        .should('contain', 'Notification settings have been saved.')
-        .get('[data-testid="remove-message-popup"]')
-        .first()
-        .click();
+const verifyUpdateMessage = (exists = true) => {
+    if (exists) {
+        cy.get('[data-testid="popup-message"]')
+            .should('contain', 'Notification settings have been saved.')
+            .get('[data-testid="remove-message-popup"]')
+            .first()
+            .click();
+    }
+    else {
+        cy.get('[data-testid="popup-message"]').should('not.exist');
+    }
 };
 
 const verifyIndividualNotificationUpdate = (name, reload = false, state = {}) => {
     if (Object.keys(state).length === 0) {
-        cy.get('[data-testid="checkbox-input"]').each(($el) => {
-            const $elJQ = Cypress.$($el);
-            const inputName = $elJQ.attr('name');
-            state[inputName] = $elJQ.prop('checked');
+        // Initialize the state of all checkboxes before performing the initial action
+        cy.get('input[data-testid="checkbox-input"]').each(($el) => {
+            const $checkbox = Cypress.$($el);
+            const inputName = $checkbox.attr('name');
+            state[inputName] = $checkbox.prop('checked');
         });
-    }
-    else {
-        cy.log(`Skipping state init for: ${name}`);
     }
 
     cy.get(`input[data-testid="checkbox-input"][name="${name}"]`).then(($checkbox) => {
         const isDisabled = $checkbox.prop('disabled');
+
         if (!isDisabled) {
             cy.wrap($checkbox).click();
             verifyUpdateMessage();
         }
         else {
-            cy.get('[data-testid="popup-message"]').should('not.exist');
+            verifyUpdateMessage(false);
         }
     });
 
@@ -39,14 +43,15 @@ const verifyIndividualNotificationUpdate = (name, reload = false, state = {}) =>
             const previousChecked = state[inputName];
 
             if (inputName === name && !isDisabled) {
+                // Inputs that are not mandatory should have been toggled
                 expect(currentChecked).to.not.equal(previousChecked);
+                // Persist the most recent state of the checkbox
+                state[inputName] = currentChecked;
             }
             else {
+                // Other inputs should remain unchanged
                 expect(currentChecked).to.equal(previousChecked);
             }
-
-            // Persist the most recent state of the checkbox
-            state[inputName] = currentChecked;
         });
     });
 
@@ -55,21 +60,23 @@ const verifyIndividualNotificationUpdate = (name, reload = false, state = {}) =>
         cy.reload();
         verifyIndividualNotificationUpdate(name, true, state);
     }
-    else if (!state['toggle']) {
+    else if (!state['opposite']) {
         // Perform the opposite action
-        state['toggle'] = true;
+        state['opposite'] = true;
         verifyIndividualNotificationUpdate(name, false, state);
     }
 };
 
-const verifyBulkNotificationUpdates = (type, action, reload = false) => {
+const verifyBulkNotificationUpdates = (identifier, message, type, action, reload = false) => {
     // Verify the success message is displayed
     if (!reload) {
+        cy.get(`[data-testid="${identifier}"]`).should('be.enabled').click();
+        cy.get('[data-testid="notification-settings-button-group"]').should('contain', message).click();
         verifyUpdateMessage();
     }
 
-    const checkboxClass = `${type === 'notification' ? '.notification-checkbox' : '.email-checkbox'} [data-testid="checkbox-input"]`;
-    cy.get(checkboxClass)
+    const classPrefix = `${type === 'notification' ? '.notification-checkbox' : '.email-checkbox'}`;
+    cy.get(`${classPrefix} [data-testid="checkbox-input"]`)
         .should('have.length.greaterThan', 0)
         .each(($el) => {
             switch (action) {
@@ -77,10 +84,10 @@ const verifyBulkNotificationUpdates = (type, action, reload = false) => {
                     expect($el.prop('checked')).to.be.true;
                     break;
                 case 'unsubscribe':
-                    expect($el.prop('checked') === $el.prop('disabled')).to.be.true;
+                    expect($el.prop('checked')).to.equal($el.prop('disabled'));
                     break;
                 case 'reset':
-                    expect($el.attr('data-default-checked') === 'true' ? $el.prop('checked') : !$el.prop('checked')).to.be.true;
+                    expect($el.prop('checked')).to.equal($el.attr('data-default-checked') === 'true');
                     break;
                 default:
                     throw new Error(`Invalid action: ${action}`);
@@ -90,7 +97,7 @@ const verifyBulkNotificationUpdates = (type, action, reload = false) => {
     if (!reload) {
         // Verify the updates persist after a full page reload
         cy.reload();
-        verifyBulkNotificationUpdates(type, action, true);
+        verifyBulkNotificationUpdates(identifier, message, type, action, true);
     }
 };
 
@@ -134,43 +141,30 @@ describe('Test cases revolving around notification settings', () => {
     });
 
     it('Should allow the user to subscribe, unsubscribe, and reset notification settings', () => {
-        // Test subscribing to all site notifications
-        cy.get('[data-testid="subscribe-all-notifications"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all notifications').click();
-        verifyBulkNotificationUpdates('notification', 'subscribe');
+        // Subscribe to all notifications
+        verifyBulkNotificationUpdates('subscribe-all-notifications', 'Subscribe to all notifications', 'notification', 'subscribe');
 
-        // Unsubscribe from all optional notifications
-        cy.get('[data-testid="unsubscribe-all-optional-notifications"]').should('be.enabled').click();
-        cy.get('[data-testid="unsubscribe-all-optional-notifications"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Unsubscribe from all optional notifications').click();
-        verifyBulkNotificationUpdates('notification', 'unsubscribe');
+        // Unsubscribe from all optional notifications (optional notifications are disabled by default)
+        verifyBulkNotificationUpdates('unsubscribe-all-optional-notifications', 'Unsubscribe from all optional notifications', 'notification', 'unsubscribe');
 
-        // Reset notification settings
-        cy.get('[data-testid="reset-notification-settings"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Reset notification settings').click();
-        verifyBulkNotificationUpdates('notification', 'reset');
+        // Reset notification settings to defaults
+        verifyBulkNotificationUpdates('reset-notification-settings', 'Reset notification settings', 'notification', 'reset');
 
-        // Test subscribing to all emails
-        cy.get('[data-testid="subscribe-all-emails"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all emails').click();
-        verifyBulkNotificationUpdates('email', 'subscribe');
+        // Subscribe to all emails
+        verifyBulkNotificationUpdates('subscribe-all-emails', 'Subscribe to all emails', 'email', 'subscribe');
 
-        // Unsubscribe from all optional emails
-        cy.get('[data-testid="unsubscribe-all-optional-emails"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Unsubscribe from all optional emails').click();
-        verifyBulkNotificationUpdates('email', 'unsubscribe');
+        // Unsubscribe from all optional emails (optional emails are disabled by default)
+        verifyBulkNotificationUpdates('unsubscribe-all-optional-emails', 'Unsubscribe from all optional emails', 'email', 'unsubscribe');
 
-        // Reset email settings
-        cy.get('[data-testid="reset-email-settings"]').should('be.enabled').click();
-        cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Reset email settings').click();
-        verifyBulkNotificationUpdates('email', 'reset');
+        // Reset email settings to defaults
+        verifyBulkNotificationUpdates('reset-email-settings', 'Reset email settings', 'email', 'reset');
     });
 
     it('Should allow the user to subscribe, unsubscribe, and reset notification settings for individual checkboxes', () => {
         cy.get('.notification-checkbox [data-testid="checkbox-input"]')
             .each(($el) => {
-                const name = $el.attr('name');
-                verifyIndividualNotificationUpdate(name);
+                // Verify check and uncheck actions for each individual checkbox
+                verifyIndividualNotificationUpdate($el.attr('name'));
             });
     });
 });
