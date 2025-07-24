@@ -77,5 +77,4 @@ window.filterWithdrawnUpdate = () => {
         withdrawnElements.show();
         window.Cookies.set('filter_withdrawn_student', 'false', { path: coursePath, expires: 365 });
     }
-    window.displaySuccessMessage('Withdrawn students filter updated successfully.');
 };
