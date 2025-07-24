@@ -45,22 +45,54 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
   // loop over all lines of the file
   while (std::getline(system_call_categories_file,line)) {
 
-    // if it's a system call
-    if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
-      int startpoint = line.find("ALLOW_SYSCALL(");
+    // ignore system call by number for now...
+    if (line.find("ALLOW_SYSCALL_BY_NUMBER(") != std::string::npos) {
+      int startpoint = line.find("ALLOW_SYSCALL_BY_NUMBER(");
+      int midpoint = line.find(",");
+      std::string tmp = line.substr(midpoint+1,line.size()-midpoint-1);
+      int midpoint2 = line.size()-tmp.size() + tmp.find(",");
       int endpoint = line.find(");");
       assert (startpoint != std::string::npos);
+      assert (midpoint != std::string::npos);
+      assert (midpoint2 != std::string::npos);
       assert (endpoint != std::string::npos);
+      assert (startpoint < midpoint);
+      assert (midpoint < midpoint2);
+      assert (midpoint2 < endpoint);
       assert (category != "");
-      assert (restriction != "");
-      assert (restriction == actual_restriction);
-      // there should be nothing else on this line
       assert (line.size() == endpoint+2);
-      assert (endpoint-startpoint-14 > 1);
-      std::string system_call = line.substr(startpoint+14,endpoint-startpoint-14);
+      assert (endpoint-startpoint-24 > 1);
+      std::string system_call = line.substr(startpoint+24,midpoint-startpoint-24);
+      std::string category2 = line.substr(midpoint2+3,endpoint-midpoint2-3-1);
+      assert (restriction == "RESTRICTED");
+      assert ("RESTRICTED:"+category == category2);
       // make sure there aren't duplicates
       assert (all_system_calls.find(system_call) == all_system_calls.end());
-      all_system_calls[system_call] = category;
+      all_system_calls[system_call] = category2;
+    }
+
+    // if it's a system call
+    else if (line.find("ALLOW_SYSCALL(") != std::string::npos) {
+      int startpoint = line.find("ALLOW_SYSCALL(");
+      int midpoint = line.find(",");
+      int endpoint = line.find(");");
+      assert (startpoint != std::string::npos);
+      assert (midpoint != std::string::npos);
+      assert (endpoint != std::string::npos);
+      assert (startpoint < midpoint);
+      assert (midpoint < endpoint);
+      assert (category != "");
+      assert (line.size() == endpoint+2);
+      assert (endpoint-startpoint-14 > 1);
+      std::string system_call = line.substr(startpoint+14,midpoint-startpoint-14);
+      std::string category2 = line.substr(midpoint+3,endpoint-midpoint-3-1);
+      assert (restriction == "SAFELIST" ||
+              restriction == "RESTRICTED" ||
+              restriction == "FORBIDDEN");
+      assert (restriction+":" +category == category2);
+      // make sure there aren't duplicates
+      assert (all_system_calls.find(system_call) == all_system_calls.end());
+      all_system_calls[system_call] = category2;
     } 
     
     // ignore blank lines
@@ -143,7 +175,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
       // something unexpected...
       else {
-        std::cout << "LINE '" << line << "'" << std::endl;
+        std::cout << "UNKNOWN LINE '" << line << "'" << std::endl;
         exit(0);
       }
     }
@@ -151,7 +183,7 @@ void parse_system_calls(std::ifstream& system_call_categories_file,
 
   // verify that we have all of the linux system calls (32 & 64 bit)
   std::cout << "all_system_calls.size() " <<  all_system_calls.size() << std::endl;
-  assert (all_system_calls.size() == 398);
+  assert (all_system_calls.size() == 400);
 }
 
 
@@ -199,6 +231,11 @@ void parse_strace_output(std::ifstream &strace_output_file,
       //std::cout << "STRACE LINE '" << line << "'" << std::endl;
       //std::cout << "attempt " << full_name << std::endl;
 
+      if (itr == all_system_calls.end() && full_name.find("syscall_") != std::string::npos) {
+        std::string just_num = full_name.substr(8,full_name.size()-8);
+        itr = all_system_calls.find(just_num);
+      }
+
       if (line[0] == '<') {
         // skip lines like: '<... wait4 resumed> [{WIFEXITED(s) && WEXITSTATUS(s) == 0}], 0, NULL) = 2200'
         continue;
@@ -220,7 +257,7 @@ void parse_strace_output(std::ifstream &strace_output_file,
 
       if (itr == all_system_calls.end()) {
         std::cout << "ERROR!  couldn't find system call " << full_name << std::endl;
-        continue;
+        exit(0);
       }
       assert (itr != all_system_calls.end());
       std::string which_category = itr->second;
@@ -263,8 +300,12 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
        itr != USED_CATEGORIES.end(); itr++) {
 
     // skip categories that don't match the current type (safelist,restricted,forbidden)
-    std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
+    int pos = itr->first.find(":");
+    assert (pos != std::string::npos);
+    std::string c = itr->first.substr(pos+1,itr->first.size()-pos-1);
+    std::map<std::string,std::string>::const_iterator cat_itr = categories.find(c);
     assert (cat_itr != categories.end());
+
     if (cat_itr->second != type) continue;
     
     // the first category (if any) prints a little information blurb
@@ -274,7 +315,7 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
         std::cout << "\n*** These system call categories are safelisted ***\n" << std::endl;
       } else if (cat_itr->second == "RESTRICTED") {
         std::cout << "\n*** WARNING!  These system calls are restricted.  To allow use of these ***\n";
-        std::cout <<   "***    system calls add the indicated #define to your config.h file.    ***\n" << std::endl;
+        std::cout <<   "***    system calls add the indicated below to your config.h file.      ***\n" << std::endl;
       } else {
         assert (cat_itr->second == "FORBIDDEN");
         std::cout << "\n*** ERROR!  These system calls are forbidden in student code on the     ***\n";
@@ -304,10 +345,15 @@ void print_system_call_categories(const std::map<std::string,std::string>& categ
     std::cout << "    \"allow_system_calls\" : [" << std::endl;
     for (std::map<std::string,std::map<std::string,int> >::const_iterator itr = USED_CATEGORIES.begin(); 
          itr != USED_CATEGORIES.end(); itr++) {
-      std::map<std::string,std::string>::const_iterator cat_itr = categories.find(itr->first);
+
+      int pos = itr->first.find(":");
+      assert (pos != std::string::npos);
+      std::string c = itr->first.substr(pos+1,itr->first.size()-pos-1);
+      std::map<std::string,std::string>::const_iterator cat_itr = categories.find(c);
       assert (cat_itr != categories.end());
+
       if (cat_itr->second != "RESTRICTED") continue;
-      std::cout << "        \"" << itr->first << "\"";
+      std::cout << "        \"" << c << "\"";
       if (restricted_count > 1) std::cout << ",";
       std::cout << std::endl;    
       restricted_count--;

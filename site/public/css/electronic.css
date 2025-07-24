@@ -138,22 +138,6 @@ aside {
     cursor: pointer;
 }
 
-#fullscreen-btn-cont.active {
-    background: var(--subheading-underscore-grey);
-}
-
-#fullscreen-btn-cont.active i.fa-compress,
-#fullscreen-btn-cont i.fa-expand {
-    display: inline-block;
-}
-
-/* stylelint-disable-next-line no-descending-specificity */
-#fullscreen-btn-cont.active i.fa-expand,
-/* stylelint-disable-next-line no-descending-specificity */
-#fullscreen-btn-cont i.fa-compress {
-    display: none;
-}
-
 /* stylelint-disable-next-line no-descending-specificity */
 #two-panel-exchange-btn {
     display: none;
