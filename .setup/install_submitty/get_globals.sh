@@ -20,16 +20,12 @@ fi
 SUBMITTY_INSTALL_DIR="$(jq -r '.submitty_install_dir' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")"
 SUBMITTY_REPOSITORY="$(jq -r '.submitty_repository' "${SUBMITTY_CONFIG_DIR:?}/submitty.json")"
 
+# every github ci action has is_ci.
+# all vagrant actions, including vagrant on ci, have is_vagrant.
 IS_WORKER="$([[ "$(jq -r '.worker' "${SUBMITTY_INSTALL_DIR:?}/config/submitty.json")" == "true" ]] && echo 1 || echo 0)"
 IS_VAGRANT="$([[ -d "${SUBMITTY_REPOSITORY:?}/.vagrant" ]] && echo 1 || echo 0)"
 IS_UTM="$([[ -d "${SUBMITTY_REPOSITORY:?}/.utm" ]] && echo 1 || echo 0)"
 IS_CI="$([[ -f "${SUBMITTY_REPOSITORY:?}/.github_actions_ci_flag" ]] && echo 1 || echo 0)"
-
-echo "IS_WORKER: ${IS_WORKER:?}"
-echo "IS_VAGRANT: ${IS_VAGRANT:?}"
-echo "IS_UTM: ${IS_UTM:?}"
-echo "IS_CI: ${IS_CI:?}"
-exit 1
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091

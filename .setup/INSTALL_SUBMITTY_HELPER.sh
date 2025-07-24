@@ -871,3 +871,20 @@ else
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateDockerImages
     "${SUBMITTY_INSTALL_DIR}/sbin/update_worker_sysinfo.sh" UpdateSystemInfo
 fi
+
+################################################################################################################
+################################################################################################################
+# Install cypress fixtures if not in worker mode
+if [ "${IS_WORKER}" == 0 ]; then
+    echo -e "Install cypress fixtures"
+    # rsync if we are on vagrant
+    if [ "${VAGRANT}" == 1 ]; then
+        rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        rsync -rtz "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+    fi
+    # copy if we are on CI and not vagrant
+    elif [ "${IS_CI}" == 1 ]; then
+        cp -r "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        cp -r "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+    fi
+fi
