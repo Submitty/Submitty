@@ -10,9 +10,26 @@
   "container_options": {
     "container_image": "submitty/jupyter:latest"
   },
+  "allow_system_calls": [
+    "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+    "COMMUNICATIONS_AND_NETWORKING_KILL",
+    "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS",
+    "COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL",
+    "FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY",
+    "FILE_MANAGEMENT_RARE",
+    "PROCESS_CONTROL_ADVANCED",
+    "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+    "PROCESS_CONTROL_MEMORY_ADVANCED",
+    "PROCESS_CONTROL_SYNCHRONIZATION",
+    "PROCESS_CONTROL_SCHEDULING",
+    "FILE_MANAGEMENT_PERMISSIONS",
+    "UNKNOWN"
+  ],
   "testcases": [
     {
       "title": "Executes successfully",
+      // Although wildcard is used, the grader will only expect one notebook file. Use if filename cannot be determined.
       "command": "jupyter_notebook_grader -i *.ipynb -o executed.ipynb",
       "points": 1,
       "validation": [
@@ -29,7 +46,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "hello_world_submitted.*",
+          "source" : "hello_world_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -38,7 +55,7 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "hello_world_submitted.txt",
+          "actual_file": "hello_world_submitted_stdout.txt",
           "expected_string" : "hello world!"
         },
         {
@@ -54,7 +71,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "markdown_submitted.*",
+          "source" : "markdown_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -79,7 +96,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "one_submitted.*",
+          "source" : "one_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -108,7 +125,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "two_submitted.*",
+          "source" : "two_submitted*.*",
           "destination" : "./"
         }
       ], 
@@ -137,7 +154,7 @@
         {
           "command" : "cp",
           "testcase" : "test01",
-          "source" : "graph_submitted.*",
+          "source" : "graph_submitted*.*",
           "destination" : "./"
         }
       ], 
