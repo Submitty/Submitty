@@ -25,6 +25,12 @@ IS_VAGRANT="$([[ -d "${SUBMITTY_REPOSITORY:?}/.vagrant" ]] && echo 1 || echo 0)"
 IS_UTM="$([[ -d "${SUBMITTY_REPOSITORY:?}/.utm" ]] && echo 1 || echo 0)"
 IS_CI="$([[ -f "${SUBMITTY_REPOSITORY:?}/.github_actions_ci_flag" ]] && echo 1 || echo 0)"
 
+echo "IS_WORKER: ${IS_WORKER:?}"
+echo "IS_VAGRANT: ${IS_VAGRANT:?}"
+echo "IS_UTM: ${IS_UTM:?}"
+echo "IS_CI: ${IS_CI:?}"
+exit 1
+
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
 source "${SUBMITTY_REPOSITORY:?}/.setup/bin/versions.sh"
