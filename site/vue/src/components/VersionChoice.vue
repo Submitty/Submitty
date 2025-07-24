@@ -19,11 +19,16 @@ const emit = defineEmits<{
     change: [value: number];
 }>();
 
-console.log('VersionChoice props:', props);
+function runOnChange() {
+    eval(props.onChange);
+}
 
 const handleChange = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     emit('change', parseInt(target.value));
+    if (props.onChange) {
+        runOnChange.call(event.target);
+    }
 };
 </script>
 
@@ -34,6 +39,7 @@ const handleChange = (event: Event) => {
     aria-label="Submission Version Select"
     :style="`margin-right: 10px;${formatting}`"
     name="submission_version"
+    :value="displayVersion"
     @change="handleChange"
   >
     <option

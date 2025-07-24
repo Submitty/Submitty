@@ -14,7 +14,11 @@
                     'type': 'component',
                     'name': 'VersionChoice',
                     'args': {
-                        'on_change': "versionChange('" ~ view_version_url ~ "', this)"
+                        'onChange': "versionChange('" ~ view_version_url ~ "', this)",
+                        'versions': versions,
+                        'activeVersion': active_version,
+                        'displayVersion': display_version,
+                        'totalPoints': total_points,
                     }
                 }) %}
 
