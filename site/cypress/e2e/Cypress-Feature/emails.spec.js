@@ -97,6 +97,23 @@ const verifyEmailDetails = (subject, source, status, error, totalRecipients = nu
     verifyEmails(status, error, totalRecipients);
 };
 
+const verifyPaginatedEmailStatus = (email, response, index) => {
+    const $email = Cypress.$(email);
+    const expectedEmail = response.data[index];
+    // Verify the base email status information
+    expect($email.find('[data-testid="email-subject"]').text().trim()).to.equal(
+        `Email Subject: ${expectedEmail.subject}`,
+    );
+    expect($email.find('[data-testid="email-time-created"]').text().trim()).to.equal(
+        `Time Created: ${expectedEmail.created}`,
+    );
+    expect($email.find('[data-testid="email-source"]').text().trim()).to.equal(
+        `Course: ${getCurrentSemester()} sample`,
+    );
+    // Verify the total recipients for the current email drop-down matches the server response count
+    cy.get(`#collapse${index + 1} li`).should('have.length', expectedEmail.count);
+};
+
 describe('Test cases involving the superuser Email All functionality', () => {
     it('sends an email via Email All and verifies Email Status page', () => {
         cy.login('superuser');
@@ -294,21 +311,7 @@ describe('Test cases involving instructor email pagination functionality', () =>
                     cy.get('[data-testid="email-status-container"]')
                         .should('have.length', response.data.length)
                         .then(($emails) => {
-                            $emails.each((index, email) => {
-                                const $email = Cypress.$(email);
-
-                                expect($email.find('[data-testid="email-subject"]').text().trim()).to.equal(
-                                    `Email Subject: ${response.data[index].subject}`,
-                                );
-                                expect($email.find('[data-testid="email-time-created"]').text().trim()).to.equal(
-                                    `Time Created: ${response.data[index].created}`,
-                                );
-                                expect($email.find('[data-testid="email-source"]').text().trim()).to.equal(
-                                    `Course: ${getCurrentSemester()} sample`,
-                                );
-                                // Verify the total recipients for the current email drop-down
-                                cy.get(`#collapse${index + 1} li`).should('have.length', response.data[index].count);
-                            });
+                            $emails.each((index, email) => verifyPaginatedEmailStatus(email, response, index));
                         });
                 });
 
