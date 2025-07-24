@@ -21,7 +21,7 @@ describe('Test cases revolving around notification settings', () => {
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all notifications').click();
 
         cy.get('[data-testid="popup-message"]').should('contain', 'Notification settings have been saved.');
-        cy.get('.site-input [data-testid="notification-checkbox-input"]')
+        cy.get('.notification-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
                 expect($el.prop('checked')).to.be.true;
@@ -30,7 +30,7 @@ describe('Test cases revolving around notification settings', () => {
         // Unsubscribe from all optional notifications
         cy.get('[data-testid="unsubscribe-all-optional-notifications"]').should('be.enabled').click();
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Unsubscribe from all optional notifications').click();
-        cy.get('.site-input [data-testid="notification-checkbox-input"]')
+        cy.get('.notification-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
                 // TODO: twig template should set this to true
@@ -46,7 +46,7 @@ describe('Test cases revolving around notification settings', () => {
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', 'Subscribe to all emails').click();
 
         cy.get('[data-testid="popup-message"]').should('contain', 'Notification settings have been saved.');
-        cy.get('.email-input [data-testid="notification-checkbox-input"]')
+        cy.get('.email-checkbox [data-testid="notification-checkbox-input"]')
             .should('have.length.greaterThan', 0)
             .each(($el) => {
                 expect($el.prop('checked')).to.be.true;
