@@ -725,9 +725,16 @@ class User extends AbstractModel {
         }
     }
 
-    public static function constructNotificationSettings($details) {
+    /**
+     * Construct the notification settings for a user.
+     *
+     * @param array $details
+     * @return array<bool>
+     */
+    public static function constructNotificationSettings($details): array {
         $notification_settings = [];
-        // Defaults not found in the notification settings table tied to the the forum and grade inquiries
+
+        /* Required  */
         $notification_settings['all_announcements'] = true;
         $notification_settings['all_announcements_email'] = true;
         $notification_settings['all_reply_thread'] = true;
@@ -744,27 +751,32 @@ class User extends AbstractModel {
         $notification_settings['grade_inquiry_resolved_reopened'] = true;
         $notification_settings['grade_inquiry_resolved_reopened_email'] = true;
 
+        /* Optional  */
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
-        $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
-        $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
-        $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
-        $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
-        $notification_settings['team_invite'] = $details['team_invite'] ?? true;
-        $notification_settings['team_joined'] = $details['team_joined'] ?? true;
-        $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
-        $notification_settings['self_notification'] = $details['self_notification'] ?? false;
-        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
         $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
+        $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
         $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
+        $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
         $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
+        $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
         $notification_settings['all_new_posts_email'] = $details['all_new_posts_email'] ?? false;
+        $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
         $notification_settings['all_modifications_forum_email'] = $details['all_modifications_forum_email'] ?? false;
+
+        $notification_settings['team_invite'] = $details['team_invite'] ?? true;
         $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
+        $notification_settings['team_joined'] = $details['team_joined'] ?? true;
         $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
+        $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
         $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+
+        $notification_settings['all_released_grades'] = $details['all_released_grades'] ?? true;
+        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
+
+        $notification_settings['self_notification'] = $details['self_notification'] ?? false;
         $notification_settings['self_registration_email'] = $details['self_registration_email'] ?? true;
         $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
-        $notification_settings['all_released_grades_email'] = $details['all_released_grades_email'] ?? true;
+
         return $notification_settings;
     }
 
