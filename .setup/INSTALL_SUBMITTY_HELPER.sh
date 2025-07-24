@@ -881,7 +881,6 @@ if [ "${IS_WORKER}" == 0 ]; then
     if [ "${VAGRANT}" == 1 ]; then
         rsync -rtz "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
         rsync -rtz "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
-    fi
     # copy if we are on CI and not vagrant
     elif [ "${IS_CI}" == 1 ]; then
         cp -r "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
