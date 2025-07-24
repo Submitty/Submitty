@@ -1,0 +1,11 @@
+/* Whole page background */
+body {
+    background-image: url(http://www.cs.rpi.edu/~cutler/classes/visualization/S18/images/vinca_minor_mirrored.jpg);
+}
+
+/* Make the center site have a transparent white bg instead of the blue gradient */
+#submitty-body {
+    background: rgba(240,240,240, 0.85) !important;
+}
+
+/* Add your own custom css (and/or rainbows) here */

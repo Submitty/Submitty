@@ -1,0 +1,15 @@
+{
+    "left": {
+	"PURPLE": {
+	    "rows": [1,2,3,4,5,6,7],
+	    "color": "#bb00ff"
+	}
+    },
+        
+    "right": {
+	"ORANGE": {
+	    "rows": [1,2,3,4,5,6,7],
+	    "color": "#ffaa00"
+	}
+    }
+}

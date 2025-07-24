@@ -1,0 +1,22 @@
+{
+    "left": {
+	"LAVENDER": {
+	    "rows": [1,2,3,4,5],
+	    "color": "#bb44ff"
+	}
+    },
+    
+    "middle": {
+	"TEAL": {
+	    "rows": [1,2,3,4,5],
+	    "color": "#00bb88"
+	}
+    },
+    
+    "right": {
+	"PINK": {
+	    "rows": [1,2,3,4,5],
+	    "color": "#ff9999"
+	}
+    }
+}

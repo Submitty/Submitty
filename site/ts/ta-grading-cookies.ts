@@ -71,11 +71,11 @@ window.filterWithdrawnUpdate = () => {
 
     if (filterCheckbox.checked) {
         withdrawnElements.hide();
-        window.Cookies.set('filter_withdrawn_student', 'true');
+        window.Cookies.set('filter_withdrawn_student', 'true', { path: coursePath, expires: 365 });
     }
     else {
         withdrawnElements.show();
-        window.Cookies.set('filter_withdrawn_student', 'false');
+        window.Cookies.set('filter_withdrawn_student', 'false', { path: coursePath, expires: 365 });
     }
     window.displaySuccessMessage('Withdrawn students filter updated successfully.');
 };

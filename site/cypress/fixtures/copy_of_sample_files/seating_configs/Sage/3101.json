@@ -1,0 +1,15 @@
+{
+    "left": {
+	"YELLOW": {
+	    "rows": [1,2,3,4,5],
+	    "color": "#dddd00"
+	}
+    },
+        
+    "right": {
+	"MAGENTA": {
+	    "rows": [1,2,3,4],
+	    "color": "#ff00ff"
+	}
+    }
+}
