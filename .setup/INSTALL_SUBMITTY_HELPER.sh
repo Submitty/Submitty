@@ -876,11 +876,17 @@ fi
 ################################################################################################################
 # Install cypress related files if not in worker mode
 if [ "${IS_WORKER}" == 0 ]; then
-    echo -e "Install cypress related files"
-    
     # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
-    copy_cmd=$([ "$IS_VAGRANT" = 1 ] && echo "rsync -rtz" || ([ "$IS_CI" = 1 ] && echo "cp -r" || echo ""))
+    if [ "${IS_VAGRANT}" == 1 ]; then
+        copy_cmd="rsync -rtz"
+    elif [ "${CI}" == 1 ]; then
+        copy_cmd="cp -r"
+    else
+        copy_cmd=""
+    fi
+
     if [ -n "$copy_cmd" ]; then
+        echo -e "Install cypress related files"
         $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
         $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
     fi
