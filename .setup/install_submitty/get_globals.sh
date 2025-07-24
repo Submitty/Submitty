@@ -29,7 +29,7 @@ echo "IS_WORKER: ${IS_WORKER:?}"
 echo "IS_VAGRANT: ${IS_VAGRANT:?}"
 echo "IS_UTM: ${IS_UTM:?}"
 echo "IS_CI: ${IS_CI:?}"
-# exit 1
+exit 1
 
 # Because shellcheck is run with the python wrapper we need to disable the 'Not following' error
 # shellcheck disable=SC1091
