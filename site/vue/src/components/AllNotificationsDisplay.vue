@@ -26,6 +26,9 @@ onMounted(() => {
     if (pref === 'unseen') {
         showUnseenOnly.value = true;
     }
+    else if (pref === 'all') {
+        showUnseenOnly.value = false;
+    }
 });
 
 function toggleUnseenOnly() {
@@ -90,7 +93,7 @@ function goToNotificationLink(notification_url: string) {
       No notifications to view.
     </p>
     <p
-      v-if="filteredNotifications.length === 0"
+      v-if="filteredNotifications.length === 0 && notifications.length > 0"
       id="no-recent-notifications"
       class="no-recent"
     >
