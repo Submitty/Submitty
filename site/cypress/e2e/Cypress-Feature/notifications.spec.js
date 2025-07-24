@@ -14,7 +14,7 @@ const verifyUpdateMessage = (exists = true) => {
     }
 };
 
-const verifyIndividualNotificationUpdate = (name, reload = false, state = {}) => {
+const verifyIndividualNotificationUpdates = (name, reload = false, state = {}) => {
     if (Object.keys(state).length === 0) {
         // Initialize the state of all checkboxes before performing the initial action
         cy.get('input[data-testid="checkbox-input"]').each(($el) => {
@@ -36,38 +36,36 @@ const verifyIndividualNotificationUpdate = (name, reload = false, state = {}) =>
 
     cy.get('input[data-testid="checkbox-input"]').each(($el) => {
         const inputName = $el.attr('name');
-        cy.wrap($el).invoke('prop', 'checked').then((currentChecked) => {
-            cy.wrap($el).invoke('prop', 'disabled').then((isDisabled) => {
-                const previousChecked = state[inputName];
+        const currentChecked = $el.prop('checked');
+        const isDisabled = $el.prop('disabled');
+        const previousChecked = state[inputName];
 
-                if (name === inputName && !isDisabled) {
-                    // Checkboxes that are not mandatory should have been toggled
-                    expect(currentChecked).to.not.equal(previousChecked);
-                    // Persist the most recent state of the checkbox
-                    state[inputName] = currentChecked;
-                }
-                else {
-                    // Other checkboxes should remain unchanged
-                    expect(currentChecked).to.equal(previousChecked);
-                }
-            });
-        });
+        if (name === inputName && !isDisabled) {
+            // Checkboxes that are not mandatory should have been toggled
+            expect(currentChecked).to.not.equal(previousChecked);
+            // Persist the most recent state of the checkbox
+            state[inputName] = currentChecked;
+        }
+        else {
+            // Other checkboxes should remain unchanged
+            expect(currentChecked).to.equal(previousChecked);
+        }
     });
 
     if (!reload) {
         // Verify the updates persist for all actions after a full page reload
-        cy.reload().then(() => verifyIndividualNotificationUpdate(name, true, state));
+        cy.reload().then(() => verifyIndividualNotificationUpdates(name, true, state));
     }
     else if (!state.reversed) {
         // Perform the opposite action at most once
         state.reversed = true;
-        cy.then(() => verifyIndividualNotificationUpdate(name, false, state));
+        cy.then(() => verifyIndividualNotificationUpdates(name, false, state));
     }
 };
 
 const verifyBatchNotificationUpdates = (identifier, message, type, action, reload = false) => {
     if (!reload) {
-        // Perform the initial action
+        // Perform the initial batch update action
         cy.get(`[data-testid="${identifier}"]`).should('be.enabled').click();
         cy.get('[data-testid="notification-settings-button-group"]').should('contain', message).click();
         verifyUpdateMessage();
@@ -93,9 +91,8 @@ const verifyBatchNotificationUpdates = (identifier, message, type, action, reloa
         });
 
     if (!reload) {
-        // Verify the updates persist after a full page reload
-        cy.reload();
-        cy.then(() => verifyBatchNotificationUpdates(identifier, message, type, action, true));
+        // Verify the updates persist for all actions after a full page reload
+        cy.reload().then(() => verifyBatchNotificationUpdates(identifier, message, type, action, true));
     }
 };
 
@@ -117,6 +114,7 @@ const toggleSelfRegistration = (enable) => {
 
 describe('Test cases revolving around notification/email settings', () => {
     before(() => {
+        // Additional notification settings are displayed for self registration courses
         toggleSelfRegistration(true);
     });
 
@@ -129,7 +127,7 @@ describe('Test cases revolving around notification/email settings', () => {
         toggleSelfRegistration(false);
     });
 
-    it('Should allow the notification settings page to be accessed', () => {
+    it('Should allow the user to access the notification settings page from the landing course page', () => {
         cy.visit(buildUrl(['sample']));
         cy.get('[data-testid="sidebar"]')
             .contains('Notifications')
@@ -149,7 +147,7 @@ describe('Test cases revolving around notification/email settings', () => {
     });
 
     it('Should allow the user to subscribe, unsubscribe, and reset notification/email settings for individual inputs', () => {
-        cy.get('.notification-checkbox input[data-testid="checkbox-input"]')
-            .each(($el) => verifyIndividualNotificationUpdate($el.attr('name')));
+        cy.get('input[data-testid="checkbox-input"]')
+            .each(($el) => verifyIndividualNotificationUpdates($el.attr('name')));
     });
 });
