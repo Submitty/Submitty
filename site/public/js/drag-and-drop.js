@@ -1202,7 +1202,7 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path, cmTime, sortPriority, sections, sections_lock, overwrite_all, calendarMenu) {
     const submit_url = buildCourseUrl(['course_materials', 'upload']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
@@ -1212,6 +1212,10 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
         alert('Floating point priority must be a number greater than 0.');
         return;
     }
+
+    formData.append('calendar_display', calendarMenu.calendar_display);
+    formData.append('associated_date', calendarMenu.associated_date);
+    formData.append('associated_gradeable', calendarMenu.gradeable_chosen);
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
@@ -1337,11 +1341,21 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  */
-function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, title, overwrite, file_path) {
+function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsEdit, partialSections, cmTime, sortPriority, sections_lock, folderUpdate, link_url, title, overwrite, file_path, calendarMenu) {
     const edit_url = buildCourseUrl(['course_materials', 'edit']);
     const return_url = buildCourseUrl(['course_materials']);
     const formData = new FormData();
+    console.log(calendarMenu);
+
+    // calendarMenu.associated_date = calendarMenu.associated_date->format('Y-m-d H:i:sO');
+
+    formData.append('calenderMenu', calendarMenu);
+
     const priority = parseFloat(sortPriority);
+
+    formData.append('calendar_display', calendarMenu.calendar_display);
+    formData.append('associated_date', calendarMenu.associated_date);
+    formData.append('associated_gradeable', calendarMenu.gradeable_chosen);
 
     if (priority < 0 || isNaN(priority)) {
         alert('Floating point priority must be a number greater than 0.');
