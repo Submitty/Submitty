@@ -285,7 +285,7 @@ if [ "${IS_WORKER}" == 0 ]; then
     # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
     if [ "${IS_VAGRANT}" == 1 ]; then
         copy_cmd="rsync -rtz"
-    elif [ "${CI}" == 1 ]; then
+    elif [ "${IS_CI}" == 1 ]; then
         copy_cmd="cp -r"
     else
         copy_cmd=""
