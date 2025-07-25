@@ -116,7 +116,7 @@ function goToNotificationLink(notification_url: string) {
           title="Forum"
         />
         <div class="notification-content">
-          <span class="notification-link">
+          <span>
             {{ n.content }}
           </span>
           <div class="notification-time">

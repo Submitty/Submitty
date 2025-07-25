@@ -43,16 +43,16 @@ defineProps<Props>();
 
 const getCourseTypeHeader = (course_type: Status) => {
     if (course_type === 'self_registration_courses') {
-        return 'Available for Self Registration';
+        return 'Courses Available for Self Registration';
     }
-    let message = 'Active';
+    let message = '';
     if (course_type === 'dropped_courses') {
         message = 'Recently Dropped ';
     }
     else if (course_type === 'archived_courses') {
         message = 'Archived ';
     }
-    return `My ${message} Courses`;
+    return `My ${message}Courses`;
 };
 
 const groupCoursesBySemester = (courses: Course[]) => {
@@ -153,6 +153,15 @@ const buildCourseUrl = (course: Course) => {
     grid-auto-rows: auto;
     align-items: start;
     grid-gap: 30px;
+}
+
+@media (max-width: 540px) {
+    .home-content {
+        padding: 0px
+    }
+    .grid-container {
+        grid-gap: 15px;
+    }
 }
 
 .courses-header {
