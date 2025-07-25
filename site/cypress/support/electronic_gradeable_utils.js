@@ -11,7 +11,8 @@ function visitGradeable(gradeableName) {
 }
 
 /**
- * switches versions if we are not on the version number we want. Null means that we return the latest version
+ * A number versionNumber means that we are switching to a specific version
+ * A null versionNumber means that we are returning the current version
  * @param {string} gradeableName the name of the gradeable we are switching to
  * @param {number|null} versionNumber
  */
@@ -33,7 +34,7 @@ export function switchOrFindVersion(gradeableName, versionNumber) {
 };
 
 /**
- * sets up the gradeable in a state where we can submit a new submission
+ * Sets up the gradeable in a state where we can submit a new submission
  * @param {string} gradeableName the name of the gradeable we are submitting to
  */
 export function newSubmission(gradeableName) {
@@ -48,7 +49,7 @@ export function newSubmission(gradeableName) {
 
 /**
  * Uploads a file and compares the results with expected scores.
- * requires newSubmission to be called first
+ * Requires newSubmission to be called first
  * @param {string} fileUploadName the fixture to upload
  * @param {number} bucket the bucket to submit to. Default gradeables has buckets starting from 1
  * @param {boolean} firstFile checks the bucket for no files if it is the first file being uploaded
@@ -62,7 +63,7 @@ export function submitFiles(fileUploadName, bucket, firstFile = false) {
 
 /**
  * Hits the gradeable submit button
- * requires newSubmission to be called first
+ * Requires newSubmission to be called first
  * @param {number} versionNumber the version number we are on
  */
 export function submitGradeable(versionNumber) {
@@ -72,7 +73,6 @@ export function submitGradeable(versionNumber) {
 };
 
 /**
- * requires switchOrFindVersion to be called first
  * @param {string} gradeableName the name of the gradeable we are checking
  * @param {number} versionNumber version number that we should check the grades against
  * @param {(number|'?')[]} expectedScores the expected score for the submission
