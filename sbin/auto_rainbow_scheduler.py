@@ -67,7 +67,8 @@ def process_course(semester, course):
         jobs_json = {
             'job': 'RunAutoRainbowGrades',
             'semester': semester,
-            'course': course
+            'course': course,
+            'source': 'submitty_daemon'
         }
 
         # Prepare filename

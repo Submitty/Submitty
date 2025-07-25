@@ -1264,6 +1264,10 @@ function updateGradeOverride() {
                 displayErrorMessage(json['message']);
                 return;
             }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
@@ -1313,16 +1317,25 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
-            const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
+            const row = `
+                <tr data-testid="grade-row-${elem['user_id']}">
+                    <td class="align-left" data-testid="student-id">${elem['user_id']}</td>
+                    <td class="align-left" data-testid="given-name">${elem['user_givenname']}</td>
+                    <td class="align-left" data-testid="family-name">${elem['user_familyname']}</td>
+                    <td class="align-left" data-testid="marks">${elem['marks']}</td>
+                    <td class="align-left" data-testid="comment">${elem['comment']}</td>
+                    <td class="align-left">${delete_button}</td>
+                </tr>
+            `;
+            $('#grade-override-table').append(row);
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
+function deleteOverriddenGrades(user_id, g_id, option) {
     const url = buildCourseUrl(['grade_override', g_id, 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
@@ -1332,11 +1345,17 @@ function deleteOverriddenGrades(user_id, g_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1348,6 +1367,38 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), $('#g_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val('');
+    }
+}
+
+function overridePopup(json) {
+    $('.popup-form').hide();
+    $('#override_team_popup').remove();
+
+    // Generate a unique mount ID for the dynamic Vue app until we implement a uniform Vue framework to manage mounting.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time.
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args,
+    );
 }
 
 /**
