@@ -109,6 +109,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/access"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/bulk_uploads"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/emails"
+    mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/notifications"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/site_errors"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/socket_errors"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/ta_grading"
@@ -121,7 +122,6 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/docker"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/daemon_job_queue"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
-    mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/notifications"
 fi
 # ------------------------------------------------------------------------
 
@@ -153,6 +153,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chown  -R "${PHP_USER:?}":"${COURSE_BUILDERS_GROUP:?}"    "${SUBMITTY_DATA_DIR:?}/logs/access"
     chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/bulk_uploads"
     chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/emails"
+    chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/notifications"
     chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/course_creation"
     chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/rainbow_grades"
     chown  -R "${PHP_USER:?}":"${COURSE_BUILDERS_GROUP:?}"    "${SUBMITTY_DATA_DIR:?}/logs/site_errors"
@@ -168,7 +169,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/docker"
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/daemon_job_queue"
     chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
-    chown  -R "${DAEMON_USER:?}:${DAEMONPHP_GROUP:?}"         "${SUBMITTY_DATA_DIR:?}/logs/notifications"
+
     # php & daemon needs to be able to read workers & containers config
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_workers.json"
     chown  "${PHP_USER:?}:${DAEMONPHP_GROUP:?}"               "${SUBMITTY_INSTALL_DIR:?}/config/autograding_containers.json"
