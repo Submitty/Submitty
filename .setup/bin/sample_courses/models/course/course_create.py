@@ -11,7 +11,7 @@ import docker
 import random
 
 
-from sqlalchemy import create_engine, Table, MetaData, bindparam
+from sqlalchemy import create_engine, Table, MetaData, bindparam, insert, update
 
 from sample_courses import (
     SUBMITTY_DATA_DIR,
@@ -89,7 +89,7 @@ class Course_create:
             f"&user={DB_USER}&password={DB_PASS}"
         )
         submitty_conn = submitty_engine.connect()
-        submitty_metadata = MetaData(bind=submitty_engine)
+        submitty_metadata = MetaData()
         print("(Master DB connection made, metadata bound)...")
 
         engine = create_engine(
@@ -97,41 +97,47 @@ class Course_create:
             f"&user={DB_USER}&password={DB_PASS}"
         )
         self.conn = engine.connect()
-        self.metadata = MetaData(bind=engine)
+        # need to pass in engine to autoload tables
+        self.engine = engine
+        self.metadata = MetaData()
         print("(Course DB connection made, metadata bound)...")
 
         print("Creating registration sections ", end="")
 
-        table = Table("courses_registration_sections", submitty_metadata, autoload=True)
+        table = Table("courses_registration_sections", submitty_metadata, autoload_with=submitty_engine)
         print("(tables loaded)...")
         for section in range(1, self.registration_sections + 1):
             print(f"Create section {section}")
             submitty_conn.execute(
-                table.insert(),
-                term=self.semester,
-                course=self.code,
-                registration_section_id=str(section),
+                insert(table).values(
+                    term=self.semester,
+                    course=self.code,
+                    registration_section_id=str(section)
+                )
             )
-        table = Table("courses", submitty_metadata, autoload=True)
+            submitty_conn.commit()
+        table = Table("courses", submitty_metadata, autoload_with=submitty_engine)
         print("(tables loaded)...")
         if self.self_registration_type != 0:
             print("Setting course default section id to 1")
             submitty_conn.execute(
-                table.update()
+                update(table)
                 .where(table.c.course == self.code)
                 .values(default_section_id=1)
             )
+            submitty_conn.commit()
         print("Creating rotating sections ", end="")
-        table = Table("sections_rotating", self.metadata, autoload=True)
+        table = Table("sections_rotating", self.metadata, autoload_with=self.engine)
         print("(tables loaded)...")
         for section in range(1, self.rotating_sections + 1):
             print(f"Create section {section}")
-            self.conn.execute(table.insert(), sections_rotating_id=section)
+            self.conn.execute(insert(table).values(sections_rotating_id=section))
+            self.conn.commit()
 
         print("Create users ", end="")
-        submitty_users = Table("courses_users", submitty_metadata, autoload=True)
-        users_table = Table("users", self.metadata, autoload=True)
-        reg_table = Table("grading_registration", self.metadata, autoload=True)
+        submitty_users = Table("courses_users", submitty_metadata, autoload_with=submitty_engine)
+        users_table = Table("users", self.metadata, autoload_with=self.engine)
+        reg_table = Table("grading_registration", self.metadata, autoload_with=self.engine)
         print("(tables loaded)...")
         for user in self.users:
             print(
@@ -151,19 +157,27 @@ class Course_create:
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
             submitty_conn.execute(
-                submitty_users.insert(),
-                term=self.semester,
-                course=self.code,
-                user_id=user.get_detail(self.code, "id"),
-                user_group=user.get_detail(self.code, "group"),
-                registration_section=reg_section,
-                manual_registration=user.get_detail(self.code, "manual"),
+                insert(submitty_users).values(
+                    term=self.semester,
+                    course=self.code,
+                    user_id=user.get_detail(self.code, "id"),
+                    user_group=user.get_detail(self.code, "group"),
+                    registration_section=reg_section,
+                    manual_registration=user.get_detail(self.code, "manual")
+                )
             )
-            update = users_table.update(
-                values={users_table.c.rotating_section: bindparam("rotating_section")}
-            ).where(users_table.c.user_id == bindparam("b_user_id"))
+            submitty_conn.commit()
+            update_query = update(users_table).where(
+                users_table.c.user_id == bindparam("b_user_id")
+            ).values(
+                rotating_section=bindparam("rotating_section")
+            )
 
-            self.conn.execute(update, rotating_section=rot_section, b_user_id=user.id)
+            self.conn.execute(
+                update_query,
+                {"rotating_section": rot_section, "b_user_id": user.id}
+            )
+            self.conn.commit()
             if user.get_detail(self.code, "grading_registration_section") is not None:
                 try:
                     grading_registration_sections = str(
@@ -176,10 +190,12 @@ class Course_create:
                     grading_registration_sections = []
                 for grading_registration_section in grading_registration_sections:
                     self.conn.execute(
-                        reg_table.insert(),
-                        user_id=user.get_detail(self.code, "id"),
-                        sections_registration_id=str(grading_registration_section),
+                        insert(reg_table).values(
+                            user_id=user.get_detail(self.code, "id"),
+                            sections_registration_id=str(grading_registration_section),
+                        )
                     )
+                    self.conn.commit()
 
             if user.unix_groups is None:
                 if user.get_detail(self.code, "group") <= 1:
@@ -188,33 +204,33 @@ class Course_create:
                 if user.get_detail(self.code, "group") <= 2:
                     add_to_group(self.code + "_tas_www", user.id)
 
-        self.gradeable_table = Table("gradeable", self.metadata, autoload=True)
+        self.gradeable_table = Table("gradeable", self.metadata, autoload_with=self.engine)
         self.electronic_table = Table(
-            "electronic_gradeable", self.metadata, autoload=True
+            "electronic_gradeable", self.metadata, autoload_with=self.engine
         )
-        self.peer_assign = Table("peer_assign", self.metadata, autoload=True)
-        self.reg_table = Table("grading_rotating", self.metadata, autoload=True)
+        self.peer_assign = Table("peer_assign", self.metadata, autoload_with=self.engine)
+        self.reg_table = Table("grading_rotating", self.metadata, autoload_with=self.engine)
         self.component_table = Table(
-            "gradeable_component", self.metadata, autoload=True
+            "gradeable_component", self.metadata, autoload_with=self.engine
         )
         self.mark_table = Table(
-            "gradeable_component_mark", self.metadata, autoload=True
+            "gradeable_component_mark", self.metadata, autoload_with=self.engine
         )
-        self.gradeable_data = Table("gradeable_data", self.metadata, autoload=True)
+        self.gradeable_data = Table("gradeable_data", self.metadata, autoload_with=self.engine)
         self.gradeable_component_data = Table(
-            "gradeable_component_data", self.metadata, autoload=True
+            "gradeable_component_data", self.metadata, autoload_with=self.engine
         )
         self.gradeable_component_mark_data = Table(
-            "gradeable_component_mark_data", self.metadata, autoload=True
+            "gradeable_component_mark_data", self.metadata, autoload_with=self.engine
         )
         self.gradeable_data_overall_comment = Table(
-            "gradeable_data_overall_comment", self.metadata, autoload=True
+            "gradeable_data_overall_comment", self.metadata, autoload_with=self.engine
         )
         self.electronic_gradeable_data = Table(
-            "electronic_gradeable_data", self.metadata, autoload=True
+            "electronic_gradeable_data", self.metadata, autoload_with=self.engine
         )
         self.electronic_gradeable_version = Table(
-            "electronic_gradeable_version", self.metadata, autoload=True
+            "electronic_gradeable_version", self.metadata, autoload_with=self.engine
         )
         for gradeable in self.gradeables:
             gradeable.create(

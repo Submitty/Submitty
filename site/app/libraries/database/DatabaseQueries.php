@@ -4531,21 +4531,41 @@ SQL;
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
         $this->course_db->query(
             "
-          UPDATE grade_override
-          SET marks=?, comment=?
-          WHERE user_id=?
-            AND g_id=?;",
-            [$marks, $comment, $user_id, $g_id]
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+            ",
+            [$user_id, $g_id, $marks, $comment]
         );
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query(
-                "
-            INSERT INTO grade_override
-            (user_id, g_id, marks, comment)
-            VALUES(?,?,?,?)",
-                [$user_id, $g_id, $marks, $comment]
-            );
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
         }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
     }
 
     /**

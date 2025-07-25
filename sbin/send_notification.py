@@ -10,7 +10,7 @@ import datetime
 import sys
 import getpass
 from json import JSONDecodeError
-from sqlalchemy import create_engine  # pylint: disable=import-error
+from sqlalchemy import create_engine, text  # pylint: disable=import-error
 from sqlalchemy.orm import Session  # pylint: disable=import-error
 from sqlalchemy.exc import DatabaseError  # pylint: disable=import-error
 
@@ -217,44 +217,44 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
 
     try:
         if site:
-            course_db.execute(
+            course_db.execute(text(
                 """
                 INSERT INTO notifications
                 (component, metadata, content, created_at,
                  from_user_id, to_user_id)
                 VALUES (:component, :metadata, :content,
                         :created_at, :from_user_id, :to_user_id);
-                """, site
+                """), site
             )
 
         if email:
-            master_db.execute(
+            master_db.execute(text(
                 """
                 INSERT INTO emails
                 (subject, body, created, user_id, email_address,
                  term, course)
                  VALUES (:subject, :body, :created, :user_id,
                          :email_address, :term, :course);
-                """, email
+                """), email
             )
 
         if gradeables:
             if notification_type == "gradeable_release":
-                course_db.execute(
+                course_db.execute(text(
                     """
                     UPDATE electronic_gradeable
                     SET eg_release_notifications_sent = TRUE
                     WHERE g_id = :g_id;
-                    """, gradeables
+                    """), gradeables
                 )
             else:
-                course_db.execute(
+                course_db.execute(text(
                     """
                     UPDATE electronic_gradeable_version
                     SET g_notification_sent = TRUE
                     WHERE (g_id = :g_id AND user_id = :user_id)
                     OR (g_id = :g_id AND team_id = :team_id);
-                    """, gradeables
+                    """), gradeables
                 )
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
@@ -280,14 +280,15 @@ def send_pending_notifications():
     notified = 0
     master_db = connect_db("submitty")
     active_courses = "SELECT term, course FROM courses WHERE status = '1';"
-    courses = master_db.execute(active_courses)
+    courses = master_db.execute(text(active_courses))
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
         default_hw_late_days, default_student_late_days = get_late_day_defaults(term, course)
 
+
         # Retrieve all fully graded gradeables with pending grade notifications
-        grades_available = course_db.execute(
+        grades_available = course_db.execute(text(
             """
             WITH gradeables AS (
                 SELECT DISTINCT
@@ -352,7 +353,7 @@ def send_pending_notifications():
                 OR
                 COUNT(component) = COUNT(graded_component)
             );
-            """
+            """)
         )
 
         if grades_available:
@@ -361,7 +362,7 @@ def send_pending_notifications():
             notified += len(lists[0])
 
         # Retrieve all gradeables with pending release notifications
-        release_available = course_db.execute(
+        release_available = course_db.execute(text(
             """
             SELECT DISTINCT
                 g.g_id AS g_id,
@@ -397,7 +398,7 @@ def send_pending_notifications():
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
                 ldc.late_days_remaining
-            """, {
+            """), {
                 "default_hw_late_days": default_hw_late_days,
                 "default_student_late_days": default_student_late_days
             }

@@ -1259,6 +1259,10 @@ function updateGradeOverride() {
                 displayErrorMessage(json['message']);
                 return;
             }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
@@ -1308,16 +1312,25 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
-            const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
+            const row = `
+                <tr data-testid="grade-row-${elem['user_id']}">
+                    <td class="align-left" data-testid="student-id">${elem['user_id']}</td>
+                    <td class="align-left" data-testid="given-name">${elem['user_givenname']}</td>
+                    <td class="align-left" data-testid="family-name">${elem['user_familyname']}</td>
+                    <td class="align-left" data-testid="marks">${elem['marks']}</td>
+                    <td class="align-left" data-testid="comment">${elem['comment']}</td>
+                    <td class="align-left">${delete_button}</td>
+                </tr>
+            `;
+            $('#grade-override-table').append(row);
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
+function deleteOverriddenGrades(user_id, g_id, option) {
     const url = buildCourseUrl(['grade_override', g_id, 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
@@ -1327,11 +1340,17 @@ function deleteOverriddenGrades(user_id, g_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1343,6 +1362,38 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), $('#g_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val('');
+    }
+}
+
+function overridePopup(json) {
+    $('.popup-form').hide();
+    $('#override_team_popup').remove();
+
+    // Generate a unique mount ID for the dynamic Vue app until we implement a uniform Vue framework to manage mounting.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time.
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args,
+    );
 }
 
 /**
@@ -1639,7 +1690,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
 function popOutSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
-    if (url_file.includes('submissions')) {
+    if (url_file.includes('submissions_processed')) {
+        directory = 'submissions_processed';
+    }
+    else if (url_file.includes('submissions')) {
         directory = 'submissions';
     }
     else if (url_file.includes('results_public')) {
@@ -1812,8 +1866,6 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
-        $('.markdown-write-mode').removeClass('active');
-        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1867,71 +1919,6 @@ function renderMarkdown(markdownContainer, url, content) {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         },
     });
-}
-
-/**
- * Function to toggle markdown rendering preview
- *
- * @param {string} type string representing what type of markdown preset to insert.
- *                      * `'code'`
- *                      * `'link'`
- *                      * `'bold'`
- *                      * `'italic'`
- *                      * `'blockquote'`
- */
-function addMarkdownCode(type) {
-    const markdown_area = $(this).closest('.markdown-area');
-    const markdown_header = markdown_area.find('.markdown-area-header');
-
-    // Don't allow markdown insertion if we are in preview mode
-    if (markdown_header.attr('data-mode') === 'preview') {
-        return;
-    }
-
-    const start = $(this).prop('selectionStart');
-    const end = $(this).prop('selectionEnd');
-    const text = $(this).val();
-    let insert = '';
-    const selectedText = text.substring(start, end);
-
-    switch (type) {
-        case 'code':
-            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
-            break;
-        case 'link':
-            insert = `[${selectedText}](url)`;
-            break;
-        case 'bold':
-            insert = selectedText ? `__${selectedText}__` : '____';
-            break;
-        case 'italic':
-            insert = selectedText ? `_${selectedText}_` : '__';
-            break;
-        case 'blockquote':
-            insert = `> ${selectedText}\n\n`;
-            break;
-    }
-
-    if (!selectedText) {
-        // Insert the markdown with the cursor in between the symbols
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        if (type === 'bold') {
-            $(this)[0].setSelectionRange(start + 2, start + 2);
-        }
-        else if (type === 'code') {
-            $(this)[0].setSelectionRange(start + 4, start + 4);
-        }
-        else {
-            $(this)[0].setSelectionRange(start + 1, start + 1);
-        }
-    }
-    else {
-        // Insert the markdown with the selected text wrapped
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
-    }
 }
 
 /**

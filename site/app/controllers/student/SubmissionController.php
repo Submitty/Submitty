@@ -265,11 +265,15 @@ class SubmissionController extends AbstractController {
         //filter out empty, null strings
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //If no user id's were submitted, give a graceful error.
@@ -309,7 +313,9 @@ class SubmissionController extends AbstractController {
                     $teams[] = $tmp->getId();
                 }
             }
-            $teams = array_unique(array_filter($teams));
+            $teams = array_unique(array_filter($teams, function ($team) {
+                return $team !== '';
+            }));
             $inconsistent_teams = count($teams) > 1;
         }
 
@@ -556,11 +562,15 @@ class SubmissionController extends AbstractController {
 
         $tmp_ids = $_POST['user_id'];
         if (is_array($tmp_ids)) {
-            $user_ids = array_filter($_POST['user_id']);
+            $user_ids = array_filter($_POST['user_id'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         else {
             $user_ids = [$tmp_ids];
-            $user_ids = array_filter($user_ids);
+            $user_ids = array_filter($user_ids, function ($value) {
+                return $value !== '';
+            });
         }
 
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
@@ -1687,6 +1697,58 @@ class SubmissionController extends AbstractController {
 
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz . "\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
+        }
+
+
+        $has_docx = false;
+        if ($vcs_checkout === false) {
+            for ($i = 1; $i <= $num_parts; $i++) {
+                if (isset($uploaded_files[$i])) {
+                    for ($j = 0; $j < $count[$i]; $j++) {
+                        if (strtolower(pathinfo($uploaded_files[$i]["name"][$j], PATHINFO_EXTENSION)) === "docx") {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+
+                // Check for docx files in extracted directories
+                if (isset($part_path[$i]) && is_dir($part_path[$i])) {
+                    $extracted_files = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($part_path[$i])
+                    );
+                    foreach ($extracted_files as $file) {
+                        if ($file->isFile() && strtolower($file->getExtension()) === 'docx') {
+                            $has_docx = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($has_docx) {
+            // Add to queue to convert Word documents to PDF files for viewing
+            $docx_queue_data = [
+                "job" => "DocxToPDF",
+                "term" => $this->core->getConfig()->getTerm(),
+                "course" => $this->core->getConfig()->getCourse(),
+                "gradeable" => $gradeable->getId(),
+                "user" => $user_id,
+                "version" => $new_version
+            ];
+
+            $docx_queue_file_helper = implode("__", ["docx_to_pdf", $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse(),
+            $gradeable->getId(), $who_id, $new_version]);
+            $docx_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "daemon_job_queue",
+                $docx_queue_file_helper
+            );
+
+            if (@file_put_contents($docx_queue_file, FileUtils::encodeJson($docx_queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for pdf generation queue.", false);
+            }
         }
 
 

@@ -712,7 +712,6 @@ ${SUBMISSION_URL}
 sysadmin@example.com
 https://example.com
 1
-y
 submitty-admin
 y
 
@@ -862,6 +861,8 @@ ${proxy}
 fi
 
 su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
+
+su -c 'docker pull submitty/libreoffice-writer:latest' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES
