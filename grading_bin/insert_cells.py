@@ -12,6 +12,7 @@ consistency.
 """
 
 import argparse
+# pylint: disable=import-error
 import nbformat
 
 
@@ -76,10 +77,10 @@ if __name__ == "__main__":
                     "Ensure IDs are the same in both notebooks."
     )
     parser.add_argument(
-        "-i", "--instructor", required=True, help="Path to the complete instructor notebook."
+        "-i", "--instructor", required=True, help="Path to complete instructor notebook."
     )
     parser.add_argument(
-        "-s", "--student", nargs="+", required=True, help="Path to the student's submitted notebook."
+        "-s", "--student", nargs="+", required=True, help="Path to student's submitted notebook."
     )
     parser.add_argument(
         "-o", "--output", required=True, help="Path for the output notebook."
