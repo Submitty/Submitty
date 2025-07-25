@@ -469,8 +469,13 @@ function newEditCourseMaterialsForm(tag) {
 function editFilePathRecommendations() {
     const fileNameInput = $('#edit-title');
     const fileName = fileNameInput.val();
-
     const options = document.getElementById('new-file-name').options;
+    // Update the input display to show just the filename
+    if (fileName.length > 0) {
+        const lastSlash = fileName.lastIndexOf('/');
+        const extractedFileName = lastSlash !== -1 ? fileName.substring(lastSlash + 1) : fileName;
+        fileNameInput.val(extractedFileName);
+    }
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
@@ -1812,6 +1817,8 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
+        $('.markdown-write-mode').removeClass('active');
+        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1865,6 +1872,71 @@ function renderMarkdown(markdownContainer, url, content) {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         },
     });
+}
+
+/**
+ * Function to toggle markdown rendering preview
+ *
+ * @param {string} type string representing what type of markdown preset to insert.
+ *                      * `'code'`
+ *                      * `'link'`
+ *                      * `'bold'`
+ *                      * `'italic'`
+ *                      * `'blockquote'`
+ */
+function addMarkdownCode(type) {
+    const markdown_area = $(this).closest('.markdown-area');
+    const markdown_header = markdown_area.find('.markdown-area-header');
+
+    // Don't allow markdown insertion if we are in preview mode
+    if (markdown_header.attr('data-mode') === 'preview') {
+        return;
+    }
+
+    const start = $(this).prop('selectionStart');
+    const end = $(this).prop('selectionEnd');
+    const text = $(this).val();
+    let insert = '';
+    const selectedText = text.substring(start, end);
+
+    switch (type) {
+        case 'code':
+            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
+            break;
+        case 'link':
+            insert = `[${selectedText}](url)`;
+            break;
+        case 'bold':
+            insert = selectedText ? `__${selectedText}__` : '____';
+            break;
+        case 'italic':
+            insert = selectedText ? `_${selectedText}_` : '__';
+            break;
+        case 'blockquote':
+            insert = `> ${selectedText}\n\n`;
+            break;
+    }
+
+    if (!selectedText) {
+        // Insert the markdown with the cursor in between the symbols
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        if (type === 'bold') {
+            $(this)[0].setSelectionRange(start + 2, start + 2);
+        }
+        else if (type === 'code') {
+            $(this)[0].setSelectionRange(start + 4, start + 4);
+        }
+        else {
+            $(this)[0].setSelectionRange(start + 1, start + 1);
+        }
+    }
+    else {
+        // Insert the markdown with the selected text wrapped
+        $(this).val(text.substring(0, start) + insert + text.substring(end));
+        $(this).focus();
+        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
+    }
 }
 
 /**

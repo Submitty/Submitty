@@ -1400,7 +1400,6 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
     }
     else {
         if (title !== null) {
-            alert("Invalid file name.")
             return;
         }
     }
