@@ -471,10 +471,13 @@ function editFilePathRecommendations() {
     const fileName = fileNameInput.val();
     const options = document.getElementById('new-file-name').options;
     // Update the input display to show just the filename
-    if (fileName.length > 0) {
+    if (fileName.trim().length > 0) {
         const lastSlash = fileName.lastIndexOf('/');
         const extractedFileName = lastSlash !== -1 ? fileName.substring(lastSlash + 1) : fileName;
         fileNameInput.val(extractedFileName);
+    }
+    else {
+        return;
     }
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;

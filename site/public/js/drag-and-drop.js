@@ -1386,6 +1386,9 @@ function handleEditCourseMaterials(csrf_token, hide_from_students, id, sectionsE
             const new_file_name = encodeURIComponent(`link-${file_path.substring(lastSlashIndex + 1)}`);
             file_path = `${file_path.substring(0, lastSlashIndex + 1)}${new_file_name}`;
         }
+        if (!window.isValidFilePath(file_path)) {
+            return;
+        }
         if (window.isValidFileName(file_name)) {
             formData.append('file_path', file_path);
         }
