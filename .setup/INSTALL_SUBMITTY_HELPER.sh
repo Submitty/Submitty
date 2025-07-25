@@ -295,6 +295,7 @@ if [ "${IS_WORKER}" == 0 ]; then
         echo -e "Install cypress related files"
         $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
         $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+        $copy_cmd "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_tutorial/"
     fi
 fi
 ########################################################################################################################
