@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """
-Script to insert missing checkpoint cells from an instructor notebook into a student's 
+Script to insert missing checkpoint cells from an instructor notebook into a student's
 submitted notebook.
 
-This script compares the cells in both notebooks based on their IDs and inserts any missing 
+This script compares the cells in both notebooks based on their IDs and inserts any missing
 cells from the instructor notebook into the student notebook.
 
 Student cells are preserved if they exist in both notebooks. Extra student cells
@@ -26,7 +26,7 @@ def insert_cells(instructor_path, student_path, output_path):
         output_path (str): Path where the final notebook will be saved.
     """
     # Load instructor and student notebooks
-    try: 
+    try:
         with open(instructor_path, 'r', encoding='utf-8') as f:
             instructor_nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
         print(f"Loaded instructor notebook from '{instructor_path}'")
@@ -42,7 +42,7 @@ def insert_cells(instructor_path, student_path, output_path):
     new_cells = []
     inserted_count = 0
 
-    print(f"Inserting missing checkpoint cells from instructor notebook into student notebook...")
+    print("Inserting missing checkpoint cells from instructor notebook into student notebook...")
     for cell in instructor_nb.cells:
         # Compares cell IDs to see if the cell exists in the student notebook
         if 'id' in cell and cell.id in student_ids:
@@ -72,7 +72,7 @@ def insert_cells(instructor_path, student_path, output_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Build notebook from an instructor and student version." \
+        description="Build notebook from an instructor and student version."
                     "Ensure IDs are the same in both notebooks."
     )
     parser.add_argument(
