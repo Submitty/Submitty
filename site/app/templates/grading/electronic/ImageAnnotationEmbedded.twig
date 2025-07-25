@@ -1,6 +1,7 @@
 {% for stylesheet in localcss %}
     <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
 {% endfor %}
+{# MarkerJS scripts are now loaded globally in the main TA grading page #}
 {% for script in localjs %}
     <script src="{{ script }}"></script>
 {% endfor %}
@@ -24,12 +25,6 @@
                 <button id="clear-annotations-btn" class="btn btn-warning" onclick="if (typeof clearAnnotations === 'function') clearAnnotations();">
                     <i class="fas fa-eraser"></i> Clear Annotations
                 </button>
-                
-                {% if not student_popup and can_download %}
-                    <button id="view-all-annotations-btn" class="btn btn-info" onclick="if (typeof viewAllAnnotations === 'function') viewAllAnnotations();">
-                        <i class="fas fa-eye"></i> View All Annotations
-                    </button>
-                {% endif %}
                 
                 {% if can_download %}
                     <button id="download-image-btn" class="btn btn-secondary" onclick="if (typeof downloadImage === 'function') downloadImage();">

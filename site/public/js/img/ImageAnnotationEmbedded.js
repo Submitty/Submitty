@@ -1,5 +1,5 @@
 /* global markerjsUI, $, csrfToken */
-/* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage */
+/* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage, cleanupAnnotationEditor */
 
 var currentAnnotations = null;
 var targetImg = null;
@@ -10,6 +10,9 @@ var filename = '';
 var filePath = '';
 var csrfToken = '';
 var isStudent = false;
+
+// Global annotation editor instance - shared across all image annotations
+var globalAnnotationEditor = null;
 
 function buildCourseUrl(parts = []) {
     return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
@@ -25,12 +28,35 @@ function addAnnotations() {
                 return;
             }
             
-            // Create annotation editor using the markerjs-ui AnnotationEditor class
-            const annotationEditor = new markerjsUI.AnnotationEditor();
-            annotationEditor.targetImage = targetImg;
+            // Check if we already have an annotation editor wrapper
+            let editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+            
+            if (editorWrapper) {
+                // Editor already exists, just show it and update the target image
+                editorWrapper.style.display = 'flex';
+                
+                if (globalAnnotationEditor) {
+                    globalAnnotationEditor.targetImage = targetImg;
+                    
+                    // Load existing annotations if available
+                    if (currentAnnotations) {
+                        globalAnnotationEditor.restoreState(currentAnnotations);
+                    } else {
+                        // Clear previous annotations if no current ones
+                        globalAnnotationEditor.restoreState({});
+                    }
+                }
+                
+                $("#annotation-status").text("Annotation editor opened").css("color", "blue");
+                return;
+            }
+            
+            // Create new annotation editor since none exists
+            globalAnnotationEditor = new markerjsUI.AnnotationEditor();
+            globalAnnotationEditor.targetImage = targetImg;
             
             // Set up event handlers for the annotation editor
-            annotationEditor.addEventListener('editorsave', function(event) {
+            globalAnnotationEditor.addEventListener('editorsave', function(event) {
                 currentAnnotations = event.detail.state;
                 if (event.detail.dataUrl) {
                     targetImg.src = event.detail.dataUrl;
@@ -38,29 +64,29 @@ function addAnnotations() {
                 $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
                 console.log("Annotations saved with editor");
                 
-                // Remove the annotation editor from the DOM
-                const editorWrapper = document.getElementById('annotation-editor-wrapper');
+                // Hide the annotation editor instead of removing it
+                const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
                 if (editorWrapper) {
-                    editorWrapper.remove();
+                    editorWrapper.style.display = 'none';
                 }
             });
             
-            annotationEditor.addEventListener('editorclose', function(event) {
-                // Remove the annotation editor from the DOM
-                const editorWrapper = document.getElementById('annotation-editor-wrapper');
+            globalAnnotationEditor.addEventListener('editorclose', function(event) {
+                // Hide the annotation editor instead of removing it
+                const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
                 if (editorWrapper) {
-                    editorWrapper.remove();
+                    editorWrapper.style.display = 'none';
                 }
                 $("#annotation-status").text("Annotation editor closed").css("color", "blue");
             });
             
             // Load existing annotations if available
             if (currentAnnotations) {
-                annotationEditor.restoreState(currentAnnotations);
+                globalAnnotationEditor.restoreState(currentAnnotations);
             }
             
             // Configure editor settings
-            annotationEditor.settings = {
+            globalAnnotationEditor.settings = {
                 renderOnSave: true,
                 rendererSettings: {
                     naturalSize: false,
@@ -71,8 +97,8 @@ function addAnnotations() {
             };
             
             // Add the annotation editor to the page
-            const editorWrapper = document.createElement('div');
-            editorWrapper.id = 'annotation-editor-wrapper';
+            editorWrapper = document.createElement('div');
+            editorWrapper.id = 'global-annotation-editor-wrapper';
             editorWrapper.style.cssText = `
                 position: fixed;
                 top: 0;
@@ -86,7 +112,7 @@ function addAnnotations() {
                 align-items: center;
             `;
             
-            annotationEditor.style.cssText = `
+            globalAnnotationEditor.style.cssText = `
                 width: 90vw;
                 height: 90vh;
                 background: white;
@@ -94,7 +120,7 @@ function addAnnotations() {
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             `;
             
-            editorWrapper.appendChild(annotationEditor);
+            editorWrapper.appendChild(globalAnnotationEditor);
             document.body.appendChild(editorWrapper);
             
             console.log("MarkerJS-UI annotation editor created and configured");
@@ -129,7 +155,6 @@ function saveAnnotations() {
                 } else {
                     $("#annotation-status").text("Error saving annotations: " + (response.message || "Unknown error")).css("color", "red");
                 }
-                window.document.reload();
             },
             error: function(xhr, status, error) {
                 $("#annotation-status").text("Error saving annotations: " + error).css("color", "red");
@@ -144,10 +169,10 @@ function clearAnnotations() {
     if (confirm("Are you sure you want to clear all annotations?")) {
         currentAnnotations = null;
         
-        // Close any open annotation editor
-        const editorWrapper = document.getElementById('annotation-editor-wrapper');
+        // Hide any open annotation editor instead of removing it
+        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
         if (editorWrapper) {
-            editorWrapper.remove();
+            editorWrapper.style.display = 'none';
         }
         
         // Reset image to original
@@ -165,6 +190,17 @@ function downloadImage() {
     link.click();
     document.body.removeChild(link);
 }
+
+function cleanupAnnotationEditor() {
+    // Hide the global annotation editor when switching to a different image
+    const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+    if (editorWrapper) {
+        editorWrapper.style.display = 'none';
+    }
+}
+
+// Make cleanup function available globally
+window.cleanupAnnotationEditor = cleanupAnnotationEditor;
 
 function renderAnnotationsOnImage() {
     if (currentAnnotations && targetImg) {
@@ -209,6 +245,9 @@ function renderAnnotationsOnImage() {
 }
 
 function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existingAnnotations) {
+    // Clean up any existing annotation editor before initializing a new image
+    cleanupAnnotationEditor();
+    
     // Set global variables from parameters
     gradeableId = gId;
     userId = uId;

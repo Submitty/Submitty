@@ -33,15 +33,11 @@ class ImageView extends AbstractView {
 
         $localjs = [];
 
-        //This jquery file should not need to be added here as jquery should already be in the header on any page
         if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
 
-        // Add markerjs3 core library first (dependency for markerjs-ui)
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('markerjs3', 'markerjs3.js'), 'vendor');
-        // Add markerjs-ui resources
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('markerjs3', 'markerjs-ui.umd.js'), 'vendor');
+        // MarkerJS scripts are now loaded globally in the main page, not per instance
         // Add image annotation JavaScript
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('img', 'ImageAnnotationEmbedded.js'), 'js');
 
