@@ -153,7 +153,8 @@ class CourseMaterialsView extends AbstractView {
                 [$file_name => $course_material] + array_slice($path_to_place, $index, null, true);
         }
 
-        $this->removeEmptyFolders($final_structure);
+        // Don't remove empty folders, revisit if this is an issue.
+        //$this->removeEmptyFolders($final_structure);
 
         $this->setSeen($final_structure, $seen, $base_course_material_path);
 
