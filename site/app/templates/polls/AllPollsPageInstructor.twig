@@ -37,7 +37,7 @@
             </thead>
             <tbody>
                 {% for poll in todays_polls %}
-                    <tr>
+                    <tr data-testid="poll-row-{{ poll.getId() }}">
                         <td>
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
@@ -101,7 +101,7 @@
             </thead>
             <tbody>
                 {% for poll in tomorrow_polls %}
-                    <tr>
+                    <tr data-testid="poll-row-{{ poll.getId() }}">
                         <td>
                                 <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
                                         <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
@@ -166,7 +166,7 @@
             </thead>
             <tbody>
                 {% for poll in older_polls %}
-                    <tr>
+                    <tr data-testid="poll-row-{{ poll.getId() }}">
                         <td>
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>
@@ -231,7 +231,7 @@
             </thead>
             <tbody>
                 {% for poll in future_polls %}
-                    <tr>
+                    <tr data-testid="poll-row-{{ poll.getId() }}">
                         <td>
                             <a class="fas fa-pencil-alt black-btn" tabindex="0" href="{{base_url}}/editPoll/{{ poll.getId() }}" title="edit poll {{ poll.getName() }}" aria-label="edit poll {{ poll.getId() }}">
                                 <input type="hidden" name="poll_id" value="{{ poll.getId() }}"/>

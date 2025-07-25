@@ -147,3 +147,22 @@ export function verifyWebSocketFunctionality(
         });
     });
 }
+
+/**
+ * Verifies the presence and content of a toast popup message, and optionally dismisses it.
+ * @param {string} message - The expected message content (substring match).
+ * @param {boolean} [exists=true] - Whether the message should exist.
+ */
+export function verifyUpdateMessage(message, exists = true) {
+    if (exists) {
+        cy.get('[data-testid="popup-message"]')
+            .should('be.visible')
+            .should('contain', message)
+            .get('[data-testid="remove-message-popup"], [data-testid="remove_popup"]')
+            .first()
+            .click();
+    }
+    else {
+        cy.get('[data-testid="popup-message"]').should('not.exist');
+    }
+}

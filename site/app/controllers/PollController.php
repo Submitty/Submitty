@@ -484,6 +484,7 @@ class PollController extends AbstractController {
 
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setOpen", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/polls/setOpen", methods: ["POST"])]
     public function openPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -597,6 +598,7 @@ class PollController extends AbstractController {
 
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setEnded", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/polls/setEnded", methods: ["POST"])]
     public function endPoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -621,6 +623,7 @@ class PollController extends AbstractController {
 
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/polls/setClosed", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/polls/setClosed", methods: ["POST"])]
     public function closePoll(): RedirectResponse {
         $poll_id = intval($_POST['poll_id'] ?? -1);
         $em = $this->core->getCourseEntityManager();
@@ -644,6 +647,7 @@ class PollController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/polls/submitResponse", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/polls/submitResponse", methods: ["POST"])] 
     public function submitResponse(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
 

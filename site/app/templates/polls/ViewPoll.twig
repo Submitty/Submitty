@@ -171,6 +171,8 @@
 
             // Store the position of each response for incoming websocket updates
             const responseIndices = {};
+            window.responseIndices = responseIndices;
+            window.data = data;
             let response = "";
             let position = 0;
             const [correctColor, defaultColor] =
@@ -209,13 +211,14 @@
                 Plotly.relayout(container, update);
             });
 
-            {% if user_admin and poll.isOpen() %}
+            {% if user_admin %}
             window.histogram = {
                 data: data,
                 layout: layout,
                 responseIndices: responseIndices
             }
-           
+            {% endif %}
+            {% if user_admin and poll.isOpen() %}
             initializeInstructorSocketClient('polls-{{ poll.getId() }}-instructor');
             {% endif %}
         }

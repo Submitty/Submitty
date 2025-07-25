@@ -1,3 +1,5 @@
+import { buildUrl, getApiKey, verifyWebSocketFunctionality, verifyUpdateMessage } from '../../support/utils';
+
 /*
  * This test relies on the polls and their initial state in the sample course
  * when running vagrant up. Modifications made to those polls will result in the
@@ -715,4 +717,134 @@ describe('Test cases revolving around polls functionality', () => {
     });
 
     // Done.
+});
+
+const createPoll = (name, question) => {
+    // TODO
+}
+
+const updatePollVisibility = (visibility = 'open') => {
+    // TODO: open, close, ended (view as student)
+}
+
+const submitExternalPollResponse = (student, response) => {
+    // TODO (view as instructor, verify the histogram is updated accordingly)
+    // Students: [student, aphacker, adamsg]
+}
+
+describe('WebSocket Poll Functionality', () => {
+    const instructor = 'instructor';
+    const students = ['student', 'aphacker', 'adamsg'];
+    const pollName = 'WebSocket Poll Test';
+    const pollQuestion = 'Which animal do you like most?';
+    const responses = ['Dolphin', 'Dove', 'Shark', 'Frog', 'Snail'];
+    let pollId;
+    let pollUrl;
+
+    before(() => {
+        cy.login(instructor);
+        cy.visit(['sample', 'polls']);
+        cy.contains('New Poll').click();
+        cy.get('[data-testid="poll-name"]').type(pollName);
+        cy.get('[data-testid="poll-question"]').type(pollQuestion);
+        cy.get('[data-testid="poll-date"]').clear({ force: true });
+        cy.get('[data-testid="poll-date"]').type('1970-01-01', { force: true });
+        cy.get('#poll-type-multiple-response-flexible').check();
+        responses.forEach((resp, i) => {
+            if (i > 0) cy.contains('Add Response').click();
+            cy.get(`[data-testid="response-${i}-wrapper"] textarea`).type(resp);
+            cy.get(`[data-testid="response-${i}-wrapper"] .correct-box`).check();
+        });
+        cy.get('h1').click();
+        cy.get('[data-testid="poll-form-submit"]').click();
+        cy.url().should('include', 'sample/polls');
+        // Find the poll row and extract pollId
+        cy.get('[data-testid^="poll-row-"]').contains(pollName).parents('tr').invoke('attr', 'data-testid').then((testid) => {
+            pollId = testid.replace('poll-row-', '');
+            pollUrl = `/courses/sample/polls/${pollId}`;
+            cy.wrap(pollId).as('pollId');
+        });
+    });
+
+    it('Instructor can open poll and students see enabled answer button', function () {
+        cy.login(instructor);
+        cy.visit(['sample', 'polls']);
+        cy.get(`[data-testid^="poll-row-"]`).contains(pollName).parents('tr').within(() => {
+            cy.get('input[id$="_view_results"]').check({ force: true });
+        });
+        verifyUpdateMessage('Poll opened');
+        // Student should see enabled answer button
+        cy.login('student');
+        cy.visit(pollUrl);
+        cy.get('[data-testid="submit-answer"]').should('not.be.disabled');
+    });
+
+    it('Students submit responses and histogram updates', function () {
+        // Student 1 selects Dolphin
+        cy.login('student');
+        cy.visit(pollUrl);
+        cy.get('input[type="checkbox"]').eq(0).check();
+        cy.get('[data-testid="submit-answer"]').click();
+        cy.window().then(win => {
+            const idx = win.histogram.responseIndices['Dolphin'];
+            expect(win.histogram.data[0].y[idx]).to.equal(1);
+        });
+        // Student 2 selects Dolphin and Dove
+        cy.login('aphacker');
+        cy.visit(pollUrl);
+        cy.get('input[type="checkbox"]').eq(0).check();
+        cy.get('input[type="checkbox"]').eq(1).check();
+        cy.get('[data-testid="submit-answer"]').click();
+        cy.window().then(win => {
+            const idxDolphin = win.histogram.responseIndices['Dolphin'];
+            const idxDove = win.histogram.responseIndices['Dove'];
+            expect(win.histogram.data[0].y[idxDolphin]).to.equal(2);
+            expect(win.histogram.data[0].y[idxDove]).to.equal(1);
+        });
+        // Student 1 unselects Dolphin, selects Shark
+        cy.login('student');
+        cy.visit(pollUrl);
+        cy.get('input[type="checkbox"]').eq(0).uncheck();
+        cy.get('input[type="checkbox"]').eq(2).check();
+        cy.get('[data-testid="submit-answer"]').click();
+        cy.window().then(win => {
+            const idxDolphin = win.histogram.responseIndices['Dolphin'];
+            const idxShark = win.histogram.responseIndices['Shark'];
+            expect(win.histogram.data[0].y[idxDolphin]).to.equal(1);
+            expect(win.histogram.data[0].y[idxShark]).to.equal(1);
+        });
+    });
+
+    it('Instructor can end poll and students see disabled answer button', function () {
+        cy.login(instructor);
+        cy.visit(['sample', 'polls']);
+        cy.get(`[data-testid^="poll-row-"]`).contains(pollName).parents('tr').within(() => {
+            cy.get('input[id$="_view_results"]').uncheck({ force: true });
+        });
+        verifyUpdateMessage('Poll ended');
+        cy.login('student');
+        cy.visit(pollUrl);
+        cy.get('[data-testid="submit-answer"]').should('be.disabled');
+    });
+
+    it('Instructor can close poll and students see disabled answer button', function () {
+        cy.login(instructor);
+        cy.visit(['sample', 'polls']);
+        cy.get(`[data-testid^="poll-row-"]`).contains(pollName).parents('tr').within(() => {
+            cy.get('input[id$="_visible"]').uncheck({ force: true });
+        });
+        verifyUpdateMessage('Poll closed');
+        cy.login('student');
+        cy.visit(pollUrl);
+        cy.get('[data-testid="submit-answer"]').should('be.disabled');
+    });
+
+    after(() => {
+        cy.login(instructor);
+        cy.visit(['sample', 'polls']);
+        cy.get(`[data-testid^="poll-row-"]`).contains(pollName).parents('tr').within(() => {
+            cy.get('a[title^="delete poll"]').click({ force: true });
+        });
+        // NOTE: If the UI does not redirect after deletion, consider adding a redirect or feedback for better UX.
+    });
 });
