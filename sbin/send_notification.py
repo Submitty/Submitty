@@ -286,7 +286,6 @@ def send_pending_notifications():
         course_db = connect_db(f"submitty_{term}_{course}")
         default_hw_late_days, default_student_late_days = get_late_day_defaults(term, course)
 
-
         # Retrieve all fully graded gradeables with pending grade notifications
         grades_available = course_db.execute(text(
             """
