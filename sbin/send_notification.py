@@ -86,6 +86,20 @@ def get_full_course_name(term, course):
     return course_name
 
 
+def get_late_day_defaults(term, course):
+    """Retrieve default late day values from the course config file."""
+    course_config_path = os.path.join(
+        COURSE_DIR_PATH, term, course, 'config', 'config.json')
+
+    with open(course_config_path, 'r', encoding="utf-8") as f:
+        data = json.load(f)
+        course_details = data.get('course_details', {})
+        default_hw_late_days = course_details.get('default_hw_late_days', 0)
+        default_student_late_days = course_details.get('default_student_late_days', 0)
+
+        return default_hw_late_days, default_student_late_days
+
+
 def connect_db(db_name):
     """Set up a connection with the specific database."""
     if os.path.isdir(DB_HOST):
@@ -101,22 +115,36 @@ def connect_db(db_name):
     return db
 
 
-def construct_notifications(term, course, pending):
+def format_timestamp(timestamp):
+    """Format a timestamp into a readable string."""
+    return timestamp.strftime("%B %d, %Y at %I:%M %p")
+
+
+def format_late_days(late_days):
+    """Format a late day value into a readable string."""
+    return f"{late_days} late day{'s' if late_days != 1 else ''}"
+
+
+def construct_notifications(term, course, pending, notification_type):
     """Construct pending gradeable notifications for the current course."""
     timestamps = {}
     gradeables, site, email = [], [], []
 
-    for notification in pending:
+    for notification in pending.mappings():
         gradeable = {
-            "id": notification[0],
-            "title": notification[1],
-            "team_id": notification[2],
-            "user_id": notification[3],
-            "user_email": notification[4],
+            "id": notification.get('g_id'),
+            "title": notification.get('g_title'),
+            "submission_due_date": notification.get('submission_due_date'),
+            "team_id": notification.get('team_id'),
+            "user_id": notification.get('user_id'),
+            "user_email": notification.get('user_email'),
             # Potentially send via the notification page
-            "site_enabled": notification[5],
+            "site_enabled": notification.get('site_enabled'),
             # Potentially send via email
-            "email_enabled": notification[6]
+            "email_enabled": notification.get('email_enabled'),
+            # Unique late day info for submissions available notifications
+            "max_late_days": notification.get('max_late_days'),
+            "remaining_late_days": notification.get('remaining_late_days')
         }
 
         timestamp = timestamps.setdefault(
@@ -129,12 +157,28 @@ def construct_notifications(term, course, pending):
         metadata = json.dumps({"url": gradeable_url})
 
         # Notification-related content
-        notification_content = "Grade Released: " + gradeable["title"]
-        email_subject = f"Grade Released: {gradeable['title']}"
-        email_body = (f"Your grade is now available for {gradeable['title']} "
-                      f"in course \n{get_full_course_name(term, course)}.\n\n"
-                      f"Click here for more info: {gradeable_url}"
-                      )
+        if notification_type == "gradeable_release":
+            email_subject = f"Submissions Open: {gradeable['title']}"
+            notification_content = (
+                f"{email_subject} (Due {format_timestamp(gradeable['submission_due_date'])} - "
+                f"{format_late_days(gradeable['remaining_late_days'])} remaining, "
+                f"{format_late_days(gradeable['max_late_days'])} allowed)"
+            )
+            email_body = (
+                f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
+                f"{get_full_course_name(term, course)}.\n\n"
+                f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
+                f"Late Days: {format_late_days(gradeable['remaining_late_days'])} remaining, "
+                f"{format_late_days(gradeable['max_late_days'])} allowed"
+            )
+        else:
+            email_subject = notification_content = f"Grade Released: {gradeable['title']}"
+            email_body = (
+                f"Your grade is now available for \"{gradeable['title']}\" in course "
+                f"{get_full_course_name(term, course)}."
+            )
+
+        email_body += f"\n\nClick here for more info: {gradeable_url}"
 
         if gradeable["site_enabled"] is True:
             site.append({
@@ -166,7 +210,7 @@ def construct_notifications(term, course, pending):
     return gradeables, site, email
 
 
-def send_notifications(course, course_db, master_db, lists):
+def send_notifications(course, course_db, master_db, lists, notification_type):
     """Send pending gradeable notifications for the current course."""
     gradeables, site, email = lists
     timestamp = datetime.datetime.now()
@@ -195,22 +239,31 @@ def send_notifications(course, course_db, master_db, lists):
             )
 
         if gradeables:
-            course_db.execute(text(
-                """
-                UPDATE electronic_gradeable_version
-                SET g_notification_sent = TRUE
-                WHERE (g_id = :g_id AND user_id = :user_id)
-                OR (g_id = :g_id AND team_id = :team_id);
-                """), gradeables
-            )
+            if notification_type == "gradeable_release":
+                course_db.execute(text(
+                    """
+                    UPDATE electronic_gradeable
+                    SET eg_release_notifications_sent = TRUE
+                    WHERE g_id = :g_id;
+                    """), gradeables
+                )
+            else:
+                course_db.execute(text(
+                    """
+                    UPDATE electronic_gradeable_version
+                    SET g_notification_sent = TRUE
+                    WHERE (g_id = :g_id AND user_id = :user_id)
+                    OR (g_id = :g_id AND team_id = :team_id);
+                    """), gradeables
+                )
 
             m = (f"[{timestamp}] ({course}): Sent {len(site)} site, "
                  f"{len(email)} email notifications\n")
             LOG_FILE.write(m)
 
             # Commit the changes to the individual databases
-        course_db.commit()
-        master_db.commit()
+            course_db.commit()
+            master_db.commit()
     except DatabaseError as notification_error:
         # Rollback the changes if an error occurs
         course_db.rollback()
@@ -231,9 +284,10 @@ def send_pending_notifications():
 
     for term, course in courses:
         course_db = connect_db(f"submitty_{term}_{course}")
+        default_hw_late_days, default_student_late_days = get_late_day_defaults(term, course)
 
-        # Retrieve all fully graded gradeables with pending notifications
-        pending = course_db.execute(text(
+        # Retrieve all fully graded gradeables with pending grade notifications
+        grades_available = course_db.execute(text(
             """
             WITH gradeables AS (
                 SELECT DISTINCT
@@ -298,12 +352,60 @@ def send_pending_notifications():
                 OR
                 COUNT(component) = COUNT(graded_component)
             );
-            """
-        ))
+            """)
+        )
 
-        if pending:
-            lists = construct_notifications(term, course, pending)
-            send_notifications(course, course_db, master_db, lists)
+        if grades_available:
+            lists = construct_notifications(term, course, grades_available, "grades_release")
+            send_notifications(course, course_db, master_db, lists, "grades_release")
+            notified += len(lists[0])
+
+        # Retrieve all gradeables with pending release notifications
+        release_available = course_db.execute(text(
+            """
+            SELECT DISTINCT
+                g.g_id AS g_id,
+                g.g_title AS g_title,
+                eg.eg_submission_due_date AS submission_due_date,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
+                COALESCE(ns.all_gradeable_releases, TRUE) AS site_enabled,
+                COALESCE(ns.all_gradeable_releases_email, FALSE) AS email_enabled,
+                COALESCE(NULLIF(eg.eg_late_days, -1), :default_hw_late_days) AS max_late_days,
+                COALESCE(ldc.late_days_remaining, :default_student_late_days) AS remaining_late_days
+            FROM electronic_gradeable eg
+            INNER JOIN gradeable AS g
+                ON eg.g_id = g.g_id
+            INNER JOIN users AS u
+                ON u.registration_type <> 'withdrawn'
+                AND (
+                    u.registration_section IS NOT NULL
+                    OR u.user_group < 4
+                )
+            LEFT JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
+            LEFT JOIN LATERAL (
+                SELECT late_days_remaining
+                FROM calculate_remaining_cache_for_user(u.user_id, :default_student_late_days)
+                ORDER BY late_day_date DESC
+                LIMIT 1
+            ) ldc ON TRUE
+            WHERE eg.eg_student_view IS TRUE
+                AND eg.eg_student_submit IS TRUE
+                AND eg.eg_release_notifications_sent IS FALSE
+                AND eg.eg_submission_open_date <= NOW()
+            GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
+                ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
+                ldc.late_days_remaining
+            """), {
+                "default_hw_late_days": default_hw_late_days,
+                "default_student_late_days": default_student_late_days
+            }
+        )
+
+        if release_available:
+            lists = construct_notifications(term, course, release_available, "gradeable_release")
+            send_notifications(course, course_db, master_db, lists, "gradeable_release")
             notified += len(lists[0])
 
         course_db.close()
@@ -317,8 +419,8 @@ def main():
     """Driver method to release course notifications"""
     try:
         notified = send_pending_notifications()
-        m = (f"[{datetime.datetime.now()}] Successfully updated notification "
-             f"status for {notified} submission{'s' if notified != 1 else ''}")
+        m = (f"[{datetime.datetime.now()}] Successfully released "
+             f"{notified} notification{'s' if notified != 1 else ''}")
         LOG_FILE.write(f"{m}\n\n")
         LOG_FILE.close()
     except (IOError, DatabaseError) as notification_error:

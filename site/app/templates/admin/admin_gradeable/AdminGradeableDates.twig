@@ -77,9 +77,9 @@
             {% if electronic and gradeable.isStudentView() and release_date <= "now"|date(date_format, timezone_string) %}
                 <p style="max-width:600px; margin-top:5px;" id="gradeable-notifications-message">
                     Note: Grades released notifications are sent and emailed at the start of every hour for students with complete TA/Manual grades.
-                    <span id="notification-total">{{ gradeable.getNotificationsSent() }}</span> notifications have been sent{{ notifications_pending <= 0 ? '.' : ',' }}
-                    {% if notifications_pending > 0 %}
-                    and <span id="notification-pending">{{ notifications_pending }}</span> are awaiting to be sent at the top of the hour.
+                    <span id="notification-total">{{ gradeable.getScoreNotificationsSent() }}</span> notifications have been sent{{ score_notifications_pending <= 0 ? '.' : ',' }}
+                    {% if score_notifications_pending > 0 %}
+                    and <span id="notification-pending">{{ score_notifications_pending }}</span> are awaiting to be sent at the top of the hour.
                     {% endif %}
                 </p>
             {% endif %}
