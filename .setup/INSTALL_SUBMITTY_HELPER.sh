@@ -282,7 +282,6 @@ if [ "${IS_WORKER}" == 0 ]; then
     find "${SUBMITTY_INSTALL_DIR}/more_autograding_examples" -type f -exec chmod 444 {} \;
 
     # Install cypress related files that are elsewhere in the repository
-    # rsync if we are on vagrant. cp if we are on CI and not vagrant. do nothing otherwise
     if [ "${IS_VAGRANT}" == 1 ]; then
         copy_cmd="rsync -rtz"
     elif [ "${IS_CI}" == 1 ]; then
