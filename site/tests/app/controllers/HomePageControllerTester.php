@@ -3,9 +3,11 @@
 namespace tests\app\controllers;
 
 use app\controllers\HomePageController;
+use app\controllers\TermController;
 use app\libraries\Core;
 use app\models\Course;
 use app\models\User;
+use app\entities\Term;
 use tests\BaseUnitTest;
 
 class HomePageControllerTester extends BaseUnitTest {
@@ -28,6 +30,19 @@ class HomePageControllerTester extends BaseUnitTest {
 
     public function testGetCourses() {
         $core = $this->createCore(['course' => 'course_dropped', 'semester' => 'f24'], 'student');
+        $em = $core->getSubmittyEntityManager();
+        $term = new Term(
+            'f24',
+            'Fall 2024',
+            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s')
+        );
+        $em->persist($term);
+        $em->flush();
+        // Set start day to today for dropped 
+        $em->method('find')
+            ->with(Term::Class, 'f24')
+            ->willReturn($term);
         $course_1 = $this->createCourse($core, 'course1');
         $course_dropped = $this->createCourse($core, 'course_dropped');
         $course_2 = $this->createCourse($core, 'course2');
