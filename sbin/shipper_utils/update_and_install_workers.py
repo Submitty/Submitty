@@ -82,8 +82,10 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
     thread_object.add_message(f'{host} needs {images_str}')
     #if we are updating the current machine, we can just move the new json to the appropriate spot (no ssh needed)
     if host == "localhost":
-        get_sysinfo.print_distribution()
+        thread_object.add_message(f"{get_sysinfo.get_distribution()}")
         client = docker.from_env()
+        docker_info = client.info()
+        thread_object.add_message(f"Docker Version: {docker_info['ServerVersion']}")
         try:
             # Precompute dicts
             image_id_to_tags = {}
@@ -117,12 +119,30 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                 except docker.errors.ImageNotFound:
                     thread_object.add_message(print_red(f"ERROR: Couldn't find image {image_tag_to_remove} ({image_id}) to remove."))
                     continue
+                except docker.errors.APIError as e:
+                    # Check if the error occurs as a result of running container and skip
+                    if 'image is being used by running container' in str(e):
+                        print(f"WARNING: Image/tag {image_tag_to_remove} is in use by a running container, skipping")
+                        continue
+                    else:
+                        # Handle other potential API errors
+                        print(f"ERROR: An API error occurred while removing {image_tag_to_remove}: {e}")
+                        traceback.print_exc(file=sys.stderr)
                 except Exception as e:
                     thread_object.add_message(print_red(f"ERROR: An error occurred while removing image by ID {image_id}: {e}"))
                     traceback.print_exc(file=sys.stderr)
 
         except Exception as e:
             thread_object.add_message(print_red(f"ERROR: An error occurred: {e}"))
+            traceback.print_exc(file=sys.stderr)
+
+        try:
+            pruned_info = client.images.prune(filters={'dangling': True})
+            images_deleted = pruned_info.get('ImagesDeleted')
+            if images_deleted and len(images_deleted) > 0:
+                thread_object.add_message(f"Pruned {len(images_deleted)} dangling image(s)")
+        except Exception as e:
+            thread_object.add_message(print_red(f"ERROR: An error occurred while pruning dangling images: {e}"))
             traceback.print_exc(file=sys.stderr)
 
         for image in images_to_update:
@@ -143,17 +163,30 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
                   # normal case
                   success = False
 
-        docker_info = client.info()
-        docker_images_obj = client.images.list()
         #print the details of the image
         get_sysinfo.print_docker_info()
     else:
+        # If we are not updating localhost then we need to run commands on the worker machine
         commands = list()
         shipperutil_path = os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "shipper_utils")
-        commands = list()
         script_directory = os.path.join(shipperutil_path, 'docker_command_wrapper.py')
+
+        # Prevent removal of system docker containers
+        with open(os.path.join(SUBMITTY_REPOSITORY_DIR, ".setup", "data", "system_docker_containers.json")) as json_file:
+            system_docker_containers = json.load(json_file)
+
+        # Create arguments for the removal command
+        required_images_str = " ".join(images_to_update)
+        system_images_str = " ".join(system_docker_containers)
+
+        # Pass in arguments for docker_command_wrapper.py (Remove unnecessary images)
+        image_removal_command = (f"python3 {script_directory} --remove "
+                           f"--required-images {required_images_str} "
+                           f"--system-images {system_images_str}")
+        commands.append(image_removal_command)
+        # Add the commands to pull the images
         for image in images_to_update:
-            commands.append(f'python3 {script_directory} {image}')
+            commands.append(f'python3 {script_directory} --pull {image}')
         commands.append(f"python3 {os.path.join(shipperutil_path, 'get_sysinfo.py')} docker osinfo")
         success = run_commands_on_worker(user, host, machine, commands, operation='docker image update', thread_object=thread_object)
 
@@ -183,6 +216,12 @@ def run_commands_on_worker(user, host, machine, commands, operation='unspecified
                 (_, stdout, _) = target_connection.exec_command(command, timeout=600)
                 
                 lines = stdout.read().decode('utf-8').split("\n")
+
+                # Add specified outputs to the simplified output
+                for line in lines:
+                    if 'Docker Version:' in line or 'Description:' in line or 'Removed' in line or 'Pruned' in line:
+                        thread_object.add_message(f'{get_machine_by_ip(host)}: {line}')
+
                 print("\n".join(f"{get_machine_by_ip(host)}: {line}" for line in lines if line))
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:

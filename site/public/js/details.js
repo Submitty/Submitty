@@ -1,5 +1,6 @@
-/* global courseUrl, showPopup */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
+/* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filterWithdrawnUpdate */
+
 const MOBILE_BREAKPOINT = 951;
 
 let collapseItems;
@@ -38,8 +39,8 @@ $(document).ready(() => {
             // the content to be added is inside this data attr
             content = $(this).data('col-title');
             style.innerHTML += `
-              #details-table td:nth-of-type(${idx + 1}):before {
-                  content: "${content}";
+              #details-table td:nth-of-type(${escapeSpecialChars((idx + 1).toString())}):before {
+                  content: "${escapeSpecialChars(content)}";
               }
             `;
         }
@@ -110,22 +111,61 @@ function collapseAllSections() {
     updateCollapsedSections();
 }
 
-function inquiry_update() {
-    const button = document.getElementById('inquiryButton');
+function inquiryUpdate() {
     const status = Cookies.get('inquiry_status');
 
     if (status === 'on') {
         $('.grade-button').each(function () {
             if (typeof $(this).attr('data-grade-inquiry') === 'undefined') {
-                $(this).closest('.grade-table').hide(); // hide gradeable items without active inquiries
+                $(this).closest('.grade-table').addClass('inquiry-only-disabled'); // hide gradeable items without active inquiries, overrrides withdrawn filter
             }
         });
-        button.textContent = 'Grade Inquiry Only: On';
     }
     else {
         $('.grade-button').each(function () {
-            $(this).closest('.grade-table').show(); // show all gradeable items
+            $(this).closest('.grade-table').removeClass('inquiry-only-disabled'); // show all gradeable items
         });
-        button.textContent = 'Grade Inquiry Only: Off';
     }
 }
+
+// Ensures all filters and checkboxes remain the same on page reload.
+window.addEventListener('DOMContentLoaded', () => {
+    const inquiryFilterStatus = Cookies.get('inquiry_status');
+    const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    withdrawnFilterElements.hide();
+    // Instructors and TAs have access to all toggles
+    if (full_access_grader_permission) {
+        // Only Assigned Sections
+        const assignedFilterBox = document.getElementById('toggle-view-sections');
+        const assignedFilterStatus = Cookies.get('view');
+        assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
+
+        // Withdrawn Students
+        const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+        const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
+        if (!is_team_assignment) { // Toggle not available on team assignments
+            if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {
+                withdrawnFilterBox.checked = true;
+                withdrawnFilterElements.hide();
+            }
+            else {
+                withdrawnFilterBox.checked = false;
+                withdrawnFilterElements.show();
+            }
+        }
+    }
+    // Grade Inquiry Only - students don't have permission
+    if (!is_student) {
+        const inquiryFilterBox = document.getElementById('toggle-inquiry-only');
+        inquiryFilterBox.checked = (inquiryFilterStatus === 'on');
+    }
+    // Randomize Order - all graders have permission
+    const randomFilterBox = document.getElementById('toggle-random-order');
+    const randomFilterStatus = Cookies.get('sort');
+    randomFilterBox.checked = (randomFilterStatus === 'random');
+
+    // Withdrawn students should always be visible in team gradeables
+    if (is_team_assignment) {
+        withdrawnFilterElements.show();
+    }
+});

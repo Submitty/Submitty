@@ -877,13 +877,7 @@ function saveChanges() {
                 console.error(response);
             }
         },
-        // error: function (jqXHR, textStatus, errorThrown) {
-        //     console.error(`Error status: ${textStatus}`);
-        //     console.error(`Error thrown: ${errorThrown}`);
-        //     console.error(`Server response: ${jqXHR.status} ${jqXHR.statusText}`);
-        // },
         error: function (jqXHR, textStatus, errorThrown) {
-            console.log('AJAX error:', jqXHR, textStatus, errorThrown);
             let errorMsg = `An error occurred: Server response: ${jqXHR.status} ${jqXHR.statusText}`;
             try {
                 // Attempt to parse JSON, if there's HTML, this will fail
@@ -897,6 +891,7 @@ function saveChanges() {
             catch (e) {
                 console.error('Failed to parse JSON response', e);
             }
+            console.error(errorMsg);
         },
     });
 }

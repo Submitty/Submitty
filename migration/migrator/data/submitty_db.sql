@@ -562,6 +562,38 @@ ALTER SEQUENCE public.global_calendar_items_id_seq OWNED BY public.global_calend
 
 
 --
+-- Name: instructor_sql_queries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.instructor_sql_queries (
+    id integer NOT NULL,
+    user_id character varying,
+    query_name character varying(255),
+    query text
+);
+
+
+--
+-- Name: instructor_sql_queries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.instructor_sql_queries_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: instructor_sql_queries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.instructor_sql_queries_id_seq OWNED BY public.instructor_sql_queries.id;
+
+
+--
 -- Name: mapped_courses; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -659,6 +691,21 @@ CREATE TABLE public.terms (
 
 
 --
+-- Name: unverified_users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.unverified_users (
+    user_id character varying(50) NOT NULL,
+    user_givenname character varying NOT NULL,
+    user_password character varying,
+    user_familyname character varying NOT NULL,
+    user_email character varying NOT NULL,
+    verification_code character varying(40),
+    verification_expiration timestamp with time zone DEFAULT now()
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -748,6 +795,13 @@ ALTER TABLE ONLY public.global_calendar_items ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: instructor_sql_queries id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.instructor_sql_queries ALTER COLUMN id SET DEFAULT nextval('public.instructor_sql_queries_id_seq'::regclass);
+
+
+--
 -- Name: saml_mapped_users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -807,6 +861,14 @@ ALTER TABLE ONLY public.docker_images
 
 ALTER TABLE ONLY public.emails
     ADD CONSTRAINT emails_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: instructor_sql_queries instructor_sql_queries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.instructor_sql_queries
+    ADD CONSTRAINT instructor_sql_queries_pkey PRIMARY KEY (id);
 
 
 --
@@ -1013,6 +1075,14 @@ ALTER TABLE ONLY public.emails
 
 ALTER TABLE ONLY public.saml_mapped_users
     ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.users(user_id);
+
+
+--
+-- Name: instructor_sql_queries instructor_sql_queries_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.instructor_sql_queries
+    ADD CONSTRAINT instructor_sql_queries_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
 
 
 --

@@ -4488,21 +4488,41 @@ SQL;
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
         $this->course_db->query(
             "
-          UPDATE grade_override
-          SET marks=?, comment=?
-          WHERE user_id=?
-            AND g_id=?;",
-            [$marks, $comment, $user_id, $g_id]
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+            ",
+            [$user_id, $g_id, $marks, $comment]
         );
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query(
-                "
-            INSERT INTO grade_override
-            (user_id, g_id, marks, comment)
-            VALUES(?,?,?,?)",
-                [$user_id, $g_id, $marks, $comment]
-            );
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
         }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
     }
 
     /**
@@ -5318,6 +5338,17 @@ AND gc_id IN (
             VALUES " . $value_param_string,
             $flattened_params
         );
+    }
+
+    /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
@@ -7430,6 +7461,14 @@ AND gc_id IN (
     }
 
     /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
@@ -9447,10 +9486,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
@@ -9494,5 +9534,61 @@ ORDER BY
             $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
         }
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @return array<string>
+     */
+    public function getInstructorQueries($user_id): array {
+        $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_name the query name save it as
+     * @param string $query the query to save
+     * @return int the last inserted id
+     */
+    public function saveInstructorQueries($user_id, $query_name, $query): int {
+        $this->submitty_db->query(
+            "INSERT INTO instructor_sql_queries (user_id, query_name, query) VALUES (?, ?, ?)",
+            [$user_id, $query_name, $query]
+        );
+        return $this->submitty_db->getLastInsertId();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_id the query id to delete
+     * @return bool true if the query was deleted, false otherwise
+     */
+    public function deleteInstructorQueries($user_id, $query_id): bool {
+        $this->submitty_db->query(
+            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND id = ?",
+            [$user_id, $query_id]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Gets the active graders for a given gradeable.
+     * @return array<array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>
+     */
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
     }
 }

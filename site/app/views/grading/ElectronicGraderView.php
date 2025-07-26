@@ -307,6 +307,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
             "gradeable_id" => $gradeable->getId(),
             "semester" => $this->core->getConfig()->getTerm(),
@@ -370,9 +371,9 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
-            "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
-            "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
-            "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
+            "include_grade_override" => $_COOKIE['include_grade_override'] ?? 'omit',
+            "include_bad_submissions" => $_COOKIE['include_bad_submissions'] ?? 'omit',
+            "include_null_section" => $_COOKIE['include_null_section'] ?? 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -502,10 +503,18 @@ HTML;
      * @param array<string, bool> $overrides
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
+     * @param bool $filter_withdrawn_student
      * @param array<string,bool> $grading_details_columns
+     * @param array<string,array<number,array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>> $active_graders
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, array $grading_details_columns) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, bool $filter_withdrawn_student, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -849,12 +858,12 @@ HTML;
         if ($this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() === User::GROUP_FULL_ACCESS_GRADER) {
             if ($view_all) {
                 if (count($grader_registration_sections) !== 0) {
-                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Select "View Your Sections" to see only your sections.';
+                    $message = 'Notice: You are assigned to grade a subset of students for this gradeable, but you are currently viewing all students. Toggle "Only Assigned Sections" to see only your sections.';
                     $message_warning = true;
                 }
             }
             elseif (count($grader_registration_sections) === 0) {
-                $message = 'Notice: You are not assigned to grade any students for this gradeable. Select "View All" to see the whole class.';
+                $message = 'Notice: You are not assigned to grade any students for this gradeable. Untoggle "Only Assigned Sections" to see the whole class.';
                 $message_warning = true;
             }
         }
@@ -891,11 +900,11 @@ HTML;
                 $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
             }
         }
-        if (count($grading_details_columns) > 0) {
-            $columns = array_filter($columns, function ($column) use ($grading_details_columns) {
-                return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns[$column['function']];
-            });
-        }
+
+        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
+            return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
+        });
+
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $details_base_path = '\/gradeable\/' . $gradeable->getId() . '/grading/details';
         $this->core->getOutput()->addInternalCss('details.css');
@@ -906,6 +915,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -917,13 +927,17 @@ HTML;
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
             "inquiry_status" => $inquiry_status,
+            "filter_withdrawn_student" => $filter_withdrawn_student,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
+            "full_access_grader_permission" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
+            "is_limited_access_grader" => ($this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
-            "columns" => $columns,
+            "columns" => $shown_columns,
+            "all_columns" => $columns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
@@ -947,6 +961,7 @@ HTML;
             "overrides" => $overrides,
             "anon_ids" => $anon_ids,
             "max_team_name_length" => Team::MAX_TEAM_NAME_LENGTH,
+            "active_graders" => $active_graders,
             "csrf_token" => $this->core->getCsrfToken(),
         ]);
     }
@@ -1236,17 +1251,20 @@ HTML;
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFInitToolbar.js'));
 
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
         $this->core->getOutput()->addInternalJs('gradeable.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
         $this->core->getOutput()->addInternalModuleJs('panel-selector-modal.js');
+        $this->core->getOutput()->addInternalModuleJs('panel-selector-modal-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
 
         if ($this->core->getUser()->getGroup() < User::GROUP_LIMITED_ACCESS_GRADER || ($gradeable->getLimitedAccessBlind() !== 2 && $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER)) {
             $return .= $this->core->getOutput()->renderTemplate(['grading', 'ElectronicGrader'], 'renderInformationPanel', $graded_gradeable, $display_version_instance);
@@ -1496,6 +1514,7 @@ HTML;
         $results = [];
         $results_public = [];
         $checkout = [];
+        $submissions_processed = [];
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
@@ -1508,6 +1527,7 @@ HTML;
 
             $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
+            $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
         }
@@ -1520,10 +1540,10 @@ HTML;
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1534,6 +1554,7 @@ HTML;
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
             "submissions" => $submissions,
+            "submissions_processed" => $submissions_processed,
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
@@ -1639,7 +1660,7 @@ HTML;
             $student_anon_ids[] = $graded_gradeable->getSubmitter()->getAnonId($graded_gradeable->getGradeableId());
         }
         // Disable grading if the requested version isn't the active one
-        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() == 0
+        $grading_disabled = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0
             || $display_version != $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
 
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
@@ -1664,7 +1685,7 @@ HTML;
                 "version_conflict" => $version_conflict,
                 "show_silent_edit" => $show_silent_edit,
                 "show_clear_conflicts" => $show_clear_conflicts,
-                "student_grader" => $this->core->getUser()->getGroup() == User::GROUP_STUDENT,
+                "student_grader" => $this->core->getUser()->getGroup() === User::GROUP_STUDENT,
                 "grader_id" => $this->core->getUser()->getId(),
                 "display_version" => $display_version,
                 "allow_custom_marks" => $gradeable->getAllowCustomMarks(),
@@ -1680,7 +1701,7 @@ HTML;
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
         $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
-        $is_student = $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
+        $is_student = $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
         foreach ($r_components as $key => $value) {

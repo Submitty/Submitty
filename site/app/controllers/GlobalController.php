@@ -184,6 +184,15 @@ class GlobalController extends AbstractController {
             ]);
         }
 
+        if ($this->core->getConfig()->isChatEnabled()) {
+            $sidebar_buttons[] = new NavButton($this->core, [
+                "href" => $this->core->buildCourseUrl(['chat']),
+                "title" => "Live Chat",
+                "id" => "nav-sidebar-chat",
+                "icon" => "fa-regular fa-keyboard"
+            ]);
+        }
+
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_materials_path = $course_path . "/uploads/course_materials";
         $empty = FileUtils::isEmptyDir($course_materials_path);
@@ -358,7 +367,7 @@ class GlobalController extends AbstractController {
         // --------------------------------------------------------------------------
 
         $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
-        if ($display_rainbow_grades_summary) {
+        if ($display_rainbow_grades_summary || $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR) {
             $sidebar_buttons[] = new NavButton($this->core, [
                 "href" => $this->core->buildCourseUrl(['grades']),
                 "title" => "Rainbow Grades",
@@ -831,8 +840,12 @@ class GlobalController extends AbstractController {
 
         //Query strings can be in (basically) arbitrary order. Make sure they at least
         // have the same parts though
-        $query_a = array_filter(explode("&", $query_a));
-        $query_b = array_filter(explode("&", $query_b));
+        $query_a = array_filter(explode("&", $query_a), function ($value) {
+            return strlen($value) > 0;
+        });
+        $query_b = array_filter(explode("&", $query_b), function ($value) {
+            return strlen($value) > 0;
+        });
 
         $query_a = array_filter($query_a, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);
