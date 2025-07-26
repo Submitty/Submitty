@@ -94,8 +94,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message",
+            'user_create_account' => false,
             "duck_special_effects" => false,
             "default_locale" => "default",
+            "user_id_requirements" => []
         ];
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
@@ -135,7 +137,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'queue_announcement_message' => '',
                 'seek_message_enabled'           => false,
                 'seek_message_instructions'      => '',
-                'polls_enabled'                  => false
+                'polls_enabled'                  => false,
+                'chat_enabled'                   => false
             ],
             'feature_flags' => [
 
@@ -311,7 +314,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'queue_announcement_message' => '',
                     'seek_message_enabled'           => false,
                     'seek_message_instructions'      => '',
-                    'polls_enabled'                  => false
+                    'polls_enabled'                  => false,
+                    'chat_enabled'                   => false
                 ],
                 'feature_flags' => []
             ],
@@ -330,6 +334,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
+            'user_create_account' => false,
+            'user_id_requirements' => [],
+            'accepted_emails' => null,
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
@@ -343,6 +350,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seek_message_enabled'           => false,
             'seek_message_instructions'      => '',
             'polls_enabled'                  => false,
+            'chat_enabled' => false,
             'feature_flags' => [],
             'submitty_install_path' => $this->temp_dir,
             'date_time_format' => ['modified' => false],
@@ -523,7 +531,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
                 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
                 'grade_inquiry_message', 'room_seating_gradeable_id', 'queue_enabled', 'queue_message',
-                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions'
+                'queue_announcement_message', 'polls_enabled', 'seek_message_enabled', 'seek_message_instructions',
+                'chat_enabled'
             ],
         ];
         $return = [];

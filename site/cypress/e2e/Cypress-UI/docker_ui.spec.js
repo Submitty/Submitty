@@ -17,12 +17,23 @@ const docker_ui_path = '/admin/docker';
  *         "submitty/python:latest",
  *         "submitty/clang:latest",
  *         "submitty/gcc:latest",
+ *         "submitty/rust:latest",
  *         "submitty/java:latest",
- *         "submitty/pdflatex:latest",
+ *         "submitty/pdflatex:latest"
+ *     ],
+ *     "python": [
+ *         "submitty/autograding-default:latest",
+ *         "submitty/python:latest"
+ *     ],
+ *     "cpp": [
+ *         "submitty/autograding-default:latest",
+ *         "submitty/clang:latest",
+ *         "submitty/gcc:latest"
+ *     ],
+ *     "notebook": [
+ *         "submitty/autograding-default:latest"
  *     ]
  * }
- * NOTE: sysinfo log is currently broken, so docker version will always show Error. Once this is fixed,
- * we should uncomment the relevant test.
  */
 
 describe('Docker UI Test', () => {
@@ -30,17 +41,6 @@ describe('Docker UI Test', () => {
         cy.login();
         cy.visit(docker_ui_path);
     });
-    // !DEPRECATED: Installer will also update the docker info
-    // it('Should be the first update', () => {
-    //     // No info update should be made before this test...
-    //     // Check if the update time is "Unknown"
-    //     cy.get(':nth-child(1) > p')
-    //         .should('contain.text', 'Unknown');
-    //     // Check if the OS info is empty
-    //     cy.get('.machine-table > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(3)')
-    //         .invoke('text')
-    //         .should('match', /[\n ]*/);
-    // });
 
     it('Should update the machine information', () => {
         // Click "Update dockers and machines" button
@@ -54,13 +54,12 @@ describe('Docker UI Test', () => {
             + ' docker, please refresh the page in a bit.');
 
         // Allow the system to update the info and reload
-        // NOTE: Will currently always be Error. Fix sysinfo logging to fix this.
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
             return cy.get('[data-testid="docker-version"]')
                 .invoke('text')
                 .then((text) => {
-                    return text !== 'Error';
+                    return text !== 'Unknown';
                 });
         }, 10000);
         // Updated time should not be "Unknown"
@@ -69,9 +68,9 @@ describe('Docker UI Test', () => {
         // Updated OS info should not be empty
         cy.get('[data-testid="system-info"]')
             .should('not.be.empty');
-        // Updated docker version should not be "Error"
+        // Updated docker version should not be "Unknown"
         cy.get('[data-testid="docker-version"]')
-            .should('not.contain.text', 'Error');
+            .should('not.contain.text', 'Unknown');
     });
 
     it('Should filter images with tags', () => {
@@ -107,14 +106,21 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
 
-        cy.get('.alert-error')
+        cy.get('[data-testid="popup-message"]')
             .should('have.text', 'submitty/invalid-image not found on DockerHub');
     });
 
     it('Should link existed image to a new tag', () => {
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('[data-testid="docker-status"]')
+            .should('contain.text', 'Up-to-Date');
+
         // Check empty tag list, should have `et-cetera'
         cy.get('#capabilities-list')
             .contains('et-cetera');
+
+        cy.intercept('POST', '**/admin/add_image').as('addImage');
+
         // Check valid format and valid image
         cy.get('#capability-form')
             .select('et-cetera');
@@ -126,19 +132,37 @@ describe('Docker UI Test', () => {
             .should('not.be.disabled')
             .click();
 
-        cy.get('.alert-success')
-            .should('have.text', 'submitty/autograding-default:latest'
-            + ' found on DockerHub and queued to be added!');
+        // Wait for the add image request to complete
+        cy.wait('@addImage');
 
-        // Allow the system to update the info and reload
+        // Check success message for adding to config
+        cy.get('.alert-success')
+            .should('contain.text', 'submitty/autograding-default:latest has been added to the configuration!');
+
+        // Verify DockerUI status has changed to "Changes Pending"
         // eslint-disable-next-line no-restricted-syntax
         cy.waitAndReloadUntil(() => {
-            return cy.get('#capabilities-list')
+            return cy.get('[data-testid="docker-status"]')
                 .invoke('text')
                 .then((text) => {
-                    return !text.includes('et-cetera');
+                    return text.includes('Changes Pending');
                 });
-        }, 10000);
+        }, 2000);
+
+        // Update the machine to link existing image to a new tag
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
+
+        // Wait until the system updates
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Up-to-Date');
+                });
+        }, 10000, 500);
 
         // Check the empty tag list
         cy.get('#capabilities-list')
@@ -162,8 +186,14 @@ describe('Docker UI Test', () => {
 
     // NOTE: Can be refactored later to speed up the Cypress test since
     //       we need to wait for the system to install the image
+    //       Currently, using one of the smaller images submitty/prolog:8.
     it('Should add new image and remove it', () => {
-        cy.reload();
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('[data-testid="docker-status"]')
+            .should('contain.text', 'Up-to-Date');
+
+        cy.intercept('POST', '**/admin/add_image').as('addImage');
+
         // Add a new image
         cy.get('#capability-form')
             .select('python');
@@ -174,9 +204,28 @@ describe('Docker UI Test', () => {
         cy.get('#send-button')
             .should('not.be.disabled')
             .click();
+
+        // Wait for the add image request to complete
+        cy.wait('@addImage');
+
+        // Check success message for adding to config
         cy.get('.alert-success')
-            .should('have.text', 'submitty/prolog:8 found on DockerHub'
-            + ' and queued to be added!');
+            .should('contain.text', 'submitty/prolog:8 has been added to the configuration!');
+
+        // Verify DockerUI status has changed to "Changes Pending"
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Changes Pending');
+                });
+        }, 2000);
+
+        // Update the machine to pull the image
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
 
         // Allow the system to install the image and update UI
         // eslint-disable-next-line no-restricted-syntax
@@ -185,11 +234,19 @@ describe('Docker UI Test', () => {
                 const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
                 return exists;
             });
-        }, 10000, 500);
+        }, 60000, 500);
+
+        cy.reload();
+
+        // Verify DockerUI status is "Up-to-Date"
+        cy.get('[data-testid="docker-status"]')
+            .should('contain.text', 'Up-to-Date');
 
         // Check if the image can be removed
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('contain.text', 'Remove');
+
+        cy.intercept('POST', '**/admin/remove_image').as('removeImage');
 
         // Remove the image
         cy.get('[data-image-id="submitty/prolog:8"]')
@@ -199,6 +256,49 @@ describe('Docker UI Test', () => {
         // Confirm dialog return true
         cy.on('window:confirm', () => true);
 
+        // Wait for the remove image request to complete
+        cy.wait('@removeImage');
+
+        cy.get('.alert-success')
+            .should('contain.text', 'submitty/prolog:8 has been removed from the configuration.');
+
+        // Verify DockerUI status has changed to "Changes Pending"
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Changes Pending');
+                });
+        }, 2000);
+
+        // Update the machine to remove the image
+        cy.get('#update-machines').click();
+        cy.get('.alert-success')
+            .should('contain.text', 'Successfully queued the system to update');
+
+        // Reload the page and wait until the image is removed
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('body').then(($body) => {
+                const exists = $body.find('[data-image-id="submitty/prolog:8"]').length > 0;
+                return !exists;
+            });
+        }, 60000, 500);
+
+        cy.reload();
+
+        // Wait until the system updates
+        // eslint-disable-next-line no-restricted-syntax
+        cy.waitAndReloadUntil(() => {
+            return cy.get('[data-testid="docker-status"]')
+                .invoke('text')
+                .then((text) => {
+                    return text.includes('Up-to-Date');
+                });
+        }, 10000, 500);
+
+        // Final verification
         cy.get('[data-image-id="submitty/prolog:8"]')
             .should('not.exist');
     });

@@ -8,7 +8,7 @@
             {% else %}
                 <a href="{{ notifications_url }}?show_all=true" class="btn btn-primary">Show All</a>
             {% endif %}
-            <a href="{{ notification_settings_url }}" class="btn btn-primary">Settings</a>
+            <a href="{{ notification_settings_url }}" class="btn btn-primary" data-testid="notification-settings-button">Settings</a>
         </div>
     </header>
     <div id="notifications">

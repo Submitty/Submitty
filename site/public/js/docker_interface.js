@@ -82,9 +82,8 @@ function removeImage(url, id) {
         success: (data) => {
             const json = JSON.parse(data);
             if (json.status === 'success') {
+                sessionStorage.setItem('successMessage', json.data);
                 location.reload();
-                // eslint-disable-next-line no-undef
-                displaySuccessMessage(json.data);
             }
             else {
                 // eslint-disable-next-line no-undef
@@ -114,8 +113,8 @@ function addImage(url) {
             const json = JSON.parse(data);
             if (json.status === 'success') {
                 $('#add-field').val('');
-                // eslint-disable-next-line no-undef
-                displaySuccessMessage(json.data);
+                sessionStorage.setItem('successMessage', json.data);
+                location.reload();
             }
             else {
                 // eslint-disable-next-line no-undef
@@ -185,7 +184,7 @@ function applySort(sortKey, direction) {
     const table = document.getElementById('docker-table');
     const tbody = table.querySelector('tbody');
     const rows = Array.from(tbody.querySelectorAll('tr'));
-    const colMap = { name: 0, size: 3, created: 5 };
+    const colMap = { name: 0, size: 4, created: 5 };
     const colIndex = colMap[sortKey];
 
     rows.sort((rowA, rowB) => {
@@ -193,11 +192,24 @@ function applySort(sortKey, direction) {
         const bText = rowB.children[colIndex].textContent.trim();
         let cmp = 0;
         if (sortKey === 'name') {
-            const [nameA, tagA = ''] = aText.split(':');
-            const [nameB, tagB = ''] = bText.split(':');
+            const nameA = rowA.children[0].textContent.trim();
+            const nameB = rowB.children[0].textContent.trim();
             cmp = nameA.localeCompare(nameB);
             if (cmp === 0) {
-                cmp = tagA.localeCompare(tagB);
+                const tagA = rowA.children[1].textContent.trim();
+                const tagB = rowB.children[1].textContent.trim();
+                const numA = parseFloat(tagA);
+                const numB = parseFloat(tagB);
+                const isNumA = !isNaN(numA);
+                const isNumB = !isNaN(numB);
+                // Tag is descending regardless of Image Name
+                if (isNumA && isNumB) {
+                    cmp = numB - numA;
+                }
+                else {
+                    cmp = tagB.localeCompare(tagA);
+                }
+                return cmp;
             }
         }
         else if (sortKey === 'size') {
@@ -237,5 +249,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedSort) {
         applySort(savedSort, savedDirection);
         updateSortIcons(savedSort, savedDirection);
+    }
+
+    const successMessage = sessionStorage.getItem('successMessage');
+    if (successMessage) {
+        // eslint-disable-next-line no-undef
+        displaySuccessMessage(successMessage);
+
+        // Clear the message from sessionStorage so it doesn't show again
+        sessionStorage.removeItem('successMessage');
     }
 });

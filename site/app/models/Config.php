@@ -55,6 +55,7 @@ use app\libraries\FileUtils;
  * @method string getSysAdminEmail()
  * @method string getSysAdminUrl()
  * @method string getCourseEmail()
+ * @method bool isUserCreateAccount()
  * @method string getVcsUser()
  * @method string getVcsType()
  * @method string getPrivateRepository()
@@ -62,12 +63,15 @@ use app\libraries\FileUtils;
  * @method void setRoomSeatingGradeableId(string $gradeable_id)
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method array getAcceptedEmails()
+ * @method array getUserIdRequirements()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
  * @method bool isSeekMessageEnabled()
  * @method bool isPollsEnabled()
+ * @method bool isChatEnabled()
  * @method void setTerm(string $term)
  * @method void setCourse(string $course)
  * @method void setCoursePath(string $course_path)
@@ -113,6 +117,14 @@ class Config extends AbstractModel {
     /** @prop
      * @var array */
     protected $course_json = [];
+
+    /** @prop
+     * @var array<mixed> */
+    protected $user_id_requirements = [];
+
+    /** @prop
+     * @var array<string> */
+    protected $accepted_emails = [];
 
     /**
      * Indicates whether a course config has been successfully loaded.
@@ -303,6 +315,9 @@ class Config extends AbstractModel {
      * @var bool */
     protected $seating_only_for_instructor;
     /** @prop
+     * @var bool */
+    protected $user_create_account = false;
+    /** @prop
      * @var string|null */
     protected $room_seating_gradeable_id;
     /** @prop
@@ -338,7 +353,9 @@ class Config extends AbstractModel {
     /** @prop
      * @var bool */
     protected $polls_enabled;
-
+    /** @prop
+     * @var bool */
+    protected $chat_enabled;
 
     /** @prop-read
      * @var array */
@@ -431,6 +448,12 @@ class Config extends AbstractModel {
 
         $this->sys_admin_email = $submitty_json['sys_admin_email'] ?? '';
         $this->sys_admin_url = $submitty_json['sys_admin_url'] ?? '';
+
+        if (isset($submitty_json['user_create_account'])) {
+            $this->user_create_account = $submitty_json['user_create_account'];
+            $this->user_id_requirements = $submitty_json['user_id_requirements'];
+            $this->accepted_emails = $submitty_json['user_id_requirements']['accepted_emails'];
+        }
 
         if (isset($submitty_json['timezone'])) {
             if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
@@ -589,7 +612,8 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'forum_create_thread_message', 'seating_only_for_instructor',
-            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled', 'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions'
+            'grade_inquiry_message', 'auto_rainbow_grades', 'queue_enabled', 'queue_message', 'polls_enabled',
+            'queue_announcement_message', 'seek_message_enabled', 'seek_message_instructions', 'chat_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -619,6 +643,7 @@ class Config extends AbstractModel {
             'queue_enabled',
             'polls_enabled',
             'seek_message_enabled',
+            'chat_enabled',
         ];
         foreach ($array as $key) {
             $this->$key = (bool) $this->$key;

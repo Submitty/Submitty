@@ -52,22 +52,23 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    metadata = MetaData(bind=db)
+    metadata = MetaData()
     return db, metadata
 
 
 def send_data(db, allowed_minutes, override):
     query = """UPDATE gradeable SET g_allowed_minutes = :minutes
                WHERE g_id=:gradeable"""
-    db.execute(text(query), minutes=allowed_minutes, gradeable=GRADEABLE)
+    db.execute(text(query), {"minutes": allowed_minutes, "gradeable": GRADEABLE})
     query = """DELETE FROM gradeable_allowed_minutes_override WHERE g_id=:gradeable"""
-    db.execute(text(query), gradeable=GRADEABLE)
+    db.execute(text(query), {"gradeable": GRADEABLE})
     if override is not None:
         for user in override:
             query = "INSERT INTO gradeable_allowed_minutes_override (g_id, user_id, allowed_minutes) " +\
                     "VALUES (:gradeable, :userid, :minutes)"  # noqa: E501
-            db.execute(text(query), gradeable=GRADEABLE, userid=user['user'],
-                       minutes=user['allowed_minutes'])
+            db.execute(text(query), {"gradeable": GRADEABLE, "userid": user['user'],
+                       "minutes": user['allowed_minutes']})
+    db.commit()
 
 
 def main():

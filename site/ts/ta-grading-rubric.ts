@@ -999,7 +999,7 @@ function isInstructorEditEnabled() {
  * @returns {boolean}
  */
 function canVerifyGraders() {
-    return $('#grader-info').attr('data-can_verify') === 'true';
+    return $('#grader-info').attr('data-can_verify') === '1';
 }
 window.canVerifyGraders = canVerifyGraders;
 
@@ -1157,7 +1157,7 @@ function getItempoolOptions(parsed = false): string | Record<string, string[]> {
             return isItempoolAvailable() ? JSON.parse($('#gradeable_rubric.electronic_file').attr('data-itempool-options')!) as Record<string, string[]> : {};
         }
         catch {
-            displayErrorMessage('Something went wrong retrieving itempool options');
+            window.displayErrorMessage('Something went wrong retrieving itempool options');
             return {};
         }
     }
@@ -1202,7 +1202,7 @@ function setupSortableMarks(component_id: number) {
 function setupSortableComponents() {
     const componentList = $('#component-list');
     componentList.sortable({
-        update: void onComponentOrderChange,
+        update: () => void onComponentOrderChange(),
         handle: '.reorder-component-container',
     });
     componentList.on('keydown', keyPressHandler);
@@ -1248,6 +1248,7 @@ function setComponentHeaderContents(component_id: number, contents: string | Ele
  * @param {string} contents
  */
 function setTotalScoreBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#total-score-container').html(contents);
 }
 
@@ -1256,6 +1257,7 @@ function setTotalScoreBoxContents(contents: string | Element | DocumentFragment 
  * @param contents
  */
 function setRubricTotalBoxContents(contents: string | Element | DocumentFragment | Document | Comment | ((this: HTMLElement, index: number, oldhtml: JQuery.htmlString) => JQuery.htmlString | JQuery.Node)) {
+    // eslint-disable-next-line no-restricted-syntax
     $('#rubric-total-container').html(contents);
 }
 
@@ -1938,7 +1940,7 @@ window.onRestoreMark = function (me: HTMLElement) {
 window.onDeleteComponent = async function (me: HTMLElement) {
     const componentCount = $('.component-container').length;
     if (componentCount === 1) {
-        displayErrorMessage('Cannot delete the only component.');
+        window.displayErrorMessage('Cannot delete the only component.');
         return;
     }
 

@@ -1,0 +1,26 @@
+<div class="chatroom-toast"></div>
+<div class="content chatroom-page dim-overlay">
+    <div class="chatroom-container">
+        <div class="chatroom-header">
+            <span class="chatroom-title" data-testid="chat-title" title="{{ chatroom.getTitle() }}"> {{ chatroom.getTitle() | length > 40 ? chatroom.getTitle() | slice(0, 40) ~ '...' : chatroom.getTitle() }} </span>
+            <a href="{{ base_url }}" class="leave-room btn btn-danger" data-testid="leave-chat">Leave</a>
+        </div>
+        <div class="chatroom-content">
+            <div class="messages-area"></div>
+            <div class="input-container">
+                <textarea name="content" class="message-input" placeholder="Enter your message here" maxlength=1500 data-testid="msg-input"></textarea>
+                <button class="send-message-btn btn btn-primary" data-testid="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="application/json" id="page-data">
+    {
+        "chatroomId": "{{ chatroom.getId() }}",
+        "baseURL": "{{ base_url }}",
+        "userId": "{{ user_id }}",
+        "displayName": "{{ user_display_name }}",
+        "user_admin": "{{ user_admin }}",
+        "isAnonymous": "{{ anonymous }}"
+    }
+</script>

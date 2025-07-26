@@ -35,7 +35,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'email' => '{"email_enabled":true,"email_user":"","email_password":"","email_sender":"submitty@vagrant","email_reply_to":"do-not-reply@vagrant","email_server_hostname":"localhost","email_server_port":25}',
             'secrets_submitty_php' => '{"session":"cGRZSDnVxdDjQwGyiq4ECnJyiZ8IQXEL1guSsJ1XlSKSEqisqvdCPhCRcYDEjpjm"}',
             'submitty_admin' => '{"submitty_admin_username":"submitty-admin","token":"token"}',
-            'submitty' => '{"submitty_install_dir":' . json_encode($this->test_dir) . ',"submitty_repository":' . json_encode($this->test_dir) . ',"submitty_data_dir":' . json_encode($this->test_dir) . ',"autograding_log_path":' . json_encode($this->test_dir) . ',"site_log_path":' . json_encode($this->test_dir) . ',"submission_url":"http:\/\/localhost:1501","vcs_url":"","cgi_url":"http:\/\/localhost:1501\/cgi-bin","institution_name":"","username_change_text":"foo","institution_homepage":"" ,"sys_admin_email": "admin@example.com","sys_admin_url": "https:\/\/example.com\/admin","timezone":"America\/New_York","worker":false,"duck_special_effects" : false}',
+            'submitty' => '{"submitty_install_dir":' . json_encode($this->test_dir) . ',"submitty_repository":' . json_encode($this->test_dir) . ',"submitty_data_dir":' . json_encode($this->test_dir) . ',"autograding_log_path":' . json_encode($this->test_dir) . ',"site_log_path":' . json_encode($this->test_dir) . ',"submission_url":"http:\/\/localhost:1501","vcs_url":"","cgi_url":"http:\/\/localhost:1501\/cgi-bin","institution_name":"","username_change_text":"foo","institution_homepage":"" ,"sys_admin_email": "admin@example.com","sys_admin_url": "https:\/\/example.com\/admin","timezone":"America\/New_York","worker":false,"duck_special_effects":false,"user_create_account":false,"user_id_requirements":{"any_user_id":true,"require_name":false,"min_length":6,"max_length":25,"name_requirements":{"given_first":false,"given_name": 2,"family_name": 4},"require_email": false,"email_requirements": {"whole_email": false,"whole_prefix": false,"prefix_count": 6}, "accepted_emails":["gmail.com"]}}',
             'submitty_users' => '{"num_grading_scheduler_workers":5,"num_untrusted":60,"first_untrusted_uid":900,"first_untrusted_gid":900,"daemon_uid":1003,"daemon_gid":1006,"daemon_user":"submitty_daemon","course_builders_group":"submitty_course_builders","php_uid":1001,"php_gid":1004,"php_user":"submitty_php","cgi_user":"submitty_cgi","daemonphp_group":"submitty_daemonphp","daemoncgi_group":"submitty_daemoncgi","verified_submitty_admin_user":"submitty-admin"}',
             'version' => '{"installed_commit":"7da8417edd6ff46f1d56e1a938b37c054a7dd071","short_installed_commit":"7da8417ed","most_recent_git_tag":"v19.09.04"}'
         ];
@@ -45,7 +45,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"forum_create_thread_message":"","grade_inquiry_message":"Grade Inquiry Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false, "queue_message":"Welcome to the OH/Lab queue", "queue_announcement_message":"announcement message", "seek_message_enabled":false, "seek_message_instructions":"", "polls_enabled": false, "chat_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -114,7 +114,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -199,7 +200,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
@@ -291,7 +293,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'polls_enabled'                  => false,
             'self_registration_type'         => ConfigurationController::NO_SELF_REGISTER,
             'registration_sections'          => null,
-            'default_section'                => null
+            'default_section'                => null,
+            'chat_enabled'                   => false
         ];
 
         $gradeable_seating_options = [
