@@ -24,6 +24,8 @@
     {% endif %}
     {% if check.pdf is defined %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
+    {% elseif check.notebook is defined %}
+        <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <div class="autocheck-header">
           {% if check.actual is defined and check.actual.type == "text" %}
