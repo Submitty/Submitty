@@ -274,6 +274,14 @@ class HomePageController extends AbstractController {
             $faculty = $this->core->getQueries()->getAllFaculty();
         }
 
+        $term_names = $this->core->getSubmittyEntityManager()
+            ->createQueryBuilder()
+            ->select('term.name')
+            ->from(Term::class, 'term')
+            ->orderBy('term.name', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+
         return new MultiResponse(
             null,
             new WebResponse(
@@ -281,7 +289,7 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                TermController::getAllTermNames($this->core),
+                $term_names,
                 $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
                 $this->core->getCsrfToken(),
                 $this->core->getQueries()->getAllCoursesForUserId($this->core->getUser()->getId())
@@ -338,8 +346,16 @@ class HomePageController extends AbstractController {
             $term_name = $_POST['term_name'];
             $start_date = $_POST['start_date'];
             $end_date = $_POST['end_date'];
+            $em = $this->core->getSubmittyEntityManager();
+            $term_names = $em->createQueryBuilder()
+                ->select('term.name')
+                ->from(Term::class, 'term')
+                ->where('term.id = ?')
+                ->orderBy('term.name', 'ASC')
+                ->setParameter($term_id)
+                ->getQuery()
+                ->getSingleColumnResult();
 
-            $terms = TermController::getAllTermNames($this->core);
             if (in_array($term_id, $terms)) {
                 $this->core->addErrorMessage("Term id already exists.");
             }
@@ -347,7 +363,14 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("End date should be after Start date.");
             }
             else {
-                TermController::createNewTerm($this->core, $term_id, $term_name, $start_date, $end_date);
+                $term = new Term(
+                    $term_id,
+                    $term_name,
+                    $start_date,
+                    $end_date,
+                );
+                $em->persist($term);
+                $em->flush();
                 $this->core->addSuccessMessage("Term added successfully.");
             }
             $url = $this->core->buildUrl(['home', 'courses', 'new']);

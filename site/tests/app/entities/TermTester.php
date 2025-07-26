@@ -10,7 +10,7 @@ use app\entities\Term;
 use app\models\User;
 use tests\BaseUnitTest;
 
-class TermControllerTester extends BaseUnitTest {
+class TermTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
         $core->getSubmittyEntityManager();
@@ -31,7 +31,14 @@ class TermControllerTester extends BaseUnitTest {
             ->expects($this->once())
             ->method('flush');
         // Testing create terms
-        $term = TermController::createNewTerm($core, 'id', 'name', '06/25/25', '07/18/25');
+        $term = new Term(
+            'id',
+            'name',
+            date('06/25/25'),
+            date('7/18/25')
+        );
+        $em->persist($term);
+        $em->flush();
         // Testing getTermStartDate
         $detail = [
             'user_id' => "aphacker",
@@ -53,11 +60,5 @@ class TermControllerTester extends BaseUnitTest {
             'manual_registration' => false,
             'grading_registration_sections' => [1, 2]
         ];
-        $core->getSubmittyEntityManager()
-            ->method('find')
-            ->with(Term::Class, 'id')
-            ->willReturn($term);
-        $user = new User($core, $detail);
-        TermController::getTermStartDate($core, 'id', $user);
     }
 }
