@@ -5434,6 +5434,84 @@ AND gc_id IN (
         return $results;
     }
 
+    /**
+     * Get 10 most recent notifications in each unarchived course
+     * @param string $user_id
+     * @param array $courses
+     */
+    public function getAllRecentUserNotifications($user_id, $courses) {
+        $all_rows = [];
+        $original_config = clone $this->core->getConfig();
+        foreach ($courses as $course) {
+            $semester = $course->getTerm();
+            $course_name = $course->getTitle();
+            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseDatabase();
+            $course_db = $this->core->getCourseDB();
+            $query = "
+                SELECT id, component, metadata, content,
+                    (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
+                    (EXTRACT(EPOCH FROM current_timestamp) - EXTRACT(EPOCH FROM created_at)) AS elapsed_time,
+                    created_at
+                FROM notifications
+                WHERE to_user_id = ? AND created_at >= current_timestamp - INTERVAL '7 days'
+                ORDER BY created_at DESC
+                LIMIT 10;
+            ";
+            $course_db->query($query, [$user_id]);
+            $rows = $course_db->rows();
+            foreach ($rows as $row) {
+                $row['semester'] = $semester;
+                $row['course'] = $course_name;
+                $all_rows[] = $row;
+            }
+        }
+
+        $results = [];
+        foreach ($all_rows as $row) {
+            $notification = Notification::createViewOnlyNotification(
+                $this->core,
+                [
+                    'id' => $row['id'],
+                    'component' => $row['component'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at']
+                ]
+            );
+
+            $this->core->loadCourseConfig($row['semester'], $row['course']);
+            if ($row['metadata']) {
+                $notification_url = $this->core->buildCourseUrl(['notifications', $row['id']]);
+            }
+            else {
+                $notification_url = null;
+            }
+
+            $results[] = [
+                'id' => $row['id'],
+                'component' => $row['component'],
+                'metadata' => $row['metadata'],
+                'content' => $row['content'],
+                'seen' => $row['seen'],
+                'elapsed_time' => $row['elapsed_time'],
+                'created_at' => $row['created_at'],
+                'notify_time' => $notification->getNotifyTime(),
+                'semester' => $row['semester'],
+                'course' => $row['course'],
+                'notification_url' => $notification_url
+            ];
+        }
+        usort($results, function ($a, $b) {
+            return $a['elapsed_time'] <=> $b['elapsed_time'];
+        });
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        return $results;
+    }
+
     public function getNotificationInfoById($user_id, $notification_id) {
         $this->course_db->query("SELECT metadata FROM notifications WHERE to_user_id = ? and id = ?", [$user_id, $notification_id]);
         return $this->course_db->row();

@@ -54,6 +54,10 @@ class HomePageView extends AbstractView {
             $statuses[$course_type_name] = $ranks;
         }
 
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $notifications = $this->core->getQueries()->getAllRecentUserNotifications($user_id, $courses);
+
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');
         return $this->output->renderTwigTemplate('Vue.twig', [
@@ -61,6 +65,7 @@ class HomePageView extends AbstractView {
             "name" => "HomePage",
             "args" => [
                 "statuses" => $statuses,
+                "notifications" => $notifications,
             ]
         ]);
     }

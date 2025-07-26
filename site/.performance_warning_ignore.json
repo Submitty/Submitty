@@ -58,5 +58,6 @@
   "/superuser/email_status_page",
   "/courses/<term>/<course>/users/details",
   "/courses/<term>/<course>/no_access",
-  "/courses/<term>/<course>/gradeable/<gradeable>/verify"
+  "/courses/<term>/<course>/gradeable/<gradeable>/verify",
+  "/home"
 ]
