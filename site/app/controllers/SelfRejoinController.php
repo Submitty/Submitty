@@ -136,7 +136,7 @@ class SelfRejoinController extends AbstractController {
                 return true;
             }
         }
-T
+
         $term_start_date = $this->core->getSubmittyEntityManager()
             ->find(Term::class, $term_id)
             ->getStartDate();
