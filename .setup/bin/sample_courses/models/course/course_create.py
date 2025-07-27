@@ -153,6 +153,9 @@ class Course_create:
                 rot_section = None
             if reg_section is not None:
                 reg_section = str(reg_section)
+            reg_type = user.get_detail(self.code, "registration_type")
+            if reg_type is None:
+                reg_type = 'graded'
             # We already have a row in submitty.users for this user,
             # just need to add a row in courses_users which will put a
             # a row in the course specific DB, and off we go.
@@ -163,6 +166,7 @@ class Course_create:
                     user_id=user.get_detail(self.code, "id"),
                     user_group=user.get_detail(self.code, "group"),
                     registration_section=reg_section,
+                    registration_type=reg_type,
                     manual_registration=user.get_detail(self.code, "manual")
                 )
             )
