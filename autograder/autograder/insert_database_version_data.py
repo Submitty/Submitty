@@ -218,7 +218,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 "autograding_complete": True
             }
         )
-    
+
     db.commit()
     db.close()
     engine.dispose()
