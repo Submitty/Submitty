@@ -63,7 +63,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData()
-    autograding_metrics = Table('autograding_metrics', metadata, autoload_with=db)
+    autograding_metrics = Table('autograding_metrics', metadata, autoload_with=engine)
     db.execute(
         delete(autograding_metrics)
         .where(autograding_metrics.c.user_id == bindparam('u_id'))
@@ -122,7 +122,7 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
         non_hidden_non_ec += nonhidden_diff
         # hidden_non_ec += hidden_diff
 
-    data_table = Table('electronic_gradeable_data', metadata, autoload_with=db)
+    data_table = Table('electronic_gradeable_data', metadata, autoload_with=engine)
 
     """
     The data row should have been inserted by PHP when the student uploads the submission, requiring
@@ -218,7 +218,8 @@ def insert_into_database(config, semester, course, gradeable_id, user_id, team_i
                 "autograding_complete": True
             }
         )
-        db.commit()
+
+    db.commit()
     db.close()
     engine.dispose()
 
