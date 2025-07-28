@@ -79,7 +79,10 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
-        if (strpos($file_path, 'submissions') !== false) {
+        if (strpos($file_path, 'submissions_processed') !== false) {
+            $directory = 'submissions_processed';
+        }
+        elseif (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
         }
         elseif (strpos($file_path, 'checkout') !== false) {
@@ -262,7 +265,7 @@ class MiscController extends AbstractController {
 
         $mime_type = mime_content_type($path);
         if ($mime_type === 'text/plain') {
-            if (str_ends_with($path, '.js')) {
+            if (str_ends_with($path, '.js') || str_ends_with($path, '.mjs')) {
                 $mime_type = 'application/javascript';
             }
             elseif (str_ends_with($path, '.css')) {
@@ -431,6 +434,7 @@ class MiscController extends AbstractController {
         if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
+            $folder_names[] = "submissions_processed";
             $folder_names[] = "checkout";
         }
 
@@ -505,9 +509,7 @@ class MiscController extends AbstractController {
         $zip_stream->finish();
     }
 
-    /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/download_zip")]
     public function downloadAssignedZips($gradeable_id, $type = null) {
         $zip_file_name = $gradeable_id . "_section_students_" . date("m-d-Y") . ".zip";
@@ -704,9 +706,7 @@ class MiscController extends AbstractController {
         unlink($zip_name); //deletes the random zip file
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")]
     public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";

@@ -128,36 +128,17 @@ function inquiryUpdate() {
     }
 }
 
-function filterWithdrawnUpdate() {
-    const filterCheckbox = document.getElementById('toggle-filter-withdrawn');
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-
-    if (filterCheckbox.checked) {
-        withdrawnElements.hide();
-        Cookies.set('filter_withdrawn_student', 'true');
-    }
-    else {
-        withdrawnElements.show();
-        Cookies.set('filter_withdrawn_student', 'false');
-    }
-}
-
 // Ensures all filters and checkboxes remain the same on page reload.
 window.addEventListener('DOMContentLoaded', () => {
     const inquiryFilterStatus = Cookies.get('inquiry_status');
     const withdrawnFilterElements = $('[data-student="electronic-grade-withdrawn"]');
+    withdrawnFilterElements.hide();
     // Instructors and TAs have access to all toggles
     if (full_access_grader_permission) {
         // Only Assigned Sections
         const assignedFilterBox = document.getElementById('toggle-view-sections');
         const assignedFilterStatus = Cookies.get('view');
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
-
-        // Anonymous Mode
-        const anonFilterBox = document.getElementById('toggle-anon-students');
-        const currentGradeableCookiePath = `anon_mode_${Cookies.get('current_gradeable_path')}`;
-        const anonFilterStatus = Cookies.get(currentGradeableCookiePath);
-        anonFilterBox.checked = (anonFilterStatus === 'on');
 
         // Withdrawn Students
         const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');

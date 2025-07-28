@@ -13,11 +13,11 @@ class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, array $audio, $css, $js, $duck_img, $page_name, $content_only, array $eventBannerImages, bool $performance_warning) {
         $messages = [];
         foreach (['error', 'notice', 'success'] as $type) {
-            foreach ($_SESSION['messages'][$type] as $key => $error) {
+            foreach ($_SESSION['messages'][$type] as $key => $message) {
                 $messages[] = [
                     "type" => $type,
                     "key" => $key,
-                    "error" => $error
+                    "message" => $message
                 ];
 
                 unset($_SESSION['messages'][$type][$key]);
@@ -85,6 +85,7 @@ class GlobalView extends AbstractView {
             "user_given_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedGivenName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "course_url" => $this->core->buildCourseUrl(),
+            "course_path" => parse_url($this->core->buildCourseUrl(), PHP_URL_PATH),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),

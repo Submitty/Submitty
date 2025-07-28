@@ -22,10 +22,13 @@ use app\data_objects\DockerImage;
  * @method array getErrorLogs()
  * @method array getDockerImages()
  * @method array getFailImages()
+ * @method bool isUpdateNeeded()
  */
 class DockerUI extends AbstractModel {
     /** @var array<mixed> Json data passed in from controller */
     private array $json_data;
+    /** @var bool Whether the docker UI needs to be updated */
+    protected bool $update_needed = true;
     /** @var array<WorkerMachine> List of worker machine names */
     protected array $worker_machines;
     /** @var array<string> List of capability tags */
@@ -79,6 +82,29 @@ class DockerUI extends AbstractModel {
 
         $this->sysinfo_filepath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "sysinfo");
         $this->docker_logpath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker");
+
+        $containers_config_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+
+        // Use the most recent docker log file as the reference for the last update time.
+        $docker_log_files = file_exists($this->docker_logpath) ? scandir($this->docker_logpath) : false;
+        if ($docker_log_files !== false && count($docker_log_files) > 2) {
+            $most_recent_log = max($docker_log_files);
+            $last_update_logpath = FileUtils::joinPaths($this->docker_logpath, $most_recent_log);
+
+            if (file_exists($containers_config_path)) {
+                $containers_mtime = filemtime($containers_config_path);
+                $last_update_mtime = filemtime($last_update_logpath);
+
+                // If the containers config is older than or the same age as the last log, it's up to date.
+                if ($containers_mtime <= $last_update_mtime) {
+                    $this->update_needed = false;
+                }
+            }
+        }
 
         $this->json_data = $json;
 
