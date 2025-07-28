@@ -253,7 +253,6 @@ create_and_set  u=rwx,g=rwxs,o=   "$instructor"  "$ta_www_group"  "$course_dir/c
 #               drwxr-s---        $PHP_USER           ta_www_group      config_upload/
 #               drwxr-s---        $PHP_USER           ta_www_group      site/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      results/
-#               drwxr-s---        $DAEMON_USER        ta_www_group      submissions_processed/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      results_public/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      checkout/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      uploads/
@@ -272,7 +271,6 @@ create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_d
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/config_upload"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/site"
 create_and_set  u=rwx,g=rxs,o=   "$DAEMON_USER"     "$ta_www_group"   "$course_dir/results"
-create_and_set  u=rwx,g=rxs,o=   "$DAEMON_USER"     "$ta_www_group"   "$course_dir/submissions_processed"
 create_and_set  u=rwx,g=rxs,o=   "$DAEMON_USER"     "$ta_www_group"   "$course_dir/generated_output"
 create_and_set  u=rwx,g=rxs,o=   "$DAEMON_USER"     "$ta_www_group"   "$course_dir/results_public"
 create_and_set  u=rwx,g=rxs,o=   "$DAEMON_USER"     "$ta_www_group"   "$course_dir/checkout"
