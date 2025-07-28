@@ -50,7 +50,7 @@ class NotebookUtils {
      * @return array<string,mixed>
      */
     private static function processMarkdownCell(array $cell): array {
-        $markdown = is_array ($cell['source']) ? implode($cell['source']) : (string) $cell['source'];
+        $markdown = is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'];
         $search = [];
         $replace = [];
 
@@ -62,9 +62,11 @@ class NotebookUtils {
                     $search[] = "attachment:$filename";
                     if (!in_array($mime, self::MIME_TYPES, true)) {
                         $replace[] = 'Image skipped: image type not supported.';
-                    } elseif (strlen($base64) > self::IMG_SIZE_LIMIT) {
+                    } 
+                    elseif (strlen($base64) > self::IMG_SIZE_LIMIT) {
                         $replace[] = 'Image skipped: exceeds size limit of ' . self::IMG_SIZE_LIMIT . ' bytes. Download the notebook to view the image.';
-                    } else {
+                    } 
+                    else {
                         $data_uri = 'data:' . $mime . ";base64," . $base64;
                         $replace[] = $data_uri;
                     }
@@ -115,7 +117,7 @@ class NotebookUtils {
                 case 'execute_result':
                     $data = $output['data'] ?? [];
                     $output_type = null;
-                    foreach (SELF::MIME_TYPES as $mime_type) {
+                    foreach (self::MIME_TYPES as $mime_type) {
                         if (isset($output['data'][$mime_type])) {
                             $output_type = $mime_type;
                             break;
