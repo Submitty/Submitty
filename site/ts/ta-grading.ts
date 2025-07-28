@@ -683,7 +683,6 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 csrf_token: window.csrfToken,
             },
             success: function (data: string) {
-                console.log(data);
                 // Clear previous PDF content before appending new content
                 $('#file-content').empty();
                 $('#file-content').append(data);
