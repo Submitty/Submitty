@@ -46,21 +46,17 @@ class WebSocketClient {
         urlWithParams.searchParams.append('course', course);
         urlWithParams.searchParams.append('term', term);
 
-        // Add the websocket token if available
-        const wsToken = window.websocketToken;
-
+        // Add websocket token for authentication
+        const wsToken = args.ws_token || window.websocketToken;
         if (wsToken) {
             urlWithParams.searchParams.append('ws_token', wsToken);
-        }
-        else {
-            console.warn('WebSocket: No websocket token provided - connection may fail');
+            console.log('WebSocket: token added to connection');
+        } else {
+            console.log('WebSocket: No websocket token provided');
         }
 
         for (const key in args) {
-            // Skip ws_token as we've already handled it above
-            if (key !== 'ws_token') {
-                urlWithParams.searchParams.append(key, args[key]);
-            }
+            urlWithParams.searchParams.append(key, args[key]);
         }
         this.client = new WebSocket(urlWithParams.href);
         this.client.onopen = () => {

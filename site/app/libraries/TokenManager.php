@@ -78,15 +78,13 @@ class TokenManager {
      *
      * @param string $user_id User ID
      * @param array<string> $authorized_pages Array of page identifiers the user can access
-     * @param int $expire_minutes Token expiration in minutes (default 30)
      * @return Token
      */
     public static function generateWebsocketToken(
         string $user_id,
-        array $authorized_pages,
-        int $expire_minutes = 30
+        array $authorized_pages
     ): Token {
-        $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString("{$expire_minutes} minutes"))->getTimestamp();
+        $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)

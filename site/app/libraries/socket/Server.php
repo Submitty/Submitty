@@ -35,6 +35,7 @@ class Server implements MessageComponentInterface {
 
     public function __construct(Core $core) {
         $this->core = $core;
+        $this->log("Server constructed");
     }
 
     private function log(string $message) {
@@ -89,6 +90,7 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
+        $this->log("Request: " . $request);
 
         if (!$request instanceof RequestInterface) {
             return false;
@@ -100,14 +102,22 @@ class Server implements MessageComponentInterface {
             return true;
         }
 
-        // Try to get websocket token from query parameters first, then headers
+        // Try to get websocket token from query parameters first, then cookies, then headers
         $query_params = [];
         $query = $request->getUri()->getQuery();
         parse_str($query, $query_params);
         $websocket_token = $query_params['ws_token'] ?? null;
+        $this->log("Websocket token from query: " . $websocket_token);
+        if ($websocket_token === null) {
+            $cookieString = $request->getHeader("cookie")[0] ?? '';
+            parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
+            $websocket_token = $cookies['submitty_websocket_token'] ?? null;
+            $this->log("Websocket token from cookie: " . $websocket_token);
+        }
         if ($websocket_token === null) {
             $headers = $request->getHeaders();
             $websocket_token = $headers['Websocket-Token'][0] ?? null;
+            $this->log("Websocket token from header: " . $websocket_token);
         }
         if ($websocket_token === null) {
             $this->log("No websocket token provided for connection {$conn->resourceId}");
@@ -127,6 +137,7 @@ class Server implements MessageComponentInterface {
         try {
             // Parse and validate the websocket token
             $token = TokenManager::parseWebsocketToken($websocket_token);
+            $this->log("Token parsed successfully");
             $user_id = $token->claims()->get('sub');
             $authorized_pages = $token->claims()->get('authorized_pages');
 
@@ -153,6 +164,7 @@ class Server implements MessageComponentInterface {
             }
             $this->clients[$full_page_identifier]->attach($conn);
             $this->setSocketClientPage($full_page_identifier, $conn);
+
             $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $full_page_identifier . "'");
             return true;
         }
@@ -258,6 +270,7 @@ class Server implements MessageComponentInterface {
      * Check the authentication status of the connection when it gets opened
      */
     public function onOpen(ConnectionInterface $conn): void {
+        $this->log("On open");
         try {
             if (!$this->checkAuth($conn)) {
                 $conn->close();
@@ -287,6 +300,7 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString): void {
+        $this->log("On message; msgString: " . $msgString);
         try {
             if ($msgString === 'ping') {
                 $from->send('pong');
@@ -329,12 +343,14 @@ class Server implements MessageComponentInterface {
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
         }
+        $this->log("On close");
     }
 
     public function closeWithError(ConnectionInterface $conn): void {
         $msg = ['error' => 'Server error'];
         $conn->send(json_encode($msg));
         $conn->close();
+        $this->log("Close with error");
     }
 
     /**
@@ -342,5 +358,6 @@ class Server implements MessageComponentInterface {
      */
     public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();
+        $this->log("On error: " . $e->getMessage());
     }
 }

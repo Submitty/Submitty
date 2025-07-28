@@ -87,13 +87,17 @@ class GlobalView extends AbstractView {
                     ['page' => 'grade_inquiry'],
                     ['page' => 'grading']
                 ];
-                $websocket_token = $this->core->getWebsocketToken($page_contexts, 30); // 30 minutes expiry
+                $websocket_token = $this->core->getWebsocketToken($page_contexts);
             }
             catch (\Exception $e) {
                 $websocket_token = null;
                 $this->core->addNoticeMessage("Failed to generate websocket token: " . $e->getMessage());
             }
         }
+
+        // $core->getConfig()->getSubmittyPath()
+        $this->core->addNoticeMessage("Submitty path: " . $this->core->getConfig()->getSubmittyPath());
+        $this->core->addNoticeMessage("Websocket port: " . $this->core->getConfig()->getWebsocketPort());
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
