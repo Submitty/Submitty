@@ -95,10 +95,6 @@ class GlobalView extends AbstractView {
             }
         }
 
-        // $core->getConfig()->getSubmittyPath()
-        $this->core->addNoticeMessage("Submitty path: " . $this->core->getConfig()->getSubmittyPath());
-        $this->core->addNoticeMessage("Websocket port: " . $this->core->getConfig()->getWebsocketPort());
-
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "audio" => $audio,

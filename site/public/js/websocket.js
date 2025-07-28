@@ -32,8 +32,10 @@ class WebSocketClient {
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
+        // Force IPv4 (macOS issue???)
+        my_url.hostname = '127.0.0.1';
         my_url.port = window.websocketPort;
-        my_url.pathname = 'ws';
+        my_url.pathname = '/ws';
         this.url = my_url.href;
         this.serverError = false;
     }

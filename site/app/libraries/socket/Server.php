@@ -90,7 +90,6 @@ class Server implements MessageComponentInterface {
     private function checkAuth(ConnectionInterface $conn): bool {
         // The httpRequest property does exist on connections...
         $request = $conn->httpRequest;
-        $this->log("Request: " . $request);
 
         if (!$request instanceof RequestInterface) {
             return false;
@@ -290,6 +289,7 @@ class Server implements MessageComponentInterface {
         }
         catch (\Throwable $t) {
             $this->logError($t, $conn);
+            $this->log("On open error . Error: " . $t->getMessage());
             $this->closeWithError($conn);
         }
     }
