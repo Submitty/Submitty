@@ -4556,21 +4556,41 @@ SQL;
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
         $this->course_db->query(
             "
-          UPDATE grade_override
-          SET marks=?, comment=?
-          WHERE user_id=?
-            AND g_id=?;",
-            [$marks, $comment, $user_id, $g_id]
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+            ",
+            [$user_id, $g_id, $marks, $comment]
         );
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query(
-                "
-            INSERT INTO grade_override
-            (user_id, g_id, marks, comment)
-            VALUES(?,?,?,?)",
-                [$user_id, $g_id, $marks, $comment]
-            );
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
         }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
     }
 
     /**
@@ -5386,6 +5406,17 @@ AND gc_id IN (
             VALUES " . $value_param_string,
             $flattened_params
         );
+    }
+
+    /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
@@ -7498,6 +7529,38 @@ AND gc_id IN (
     }
 
     /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the sent timestamp for an email and clears the error message
+     *
+     * @param string $subject
+     * @return bool
+     */
+    public function updateEmailSent(string $subject): bool {
+        $time = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+        $this->submitty_db->query('UPDATE emails SET sent = ? WHERE subject = ?', [$time, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the error message for an email, where an empty string implies no error
+     *
+     * @param string $subject
+     * @param string $error
+     * @return bool
+     */
+    public function updateEmailError(string $subject, string $error): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
@@ -9515,10 +9578,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**

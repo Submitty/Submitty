@@ -221,9 +221,8 @@ class ElectronicGraderController extends AbstractController {
     }
     /**
      * Route for randomizing peer assignments with 'One Grades Many'
-     *
-     * @AccessControl(role="INSTRUCTOR")
      */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/RandomizePeers", methods: ["POST"])]
     public function RandomizePeers($gradeable_id) {
         /* How does this function work?
@@ -424,9 +423,8 @@ class ElectronicGraderController extends AbstractController {
      * Route for verifying the grader of a graded component
      * @param string $gradeable_id verify all components or not
      * @param bool $verify_all false be default
-     *
-     * @AccessControl(permission="grading.electronic.verify_grader")
      */
+    #[AccessControl(permission: "grading.electronic.verify_grader")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods: ["POST"])]
     public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
         $anon_id = $_POST['anon_id'] ?? '';
@@ -505,14 +503,24 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")]
     public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
             $this->core->redirect($this->core->buildCourseUrl());
+        }
+
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable,
+                "grades"
+            );
+            return;
         }
 
         // Make sure this gradeable is an electronic file gradeable
@@ -686,10 +694,10 @@ class ElectronicGraderController extends AbstractController {
                 $team_users = [];
                 $individual_viewed_grade = 0;
             }
-            $override_cookie = array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit';
-            $bad_submissions_cookie = array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit';
-            $null_section_cookie = array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit';
-            $withdrawn_students_cookie = array_key_exists('include_withdrawn_students__' . $gradeable_id, $_COOKIE) ? $_COOKIE['include_withdrawn_students__' . $gradeable_id] : 'omit';
+            $override_cookie = $_COOKIE['include_grade_override'] ?? 'omit';
+            $bad_submissions_cookie = $_COOKIE['include_bad_submissions'] ?? 'omit';
+            $null_section_cookie = $_COOKIE['include_null_section'] ?? 'omit';
+            $withdrawn_students_cookie = $_COOKIE['include_withdrawn_students__' . $gradeable_id] ?? 'omit';
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
@@ -719,7 +727,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
+                if ($key === "NULL" && ($_COOKIE['include_null_section'] ?? 'omit') === 'omit') {
                     continue;
                 }
                 $total_submissions += $value;
@@ -727,7 +735,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($total_users_who_submitted as $key => $value) {
                 // If we allow NULL sections, use any.
                 // If not, make sure $key is not NULL
-                if ($key === "NULL" && (!array_key_exists('include_null_section', $_COOKIE) || $_COOKIE['include_null_section'] === 'omit')) {
+                if ($key === "NULL" && ($_COOKIE['include_null_section'] ?? 'omit') === 'omit') {
                     continue;
                 }
                 $total_who_submitted += $value;
@@ -950,6 +958,7 @@ class ElectronicGraderController extends AbstractController {
         // If nothing to grade, Instructor will see all sections
         $view_all = isset($_COOKIE['view']) && $_COOKIE['view'] === 'all';
         $gradeable = $this->tryGetGradeable($gradeable_id);
+        $current_user = $this->core->getUser();
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid Gradeable!');
             $this->core->redirect($this->core->buildCourseUrl());
@@ -962,7 +971,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
-        $peer = ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT);
+        $peer = ($gradeable->hasPeerComponent() && $current_user->getGroup() == User::GROUP_STUDENT);
         if (!$this->core->getAccess()->canI("grading.electronic.details", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             $this->core->redirect($this->core->buildCourseUrl());
@@ -978,12 +987,14 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $anon_mode = $gradeable->getInstructorBlind() - 1;
-        $anon_mode_enabled = "anon_mode_" . $gradeable_id;
-        $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
-        if (isset($_COOKIE[$anon_mode_override]) && $_COOKIE[$anon_mode_override] === 'on') {
-            $anon_mode = (isset($_COOKIE[$anon_mode_enabled]) && $_COOKIE[$anon_mode_enabled] === 'on');
-        }
+        // Anon mode for limited access graders should be based on the limited access blind setting
+        // For the instructor, they can choose to toggle anon mode, so check the cookie then the setting
+        $anon_mode =
+            ($current_user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+            ($current_user->getGroup() < 3 && (
+                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+            ));
 
         $inquiry_status = isset($_COOKIE['inquiry_status']) && $_COOKIE['inquiry_status'] === 'on';
 
@@ -1004,7 +1015,7 @@ class ElectronicGraderController extends AbstractController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = $view_all && $can_show_all;
 
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        $order = new GradingOrder($this->core, $gradeable, $current_user, $show_all);
 
         $order->sort($sort, $direction);
 
@@ -1533,8 +1544,8 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Handle requests to create individual teams via the AdminTeamForm
-     * @AccessControl(permission="grading.electronic.submit_team_form")
      */
+    #[AccessControl(permission: "grading.electronic.submit_team_form")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/new", methods: ["POST"])]
     public function adminTeamSubmit($gradeable_id) {
         $new_team = ($_POST['new_team'] ?? '') === 'true';
@@ -1727,6 +1738,15 @@ class ElectronicGraderController extends AbstractController {
             $this->core->addErrorMessage('This gradeable is not an electronic file gradeable');
             $this->core->redirect($this->core->buildCourseUrl());
         }
+        if (!$gradeable->hasAutogradingConfig()) {
+            $this->core->getOutput()->renderOutput(
+                'Error',
+                'unbuiltGradeable',
+                $gradeable,
+                "grades"
+            );
+            return;
+        }
         $peer = $gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT;
         $team = $gradeable->isTeamAssignment();
         if ($gradeable->hasPeerComponent() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -1893,7 +1913,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $progress = round(($graded / $total_submitted) * 100, 1);
 
-            if (array_key_exists('include_bad_submissions', $_COOKIE) && $_COOKIE['include_bad_submissions'] == 'include') {
+            if (($_COOKIE["include_bad_submissions"] ?? 'omit') === 'include') {
                 $progress = round(($non_late_graded / $non_late_total_submitted) * 100, 1);
             }
         }
@@ -1967,12 +1987,13 @@ class ElectronicGraderController extends AbstractController {
         ];
         Logger::logTAGrading($logger_params);
 
-        $anon_mode = $gradeable->getInstructorBlind() - 1;
-        $anon_mode_enabled = "anon_mode_" . $gradeable_id;
-        $anon_mode_override =  "default_" . $anon_mode_enabled . "_override";
-        if (isset($_COOKIE[$anon_mode_override]) && $_COOKIE[$anon_mode_override] === 'on') {
-            $anon_mode = (isset($_COOKIE[$anon_mode_enabled]) && $_COOKIE[$anon_mode_enabled] === 'on');
-        }
+        $user = $this->core->getUser();
+        $anon_mode =
+            ($user->getGroup() === User::GROUP_LIMITED_ACCESS_GRADER && $gradeable->getLimitedAccessBlind() === Gradeable::SINGLE_BLIND_GRADING) ||
+            ($user->getGroup() < 3 && (
+                (isset($_COOKIE['anon_mode']) && $_COOKIE['anon_mode'] === 'on') ||
+                (!isset($_COOKIE['anon_mode']) && $gradeable->getInstructorBlind() === Gradeable::SINGLE_BLIND_GRADING)
+            ));
 
         $submitter_itempool_map = $this->getItempoolMapForSubmitter($gradeable, $graded_gradeable->getSubmitter()->getId());
         $solution_ta_notes = $this->getSolutionTaNotesForGradeable($gradeable, $submitter_itempool_map) ?? [];
@@ -3776,9 +3797,7 @@ class ElectronicGraderController extends AbstractController {
         return true;
     }
 
-    /**
-     * @AccessControl(role="FULL_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "FULL_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/clear_peer_marks", methods: ["POST"])]
     public function ajaxClearPeerMarks($gradeable_id) {
         $submitter_id = $_POST['submitter_id'] ?? '';
