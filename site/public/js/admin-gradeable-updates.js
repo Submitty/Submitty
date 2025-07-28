@@ -1238,21 +1238,19 @@ function removeFile(g_id, path, isFolder) {
     });
 }
 
-const enableLineNums = 'enableLineNums';
-const setTabLength = 'setTabLength';
-
 function loadCodeMirror() {
     codeMirrorInstance = CodeMirror.fromTextArea(
         document.getElementById('gradeable-config-edit'),
         {
             mode: { name: 'json', json: true },
             theme: localStorage.theme === 'light' ? 'eclipse' : 'monokai',
-            lineNumbers: localStorage.getItem(enableLineNums) === 'true',
-            tabSize: Number(localStorage.getItem(setTabLength)) === 2 ? 2 : 4,
-            indentUnit: 2,
+            lineNumbers: localStorage.getItem('enableLineNums') === 'true',
+            tabSize: Number(localStorage.getItem('setTabLength')) === 2 ? 2 : 4,
+            indentUnit: Number(localStorage.getItem('setTabLength')) === 2 ? 2 : 4,
             lineWrapping: true,
         },
     );
+    updateEditorIcons();
     codeMirrorInstance.on('change', () => {
         const currentContent = codeMirrorInstance.getValue();
         isConfigEdited = currentContent !== originalConfigContent;
@@ -1261,16 +1259,16 @@ function loadCodeMirror() {
 
 // Toggle line nums in gradeable editor
 function toggleLineNums() {
-    const current = localStorage.getItem(enableLineNums);
-    localStorage.setItem(enableLineNums, (!current || current === 'false') ? 'true' : 'false');
+    const current = localStorage.getItem('enableLineNums');
+    localStorage.setItem('enableLineNums', (!current || current === 'false') ? 'true' : 'false');
     reloadCodeMirror();
 }
 
 // Toggle between tab length of 2 and 4 for gradeable editor
 function toggleTabLength() {
-    const tabLength = Number(localStorage.getItem(setTabLength));
+    const tabLength = Number(localStorage.getItem('setTabLength'));
     const newLength = (!tabLength || tabLength === 2) ? 4 : 2;
-    localStorage.setItem(setTabLength, newLength);
+    localStorage.setItem('setTabLength', newLength);
     reloadCodeMirror();
 
     // Update icon
@@ -1281,7 +1279,6 @@ function toggleTabLength() {
     }
 }
 
-
 function reloadCodeMirror() {
     if (codeMirrorInstance) {
         const currentContent = codeMirrorInstance.getValue();
@@ -1291,3 +1288,20 @@ function reloadCodeMirror() {
     loadCodeMirror();
 }
 
+function updateEditorIcons() {
+    // Line Number Icon
+    const enableLineNumsIcon = document.getElementById('toggle-line-nums');
+    const lineNums = localStorage.getItem('enableLineNums');
+    if (lineNums === 'true') {
+        enableLineNumsIcon.classList.add('line-nums-selected');
+    }
+    else {
+        enableLineNumsIcon.classList.remove('line-nums-selected');
+    }
+    
+    // Tab Length Icon
+    const tabLengthIcon = document.getElementById('toggle-tab-length');
+    const tabLength = localStorage.getItem('setTabLength');
+    tabLengthIcon.classList.remove('fa-2', 'fa-4');
+    tabLengthIcon.classList.add(`fa-${tabLength}`);
+}

@@ -480,6 +480,10 @@ body::-webkit-scrollbar-track {
     margin-right: 6px;
 }
 
+.line-nums-selected {
+    background-color: var(--standard-deep-blue);
+}
+
 /* stylelint-disable-next-line selector-class-pattern */
 #gradeable-config-edit-bar .CodeMirror {
     /* The below instances of !important are identical to those used in gradeable-notebook.css.
