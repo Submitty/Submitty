@@ -2,7 +2,7 @@
 /* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage, cleanupAnnotationEditor */
 
 var currentAnnotations = null;
-var currentAnnotatedImageDataUrl = null; // Store the annotated image data URL
+var annotatedImage = null; // Store the annotated image data URL
 var targetImg = null;
 var gradeableId = '';
 var userId = '';
@@ -65,7 +65,7 @@ function addAnnotations() {
             // Set up event handlers for the annotation editor
             globalAnnotationEditor.addEventListener('editorsave', function(event) {
                 currentAnnotations = event.detail.state;
-                currentAnnotatedImageDataUrl = event.detail.dataUrl; // Capture the annotated image data URL
+                annotatedImage.src = event.detail.dataUrl; // Capture the annotated image data URL
                 $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
                 
                 // Hide the annotation editor instead of removing it
@@ -179,7 +179,6 @@ function saveAnnotations() {
 function clearAnnotations() {
     if (confirm("Are you sure you want to clear all annotations?")) {
         currentAnnotations = [];
-        currentAnnotatedImageDataUrl = null; // Clear the annotated image data URL
         
         // Hide any open annotation editor instead of removing it
         const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
@@ -211,29 +210,24 @@ function clearAnnotations() {
             
             // Update global reference
             targetImg = originalImg;
+            annotatedImage = targetImg;
         }
         
         $("#annotation-status").text("Annotations cleared (not saved)").css("color", "red");
     }
 }
 
-function downloadImage(targetImg) {
-    // Get the actual image element (might be replaced by MarkerView)
-    const markerView = document.getElementById('annotation-marker-view');
-    const actualImg = markerView ? markerView.targetImage : targetImg;
-    
-    if (!actualImg) {
+function downloadImage() {
+    if (!targetImg) {
         console.error("No image available for download");
         alert("Error: No image available for download");
         return;
     }
-    
-    // Check if we have the annotated image data URL from markerjsUI
-    console.log(currentAnnotatedImageDataUrl);
-    if (currentAnnotatedImageDataUrl && currentAnnotations && currentAnnotations.markers && currentAnnotations.markers.length > 0) {
+
+    if (annotatedImage && currentAnnotations && currentAnnotations.markers && currentAnnotations.markers.length > 0) {
         // Create download link with the pre-generated annotated image
         const link = document.createElement('a');
-        link.href = currentAnnotatedImageDataUrl;
+        link.href = annotatedImage.src;
         
         // Add suffix to filename for annotated version
         const nameParts = filename.split('.');
@@ -297,7 +291,7 @@ function cleanupAnnotationEditor() {
 // Make cleanup function available globally
 window.cleanupAnnotationEditor = cleanupAnnotationEditor;
 
-function renderAnnotationsOnImage(targetImg) {
+function renderAnnotationsOnImage() {
     if (!targetImg) {
         console.error("No target image provided to renderAnnotationsOnImage");
         $("#annotation-status").text("Error: No image available for rendering").css("color", "red");
@@ -387,15 +381,17 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
     filePath = fPath;
     csrfToken = token;
     isStudent = isStud;
-    
-    // Reset annotation data for new image
-    currentAnnotatedImageDataUrl = null;
+
     
     // Wait for DOM to be ready
     $(document).ready(function() {
         // Get the target image element
         targetImg = document.getElementById("annotatable-image");
-        
+        // Reset annotation data for new image
+        if (annotatedImage === null) {
+            annotatedImage = targetImg;
+        }
+
         // Handle image load errors
         if (targetImg) {
             targetImg.onerror = function() {
@@ -408,6 +404,18 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
         if (existingAnnotations && existingAnnotations.markers) {    
             currentAnnotations = existingAnnotations;
         }
-        renderAnnotationsOnImage(targetImg);
+        
+        // Wait for image to load before rendering annotations
+        if (targetImg && (targetImg.complete && targetImg.naturalHeight !== 0)) {
+            // Image is already loaded
+            renderAnnotationsOnImage(targetImg);
+        } else if (targetImg) {
+            // Wait for image to load
+            const imageLoadHandler = function() {
+                targetImg.removeEventListener('load', imageLoadHandler);
+                renderAnnotationsOnImage(targetImg);
+            };
+            targetImg.addEventListener('load', imageLoadHandler);
+        }
     });
 }
