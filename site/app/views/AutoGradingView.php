@@ -152,27 +152,13 @@ class AutoGradingView extends AbstractView {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
-            if (substr($file_path, strlen($file_path) - 4, 4) == ".pdf") {
+            if (str_ends_with($file_path, '.pdf') || str_ends_with($file_path, '.ipynb')) {
                 $public = $autocheck->getPublic();
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
+                $file_type = str_ends_with($file_path, '.pdf') ? "pdf" : "notebook";
                 $checks[] = [
-                    "pdf" => true,
-                    "name" => $file_name,
-                    "path" => $file_path,
-                    "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
-                        "dir" => $public ? "results_public" : "results",
-                        "file" => $file_name,
-                        "path" => $file_path
-                    ])
-                ];
-            }
-            elseif (substr($file_path, strlen($file_path) - 6, 6) === ".ipynb") {
-                $public = $autocheck->getPublic();
-                $file_name = pathinfo($file_path, PATHINFO_BASENAME);
-                $file_path = urlencode($file_path);
-                $checks[] = [
-                    "notebook" => true,
+                    $file_type => true,
                     "name" => $file_name,
                     "path" => $file_path,
                     "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([

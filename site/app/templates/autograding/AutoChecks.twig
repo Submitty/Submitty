@@ -22,9 +22,7 @@
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
     {% endif %}
-    {% if check.pdf is defined %}
-        <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
-    {% elseif check.notebook is defined %}
+    {% if check.pdf is defined or check.notebook is defined %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <div class="autocheck-header">

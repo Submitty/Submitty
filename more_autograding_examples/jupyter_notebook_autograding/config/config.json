@@ -5,8 +5,10 @@
     },
   "autograding_method": "docker",
   "resource_limits" : {
-    "RLIMIT_NPROC" : 32
+    "RLIMIT_NPROC" : 32,
+    "RLIMIT_FSIZE" : 20971520, // 20 MB
   },
+  "max_submission_size" : 10485760, // 10 MB
   "container_options": {
     "container_image": "submitty/jupyter:latest"
   },

@@ -25,7 +25,8 @@ class NotebookUtils {
             'image/bmp',
             'text/plain', // Fall back to text/plain if it is available.
         ];
-        $img_size_limit = 1024 * 1024; // 1MB limit
+        $img_size_limit = 1024 * 1024 * 5; // 5MB limit
+        $text_limit = 1024 * 30;            // 30KB limit
         foreach ($filedata['cells'] as $cell) {
             switch ($cell['cell_type']) {
                 case 'markdown':
@@ -72,9 +73,13 @@ class NotebookUtils {
 
                     foreach ($cell['outputs'] ?? [] as $output) {
                         if (($output['output_type'] ?? '') === 'stream') {
+                            $output_text = is_array($output['text'] ?? '') ? implode ($output['text']) : (string) ($output['text'] ?? '');
+                            if (strlen($output_text) > $text_limit) {
+                                $output_text = substr($output_text, 0, $text_limit) . PHP_EOL . '[Output truncated: exceeds size limit of ' . $text_limit . ' bytes.]';
+                            }
                             $cells[] = [
                                 'type' => 'output',
-                                'output_text' => is_array($output['text'] ?? '') ? implode($output['text']) : (string) ($output['text'] ?? ''),
+                                'output_text' => $output_text,
                             ];
                         }
                         elseif ((($output['output_type'] ?? '') === 'display_data' || ($output['output_type'] ?? '') === 'execute_result') && isset($output['data'])) {
@@ -89,7 +94,9 @@ class NotebookUtils {
 
                             $text = $output['data']['text/plain'] ?? '';
                             $output_text = is_array($text) ? implode($text) : (string) $text;
-
+                            if (strlen($output_text) > $text_limit) {
+                                $output_text = substr($output_text, 0, $text_limit) . PHP_EOL .'[Output truncated: exceeds size limit of ' . $text_limit . ' bytes.]';
+                            }
                             if ($output_type === 'text/plain') {
                                 // Display output text if we don't know how to render the content otherwise
                                 $cells[] = [
