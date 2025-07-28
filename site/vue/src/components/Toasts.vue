@@ -104,6 +104,7 @@ window.displayWarningMessage = (message: string) => displayMessage(message, 'war
       <a
         id="remove_popup"
         class="fas fa-times key_to_click"
+        data-testid="remove-message-popup"
         tabindex="0"
         @click="removeMessagePopup(message.key)"
       />
