@@ -14,9 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\socket\Client;
 use WebSocket;
 
-/**
- * @Enabled("chat")
- */
+#[Enabled(feature: "chat")]
 class ChatroomController extends AbstractController {
     /**
      * Send a message over WebSocket.
@@ -61,9 +59,7 @@ class ChatroomController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/new", methods:["POST"])]
     public function addChatroom(): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -129,9 +125,7 @@ class ChatroomController extends AbstractController {
         );
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/delete", methods: ["POST"])]
     public function deleteChatroom(): JsonResponse {
         $chatroom_id = intval($_POST['chatroom_id'] ?? -1);
@@ -148,9 +142,7 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse();
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/edit", methods: ["POST"])]
     public function editChatroom(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -176,9 +168,7 @@ class ChatroomController extends AbstractController {
         return new RedirectResponse($this->core->buildCourseUrl(['chat']));
     }
 
-    /**
-     * @AccessControl(role="INSTRUCTOR")
-     */
+    #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/toggleActiveStatus", methods: ["POST"], requirements: ["chatroom_id" => "\d+"])]
     public function toggleChatroomActiveStatus(string $chatroom_id): RedirectResponse {
         $em = $this->core->getCourseEntityManager();
@@ -239,6 +229,7 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($formattedMessages);
     }
 
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/send/{anonymous_route_segment?}", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send/{anonymous_route_segment?}", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     public function addMessage(string $chatroom_id, ?string $anonymous_route_segment = null,): JsonResponse {
         $isAnonymous = ($anonymous_route_segment === 'anonymous');
@@ -274,10 +265,11 @@ class ChatroomController extends AbstractController {
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
         $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
-        $this->sendSocketMessage($msg_array);
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
+        $msg_array['id'] = $message->getId();
+        $this->sendSocketMessage($msg_array);
         return JsonResponse::getSuccessResponse($message);
     }
 }

@@ -1,9 +1,3 @@
-declare global {
-    interface Window {
-        togglePanelSelectorModal: (show: boolean) => void;
-    }
-}
-
 export function togglePanelSelectorModal(show: boolean) {
     if (show) {
         $('#panels-selector-modal').show();
@@ -12,5 +6,3 @@ export function togglePanelSelectorModal(show: boolean) {
         $('#panels-selector-modal').hide();
     }
 }
-
-window.togglePanelSelectorModal = togglePanelSelectorModal;

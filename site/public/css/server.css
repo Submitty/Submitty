@@ -1750,11 +1750,6 @@ end of styles used in the admin gradeable page
     margin: 10px 0;
 }
 
-.flex-line {
-    display: flex;
-    align-items: center;
-}
-
 .shadow {
     box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
