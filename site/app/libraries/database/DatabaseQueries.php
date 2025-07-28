@@ -5449,7 +5449,7 @@ AND gc_id IN (
                 (EXTRACT(EPOCH FROM current_timestamp) - EXTRACT(EPOCH FROM created_at)) AS elapsed_time,
                 created_at
             FROM notifications
-            WHERE to_user_id = ? AND created_at >= current_timestamp - INTERVAL '7 days'
+            WHERE to_user_id = ?
             ORDER BY created_at DESC
             LIMIT 10;
         ";

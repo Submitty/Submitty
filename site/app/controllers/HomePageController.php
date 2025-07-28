@@ -126,7 +126,7 @@ class HomePageController extends AbstractController {
             foreach ($course_notifications as $notification) {
                 $notify_time = $notification->getNotifyTime();
                 $base_url = '';
-                if ($notification->getNotifyMetadata()) {
+                if ($notification->getNotifyMetadata() !== null) {
                     $base_url = $this->core->buildCourseUrl(['notifications', $notification->getId()]);
                 }
                 else {
