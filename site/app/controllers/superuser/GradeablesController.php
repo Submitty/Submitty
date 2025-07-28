@@ -13,13 +13,9 @@ use app\models\gradeable\GradeableList;
 use app\views\superuser\GradeablesView;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
+#[AccessControl(level: "SUPERUSER")]
 class GradeablesController extends AbstractController {
-    /**
-     * @AccessControl(level="SUPERUSER")
-     */
+    #[AccessControl(level: "SUPERUSER")]
     #[Route("/api/superuser/gradeables")]
     #[Route("/superuser/gradeables")]
     public function viewGradeablesList(): MultiResponse {

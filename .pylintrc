@@ -89,6 +89,7 @@ ignore-paths=
     .setup/bin/create_untrusted_users.py,
     .setup/bin/partial_reset.py,
     .setup/bin/update_repo_version.py,
+    .setup/bin/refresh_vagrant_workers.py,
     .setup/bin/reset_system.py,
     .setup/bin/code_watcher.py,
     .setup/bin/setup_sample_emails.py,
@@ -134,7 +135,9 @@ ignore-paths=
     migration/tests/test_handle_migration.py,
     migration/tests/test_dumper.py,
     sample_files/sample_CSV/test_grades.py,
-    sample_files/sample_CSV/verify.py
+    sample_files/sample_CSV/verify.py,
+    vagrant-workers/workers.py,
+    vagrant-workers/generate_workers.py
 
 [FORMAT]
 max-line-length=100

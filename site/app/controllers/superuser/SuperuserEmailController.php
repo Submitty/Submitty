@@ -11,9 +11,7 @@ use app\views\superuser\SuperuserEmailView;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\SuperuserEmail;
 
-/**
- * @AccessControl(level="SUPERUSER")
- */
+#[AccessControl(level: "SUPERUSER")]
 class SuperuserEmailController extends AbstractController {
     /**
      * @return MultiResponse
@@ -78,5 +76,29 @@ class SuperuserEmailController extends AbstractController {
                 "data" => json_encode($active_user_ids)
             ]);
         }
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/api/superuser/email/sent", methods: ["PUT"])]
+    public function updateEmailSent(): JsonResponse {
+        if (!$this->core->getQueries()->updateEmailSent($_POST['subject'])) {
+            return JsonResponse::getFailResponse("Failed to update email sent status");
+        }
+
+        return JsonResponse::getSuccessResponse();
+    }
+
+    /**
+     * @return JsonResponse
+     */
+    #[Route("/api/superuser/email/error", methods: ["PUT"])]
+    public function updateEmailError(): JsonResponse {
+        if (!$this->core->getQueries()->updateEmailError($_POST['subject'], $_POST['error'] ?? '')) {
+            return JsonResponse::getFailResponse("Failed to update email error status");
+        }
+
+        return JsonResponse::getSuccessResponse();
     }
 }

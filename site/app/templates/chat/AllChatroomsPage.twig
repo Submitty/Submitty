@@ -26,9 +26,9 @@
                 </thead>
                 <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
-                        <tr>
+                        <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
                             <td>
-                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn"></a>
+                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn" data-testid="edit-chatroom"></a>
                             </td>
                             <td>
                                 {% if not chatroom.isActive() %}
@@ -36,12 +36,12 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span title="{{ chatroom.getTitle() }}">
+                                <span title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                     {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
                                 </span>
                             </td>
                             <td>
-                                <span title="{{ chatroom.getDescription() }}">
+                                <span title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
                                     {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
                                 </span>
                             </td>
@@ -50,11 +50,11 @@
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 </form>
                                 {% if not chatroom.isActive() %}
-                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)">
+                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)" data-testid="enable-chatroom">
                                         Start Session
                                     </button>
                                 {% else %}
-                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)">
+                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)" data-testid="disable-chatroom">
                                         <i class="fas fa-pause"></i>
                                         End Session
                                     </button>
@@ -83,28 +83,28 @@
                         <th scope="col" style="text-align: left"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody data-testid="chatroom-list-item">
                     {% for chatroom in chatrooms %}
                         {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
-                            <tr id="{{ chatroom.getId() }}">
+                            <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
                                 <td>
-                                    <span class="display-short" title="{{ chatroom.getTitle() }}">
+                                    <span class="display-short" title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
                                         {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-testid="chatroom-host">
                                     {{ chatroom.getHostName() }}
                                 </td>
                                 <td>
-                                    <span class="display-short" title="{{ chatroom.getDescription() }}">
+                                    <span class="display-short" title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
                                         {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary">Join</a>
+                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary"  data-testid="chat-join-btn">Join</a>
                                     {% if chatroom.isAllowAnon() %}
                                         <i> or </i>
-                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default">Join As Anon.</a>
+                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
                                     {% endif %}
                                 </td>
                             </tr>

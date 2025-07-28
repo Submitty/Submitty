@@ -12,7 +12,7 @@
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
 
-        if ("serviceWorker" in navigator) {
+        if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker
                     .register("{{ service_worker_path }}")
@@ -47,7 +47,7 @@
     {% endfor %}
 
     {% for js_ref in js %}
-    <script src='{{ js_ref }}'></script>
+    <script src='{{ js_ref }}' type={{ '.mjs' in js_ref ? 'module' : '' }}></script>
     {% endfor %}
 
     {% if not content_only %}
@@ -123,7 +123,7 @@
     {% endif %}
 
 </head>
-<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-course-path="{{ course_path }}" data-csrf-token="{{ csrf_token }}" data-user-tz-off="{{ core.getUser().getUTCOffset() ?? "NONE" }}">
 <a id="skip-nav" class="skip-btn" href="#main">Skip to main content</a>
     <div id="submitty-body" class="flex-col">
         {% if not content_only %}
@@ -132,17 +132,21 @@
                 <a href="{{ base_url }}" aria-label="Go to Submitty Home"><span class="mobile-title">Submitty</span></a>
                     <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
                 </div>
-                <ul>
-                    {% set total_notifications = 0 %}
-                    {% for button in sidebar_buttons %}
-                        {% if button.getTitle() != "Collapse Sidebar" %}
-                            {{ self.render_sidebar_button(button, true) }}
-                        {% endif %}
-                        {% if button.getBadge() %}
-                            {% set total_notifications = total_notifications + button.getBadge() %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
+                {% include 'Vue.twig' with {
+                    'type': 'component',
+                    'name': 'sidebar/Button',
+                    'args': {
+                            "buttons": sidebar_buttons,
+                            "mobile": true
+                        }
+                    }
+                %}
+                {% set total_notifications = 0 %}
+                {% for button in sidebar_buttons %}
+                    {% if button.getBadge() %}
+                        {% set total_notifications = total_notifications + button.getBadge() %}
+                    {% endif %}
+                {% endfor %}
             </div>
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
@@ -251,91 +255,32 @@
         </div>
         {% include 'Vue.twig' with {
             'type': 'component',
-            'name': 'performanceWarning',
+            'name': 'PerformanceWarning',
             'args': {
                 "performanceWarning": performance_warning,
                 "submittyQueries": submitty_queries,
                 "courseQueries": course_queries
             }
         } %}
-        <div id='messages'>
-            <!-- If the below <div> definition changes, update the design in server.js in displayMessage function -->
-            {% for message in messages %}
-                <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}" data-testid="popup-message">
-                    <span>
-                        {% if message.type == "error" %}
-                        <i class="fas fa-times-circle"></i>
-                        {% elseif message.type == "success" %}
-                        <i class="fas fa-check-circle"></i>
-                        {% else %}
-                        <i class="fas fa-circle-exclamation"></i>
-                        {% endif %}
-                        {{ message.error | nl2br }}
-                    </span>
-                    <a class="fas fa-times key_to_click" tabindex="0" id="remove_popup" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                </div>
-            {% endfor %}
-        </div>
+        {% include 'Vue.twig' with {
+            'name': 'Toasts',
+            'type': 'component',
+            'args': {
+                "messages": messages,
+            }
+        } %}
         <div id="wrapper">
             {% if not content_only and sidebar_buttons|length > 0 %}
                 <aside data-testid="sidebar" class="{{collapse_sidebar?'collapsed':''}}">
-                    <ul>
-                        {% for button in sidebar_buttons %}
-                            {{ self.render_sidebar_button(button, false) }}
-                        {% endfor %}
-                    </ul>
+                    {% include 'Vue.twig' with {
+                        'type': 'component',
+                        'name': 'sidebar/Button',
+                        'args': {
+                            "buttons": sidebar_buttons,
+                            "mobile": false 
+                        }
+                    } %}
                 </aside>
             {% endif %}
             <main id="main" data-testid="content-main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
-
-{% macro render_sidebar_button(button, mobile) %}
-    {% if button.getTitle() == "" %}
-        <li><hr /></li>
-    {% else %}
-        <li>
-            {% if button.getHref() == null %}
-                <span
-                    class="flex-row {{ button.getClass() }}"
-                    {% if button.getId() != "" %}
-                        id="{{ [mobile ? 'mobile-' : '', button.getId()]|join }}"
-                    {% endif %}
-                >
-                    <span class="flex-line"> {# col in flex-row #}
-                        {% if button.getIcon() != null %}
-                            <i class="fa {{ button.getIcon() }}"></i>
-                        {% endif %}
-
-                        {{ button.getTitle() }}
-                    </span>
-                    {% if button.getBadge() > 0 %}
-                        <span class="notification-badge">{{  button.getBadge() }} </span>
-                    {% endif %}
-                </span>
-            {% else %}
-                <a href="{{ button.getHref() }}"
-                    title="{{ button.getTitle() }}"
-                    class="flex-row {{ button.getClass() }}"
-                    {% if button.getId() != "" %}
-                        id="{{ [mobile ? 'mobile-' : '', button.getId()]|join }}"
-                    {% endif %}
-                    {% if not mobile %}
-                        data-toggle="tooltip"
-                    {% endif %}
-                >
-                    <span class="flex-line"> {# col in flex-row #}
-                        {% if button.getIcon() != null %}
-                            <i class="{{ button.getPrefix() }} {{ button.getIcon() }}"></i>
-                        {% endif %}
-
-                        <span class="icon-title"> {{ button.getTitle() }} </span>
-                    </span>
-                    {% if button.getBadge() > 0 %}
-                        <span class="notification-badge">{{  button.getBadge() }} </span>
-                    {% endif %}
-                </a>
-
-            {% endif %}
-        </li>
-    {% endif %}
-{% endmacro %}

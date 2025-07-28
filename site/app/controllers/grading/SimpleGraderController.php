@@ -19,8 +19,8 @@ use WebSocket;
 /**
  * Class SimpleGraderController
  * @package app\controllers\grading
- * @AccessControl(permission="grading.simple")
  */
+#[AccessControl(permission: "grading.simple")]
 class SimpleGraderController extends AbstractController {
     /**
      * @param string $gradeable_id

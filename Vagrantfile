@@ -79,21 +79,20 @@ base_boxes[:arm_bento]     = "bento/ubuntu-22.04-arm64"
 base_boxes[:libvirt]       = "generic/ubuntu2204"
 base_boxes[:arm_mac_qemu]  = "perk/ubuntu-2204-arm64"
 
-
-def mount_folders(config, mount_options, type = nil)
+def mount_folders(config, mount_options, type = nil, host = '10.0.2.2')
  # ideally we would use submitty_daemon or something as the owner/group, but since that user doesn't exist
   # till post-provision (and this is mounted before provisioning), we want the group to be 'vagrant'
   # which is guaranteed to exist and that during install_system.sh we add submitty_daemon/submitty_php/etc to the
   # vagrant group so that they can write to this shared folder, primarily just for the log files
   owner = 'root'
   group = 'vagrant'
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type: type
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
 
   optional_repos = %w(AnalysisTools AnalysisToolsTS Lichen RainbowGrades Tutorial CrashCourseCPPSyntax IntroQuantumComputing LichenTestData DockerImages DockerImagesRPI)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)
-      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: '10.0.2.2', smb_username: `whoami`.chomp, type:type
+      config.vm.synced_folder repo_path, "/usr/local/submitty/GIT_CHECKOUT/" + repo, owner: owner, group: group, mount_options: mount_options, smb_host: host, smb_username: `whoami`.chomp, type: type
     end
   }
 end
@@ -101,7 +100,7 @@ end
 def get_workers()
   worker_file = File.join(__dir__, '.vagrant', 'workers.json')
   if File.file?(worker_file)
-    return JSON.parse(File.read(worker_file), symbolize_names: true)
+    return JSON.parse(File.read(worker_file), symbolize_names: true)[:workers]
   else
     return Hash[]
   end
@@ -144,22 +143,44 @@ Vagrant.configure(2) do |config|
   # that one) as well as making sure all non-primary ones have "autostart: false" set
   # so that when we do "vagrant up", it doesn't spin up those machines.
 
-  get_workers.map do |worker_name, data|
-    config.vm.define worker_name do |ubuntu|
-      ubuntu.vm.network 'private_network', ip: data[:ip_addr]
-      ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh'
-      ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: base_box)
+  if ARGV[0] == 'workers'
+    if apple_silicon
+      exec("arch", "-arm64", "python3", "vagrant-workers/workers.py", *ARGV[1..])
     end
+    exec("python3", "vagrant-workers/workers.py", *ARGV[1..])
   end
 
-  vm_name = 'ubuntu-22.04'
-  config.vm.define vm_name, primary: true do |ubuntu|
-    ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
-    ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
-    ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7001)
-    ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
-    ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
+  if ENV.fetch('WORKER_MODE', '0') == '1'
+    get_workers.map do |worker_name, data|
+      config.vm.define worker_name do |ubuntu|
+        ubuntu.vm.network 'private_network', ip: data[:ip_addr]
+        ubuntu.vm.network 'forwarded_port', guest: 22, host: data[:ssh_port], id: 'ssh' unless data[:ssh_port].nil?
+        ubuntu.vm.provision 'shell', inline: gen_script(worker_name, worker: true, base: true)
+
+        ubuntu.vm.provider "qemu" do |qe, override|
+          qe.ssh_host = data[:ip_addr]
+          qe.ssh_port = 22
+          qe.socket_fd = 3
+          qe.mac_address = data[:mac_addr]
+          mount_folders(override, [], 'smb', ENV.fetch('GATEWAY_IP', '10.0.2.2'))
+        end
+      end
+    end
+  else
+    vm_name = 'ubuntu-22.04'
+    config.vm.define vm_name, primary: true do |ubuntu|
+      ubuntu.vm.network 'forwarded_port', guest: 1511, host: ENV.fetch('VM_PORT_SITE', 1511)
+      ubuntu.vm.network 'forwarded_port', guest: 8443, host: ENV.fetch('VM_PORT_WS',   8443)
+      ubuntu.vm.network 'forwarded_port', guest: 5432, host: ENV.fetch('VM_PORT_DB',  16442)
+      ubuntu.vm.network 'forwarded_port', guest: 7000, host: ENV.fetch('VM_PORT_SAML', 7001)
+      ubuntu.vm.network 'forwarded_port', guest:   22, host: ENV.fetch('VM_PORT_SSH',  2222), id: 'ssh'
+      ubuntu.vm.provision 'shell', inline: gen_script(vm_name, base: base_box)
+
+      ubuntu.vm.provider "qemu" do |qe, override|
+        qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
+        mount_folders(override, [], 'smb')
+      end
+    end
   end
 
   config.vm.provider 'virtualbox' do |vb, override|
@@ -264,10 +285,6 @@ Vagrant.configure(2) do |config|
 
     qe.memory = "2G"
     qe.smp = 2
-
-    qe.ssh_port = ENV.fetch('VM_PORT_SSH', 2222)
-
-    mount_folders(override, [])
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
