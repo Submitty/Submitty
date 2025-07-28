@@ -249,6 +249,7 @@ create_and_set  u=rwx,g=rwxs,o=   "$instructor"  "$ta_www_group"  "$course_dir/c
 
 # NOTE: on each student submission, files are written to these directories
 #               drwxr-s---        $PHP_USER           ta_www_group      submissions/
+#               drwxrws---        $DAEMON_USER        ta_www_group      submissions_processed/
 #               drwxr-s---        $PHP_USER           ta_www_group      config_upload/
 #               drwxr-s---        $PHP_USER           ta_www_group      site/
 #               drwxr-s---        $DAEMON_USER        ta_www_group      results/
@@ -265,6 +266,7 @@ create_and_set  u=rwx,g=rwxs,o=   "$instructor"  "$ta_www_group"  "$course_dir/c
 #               drwxrws---        $PHP_USER           ta_www_group      rainbow_grades
 #               drwxrws---        $DAEMON_USER        ta_www_group      lichen/
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/submissions"
+create_and_set  u=rwx,g=rwxs,o=  "$DAEMON_USER"     "$ta_www_group"   "$course_dir/submissions_processed"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/forum_attachments"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/annotations"
 create_and_set  u=rwx,g=rxs,o=   "$PHP_USER"        "$ta_www_group"   "$course_dir/config_upload"
