@@ -69,11 +69,6 @@ const onChangeNavTab = (tab: number): void => {
     activeTab.value = tab;
 };
 
-const checkForm = (): boolean => {
-    // Add form validation logic here
-    return true;
-};
-
 const handleVersionChange = (version: number) => {
     // Handle version change logic here
     console.log('Version changed to:', version);
@@ -172,7 +167,6 @@ console.log(props);
             class="form-signin"
             method="post"
             enctype="multipart/form-data"
-            @submit="checkForm"
           >
             <div
               class="tab-bar-wrapper"
