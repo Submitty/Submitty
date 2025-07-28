@@ -972,16 +972,23 @@ class Core {
      * Get or generate websocket token, similar to how session tokens are managed, using
      * existing valid tokens instead of always generating new ones
      *
-     * @param array<int, array<string, string>> $page_contexts Array of page contexts the user should have access to
+     * @param string|null $key Optional key to check for access to, if not provided, all keys are checked
+     * @param string|null $page Optional page to check for access to, if not provided, all pages are checked
      * @return string|null JWT token string or null if generation fails
      */
-    public function getWebsocketToken(array $page_contexts): ?string {
+    public function getWebsocketToken(?string $key = null, ?string $page = null, ?array $params = null): ?string {
         if (!$this->userLoaded() || !$this->config->isCourseLoaded()) {
             return null;
         }
 
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
+
+        $page_contexts = [
+            ['page' => 'discussion_forum'],
+            ['page' => 'office_hours_queue'],
+            ['page' => 'chatrooms'],
+        ];
 
         // Check if we have an existing valid token
         if ($existing_token !== null) {
@@ -993,28 +1000,23 @@ class Core {
                 // Verify token is for current user
                 if ($token_user_id === $this->user->getId()) {
                     // Calculate required pages for current context
-                    // TODO: this should only be called for new tokens
-                    // $required_pages = $this->access->getAuthorizedWebsocketPages(
-                    //     $this->user,
-                    //     $this->config->getTerm(),
-                    //     $this->config->getCourse(),
-                    //     $page_contexts
-                    // );
 
-                    // Check if existing token covers all required pages
-                    // $has_all_required = true;
-                    // foreach ($required_pages as $required_page) {
-                    //     if (!in_array($required_page, $token_pages, true)) {
-                    //         $has_all_required = false;
-                    //         break;
-                    //     }
-                    // }
+                    if ($key !== null) {
+                        $page_contexts[] = ['page' => $page, 'params' => $params];
+                    }
 
-                    // If token covers all required pages, reuse it
-                    // if ($has_all_required) {
-                    //     return $existing_token;
-                    // }
-                    return $existing_token;
+                    if ($key !== null && !in_array($key, $token_pages, true)) {
+                        // Update the authorized_pages claim with the new key within the bottom block
+                        $this->access->getAuthorizedWebsocketPages(
+                            $this->user,
+                            $this->config->getTerm(),
+                            $this->config->getCourse(),
+                            $page_contexts
+                        );
+                    }
+                    else {
+                        return $existing_token;
+                    }
                 }
             }
             catch (\InvalidArgumentException $exc) {

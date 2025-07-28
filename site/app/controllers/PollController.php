@@ -144,6 +144,12 @@ class PollController extends AbstractController {
             $response_counts = [];
         }
 
+        // Check if the poll ID is within the websocket token authorized_pages claim, otherwise refresh the token
+        $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-polls-' . $poll_id;
+        $page = 'polls';
+        $params = ['poll' => $poll, 'instructor' => $this->core->getUser()->accessAdmin()]; // Pass in poll to avoid DB query
+        $this->core->getWebsocketToken($key, $page, $params);
+
         return new WebResponse(
             PollView::class,
             'showPoll',
@@ -752,6 +758,12 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
+        // Check if the poll ID is within the websocket token authorized_pages claim, otherwise refresh the token
+        $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-polls-' . $poll_id;
+        $page = 'polls';
+        $params = ['poll' => $poll, 'instructor' => true]; // Pass in poll to avoid DB query
+        $this->core->getWebsocketToken($key, $page, $params);
         return new WebResponse(
             PollView::class,
             'viewResults',

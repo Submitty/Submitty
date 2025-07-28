@@ -78,16 +78,7 @@ class GlobalView extends AbstractView {
         $websocket_token = null;
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             try {
-                // Simple token with basic page access for most common websocket features
-                $page_contexts = [
-                    ['page' => 'discussion_forum'],
-                    ['page' => 'office_hours_queue'],
-                    ['page' => 'chatrooms'],
-                    ['page' => 'polls'],
-                    ['page' => 'grade_inquiry'],
-                    ['page' => 'grading']
-                ];
-                $websocket_token = $this->core->getWebsocketToken($page_contexts);
+                $websocket_token = $this->core->getWebsocketToken();
             }
             catch (\Exception $e) {
                 $websocket_token = null;

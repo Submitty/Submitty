@@ -994,14 +994,21 @@ class Access {
                         $authorized = true; // Basic course access is sufficient
                         break;
                     case 'polls':
-                        if (isset($params['poll_id']) && isset($params['instructor'])) {
+                        if (isset($params['instructor'])) {
                             $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
 
                             // Load poll from database to check permissions
-                            $poll = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findByIDWithOptions(intval($params['poll_id']));
+                            $poll = $params['poll'];
+                            if ($poll instanceof Poll) {
+                                $poll_id = $poll->getId();
+                            }
+                            else {
+                                $poll_id = $params['poll_id'];
+                            }
+
                             if ($poll !== null && $this->canUser($user, "poll.view", ['poll' => $poll])) {
                                 if (!$instructor || $this->canUser($user, "poll.view.histogram", ['poll' => $poll])) {
-                                    $page_identifier = $page . '-' . $params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+                                    $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
                                     $authorized = true;
                                 }
                             }
@@ -1009,6 +1016,7 @@ class Access {
                         break;
                     case 'grade_inquiry':
                         if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
+                            // TODO: add this to the GradeInquiryController
                             $gradeable = $this->core->getQueries()->getGradeableConfig($params['gradeable_id']);
                             $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $params['submitter_id']);
                             if ($this->canUser($user, "grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
@@ -1019,9 +1027,15 @@ class Access {
                         break;
                     case 'grading':
                         if (isset($params['gradeable_id'])) {
-                            $gradeable = $this->core->getQueries()->getGradeableConfig($params['gradeable_id']);
+                            $gradeable = $params['gradeable'];
+                            if ($gradeable instanceof Gradeable) {
+                                $gradeable_id = $gradeable->getId();
+                            }
+                            else {
+                                $gradeable_id = $params['gradeable_id'];
+                            }
                             if ($this->canUser($user, "grading.simple.grade", ['gradeable' => $gradeable])) {
-                                $page_identifier = $page . '-' . $params['gradeable_id'];
+                                $page_identifier = $page . '-' . $gradeable_id;
                                 $authorized = true;
                             }
                         }
