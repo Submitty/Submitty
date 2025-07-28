@@ -24,7 +24,7 @@ interface Version {
     days_late: number;
 }
 
-export type Versions = Record<number, Version>;
+export type Versions = Record<string, Version>;
 
 interface Props {
     displayVersion: number;
@@ -82,7 +82,6 @@ onMounted(() => {
     // Initialize first tab as active
     onChangeNavTab(1);
 });
-console.log(props);
 </script>
 
 <template>

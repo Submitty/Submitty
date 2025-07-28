@@ -35,6 +35,7 @@ const handleChange = (event: Event) => {
         runOnChange.call(event.target as HTMLSelectElement);
     }
 };
+console.log(props);
 </script>
 
 <template>
@@ -44,7 +45,6 @@ const handleChange = (event: Event) => {
     aria-label="Submission Version Select"
     :style="`margin-right: 10px;${formatting}`"
     name="submission_version"
-    :value="displayVersion"
     @change="handleChange"
   >
     <option
@@ -57,7 +57,7 @@ const handleChange = (event: Event) => {
       v-for="(version, versionNum) in versions"
       :key="versionNum"
       :value="versionNum"
-      :selected="versionNum === displayVersion"
+      :selected="parseInt(versionNum) === displayVersion"
     >
       Version #{{ versionNum }}
       <template v-if="totalPoints > 0">
@@ -66,7 +66,7 @@ const handleChange = (event: Event) => {
       <template v-if="version.days_late > 0">
         &nbsp;&nbsp;&nbsp;Days Late: {{ version.days_late }}
       </template>
-      <template v-if="versionNum == activeVersion">
+      <template v-if="parseInt(versionNum) === activeVersion">
         &nbsp;&nbsp;&nbsp;GRADE THIS VERSION
       </template>
     </option>
