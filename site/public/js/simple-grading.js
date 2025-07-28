@@ -1025,9 +1025,9 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
 window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('withdrawn_students_cookie');
+    const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
     if (full_grader_access) {
-        if (withdrawnFilterStatus === 'false') {
+        if (withdrawnFilterStatus === 'include') {
             withdrawnFilterBox.checked = false;
             withdrawnFilterElements.show();
         }

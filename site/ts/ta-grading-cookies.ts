@@ -32,13 +32,16 @@ window.filter_null_section = () => {
 
 window.filter_withdrawn_students = () => {
     const withdrawn_students = window.Cookies.get('include_withdrawn_students') ?? 'omit';
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
+    const withdrawn_electronic = $('[data-student="electronic-grade-withdrawn"]');
+    const withdrawn_simple = $('[data-student="simple-grade-withdrawn"]');
     if (withdrawn_students === 'include') {
-        withdrawnElements.hide();
+        withdrawn_electronic.hide();
+        withdrawn_simple.hide();
         window.Cookies.set('include_withdrawn_students', 'omit', { path: coursePath, expires: 365 });
     }
     else {
-        withdrawnElements.show();
+        withdrawn_electronic.show();
+        withdrawn_simple.show();
         window.Cookies.set('include_withdrawn_students', 'include', { path: coursePath, expires: 365 });
     }
 };
