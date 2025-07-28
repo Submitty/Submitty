@@ -941,7 +941,7 @@ class Core {
     /**
      * Generate a websocket token for the current user with permissions for specified pages
      *
-     * @param array<int, array<string, string>> $page_contexts Array of page contexts the user should have access to
+     * @param array<int, array<string, mixed>> $page_contexts Array of page contexts the user should have access to
      * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return string JWT token string
      */
@@ -976,6 +976,7 @@ class Core {
      *
      * @param string|null $key Optional key to check for access to, if not provided, all keys are checked
      * @param string|null $page Optional page to check for access to, if not provided, all pages are checked
+     * @param array<string, mixed> $params Optional parameters to pass during authorization checks
      * @return string|null JWT token string or null if generation fails
      */
     public function getWebsocketToken(?string $key = null, ?string $page = null, ?array $params = null): ?string {
@@ -1001,7 +1002,7 @@ class Core {
                 $token_pages = $existing_authorized_pages = $token->claims()->get('authorized_pages');
 
                 if ($token_user_id === $this->user->getId()) {
-                    if ($key !== null && !in_array($key, $token_pages, true)) {
+                    if ($key !== null && !array_key_exists($key, $token_pages)) {
                         // Refresh token if it doesn't have the required page
                         $page_contexts[] = ['page' => $page, 'params' => $params];
                     }

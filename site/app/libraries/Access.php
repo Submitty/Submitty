@@ -960,10 +960,10 @@ class Access {
      * @param User $user User to check permissions for
      * @param string $term Course term/semester
      * @param string $course Course identifier
-     * @param array<int, array<string, string>> $page_contexts Array of page contexts to check, each containing:
+     * @param array<int, array<string, mixed>> $page_contexts Array of page contexts to check, each containing:
      *                            - 'page': Page type (discussion_forum, polls, etc.)
      *                            - 'params': Additional parameters for the page
-     * @return array<string> Array of authorized page identifiers
+     * @return array<string, null> Array of authorized page identifiers
      */
     public function getAuthorizedWebsocketPages(User $user, string $term, string $course, array $page_contexts): array {
         $authorized_pages = [];
