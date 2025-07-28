@@ -112,7 +112,7 @@ class HomePageController extends AbstractController {
     private function getAllRecentNotifications() {
         $user_id = $this->core->getUser()->getId();
         $courses = $this->core->getQueries()->getCourseForUserId($user_id);
-        $all_rows = [];
+        $results = [];
         $original_config = clone $this->core->getConfig();
 
         // Loop through all courses and add info to rows
@@ -122,54 +122,35 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseConfig($semester, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $all_rows = array_merge(
-                $all_rows,
-                $this->core->getQueries()->getAllRecentNotifications($user_id, $semester, $course_name, $course_db)
-            );
-        }
+            $course_notifications = $this->core->getQueries()->getAllRecentNotifications($user_id, $semester, $course_name, $course_db);
 
-        $results = [];
-        foreach ($all_rows as $row) {
-            // Create object to call helper functions on it
-            $notification = Notification::createViewOnlyNotification(
-                $this->core,
-                [
-                    'id' => $row['id'],
-                    'component' => $row['component'],
-                    'metadata' => $row['metadata'],
-                    'content' => $row['content'],
-                    'seen' => $row['seen'],
-                    'elapsed_time' => $row['elapsed_time'],
-                    'created_at' => $row['created_at']
-                ]
-            );
-
-            // Get the notification's link if it exists
-            $this->core->loadCourseConfig($row['semester'], $row['course']);
-            if ($row['metadata']) {
-                $notification_url = $this->core->buildCourseUrl(['notifications', $row['id']]);
+            foreach ($course_notifications as $notification) {
+                $notify_time = $notification->getNotifyTime();
+                
+                $base_url = '';
+                if($notification->getNotifyMetadata()) {
+                    $base_url = $this->core->buildCourseUrl(['notifications', $notification->getId()]);
+                }
+                else {
+                   $base_url = $this->core->buildUrl(['home']); 
+                }
+                $notification_url = $base_url . '?seen=' . ($notification->isSeen() ? '1' : '0');
+                
+                // Convert to string for Vue
+                $results[] = [
+                    'id' => $notification->getId(),
+                    'component' => $notification->getComponent(),
+                    'metadata' => $notification->getNotifyMetadata(),
+                    'content' => $notification->getNotifyContent(),
+                    'seen' => $notification->isSeen(),
+                    'elapsed_time' => $notification->getElapsedTime(),
+                    'created_at' => $notification->getCreatedAt(),
+                    'notify_time' => $notify_time,
+                    'semester' => $semester,
+                    'course' => $course_name,
+                    'notification_url' => $notification_url
+                ];
             }
-            else {
-                $notification_url = null;
-            }
-
-            // Get the formatted timestamp
-            $notify_time = $notification->getNotifyTime();
-
-            // Convert to string for Vue
-            $results[] = [
-                'id' => $row['id'],
-                'component' => $row['component'],
-                'metadata' => $row['metadata'],
-                'content' => $row['content'],
-                'seen' => $row['seen'],
-                'elapsed_time' => $row['elapsed_time'],
-                'created_at' => $row['created_at'],
-                'notify_time' => $notify_time,
-                'semester' => $row['semester'],
-                'course' => $row['course'],
-                'notification_url' => $notification_url
-            ];
         }
 
         // Sort by recency

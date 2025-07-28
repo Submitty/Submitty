@@ -5409,7 +5409,7 @@ AND gc_id IN (
      * @param string $semester
      * @param string $course_name
      * @param object $course_db
-     * @return array<int, array<string, mixed>>
+     * @return array<int, Notification>
     */
     public function getAllRecentNotifications($user_id, $semester, $course_name, $course_db) {
         $query = "
@@ -5423,16 +5423,22 @@ AND gc_id IN (
             LIMIT 10;
         ";
         $course_db->query($query, [$user_id]);
-        $all_rows = $course_db->rows();
-
-        // Return semester and course associated with the notification
+        $rows = $this->course_db->rows();
         $results = [];
-        foreach ($all_rows as $row) {
-            $row['semester'] = $semester;
-            $row['course'] = $course_name;
-            $results[] = $row;
+        foreach ($rows as $row) {
+            $results[] = Notification::createViewOnlyNotification(
+                $this->core,
+                [
+                    'id' => $row['id'],
+                    'component' => $row['component'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at']
+                ]
+            );
         }
-
         return $results;
     }
 

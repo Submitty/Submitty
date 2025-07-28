@@ -50,10 +50,6 @@ const filteredNotifications = computed(() =>
 const visibleNotifications = computed(() =>
     filteredNotifications.value.slice(0, visibleCount),
 );
-
-function goToNotificationLink(notification_url: string) {
-    window.location.href = notification_url;
-}
 </script>
 <template>
   <div class="notification-panel shadow">
@@ -103,12 +99,12 @@ function goToNotificationLink(notification_url: string) {
       v-else
       id="recent-notifications"
     >
-      <div
+      <a
         v-for="n in visibleNotifications"
         :key="n.id"
         class="notification"
         :class="{ unseen: !n.seen }"
-        @click="n.notification_url && goToNotificationLink(`${n.notification_url}/?seen=${n.seen ? 1 : 0}`)"
+        :href="n.notification_url"
       >
         <i
           v-if="n.component === 'forum'"
@@ -124,11 +120,11 @@ function goToNotificationLink(notification_url: string) {
           </div>
         </div>
         <!-- FUTURE FEATURE: individual mark as seen
-                <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
-                    <i class="far fa-envelope-open"></i>
-                </a>
-            -->
-      </div>
+                      <a class="notification-seen black-btn" title="Mark as seen" aria-label="Mark as seen" v-if="!n.seen">
+                          <i class="far fa-envelope-open"></i>
+                      </a>
+                  -->
+      </a>
     </div>
   </div>
 </template>
@@ -180,7 +176,12 @@ function goToNotificationLink(notification_url: string) {
     background-color: var(--viewed-content);
 }
 
-div.notification:last-of-type {
+a.notification {
+    color: var(--text-black);
+    text-decoration: none;
+}
+
+a.notification:last-of-type {
     border-bottom: none;
 }
 
