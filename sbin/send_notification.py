@@ -394,6 +394,7 @@ def send_pending_notifications():
                 AND eg.eg_student_submit IS TRUE
                 AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
+                AND eg.eg_submission_due_date >= NOW()
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
                 ldc.late_days_remaining
