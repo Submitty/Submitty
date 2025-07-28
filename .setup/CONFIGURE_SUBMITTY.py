@@ -554,20 +554,6 @@ if not args.worker:
             }
         }
 
-        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
-        if os.path.isfile(vagrant_workers_json):
-            with open(vagrant_workers_json) as f:
-                vagrant_workers = json.load(f, object_hook=OrderedDict)
- 
-            for worker, data in vagrant_workers.items():
-                worker_dict[worker] = {
-                    "capabilities": capabilities,
-                    "address": data["ip_addr"],
-                    "username": "submitty",
-                    "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                    "enabled": True
-                }
-
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
 
@@ -580,7 +566,8 @@ if not args.worker:
                           "submitty/gcc:latest",
                           "submitty/rust:latest",
                           "submitty/java:latest",
-                          "submitty/pdflatex:latest"
+                          "submitty/pdflatex:latest",
+                          "submitty/jupyter:latest"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",

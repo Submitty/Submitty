@@ -2,7 +2,7 @@
     <header>
         <h1>Course Settings</h1>
         <div class="btn-wrapper">
-            <a href="{{ theme_url }}" class="btn btn-default">Customize Website Theme</a>
+            <a href="{{ theme_url }}" class="btn btn-default" data-testid="customize-website-theme-button">Customize Website Theme</a>
         </div>
     </header>
     <div id="config">
@@ -42,15 +42,17 @@
             <br>
             <span class="option-alt">Input a message that would be shown in the thread creation page.</span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "create-thread-message",
-            "class" : "config-row",
-            "markdown_area_name" : "forum_create_thread_message",
-            "markdown_area_value" : fields['forum_create_thread_message'],
-            "preview_div_id" : "create-thread-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with { "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "create-thread-message",
+                "class" : "config-row",
+                "markdownAreaName" : "forum_create_thread_message",
+                "markdownAreaValue" : fields['forum_create_thread_message'],
+                "previewDivId" : "create-thread-message-preview",
+                "renderHeader" : true
+            }
         } only %}
-
         <h2>Office Hours Queue</h2>
         <hr>
         <div id="queue-enabled-wrapper" class="config-row checkbox-row">
@@ -70,15 +72,18 @@
                 If the queue is used for remote or online instruction and tutoring, you may explain the connection requirements and establish student expectations with this message.
             </span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "queue-message",
-            "class" : "config-row",
-            "markdown_area_name" : "queue_message",
-            "markdown_area_value" : fields['queue_message'],
-            "preview_div_id" : "queue-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with {
+            "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "queue-message",
+                "class" : "config-row",
+                "markdownAreaName" : "queue_message",
+                "markdownAreaValue" : fields['queue_message'],
+                "previewDivId" : "queue-message-preview",
+                "renderHeader" : true
+            }
         } only %}
-
 
         <h2>Online Polls</h2>
         <hr>
@@ -112,13 +117,17 @@
                 What is the message that should be shown to students above the upload area on the submission page?
             </span>
         </label>
-        {% include "misc/MarkdownArea.twig" with {
-            "markdown_area_id" : "upload-message",
-            "class" : "config-row",
-            "markdown_area_name" : "upload_message",
-            "markdown_area_value" : fields['upload_message'],
-            "preview_div_id" : "upload-message-preview",
-            "render_header" : true
+        {% include "Vue.twig" with {
+            "name" : "MarkdownArea",
+            "type": "component",
+            "args": {
+                "markdownAreaId" : "upload-message",
+                "class" : "config-row",
+                "markdownAreaName" : "upload_message",
+                "markdownAreaValue" : fields['upload_message'],
+                "previewDivId" : "upload-message-preview",
+                "renderHeader" : true
+            }
         } only %}
 
         <label for="private-repository" class="config-row">

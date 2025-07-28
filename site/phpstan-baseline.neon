@@ -1417,18 +1417,6 @@ parameters:
 			path: app/controllers/admin/EmailRoomSeatingController.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: app/controllers/admin/GradeOverrideController.php
-
-		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/GradeOverrideController.php
-
-		-
 			message: '#^Method app\\controllers\\admin\\GradeOverrideController\:\:deleteOverriddenGrades\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1695,12 +1683,6 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateCSVRow\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/controllers/admin/ReportController.php
-
-		-
-			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateCustomization\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controllers/admin/ReportController.php
 
@@ -2493,7 +2475,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 19
+			count: 18
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -10780,18 +10762,6 @@ parameters:
 			path: app/models/User.php
 
 		-
-			message: '#^Method app\\models\\User\:\:constructNotificationSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: '#^Method app\\models\\User\:\:constructNotificationSettings\(\) has parameter \$details with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/models/User.php
-
-		-
 			message: '#^Method app\\models\\User\:\:getAnonId\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -13859,18 +13829,6 @@ parameters:
 
 		-
 			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdown\(\) has parameter \$content with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
-			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdownArea\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
-			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdownArea\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/views/MarkdownView.php
