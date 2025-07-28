@@ -4,7 +4,7 @@ import MarkdownArea from './MarkdownArea.vue';
 import { buildCourseUrl } from '../../../ts/utils/server';
 
 type Component = {
-    id: string;
+    id: number;
     title: string;
     isFirstEdit: boolean;
     author: string;
@@ -30,12 +30,13 @@ const props = defineProps<{
 }>();
 
 const solutionComponents = ref(props.solutionComponents);
+const textboxValueRefs = ref<Record<string, string>>({});
 
-const detectSolutionChange = (componentId: string, newValue: string) => {
+const detectSolutionChange = (componentId: number, newValue: string) => {
     textboxValueRefs.value[componentId] = newValue;
 };
 
-function updateSolutionTaNotes(gradeable_id: string, component_id: string, itempool_item: string) {
+function updateSolutionTaNotes(gradeable_id: string, component_id: number, itempool_item: string) {
     const component = solutionComponents.value.find((c) => c.id === component_id);
     if (!component) {
         window.displayErrorMessage('Component not found');
@@ -55,17 +56,18 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
             const response = JSON.parse(res) as SolutionTaNotesResponse;
             if (response.status === 'success') {
                 window.displaySuccessMessage('Solution has been updated successfully');
-                // Dom manipulation after the Updating/adding the solution note
-                solutionComponents.value = solutionComponents.value.map((comp) => {
-                    if (comp.id === component_id) {
-                        return {
-                            ...comp,
-                            solutionNotes: textboxValueRefs.value[component_id],
-                            editedAt: response.data.edited_at,
-                            author: response.data.current_user_id === response.data.author ? `${response.data.author} (You)` : response.data.author,
-                        };
-                    }
-                    return comp;
+                const index = solutionComponents.value.findIndex((comp) => comp.id === component_id);
+                if (index === -1) {
+                    window.displayErrorMessage('Component not found in solutionComponents');
+                    return;
+                }
+                // Update the component in the solutionComponents array
+                solutionComponents.value.splice(index, 1, {
+                    ...solutionComponents.value[index],
+                    solutionNotes: textboxValueRefs.value[component_id],
+                    editedAt: response.data.edited_at,
+                    author: response.data.current_user_id === response.data.author ? `${response.data.author} (You)` : response.data.author,
+                    isFirstEdit: false,
                 });
             }
             else {
@@ -73,11 +75,10 @@ function updateSolutionTaNotes(gradeable_id: string, component_id: string, itemp
             }
         },
         error: function (err) {
-            console.log(err);
+            console.error(err);
         },
     });
 }
-const textboxValueRefs = ref<Record<string, string>>({});
 for (const component of props.solutionComponents) {
     textboxValueRefs.value[component.id] = component.solutionNotes;
 }
