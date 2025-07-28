@@ -76,10 +76,10 @@ class NotebookUtils {
                     $search[] = "attachment:$filename";
                     if (!in_array($mime, self::MIME_TYPES, true)) {
                         $replace[] = 'Image skipped: image type not supported.';
-                    } 
+                    }
                     elseif (strlen($base64) > self::IMG_SIZE_LIMIT) {
                         $replace[] = 'Image skipped: exceeds size limit of ' . (self::IMG_SIZE_LIMIT / (1024 * 1024)) . ' MB. Download the notebook to view the image.';
-                    } 
+                    }
                     else {
                         $data_uri = 'data:' . $mime . ";base64," . $base64;
                         $replace[] = $data_uri;
