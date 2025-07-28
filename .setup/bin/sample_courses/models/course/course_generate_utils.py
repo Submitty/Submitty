@@ -7,7 +7,7 @@ import random
 import os
 import json
 
-from sqlalchemy import Table, select, func
+from sqlalchemy import Table, insert, select, func
 
 from submitty_utils import dateutils
 
@@ -258,11 +258,11 @@ class Course_generate_utils:
         """
         assert gradeable.team_assignment
         json_team_history = {}
-        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload=True)
-        teams_table = Table("teams", self.metadata, autoload=True)
+        gradeable_teams_table = Table("gradeable_teams", self.metadata, autoload_with=self.conn)
+        teams_table = Table("teams", self.metadata, autoload_with=self.conn)
         ucounter = self.conn.execute(
-            select([func.count()]).select_from(gradeable_teams_table)
-        ).scalar()
+            select(func.count()).select_from(gradeable_teams_table)
+        ).scalar() or 0
         anon_team_ids = []
         for user in self.users:
             # the unique team id is made up of 5 digits, an underline, and the
@@ -284,7 +284,7 @@ class Course_generate_utils:
             # the same registration section
             print("Adding team for " + unique_team_id + " in gradeable " + gradeable.id)
             # adding json data for team history
-            teams_registration = select([gradeable_teams_table]).where(
+            teams_registration = select(gradeable_teams_table).where(
                 (gradeable_teams_table.c["registration_section"] == str(reg_section))
                 & (gradeable_teams_table.c["g_id"] == gradeable.id)
             )
@@ -292,18 +292,20 @@ class Course_generate_utils:
             added = False
             if res.rowcount != 0:
                 # If the registration has a team already, join it
-                for team_in_section in res:
-                    members_in_team = select([teams_table]).where(
+                for team_in_section in res.mappings():
+                    members_in_team = select(teams_table).where(
                         teams_table.c["team_id"] == team_in_section["team_id"]
                     )
                     res = self.conn.execute(members_in_team)
                     if res.rowcount < gradeable.max_team_size:
                         self.conn.execute(
-                            teams_table.insert(),
-                            team_id=team_in_section["team_id"],
-                            user_id=user.get_detail(self.code, "id"),
-                            state=1,
+                            insert(teams_table).values(
+                                team_id=team_in_section["team_id"],
+                                user_id=user.get_detail(self.code, "id"),
+                                state=1,
+                            )
                         )
+                        self.conn.commit()
                         team_id_section = team_in_section["team_id"]
                         temp_json_team_history = {
                             "action": "admin_create",
@@ -320,19 +322,22 @@ class Course_generate_utils:
             if not added:
                 # if the team the user tried to join is full, make a new team
                 self.conn.execute(
-                    gradeable_teams_table.insert(),
-                    team_id=unique_team_id,
-                    anon_id=anon_team_id,
-                    g_id=gradeable.id,
-                    registration_section=str(reg_section),
-                    rotating_section=str(random.randint(1, self.rotating_sections)),
+                    insert(gradeable_teams_table).values(
+                        team_id=unique_team_id,
+                        anon_id=anon_team_id,
+                        g_id=gradeable.id,
+                        registration_section=str(reg_section),
+                        rotating_section=str(random.randint(1, self.rotating_sections)),
+                    )
                 )
                 self.conn.execute(
-                    teams_table.insert(),
-                    team_id=unique_team_id,
-                    user_id=user.get_detail(self.code, "id"),
-                    state=1,
+                    insert(teams_table).values(
+                        team_id=unique_team_id,
+                        user_id=user.get_detail(self.code, "id"),
+                        state=1,
+                    )
                 )
+                self.conn.commit()
                 json_team_history[unique_team_id] = [
                     {
                         "action": "admin_create",

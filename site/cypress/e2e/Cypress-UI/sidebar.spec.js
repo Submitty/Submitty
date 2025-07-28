@@ -2,8 +2,12 @@ import { getCurrentSemester } from '../../support/utils.js';
 
 const currentSemester = getCurrentSemester();
 
-function sidebarContains(title, extension, header = title) {
+function sidebarContainsButton(title, extension) {
     cy.get('[data-testid="sidebar"]').contains(title).should('have.attr', 'href').and('contain', extension);
+}
+
+function sidebarContains(title, extension, header = title) {
+    sidebarContainsButton(title, extension);
     cy.visit(extension);
 
     let selector = '#main > .content';
@@ -23,6 +27,17 @@ function baseSidebar() {
     sidebarContains('Calendar', '/calendar');
     cy.get('[data-testid="sidebar"]').contains('Collapse Sidebar').should('exist');
     cy.get('[data-testid="sidebar"]').contains('Logout').should('exist');
+}
+
+// we do not want to visit these pages as they are external links
+function extendedBaseSidebar() {
+    sidebarContainsButton('Syllabus', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/syllabus.php');
+    sidebarContainsButton('Calendar', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/calendar.php');
+    sidebarContainsButton('Weekly Office Hours and Lab Schedule', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/schedule.php');
+    sidebarContainsButton('C++ Development', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/development_environment.php');
+    sidebarContainsButton('Homework Information', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/homework.php');
+    sidebarContainsButton('Collaboration Policy & Academic Integrity', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/academic_integrity.php');
+    sidebarContainsButton('Getting Help', 'http://www.cs.rpi.edu/academics/courses/fall18/csci1200/getting_help.php');
 }
 
 function instructorSidebar() {
@@ -107,5 +122,33 @@ describe('Test sidebars', () => {
         baseSidebar();
         cy.visit(['sample']);
         sidebarContains('Student Photos', `/courses/${currentSemester}/sample/student_photos`);
+    });
+
+    it('Test custom sidebars and themes', () => {
+        const sidebarElements = ['override.css', 'sidebar.json'];
+        cy.login('instructor');
+        cy.visit(['sample', 'config']);
+        cy.get('[data-testid="customize-website-theme-button"]').click();
+
+        // assert that we dont begin with any custom sidebar elements
+        sidebarElements.forEach((element) => {
+            cy.get(`[data-testid="${element}-delete-button"]`).should('not.exist');
+            cy.get(`[data-testid="${element}-upload-input"]`).attachFile(`copy_of_sample_files/site_theme/${element}`);
+            cy.get(`[data-testid="${element}-upload-button"]`).click();
+        });
+
+        ['student', 'ta', 'instructor', 'grader'].forEach((user) => {
+            cy.login(user);
+            cy.visit(['sample']);
+            extendedBaseSidebar();
+            cy.get('body').should('have.css', 'background-image').and('include', 'http://www.cs.rpi.edu/~cutler/classes/visualization/S18/images/vinca_minor_mirrored.jpg');
+            cy.get('#submitty-body').should('have.css', 'background-color', 'rgba(240, 240, 240, 0.85)');
+        });
+
+        cy.login('instructor');
+        cy.visit(['sample', 'theme']);
+        sidebarElements.forEach((element) => {
+            cy.get(`[data-testid="${element}-delete-button"]`).click();
+        });
     });
 });

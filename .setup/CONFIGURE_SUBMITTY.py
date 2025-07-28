@@ -185,6 +185,7 @@ defaults = {
     'authentication_method': 0,
     'institution_name' : '',
     'institution_homepage' : '',
+    'user_create_account' : False,
     'timezone' : str(tzlocal.get_localzone()),
     'submitty_admin_username': '',
     'email_user': '',
@@ -312,8 +313,7 @@ else:
         if INSTITUTION_HOMEPAGE.lower() == "none":
             INSTITUTION_HOMEPAGE = ''
         print()
-
-
+    
     SYS_ADMIN_EMAIL = get_input("What is the email for system administration?", defaults['sys_admin_email'])
     SYS_ADMIN_URL = get_input("Where to report problems with Submitty (url for help link)?", defaults['sys_admin_url'])
 
@@ -339,7 +339,11 @@ else:
         'uid': default_auth_options.get('uid', ''),
         'bind_dn': default_auth_options.get('bind_dn', '')
     }
-
+    USER_CREATE_ACCOUNT = False
+    if AUTHENTICATION_METHOD == 'DatabaseAuthentication':
+        user_create_account = get_input("Allow users to create their own accounts? [y/n]", 'n')
+        USER_CREATE_ACCOUNT = user_create_account.lower() in ['yes', 'y']
+        print()
     if AUTHENTICATION_METHOD == 'LdapAuthentication':
         LDAP_OPTIONS['url'] = get_input('Enter LDAP url?', LDAP_OPTIONS['url'])
         LDAP_OPTIONS['uid'] = get_input('Enter LDAP UID?', LDAP_OPTIONS['uid'])
@@ -450,6 +454,7 @@ else:
     config['institution_name'] = INSTITUTION_NAME
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
+    config['user_create_account'] = USER_CREATE_ACCOUNT
 
 # site_log_path is a holdover name. This could more accurately be called the "log_path"
 config['site_log_path'] = TAGRADING_LOG_PATH
@@ -549,20 +554,6 @@ if not args.worker:
             }
         }
 
-        vagrant_workers_json = os.path.join(SUBMITTY_REPOSITORY, '.vagrant', 'workers.json')
-        if os.path.isfile(vagrant_workers_json):
-            with open(vagrant_workers_json) as f:
-                vagrant_workers = json.load(f, object_hook=OrderedDict)
- 
-            for worker, data in vagrant_workers.items():
-                worker_dict[worker] = {
-                    "capabilities": capabilities,
-                    "address": data["ip_addr"],
-                    "username": "submitty",
-                    "num_autograding_workers": NUM_GRADING_SCHEDULER_WORKERS,
-                    "enabled": True
-                }
-
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
 
@@ -575,7 +566,8 @@ if not args.worker:
                           "submitty/gcc:latest",
                           "submitty/rust:latest",
                           "submitty/java:latest",
-                          "submitty/pdflatex:latest"
+                          "submitty/pdflatex:latest",
+                          "submitty/jupyter:latest"
                         ],
             "python":   [
                           "submitty/autograding-default:latest",
@@ -634,6 +626,37 @@ if not args.worker:
 
 ##############################################################################
 # Write submitty json
+# Full documentation at submitty.org/...
+user_id_requirements = {
+    "any_user_id": True,
+    "require_name": False,
+    "min_length": 6,
+    "max_length": 25,
+    # Example for Alyssa Hacker : hackal -- Allows for shorter names. If they are shorter, then it will just take the entire name. 
+    # Example for Joseph Wo : wojo
+    "name_requirements": {
+        "given_first": False,
+        "given_name": 2,
+        "family_name": 4
+    },
+    "require_email": False,
+    # If the user_id must contain part of the email. If whole_email is true, it must match the email.
+    # If whole_prefix is true, then the user_id must equal everything before the final @ sign.
+    # Else, it must be a certain number of characters of the prefix. 
+    # Examples for myemail@email.com:
+    # Whole email: myemail@gmail.com
+    # Whole prefix: myemail
+    # Part of prefix: myemai
+    "email_requirements": {
+        "whole_email": False,
+        "whole_prefix": False,
+        "prefix_count": 6
+    },
+    "accepted_emails": [
+        "gmail.com"
+    ]
+}
+
 
 config = submitty_config
 config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
@@ -657,7 +680,9 @@ if not args.worker:
     config['default_locale'] = DEFAULT_LOCALE
     config['duck_special_effects'] = False
     config['course_material_file_upload_limit_mb'] = COURSE_MATERIAL_UPLOAD_LIMIT_MB
-
+    config['user_create_account'] = USER_CREATE_ACCOUNT
+    config['user_id_requirements'] = user_id_requirements
+    
 config['worker'] = True if args.worker == 1 else False
 
 with open(SUBMITTY_JSON, 'w') as json_file:

@@ -119,20 +119,14 @@ class AccessControlTester extends BaseUnitTest {
         return $core;
     }
 
-    public function testInvalidProperty() {
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage('Unknown property "foo" on annotation "app\libraries\routers\AccessControl"');
-        new AccessControl(['foo' => 1]);
-    }
-
     public function testInvalidRoleConstructor() {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
-        new AccessControl(['role' => 'INVALID_ROLE']);
+        new AccessControl(role: 'INVALID_ROLE');
     }
 
     public function testInvalidRoleMethod() {
-        $access = new AccessControl([]);
+        $access = new AccessControl();
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid role: INVALID_ROLE');
         $access->setRole('INVALID_ROLE');
@@ -146,7 +140,7 @@ class AccessControlTester extends BaseUnitTest {
      * @dataProvider accessRoleProvider
      */
     public function testAccessControlConstructor($role) {
-        $access = new AccessControl(['role' => $role, 'permission' => 'grading.simple']);
+        $access = new AccessControl(role: $role, permission: 'grading.simple');
         $this->assertEquals($role, $access->getRole());
         $this->assertEquals('grading.simple', $access->getPermission());
     }
@@ -155,7 +149,7 @@ class AccessControlTester extends BaseUnitTest {
      * @dataProvider accessRoleProvider
      */
     public function testAccessControlSet($role) {
-        $access = new AccessControl([]);
+        $access = new AccessControl();
         $this->assertNull($access->getRole());
         $this->assertNull($access->getPermission());
         $access->setRole($role);

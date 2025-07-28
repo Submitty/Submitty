@@ -307,6 +307,7 @@ class ElectronicGraderView extends AbstractView {
         }
         $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/ta_status/StatusBase.twig", [
             "gradeable_id" => $gradeable->getId(),
             "semester" => $this->core->getConfig()->getTerm(),
@@ -370,9 +371,9 @@ class ElectronicGraderView extends AbstractView {
             "grade_inquiry_allowed" => $gradeable->isGradeInquiryAllowed(),
             "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
             "histograms" => $histogram_data,
-            "include_grade_override" => array_key_exists('include_grade_override', $_COOKIE) ? $_COOKIE['include_grade_override'] : 'omit',
-            "include_bad_submissions" => array_key_exists('include_bad_submissions', $_COOKIE) ? $_COOKIE['include_bad_submissions'] : 'omit',
-            "include_null_section" => array_key_exists('include_null_section', $_COOKIE) ? $_COOKIE['include_null_section'] : 'omit',
+            "include_grade_override" => $_COOKIE['include_grade_override'] ?? 'omit',
+            "include_bad_submissions" => $_COOKIE['include_bad_submissions'] ?? 'omit',
+            "include_null_section" => $_COOKIE['include_null_section'] ?? 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -615,7 +616,6 @@ HTML;
             }
             else {
                 $columns[] = ["title" => "Grading", "function" => "grading"];
-                $columns[] = ["title" => "Active Graders", "function" => "active_graders"];
             }
             $columns[] = ["title" => "Total", "function" => "total"];
             $columns[] = ["title" => "Active Version", "function" => "active_version"];
@@ -901,13 +901,7 @@ HTML;
             }
         }
 
-        $default_hidden_columns = ["active_graders"];
-        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns, $default_hidden_columns) {
-            foreach ($default_hidden_columns as $hidden) {
-                if (strcmp($column['function'], $hidden) === 0) {
-                    return array_key_exists($column['function'], $grading_details_columns) && $grading_details_columns['active_graders'];
-                }
-            }
+        $shown_columns = array_filter($columns, function ($column) use ($grading_details_columns) {
             return !array_key_exists($column['function'], $grading_details_columns) || $grading_details_columns[$column['function']];
         });
 
@@ -921,6 +915,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('admin-team-form.js');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        $this->core->getOutput()->addInternalModuleJs('ta-grading-cookies.js');
         $this->core->getOutput()->enableMobileViewport();
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
@@ -942,7 +937,6 @@ HTML;
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $shown_columns,
-            "default_hidden_columns" => $default_hidden_columns,
             "all_columns" => $columns,
             "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
             "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
@@ -1257,6 +1251,7 @@ HTML;
         $this->core->getOutput()->addInternalJs('markdown-code-highlight.js');
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'));
 
         $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
@@ -1268,7 +1263,6 @@ HTML;
         $this->core->getOutput()->addInternalModuleJs('ta-grading-keymap-init.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-init.js');
-        $this->core->getOutput()->addInternalModuleJs('ta-grading-navigation.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels.js');
         $this->core->getOutput()->addInternalModuleJs('ta-grading-panels-init.js');
 
@@ -1520,6 +1514,7 @@ HTML;
         $results = [];
         $results_public = [];
         $checkout = [];
+        $submissions_processed = [];
 
         // NOTE TO FUTURE DEVS: There is code around line 830 (ctrl-f openAll) which depends on these names,
         // if you change here, then change there as well
@@ -1532,6 +1527,7 @@ HTML;
 
             $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions', $graded_gradeable);
             $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout', $graded_gradeable);
+            $add_files($submissions_processed, $display_version_instance->getProcessedFiles(), 'submissions_processed', $graded_gradeable);
             $add_files($results, $display_version_instance->getResultsFiles(), 'results', $graded_gradeable);
             $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public', $graded_gradeable);
         }
@@ -1544,9 +1540,10 @@ HTML;
         $user_ids[$anon_submitter_id] = $submitter_id;
         $uas = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), "user_assignment_settings.json");
         $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
-        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
+        $this->core->getOutput()->addModuleJs($this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdfjs-shim.js'), 'js'));
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.min.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf_viewer.mjs'), 'vendor');
+        $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.mjs'), 'vendor');
         $this->core->getOutput()->addInternalJs(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
@@ -1557,6 +1554,7 @@ HTML;
             "has_vcs_files" => $isVcs,
             "user_ids" => $user_ids,
             "submissions" => $submissions,
+            "submissions_processed" => $submissions_processed,
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
@@ -1702,7 +1700,6 @@ HTML;
      * @return string
      */
     public function renderSolutionTaNotesPanel($gradeable, $solution_array, $submitter_itempool_map) {
-        $this->core->getOutput()->addInternalJs('solution-ta-notes.js');
         $is_student = $this->core->getUser()->getGroup() === User::GROUP_STUDENT;
         $r_components = $gradeable->getComponents();
         $solution_components = [];
@@ -1712,24 +1709,28 @@ HTML;
                 $solution_components[] = [
                     'id' => $id,
                     'title' => $value->getTitle(),
-                    'is_first_edit' => !isset($solution_array[$id]),
+                    'isFirstEdit' => !isset($solution_array[$id]),
                     'author' => isset($solution_array[$id]) ? $solution_array[$id]['author'] : '',
-                    'solution_notes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
-                    'edited_at' => isset($solution_array[$id])
+                    'solutionNotes' => isset($solution_array[$id]) ? $solution_array[$id]['solution_notes'] : '',
+                    'editedAt' => isset($solution_array[$id])
                         ? DateUtils::convertTimeStamp(
                             $this->core->getUser(),
                             $solution_array[$id]['edited_at'],
                             $this->core->getConfig()->getDateTimeFormat()->getFormat('solution_ta_notes')
                         ) : null,
-                    'is_itempool_linked' => $value->getIsItempoolLinked(),
-                    'itempool_item' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
+                    'isItempoolLinked' => $value->getIsItempoolLinked(),
+                    'itempoolItem' => $value->getItempool() === "" ? "" : $submitter_itempool_map[$value->getItempool()]
                 ];
             }
         }
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SolutionTaNotesPanel.twig", [
-            'gradeable_id' => $gradeable->getId(),
-            'solution_components' => $solution_components,
-            'current_user_id' => $this->core->getUser()->getId(),
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            'type' => 'component',
+            'name' => 'SolutionPanel',
+            'args' => [
+                'gradeableId' => $gradeable->getId(),
+                'solutionComponents' => $solution_components,
+                'currentUserId' => $this->core->getUser()->getId(),
+            ]
         ]);
     }
 

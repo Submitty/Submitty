@@ -365,10 +365,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+    cp -R ${NODE_FOLDER}/pdfjs-dist/build/* ${VENDOR_FOLDER}/pdfjs
+    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.mjs ${VENDOR_FOLDER}/pdfjs
+    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs
     cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
@@ -408,12 +407,16 @@ chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
 chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
+mkdir -p "${NODE_FOLDER}/.vue-global-types"
+chgrp "${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+chmod -R g+w ${NODE_FOLDER}/.vue-global-types
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
@@ -422,8 +425,10 @@ su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod -R g-w ${NODE_FOLDER}/.vue-global-types
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

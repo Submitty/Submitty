@@ -1,0 +1,43 @@
+{
+    "required_capabilities": "default",
+    "autograding_method": "docker",
+    "autograding": {
+        "submission_to_runner": ["*.julia", "**/*.julia"]
+    },
+    "resource_limits" : {
+        "RLIMIT_CPU" : 10,
+        "RLIMIT_NPROC" : 100
+    },
+    "allow_system_calls" : [
+        "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "DEVICE_MANAGEMENT_ADVANCED",
+        "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
+        "FILE_MANAGEMENT_RARE",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING",
+        "CUSTOM_SYSTEM_CALLS"
+    ],
+
+    "container_options": {
+        "container_image": "submitty/julia:latest"
+    },
+    "testcases": [
+        {
+            "title": "Check output",
+            "details": "details",
+            "command": "/usr/bin/julia *.julia",
+            "points": 5,
+            // check STDOUT.txt for a single line containing "hello world"
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "method": "diff",
+                    "comparison": "byLinebyChar",
+                    "expected_string": "hello world\n"
+                }
+            ]
+        }
+    ]
+}

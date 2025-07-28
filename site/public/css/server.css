@@ -524,16 +524,6 @@ td > a.active-sort {
     align-items: center;
 }
 
-.inner-message {
-    margin: 0 auto 10px;
-}
-
-.message-close {
-    float: right;
-    margin-right: -20px;
-    cursor: pointer;
-}
-
 .option {
     margin-bottom: 20px;
 }
@@ -1758,11 +1748,6 @@ end of styles used in the admin gradeable page
 
 .flex-col-space > * {
     margin: 10px 0;
-}
-
-.flex-line {
-    display: flex;
-    align-items: center;
 }
 
 .shadow {
