@@ -3,7 +3,7 @@ import type { Versions } from './StudentInformationPanel.vue';
 
 interface Props {
     formatting?: string;
-    onChange?: string;
+    onChange?: string | ((arg0: number) => void);
     activeVersion: number;
     displayVersion: number;
     versions: Versions;
@@ -19,15 +19,20 @@ const emit = defineEmits<{
     change: [value: number];
 }>();
 
-function runOnChange() {
-    eval(props.onChange);
+function runOnChange(this: HTMLSelectElement) {
+    if (typeof props.onChange === 'function') {
+        props.onChange(parseInt(this.value));
+    }
+    else if (typeof props.onChange === 'string') {
+        eval(props.onChange);
+    }
 }
 
 const handleChange = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     emit('change', parseInt(target.value));
     if (props.onChange) {
-        runOnChange.call(event.target);
+        runOnChange.call(event.target as HTMLSelectElement);
     }
 };
 </script>

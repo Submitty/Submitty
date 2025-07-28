@@ -4,7 +4,7 @@ import VersionChoice from './VersionChoice.vue';
 
 interface Team {
     name?: string;
-    memberUsers: User[];
+    members: User[];
 }
 
 interface User {
@@ -47,15 +47,15 @@ const props = defineProps<Props>();
 
 const activeTab = ref(1);
 
-const formatSubmissionTime = (submissionTime: { date: string; timezone: string }): string => {
-    return new Date(submissionTime.date).toLocaleString('en-US', {
+const formatSubmissionTime = (submissionTime?: { date: string; timezone: string }): string => {
+    return new Date(submissionTime?.date || '').toLocaleString('en-US', {
         month: '2-digit',
         day: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        timeZone: submissionTime.timezone,
+        timeZone: submissionTime?.timezone,
         timeZoneName: 'short',
     });
 };
@@ -77,6 +77,10 @@ const checkForm = (): boolean => {
 const handleVersionChange = (version: number) => {
     // Handle version change logic here
     console.log('Version changed to:', version);
+    // add gradeable_version to the current URL
+    const url = new URL(window.location.href);
+    url.searchParams.set('gradeable_version', version.toString());
+    window.location.href = url.toString();
 };
 
 onMounted(() => {
@@ -145,7 +149,7 @@ console.log(props);
                 Team Name: {{ submitter.team?.name || 'Not Set' }}<br />
                 Team:<br />
                 <div
-                  v-for="teamMember in submitter.team?.memberUsers"
+                  v-for="teamMember in submitter.team?.members"
                   :key="teamMember.id"
                 >
                   &emsp;{{ teamMember.displayedGivenName }} {{ teamMember.displayedFamilyName }} ({{ teamMember.id }})<br />
@@ -175,7 +179,7 @@ console.log(props);
               data-testid="tab-bar-wrapper"
             >
               <a
-                v-for="(teamMember, index) in submitter.team?.memberUsers"
+                v-for="(teamMember, index) in submitter.team?.members"
                 :id="`page_${index + 1}_nav`"
                 :key="teamMember.id"
                 class="nav-bar key_to_click normal-btn"
