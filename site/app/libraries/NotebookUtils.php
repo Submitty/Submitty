@@ -7,6 +7,7 @@ namespace app\libraries;
 class NotebookUtils {
     private const TEXT_LIMIT = 1024 * 30; // 30KB limit for output text
     private const IMG_SIZE_LIMIT = 1024 * 1024 * 5; // 5MB limit for images
+    private const NOTEBOOK_SIZE_LIMIT = 1024 * 1024 * 10; // 10MB limit for rendering
     // Note: SVG files are not supported due to XSS risks
     private const MIME_TYPES = [
         'image/png',
@@ -22,6 +23,19 @@ class NotebookUtils {
      * @return array<int,array<string,mixed>>
      */
     public static function jupyterToSubmittyNotebook(string $filepath): array {
+        // Check the total file size before doing any processing
+        if (filesize($filepath) > self::NOTEBOOK_SIZE_LIMIT) {
+            // Return a single markdown cell with an error message
+            return [
+                [
+                    'type' => 'markdown',
+                    'markdown_data' => '### Notebook Not Rendered' . PHP_EOL .
+                    'The notebook file is too large to be displayed (over ' . (self::NOTEBOOK_SIZE_LIMIT / (1024 * 1024)) . ' MB).' . PHP_EOL .
+                    'Please download the notebook to view its contents.'
+                ]
+            ];
+        }
+
         $filedata = FileUtils::readJsonFile($filepath);
         if ($filedata === false) {
             $filedata = [];
@@ -64,7 +78,7 @@ class NotebookUtils {
                         $replace[] = 'Image skipped: image type not supported.';
                     } 
                     elseif (strlen($base64) > self::IMG_SIZE_LIMIT) {
-                        $replace[] = 'Image skipped: exceeds size limit of ' . self::IMG_SIZE_LIMIT . ' bytes. Download the notebook to view the image.';
+                        $replace[] = 'Image skipped: exceeds size limit of ' . (self::IMG_SIZE_LIMIT / (1024 * 1024)) . ' MB. Download the notebook to view the image.';
                     } 
                     else {
                         $data_uri = 'data:' . $mime . ";base64," . $base64;
@@ -138,7 +152,7 @@ class NotebookUtils {
                         if (strlen($img) > self::IMG_SIZE_LIMIT) {
                             $code_cell[] = [
                                 'type' => 'output',
-                                'output_text' => 'Image skipped: exceeds size limit of ' . self::IMG_SIZE_LIMIT . ' bytes. Download the notebook to view the full image.'
+                                'output_text' => 'Image skipped: exceeds size limit of ' . (self::IMG_SIZE_LIMIT / (1024 * 1024)) . ' MB. Download the notebook to view the full image.'
                             ];
                         }
                         else {
@@ -168,7 +182,7 @@ class NotebookUtils {
     private static function truncateText(string|array $text): string {
         $output_text = is_array($text) ? implode($text) : (string) $text;
         if (strlen($output_text) > self::TEXT_LIMIT) {
-            return substr($output_text, 0, self::TEXT_LIMIT) . '...' . PHP_EOL . '[Output truncated: exceeds size limit of ' . self::TEXT_LIMIT . ' bytes. Download the notebook to view the full output.]';
+            return substr($output_text, 0, self::TEXT_LIMIT) . '...' . PHP_EOL . '[Output truncated: exceeds size limit of ' . (self::TEXT_LIMIT / 1024) . ' KB. Download the notebook to view the full output.]';
         }
         return $output_text;
     }
