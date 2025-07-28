@@ -73,6 +73,33 @@ class TokenManager {
             );
     }
 
+    /**
+     * Generate a websocket token containing authorized pages for a user
+     *
+     * @param string $user_id User ID
+     * @param array<string> $authorized_pages Array of page identifiers the user can access
+     * @param int $expire_minutes Token expiration in minutes (default 30)
+     * @return Token
+     */
+    public static function generateWebsocketToken(
+        string $user_id,
+        array $authorized_pages,
+        int $expire_minutes = 30
+    ): Token {
+        $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString("{$expire_minutes} minutes"))->getTimestamp();
+        return self::$configuration->builder()
+            ->issuedAt(new \DateTimeImmutable())
+            ->issuedBy(self::$issuer)
+            ->relatedTo($user_id)
+            ->withClaim('authorized_pages', $authorized_pages)
+            ->withClaim('expire_time', $expire_time)
+            ->withClaim('token_type', 'websocket')
+            ->getToken(
+                self::$configuration->signer(),
+                self::$configuration->signingKey()
+            );
+    }
+
     public static function parseSessionToken(string $token): Token {
         $token = self::parseToken($token);
         if (
@@ -90,6 +117,34 @@ class TokenManager {
         if (!$token->claims()->has('api_key')) {
             throw new \InvalidArgumentException('Missing claims in api token');
         }
+        return $token;
+    }
+
+    /**
+     * Parse and validate a websocket token
+     *
+     * @param string $token JWT token string
+     * @return Token Parsed token with websocket claims
+     * @throws \InvalidArgumentException If token is invalid or missing required claims
+     */
+    public static function parseWebsocketToken(string $token): Token {
+        $token = self::parseToken($token);
+        if (
+            !$token->claims()->has('authorized_pages')
+            || !$token->claims()->has('expire_time')
+            || !$token->claims()->has('sub')
+            || !$token->claims()->has('token_type')
+            || $token->claims()->get('token_type') !== 'websocket'
+        ) {
+            throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
+        }
+
+        // Check if token has expired
+        $expire_time = $token->claims()->get('expire_time');
+        if ($expire_time > 0 && time() > $expire_time) {
+            throw new \InvalidArgumentException('Websocket token has expired');
+        }
+
         return $token;
     }
 

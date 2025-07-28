@@ -955,6 +955,92 @@ class Access {
     }
 
     /**
+     * Determine what websocket pages a user is authorized to access
+     *
+     * @param User $user User to check permissions for
+     * @param string $term Course term/semester
+     * @param string $course Course identifier
+     * @param array<int, array<string, string>> $page_contexts Array of page contexts to check, each containing:
+     *                            - 'page': Page type (discussion_forum, polls, etc.)
+     *                            - 'params': Additional parameters for the page
+     * @return array<string> Array of authorized page identifiers
+     */
+    public function getAuthorizedWebsocketPages(User $user, string $term, string $course, array $page_contexts): array {
+        $authorized_pages = [];
+
+        // First check if user can view the course at all
+        if (!$this->canUser($user, "course.view", ['course' => $course, 'semester' => $term])) {
+            return $authorized_pages;
+        }
+
+        foreach ($page_contexts as $context) {
+            $page = $context['page'];
+            $params = $context['params'] ?? [];
+            $page_identifier = null;
+            $authorized = false;
+
+            try {
+                switch ($page) {
+                    case 'discussion_forum':
+                    case 'office_hours_queue':
+                        $page_identifier = $page;
+                        $authorized = true; // Basic course access is sufficient
+                        break;
+                    case 'chatrooms':
+                        $page_identifier = $page;
+                        if (isset($params['chatroom_id'])) {
+                            $page_identifier = $page . '-' . $params['chatroom_id'];
+                        }
+                        $authorized = true; // Basic course access is sufficient
+                        break;
+                    case 'polls':
+                        if (isset($params['poll_id']) && isset($params['instructor'])) {
+                            $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
+
+                            // Load poll from database to check permissions
+                            $poll = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findByIDWithOptions(intval($params['poll_id']));
+                            if ($poll !== null && $this->canUser($user, "poll.view", ['poll' => $poll])) {
+                                if (!$instructor || $this->canUser($user, "poll.view.histogram", ['poll' => $poll])) {
+                                    $page_identifier = $page . '-' . $params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+                                    $authorized = true;
+                                }
+                            }
+                        }
+                        break;
+                    case 'grade_inquiry':
+                        if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
+                            $gradeable = $this->core->getQueries()->getGradeableConfig($params['gradeable_id']);
+                            $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $params['submitter_id']);
+                            if ($this->canUser($user, "grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
+                                $page_identifier = $page . '-' . $params['gradeable_id'] . '_' . $params['submitter_id'];
+                                $authorized = true;
+                            }
+                        }
+                        break;
+                    case 'grading':
+                        if (isset($params['gradeable_id'])) {
+                            $gradeable = $this->core->getQueries()->getGradeableConfig($params['gradeable_id']);
+                            if ($this->canUser($user, "grading.simple.grade", ['gradeable' => $gradeable])) {
+                                $page_identifier = $page . '-' . $params['gradeable_id'];
+                                $authorized = true;
+                            }
+                        }
+                        break;
+                }
+                if ($authorized && $page_identifier !== null) {
+                    $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
+                    $authorized_pages[] = $full_page_identifier;
+                }
+            }
+            catch (\Exception $e) {
+                Logger::error("Error checking permissions for page {$page}: " . $e->getMessage());
+                continue;
+            }
+        }
+        return $authorized_pages;
+    }
+
+    /**
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path

@@ -74,6 +74,27 @@ class GlobalView extends AbstractView {
 
         $html_lang = str_replace('_', '-', $this->core->getConfig()->getLocale()->getName());
 
+        // Fetch or generate websocket token for course pages
+        $websocket_token = null;
+        if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
+            try {
+                // Simple token with basic page access for most common websocket features
+                $page_contexts = [
+                    ['page' => 'discussion_forum'],
+                    ['page' => 'office_hours_queue'],
+                    ['page' => 'chatrooms'],
+                    ['page' => 'polls'],
+                    ['page' => 'grade_inquiry'],
+                    ['page' => 'grading']
+                ];
+                $websocket_token = $this->core->getWebsocketToken($page_contexts, 30); // 30 minutes expiry
+            }
+            catch (\Exception $e) {
+                $websocket_token = null;
+                $this->core->addNoticeMessage("Failed to generate websocket token: " . $e->getMessage());
+            }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "audio" => $audio,
@@ -87,6 +108,7 @@ class GlobalView extends AbstractView {
             "course_url" => $this->core->buildCourseUrl(),
             "course_path" => parse_url($this->core->buildCourseUrl(), PHP_URL_PATH),
             "websocket_port" => $this->core->getConfig()->getWebsocketPort(),
+            "websocket_token" => $websocket_token,
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,

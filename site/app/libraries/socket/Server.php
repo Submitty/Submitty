@@ -12,7 +12,6 @@ use Ratchet\ConnectionInterface;
 use app\libraries\Core;
 use app\libraries\TokenManager;
 use Psr\Http\Message\RequestInterface;
-use app\entities\poll\Poll;
 
 class Server implements MessageComponentInterface {
     // Holds the mapping between pages that have open socket clients and those clients
@@ -83,7 +82,7 @@ class Server implements MessageComponentInterface {
 
     /**
      * This function checks if a given connection object is authenticated
-     * It uses the submitty_session cookie in the header data to work
+     * It now uses websocket tokens instead of database lookups for better performance
      * @param ConnectionInterface $conn
      * @return bool
      */
@@ -101,94 +100,111 @@ class Server implements MessageComponentInterface {
             return true;
         }
 
-        $cookieString = $request->getHeader("cookie")[0] ?? '';
-        parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-        if (empty($cookies['submitty_session'])) {
+        // Try to get websocket token from query parameters first, then headers
+        $query_params = [];
+        $query = $request->getUri()->getQuery();
+        parse_str($query, $query_params);
+        $websocket_token = $query_params['ws_token'] ?? null;
+        if ($websocket_token === null) {
+            $headers = $request->getHeaders();
+            $websocket_token = $headers['Websocket-Token'][0] ?? null;
+        }
+        if ($websocket_token === null) {
+            $this->log("No websocket token provided for connection {$conn->resourceId}");
             return false;
         }
-        $sessid = $cookies['submitty_session'];
+
+        // Get required parameters
+        if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
+            $this->log("Missing required parameters for connection {$conn->resourceId}");
+            return false;
+        }
+
+        $page = $query_params['page'];
+        $term = $query_params['term'];
+        $course = $query_params['course'];
 
         try {
-            $query_params = [];
-            $query = $request->getUri()->getQuery();
-            parse_str($query, $query_params);
-            if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
-                return false;
-            }
-            $page = $query_params['page'];
-            $term = $query_params['term'];
-            $course = $query_params['course'];
-            $this->core->loadCourseConfig($term, $course);
-            $this->core->loadCourseDatabase();
-            $token = TokenManager::parseSessionToken($sessid);
-            $session_id = $token->claims()->get('session_id');
+            // Parse and validate the websocket token
+            $token = TokenManager::parseWebsocketToken($websocket_token);
             $user_id = $token->claims()->get('sub');
-            if (!$this->core->getSession($session_id, $user_id)) {
+            $authorized_pages = $token->claims()->get('authorized_pages');
+
+            // Build the page identifier based on page type and parameters
+            $page_identifier = $this->buildPageIdentifier($page, $query_params);
+            if ($page_identifier === null) {
+                $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
             }
-            if (!$this->core->getAccess()->canI("course.view", ['course' => $course, 'semester' => $term])) {
+
+            // Build full page identifier with term and course
+            $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
+
+            // Check if this page is in the user's authorized pages
+            if (!in_array($full_page_identifier, $authorized_pages, true)) {
+                $this->log("Page '{$full_page_identifier}' not authorized for user '{$user_id}' in connection {$conn->resourceId}");
                 return false;
             }
-            switch ($page) {
-                case 'discussion_forum':
-                case 'office_hours_queue':
-                    break;
-                case 'chatrooms':
-                    if (isset($query_params['chatroom_id'])) {
-                        $page = $page . '-' . $query_params['chatroom_id'];
-                    }
-                    break;
-                case 'polls':
-                    if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
-                        return false;
-                    }
-                    $instructor = filter_var($query_params['instructor'], FILTER_VALIDATE_BOOLEAN);
-                    $poll = $this->core->getCourseEntityManager()->getRepository(Poll::class)->findByIDWithOptions(intval($query_params['poll_id']));
-                    if (!$this->core->getAccess()->canI("poll.view", ['poll' => $poll])) {
-                        return false;
-                    }
-                    elseif ($instructor && !$this->core->getAccess()->canI("poll.view.histogram", ['poll' => $poll])) {
-                        return false;
-                    }
-                    $page = $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
-                    break;
-                case 'grade_inquiry':
-                    if (!isset($query_params['gradeable_id'])) {
-                        return false;
-                    }
-                    $gradeable = $this->core->getQueries()->getGradeableConfig($query_params['gradeable_id']);
-                    $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $query_params['submitter_id']);
-                    if (!$this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
-                        return false;
-                    }
-                    $page = $page . '-' . $query_params['gradeable_id'] . '_' . $query_params['submitter_id'];
-                    break;
-                case 'grading':
-                    if (!isset($query_params['gradeable_id'])) {
-                        return false;
-                    }
-                    $gradeable = $this->core->getQueries()->getGradeableConfig($query_params['gradeable_id']);
-                    if (!$this->core->getAccess()->canI("grading.simple.grade", ['gradeable' => $gradeable])) {
-                        return false;
-                    }
-                    $page = $page . '-' . $query_params['gradeable_id'];
-                    break;
-                default:
-                    return false;
-            }
+
+            // Set up the connection
             $this->setSocketClient($user_id, $conn);
-            $page = $term . "-" . $course . "-" . $page;
-            if (!array_key_exists($page, $this->clients)) {
-                $this->clients[$page] = new \SplObjectStorage();
+            if (!array_key_exists($full_page_identifier, $this->clients)) {
+                $this->clients[$full_page_identifier] = new \SplObjectStorage();
             }
-            $this->clients[$page]->attach($conn);
-            $this->setSocketClientPage($page, $conn);
-            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $page . "'");
+            $this->clients[$full_page_identifier]->attach($conn);
+            $this->setSocketClientPage($full_page_identifier, $conn);
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $full_page_identifier . "'");
             return true;
         }
         catch (\InvalidArgumentException $exc) {
+            $this->log("Token validation failed for connection {$conn->resourceId}: " . $exc->getMessage());
             $this->logError($exc, $conn);
             return false;
+        }
+        catch (\Exception $exc) {
+            $this->log("Unexpected error during auth for connection {$conn->resourceId}: " . $exc->getMessage());
+            $this->logError($exc, $conn);
+            return false;
+        }
+    }
+
+    /**
+     * Build page identifier based on page type and parameters, mirroring the logic from the old checkAuth method but without database calls
+     *
+     * @param string $page Page type
+     * @param array<string, string> $query_params Query parameters
+     * @return string|null Page identifier or null if invalid
+     */
+    private function buildPageIdentifier(string $page, array $query_params): ?string {
+        switch ($page) {
+            case 'discussion_forum':
+            case 'office_hours_queue':
+                return $page;
+
+            case 'chatrooms':
+                $page_identifier = $page;
+                if (isset($query_params['chatroom_id'])) {
+                    $page_identifier = $page . '-' . $query_params['chatroom_id'];
+                }
+                return $page_identifier;
+            case 'polls':
+                if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
+                    return null;
+                }
+                $instructor = filter_var($query_params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                return $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+            case 'grade_inquiry':
+                if (!isset($query_params['gradeable_id']) || !isset($query_params['submitter_id'])) {
+                    return null;
+                }
+                return $page . '-' . $query_params['gradeable_id'] . '_' . $query_params['submitter_id'];
+            case 'grading':
+                if (!isset($query_params['gradeable_id'])) {
+                    return null;
+                }
+                return $page . '-' . $query_params['gradeable_id'];
+            default:
+                return null;
         }
     }
 

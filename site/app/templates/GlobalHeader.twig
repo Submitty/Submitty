@@ -11,6 +11,9 @@
         window.courseUrl = "{{ course_url }}";
         window.csrfToken = "{{ csrf_token }}";
         window.websocketPort = {{ websocket_port }};
+        {% if websocket_token %}
+        window.websocketToken = "{{ websocket_token }}";
+        {% endif %}
 
         if (!window.Cypress && !window.parent.Cypress && "serviceWorker" in navigator) {
             window.addEventListener("load", () => {
