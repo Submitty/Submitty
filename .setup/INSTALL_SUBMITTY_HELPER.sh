@@ -283,7 +283,7 @@ if [ "${IS_WORKER}" == 0 ]; then
 
     # Install cypress related files that are elsewhere in the repository
     if [ "${IS_VAGRANT}" == 1 ]; then
-        copy_cmd="rsync -rtz"
+        copy_cmd="rsync -rtz --exclude='.git'"
     elif [ "${IS_CI}" == 1 ]; then
         copy_cmd="cp -r"
     else
