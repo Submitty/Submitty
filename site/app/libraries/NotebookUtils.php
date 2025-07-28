@@ -61,6 +61,7 @@ class NotebookUtils {
     /**
      * Process a markdown cell and return the processed cell.
      *
+     * @param array<string,mixed> $cell
      * @return array<string,mixed>
      */
     private static function processMarkdownCell(array $cell): array {
@@ -98,9 +99,12 @@ class NotebookUtils {
     /**
      * Process a code cell and return the processed cell.
      *
-     * @return array<string,mixed>
+     * @param array<string,mixed> $cell
+     * @param array<string,mixed> $filedata
+     * @return array<int,array<string,mixed>>
      */
     private static function processCodeCell(array $cell, array $filedata): array {
+        $code_cell = [];
         $code_cell[] = [
             'type' => 'short_answer',
             'label' => '',
@@ -139,7 +143,7 @@ class NotebookUtils {
                     }
 
                     $text = $output['data']['text/plain'] ?? '';
-                    if ($output_type == 'text/plain') {
+                    if ($output_type === 'text/plain') {
                         // Display output text if we don't know how to render the content otherwise
                         $code_cell[] = [
                             'type' => 'output',
@@ -177,10 +181,11 @@ class NotebookUtils {
     /**
      * Truncate text to the defined limit and append a message if truncated.
      *
+     * @param string|string[] $text
      * @return string
      */
     private static function truncateText(string|array $text): string {
-        $output_text = is_array($text) ? implode($text) : (string) $text;
+        $output_text = is_array($text) ? implode($text) : $text;
         if (strlen($output_text) > self::TEXT_LIMIT) {
             return substr($output_text, 0, self::TEXT_LIMIT) . '...' . PHP_EOL . '[Output truncated: exceeds size limit of ' . (self::TEXT_LIMIT / 1024) . ' KB. Download the notebook to view the full output.]';
         }
