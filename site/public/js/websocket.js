@@ -46,12 +46,13 @@ class WebSocketClient {
         urlWithParams.searchParams.append('course', course);
         urlWithParams.searchParams.append('term', term);
 
-        // Add websocket token if available
-        const wsToken = args.ws_token || window.websocketToken;
+        // Add the websocket token if available
+        const wsToken = window.websocketToken;
 
         if (wsToken) {
             urlWithParams.searchParams.append('ws_token', wsToken);
-        } else {
+        }
+        else {
             console.warn('WebSocket: No websocket token provided - connection may fail');
         }
 
