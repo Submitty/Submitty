@@ -158,6 +158,6 @@ class HomePageControllerTester extends BaseUnitTest {
         $controller = new HomePageController($core);
         $response = $controller->showHomepage();
         $this->assertEquals('showHomePage', $response->web_response->view_function);
-        $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], []], $response->web_response->parameters);
+        $this->assertEqualsCanonicalizing([$core->getUser(), [], [], [], [], []], $response->web_response->parameters);
     }
 }

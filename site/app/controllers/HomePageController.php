@@ -7,7 +7,6 @@ use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
 use app\libraries\response\MultiResponse;
-use app\models\Notification;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -126,16 +125,15 @@ class HomePageController extends AbstractController {
 
             foreach ($course_notifications as $notification) {
                 $notify_time = $notification->getNotifyTime();
-                
                 $base_url = '';
-                if($notification->getNotifyMetadata()) {
+                if ($notification->getNotifyMetadata()) {
                     $base_url = $this->core->buildCourseUrl(['notifications', $notification->getId()]);
                 }
                 else {
-                   $base_url = $this->core->buildUrl(['home']); 
+                    $base_url = $this->core->buildUrl(['home']);
                 }
                 $notification_url = $base_url . '?seen=' . ($notification->isSeen() ? '1' : '0');
-                
+
                 // Convert to string for Vue
                 $results[] = [
                     'id' => $notification->getId(),

@@ -5410,7 +5410,7 @@ AND gc_id IN (
      * @param string $course_name
      * @param object $course_db
      * @return array<int, Notification>
-    */
+     */
     public function getAllRecentNotifications($user_id, $semester, $course_name, $course_db) {
         $query = "
             SELECT id, component, metadata, content,
