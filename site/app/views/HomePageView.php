@@ -11,6 +11,7 @@ class HomePageView extends AbstractView {
      * @param array<array<string, string>> $dropped_courses
      * @param array $archived_courses
      * @param array<mixed> $self_registration_courses
+     * @param array<array<string, mixed>> $notifications
      */
     public function showHomePage(
         User $user,
@@ -18,6 +19,7 @@ class HomePageView extends AbstractView {
         array $dropped_courses,
         array $archived_courses,
         array $self_registration_courses,
+        array $notifications,
     ) {
         $statuses = [];
         $course_types = [
@@ -53,10 +55,6 @@ class HomePageView extends AbstractView {
             });
             $statuses[$course_type_name] = $ranks;
         }
-
-        $user_id = $this->core->getUser()->getId();
-        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
-        $notifications = $this->core->getQueries()->getAllRecentUserNotifications($user_id, $courses);
 
         $this->core->getOutput()->enableMobileViewport();
         $this->output->setPageName('Homepage');

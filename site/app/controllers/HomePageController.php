@@ -7,6 +7,7 @@ use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
 use app\libraries\response\MultiResponse;
+use app\models\Notification;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -105,6 +106,84 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * Returns recent notifications for a user
+     * @return array<int, array<string, mixed>>
+     */
+    private function getAllRecentNotifications() {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $all_rows = [];
+        $original_config = clone $this->core->getConfig();
+
+        // Loop through all courses and add info to rows
+        foreach ($courses as $course) {
+            $semester = $course->getTerm();
+            $course_name = $course->getTitle();
+            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseDatabase();
+            $course_db = $this->core->getCourseDB();
+            $all_rows = array_merge(
+                $all_rows,
+                $this->core->getQueries()->getAllRecentNotifications($user_id, $semester, $course_name, $course_db)
+            );
+        }
+
+        $results = [];
+        foreach ($all_rows as $row) {
+            // Create object to call helper functions on it
+            $notification = Notification::createViewOnlyNotification(
+                $this->core,
+                [
+                    'id' => $row['id'],
+                    'component' => $row['component'],
+                    'metadata' => $row['metadata'],
+                    'content' => $row['content'],
+                    'seen' => $row['seen'],
+                    'elapsed_time' => $row['elapsed_time'],
+                    'created_at' => $row['created_at']
+                ]
+            );
+
+            // Get the notification's link if it exists
+            $this->core->loadCourseConfig($row['semester'], $row['course']);
+            if ($row['metadata']) {
+                $notification_url = $this->core->buildCourseUrl(['notifications', $row['id']]);
+            }
+            else {
+                $notification_url = null;
+            }
+
+            // Get the formatted timestamp
+            $notify_time = $notification->getNotifyTime();
+
+            // Convert to string for Vue
+            $results[] = [
+                'id' => $row['id'],
+                'component' => $row['component'],
+                'metadata' => $row['metadata'],
+                'content' => $row['content'],
+                'seen' => $row['seen'],
+                'elapsed_time' => $row['elapsed_time'],
+                'created_at' => $row['created_at'],
+                'notify_time' => $notify_time,
+                'semester' => $row['semester'],
+                'course' => $row['course'],
+                'notification_url' => $notification_url
+            ];
+        }
+
+        // Sort by recency
+        usort($results, function ($a, $b) {
+            return $a['elapsed_time'] <=> $b['elapsed_time'];
+        });
+
+        // Reset to original config where no courses are selected
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        return $results;
+    }
+
+    /**
      * Display the HomePageView to the student.
      *
      * @return MultiResponse
@@ -112,7 +191,7 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-
+        $notifications = $this->getAllRecentNotifications();
         return new MultiResponse(
             null,
             new WebResponse(
@@ -122,7 +201,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
-                $courses["data"]["self_registration_courses"]
+                $courses["data"]["self_registration_courses"],
+                $notifications
             )
         );
     }
