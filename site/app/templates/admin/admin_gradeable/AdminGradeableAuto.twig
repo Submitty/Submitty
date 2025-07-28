@@ -143,6 +143,10 @@
                     </div>
                 </div>
                 <div id="gradeable-config-edit-bar">
+                    <div style="display: flex; flex-grow: 1; justify-content: flex-end;">
+                        <i class="fas fa-list-ol" id="toggle-line-nums" style="margin-right: 16px" onClick="toggleLineNums()"></i>
+                        <i class="fas fa-2" id="toggle-tab-length" style="margin-right:10px" onClick="toggleTabLength()"></i>
+                    </div>
                     <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
                     <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
                     <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>

@@ -1238,14 +1238,17 @@ function removeFile(g_id, path, isFolder) {
     });
 }
 
+const enableLineNums = 'enableLineNums';
+const setTabLength = 'setTabLength';
+
 function loadCodeMirror() {
     codeMirrorInstance = CodeMirror.fromTextArea(
         document.getElementById('gradeable-config-edit'),
         {
             mode: { name: 'json', json: true },
             theme: localStorage.theme === 'light' ? 'eclipse' : 'monokai',
-            lineNumbers: false,
-            tabSize: 2,
+            lineNumbers: localStorage.getItem(enableLineNums) === 'true',
+            tabSize: Number(localStorage.getItem(setTabLength)) === 2 ? 2 : 4,
             indentUnit: 2,
             lineWrapping: true,
         },
@@ -1255,3 +1258,36 @@ function loadCodeMirror() {
         isConfigEdited = currentContent !== originalConfigContent;
     });
 }
+
+// Toggle line nums in gradeable editor
+function toggleLineNums() {
+    const current = localStorage.getItem(enableLineNums);
+    localStorage.setItem(enableLineNums, (!current || current === 'false') ? 'true' : 'false');
+    reloadCodeMirror();
+}
+
+// Toggle between tab length of 2 and 4 for gradeable editor
+function toggleTabLength() {
+    const tabLength = Number(localStorage.getItem(setTabLength));
+    const newLength = (!tabLength || tabLength === 2) ? 4 : 2;
+    localStorage.setItem(setTabLength, newLength);
+    reloadCodeMirror();
+
+    // Update icon
+    const icon = document.getElementById('toggle-tab-length');
+    if (icon) {
+        icon.classList.remove('fa-2', 'fa-4');
+        icon.classList.add(`fa-${newLength}`);
+    }
+}
+
+
+function reloadCodeMirror() {
+    if (codeMirrorInstance) {
+        const currentContent = codeMirrorInstance.getValue();
+        codeMirrorInstance.toTextArea();
+        document.getElementById('gradeable-config-edit').value = currentContent;
+    }
+    loadCodeMirror();
+}
+
