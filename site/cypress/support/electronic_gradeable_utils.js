@@ -85,13 +85,13 @@ export function checkNonHiddenResults(gradeableName, versionNumber, expectedScor
     if (!fullScores.includes('?')) {
         const scoreTotal = fullScores.reduce((partial, actual) => partial + actual, 0);
         const expectedTotal = expectedScores.reduce((partial, actual) => partial + actual, 0);
-        cy.get('[data-testid="autograding-total-no-hidden"]').find('[data-testid="score-pill-badge"]').contains(`${expectedTotal} / ${scoreTotal}`);
+        cy.get('[data-testid="autograding-total-no-hidden"]').find('[data-testid="score-pill-badge"]').should('contain.text', `${expectedTotal} / ${scoreTotal}`);
     }
 
     cy.get('[data-testid="results-box"]').each(($el, index) => {
         if (expectedScores[index] === '?' || fullScores[index] === '?') {
             return;
         }
-        cy.wrap($el).find('[data-testid="score-pill-badge"]').contains(`${expectedScores[index]} / ${fullScores[index]}`);
+        cy.wrap($el).find('[data-testid="score-pill-badge"]').should('contain.text', `${expectedScores[index]} / ${fullScores[index]}`);
     });
 };
