@@ -14,12 +14,4 @@ class MarkdownController extends AbstractController {
     public function displayMarkdown() {
         return new WebResponse(MarkdownView::class, 'renderMarkdown', $_POST['content']);
     }
-
-    /**
-     * @return WebResponse
-     */
-    #[Route("/markdown/area", methods: ["POST"])]
-    public function displayMarkdownArea() {
-        return new WebResponse(MarkdownView::class, 'renderMarkdownArea', $_POST['data']);
-    }
 }
