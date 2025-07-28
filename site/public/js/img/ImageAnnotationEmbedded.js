@@ -2,6 +2,7 @@
 /* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage, cleanupAnnotationEditor */
 
 var currentAnnotations = null;
+var currentAnnotatedImageDataUrl = null; // Store the annotated image data URL
 var targetImg = null;
 var gradeableId = '';
 var userId = '';
@@ -64,8 +65,8 @@ function addAnnotations() {
             // Set up event handlers for the annotation editor
             globalAnnotationEditor.addEventListener('editorsave', function(event) {
                 currentAnnotations = event.detail.state;
+                currentAnnotatedImageDataUrl = event.detail.dataUrl; // Capture the annotated image data URL
                 $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
-                console.log("Annotations saved with editor");
                 
                 // Hide the annotation editor instead of removing it
                 const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
@@ -134,7 +135,6 @@ function addAnnotations() {
             editorWrapper.appendChild(globalAnnotationEditor);
             document.body.appendChild(editorWrapper);
             
-            console.log("MarkerJS-UI annotation editor created and configured");
             $("#annotation-status").text("Annotation editor opened").css("color", "blue");
             
         } catch (error) {
@@ -179,6 +179,7 @@ function saveAnnotations() {
 function clearAnnotations() {
     if (confirm("Are you sure you want to clear all annotations?")) {
         currentAnnotations = [];
+        currentAnnotatedImageDataUrl = null; // Clear the annotated image data URL
         
         // Hide any open annotation editor instead of removing it
         const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
@@ -186,10 +187,30 @@ function clearAnnotations() {
             editorWrapper.style.display = 'none';
         }
         
-        // Remove annotation overlay
-        const annotationOverlay = document.getElementById('annotation-overlay');
-        if (annotationOverlay) {
-            annotationOverlay.remove();
+        // Restore original image if it was replaced with MarkerView
+        const markerView = document.getElementById('annotation-marker-view');
+        if (markerView && markerView.targetImage) {
+            const originalImg = markerView.targetImage;
+            
+            // Restore original properties
+            if (originalImg.dataset.originalId) {
+                originalImg.id = originalImg.dataset.originalId;
+                originalImg.className = originalImg.dataset.originalClass || '';
+                
+                // Restore original size properties
+                if (originalImg.dataset.originalWidth) {
+                    originalImg.style.width = originalImg.dataset.originalWidth;
+                }
+                if (originalImg.dataset.originalHeight) {
+                    originalImg.style.height = originalImg.dataset.originalHeight;
+                }
+            }
+            
+            // Replace MarkerView back with original image
+            markerView.parentElement.replaceChild(originalImg, markerView);
+            
+            // Update global reference
+            targetImg = originalImg;
         }
         
         $("#annotation-status").text("Annotations cleared (not saved)").css("color", "red");
@@ -197,32 +218,22 @@ function clearAnnotations() {
 }
 
 function downloadImage(targetImg) {
-    if (!targetImg) {
-        console.error("No target image provided to downloadImage");
+    // Get the actual image element (might be replaced by MarkerView)
+    const markerView = document.getElementById('annotation-marker-view');
+    const actualImg = markerView ? markerView.targetImage : targetImg;
+    
+    if (!actualImg) {
+        console.error("No image available for download");
         alert("Error: No image available for download");
         return;
     }
     
-    // Check if there's an annotation overlay
-    const annotationOverlay = document.getElementById('annotation-overlay');
-    
-    if (annotationOverlay) {
-        // If there are annotations, create a composite image for download
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = targetImg.naturalWidth;
-        canvas.height = targetImg.naturalHeight;
-        
-        // Draw the original image first
-        ctx.drawImage(targetImg, 0, 0);
-        
-        // Draw the annotations on top
-        ctx.drawImage(annotationOverlay, 0, 0);
-        
-        // Create download link with composite image
+    // Check if we have the annotated image data URL from markerjsUI
+    console.log(currentAnnotatedImageDataUrl);
+    if (currentAnnotatedImageDataUrl && currentAnnotations && currentAnnotations.markers && currentAnnotations.markers.length > 0) {
+        // Create download link with the pre-generated annotated image
         const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
+        link.href = currentAnnotatedImageDataUrl;
         
         // Add suffix to filename for annotated version
         const nameParts = filename.split('.');
@@ -241,7 +252,7 @@ function downloadImage(targetImg) {
     } else {
         // No annotations, download original image
         const link = document.createElement('a');
-        link.href = targetImg.src;
+        link.href = actualImg.src;
         link.download = filename;
         document.body.appendChild(link);
         link.click();
@@ -256,10 +267,30 @@ function cleanupAnnotationEditor() {
         editorWrapper.style.display = 'none';
     }
     
-    // Remove annotation overlay
-    const annotationOverlay = document.getElementById('annotation-overlay');
-    if (annotationOverlay) {
-        annotationOverlay.remove();
+    // Restore original image if it was replaced with MarkerView
+    const markerView = document.getElementById('annotation-marker-view');
+    if (markerView && markerView.targetImage) {
+        const originalImg = markerView.targetImage;
+        
+        // Restore original properties
+        if (originalImg.dataset.originalId) {
+            originalImg.id = originalImg.dataset.originalId;
+            originalImg.className = originalImg.dataset.originalClass || '';
+            
+            // Restore original size properties
+            if (originalImg.dataset.originalWidth) {
+                originalImg.style.width = originalImg.dataset.originalWidth;
+            }
+            if (originalImg.dataset.originalHeight) {
+                originalImg.style.height = originalImg.dataset.originalHeight;
+            }
+        }
+        
+        // Replace MarkerView back with original image
+        markerView.parentElement.replaceChild(originalImg, markerView);
+        
+        // Update global reference
+        targetImg = originalImg;
     }
 }
 
@@ -274,71 +305,69 @@ function renderAnnotationsOnImage(targetImg) {
     }
     
     if (!currentAnnotations) {
-        console.log("No annotations to render");
         return;
     }
     
-    console.log("Rendering annotations on image using Renderer");
-    console.log("Current annotations:", currentAnnotations);
-    console.log("Annotation structure:", {
-        hasMarkers: currentAnnotations && currentAnnotations.markers,
-        markersLength: currentAnnotations && currentAnnotations.markers ? currentAnnotations.markers.length : 0,
-        annotationType: typeof currentAnnotations
-    });
-    
     try {
+        if (typeof markerjs3 === 'undefined' || !markerjs3.MarkerView) {
+            console.error("markerjs3 MarkerView is not available");
+            $("#annotation-status").text("Error: MarkerView not available").css("color", "red");
+            return;
+        }
         
-        // Create renderer and render annotations
-        const renderer = new markerjs3.Renderer();
-        renderer.targetImage = targetImg;
-        renderer.naturalSize = true;
-        renderer.markersOnly = true; // Only render annotations since we're overlaying
-        renderer.imageType = 'image/png';
-        renderer.imageQuality = 1;
+        // Check if we already replaced the image with MarkerView
+        const existingMarkerView = document.getElementById('annotation-marker-view');
+        if (existingMarkerView) {
+            return;
+        }
         
-        renderer.rasterize(currentAnnotations).then((dataUrl) => {
-
-            // Remove any existing annotation overlay
-            const existingOverlay = document.getElementById('annotation-overlay');
-            if (existingOverlay) {
-                existingOverlay.remove();
-            }
-            
-            // Create an overlay image element for the annotations
-            const annotationOverlay = document.createElement('img');
-            annotationOverlay.id = 'annotation-overlay';
-            annotationOverlay.src = dataUrl;
-            
-            // Style the overlay to position it exactly over the original image
-            annotationOverlay.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 10;
-            `;
-            
-            // Ensure the target image container has relative positioning
-            const container = targetImg.parentElement;
-            if (container && window.getComputedStyle(container).position === 'static') {
-                container.style.position = 'relative';
-            }
-            
-            // Add the overlay after the target image
-            targetImg.insertAdjacentElement('afterend', annotationOverlay);
-            
-            // Store reference for cleanup
-            annotationOverlay._originalImage = targetImg;
-            
-            $("#annotation-status").text("Annotations rendered").css("color", "green");
-            console.log("Annotations overlaid successfully");
-            
-        }).catch((error) => {
-            console.error("Error rendering annotations:", error);
-            $("#annotation-status").text("Error rendering annotations: " + error.message).css("color", "red");
-        });
+        // Store original image properties before replacing
+        if (!targetImg.dataset.originalId) {
+            targetImg.dataset.originalId = targetImg.id;
+            targetImg.dataset.originalSrc = targetImg.src;
+            targetImg.dataset.originalAlt = targetImg.alt;
+            targetImg.dataset.originalClass = targetImg.className;
+            targetImg.dataset.originalWidth = targetImg.style.width || '';
+            targetImg.dataset.originalHeight = targetImg.style.height || '';
+        }
+        
+        // Create MarkerView instance
+        const markerView = new markerjs3.MarkerView();
+        markerView.id = 'annotation-marker-view';
+        markerView.className = targetImg.className; // Copy original classes
+        markerView.targetImage = targetImg;
+        
+        // Get computed style dimensions to ensure proper scaling
+        const computedStyle = getComputedStyle(targetImg);
+        const displayWidth = parseInt(computedStyle.width) || targetImg.width || targetImg.naturalWidth;
+        const displayHeight = parseInt(computedStyle.height) || targetImg.height || targetImg.naturalHeight;
+        
+        // Set target dimensions to match the displayed image size
+        markerView.targetWidth = displayWidth;
+        markerView.targetHeight = displayHeight;
+        
+        // Set zoom level to 1 to show image at natural scale within the target dimensions
+        markerView.zoomLevel = 1;
+        
+        // Apply the original image's size to MarkerView container
+        markerView.style.width = displayWidth + 'px';
+        markerView.style.height = displayHeight + 'px';
+        
+        // Copy any additional inline styles for width/height if they exist
+        if (targetImg.style.width) {
+            markerView.style.width = targetImg.style.width;
+        }
+        if (targetImg.style.height) {
+            markerView.style.height = targetImg.style.height;
+        }
+        
+        // Replace the image with MarkerView
+        targetImg.parentElement.replaceChild(markerView, targetImg);
+        
+        // Show the annotations
+        markerView.show(currentAnnotations);
+        
+        $("#annotation-status").text("Annotations rendered").css("color", "green");
         
     } catch (error) {
         console.error("Error in renderAnnotationsOnImage:", error);
@@ -359,6 +388,9 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
     csrfToken = token;
     isStudent = isStud;
     
+    // Reset annotation data for new image
+    currentAnnotatedImageDataUrl = null;
+    
     // Wait for DOM to be ready
     $(document).ready(function() {
         // Get the target image element
@@ -373,19 +405,9 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
         }
         
         // Load existing annotations if available
-        console.log(existingAnnotations);
-        if (existingAnnotations && existingAnnotations.markers) {
-            try {
-                console.log('Loading current annotations');
-                
-                currentAnnotations = existingAnnotations;
-                console.log(currentAnnotations);
-                renderAnnotationsOnImage(targetImg);
-            } catch (e) {
-                console.error("Error loading existing annotations:", e);
-            }
+        if (existingAnnotations && existingAnnotations.markers) {    
+            currentAnnotations = existingAnnotations;
         }
-        
-        console.log("Image annotation system initialized with parameters");
+        renderAnnotationsOnImage(targetImg);
     });
 }
