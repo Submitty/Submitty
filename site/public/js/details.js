@@ -144,7 +144,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
         if (!is_team_assignment) { // Toggle not available on team assignments
-            if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {
+            if (withdrawnFilterStatus === 'omit' || withdrawnFilterStatus === undefined) {
                 withdrawnFilterBox.checked = true;
                 withdrawnFilterElements.hide();
             }
