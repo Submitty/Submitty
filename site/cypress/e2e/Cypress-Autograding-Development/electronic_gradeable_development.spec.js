@@ -1,12 +1,11 @@
-import { switchOrFindVersion, submitFiles, submitGradeable, newSubmission, checkNonHiddenResults, setCourse } from '../../support/electronic_gradeable_utils';
+import { switchOrFindVersion, submitFiles, submitGradeable, newSubmission, checkNonHiddenResults } from '../../support/electronic_gradeable_utils';
 
 const constructFileName = (gradeable, fileName) => {
     const baseFolder = 'copy_of_more_autograding_examples';
     return `${baseFolder}/${gradeable}/submissions/${fileName}`;
 };
 
-describe('Test the development course gradeables', () => {
-    setCourse('development');
+describe('Test the development course gradeables', { env: { course: 'development' } }, () => {
     it('Should test the cpp cats gradeable with full and buggy submissions', () => {
         cy.login('instructor');
 

@@ -1,14 +1,13 @@
-import { switchOrFindVersion, submitFiles, submitGradeable, newSubmission, checkNonHiddenResults, setCourse } from '../../support/electronic_gradeable_utils';
+import { switchOrFindVersion, submitFiles, submitGradeable, newSubmission, checkNonHiddenResults } from '../../support/electronic_gradeable_utils';
 
 const constructFileName = (gradeable, folderName, fileName) => {
     const baseFolder = 'copy_of_tutorial';
     return `${baseFolder}/examples/${gradeable}/submissions/${folderName}/${fileName}`;
 };
 
-describe('Test the tutorial course gradeables', () => {
-    setCourse('tutorial');
+describe('Test the tutorial course gradeables', { env: { course: 'tutorial' } }, () => {
     it('Should test the docker network gradeable with full and buggy submissions', () => {
-        cy.login('student');
+        cy.login('instructor');
 
         const docker_network = '16_docker_network_python';
         const docker_network_full_score = [5, 5, '?', 5];

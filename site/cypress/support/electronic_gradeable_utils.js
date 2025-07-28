@@ -1,13 +1,6 @@
-let course = '';
-
-export function setCourse(newCourse) {
-    course = newCourse;
-}
-
 function visitGradeable(gradeableName) {
+    const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
-    // wait for client JS to load - reduces flakyness
-    cy.get('[data-testid="gradeable-time-remaining-text"]').contains('days');
 }
 
 /**
@@ -39,7 +32,7 @@ export function switchOrFindVersion(gradeableName, versionNumber) {
  */
 export function newSubmission(gradeableName) {
     visitGradeable(gradeableName);
-    // If the clear button exists, we should click it.
+    // If the clear button exists, we should click it and clear all files so we can submit new ones
     cy.get('[data-testid="clear-all-files-button"]').then(($btn) => {
         if (!$btn.is(':disabled')) {
             cy.wrap($btn).click();
