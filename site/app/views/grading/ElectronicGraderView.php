@@ -375,7 +375,7 @@ class ElectronicGraderView extends AbstractView {
             "include_grade_override" => $_COOKIE['include_grade_override'] ?? 'omit',
             "include_bad_submissions" => $_COOKIE['include_bad_submissions'] ?? 'omit',
             "include_null_section" => $_COOKIE['include_null_section'] ?? 'omit',
-            "include_withdrawn_students" => $_COOKIE['include_withdrawn_students__' . $gradeable_id] ?? 'omit',
+            "include_withdrawn_students" => $_COOKIE['include_withdrawn_students'] ?? 'omit',
             "warnings" => $warnings,
             "submissions_in_queue" => $submissions_in_queue,
             "can_manage_teams" => $this->core->getAccess()->canI('grading.electronic.show_edit_teams', ["gradeable" => $gradeable])
@@ -505,7 +505,7 @@ HTML;
      * @param array<string, bool> $overrides
      * @param array<string, string> $anon_ids
      * @param bool $inquiry_status
-     * @param bool $filter_withdrawn_student
+     * @param bool $withdrawn_students_cookie
      * @param array<string,bool> $grading_details_columns
      * @param array<string,array<number,array{
      *      gc_id: number,
@@ -516,7 +516,7 @@ HTML;
      * }>> $active_graders
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, bool $filter_withdrawn_student, array $grading_details_columns, array $active_graders) {
+    public function detailsPage(Gradeable $gradeable, array $graded_gradeables, array $teamless_users, array $graders, array $empty_teams, bool $show_all_sections_button, bool $show_import_teams_button, bool $show_export_teams_button, bool $show_edit_teams, string $past_grade_start_date, bool $view_all, string $sort, string $direction, bool $anon_mode, array $overrides, array $anon_ids, bool $inquiry_status, bool $withdrawn_students_cookie, array $grading_details_columns, array $active_graders) {
         $collapsed_sections = isset($_COOKIE['collapsed_sections']) ? json_decode(rawurldecode($_COOKIE['collapsed_sections'])) : [];
 
         $peer = false;
@@ -929,7 +929,7 @@ HTML;
             "view_all" => $view_all,
             "anon_mode" => $anon_mode,
             "inquiry_status" => $inquiry_status,
-            "filter_withdrawn_student" => $filter_withdrawn_student,
+            "withdrawn_students_cookie" => $withdrawn_students_cookie,
             "toggle_anon_button" => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER),
             "show_all_sections_button" => $show_all_sections_button,
             'grade_inquiry_only_button' => ($this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR || $this->core->getUser()->getGroup() == User::GROUP_FULL_ACCESS_GRADER || $this->core->getUser()->getGroup() == User::GROUP_LIMITED_ACCESS_GRADER),

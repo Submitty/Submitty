@@ -1,5 +1,5 @@
 /* global courseUrl, showPopup, escapeSpecialChars, full_access_grader_permission, is_team_assignment, is_student */
-/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update, filterWithdrawnUpdate */
+/* exported gradeableMessageAgree, gradeableMessageCancel, showGradeableMessage, hideGradeableMessage, expandAllSections, collapseAllSections, grade_inquiry_only, reverse_inquiry_only, inquiry_update */
 
 const MOBILE_BREAKPOINT = 951;
 
@@ -141,7 +141,7 @@ window.addEventListener('DOMContentLoaded', () => {
         assignedFilterBox.checked = (assignedFilterStatus === 'assigned' || assignedFilterStatus === undefined);
 
         // Withdrawn Students
-        const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+        const withdrawnFilterStatus = Cookies.get('include_withdrawn_students');
         const withdrawnFilterBox = document.getElementById('toggle-filter-withdrawn');
         if (!is_team_assignment) { // Toggle not available on team assignments
             if (withdrawnFilterStatus === 'true' || withdrawnFilterStatus === undefined) {

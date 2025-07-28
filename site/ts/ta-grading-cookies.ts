@@ -4,12 +4,12 @@ declare global {
         filter_overriden_grades: () => void;
         filter_bad_grades: () => void;
         filter_null_section: () => void;
+        filter_withdrawn_students: () => void;
         changeSections: () => void;
         changeInquiry: () => void;
         changeSortOrder: () => void;
         sortTableByColumn: (sort_type?: string, direction?: 'ASC' | 'DESC') => void;
         changeAnon: () => void;
-        filterWithdrawnUpdate: () => void;
     }
 }
 
@@ -28,6 +28,19 @@ window.filter_bad_grades = () => {
 window.filter_null_section = () => {
     const null_section_status = window.Cookies.get('include_null_section') ?? 'omit';
     window.Cookies.set('include_null_section', null_section_status === 'omit' ? 'include' : 'omit', { path: coursePath, expires: 365 });
+};
+
+window.filter_withdrawn_students = () => {
+    const withdrawn_students = window.Cookies.get('include_withdrawn_students') ?? 'omit';
+    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
+    if (withdrawn_students === 'include') {
+        withdrawnElements.hide();
+        window.Cookies.set('include_withdrawn_students', 'omit', { path: coursePath, expires: 365 });
+    }
+    else {
+        withdrawnElements.show();
+        window.Cookies.set('include_withdrawn_students', 'include', { path: coursePath, expires: 365 });
+    }
 };
 
 window.changeSections = () => {
@@ -64,18 +77,4 @@ window.sortTableByColumn = (sort_type: string = 'id', direction: 'ASC' | 'DESC' 
 window.changeAnon = () => {
     window.Cookies.set('anon_mode', $('#toggle-anon-students').is(':checked') ? 'on' : 'off', { path: coursePath, expires: 365 });
     location.reload();
-};
-
-window.filterWithdrawnUpdate = () => {
-    const filterCheckbox = document.getElementById('toggle-filter-withdrawn') as HTMLInputElement;
-    const withdrawnElements = $('[data-student="electronic-grade-withdrawn"]');
-
-    if (filterCheckbox.checked) {
-        withdrawnElements.hide();
-        window.Cookies.set('filter_withdrawn_student', 'true', { path: coursePath, expires: 365 });
-    }
-    else {
-        withdrawnElements.show();
-        window.Cookies.set('filter_withdrawn_student', 'false', { path: coursePath, expires: 365 });
-    }
 };

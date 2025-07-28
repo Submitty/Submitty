@@ -1021,25 +1021,11 @@ function numericSocketHandler(elem_id, anon_id, value, total) {
     }
 }
 
-function updateFilterWithdrawn() {
-    const withdrawnFilterBox = document.getElementById('filter-withdrawn');
-    const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-
-    if (withdrawnFilterBox.checked) {
-        withdrawnFilterElements.hide();
-        Cookies.set('filter_withdrawn_student', 'true');
-    }
-    else {
-        withdrawnFilterElements.show();
-        Cookies.set('filter_withdrawn_student', 'false');
-    }
-}
-
 // Withdrawn filter checkbox should remain the same on reload
 window.addEventListener('DOMContentLoaded', () => {
     const withdrawnFilterBox = document.getElementById('filter-withdrawn');
     const withdrawnFilterElements = $('[data-student="simple-grade-withdrawn"]');
-    const withdrawnFilterStatus = Cookies.get('filter_withdrawn_student');
+    const withdrawnFilterStatus = Cookies.get('withdrawn_students_cookie');
     if (full_grader_access) {
         if (withdrawnFilterStatus === 'false') {
             withdrawnFilterBox.checked = false;

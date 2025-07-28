@@ -59,7 +59,7 @@
                 {% endif %}
                 {% if full_access_grader_permission and not gradeable.isTeamAssignment() %}
                 <label for="toggle-filter-withdrawn" data-testid="filter-withdrawn-label" class="column-wrapper"> Hide Withdrawn Students
-                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filterWithdrawnUpdate()">
+                    <input type="checkbox" id="toggle-filter-withdrawn" data-testid="filter-withdrawn-checkbox" onchange="filter_withdrawn_students()">
                 </label>
                 {% endif %}
             </div>
