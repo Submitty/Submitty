@@ -997,16 +997,10 @@ class Core {
                 $token_user_id = $token->claims()->get('sub');
                 $token_pages = $token->claims()->get('authorized_pages');
 
-                // Verify token is for current user
                 if ($token_user_id === $this->user->getId()) {
-                    // Calculate required pages for current context
-
-                    if ($key !== null) {
-                        $page_contexts[] = ['page' => $page, 'params' => $params];
-                    }
-
+                    // Refresh token if it doesn't have the required page
                     if ($key !== null && !in_array($key, $token_pages, true)) {
-                        // Update the authorized_pages claim with the new key within the bottom block
+                        $page_contexts[] = ['page' => $page, 'params' => $params];
                         $this->access->getAuthorizedWebsocketPages(
                             $this->user,
                             $this->config->getTerm(),
@@ -1015,6 +1009,7 @@ class Core {
                         );
                     }
                     else {
+                        // No refresh needed, return existing token
                         return $existing_token;
                     }
                 }

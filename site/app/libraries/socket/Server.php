@@ -149,6 +149,7 @@ class Server implements MessageComponentInterface {
 
             // Build full page identifier with term and course
             $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
+            $this->log("Full page identifier: " . $full_page_identifier);
 
             // Check if this page is in the user's authorized pages
             if (!in_array($full_page_identifier, $authorized_pages, true)) {

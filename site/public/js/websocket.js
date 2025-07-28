@@ -32,8 +32,12 @@ class WebSocketClient {
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
-        // Force IPv4 (macOS issue???)
-        my_url.hostname = '127.0.0.1';
+
+        if (my_url.hostname === 'localhost') {
+            // Force IPv4 (macOS issue???)
+            my_url.hostname = '127.0.0.1';
+        }
+
         my_url.port = window.websocketPort;
         my_url.pathname = '/ws';
         this.url = my_url.href;
@@ -50,11 +54,9 @@ class WebSocketClient {
 
         // Add websocket token for authentication
         const wsToken = args.ws_token || window.websocketToken;
+
         if (wsToken) {
             urlWithParams.searchParams.append('ws_token', wsToken);
-            console.log('WebSocket: token added to connection');
-        } else {
-            console.log('WebSocket: No websocket token provided');
         }
 
         for (const key in args) {

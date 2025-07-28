@@ -117,6 +117,13 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
+
+        // Potentially the websocket token
+        $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-chatrooms-' . $chatroom->getId();
+        $page = 'chatrooms';
+        $params = ['chatroom_id' => $chatroom->getId()];
+        $this->core->getWebsocketToken($key, $page, $params);
+
         return new WebResponse(
             'Chatroom',
             'showChatroom',
