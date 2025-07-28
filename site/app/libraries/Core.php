@@ -998,15 +998,9 @@ class Core {
                 $token_pages = $token->claims()->get('authorized_pages');
 
                 if ($token_user_id === $this->user->getId()) {
-                    // Refresh token if it doesn't have the required page
                     if ($key !== null && !in_array($key, $token_pages, true)) {
+                        // Refresh token if it doesn't have the required page
                         $page_contexts[] = ['page' => $page, 'params' => $params];
-                        $this->access->getAuthorizedWebsocketPages(
-                            $this->user,
-                            $this->config->getTerm(),
-                            $this->config->getCourse(),
-                            $page_contexts
-                        );
                     }
                     else {
                         // No refresh needed, return existing token
