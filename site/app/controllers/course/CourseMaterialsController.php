@@ -347,9 +347,6 @@ class CourseMaterialsController extends AbstractController {
         if ($course_material === null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
-        if ($_POST['file_path'] === null) {
-            return JsonResponse::getErrorResponse("File path cannot be empty");
-        }
 
         // Track directories that might be affected by this operation
         $affected_directory = null;
