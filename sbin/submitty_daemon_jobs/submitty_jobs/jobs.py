@@ -455,9 +455,9 @@ class RegenerateBulkImages(AbstractJob):
         pass
 
 
-class DocToPDF(AbstractJob):
+class DocxToPDF(AbstractJob):
     def run_job(self):
-        log_dir = os.path.join(DATA_DIR, "logs", "doc_to_pdf")
+        log_dir = os.path.join(DATA_DIR, "logs", "docx_to_pdf")
         today = datetime.datetime.now()
         log_file = os.path.join(log_dir, "{:04d}{:02d}{:02d}.txt".format(today.year, today.month, today.day))
         log = open(log_file, 'a')
@@ -475,36 +475,36 @@ class DocToPDF(AbstractJob):
             submissions_processed_dir = os.path.join(course_dir, 'submissions_processed')
 
             submissions_path = os.path.join(submissions_dir, gradeable, user, str(version))
-            submissions_processed_path = os.path.join(submissions_processed_dir, gradeable, user, str(version), 'pdf')
+            submissions_processed_path = os.path.join(submissions_processed_dir, gradeable, user, str(version), 'convert_docx_to_pdf')
 
             if not os.path.isdir(submissions_processed_path):
                 os.makedirs(submissions_processed_path)
 
-            DOC_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            docx_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 
-            doc_files = []
+            docx_files = []
 
             for root, _, files in os.walk(submissions_path):
                 for file in files:
                     file_path = os.path.join(root, file)
                     mimetype, _ = mimetypes.guess_type(file_path)
-                    if mimetype in DOC_MIME_TYPES:
-                        doc_files.append(file_path)
+                    if mimetype in docx_MIME_TYPES:
+                        docx_files.append(file_path)
 
             with TemporaryDirectory() as tmpdir:
-                os.mkdir(os.path.join(tmpdir, 'doc_files'))
+                os.mkdir(os.path.join(tmpdir, 'docx_files'))
 
-                for i in range(len(doc_files)):
-                    numfolder = os.path.join(tmpdir, 'doc_files', str(i))
+                for i in range(len(docx_files)):
+                    numfolder = os.path.join(tmpdir, 'docx_files', str(i))
                     os.mkdir(numfolder)
-                    shutil.copyfile(doc_files[i], os.path.join(numfolder, os.path.basename(doc_files[i])))
+                    shutil.copyfile(docx_files[i], os.path.join(numfolder, os.path.basename(docx_files[i])))
 
                 client = docker.from_env(timeout=60)
                 container = client.containers.run(
                     image='submitty/libreoffice-writer:latest',
-                    command=['/bin/bash', '-c', f'for x in /app/doc_files/*/; \
+                    command=['/bin/bash', '-c', f'for x in /app/docx_files/*/; \
                             do libreoffice --headless --convert-to pdf --outdir "$x"out "$x"*; done; \
-                            chown -R {os.getuid()}:{os.getgid()} /app/doc_files'],
+                            chown -R {os.getuid()}:{os.getgid()} /app/docx_files'],
                     volumes={tmpdir: {'bind': '/app', 'mode': 'rw'}},
                     stdout=True,
                     stderr=True,
@@ -521,16 +521,16 @@ class DocToPDF(AbstractJob):
                 container.remove()
 
                 stat_parent = os.stat(submissions_processed_path)
-                for i in range(len(doc_files)):
-                    dest = os.path.join(submissions_processed_path, os.path.relpath(doc_files[i], submissions_path) + '.pdf')
+                for i in range(len(docx_files)):
+                    dest = os.path.join(submissions_processed_path, os.path.relpath(docx_files[i], submissions_path) + '.pdf')
                     os.makedirs(os.path.dirname(dest), 0o2755, exist_ok=True)
-                    out_dir = os.path.join(tmpdir, 'doc_files', str(i), 'out')
+                    out_dir = os.path.join(tmpdir, 'docx_files', str(i), 'out')
                     if not os.path.isdir(out_dir):
-                        log.write(f"Failed to generate output for '{doc_files[i]}'\n")
+                        log.write(f"Failed to generate output for '{docx_files[i]}'\n")
                         continue
                     out_contents = os.listdir(out_dir)
                     if len(out_contents) != 1:
-                        log.write(f"Failed to generate output for '{doc_files[i]}'\n")
+                        log.write(f"Failed to generate output for '{docx_files[i]}'\n")
                         continue
                     src = os.path.join(out_dir, out_contents[0])
                     os.rename(src, dest)
