@@ -152,7 +152,7 @@ class Server implements MessageComponentInterface {
             $this->log("Full page identifier: " . $full_page_identifier);
 
             // Check if this page is in the user's authorized pages
-            if (!in_array($full_page_identifier, $authorized_pages, true)) {
+            if (!array_key_exists($full_page_identifier, $authorized_pages) || time() > intval($authorized_pages[$full_page_identifier])) {
                 $this->log("Page '{$full_page_identifier}' not authorized for user '{$user_id}' in connection {$conn->resourceId}");
                 return false;
             }

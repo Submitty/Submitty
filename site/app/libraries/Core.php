@@ -942,9 +942,10 @@ class Core {
      * Generate a websocket token for the current user with permissions for specified pages
      *
      * @param array<int, array<string, string>> $page_contexts Array of page contexts the user should have access to
+     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return string JWT token string
      */
-    public function generateWebsocketToken(array $page_contexts): string {
+    public function generateWebsocketToken(array $page_contexts, ?array $existing_authorized_pages = []): string {
         if (!$this->userLoaded()) {
             throw new \BadMethodCallException("Cannot generate websocket token: no user loaded");
         }
@@ -962,7 +963,8 @@ class Core {
 
         $token = TokenManager::generateWebsocketToken(
             $this->user->getId(),
-            $authorized_pages
+            $authorized_pages,
+            $existing_authorized_pages
         );
 
         return $token->toString();
@@ -983,6 +985,7 @@ class Core {
 
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
+        $existing_authorized_pages = [];
 
         $page_contexts = [
             ['page' => 'discussion_forum'],
@@ -995,7 +998,7 @@ class Core {
             try {
                 $token = TokenManager::parseWebsocketToken($existing_token);
                 $token_user_id = $token->claims()->get('sub');
-                $token_pages = $token->claims()->get('authorized_pages');
+                $token_pages = $existing_authorized_pages = $token->claims()->get('authorized_pages');
 
                 if ($token_user_id === $this->user->getId()) {
                     if ($key !== null && !in_array($key, $token_pages, true)) {
@@ -1018,7 +1021,7 @@ class Core {
         // Generate new token if no valid existing token
         try {
             $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
-            $new_token = $this->generateWebsocketToken($page_contexts);
+            $new_token = $this->generateWebsocketToken($page_contexts, $existing_authorized_pages);
 
             // Store in cookie for reuse (shorter expiry than session tokens)
             Utils::setCookie($cookie_key, $new_token, $expire_time);

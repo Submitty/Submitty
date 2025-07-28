@@ -1059,7 +1059,7 @@ class Access {
 
                 if ($authorized && $page_identifier !== null) {
                     $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
-                    $authorized_pages[] = $full_page_identifier;
+                    $authorized_pages[$full_page_identifier] = null; // This will eventually be a timestamp in token provisioning
                 }
             }
             catch (\Exception $e) {

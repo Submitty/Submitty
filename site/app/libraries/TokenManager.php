@@ -77,20 +77,37 @@ class TokenManager {
      * Generate a websocket token containing authorized pages for a user
      *
      * @param string $user_id User ID
-     * @param array<string> $authorized_pages Array of page identifiers the user can access
+     * @param array<string, int|null> $authorized_pages Array of page identifiers the user can access
+     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return Token
      */
     public static function generateWebsocketToken(
         string $user_id,
-        array $authorized_pages
+        array $authorized_pages,
+        ?array $existing_authorized_pages = []
     ): Token {
-        $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
+        $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
+
+        // Persist existing authorized pages if the expiration time is within reason
+        foreach ($existing_authorized_pages as $page_identifier => $expire_time) {
+            if ($expire_time !== null && $expire_time > time() && !array_key_exists($page_identifier, $authorized_pages)) {
+                $authorized_pages[$page_identifier] = $expire_time;
+            }
+        }
+
+        // Persist new authorized pages with the latest expiration time
+        foreach ($authorized_pages as $page_identifier => $expire_time) {
+            if ($expire_time === null) {
+                $authorized_pages[$page_identifier] = $token_expire_time;
+            }
+        }
+
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
             ->relatedTo($user_id)
             ->withClaim('authorized_pages', $authorized_pages)
-            ->withClaim('expire_time', $expire_time)
+            ->withClaim('expire_time', $token_expire_time)
             ->withClaim('token_type', 'websocket')
             ->getToken(
                 self::$configuration->signer(),
