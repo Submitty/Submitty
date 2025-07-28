@@ -100,6 +100,6 @@
     "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
-    "build": "vue-tsc --noEmit && node .build.js && vite build vue"
+    "build": "vue-tsc && node .build.js && vite build vue"
   }
 }
