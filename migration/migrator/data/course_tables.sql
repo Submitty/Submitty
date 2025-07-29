@@ -2871,6 +2871,13 @@ CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree 
 
 
 --
+-- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
+
+
+--
 -- Name: users_user_numeric_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 

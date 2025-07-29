@@ -121,7 +121,7 @@ class HomePageController extends AbstractController {
             $this->core->loadCourseConfig($semester, $course_name);
             $this->core->loadCourseDatabase();
             $course_db = $this->core->getCourseDB();
-            $course_notifications = $this->core->getQueries()->getAllRecentNotifications($user_id, $semester, $course_name, $course_db);
+            $course_notifications = $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db);
 
             foreach ($course_notifications as $notification) {
                 $notify_time = $notification->getNotifyTime();

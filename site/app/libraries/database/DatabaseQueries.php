@@ -5442,7 +5442,7 @@ AND gc_id IN (
      * @param object $course_db
      * @return array<int, Notification>
      */
-    public function getAllRecentNotifications($user_id, $semester, $course_name, $course_db) {
+    public function getRecentUserNotifications($user_id, $semester, $course_name, $course_db) {
         $query = "
             SELECT id, component, metadata, content,
                 (CASE WHEN seen_at IS NULL THEN false ELSE true END) AS seen,
