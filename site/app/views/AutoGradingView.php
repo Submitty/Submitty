@@ -152,13 +152,12 @@ class AutoGradingView extends AbstractView {
             $description = $autocheck->getDescription();
             $diff_viewer = $autocheck->getDiffViewer();
             $file_path = $diff_viewer->getActualFilename();
-            if (str_ends_with($file_path, '.pdf') || str_ends_with($file_path, '.ipynb')) {
+            if (str_ends_with($file_path, '.pdf')) {
                 $public = $autocheck->getPublic();
                 $file_name = pathinfo($file_path, PATHINFO_BASENAME);
                 $file_path = urlencode($file_path);
-                $file_type = str_ends_with($file_path, '.pdf') ? "pdf" : "notebook";
                 $checks[] = [
-                    $file_type => true,
+                    "pdf" => true,
                     "name" => $file_name,
                     "path" => $file_path,
                     "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
@@ -198,6 +197,21 @@ class AutoGradingView extends AbstractView {
                             "title" => $actual_title,
                             "show_popup" => $this->autoShouldDisplayPopup($actual_display),
                             "src" => file_get_contents($diff_viewer->getActualFilename())
+                        ];
+                    }
+                    elseif (str_ends_with($file_name, '.ipynb')) {
+                        $public = $autocheck->getPublic();
+                        $display_url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                            "dir" => $public ? "results_public" : "results",
+                            "file" => $file_name,
+                            "path" => urlencode($file_path)
+                        ]);
+                        $check["actual"] = [
+                            "type" => "notebook",
+                            "title" => $actual_title,
+                            "show_popup" => $this->autoShouldDisplayPopup($actual_display),
+                            "src" => $display_url,
+                            "filepath" => $file_path,
                         ];
                     }
                     else {

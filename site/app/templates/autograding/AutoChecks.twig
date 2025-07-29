@@ -22,7 +22,7 @@
     {% if loop.index0 != 0 %}
         <div class="clear"></div>
     {% endif %}
-    {% if check.pdf is defined or check.notebook is defined %}
+    {% if check.pdf is defined %}
         <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <div class="autocheck-header">
@@ -78,14 +78,20 @@
         <h4>
             {{ element.title }}
             {% if element.show_popup %}
-                <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});" class="key_to_click" tabindex="0">
-                    <i class="fas fa-window-restore" style="cursor: pointer;"></i>
-                </span>
+                {% if element.type == "notebook" %}
+                  <span onclick='popOutSubmittedFile("{{ check.filename|url_encode }}", "{{ element.filepath|url_encode }}")' aria-label="Pop up the file in a new window">
+                      <i class="fas fa-window-restore" style="cursor: pointer;"></i>
+                  </span>
+                {% else %}
+                  <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});" class="key_to_click" tabindex="0">
+                      <i class="fas fa-window-restore" style="cursor: pointer;"></i>
+                  </span>
+                {% endif %}
                 {% if side == 0 %}
-                <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0"
-                title="Downloads your test case result file">
-                    <i class="fas fa-download" style="cursor: pointer;"></i>
-                </span>
+                  <span onclick="downloadTestCaseResult({{ index }}, '{{ check.filename }}', {{ display_version }}, '{{ gradeable_id }}', '{{ who }}')" tabindex="0"
+                  title="Downloads your test case result file">
+                      <i class="fas fa-download" style="cursor: pointer;"></i>
+                  </span>
                 {% endif %}
             {% endif %}
         </h4>
@@ -129,6 +135,8 @@
                     mermaid.init( { "useMaxWidth" : false }, "#div_{{ index }}_{{ check_index }}");
                 });
               </script>
+            {% elseif element.type == "notebook" %}
+                <iframe src="{{ element.src }}" width="95%" height="1200px" style="border: 0"></iframe>
             {% endif %}
         </div>
     </div>

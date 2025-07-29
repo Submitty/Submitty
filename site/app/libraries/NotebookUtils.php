@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace app\libraries;
 
 class NotebookUtils {
-    private const TEXT_LIMIT = 1024 * 30; // 30KB limit for output text
-    private const IMG_SIZE_LIMIT = 1024 * 1024 * 5; // 5MB limit for images
+    private const TEXT_LIMIT = 1024 * 5; // 5KB limit for output text
+    private const IMG_SIZE_LIMIT = 1024 * 1024 * 2; // 2MB limit for images
     private const NOTEBOOK_SIZE_LIMIT = 1024 * 1024 * 10; // 10MB limit for rendering
     // Note: SVG files are not supported due to XSS risks
     private const MIME_TYPES = [
@@ -42,17 +42,33 @@ class NotebookUtils {
         }
 
         $cells = [];
+        $skipped_content = 0;
+        $skipped_output = 0;
+        // Process each cell in the notebook
         foreach ($filedata['cells'] as $cell) {
             switch ($cell['cell_type']) {
                 case 'markdown':
-                    $cells[] = self::processMarkdownCell($cell);
+                    $cells[] = self::processMarkdownCell($cell, $skipped_content);
                     break;
                 case 'code':
-                    $cells = array_merge($cells, self::processCodeCell($cell, $filedata));
+                    $cells = array_merge($cells, self::processCodeCell($cell, $filedata, $skipped_output));
                     break;
                 default:
                     break;
             }
+        }
+
+        // If there is skipped content, prepend a warning cell
+        if ($skipped_content > 0 || $skipped_output > 0) {
+            $warning_cell = [
+                'type' => 'markdown',
+                'markdown_data' => '### Notebook Rendered with Skipped Content' . PHP_EOL .
+                'Some content was skipped due to size limits. ' .
+                ($skipped_content > 0 ? "Skipped $skipped_content attachment(s)." : '') .
+                ($skipped_output > 0 ? " Skipped $skipped_output output(s)." : '') .
+                PHP_EOL . 'Download the notebook to view the full notebook.'
+            ];
+            array_unshift($cells, $warning_cell);
         }
 
         return $cells;
@@ -64,7 +80,7 @@ class NotebookUtils {
      * @param array<string,mixed> $cell
      * @return array<string,mixed>
      */
-    private static function processMarkdownCell(array $cell): array {
+    private static function processMarkdownCell(array $cell, int &$skipped_content): array {
         $markdown = is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'];
         $search = [];
         $replace = [];
@@ -77,9 +93,11 @@ class NotebookUtils {
                     $search[] = "attachment:$filename";
                     if (!in_array($mime, self::MIME_TYPES, true)) {
                         $replace[] = 'Image skipped: image type not supported.';
+                        $skipped_content += 1;
                     }
                     elseif (strlen($base64) > self::IMG_SIZE_LIMIT) {
                         $replace[] = 'Image skipped: exceeds size limit of ' . (self::IMG_SIZE_LIMIT / (1024 * 1024)) . ' MB. Download the notebook to view the image.';
+                        $skipped_content += 1;
                     }
                     else {
                         $data_uri = 'data:' . $mime . ";base64," . $base64;
@@ -103,7 +121,7 @@ class NotebookUtils {
      * @param array<string,mixed> $filedata
      * @return array<int,array<string,mixed>>
      */
-    private static function processCodeCell(array $cell, array $filedata): array {
+    private static function processCodeCell(array $cell, array $filedata, int &$skipped_output): array {
         $code_cell = [];
         $code_cell[] = [
             'type' => 'short_answer',
@@ -124,6 +142,7 @@ class NotebookUtils {
                     $output_text = is_array($output['text'] ?? '') ? implode($output['text']) : (string) ($output['text'] ?? '');
                     if (strlen($output_text) > self::TEXT_LIMIT) {
                         $output_text = self::truncateText($output_text);
+                        $skipped_output += 1;
                     }
                     $code_cell[] = [
                         'type' => 'output',
@@ -145,6 +164,9 @@ class NotebookUtils {
                     $text = $output['data']['text/plain'] ?? '';
                     if ($output_type === 'text/plain') {
                         // Display output text if we don't know how to render the content otherwise
+                        if (strlen($output_text) > self::TEXT_LIMIT) {
+                            $skipped_output += 1;
+                        }
                         $code_cell[] = [
                             'type' => 'output',
                             'output_text' => self::truncateText($text),
@@ -158,6 +180,7 @@ class NotebookUtils {
                                 'type' => 'output',
                                 'output_text' => 'Image skipped: exceeds size limit of ' . (self::IMG_SIZE_LIMIT / (1024 * 1024)) . ' MB. Download the notebook to view the full image.'
                             ];
+                            $skipped_output += 1;
                         }
                         else {
                             $code_cell[] = [
