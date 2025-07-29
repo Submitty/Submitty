@@ -164,7 +164,7 @@ class NotebookUtils {
                     $text = $output['data']['text/plain'] ?? '';
                     if ($output_type === 'text/plain') {
                         // Display output text if we don't know how to render the content otherwise
-                        if (strlen($output_text) > self::TEXT_LIMIT) {
+                        if (strlen($text) > self::TEXT_LIMIT) {
                             $skipped_output += 1;
                         }
                         $code_cell[] = [
