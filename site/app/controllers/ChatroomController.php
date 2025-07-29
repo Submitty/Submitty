@@ -118,7 +118,9 @@ class ChatroomController extends AbstractController {
             );
         }
 
-        $this->core->authorizeWebSocketToken('chatrooms', ['chatroom_id' => $chatroom->getId()]);
+        $this->core->authorizeWebSocketToken('chatrooms', [
+            'chatroom_id' => $chatroom->getId(),
+        ]);
 
         return new WebResponse(
             'Chatroom',

@@ -941,21 +941,12 @@ class Core {
     /**
      * Generate a websocket token for the current user with permissions for specified pages
      *
-     * @param array<int, array<string, mixed>> $page_contexts Array of page contexts the user should have access to
-     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
+     * @param array<int, array<string, mixed>> $page_contexts Array of page contexts the user should have access to, such as 'page' and 'params'
+     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to, where the key is the page identifier and the value is null
      * @return string JWT token string
      */
     public function generateWebSocketToken(array $page_contexts, ?array $existing_authorized_pages = []): string {
-        if (!$this->userLoaded()) {
-            throw new \BadMethodCallException("Cannot generate websocket token: no user loaded");
-        }
-
-        if (!$this->config->isCourseLoaded()) {
-            throw new \BadMethodCallException("Cannot generate websocket token: no course loaded");
-        }
-
-        $authorized_pages = $this->access->getAuthorizedWebsocketPages(
-            $this->user,
+        $authorized_pages = $this->access->formatAuthorizedWebsocketPages(
             $this->config->getTerm(),
             $this->config->getCourse(),
             $page_contexts
@@ -971,26 +962,32 @@ class Core {
     }
 
     /**
-     * Authorize a websocket token,
+     * Authorize a websocket token, which assumes the authorization checks have already been performed
+     * to avoid redundant database queries or file system checks.
      *
      * @param string|null $page Page type
      * @param array<string, mixed> $query_params Query parameters
      * @return string|null JWT token string or null if generation fails
      */
     public function authorizeWebSocketToken(?string $page = null, ?array $query_params = null): ?string {
+        if (!$this->config->isCourseLoaded() || !$this->userLoaded()) {
+            return null;
+        }
+
         $page_identifier = Utils::buildWebSocketPageIdentifier($page ?? '', $query_params ?? []);
 
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
         $existing_authorized_pages = [];
 
+        // Default page contexts available to all users within the course
         $page_contexts = [
             ['page' => 'discussion_forum'],
             ['page' => 'office_hours_queue'],
             ['page' => 'chatrooms'],
         ];
 
-        // Check if we have an existing valid token
+        // Validate the existing token, refreshing or regenerating if needed for new pages or expired tokens
         if ($existing_token !== null) {
             try {
                 $token = TokenManager::parseWebsocketToken($existing_token);

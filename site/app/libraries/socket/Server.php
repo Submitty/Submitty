@@ -35,7 +35,6 @@ class Server implements MessageComponentInterface {
 
     public function __construct(Core $core) {
         $this->core = $core;
-        $this->log("Server constructed");
     }
 
     private function log(string $message) {
@@ -82,8 +81,9 @@ class Server implements MessageComponentInterface {
     }
 
     /**
-     * This function checks if a given connection object is authenticated
-     * It now uses websocket tokens instead of database lookups for better performance
+     * This function checks if a given connection object is authenticated and authorized to access the requested page
+     * using the websocket token provided in the cookie that is created by the web server.
+     *
      * @param ConnectionInterface $conn
      * @return bool
      */
@@ -101,47 +101,38 @@ class Server implements MessageComponentInterface {
             return true;
         }
 
-        // Try to get websocket token from query parameters first, then cookies, then headers
+        // Parse query parameters
         $query_params = [];
         $query = $request->getUri()->getQuery();
         parse_str($query, $query_params);
+
+        // Parse the authorization token from the query parameters
         $websocket_token = $query_params['ws_token'] ?? null;
-        $this->log("Websocket token from query: " . $websocket_token);
+
+        // If no token is provided, close the connection
         if ($websocket_token === null) {
-            $cookieString = $request->getHeader("cookie")[0] ?? '';
-            parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
-            $websocket_token = $cookies['submitty_websocket_token'] ?? null;
-            $this->log("Websocket token from cookie: " . $websocket_token);
-        }
-        if ($websocket_token === null) {
-            $headers = $request->getHeaders();
-            $websocket_token = $headers['Websocket-Token'][0] ?? null;
-            $this->log("Websocket token from header: " . $websocket_token);
-        }
-        if ($websocket_token === null) {
-            $this->log("No websocket token provided for connection {$conn->resourceId}");
             return false;
         }
 
-        // Get required parameters
+        // If required parameters are not provided, close the connection
         if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
-            $this->log("Missing required parameters for connection {$conn->resourceId}");
             return false;
         }
 
+        // Get the page, term, and course from the query parameters
         $page = $query_params['page'];
         $term = $query_params['term'];
         $course = $query_params['course'];
 
+        // Parse and validate the websocket token
         try {
-            // Parse and validate the websocket token
             $token = TokenManager::parseWebsocketToken($websocket_token);
-            $this->log("Token parsed successfully");
             $user_id = $token->claims()->get('sub');
             $authorized_pages = $token->claims()->get('authorized_pages');
 
             // Build the page identifier based on page type and parameters
             $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
+
             if ($page_identifier === null) {
                 $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
@@ -149,11 +140,9 @@ class Server implements MessageComponentInterface {
 
             // Build full page identifier with term and course
             $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
-            $this->log("Full page identifier: " . $full_page_identifier);
 
             // Check if this page is in the user's authorized pages
             if (!array_key_exists($full_page_identifier, $authorized_pages) || time() > intval($authorized_pages[$full_page_identifier])) {
-                $this->log("Page '{$full_page_identifier}' not authorized for user '{$user_id}' in connection {$conn->resourceId}");
                 return false;
             }
 
@@ -230,7 +219,6 @@ class Server implements MessageComponentInterface {
      * Check the authentication status of the connection when it gets opened
      */
     public function onOpen(ConnectionInterface $conn): void {
-        $this->log("On open");
         try {
             if (!$this->checkAuth($conn)) {
                 $conn->close();
@@ -250,7 +238,6 @@ class Server implements MessageComponentInterface {
         }
         catch (\Throwable $t) {
             $this->logError($t, $conn);
-            $this->log("On open error . Error: " . $t->getMessage());
             $this->closeWithError($conn);
         }
     }
@@ -261,7 +248,6 @@ class Server implements MessageComponentInterface {
      * @param string $msgString
      */
     public function onMessage(ConnectionInterface $from, $msgString): void {
-        $this->log("On message; msgString: " . $msgString);
         try {
             if ($msgString === 'ping') {
                 $from->send('pong');
@@ -304,14 +290,12 @@ class Server implements MessageComponentInterface {
         if ($user_id) {
             unset($this->sessions[$conn->resourceId]);
         }
-        $this->log("On close");
     }
 
     public function closeWithError(ConnectionInterface $conn): void {
         $msg = ['error' => 'Server error'];
         $conn->send(json_encode($msg));
         $conn->close();
-        $this->log("Close with error");
     }
 
     /**
@@ -319,6 +303,5 @@ class Server implements MessageComponentInterface {
      */
     public function onError(ConnectionInterface $conn, \Exception $e): void {
         $conn->close();
-        $this->log("On error: " . $e->getMessage());
     }
 }

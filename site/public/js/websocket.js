@@ -51,13 +51,7 @@ class WebSocketClient {
         urlWithParams.searchParams.append('page', page);
         urlWithParams.searchParams.append('course', course);
         urlWithParams.searchParams.append('term', term);
-
-        // Add websocket token for authentication
-        const wsToken = args.ws_token || window.websocketToken;
-
-        if (wsToken) {
-            urlWithParams.searchParams.append('ws_token', wsToken);
-        }
+        urlWithParams.searchParams.append('ws_token', window.websocketToken);
 
         for (const key in args) {
             urlWithParams.searchParams.append(key, args[key]);

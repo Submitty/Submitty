@@ -139,7 +139,7 @@ class TokenManager {
      *
      * @param string $token JWT token string
      * @return Token Parsed token with websocket claims
-     * @throws \InvalidArgumentException If token is invalid or missing required claims
+     * @throws \InvalidArgumentException If token is invalid or missing required claims or has expired
      */
     public static function parseWebsocketToken(string $token): Token {
         $token = self::parseToken($token);
@@ -151,9 +151,11 @@ class TokenManager {
             throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
         }
 
-        // Check if token has expired
         $expire_time = $token->claims()->get('expire_time');
-        if ($expire_time > 0 && time() > $expire_time) {
+        if (!is_int($expire_time)) {
+            throw new \InvalidArgumentException('Invalid \'expire_time\' in websocket token');
+        }
+        elseif (time() > $expire_time) {
             throw new \InvalidArgumentException('Websocket token has expired');
         }
 

@@ -1923,7 +1923,10 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
 
-        $this->core->authorizeWebsocketToken('grade_inquiry', ['gradeable_id' => $gradeable_id, 'submitter_id' => $graded_gradeable->getSubmitter()->getId()]);
+        $this->core->authorizeWebSocketToken('grade_inquiry', [
+            'gradeable_id' => $gradeable_id,
+            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+        ]);
 
         $show_verify_all = false;
         //check if verify all button should be shown or not

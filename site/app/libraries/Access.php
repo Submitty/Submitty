@@ -955,17 +955,16 @@ class Access {
     }
 
     /**
-     * Determine what websocket pages a user is authorized to access
+     * Format the authorized pages for a websocket authorization token
      *
-     * @param User $user User to check permissions for
      * @param string $term Course term/semester
      * @param string $course Course identifier
      * @param array<int, array<string, mixed>> $page_contexts Array of page contexts to check, each containing:
      *                            - 'page': Page type (discussion_forum, polls, etc.)
-     *                            - 'params': Additional parameters for the page
-     * @return array<string, null> Array of authorized page identifiers
+     *                            - 'params': Additional parameters for the page, such as 'gradeable_id' or 'chatroom_id'
+     * @return array<string, null> Array of authorized page identifiers, where the key is the page identifier and the value is null
      */
-    public function getAuthorizedWebsocketPages(User $user, string $term, string $course, array $page_contexts): array {
+    public function formatAuthorizedWebsocketPages(string $term, string $course, array $page_contexts): array {
         $authorized_pages = [];
 
         foreach ($page_contexts as $context) {

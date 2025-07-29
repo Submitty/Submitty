@@ -436,7 +436,6 @@ class Utils {
             case 'discussion_forum':
             case 'office_hours_queue':
                 return $page;
-
             case 'chatrooms':
                 $page_identifier = $page;
                 if (isset($query_params['chatroom_id'])) {
