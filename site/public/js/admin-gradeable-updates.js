@@ -1311,7 +1311,7 @@ function updateEditorIcons() {
     
     // Tab Length Icon
     const tabLengthIcon = document.getElementById('toggle-tab-length');
-    const tabLength = localStorage.getItem('setTabLength');
+    const tabLength = localStorage.getItem('setTabLength') || '2';
     tabLengthIcon.classList.remove('fa-2', 'fa-4');
     tabLengthIcon.classList.add(`fa-${tabLength}`);
 }
