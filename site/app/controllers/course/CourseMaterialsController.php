@@ -478,7 +478,7 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 if (!rename($course_material->getPath(), $new_path)) {
-                    return JsonResponse::getErrorResponse("Failure to rename filepath, likely due to a folder with the same name as the file.");
+                    return JsonResponse::getErrorResponse("Failure to rename filepath.");
                 }
 
                 $course_material->setPath($new_path);
@@ -707,7 +707,7 @@ class CourseMaterialsController extends AbstractController {
                             }
 
                             if (!$zip->extractTo($upload_path, $entries)) {
-                                return JsonResponse::getErrorResponse('Failed to Extract zip');
+                                return JsonResponse::getErrorResponse('Failed to extract zip');
                             }
 
                             foreach ($zfiles as $zfile) {
