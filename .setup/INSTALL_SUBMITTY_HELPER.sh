@@ -283,18 +283,18 @@ if [ "${IS_WORKER}" == 0 ]; then
 
     # Install cypress related files that are elsewhere in the repository
     if [ "${IS_VAGRANT}" == 1 ]; then
-        copy_cmd="rsync -rtz --exclude='.git'"
+        copy_cmd=(rsync -rtz --exclude='.git')
     elif [ "${IS_CI}" == 1 ]; then
-        copy_cmd="cp -r"
+        copy_cmd=(cp -r)
     else
-        copy_cmd=""
+        copy_cmd=()
     fi
 
-    if [ -n "$copy_cmd" ]; then
+    if [ -n "${copy_cmd[0]}" ]; then
         echo -e "Install cypress related files"
-        $copy_cmd "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
-        $copy_cmd "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
-        $copy_cmd "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_tutorial/"
+        ${copy_cmd[@]} "${SUBMITTY_REPOSITORY}/more_autograding_examples/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_more_autograding_examples/"
+        ${copy_cmd[@]} "${SUBMITTY_REPOSITORY}/sample_files/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_sample_files/"
+        ${copy_cmd[@]} "${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Tutorial/" "${SUBMITTY_REPOSITORY}/site/cypress/fixtures/copy_of_tutorial/"
     fi
 fi
 ########################################################################################################################
