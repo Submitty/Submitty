@@ -968,11 +968,6 @@ class Access {
     public function getAuthorizedWebsocketPages(User $user, string $term, string $course, array $page_contexts): array {
         $authorized_pages = [];
 
-        // First check if user can view the course at all
-        if (!$this->canUser($user, "course.view", ['course' => $course, 'semester' => $term])) {
-            return $authorized_pages;
-        }
-
         foreach ($page_contexts as $context) {
             $page = $context['page'];
             $params = $context['params'] ?? [];
