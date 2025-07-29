@@ -500,14 +500,6 @@ class CourseMaterialsController extends AbstractController {
 
         if ($flush) {
             $this->core->getCourseEntityManager()->flush();
-
-            // Clean up any empty directories that were affected by this operation
-            if ($affected_directory !== null) {
-                $this->cleanupEmptyDirectoriesAfterDeletion($affected_directory);
-
-                // Flush again after directory cleanup
-                $this->core->getCourseEntityManager()->flush();
-            }
         }
 
         return JsonResponse::getSuccessResponse("Successfully uploaded!");
