@@ -4,6 +4,16 @@
     "container_options": {
         "container_image": "submitty/rust:latest"
     },
+    "allow_system_calls" : [
+        "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
+        "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
+        "FILE_MANAGEMENT_RARE",
+        "PROCESS_CONTROL_ADVANCED",
+        "PROCESS_CONTROL_MEMORY_ADVANCED",
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING"
+    ],
     "autograding": {
         "submission_to_compilation": ["**/*.rs"]
     },
