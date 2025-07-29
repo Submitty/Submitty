@@ -61,6 +61,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.6.2",
     "@types/node": "^24.0.10",
+    "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
     "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-vue": "^6.0.0",
@@ -88,7 +89,7 @@
     "typescript-eslint": "^8.36.0",
     "vite": "^7.0.3",
     "vnu-jar": "^24.10.17",
-    "vue-tsc": "^2.2.10"
+    "vue-tsc": "^3.0.2"
   },
   "scripts": {
     "prettier": "prettier --check \"public/css/**/*.css\"",
@@ -99,6 +100,6 @@
     "eslint:fix": "eslint . --fix",
     "test": "jest",
     "test:api": "jest --config jest.config.api.js",
-    "build": "tsc -p . && node .build.js && vite build vue"
+    "build": "vue-tsc && node .build.js && vite build vue"
   }
 }
