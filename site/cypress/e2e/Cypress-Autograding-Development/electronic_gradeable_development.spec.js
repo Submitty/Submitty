@@ -6,7 +6,7 @@ const constructFileName = (gradeable, fileName) => {
 };
 
 describe('Test the development course gradeables', { env: { course: 'development' } }, () => {
-    it('Should test the cpp cats gradeable with full and buggy submissions', () => {
+    it('Should test the development gradeables with full and buggy submissions', () => {
         cy.login('aphacker');
 
         const cpp_cats = 'cpp_cats';
