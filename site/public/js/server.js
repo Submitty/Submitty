@@ -1698,7 +1698,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
 function popOutSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
-    if (url_file.includes('submissions')) {
+    if (url_file.includes('submissions_processed')) {
+        directory = 'submissions_processed';
+    }
+    else if (url_file.includes('submissions')) {
         directory = 'submissions';
     }
     else if (url_file.includes('results_public')) {

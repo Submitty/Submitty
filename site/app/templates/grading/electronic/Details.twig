@@ -49,7 +49,7 @@
                 </label>
                 {% if toggle_anon_button %}
                 <label for="toggle-anon-students" data-testid="anon-students-label" data-gradeable-id="{{ gradeable.getId() }}" class="column-wrapper">  Anonymize Student Names
-                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon('{{ gradeable.getId() }}')">
+                    <input type="checkbox" id="toggle-anon-students" data-testid="anon-students-checkbox" onchange="changeAnon()" {% if anon_mode %}checked{% endif %}>
                 </label>
                 {% endif %}
                 {% if grade_inquiry_only_button %}
@@ -91,7 +91,6 @@
         'args': {
             'columns': all_columns|map(column => column.function),
             'labels': all_columns|map(column => column.title),
-            'hiddenColumns': default_hidden_columns,
             'forced': [
                 'grading'
             ],
@@ -777,52 +776,6 @@
     const full_access_grader_permission = {{ full_access_grader_permission ? 'true' : 'false' }};
     const is_team_assignment = {{ gradeable.isTeamAssignment() ? 'true' : 'false' }};
     const is_student = {{ is_student ? 'true' : 'false' }};
-
-    function changeSections() {
-        const status = {{ view_all ? 1 : 0 }};
-        if (status) {
-            Cookies.set('view', 'assigned', { path: '/' });
-            localStorage.setItem("general-setting-navigate-assigned-students-only", "true");
-        } else {
-            Cookies.set('view', 'all', { path: '/' });
-            localStorage.setItem("general-setting-navigate-assigned-students-only", "false");
-        }
-        location.reload();
-    }
-
-    function changeAnon(gradeable_id) {
-        Cookies.set(`default_anon_mode_${gradeable_id}_override`, 'on');
-        Cookies.set('current_gradeable_path', gradeable_id);
-        const status = {{ anon_mode ? 1 : 0}};
-        if (status) {
-            Cookies.set(`anon_mode_${gradeable_id}`, 'off');
-        }
-        else {
-            Cookies.set(`anon_mode_${gradeable_id}`, 'on');
-        }
-        location.reload();
-    }
-
-    function changeInquiry() {
-        Cookies.set('inquiry_status', '{{ inquiry_status ? "off" : "on"}}');
-        location.reload();
-    }
-
-    function changeSortOrder() {
-        if ({{ sort == 'random' ? "true" : "false" }}) {
-            Cookies.set('sort', 'id');
-        }
-        else {
-            Cookies.set('sort', 'random');
-        }
-        location.reload();
-    }
-
-    function sortTableByColumn(sort_type = 'id', direction) {
-        Cookies.set('sort', sort_type);
-        Cookies.set('direction', direction);
-        location.reload();
-    }
 
     //function to count how many submissions are being regraded so that a confirm message can be displayed if necessary
     function ajaxCountRegrade(choice,e,confirmMessage) {

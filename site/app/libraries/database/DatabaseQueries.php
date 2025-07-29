@@ -7512,6 +7512,30 @@ AND gc_id IN (
     }
 
     /**
+     * Updates the sent timestamp for an email and clears the error message
+     *
+     * @param string $subject
+     * @return bool
+     */
+    public function updateEmailSent(string $subject): bool {
+        $time = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+        $this->submitty_db->query('UPDATE emails SET sent = ? WHERE subject = ?', [$time, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the error message for an email, where an empty string implies no error
+     *
+     * @param string $subject
+     * @param string $error
+     * @return bool
+     */
+    public function updateEmailError(string $subject, string $error): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
      * Gives true if thread is locked
      */
     public function isThreadLocked(int $thread_id): bool {
