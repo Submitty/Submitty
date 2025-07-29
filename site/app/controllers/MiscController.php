@@ -79,7 +79,10 @@ class MiscController extends AbstractController {
         $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $this->decodeAnonPath(urldecode($_POST['file_path']), $gradeable_id);
         $directory = 'invalid';
-        if (strpos($file_path, 'submissions') !== false) {
+        if (strpos($file_path, 'submissions_processed') !== false) {
+            $directory = 'submissions_processed';
+        }
+        elseif (strpos($file_path, 'submissions') !== false) {
             $directory = 'submissions';
         }
         elseif (strpos($file_path, 'checkout') !== false) {
@@ -431,6 +434,7 @@ class MiscController extends AbstractController {
         if ($this->core->getAccess()->canI("path.read.submissions", $access_args)) {
             //These two have the same check
             $folder_names[] = "submissions";
+            $folder_names[] = "submissions_processed";
             $folder_names[] = "checkout";
         }
 
