@@ -1268,11 +1268,11 @@ function toggleLineNums() {
 
     if (newState === 'true') {
         icon.classList.add('line-nums-selected');
-    } else {
+    }
+    else {
         icon.classList.remove('line-nums-selected');
     }
 }
-
 
 // Toggle between tab length of 2 and 4 for gradeable editor
 function toggleTabLength() {
@@ -1308,7 +1308,7 @@ function updateEditorIcons() {
     else {
         enableLineNumsIcon.classList.remove('line-nums-selected');
     }
-    
+
     // Tab Length Icon
     const tabLengthIcon = document.getElementById('toggle-tab-length');
     const tabLength = localStorage.getItem('setTabLength') || '2';
