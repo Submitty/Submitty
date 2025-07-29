@@ -401,6 +401,10 @@ class CourseMaterialsController extends AbstractController {
                     return JsonResponse::getErrorResponse("Invalid path or filename");
                 }
 
+                if (dirname($new_path) === $path) {
+                    return JsonResponse::getErrorResponse("Cannot move a file into a directory with the same name as the file.");
+                }
+
                 if (($overflow = strlen($new_path) - self::MAX_PATH_LENGTH) > 0) {
                     return JsonResponse::getErrorResponse("The new path is too long. Please reduce it by {$overflow} characters.");
                 }
