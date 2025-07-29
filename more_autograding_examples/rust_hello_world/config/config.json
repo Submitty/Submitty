@@ -5,12 +5,8 @@
         "container_image": "submitty/rust:latest"
     },
     "allow_system_calls" : [
-        "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
         "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
-        "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
-        "FILE_MANAGEMENT_RARE",
         "PROCESS_CONTROL_ADVANCED",
-        "PROCESS_CONTROL_MEMORY_ADVANCED",
         "PROCESS_CONTROL_NEW_PROCESS_THREAD",
         "PROCESS_CONTROL_SCHEDULING"
     ],
@@ -21,6 +17,7 @@
         {
             "type": "Compilation",
             "title": "Compilation",
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
             "command": "/usr/local/cargo/bin/rustc *.rs -o a.out",
             "executable_name": "a.out",
             "points": 5

@@ -8,12 +8,8 @@
 
     // needed for rust
     "allow_system_calls" : [
-        "COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
         "COMMUNICATIONS_AND_NETWORKING_SIGNALS",
-        "FILE_MANAGEMENT_EXTENDED_ATTRIBUTES",
-        "FILE_MANAGEMENT_RARE",
         "PROCESS_CONTROL_ADVANCED",
-        "PROCESS_CONTROL_MEMORY_ADVANCED",
         "PROCESS_CONTROL_NEW_PROCESS_THREAD",
         "PROCESS_CONTROL_SCHEDULING"
     ],
@@ -24,6 +20,7 @@
         {
             "type": "Compilation",
             "title": "Rust Compilation",
+            "allow_system_calls" : [ "ALLOW_ALL_RESTRICTED_SYSTEM_CALLS" ],
             "containers": [
                 {
                     // Rust will use dynamic linking by default, and libraries may not be available in a different image.
