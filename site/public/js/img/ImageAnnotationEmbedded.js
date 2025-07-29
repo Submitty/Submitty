@@ -65,7 +65,7 @@ function addAnnotations() {
             // Set up event handlers for the annotation editor
             globalAnnotationEditor.addEventListener('editorsave', function(event) {
                 currentAnnotations = event.detail.state;
-                annotatedImage.src = event.detail.dataUrl; // Capture the annotated image data URL
+                annotatedImage.src = event.detail.dataUrl;
                 $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
                 
                 // Hide the annotation editor instead of removing it
@@ -303,12 +303,6 @@ function renderAnnotationsOnImage() {
     }
     
     try {
-        if (typeof markerjs3 === 'undefined' || !markerjs3.MarkerView) {
-            console.error("markerjs3 MarkerView is not available");
-            $("#annotation-status").text("Error: MarkerView not available").css("color", "red");
-            return;
-        }
-        
         // Check if we already replaced the image with MarkerView
         const existingMarkerView = document.getElementById('annotation-marker-view');
         if (existingMarkerView) {
@@ -369,6 +363,28 @@ function renderAnnotationsOnImage() {
     }
 }
 
+async function generateAnnotatedImageDataURL() {
+    if (!targetImg || !currentAnnotations) {
+        return;
+    }
+    
+    try {
+        // Create a Renderer instance to generate the annotated image
+        const renderer = new markerjs3.Renderer();
+        renderer.targetImage = targetImg;
+        
+        // Generate the annotated image dataURL using the current annotations
+        const dataUrl = await renderer.rasterize(currentAnnotations);
+        
+        // Set the annotated image src to the generated dataURL
+        annotatedImage.src = dataUrl;
+        console.log("Annotated image dataURL generated on load");
+        
+    } catch (error) {
+        console.error("Error generating annotated image dataURL:", error);
+    }
+}
+
 function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existingAnnotations) {
     // Clean up any existing annotation editor before initializing a new image
     cleanupAnnotationEditor();
@@ -386,6 +402,7 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
     // Wait for DOM to be ready
     $(document).ready(function() {
         // Get the target image element
+        console.log(existingAnnotations);
         targetImg = document.getElementById("annotatable-image");
         // Reset annotation data for new image
         if (annotatedImage === null) {
@@ -409,11 +426,23 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
         if (targetImg && (targetImg.complete && targetImg.naturalHeight !== 0)) {
             // Image is already loaded
             renderAnnotationsOnImage(targetImg);
+            // Generate annotated image dataURL if annotations exist
+            if (currentAnnotations && currentAnnotations.markers && currentAnnotations.markers.length > 0) {
+                generateAnnotatedImageDataURL().catch(console.error);
+            }
         } else if (targetImg) {
             // Wait for image to load
-            const imageLoadHandler = function() {
+            const imageLoadHandler = async function() {
                 targetImg.removeEventListener('load', imageLoadHandler);
                 renderAnnotationsOnImage(targetImg);
+                // Generate annotated image dataURL if annotations exist
+                if (currentAnnotations && currentAnnotations.markers && currentAnnotations.markers.length > 0) {
+                    try {
+                        await generateAnnotatedImageDataURL();
+                    } catch (error) {
+                        console.error("Error generating annotated image on load:", error);
+                    }
+                }
             };
             targetImg.addEventListener('load', imageLoadHandler);
         }
