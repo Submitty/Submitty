@@ -1278,7 +1278,7 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $jsonThreads = json_encode('{}');
+            $jsonThreads = [];
             $discussion_clicked = Utils::getBooleanValue($details['discussion_based'] ?? false);
 
             //Validate user input for discussion threads
@@ -1289,7 +1289,6 @@ class AdminGradeableController extends AbstractController {
                         throw new \InvalidArgumentException('Invalid thread id specified.');
                     }
                 }
-                $jsonThreads = json_encode($jsonThreads);
             }
 
             $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed'] ?? false);
