@@ -344,6 +344,7 @@ describe('Should test WebSocket functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        cy.get('#socket-server-system-message').should('be.hidden');
         removeThread(title5);
     });
 

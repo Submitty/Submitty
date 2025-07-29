@@ -46,6 +46,20 @@ export function getApiKey(user_id, password) {
 }
 
 /**
+ * Get the current user's websocket token contents for testing
+ * @returns {Object} The parsed websocket token data
+ */
+export function getWebSocketToken() {
+    return cy.request({
+        method: 'GET',
+        url: `${Cypress.config('baseUrl')}/api/websocket_token`,
+    }).then((response) => {
+        console.log(response);
+        return JSON.parse(response.body).data.token;
+    });
+}
+
+/**
 * Build a courseURL based on an array of 'parts', e.g [foo, bar] -> courses/s21/foo/bar
 *
 * @param {String[]} [parts=[]] array of parts to string together

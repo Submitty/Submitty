@@ -14,6 +14,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
 use app\libraries\response\MultiResponse;
+use app\libraries\TokenManager;
 use app\views\AuthenticationView;
 use app\models\User;
 use app\models\Email;
@@ -198,6 +199,32 @@ class AuthenticationController extends AbstractController {
         else {
             $msg = "Could not login using that user id or password";
             return MultiResponse::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+    }
+
+    #[Route("/api/websocket_token", methods: ["GET"])]
+    public function getWebSocketToken(): JsonResponse {
+        $cookie_key = 'submitty_websocket_token';
+        $existing_token = $_COOKIE[$cookie_key] ?? null;
+
+        if ($existing_token === null) {
+            return JsonResponse::getFailResponse("No websocket token found");
+        }
+
+        try {
+            $token = TokenManager::parseWebsocketToken($existing_token);
+            $token_parsed = [
+                'iat' => $token->claims()->get('iat'),
+                'sub' => $token->claims()->get('sub'),
+                'iss' => $token->claims()->get('iss'),
+                'authorized_pages' => $token->claims()->get('authorized_pages'),
+                'expire_time' => $token->claims()->get('expire_time'),
+            ];
+
+            return JsonResponse::getSuccessResponse(['token' => $token_parsed]);
+        }
+        catch (\Exception $e) {
+            return JsonResponse::getFailResponse("Invalid websocket token: " . $e->getMessage());
         }
     }
 

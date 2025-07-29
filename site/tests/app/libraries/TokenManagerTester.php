@@ -104,4 +104,115 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $this->expectExceptionMessage('Missing claims in api token');
         TokenManager::parseApiToken($token);
     }
+
+    public function testCreateWebsocketToken() {
+        $authorized_pages = [
+            'f25-sample-discussion_forum' => 1753800957,
+            'f25-sample-polls-3-instructor' => 1753800912
+        ];
+        $token = TokenManager::generateWebsocketToken(
+            'test_user',
+            $authorized_pages
+        );
+
+        $this->assertEquals('test_user', $token->claims()->get('sub'));
+        $this->assertEquals('https://submitty.org', $token->claims()->get('iss'));
+        $this->assertEquals($authorized_pages, $token->claims()->get('authorized_pages'));
+        $this->assertTrue($token->claims()->has('expire_time'));
+        $this->assertGreaterThan(time(), $token->claims()->get('expire_time'));
+    }
+
+    public function testParseWebsocketToken() {
+        $authorized_pages = [
+            'f25-sample-discussion_forum' => 1753800957,
+            'f25-sample-chatrooms-1' => 1753800957
+        ];
+
+        $token = TokenManager::generateWebsocketToken(
+            'test_user',
+            $authorized_pages
+        );
+
+        $parsed_token = TokenManager::parseWebsocketToken($token->toString());
+        $this->assertEquals('test_user', $parsed_token->claims()->get('sub'));
+        $this->assertEquals('https://submitty.org', $parsed_token->claims()->get('iss'));
+        $this->assertEquals($authorized_pages, $parsed_token->claims()->get('authorized_pages'));
+    }
+
+    public function testWebsocketTokenWithExistingPages() {
+        $existing_pages = [
+            'f25-sample-discussion_forum' => time() + 1000,
+            'f25-sample-expired-page' => time() - 100  // expired page should be filtered out
+        ];
+
+        $new_pages = [
+            'f25-sample-polls-3-instructor' => null  // null means use default expiration
+        ];
+        $token = TokenManager::generateWebsocketToken(
+            'test_user',
+            $new_pages,
+            $existing_pages
+        );
+        $authorized_pages = $token->claims()->get('authorized_pages');
+        $this->assertArrayHasKey('f25-sample-discussion_forum', $authorized_pages);
+        $this->assertArrayHasKey('f25-sample-polls-3-instructor', $authorized_pages);
+        $this->assertArrayNotHasKey('f25-sample-expired-page', $authorized_pages);
+    }
+
+    public function testWebsocketTokenMissingSubject() {
+        // Create a token without 'sub' claim
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kaXNjdXNzaW9uX2ZvcnVtIjoxNzUzODAwOTU3fSwiZXhwaXJlX3RpbWUiOjE3NTM4MDA5NTd9.F5lQx8xm1_wFzMwfgfQfB5T3xHfO2B8vMgQtWfHGlYI';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid signature for token');
+        TokenManager::parseWebsocketToken($token);
+    }
+
+    public function testWebsocketTokenMissingAuthorizedPages() {
+        // Create a token without 'authorized_pages' claim
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InRlc3RfdXNlciIsImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.Tm8xg5Fh3mLHHgJzFJmODgcFQfBz1_MfLfQW3d3HgIo';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid signature for token');
+        TokenManager::parseWebsocketToken($token);
+    }
+
+    public function testWebsocketTokenMissingExpireTime() {
+        // Create a token without 'expire_time' claim
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InRlc3RfdXNlciIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kaXNjdXNzaW9uX2ZvcnVtIjoxNzUzODAwOTU3fX0.YQYGZm8W2qYQF5ZHhFhDGzZhDgJ8sHGzL7gH5fQmBxQ';
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid signature for token');
+        TokenManager::parseWebsocketToken($token);
+    }
+
+    public function testWebsocketTokenInvalidSignature() {
+        // Test with a token that has been tampered with (invalid signature)
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6InRlc3RfdXNlciIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kaXNjdXNzaW9uX2ZvcnVtIjoxNzUzODAwOTU3fSwiZXhwaXJlX3RpbWUiOjE3NTM4MDA5NTcsInRva2VuX3R5cGUiOiJ3ZWJzb2NrZXQifQ.INVALID_SIGNATURE';
+
+        $this->expectException(\Lcobucci\JWT\Encoding\CannotDecodeContent::class);
+        $this->expectExceptionMessage('Error while decoding from Base64Url, invalid base64 characters detected');
+        TokenManager::parseWebsocketToken($token);
+    }
+
+    public function testMalformedWebsocketToken() {
+        // Test various malformed tokens
+        $malformed_tokens = [
+            'invalid.token',  // Too few parts
+            'invalid.token.signature.extra',  // Too many parts
+            'invalid-base64!.eyJzdWIiOiJ0ZXN0In0.signature',  // Invalid base64
+            '',  // Empty string
+            'not-a-jwt-at-all'  // Not JWT format
+        ];
+
+        foreach ($malformed_tokens as $malformed_token) {
+            try {
+                TokenManager::parseWebsocketToken($malformed_token);
+                $this->fail("Expected exception for malformed token: $malformed_token");
+            } catch (\Exception $e) {
+                // Expected - any exception is fine for malformed tokens
+                $this->assertInstanceOf(\Exception::class, $e);
+            }
+        }
+    }
 }

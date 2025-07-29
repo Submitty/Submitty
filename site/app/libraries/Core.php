@@ -990,19 +990,26 @@ class Core {
         // Validate the existing token, refreshing or regenerating if needed for new pages or expired tokens
         if ($existing_token !== null) {
             try {
+                $refresh = false;
                 $token = TokenManager::parseWebsocketToken($existing_token);
                 $token_user_id = $token->claims()->get('sub');
                 $token_pages = $existing_authorized_pages = $token->claims()->get('authorized_pages');
 
+                if ($page_identifier !== null && !array_key_exists($page_identifier, $token_pages)) {
+                    // Refresh token if it doesn't have the required page
+                    $refresh = true;
+                    $page_contexts[] = ['page' => $page, 'params' => $query_params];
+                }
+
                 if ($token_user_id === $this->user->getId()) {
-                    if ($page_identifier !== null && !array_key_exists($page_identifier, $token_pages)) {
-                        // Refresh token if it doesn't have the required page
-                        $page_contexts[] = ['page' => $page, 'params' => $query_params];
-                    }
-                    else {
+                    if (!$refresh) {
                         // No refresh needed, return existing token
                         return $existing_token;
                     }
+                }
+                else {
+                    // Clear existing authorized pages in case of account change
+                    $existing_authorized_pages = [];
                 }
             }
             catch (\InvalidArgumentException $exc) {
