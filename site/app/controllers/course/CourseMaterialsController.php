@@ -348,9 +348,6 @@ class CourseMaterialsController extends AbstractController {
             return JsonResponse::getErrorResponse("Course material not found");
         }
 
-        // Track directories that might be affected by this operation
-        $affected_directory = null;
-
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
                 $course_material->setPriority($_POST['sort_priority']);
@@ -482,12 +479,6 @@ class CourseMaterialsController extends AbstractController {
 
                 if (!rename($course_material->getPath(), $new_path)) {
                     return JsonResponse::getErrorResponse("Failure to rename filepath, likely due to a folder with the same name as the file.");
-                }
-
-                // Track the old directory for cleanup
-                $old_directory = dirname($path);
-                if ($old_directory !== dirname($new_path)) {
-                    $affected_directory = $old_directory;
                 }
 
                 $course_material->setPath($new_path);
