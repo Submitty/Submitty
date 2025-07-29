@@ -945,7 +945,7 @@ class Core {
      * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return string JWT token string
      */
-    public function generateWebsocketToken(array $page_contexts, ?array $existing_authorized_pages = []): string {
+    public function generateWebSocketToken(array $page_contexts, ?array $existing_authorized_pages = []): string {
         if (!$this->userLoaded()) {
             throw new \BadMethodCallException("Cannot generate websocket token: no user loaded");
         }
@@ -971,18 +971,14 @@ class Core {
     }
 
     /**
-     * Get or generate websocket token, similar to how session tokens are managed, using
-     * existing valid tokens instead of always generating new ones
+     * Authorize a websocket token,
      *
-     * @param string|null $key Optional key to check for access to, if not provided, all keys are checked
-     * @param string|null $page Optional page to check for access to, if not provided, all pages are checked
-     * @param array<string, mixed> $params Optional parameters to pass during authorization checks
+     * @param string|null $page Page type
+     * @param array<string, mixed> $query_params Query parameters
      * @return string|null JWT token string or null if generation fails
      */
-    public function getWebsocketToken(?string $key = null, ?string $page = null, ?array $params = null): ?string {
-        if (!$this->userLoaded() || !$this->config->isCourseLoaded()) {
-            return null;
-        }
+    public function authorizeWebSocketToken(?string $page = null, ?array $query_params = null): ?string {
+        $page_identifier = Utils::buildWebSocketPageIdentifier($page ?? '', $query_params ?? []);
 
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
@@ -1002,9 +998,9 @@ class Core {
                 $token_pages = $existing_authorized_pages = $token->claims()->get('authorized_pages');
 
                 if ($token_user_id === $this->user->getId()) {
-                    if ($key !== null && !array_key_exists($key, $token_pages)) {
+                    if ($page_identifier !== null && !array_key_exists($page_identifier, $token_pages)) {
                         // Refresh token if it doesn't have the required page
-                        $page_contexts[] = ['page' => $page, 'params' => $params];
+                        $page_contexts[] = ['page' => $page, 'params' => $query_params];
                     }
                     else {
                         // No refresh needed, return existing token
@@ -1021,13 +1017,16 @@ class Core {
 
         // Generate new token if no valid existing token
         try {
-            $expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
-            $new_token = $this->generateWebsocketToken($page_contexts, $existing_authorized_pages);
+            $new_token_string = $this->generateWebSocketToken($page_contexts, $existing_authorized_pages);
 
-            // Store in cookie for reuse (shorter expiry than session tokens)
-            Utils::setCookie($cookie_key, $new_token, $expire_time);
+            // Parse the new token to get the true expire time
+            $new_token_parsed = TokenManager::parseWebsocketToken($new_token_string);
+            $expire_time = $new_token_parsed->claims()->get('expire_time');
 
-            return $new_token;
+            // Store in cookie for reuse
+            Utils::setCookie($cookie_key, $new_token_string, $expire_time);
+
+            return $new_token_string;
         }
         catch (\Exception $e) {
             Logger::error("Failed to generate websocket token: " . $e->getMessage());

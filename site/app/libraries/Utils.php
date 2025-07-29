@@ -423,4 +423,44 @@ class Utils {
         // Default to returning false
         return false;
     }
+
+    /**
+     * Build page identifier based on page type and parameters for a WebSocket page.
+     *
+     * @param string|null $page Page type
+     * @param array<string, string> $query_params Query parameters
+     * @return string|null Page identifier or null if invalid
+     */
+    public static function buildWebSocketPageIdentifier(?string $page = null, ?array $query_params = null): ?string {
+        switch ($page) {
+            case 'discussion_forum':
+            case 'office_hours_queue':
+                return $page;
+
+            case 'chatrooms':
+                $page_identifier = $page;
+                if (isset($query_params['chatroom_id'])) {
+                    $page_identifier = $page . '-' . $query_params['chatroom_id'];
+                }
+                return $page_identifier;
+            case 'polls':
+                if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
+                    return null;
+                }
+                $instructor = filter_var($query_params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                return $page . '-' . $query_params['poll_id'] . '-' . ($instructor ? 'instructor' : 'student');
+            case 'grade_inquiry':
+                if (!isset($query_params['gradeable_id']) || !isset($query_params['submitter_id'])) {
+                    return null;
+                }
+                return $page . '-' . $query_params['gradeable_id'] . '_' . $query_params['submitter_id'];
+            case 'grading':
+                if (!isset($query_params['gradeable_id'])) {
+                    return null;
+                }
+                return $page . '-' . $query_params['gradeable_id'];
+            default:
+                return null;
+        }
+    }
 }

@@ -108,7 +108,6 @@ class TokenManager {
             ->relatedTo($user_id)
             ->withClaim('authorized_pages', $authorized_pages)
             ->withClaim('expire_time', $token_expire_time)
-            ->withClaim('token_type', 'websocket')
             ->getToken(
                 self::$configuration->signer(),
                 self::$configuration->signingKey()
@@ -148,8 +147,6 @@ class TokenManager {
             !$token->claims()->has('authorized_pages')
             || !$token->claims()->has('expire_time')
             || !$token->claims()->has('sub')
-            || !$token->claims()->has('token_type')
-            || $token->claims()->get('token_type') !== 'websocket'
         ) {
             throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
         }

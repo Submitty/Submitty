@@ -977,14 +977,12 @@ class Access {
             $page = $context['page'];
             $params = $context['params'] ?? [];
             $page_identifier = null;
-            $authorized = false;
 
             try {
                 switch ($page) {
                     case 'discussion_forum':
                     case 'office_hours_queue':
                         $page_identifier = $page;
-                        $authorized = true;
                         break;
                     case 'chatrooms':
                         $page_identifier = $page;
@@ -993,73 +991,36 @@ class Access {
                             $page_identifier = $page . '-' . $params['chatroom_id'];
                         }
 
-                        $authorized = true;
                         break;
                     case 'polls':
-                        if (isset($params['instructor'])) {
+                        if (isset($params['instructor']) && isset($params['poll_id'])) {
                             $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
 
-                            /* @var Poll $poll */
-                            $poll = $params['poll'];
-                            if ($poll instanceof Poll) {
-                                $poll_id = $poll->getId();
-                            }
-                            else {
-                                throw new \InvalidArgumentException("Invalid poll parameter");
-                            }
+                            $poll_id = $params['poll_id'];
 
-                            if ($this->canUser($user, "poll.view", ['poll' => $poll])) {
-                                if (!$instructor || $this->canUser($user, "poll.view.histogram", ['poll' => $poll])) {
-                                    $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
-                                    $authorized = true;
-                                }
-                            }
+                            $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
                         }
                         break;
                     case 'grade_inquiry':
-                        if (isset($params['gradeable']) && isset($params['graded_gradeable'])) {
-                            /* @var Gradeable $gradeable */
-                            $gradeable = $params['gradeable'];
-                            /* @var GradedGradeable $graded_gradeable */
-                            $graded_gradeable = $params['graded_gradeable'];
+                        if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
+                            $gradeable_id = $params['gradeable_id'];
+                            $submitter_id = $params['submitter_id'];
 
-                            if ($gradeable instanceof Gradeable && $graded_gradeable instanceof GradedGradeable) {
-                                $gradeable_id = $gradeable->getId();
-                                $submitter_id = $graded_gradeable->getSubmitter()->getId();
-                            }
-                            else {
-                                throw new \InvalidArgumentException("Invalid gradeable or graded_gradeable parameter");
-                            }
-
-                            if ($this->canUser($user, "grading.electronic.grade_inquiry", ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable])) {
-                                $page_identifier = $page . '-' . $gradeable_id . '_' . $submitter_id;
-                                $authorized = true;
-                            }
+                            $page_identifier = $page . '-' . $gradeable_id . '_' . $submitter_id;
                         }
                         break;
                     case 'grading':
                         if (isset($params['gradeable_id'])) {
-                            $gradeable = $params['gradeable'];
+                            $gradeable_id = $params['gradeable_id'];
 
-                            if ($gradeable instanceof Gradeable) {
-                                /* @var Gradeable $gradeable */
-                                $gradeable_id = $gradeable->getId();
-                            }
-                            else {
-                                throw new \InvalidArgumentException("Invalid gradeable parameter");
-                            }
-
-                            if ($this->canUser($user, "grading.simple.grade", ['gradeable' => $gradeable])) {
-                                $page_identifier = $page . '-' . $gradeable_id;
-                                $authorized = true;
-                            }
+                            $page_identifier = $page . '-' . $gradeable_id;
                         }
                         break;
                 }
 
-                if ($authorized && $page_identifier !== null) {
+                if ($page_identifier !== null) {
                     $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
-                    $authorized_pages[$full_page_identifier] = null; // This will eventually be a timestamp in token provisioning
+                    $authorized_pages[$full_page_identifier] = null;
                 }
             }
             catch (\Exception $e) {

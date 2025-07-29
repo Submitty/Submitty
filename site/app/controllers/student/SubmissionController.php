@@ -189,10 +189,7 @@ class SubmissionController extends AbstractController {
                 $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
 
                 // Potentially the websocket token
-                $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-grade_inquiry-' . $gradeable->getId() . '_' . $graded_gradeable->getSubmitter()->getId();
-                $page = 'grade_inquiry';
-                $params = ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable];
-                $this->core->getWebsocketToken($key, $page, $params);
+                $this->core->authorizeWebSocketToken('grade_inquiry', ['gradeable_id' => $gradeable->getId(), 'submitter_id' => $graded_gradeable->getSubmitter()->getId()]);
             }
 
             // If we get here, then we can safely construct the old model w/o checks

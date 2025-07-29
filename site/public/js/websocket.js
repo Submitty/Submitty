@@ -34,7 +34,7 @@ class WebSocketClient {
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
 
         if (my_url.hostname === 'localhost') {
-            // Force IPv4 (macOS issue???)
+            // Force IPv4 (macOS issue)
             my_url.hostname = '127.0.0.1';
         }
 

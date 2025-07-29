@@ -1923,13 +1923,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
 
-        // TODO: turn these refresh blocks into a uniform method
-        // TODO: this should probably be an API middleware
-        // Potentially the websocket token;
-        $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-grade_inquiry-' . $gradeable->getId() . '_' . $graded_gradeable->getSubmitter()->getId();
-        $page = 'grade_inquiry';
-        $params = ['gradeable' => $gradeable, 'graded_gradeable' => $graded_gradeable];
-        $this->core->getWebsocketToken($key, $page, $params);
+        $this->core->authorizeWebsocketToken('grade_inquiry', ['gradeable_id' => $gradeable_id, 'submitter_id' => $graded_gradeable->getSubmitter()->getId()]);
 
         $show_verify_all = false;
         //check if verify all button should be shown or not

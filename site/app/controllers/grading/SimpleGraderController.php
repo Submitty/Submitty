@@ -123,12 +123,8 @@ class SimpleGraderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl());
         }
 
-        // Check if the gradeable ID is within the websocket token authorized_pages claim, otherwise refresh the token\
-        $key = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-grading-' . $gradeable->getId();
-        $page = 'grading';
-        $params = ['gradeable' => $gradeable]; // Pass in gradeable to avoid DB query
-        // Potentially refresh the token to add the gradeable ID to the authorized_pages claim
-        $this->core->getWebsocketToken($key, $page, $params);
+        // Check if the gradeable ID is within the websocket token authorized_pages claim, otherwise refresh the token
+        $this->core->authorizeWebSocketToken('grading', ['gradeable_id' => $gradeable_id]);
 
         // sort makes sorting remain when clicking print lab or view all
         if ($sort === "id") {
