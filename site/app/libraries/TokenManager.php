@@ -77,36 +77,33 @@ class TokenManager {
      * Generate a websocket token containing authorized pages for a user
      *
      * @param string $user_id User ID
-     * @param array<string, int|null> $authorized_pages Array of page identifiers the user can access
+     * @param array<int, string> $authorized_pages Array of page identifiers the user can access
      * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return Token
      */
-    public static function generateWebsocketToken(
+    public static function generateWebSocketToken(
         string $user_id,
-        array $authorized_pages,
+        string $authorized_page,
         ?array $existing_authorized_pages = []
     ): Token {
         $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
 
         // Persist existing authorized pages if the expiration time is within reason
+        $pages = [];
         foreach ($existing_authorized_pages as $page_identifier => $expire_time) {
-            if ($expire_time !== null && $expire_time > time() && !array_key_exists($page_identifier, $authorized_pages)) {
-                $authorized_pages[$page_identifier] = $expire_time;
+            if ($expire_time !== null && $expire_time > time() && $page_identifier !== $authorized_page) {
+                $pages[$page_identifier] = $expire_time;
             }
         }
 
         // Persist new authorized pages with the latest expiration time
-        foreach ($authorized_pages as $page_identifier => $expire_time) {
-            if ($expire_time === null) {
-                $authorized_pages[$page_identifier] = $token_expire_time;
-            }
-        }
+        $pages[$authorized_page] = $token_expire_time;
 
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
             ->relatedTo($user_id)
-            ->withClaim('authorized_pages', $authorized_pages)
+            ->withClaim('authorized_pages', $pages)
             ->withClaim('expire_time', $token_expire_time)
             ->getToken(
                 self::$configuration->signer(),

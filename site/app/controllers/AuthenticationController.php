@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthenticationController extends AbstractController {
     /**
      * @var bool Is the user logged in or not. We use this to prevent the user going to the login controller
-     *           and trying to login again.
+    *           and trying to login again.
      */
     private $logged_in;
 
@@ -202,29 +202,32 @@ class AuthenticationController extends AbstractController {
         }
     }
 
+    /**
+     * @return JsonResponse
+     */
     #[Route("/api/websocket_token", methods: ["GET"])]
     public function getWebSocketToken(): JsonResponse {
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
 
         if ($existing_token === null) {
-            return JsonResponse::getFailResponse("No websocket token found");
+            return JsonResponse::getFailResponse("No existing WebSocket token found");
         }
 
         try {
-            $token = TokenManager::parseWebsocketToken($existing_token);
-            $token_parsed = [
-                'iat' => $token->claims()->get('iat'),
-                'sub' => $token->claims()->get('sub'),
-                'iss' => $token->claims()->get('iss'),
-                'authorized_pages' => $token->claims()->get('authorized_pages'),
-                'expire_time' => $token->claims()->get('expire_time'),
+            $claims = TokenManager::parseWebsocketToken($existing_token)->claims();
+            $token = [
+                'iat' => $claims->get('iat')->getTimestamp(),
+                'sub' => $claims->get('sub'),
+                'iss' => $claims->get('iss'),
+                'authorized_pages' => $claims->get('authorized_pages'),
+                'expire_time' => $claims->get('expire_time'),
             ];
 
-            return JsonResponse::getSuccessResponse(['token' => $token_parsed]);
+            return JsonResponse::getSuccessResponse(['token' => $token]);
         }
         catch (\Exception $e) {
-            return JsonResponse::getFailResponse("Invalid websocket token: " . $e->getMessage());
+            return JsonResponse::getFailResponse("Invalid WebSocket token: " . $e->getMessage());
         }
     }
 

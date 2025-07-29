@@ -17,7 +17,7 @@ use DateTime;
  */
 class SessionManager {
     const SESSION_EXPIRATION = "2 weeks";
-    const WEBSOCKET_EXPIRATION = "1 hour";
+    const WEBSOCKET_EXPIRATION = "30 minutes";
 
     /**
      * @var Core

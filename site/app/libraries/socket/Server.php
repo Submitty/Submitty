@@ -114,15 +114,13 @@ class Server implements MessageComponentInterface {
             return false;
         }
 
-        // If required parameters are not provided, close the connection
+        // If required parameters are not provided, close the connection (term and course is required for full page identifier)
         if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
             return false;
         }
 
-        // Get the page, term, and course from the query parameters
+        // Get the page from the query parameters
         $page = $query_params['page'];
-        $term = $query_params['term'];
-        $course = $query_params['course'];
 
         // Parse and validate the websocket token
         try {
@@ -130,31 +128,40 @@ class Server implements MessageComponentInterface {
             $user_id = $token->claims()->get('sub');
             $authorized_pages = $token->claims()->get('authorized_pages');
 
-            // Build the page identifier based on page type and parameters
-            $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
+            // TODO: handle converting discussion_forum, office_hours_queue, and chatrooms to defaults (unless chatroom_id is provided)
+            if ($page === 'discussion_forum' || $page === 'office_hours_queue' || ($page === 'chatroom' && !isset($query_params['chatroom_id']))) {
+                $key = 'defaults';
+            }
+            else {
+                $key = $page;
+            }
+
+            // Build the page identifier for authorization checks
+            $page_identifier = Utils::buildWebSocketPageIdentifier($key, $query_params);
 
             if ($page_identifier === null) {
                 $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
             }
 
-            // Build full page identifier with term and course
-            $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
-
             // Check if this page is in the user's authorized pages
-            if (!array_key_exists($full_page_identifier, $authorized_pages) || time() > intval($authorized_pages[$full_page_identifier])) {
+            if (!array_key_exists($page_identifier, $authorized_pages) || time() > intval($authorized_pages[$page_identifier])) {
+                $this->log("Unauthorized page '{$page_identifier}' for connection {$conn->resourceId}");
                 return false;
             }
 
+            // Create the true full page identifier after authorization checks (WS broadcasting)
+            $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
+
             // Set up the connection
             $this->setSocketClient($user_id, $conn);
-            if (!array_key_exists($full_page_identifier, $this->clients)) {
-                $this->clients[$full_page_identifier] = new \SplObjectStorage();
+            if (!array_key_exists($page_identifier, $this->clients)) {
+                $this->clients[$page_identifier] = new \SplObjectStorage();
             }
-            $this->clients[$full_page_identifier]->attach($conn);
-            $this->setSocketClientPage($full_page_identifier, $conn);
+            $this->clients[$page_identifier]->attach($conn);
+            $this->setSocketClientPage($page_identifier, $conn);
 
-            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $full_page_identifier . "'");
+            $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $page_identifier . "'");
             return true;
         }
         catch (\InvalidArgumentException $exc) {

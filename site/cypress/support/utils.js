@@ -54,7 +54,6 @@ export function getWebSocketToken() {
         method: 'GET',
         url: `${Cypress.config('baseUrl')}/api/websocket_token`,
     }).then((response) => {
-        console.log(response);
         return JSON.parse(response.body).data.token;
     });
 }

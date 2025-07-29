@@ -957,69 +957,55 @@ class Access {
     /**
      * Format the authorized pages for a websocket authorization token
      *
-     * @param string $term Course term/semester
-     * @param string $course Course identifier
-     * @param array<int, array<string, mixed>> $page_contexts Array of page contexts to check, each containing:
-     *                            - 'page': Page type (discussion_forum, polls, etc.)
-     *                            - 'params': Additional parameters for the page, such as 'gradeable_id' or 'chatroom_id'
-     * @return array<string, null> Array of authorized page identifiers, where the key is the page identifier and the value is null
+     * @param array<int, array<string, mixed>> $authorized_pages Array of page contexts to check, each containing
+     * a page type (discussion_forum, polls, etc.) and additional parameters for the page, such as 'gradeable_id' or 'chatroom_id'.
+     * @return array<string, null> Array of authorized page identifiers, where the key is the page identifier and the value is null.
      */
-    public function formatAuthorizedWebsocketPages(string $term, string $course, array $page_contexts): array {
+    public function formatAuthorizedWebsocketPages(array $authorized_pages): array {
         $authorized_pages = [];
 
-        foreach ($page_contexts as $context) {
+        foreach ($authorized_pages as $context) {
             $page = $context['page'];
             $params = $context['params'] ?? [];
             $page_identifier = null;
 
-            try {
-                switch ($page) {
-                    case 'discussion_forum':
-                    case 'office_hours_queue':
-                        $page_identifier = $page;
-                        break;
-                    case 'chatrooms':
-                        $page_identifier = $page;
-
-                        if (isset($params['chatroom_id'])) {
-                            $page_identifier = $page . '-' . $params['chatroom_id'];
-                        }
-
-                        break;
-                    case 'polls':
-                        if (isset($params['instructor']) && isset($params['poll_id'])) {
-                            $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
-
-                            $poll_id = $params['poll_id'];
-
-                            $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
-                        }
-                        break;
-                    case 'grade_inquiry':
-                        if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
-                            $gradeable_id = $params['gradeable_id'];
-                            $submitter_id = $params['submitter_id'];
-
-                            $page_identifier = $page . '-' . $gradeable_id . '_' . $submitter_id;
-                        }
-                        break;
-                    case 'grading':
-                        if (isset($params['gradeable_id'])) {
-                            $gradeable_id = $params['gradeable_id'];
-
-                            $page_identifier = $page . '-' . $gradeable_id;
-                        }
-                        break;
-                }
-
-                if ($page_identifier !== null) {
-                    $full_page_identifier = $term . "-" . $course . "-" . $page_identifier;
-                    $authorized_pages[$full_page_identifier] = null;
-                }
+            switch ($page) {
+                case 'defaults':
+                    $page_identifier = $page;
+                    break;
+                case 'chatrooms':
+                    $page_identifier = $page;
+                    if (isset($params['chatroom_id'])) {
+                        $page_identifier = $page . '-' . $params['chatroom_id'];
+                    }
+                    break;
+                case 'polls':
+                    if (isset($params['instructor']) && isset($params['poll_id'])) {
+                        $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
+                        $poll_id = $params['poll_id'];
+                        $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
+                    }
+                    break;
+                case 'grade_inquiry':
+                    if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
+                        $gradeable_id = $params['gradeable_id'];
+                        $submitter_id = $params['submitter_id'];
+                        $page_identifier = $page . '-' . $gradeable_id . '_' . $submitter_id;
+                    }
+                    break;
+                case 'grading':
+                    if (isset($params['gradeable_id'])) {
+                        $gradeable_id = $params['gradeable_id'];
+                        $page_identifier = $page . '-' . $gradeable_id;
+                    }
+                    break;
+                default:
+                    // Ignore invalid page types
+                    break;
             }
-            catch (\Exception $e) {
-                Logger::error("Error checking permissions for page {$page}: " . $e->getMessage());
-                continue;
+
+            if ($page_identifier !== null) {
+                $authorized_pages[$page_identifier] = null;
             }
         }
 
