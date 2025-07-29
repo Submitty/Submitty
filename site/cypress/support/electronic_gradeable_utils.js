@@ -1,8 +1,8 @@
 function visitGradeable(gradeableName) {
     const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
-    // wait for client JS to load - reduces flakyness
-    cy.get('[data-testid="gradeable-time-remaining-text"]').should('contain.text', 'days');
+    // wait 5 seconds for client JS to load - reduces flakyness
+    cy.get('[data-testid="gradeable-time-remaining-text"]', { timeout: 5000 }).should('contain.text', 'days');
 }
 
 /**
@@ -11,7 +11,7 @@ function visitGradeable(gradeableName) {
  * @param {string} gradeableName the name of the gradeable we are switching to
  * @param {number|null} versionNumber
  */
-export function switchOrFindVersion(gradeableName, versionNumber) {
+function switchOrFindVersion(gradeableName, versionNumber) {
     visitGradeable(gradeableName);
     return cy.get('[data-testid="content-main"]').then(($content) => {
         if ($content.find('[data-testid="no-submissions-box"]').length > 0) {
@@ -32,7 +32,7 @@ export function switchOrFindVersion(gradeableName, versionNumber) {
  * Sets up the gradeable in a state where we can submit a new submission
  * @param {string} gradeableName the name of the gradeable we are submitting to
  */
-export function newSubmission(gradeableName) {
+function newSubmission(gradeableName) {
     visitGradeable(gradeableName);
     // If the clear button exists, we should click it and clear all files so we can submit new ones
     cy.get('[data-testid="clear-all-files-button"]').then(($btn) => {
@@ -49,7 +49,7 @@ export function newSubmission(gradeableName) {
  * @param {number} bucket the bucket to submit to. Default gradeables has buckets starting from 1
  * @param {boolean} firstFile checks the bucket for no files if it is the first file being uploaded
  */
-export function submitFiles(fileUploadName, bucket, firstFile = false) {
+function submitFiles(fileUploadName, bucket, firstFile = false) {
     if (firstFile) {
         cy.get(`[data-testid="file-upload-table-${bucket}"] > tr`).should('not.exist');
     }
@@ -61,7 +61,7 @@ export function submitFiles(fileUploadName, bucket, firstFile = false) {
  * Requires newSubmission to be called first
  * @param {number} versionNumber the version number we are on
  */
-export function submitGradeable(versionNumber) {
+function submitGradeable(versionNumber) {
     cy.get('[data-testid="submit-gradeable"]').click();
     cy.get('[data-testid="submission-version-select"]').find('option:selected').should('contain.text', `Version #${versionNumber}`);
     cy.get('[data-testid="popup-message"]').should('contain.text', `Successfully uploaded version ${versionNumber}`);
@@ -73,7 +73,7 @@ export function submitGradeable(versionNumber) {
  * @param {(number|'?')[]} expectedScores the expected score for the submission
  * @param {(number|'?')[]} fullScores the max scores for the gradeables
  */
-export function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, fullScores) {
+function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, fullScores) {
     switchOrFindVersion(gradeableName, versionNumber);
     expect(expectedScores.length).to.eq(fullScores.length);
     // after 20 submissions we start having penalties
@@ -95,3 +95,42 @@ export function checkNonHiddenResults(gradeableName, versionNumber, expectedScor
         cy.wrap($el).find('[data-testid="score-pill-badge"]').should('contain.text', `${expectedScores[index]} / ${fullScores[index]}`);
     });
 };
+
+const constructFileName = (gradeable, filePath) => {
+    const course = Cypress.env('course');
+    if (course === 'development') {
+        return `copy_of_more_autograding_examples/${gradeable}/submissions/${filePath}`;
+    }
+    return `copy_of_tutorial/examples/${gradeable}/submissions/${filePath}`;
+};
+
+export function submitSubmissions(gradeable, submissions) {
+    return switchOrFindVersion(gradeable, null).then((startingVersion) => {
+        cy.wrap(startingVersion).as(`${gradeable}_starting_version`);
+
+        cy.wrap(submissions).each((submission, index) => {
+            newSubmission(gradeable);
+
+            // Loop through each bucket and submit the files
+            Object.entries(submission.submissionFiles).forEach(([bucket, files]) => {
+                files.forEach((file) => {
+                    const filePath = constructFileName(gradeable, file);
+                    submitFiles(filePath, Number(bucket), true);
+                });
+            });
+
+            cy.get(`@${gradeable}_starting_version`).then((start) => {
+                submitGradeable(start + index + 1);
+            });
+        });
+    });
+}
+
+export function checkSubmissions(gradeable, submissions) {
+    cy.get(`@${gradeable}_starting_version`).then((start) => {
+        cy.wrap(submissions).each((submission, index) => {
+            const version = start + index + 1;
+            checkNonHiddenResults(gradeable, version, submission.expected, submission.full);
+        });
+    });
+}
