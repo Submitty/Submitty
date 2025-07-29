@@ -480,8 +480,37 @@ body::-webkit-scrollbar-track {
     margin-right: 6px;
 }
 
+.customize-editor-container {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-end;
+    margin-bottom: 2px;
+}
+
+.customize-editor-button {
+    margin-left: 6px;
+    width: 25px;
+    height: 25px;
+    outline: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: var(--btn-default-white);
+}
+
+.customize-editor-button-icon {
+    pointer-events: none;
+    color: var(--text-black);
+}
+
 .line-nums-selected {
-    background-color: var(--standard-deep-blue);
+    background-color: var(--standard-light-blue);
+}
+
+[data-theme="dark"] .line-nums-selected {
+    background: var(--standard-plum-purple);
 }
 
 /* stylelint-disable-next-line selector-class-pattern */

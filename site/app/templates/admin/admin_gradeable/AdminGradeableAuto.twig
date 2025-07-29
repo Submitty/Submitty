@@ -143,12 +143,12 @@
                     </div>
                 </div>
                 <div id="gradeable-config-edit-bar">
-                    <div style="display: flex; flex-grow: 1; justify-content: flex-end; margin-bottom: 2px;">
-                        <button type="button" style="margin-right:6px; width:25px; height:25px" id="toggle-line-nums" onClick="toggleLineNums()">
-                            <i class="fas fa-list-ol"></i>
+                    <div class="customize-editor-container">
+                        <button type="button" class="customize-editor-button" onClick="toggleLineNums()">
+                            <i class="fas fa-list-ol icon" class="customize-editor-button-icon"></i>
                         </button>
-                        <button type="button" style="width:25px; height:25px" onClick="toggleTabLength()">
-                            <i class="fas fa-2" id="toggle-tab-length"></i>
+                        <button type="button" class="customize-editor-button" onClick="toggleTabLength()">
+                            <i class="fas fa-2" id="toggle-tab-length" class="customize-editor-button-icon"></i>
                         </button>
                     </div>
                     <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>

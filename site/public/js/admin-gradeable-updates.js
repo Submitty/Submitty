@@ -1259,10 +1259,20 @@ function loadCodeMirror() {
 
 // Toggle line nums in gradeable editor
 function toggleLineNums() {
+    const icon = document.getElementById('toggle-line-nums');
     const current = localStorage.getItem('enableLineNums');
-    localStorage.setItem('enableLineNums', (!current || current === 'false') ? 'true' : 'false');
+    const newState = (!current || current === 'false') ? 'true' : 'false';
+
+    localStorage.setItem('enableLineNums', newState);
     reloadCodeMirror();
+
+    if (newState === 'true') {
+        icon.classList.add('line-nums-selected');
+    } else {
+        icon.classList.remove('line-nums-selected');
+    }
 }
+
 
 // Toggle between tab length of 2 and 4 for gradeable editor
 function toggleTabLength() {
