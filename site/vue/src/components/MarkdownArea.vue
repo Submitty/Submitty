@@ -356,7 +356,7 @@ function toggleHeader() {
         class="screen-reader"
       >{{ markdownAreaId }}</label>
       <textarea
-        v-show="mode === 'edit'"
+        v-if="mode === 'edit'"
         :id="markdownAreaId"
         ref="textareaRef"
         v-model="content"
@@ -378,7 +378,7 @@ function toggleHeader() {
       />
       <!-- eslint-disable vue/no-v-html -->
       <div
-        v-show="mode === 'preview'"
+        v-if="mode === 'preview'"
         :id="previewDivId ?? undefined"
         class="fill-available markdown-preview"
         :style="previewStyle"
