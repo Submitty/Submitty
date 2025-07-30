@@ -11,6 +11,7 @@ import argparse
 import base64
 import glob
 from pathlib import Path
+import re
 
 # pylint: disable=import-error
 import nbformat
@@ -103,10 +104,16 @@ def save_output(cell_idx, cell):
         cell_idx (int): The index of the cell in the notebook.
         cell (nbformat.NotebookNode): The cell to save.
     """
-    # If the cell has a metadata field 'grade_id', use it as the file name
-    grade_id = cell.metadata.get('grade_id')
-    if grade_id:
-        file_name = f"{grade_id}"
+    # If the cell has a metadata field 'submitty_id', use it as the file name
+    submitty_id = cell.metadata.get('submitty_id')
+    if submitty_id:
+        file_name = f"{submitty_id}"
+        # Alphanumeric characters, hyphens, and underscores are allowed
+        if re.fullmatch(r'^[A-Za-z0-9-_]+$', file_name) is None:
+            raise ValueError(
+                f"Invalid characters in submitty_id '{submitty_id}' for cell {cell_idx}. "
+                "Only alphanumeric characters, hyphens, and underscores are allowed."
+            )
     else:
         file_name = f"cell{cell_idx}"
 
