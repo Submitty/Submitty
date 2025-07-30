@@ -57,24 +57,13 @@ const visibleNotifications = computed(() =>
       <h1 class="notifications-header">
         Notifications
       </h1>
-      <a
-        v-if="!showUnseenOnly && notifications.length !== 0"
-        class="notification-seen black-btn"
-        title="See All"
-        aria-label="See All"
+      <button
+        v-if="notifications.length !== 0"
+        class="btn btn-default"
         @click="toggleUnseenOnly"
       >
-        <i class="fas fa-eye" />
-      </a>
-      <a
-        v-if="showUnseenOnly && notifications.length !== 0"
-        class="notification-seen black-btn"
-        title="Unseen Only"
-        aria-label="Unseen Only"
-        @click="toggleUnseenOnly"
-      >
-        <i class="fas fa-eye-slash" />
-      </a>
+        {{ showUnseenOnly ? 'Show All' : 'Show Unseen Only' }}
+      </button>
       <!-- FUTURE FEATURE: mark all notifications on the home page as seen
             <a class="btn btn-primary">
                 Mark all as seen
