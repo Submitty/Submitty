@@ -1,8 +1,12 @@
 {% if viewer.getQueueAnnouncementMessage() | length > 0 %}
     <div id="announcement" data-testid="announcement">
         <h2>Office Hours Queue Announcements:</h2>
-        {% include "misc/Markdown.twig" with {
-            content: viewer.getQueueAnnouncementMessage()
+        {% include 'Vue.twig' with {
+            type: "component",
+            name: "Markdown",
+            args: {
+                content: viewer.getQueueAnnouncementMessage()
+            }
         } only %}
     </div>
 {% endif %}

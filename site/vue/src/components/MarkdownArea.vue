@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { buildUrl } from '../../../ts/utils/server';
+import Markdown from './Markdown.vue';
 
 interface Props {
     markdownAreaId: string;
@@ -70,49 +70,10 @@ const previewStyle = computed(() => ({
     maxHeight: props.maxHeight,
 }));
 
-async function setMode(newMode: 'edit' | 'preview') {
+function setMode(newMode: 'edit' | 'preview') {
     mode.value = newMode;
     if (newMode === 'preview') {
         emit('preview', content.value ?? '');
-        await fetchPreviewContent();
-    }
-}
-
-const previewContent = ref('');
-
-async function fetchPreviewContent() {
-    if (!content.value) {
-        previewContent.value = '';
-        return;
-    }
-
-    isLoadingPreview.value = true;
-    try {
-        const response = await fetch(buildUrl(['markdown']), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                content: content.value,
-                csrf_token: window.csrfToken,
-            }),
-        });
-
-        if (response.ok) {
-            const html = await response.text();
-            previewContent.value = html;
-        }
-        else {
-            previewContent.value = 'Error loading preview';
-        }
-    }
-    catch (error) {
-        console.log('Error fetching markdown preview:', error);
-        previewContent.value = 'Error loading preview';
-    }
-    finally {
-        isLoadingPreview.value = false;
     }
 }
 
@@ -249,9 +210,9 @@ function handleInput(event: Event) {
     }
 }
 
-onMounted(async () => {
+onMounted(() => {
     if (props.initializePreview) {
-        await setMode('preview');
+        setMode('preview');
     }
 });
 const showHeader = ref<boolean>(window.Cookies.get('markdown_enabled') === '1');
@@ -421,8 +382,9 @@ function toggleHeader() {
         :id="previewDivId ?? undefined"
         class="fill-available markdown-preview"
         :style="previewStyle"
-        v-html="previewContent"
-      />
+      >
+        <Markdown :content="content" />
+      </div>
     </div>
   </div>
 </template>

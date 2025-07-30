@@ -2,9 +2,13 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    {% include "misc/Markdown.twig" with {
-        "content" : gradeable_message,
-        "class" : "content gradeable_message"
+    {% include 'Vue.twig' with {
+        type: "component",
+        name: "Markdown",
+        args: {
+            content: gradeable_message
+        },
+        class: "content gradeable_message",
     } only %}
 {% endif %}
 
@@ -199,8 +203,12 @@
             <em>Note: Only files located in the '<b>{{ vcs_subdirectory }}</b>' subdirectory will be collected for submission and grading. If this subdirectory does not already exist within your repository, you will have to create it. </em>
             {% endif %}
             <div class="upload-message">
-                {% include "misc/Markdown.twig" with {
-                    "content" : upload_message
+                {% include 'Vue.twig' with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        content: upload_message,
+                    }
                 } only %}
             </div>
             <input type="submit" id="submit" class="submit-gradeable btn btn-success" value="Grade My Repository" />
@@ -279,8 +287,12 @@
         
         {% if can_student_submit %}
             <div class="upload-message">
-                {% include "misc/Markdown.twig" with {
-                    "content" : upload_message
+                {% include 'Vue.twig' with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        content: upload_message
+                    }
                 } only %}
             </div>
             <button type="button" id="submit" data-testid="submit-gradeable" class="submit-gradeable btn btn-success" {% if viewing_inactive_version %} title="Switch to most recent version to submit"{% endif %}>

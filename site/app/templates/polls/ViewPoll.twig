@@ -22,8 +22,12 @@
     <br/>
     <div class="poll-view-table" id="info-histogram-table">
         <div class="poll-view-wrapper info-wrapper" id="poll-info">
-            {% include "misc/Markdown.twig" with {
-                "content": poll.getQuestion(),
+            {% include 'Vue.twig' with {
+                type: "component",
+                name: "Markdown",
+                args: {
+                    content: poll.getQuestion()
+                }
             } only %}
             {% if file_data is not null %}
                 <br/>
@@ -78,9 +82,13 @@
                             />
                             </td>
                             <td class="option-text" id = "markdown-{{index}}">
-                            {% include "misc/Markdown.twig" with {
-                                "content" : option.getResponse(),
-                                "style": "display: inline"
+                            {% include 'Vue.twig' with {
+                                type: "component",
+                                name: "Markdown",
+                                args: {
+                                    content: option.getResponse()
+                                },
+                                style: "display: inline",
                             } only %}
                             {% if ((poll.getAllowsCustomResponses() and option.isCustom()) and (user_id == option.getAuthorId())) %}
                                 <button
