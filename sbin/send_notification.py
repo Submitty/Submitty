@@ -160,7 +160,7 @@ def construct_notifications(term, course, pending, notification_type):
         if notification_type == "gradeable_release":
             email_subject = f"Submissions Open: {gradeable['title']}"
             notification_content = (
-                f"{email_subject} | Due: {format_timestamp(gradeable['submission_due_date'])} | "
+                f"{email_subject} | Due {format_timestamp(gradeable['submission_due_date'])} | "
                 f"{format_late_days(gradeable['remaining_late_days'])} remaining "
                 f"({gradeable['max_late_days']} allowed)"
             )
