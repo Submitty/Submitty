@@ -6,6 +6,7 @@ namespace app\libraries;
 
 class NotebookUtils {
     private const TEXT_LIMIT = 1024 * 5; // 5KB limit for output text
+    private const LINE_LIMIT = 100; // 100 lines limit for text output
     private const IMG_SIZE_LIMIT = 1024 * 1024 * 2; // 2MB limit for images
     private const NOTEBOOK_SIZE_LIMIT = 1024 * 1024 * 10; // 10MB limit for rendering
     // Note: SVG files are not supported due to XSS risks
@@ -48,10 +49,14 @@ class NotebookUtils {
         foreach ($filedata['cells'] as $cell) {
             switch ($cell['cell_type']) {
                 case 'markdown':
-                    $cells[] = self::processMarkdownCell($cell, $skipped_content);
+                    $result = self::processMarkdownCell($cell);
+                    $cells[] = $result['cell'];
+                    $skipped_content += $result['skipped_content'];
                     break;
                 case 'code':
-                    $cells = array_merge($cells, self::processCodeCell($cell, $filedata, $skipped_output));
+                    $result = self::processCodeCell($cell, $filedata);
+                    $cells = array_merge($cells, $result['cells']);
+                    $skipped_output += $result['skipped_output'];
                     break;
                 default:
                     break;
@@ -80,7 +85,8 @@ class NotebookUtils {
      * @param array<string,mixed> $cell
      * @return array<string,mixed>
      */
-    private static function processMarkdownCell(array $cell, int &$skipped_content): array {
+    private static function processMarkdownCell(array $cell): array {
+        $skipped_content = 0;
         $markdown = is_array($cell['source']) ? implode($cell['source']) : (string) $cell['source'];
         $search = [];
         $replace = [];
@@ -109,8 +115,11 @@ class NotebookUtils {
         // Replace all attachments with the data URI or a message if skipped
         $markdown = str_replace($search, $replace, $markdown);
         return [
-            'type' => 'markdown',
-            'markdown_data' => $markdown,
+            'cell' => [
+                'type' => 'markdown',
+                'markdown_data' => $markdown,
+            ],
+            'skipped_content' => $skipped_content
         ];
     }
 
@@ -121,7 +130,8 @@ class NotebookUtils {
      * @param array<string,mixed> $filedata
      * @return array<int,array<string,mixed>>
      */
-    private static function processCodeCell(array $cell, array $filedata, int &$skipped_output): array {
+    private static function processCodeCell(array $cell, array $filedata): array {
+        $skipped_output = 0;
         $code_cell = [];
         $code_cell[] = [
             'type' => 'short_answer',
@@ -139,11 +149,9 @@ class NotebookUtils {
             switch ($output['output_type'] ?? '') {
                 // Print output text if it is a stream
                 case 'stream':
-                    $output_text = is_array($output['text'] ?? '') ? implode($output['text']) : (string) ($output['text'] ?? '');
-                    if (strlen($output_text) > self::TEXT_LIMIT) {
-                        $output_text = self::truncateText($output_text);
-                        $skipped_output += 1;
-                    }
+                    $truncation_result = self::truncateText($output['text'] ?? '');
+                    $output_text = $truncation_result['text'];
+                    $skipped_output += $truncation_result['was_truncated'];
                     $code_cell[] = [
                         'type' => 'output',
                         'output_text' => $output_text,
@@ -162,14 +170,15 @@ class NotebookUtils {
                     }
 
                     $text = $output['data']['text/plain'] ?? '';
+                    $truncation_result = self::truncateText($text);
+                    $text = $truncation_result['text'];
+                    $skipped_output += $truncation_result['was_truncated'];
+
                     if ($output_type === 'text/plain') {
                         // Display output text if we don't know how to render the content otherwise
-                        if (strlen($text) > self::TEXT_LIMIT) {
-                            $skipped_output += 1;
-                        }
                         $code_cell[] = [
                             'type' => 'output',
-                            'output_text' => self::truncateText($text),
+                            'output_text' => $text,
                         ];
                     }
                     elseif ($output_type !== null) {
@@ -188,7 +197,7 @@ class NotebookUtils {
                                 'image' => "data:" . $output_type . ';base64, ' . $img,
                                 'width' => 0,
                                 'height' => 0,
-                                'alt_text' => self::truncateText($text),
+                                'alt_text' => $text,
                             ];
                         }
                     }
@@ -198,20 +207,43 @@ class NotebookUtils {
             }
         }
 
-        return $code_cell;
+        return [
+            'cells' => $code_cell,
+            'skipped_output' => $skipped_output
+        ];
     }
 
     /**
      * Truncate text to the defined limit and append a message if truncated.
      *
      * @param string|string[] $text
-     * @return string
+     * @return array<string,int>
      */
-    private static function truncateText(string|array $text): string {
-        $output_text = is_array($text) ? implode($text) : $text;
-        if (strlen($output_text) > self::TEXT_LIMIT) {
-            return substr($output_text, 0, self::TEXT_LIMIT) . '...' . PHP_EOL . '[Output truncated: exceeds size limit of ' . (self::TEXT_LIMIT / 1024) . ' KB. Download the notebook to view the full output.]';
+    private static function truncateText(string|array $text): array {
+        $output_text = is_array($text) ? implode($text) : (string) $text;
+        $truncated_text = $output_text;
+        $was_truncated = false;
+
+        // Truncate by line limit if necessary
+        $lines = explode("\n", $truncated_text);
+        if (count($lines) > self::LINE_LIMIT) {
+            $lines = array_slice($lines, 0, self::LINE_LIMIT);
+            $truncated_text = implode("\n", $lines);
+            $was_truncated = true;
         }
-        return $output_text;
+
+        // Truncate by character limit if necessary
+        if (strlen($truncated_text) > self::TEXT_LIMIT) {
+            $truncated_text = substr($truncated_text, 0, self::TEXT_LIMIT);
+            $was_truncated = true;
+        }
+
+        // If truncation occurred, append the warning message
+        if ($was_truncated) {
+            $final_text = $truncated_text . '...' . PHP_EOL . '[Output truncated: exceeds size or line limit. Download the notebook to view the full output.]';
+            return ['text' => $final_text, 'was_truncated' => 1];
+        }
+
+        return ['text' => $output_text, 'was_truncated' => 0];
     }
 }
