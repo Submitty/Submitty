@@ -134,6 +134,7 @@ def construct_notifications(term, course, pending, notification_type):
         gradeable = {
             "id": notification.get('g_id'),
             "title": notification.get('g_title'),
+            "depends_on": notification.get('depends_on'),
             "submission_due_date": notification.get('submission_due_date'),
             "team_id": notification.get('team_id'),
             "user_id": notification.get('user_id'),
@@ -144,7 +145,7 @@ def construct_notifications(term, course, pending, notification_type):
             "email_enabled": notification.get('email_enabled'),
             # Unique late day info for submissions available notifications
             "max_late_days": notification.get('max_late_days'),
-            "remaining_late_days": notification.get('remaining_late_days')
+            "remaining_late_days": notification.get('remaining_late_days'),
         }
 
         timestamp = timestamps.setdefault(
@@ -204,7 +205,8 @@ def construct_notifications(term, course, pending, notification_type):
         gradeables.append({
             "g_id": gradeable['id'],
             "user_id": gradeable['user_id'],
-            "team_id": gradeable['team_id']
+            "team_id": gradeable['team_id'],
+            "depends_on": gradeable['depends_on']
         })
 
     return gradeables, site, email
@@ -240,12 +242,16 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
 
         if gradeables:
             if notification_type == "gradeable_release":
-                course_db.execute(text(
-                    """
-                    UPDATE electronic_gradeable
-                    SET eg_release_notifications_sent = TRUE
-                    WHERE g_id = :g_id;
-                    """), gradeables
+                # Filter out gradeables that have dependencies to allow rolling notifications
+                updates = [g for g in gradeables if g['depends_on'] is None]
+
+                if updates:
+                    course_db.execute(text(
+                        """
+                        UPDATE electronic_gradeable
+                        SET eg_release_notifications_sent = TRUE
+                        WHERE g_id = :g_id;
+                        """), updates
                 )
             else:
                 course_db.execute(text(
@@ -366,6 +372,7 @@ def send_pending_notifications():
             SELECT DISTINCT
                 g.g_id AS g_id,
                 g.g_title AS g_title,
+                eg.eg_depends_on AS depends_on,
                 eg.eg_submission_due_date AS submission_due_date,
                 u.user_id AS user_id,
                 u.user_email AS user_email,
@@ -424,11 +431,17 @@ def send_pending_notifications():
                                     (egd.user_id IS NULL AND egv.team_id = egd.team_id)
                                 )
                             )
-                    ) >= eg.eg_depends_on_points
+                    ) >= eg.eg_depends_on_points AND NOT EXISTS (
+                        SELECT 1
+                        FROM notifications n
+                        WHERE n.to_user_id = u.user_id
+                        AND n.component = 'grading'
+                        AND n.content ILIKE '%' || 'Submissions Open: ' || g.g_title || '%'
+                    )
                 )
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
-                ldc.late_days_remaining
+                eg.eg_depends_on, ldc.late_days_remaining
             """), {
                 "default_hw_late_days": default_hw_late_days,
                 "default_student_late_days": default_student_late_days
