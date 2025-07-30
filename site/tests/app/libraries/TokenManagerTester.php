@@ -177,24 +177,31 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testWebsocketTokenMissingClaims() {
-        $missing = [
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.cYK3mmRAnstXNeClfjsIZhwsoyMhFO55zv9RextmV_U', // Missing authorized_pages
-            // 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N319.FJiVL8q2gKiua8-UZkvriV-PZNcs2PP7aeOcjRaXw4Q', // Missing expire_time
-            // 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N30sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.DhDL89-7PNd9UA6gGWsF3h71f2fUFW1_n4nOAfEB3M8', // Missing session_id
-            // 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic2Vzc2lvbl9pZCI6ImM1YzZiNGU4MWMyZTEzZTMzYzgyOGViOGI4MWQ2NmQyIiwiYXV0aG9yaXplZF9wYWdlcyI6eyJmMjUtc2FtcGxlLWRlZmF1bHRzIjoxNzUzODAwOTU3fSwiZXhwaXJlX3RpbWUiOjE3NTM4MDA5NTd9.Gv6-SLfXEUJ3meme98bI31Yn5aokXLYcBV_iHjq4vK0', // Missing sub
+        $failures = [
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.E1dhq57eiDuqBmdPFNg6Gl2Ii3u0nXRezvU2NIPCL2Y', // Missing authorized_pages
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9fQ.cxcYDXkV6Wi12ZKd5SpERXJa_YIF04xWjBd0_G6RBrA', // Missing expire_time
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9LCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.3WtN0gt6Ho1eRQy9zaBTwbmpPw9RWONX9ArSgDfpjxo', // Missing session_id
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N30sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.twa4Zr5pRnqcL04PI0fICRxAbAAWJsaKHAn4FbTLiLI', // Missing sub,
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6W119.iq4Ux46GgkNofYXQsuWo2nnH3rP8TJqB7exttcQmbkA' // Invalid expire_time
         ];
-        foreach ($missing as $token) {
+
+        foreach ($failures as $token) {
             $this->expectException(\InvalidArgumentException::class);
-            // TODO: fix this
-            // $this->expectExceptionMessage("Missing claims in websocket token");
-            $this->expectExceptionMessage("Invalid signature for token");
+            $this->expectExceptionMessage("Missing or invalid claims in websocket token");
             TokenManager::parseWebsocketToken($token);
         }
     }
 
-    public function testWebsocketTokenInvalidSignature() {
-        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.HPMVrx8Ceh8zwDfo7K--7rSIBAm48X67mrou4AFUqPk';
 
+    public function testExpiredWebsocketToken() {
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6MTcyMzg5MDQxMH0.c4lggfl9sTMnHy3I1_ZRLMDy2idfgZBGTzjtGFDZahw';
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Websocket token has expired');
+        TokenManager::parseWebsocketToken($token);
+    }
+
+    public function testWebsocketTokenInvalidSignature() {
+        $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsInNlc3Npb25faWQiOiI4ZTZmZjdiNWViNzBiMGMwNGYzNDQ0NjRmMjQ2ODlhZCIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1Mzg5MDQxMH0sImV4cGlyZV90aW1lIjoxNzUzODkwNDEwfQ.Ppgpiz68NcaGtof7IHBAuuHdPBl5sfGTp6Fgv_bWGKw';
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
         TokenManager::parseWebsocketToken($token);

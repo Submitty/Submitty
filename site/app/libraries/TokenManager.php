@@ -144,19 +144,17 @@ class TokenManager {
     public static function parseWebsocketToken(string $token): Token {
         $token = self::parseToken($token);
         if (
-            !$token->claims()->has('authorized_pages')
-            || !$token->claims()->has('expire_time')
-            || !$token->claims()->has('sub')
+            !$token->claims()->has('sub')
             || !$token->claims()->has('session_id')
+            || !$token->claims()->has('authorized_pages')
+            || !$token->claims()->has('expire_time')
+            || !is_int($token->claims()->get('expire_time'))
         ) {
             throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
         }
 
         $expire_time = $token->claims()->get('expire_time');
-        if (!is_int($expire_time)) {
-            throw new \InvalidArgumentException('Invalid \'expire_time\' in websocket token');
-        }
-        elseif (time() > $expire_time) {
+        if (time() > $expire_time) {
             throw new \InvalidArgumentException('Websocket token has expired');
         }
 
