@@ -939,28 +939,11 @@ class Core {
     }
 
     /**
-     * Generate a websocket token for the current user with permissions for specified pages
-     *
-     * @param string $new_authorized_page Page identifier the user should have access to
-     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to, where the key is the page identifier and the value is null
-     * @return string JWT token string
-     */
-    public function generateWebSocketToken(string $new_authorized_page, ?array $existing_authorized_pages = []): string {
-        $token = TokenManager::generateWebSocketToken(
-            $this->user->getId(),
-            $new_authorized_page,
-            $existing_authorized_pages
-        );
-
-        return $token->toString();
-    }
-
-    /**
      * Authorize a websocket token, which assumes the authorization checks have already been performed
      * to avoid redundant database queries or file system checks.
      *
-     * @param string|null $page Optional page identifier.
-     * @param array<string, mixed> $query_params Optional query parameters.
+     * @param string|null $page Optional page identifier, defaulting to a course-specific default page, such as f25-sample-defaults
+     * @param array<string, mixed> $query_params Optional query parameters to augment the full page identifier.
      * @return string|null JWT WebSocket authorization token string or null if generation fails.
      */
     public function authorizeWebSocketToken(?string $page = null, ?array $query_params = []): ?string {
@@ -968,14 +951,14 @@ class Core {
             return null;
         }
 
-        // Append the term and course to the query params for the page identifier
+        $user_id = $this->user->getId();
+        $session_id = $this->getCurrentSessionId();
+
+        // Append the term and course to the query params for the full page identifier
         $query_params['term'] = $this->config->getTerm();
         $query_params['course'] = $this->config->getCourse();
-
-        // Build the full page identifier
         $page = Utils::buildWebSocketPageIdentifier($page ?? 'defaults', $query_params);
 
-        $new_authorized_page = null;
         $existing_authorized_pages = [];
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
@@ -987,44 +970,37 @@ class Core {
                 $token = TokenManager::parseWebsocketToken($existing_token);
 
                 $token_user_id = $token->claims()->get('sub');
-                $token_pages = $token->claims()->get('authorized_pages');
+                $token_authorized_pages = $token->claims()->get('authorized_pages');
 
-                if (!array_key_exists($page, $token_pages)) {
-                    // Refresh token for missing authorization pages or default course pages
+                if (!array_key_exists($page, $token_authorized_pages)) {
+                    // Add the new page to the authorized pages
                     $refresh = true;
-                    $new_authorized_page = $page;
                 }
 
-                if ($token_user_id === $this->user->getId()) {
+                if ($token_user_id === $user_id) {
                     if (!$refresh) {
-                        // No refresh needed, return existing token
+                        // No refresh needed, return the existing token
                         return $existing_token;
                     }
                     else {
-                        // Persist older authorized pages for reuse in the new token, where expired pages will be filtered out
-                        $existing_authorized_pages = $token_pages;
+                        // Persist existing authorized pages for reuse, where expired pages will be filtered out
+                        $existing_authorized_pages = $token_authorized_pages;
                     }
                 }
-                else {
-                    // Clear existing authorized pages in case of a user change
-                    $existing_authorized_pages = [];
-                }
             }
-            catch (\InvalidArgumentException $exc) {
-                // Invalid or expired token, delete the cookie
+            catch (\Exception $exc) {
+                // Clear invalid or expired tokens
                 Utils::setCookie($cookie_key, "", time() - 3600);
-                Logger::error("Invalid or expired websocket token: " . $exc->getMessage());
+                Logger::error("Failed to parse websocket token: " . $exc->getMessage());
             }
         }
 
         try {
-            $token_string = $this->generateWebSocketToken($new_authorized_page ?? $page, $existing_authorized_pages);
+            $token = TokenManager::generateWebSocketToken($user_id, $session_id, $page, $existing_authorized_pages);
+            $expire_time = $token->claims()->get('expire_time');
+            Utils::setCookie($cookie_key, $token->toString(), $expire_time);
 
-            // Parse the new token for it's true expire time and store it in the cookie
-            $expire_time = TokenManager::parseWebsocketToken($token_string)->claims()->get('expire_time');
-            Utils::setCookie($cookie_key, $token_string, $expire_time);
-
-            return $token_string;
+            return $token->toString();
         }
         catch (\Exception $e) {
             Logger::error("Failed to generate websocket token: " . $e->getMessage());

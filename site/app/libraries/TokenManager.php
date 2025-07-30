@@ -77,33 +77,36 @@ class TokenManager {
      * Generate a websocket token containing authorized pages for a user
      *
      * @param string $user_id User ID
-     * @param array<int, string> $authorized_pages Array of page identifiers the user can access
+     * @param string $session_id Session ID
+     * @param string $page Full page identifier the user should have access to
      * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return Token
      */
     public static function generateWebSocketToken(
         string $user_id,
-        string $authorized_page,
+        string $session_id,
+        string $page,
         ?array $existing_authorized_pages = []
     ): Token {
         $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
 
-        // Persist existing authorized pages if the expiration time is within reason
-        $pages = [];
+        // Persist existing non-expired authorized pages
+        $authorized_pages = [];
         foreach ($existing_authorized_pages as $page_identifier => $expire_time) {
-            if ($expire_time !== null && $expire_time > time() && $page_identifier !== $authorized_page) {
-                $pages[$page_identifier] = $expire_time;
+            if ($expire_time !== null && $expire_time > time() && $page_identifier !== $page) {
+                $authorized_pages[$page_identifier] = $expire_time;
             }
         }
 
         // Persist new authorized pages with the latest expiration time
-        $pages[$authorized_page] = $token_expire_time;
+        $authorized_pages[$page] = $token_expire_time;
 
         return self::$configuration->builder()
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
             ->relatedTo($user_id)
-            ->withClaim('authorized_pages', $pages)
+            ->withClaim('session_id', $session_id)
+            ->withClaim('authorized_pages', $authorized_pages)
             ->withClaim('expire_time', $token_expire_time)
             ->getToken(
                 self::$configuration->signer(),
@@ -144,6 +147,7 @@ class TokenManager {
             !$token->claims()->has('authorized_pages')
             || !$token->claims()->has('expire_time')
             || !$token->claims()->has('sub')
+            || !$token->claims()->has('session_id')
         ) {
             throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
         }

@@ -31,7 +31,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthenticationController extends AbstractController {
     /**
      * @var bool Is the user logged in or not. We use this to prevent the user going to the login controller
-    *           and trying to login again.
+     *           and trying to login again.
      */
     private $logged_in;
 
@@ -60,6 +60,7 @@ class AuthenticationController extends AbstractController {
         }
 
         Utils::setCookie('submitty_session', '', time() - 3600);
+        Utils::setCookie('submitty_websocket_token', '', time() - 3600);
         // Remove all history for checkpoint gradeables
         foreach (array_keys($_COOKIE) as $cookie) {
             if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8

@@ -955,64 +955,6 @@ class Access {
     }
 
     /**
-     * Format the authorized pages for a websocket authorization token
-     *
-     * @param array<int, array<string, mixed>> $authorized_pages Array of page contexts to check, each containing
-     * a page type (discussion_forum, polls, etc.) and additional parameters for the page, such as 'gradeable_id' or 'chatroom_id'.
-     * @return array<string, null> Array of authorized page identifiers, where the key is the page identifier and the value is null.
-     */
-    public function formatAuthorizedWebsocketPages(array $authorized_pages): array {
-        $authorized_pages = [];
-
-        foreach ($authorized_pages as $context) {
-            $page = $context['page'];
-            $params = $context['params'] ?? [];
-            $page_identifier = null;
-
-            switch ($page) {
-                case 'defaults':
-                    $page_identifier = $page;
-                    break;
-                case 'chatrooms':
-                    $page_identifier = $page;
-                    if (isset($params['chatroom_id'])) {
-                        $page_identifier = $page . '-' . $params['chatroom_id'];
-                    }
-                    break;
-                case 'polls':
-                    if (isset($params['instructor']) && isset($params['poll_id'])) {
-                        $instructor = filter_var($params['instructor'], FILTER_VALIDATE_BOOLEAN);
-                        $poll_id = $params['poll_id'];
-                        $page_identifier = $page . '-' . $poll_id . '-' . ($instructor ? 'instructor' : 'student');
-                    }
-                    break;
-                case 'grade_inquiry':
-                    if (isset($params['gradeable_id']) && isset($params['submitter_id'])) {
-                        $gradeable_id = $params['gradeable_id'];
-                        $submitter_id = $params['submitter_id'];
-                        $page_identifier = $page . '-' . $gradeable_id . '_' . $submitter_id;
-                    }
-                    break;
-                case 'grading':
-                    if (isset($params['gradeable_id'])) {
-                        $gradeable_id = $params['gradeable_id'];
-                        $page_identifier = $page . '-' . $gradeable_id;
-                    }
-                    break;
-                default:
-                    // Ignore invalid page types
-                    break;
-            }
-
-            if ($page_identifier !== null) {
-                $authorized_pages[$page_identifier] = null;
-            }
-        }
-
-        return $authorized_pages;
-    }
-
-    /**
      * Resolve relative (and absolute) file paths for a directory
      * @param string $dir Directory name
      * @param string $path
