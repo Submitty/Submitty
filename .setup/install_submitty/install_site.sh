@@ -391,6 +391,10 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     #vue
     mkdir ${VENDOR_FOLDER}/vue
     cp ${NODE_FOLDER}/vue/dist/vue.runtime.global.prod.js ${VENDOR_FOLDER}/vue
+    #katex
+    mkdir -p ${VENDOR_FOLDER}/katex/fonts
+    cp ${NODE_FOLDER}/katex/dist/katex.min.css ${VENDOR_FOLDER}/katex
+    cp ${NODE_FOLDER}/katex/dist/fonts/*.woff2 ${VENDOR_FOLDER}/katex/fonts
 
     find ${NODE_FOLDER} -type d -exec chmod 551 {} \;
     find ${NODE_FOLDER} -type f -exec chmod 440 {} \;
