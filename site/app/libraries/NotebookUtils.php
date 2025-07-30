@@ -83,7 +83,10 @@ class NotebookUtils {
      * Process a markdown cell and return the processed cell.
      *
      * @param array<string,mixed> $cell
-     * @return array<string,mixed>
+     * @return array{
+     *     cell: array<string,mixed>,
+     *     skipped_content: int
+     * }
      */
     private static function processMarkdownCell(array $cell): array {
         $skipped_content = 0;
@@ -128,7 +131,10 @@ class NotebookUtils {
      *
      * @param array<string,mixed> $cell
      * @param array<string,mixed> $filedata
-     * @return array<int,array<string,mixed>>
+     * @return array{
+     *     cells: array<int,array<string,mixed>>,
+     *     skipped_output: int
+     * }
      */
     private static function processCodeCell(array $cell, array $filedata): array {
         $skipped_output = 0;
@@ -217,10 +223,13 @@ class NotebookUtils {
      * Truncate text to the defined limit and append a message if truncated.
      *
      * @param string|string[] $text
-     * @return array<string,int>
+     * @return array{
+     *     text: string,
+     *     was_truncated: int
+     * }
      */
     private static function truncateText(string|array $text): array {
-        $output_text = is_array($text) ? implode($text) : (string) $text;
+        $output_text = is_array($text) ? implode($text) : $text;
         $truncated_text = $output_text;
         $was_truncated = false;
 
