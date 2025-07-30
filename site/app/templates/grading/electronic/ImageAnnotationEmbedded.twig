@@ -51,6 +51,8 @@
     </div>
 </div>
 
-<script>
-    initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons[grader_id] | default('[]') | raw }});
+<script defer>
+    $(()=>{
+        window.initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons[grader_id] | default('[]') | raw }});
+    })
 </script>

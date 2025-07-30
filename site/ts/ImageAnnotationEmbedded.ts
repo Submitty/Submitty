@@ -1,12 +1,59 @@
-/* global markerjs3, markerjsUI, $, csrfToken */
-/* exported initImageAnnotation, addAnnotations, saveAnnotations, clearAnnotations, viewAllAnnotations, downloadImage, cleanupAnnotationEditor */
+
+// Import utility functions
+import { buildCourseUrl } from './utils/server';
+import type { AnnotationState } from '@markerjs/markerjs3';
+import type { AnnotationEditor, AnnotationEditorSettings } from '@markerjs/markerjs-ui';
+
+// Type declarations for external libraries
+const markerjs3 = window.markerjs3;
+const markerjsUI = window.markerjsUI;
+const $ = window.$;
+const csrfToken = window.csrfToken;
+declare global {
+    interface Window {
+        initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void;
+        addAnnotations(): void;
+        saveAnnotations(): void;
+        clearAnnotations(): void;
+        downloadImage(): void;
+        cleanupAnnotationEditor(): void;
+    }
+}
+
+// Interface for API response
+interface ApiResponse {
+    status: string;
+    message?: string;
+}
+
+// Interface for annotation data
+interface AnnotationData {
+    user_id: string;
+    grader_id: string;
+    filename: string;
+    file_path: string;
+    annotations: string;
+    csrf_token: string;
+}
 
 // Image annotation manager class to encapsulate all state
-class ImageAnnotationManager {
+class AnnotationManager {
+    currentAnnotations: AnnotationState | null;
+    originalImg: HTMLImageElement | null;
+    annotatedImageDataUrl: string | null;
+    gradeableId: string;
+    userId: string;
+    graderId: string;
+    filename: string;
+    filePath: string;
+    csrfToken: string;
+    isStudent: boolean;
+    globalAnnotationEditor: AnnotationEditor | null;
+
     constructor() {
         this.currentAnnotations = null;
-        this.originalImg = null; // The actual DOM image element
-        this.annotatedImageDataUrl = null; // Data URL of the annotated image for downloads
+        this.originalImg = null;
+        this.annotatedImageDataUrl = null;
         this.gradeableId = '';
         this.userId = '';
         this.graderId = '';
@@ -17,7 +64,7 @@ class ImageAnnotationManager {
         this.globalAnnotationEditor = null;
     }
     
-    reset() {
+    reset(): void {
         this.currentAnnotations = null;
         this.originalImg = null;
         this.annotatedImageDataUrl = null;
@@ -31,14 +78,16 @@ class ImageAnnotationManager {
     }
 }
 
+const emptyAnnotations: AnnotationState = {
+    width: 600,
+    height: 800,
+    markers: []
+};
+
 // Single instance to manage the current image annotation state
-const annotationManager = new ImageAnnotationManager();
+const annotationManager: AnnotationManager = new AnnotationManager();
 
-function buildCourseUrl(parts = []) {
-    return `${document.body.dataset.courseUrl}/${parts.join('/')}`;
-}
-
-function addAnnotations() {
+function addAnnotations(): void {
     if (!annotationManager.originalImg) {
         console.error("No target image provided to addAnnotations");
         $("#annotation-status").text("Error: No image available for annotation").css("color", "red");
@@ -55,7 +104,7 @@ function addAnnotations() {
             }
             
             // Check if we already have an annotation editor wrapper
-            let editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+            let editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
             
             if (editorWrapper) {
                 // Editor already exists, just show it and update the target image
@@ -69,7 +118,9 @@ function addAnnotations() {
                         annotationManager.globalAnnotationEditor.restoreState(annotationManager.currentAnnotations);
                     } else {
                         // Clear previous annotations if no current ones
-                        annotationManager.globalAnnotationEditor.restoreState({});
+                        emptyAnnotations.width = annotationManager.originalImg.naturalWidth || 600;
+                        emptyAnnotations.height = annotationManager.originalImg.naturalHeight || 800;
+                        annotationManager.globalAnnotationEditor.restoreState(emptyAnnotations);
                     }
                 }
                 
@@ -82,7 +133,7 @@ function addAnnotations() {
             annotationManager.globalAnnotationEditor.targetImage = annotationManager.originalImg;
             
             // Set up event handlers for the annotation editor
-            annotationManager.globalAnnotationEditor.addEventListener('editorsave', function(event) {
+            annotationManager.globalAnnotationEditor.addEventListener('editorsave', function(event: any) {
                 annotationManager.currentAnnotations = event.detail.state;
                 annotationManager.annotatedImageDataUrl = event.detail.dataUrl;
                 $("#annotation-status").text("Annotations modified (not saved)").css("color", "orange");
@@ -97,7 +148,7 @@ function addAnnotations() {
                 renderAnnotationsOnImage();
             });
             
-            annotationManager.globalAnnotationEditor.addEventListener('editorclose', function(event) {
+            annotationManager.globalAnnotationEditor.addEventListener('editorclose', function(event: any) {
                 // Hide the annotation editor instead of removing it
                 const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
                 if (editorWrapper) {
@@ -117,15 +168,12 @@ function addAnnotations() {
             }
             
             // Configure editor settings
-            annotationManager.globalAnnotationEditor.settings = {
-                renderOnSave: true,
-                rendererSettings: {
-                    naturalSize: false,
-                    imageType: "image/png",
-                    imageQuality: 1,
-                    markersOnly: false
-                }
-            };
+            annotationManager.globalAnnotationEditor.settings.renderOnSave = true;
+            annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = false;
+            annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = "image/png";
+            annotationManager.globalAnnotationEditor.settings.rendererSettings.imageQuality = 1;
+            annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
+
             
             // Add the annotation editor to the page
             editorWrapper = document.createElement('div');
@@ -158,58 +206,54 @@ function addAnnotations() {
             
         } catch (error) {
             console.error("Error opening annotation editor:", error);
-            $("#annotation-status").text("Error opening annotation editor: " + error.message).css("color", "red");
+            $("#annotation-status").text("Error opening annotation editor: " + (error as Error).message).css("color", "red");
         }
     }
 }
 
-function saveAnnotations() {
-    if (annotationManager.currentAnnotations) {
-        const annotationData = {
-            user_id: annotationManager.userId,
-            grader_id: annotationManager.graderId,
-            filename: annotationManager.filename,
-            file_path: annotationManager.filePath,
-            annotations: JSON.stringify(annotationManager.currentAnnotations),
-            csrf_token: annotationManager.csrfToken
-        };
-        
-        $.ajax({
-            url: buildCourseUrl(['gradeable', annotationManager.gradeableId, 'img', 'annotations']),
-            type: "POST",
-            data: annotationData,
-            dataType: "json",
-            success: function(response) {
-                if (response.status === "success") {
-                    $("#annotation-status").text("Annotations saved successfully!").css("color", "green");
-                } else {
-                    $("#annotation-status").text("Error saving annotations: " + (response.message || "Unknown error")).css("color", "red");
-                }
-            },
-            error: function(xhr, status, error) {
-                $("#annotation-status").text("Error saving annotations: " + error).css("color", "red");
+function saveAnnotations(): void {
+    const annotationData: AnnotationData = {
+        user_id: annotationManager.userId,
+        grader_id: annotationManager.graderId,
+        filename: annotationManager.filename,
+        file_path: annotationManager.filePath,
+        annotations: JSON.stringify(annotationManager.currentAnnotations),
+        csrf_token: annotationManager.csrfToken
+    };
+    
+    $.ajax({
+        url: buildCourseUrl(['gradeable', annotationManager.gradeableId, 'img', 'annotations']),
+        type: "POST",
+        data: annotationData,
+        dataType: "json",
+        success: function(response: ApiResponse) {
+            if (response.status === "success") {
+                $("#annotation-status").text("Annotations saved successfully!").css("color", "green");
+            } else {
+                $("#annotation-status").text("Error saving annotations: " + (response.message || "Unknown error")).css("color", "red");
             }
-        });
-    } else {
-        alert("No annotations to save. Please create annotations first.");
-    }
+        },
+        error: function(xhr: any, status: string, error: string) {
+            $("#annotation-status").text("Error saving annotations: " + error).css("color", "red");
+        }
+    });
 }
 
-function clearAnnotations() {
+function clearAnnotations(): void {
     if (confirm("Are you sure you want to clear all annotations?")) {
-        annotationManager.currentAnnotations = [];
+        annotationManager.currentAnnotations = null;
         annotationManager.annotatedImageDataUrl = null;
         
         // Hide any open annotation editor instead of removing it
-        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+        const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
         if (editorWrapper) {
             editorWrapper.style.display = 'none';
         }
         
         // Restore original image if it was replaced with MarkerView
-        const markerView = document.getElementById('annotation-marker-view');
+        const markerView: any = document.getElementById('annotation-marker-view');
         if (markerView && markerView.targetImage) {
-            const originalImgElement = markerView.targetImage;
+            const originalImgElement: HTMLImageElement = markerView.targetImage;
             
             // Restore original properties
             if (originalImgElement.dataset.originalId) {
@@ -226,7 +270,9 @@ function clearAnnotations() {
             }
             
             // Replace MarkerView back with original image
-            markerView.parentElement.replaceChild(originalImgElement, markerView);
+            if (markerView.parentElement) {
+                markerView.parentElement.replaceChild(originalImgElement, markerView);
+            }
             
             // Update manager reference
             annotationManager.originalImg = originalImgElement;
@@ -236,7 +282,7 @@ function clearAnnotations() {
     }
 }
 
-function downloadImage() {
+function downloadImage(): void {
     if (!annotationManager.originalImg) {
         console.error("No image available for download");
         alert("Error: No image available for download");
@@ -245,14 +291,14 @@ function downloadImage() {
 
     if (annotationManager.annotatedImageDataUrl && annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
         // Create download link with the pre-generated annotated image
-        const link = document.createElement('a');
+        const link: HTMLAnchorElement = document.createElement('a');
         link.href = annotationManager.annotatedImageDataUrl;
         
         // Add suffix to filename for annotated version
-        const nameParts = annotationManager.filename.split('.');
-        let downloadFilename;
+        const nameParts: string[] = annotationManager.filename.split('.');
+        let downloadFilename: string;
         if (nameParts.length > 1) {
-            const extension = nameParts.pop();
+            const extension: string = nameParts.pop()!;
             downloadFilename = nameParts.join('.') + '_annotated.' + extension;
         } else {
             downloadFilename = annotationManager.filename + '_annotated';
@@ -264,7 +310,7 @@ function downloadImage() {
         document.body.removeChild(link);
     } else {
         // No annotations, download original image
-        const link = document.createElement('a');
+        const link: HTMLAnchorElement = document.createElement('a');
         link.href = annotationManager.originalImg.src;
         link.download = annotationManager.filename;
         document.body.appendChild(link);
@@ -273,17 +319,17 @@ function downloadImage() {
     }
 }
 
-function cleanupAnnotationEditor() {
+function cleanupAnnotationEditor(): void {
     // Hide the global annotation editor when switching to a different image
-    const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+    const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
     if (editorWrapper) {
         editorWrapper.style.display = 'none';
     }
     
     // Restore original image if it was replaced with MarkerView
-    const markerView = document.getElementById('annotation-marker-view');
+    const markerView: any = document.getElementById('annotation-marker-view');
     if (markerView && markerView.targetImage) {
-        const originalImgElement = markerView.targetImage;
+        const originalImgElement: HTMLImageElement = markerView.targetImage;
         
         // Restore original properties
         if (originalImgElement.dataset.originalId) {
@@ -300,17 +346,16 @@ function cleanupAnnotationEditor() {
         }
         
         // Replace MarkerView back with original image
-        markerView.parentElement.replaceChild(originalImgElement, markerView);
+        if (markerView.parentElement) {
+            markerView.parentElement.replaceChild(originalImgElement, markerView);
+        }
         
         // Update manager reference
         annotationManager.originalImg = originalImgElement;
     }
 }
 
-// Make cleanup function available globally
-window.cleanupAnnotationEditor = cleanupAnnotationEditor;
-
-function renderAnnotationsOnImage() {
+function renderAnnotationsOnImage(): void {
     if (!annotationManager.originalImg) {
         console.error("No target image provided to renderAnnotationsOnImage");
         $("#annotation-status").text("Error: No image available for rendering").css("color", "red");
@@ -323,7 +368,7 @@ function renderAnnotationsOnImage() {
     
     try {
         // Check if we already replaced the image with MarkerView
-        const existingMarkerView = document.getElementById('annotation-marker-view');
+        const existingMarkerView: HTMLElement | null = document.getElementById('annotation-marker-view');
         if (existingMarkerView) {
             return;
         }
@@ -339,15 +384,15 @@ function renderAnnotationsOnImage() {
         }
         
         // Create MarkerView instance
-        const markerView = new markerjs3.MarkerView();
+        const markerView: any = new markerjs3.MarkerView();
         markerView.id = 'annotation-marker-view';
         markerView.className = annotationManager.originalImg.className; // Copy original classes
         markerView.targetImage = annotationManager.originalImg;
         
         // Get computed style dimensions to ensure proper scaling
-        const computedStyle = getComputedStyle(annotationManager.originalImg);
-        const displayWidth = parseInt(computedStyle.width) || annotationManager.originalImg.width || annotationManager.originalImg.naturalWidth;
-        const displayHeight = parseInt(computedStyle.height) || annotationManager.originalImg.height || annotationManager.originalImg.naturalHeight;
+        const computedStyle: CSSStyleDeclaration = getComputedStyle(annotationManager.originalImg);
+        const displayWidth: number = parseInt(computedStyle.width) || annotationManager.originalImg.width || annotationManager.originalImg.naturalWidth;
+        const displayHeight: number = parseInt(computedStyle.height) || annotationManager.originalImg.height || annotationManager.originalImg.naturalHeight;
         
         // Set target dimensions to match the displayed image size
         markerView.targetWidth = displayWidth;
@@ -369,7 +414,9 @@ function renderAnnotationsOnImage() {
         }
         
         // Replace the image with MarkerView
-        annotationManager.originalImg.parentElement.replaceChild(markerView, annotationManager.originalImg);
+        if (annotationManager.originalImg.parentElement) {
+            annotationManager.originalImg.parentElement.replaceChild(markerView, annotationManager.originalImg);
+        }
         
         // Show the annotations
         markerView.show(annotationManager.currentAnnotations);
@@ -378,22 +425,22 @@ function renderAnnotationsOnImage() {
         
     } catch (error) {
         console.error("Error in renderAnnotationsOnImage:", error);
-        $("#annotation-status").text("Error rendering annotations: " + error.message).css("color", "red");
+        $("#annotation-status").text("Error rendering annotations: " + (error as Error).message).css("color", "red");
     }
 }
 
-async function generateAnnotatedImageDataURL() {
+async function generateAnnotatedImageDataURL(): Promise<void> {
     if (!annotationManager.originalImg || !annotationManager.currentAnnotations) {
         return;
     }
     
     try {
         // Create a Renderer instance to generate the annotated image
-        const renderer = new markerjs3.Renderer();
+        const renderer: any = new markerjs3.Renderer();
         renderer.targetImage = annotationManager.originalImg;
         
         // Generate the annotated image dataURL using the current annotations
-        const dataUrl = await renderer.rasterize(annotationManager.currentAnnotations);
+        const dataUrl: string = await renderer.rasterize(annotationManager.currentAnnotations);
         
         // Store the annotated image data URL
         annotationManager.annotatedImageDataUrl = dataUrl;
@@ -404,7 +451,7 @@ async function generateAnnotatedImageDataURL() {
     }
 }
 
-function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existingAnnotations) {
+function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void {
     // Clean up any existing annotation editor before initializing a new image
     cleanupAnnotationEditor();
     
@@ -424,7 +471,7 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
     $(document).ready(function() {
         // Get the original image element
         console.log(existingAnnotations);
-        annotationManager.originalImg = document.getElementById("annotatable-image");
+        annotationManager.originalImg = document.getElementById("annotatable-image") as HTMLImageElement;
 
         // Handle image load errors
         if (annotationManager.originalImg) {
@@ -450,14 +497,16 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
         } else if (annotationManager.originalImg) {
             // Wait for image to load
             const imageLoadHandler = async function() {
-                annotationManager.originalImg.removeEventListener('load', imageLoadHandler);
-                renderAnnotationsOnImage();
-                // Generate annotated image dataURL if annotations exist
-                if (annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
-                    try {
-                        await generateAnnotatedImageDataURL();
-                    } catch (error) {
-                        console.error("Error generating annotated image on load:", error);
+                if (annotationManager.originalImg) {
+                    annotationManager.originalImg.removeEventListener('load', imageLoadHandler);
+                    renderAnnotationsOnImage();
+                    // Generate annotated image dataURL if annotations exist
+                    if (annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
+                        try {
+                            await generateAnnotatedImageDataURL();
+                        } catch (error) {
+                            console.error("Error generating annotated image on load:", error);
+                        }
                     }
                 }
             };
@@ -465,3 +514,11 @@ function initImageAnnotation(gId, uId, grId, fname, fPath, token, isStud, existi
         }
     });
 }
+
+// Make all functions available globally
+window.initImageAnnotation = initImageAnnotation;
+window.addAnnotations = addAnnotations;
+window.saveAnnotations = saveAnnotations;
+window.clearAnnotations = clearAnnotations;
+window.downloadImage = downloadImage;
+window.cleanupAnnotationEditor = cleanupAnnotationEditor;
