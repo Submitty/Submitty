@@ -2864,17 +2864,17 @@ CREATE UNIQUE INDEX ldc_g_user_id_unique ON public.late_day_cache USING btree (g
 
 
 --
--- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
-
-
---
 -- Name: notifications_to_user_created_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX notifications_to_user_created_at_index ON public.notifications USING btree (to_user_id, created_at DESC);
+
+
+--
+-- Name: notifications_to_user_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX notifications_to_user_id_index ON public.notifications USING btree (to_user_id);
 
 
 --
