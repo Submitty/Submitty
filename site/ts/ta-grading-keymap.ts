@@ -180,7 +180,7 @@ window.removeAllHotkeys = function () {
  */
 function generateHotkeysList() {
     const parent = $('#hotkeys-list');
-
+    console.log(keymap);
     parent.replaceWith(window.Twig.twig({
         ref: 'HotkeyList',
     }).render({

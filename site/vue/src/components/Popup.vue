@@ -83,26 +83,28 @@ watch(
           </button>
         </div>
 
-        <slot>Default popup content (you should probably override this)</slot>
+        <div class="form-body">
+          <slot>Default popup content (you should probably override this)</slot>
 
-        <div class="form-buttons">
-          <div class="form-button-container">
-            <button
-              class="btn btn-default close-button"
-              data-testid="popup-close-button"
-              tabindex="0"
-              @click="$emit('toggle', $event)"
-            >
-              {{ dismissText }}
-            </button> <button
-              v-if="savable"
-              class="btn btn-primary"
-              data-testid="popup-save-button"
-              tabindex="1"
-              @click="$emit('save', $event)"
-            >
-              {{ saveText }}
-            </button>
+          <div class="form-buttons">
+            <div class="form-button-container">
+              <button
+                class="btn btn-default close-button"
+                data-testid="popup-close-button"
+                tabindex="0"
+                @click="$emit('toggle', $event)"
+              >
+                {{ dismissText }}
+              </button> <button
+                v-if="savable"
+                class="btn btn-primary"
+                data-testid="popup-save-button"
+                tabindex="1"
+                @click="$emit('save', $event)"
+              >
+                {{ saveText }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -110,12 +112,16 @@ watch(
   </div>
 </template>
 
-<style>
+<style scoped>
 h1 {
   margin-bottom: 0 !important;
 }
 
 .popup-window {
   gap: 0.25em;
+}
+
+.popup-form {
+  box-sizing: border-box;
 }
 </style>

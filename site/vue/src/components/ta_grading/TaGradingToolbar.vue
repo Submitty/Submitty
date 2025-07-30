@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import NavigationButton from '@/components/ta_grading/NavigationButton.vue';
+import TaGradingKeyMap from '@/components/ta_grading/TaGradingKeymap.vue';
+import { defineProps, ref } from 'vue';
+import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
 import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
@@ -11,6 +12,7 @@ const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
     prevStudentUrl: string;
     nextStudentUrl: string;
     progress: number;
+    fullAccess: boolean;
 }>();
 
 // need to assign because ta-grading-panels-init.ts is not called
@@ -19,6 +21,15 @@ if (taLayoutDet.isFullScreenMode) {
     toggleFullScreenMode();
 }
 const fullScreened = taLayoutDet.isFullScreenMode;
+function changeNavigationTitles([prevTitle, nextTitle]: [string, string]) {
+    navigationTitles.value.prevStudentTitle = prevTitle;
+    navigationTitles.value.nextStudentTitle = nextTitle;
+}
+
+const navigationTitles = ref({
+    prevStudentTitle: 'Previous student',
+    nextStudentTitle: 'Next student',
+});
 </script>
 
 <template>
@@ -34,7 +45,7 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     :on-click="gotoPrevStudent"
     visible-icon="fa-caret-left"
     button-id="prev-student"
-    title="Previous Student"
+    :title="navigationTitles.prevStudentTitle"
     :optional-href="prevStudentUrl"
     optional-test-id="prev-student-navlink"
     optional-spanid="prev-student-navlink"
@@ -44,7 +55,7 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     :on-click="gotoNextStudent"
     visible-icon="fa-caret-right"
     button-id="next-student"
-    title="Next Student"
+    :title="navigationTitles.nextStudentTitle"
     :optional-href="nextStudentUrl"
     optional-test-id="next-student-navlink"
     optional-spanid="next-student-navlink"
@@ -82,6 +93,10 @@ const fullScreened = taLayoutDet.isFullScreenMode;
     title="Show Grading Settings"
     optional-spanid="grading-setting-btn"
     optional-test-id="grading-setting-btn"
+  />
+  <TaGradingKeyMap
+    :full-access="fullAccess"
+    @change-navigation-titles="changeNavigationTitles"
   />
   <span
     id="progress-bar-cont"
