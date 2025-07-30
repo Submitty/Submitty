@@ -7,6 +7,8 @@
 #   NO_SUBMISSIONS=1 vagrant up
 #       or
 #   EXTRA=rpi vagrant up
+#       or
+#   VM_MEMORY=4096 VM_CPUS=4 vagrant up
 #
 #
 # If you want to override the default image used for the virtual machines, you can set the
@@ -25,6 +27,9 @@
 #
 # If you don't want any submissions to be automatically generated for the courses created
 # by vagrant, you'll want to specify NO_SUBMISSIONS flag.
+#
+# You can also customize VM resources using environment variables:
+# VM_MEMORY=4096 VM_CPUS=4 vagrant up
 
 # Don't buffer output.
 $stdout.sync = true
@@ -33,6 +38,10 @@ $stderr.sync = true
 require 'json'
 
 ON_CI = !ENV.fetch('CI', '').empty?
+
+# VM resource configuration
+VM_MEMORY = ENV.fetch('VM_MEMORY', ON_CI ? '1024' : '2048').to_i
+VM_CPUS = ENV.fetch('VM_CPUS', ON_CI ? '1' : '2').to_i
 
 def gen_script(machine_name, worker: false, base: false)
   no_submissions = !ENV.fetch('NO_SUBMISSIONS', '').empty?
@@ -197,8 +206,8 @@ Vagrant.configure(2) do |config|
 
     # We limit resources when running on CI to avoid resource exhaustion and it isn't used for grading stuff or
     # other things we do in dev.
-    vb.memory = ON_CI ? 1024 : 2048
-    vb.cpus = ON_CI ? 1 : 2
+    vb.memory = VM_MEMORY
+    vb.cpus = VM_CPUS
 
     # When you put your computer (while running the VM) to sleep, then resume work some time later the VM will be out
     # of sync timewise with the host for however long the host was asleep. Of course, the VM by default will
@@ -243,8 +252,8 @@ Vagrant.configure(2) do |config|
       end
     end
 
-    prl.memory = 2048
-    prl.cpus = 2
+    prl.memory = VM_MEMORY
+    prl.cpus = VM_CPUS
 
     mount_folders(override, ["share", "nosuid"])
   end
@@ -255,8 +264,8 @@ Vagrant.configure(2) do |config|
         override.vm.box = base_boxes[:arm_bento]
       end
     end
-    vmware.vmx["memsize"] = "2048"
-    vmware.vmx["numvcpus"] = "2"
+    vmware.vmx["memsize"] = VM_MEMORY.to_s
+    vmware.vmx["numvcpus"] = VM_CPUS.to_s
 
     mount_folders(override, [])
   end
@@ -268,8 +277,8 @@ Vagrant.configure(2) do |config|
 
     libvirt.qemu_use_session = true
 
-    libvirt.memory = 2048
-    libvirt.cpus = 2
+    libvirt.memory = VM_MEMORY
+    libvirt.cpus = VM_CPUS
 
     libvirt.forward_ssh_port = true
 
@@ -283,8 +292,8 @@ Vagrant.configure(2) do |config|
       end
     end
 
-    qe.memory = "2G"
-    qe.smp = 2
+    qe.memory = "#{VM_MEMORY}M"
+    qe.smp = VM_CPUS
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
