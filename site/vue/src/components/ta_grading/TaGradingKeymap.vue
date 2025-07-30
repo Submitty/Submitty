@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import Popup from '@/components/Popup.vue';
 import TaGradingGeneralSettings from '@/components/ta_grading/TaGradingGeneralSettings.vue';
-import TaGradingHotkeySettings from '@/components/ta_grading/TaGradingHotkeySettings.vue';
+import { generateHotkeysList } from '../../../../ts/ta-grading-keymap';
 import { getDefaultSettingsData, loadTAGradingSettingData, optionsCallback, type SettingsData } from '@/ts/ta-grading-general-settings';
 
 const { fullAccess } = defineProps<{
@@ -17,6 +17,7 @@ const visible = ref(false);
 
 const togglePopup = () => {
     visible.value = !visible.value;
+    generateHotkeysList();
 };
 
 function handleChangeNavigationTitles(titles: [string, string]) {
@@ -68,7 +69,7 @@ onMounted(() => {
         @change-navigation-titles="handleChangeNavigationTitles"
       />
 
-      <TaGradingHotkeySettings />
+      <div id="hotkeys-list" />
     </template>
   </Popup>
 </template>

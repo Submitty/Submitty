@@ -157,14 +157,6 @@ function isSettingsVisible() {
     return $('#settings-popup').is(':visible');
 }
 
-export function showSettings() {
-    generateSettingList();
-    generateHotkeysList();
-    $('#settings-popup').show();
-    captureTabInModal('settings-popup');
-}
-window.showSettings = showSettings;
-
 window.restoreAllHotkeys = function () {
     keymap.forEach((hotkey, index) => {
         updateKeymapAndStorage(index, hotkey.originalCode!);
@@ -178,9 +170,10 @@ window.removeAllHotkeys = function () {
 /**
  * Generate list of hotkeys on the ui
  */
-function generateHotkeysList() {
+export function generateHotkeysList() {
     const parent = $('#hotkeys-list');
     console.log(keymap);
+    console.log(parent.length);
     parent.replaceWith(window.Twig.twig({
         ref: 'HotkeyList',
     }).render({
@@ -189,47 +182,6 @@ function generateHotkeysList() {
             code: hotkey.code || hotkey.originalCode || 'Unassigned',
         })),
     }));
-}
-
-/**
- * Generate list of settings on the ui
- */
-function generateSettingList() {
-    const parent = $('#ta-grading-general-settings');
-    loadTAGradingSettingData();
-
-    parent.replaceWith(window.Twig.twig({
-        ref: 'GeneralSettingList',
-    }).render({
-        settings: settingsData,
-    }));
-}
-
-export function loadTAGradingSettingData() {
-    for (let i = 0; i < settingsData.length; i++) {
-        for (let x = 0; x < settingsData[i].values.length; x++) {
-            const generator = settingsData[i].values[x].optionsGenerator;
-            if (generator) {
-                settingsData[i].values[x].options = generator();
-            }
-            const inquiry = window.Cookies.get('inquiry_status');
-            if (inquiry === 'on') {
-                settingsData[i].values[x].currValue = 'active-inquiry';
-            }
-            else {
-                if (localStorage.getItem(settingsData[i].values[x].storageCode) !== 'default' && localStorage.getItem(settingsData[i].values[x].storageCode) !== 'active-inquiry') {
-                    settingsData[i].values[x].currValue = localStorage.getItem(settingsData[i].values[x].storageCode)!;
-                }
-                else {
-                    settingsData[i].values[x].currValue = 'default';
-                }
-            }
-            if (settingsData[i].values[x].currValue === null) {
-                localStorage.setItem(settingsData[i].values[x].storageCode, settingsData[i].values[x].options[settingsData[i].values[x].default]);
-                settingsData[i].values[x].currValue = settingsData[i].values[x].options[settingsData[i].values[x].default];
-            }
-        }
-    }
 }
 
 /**

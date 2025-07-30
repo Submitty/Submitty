@@ -4,7 +4,6 @@ import TaGradingKeyMap from '@/components/ta_grading/TaGradingKeymap.vue';
 import { defineProps, ref } from 'vue';
 import { gotoMainPage, gotoPrevStudent, gotoNextStudent } from '../../../../ts/ta-grading-toolbar';
 import { togglePanelSelectorModal } from '../../../../ts/panel-selector-modal';
-import { showSettings } from '../../../../ts/ta-grading-keymap';
 import { exchangeTwoPanels, taLayoutDet, toggleFullScreenMode, getSavedTaLayoutDetails } from '../../../../ts/ta-grading-panels';
 
 const { homeUrl, prevStudentUrl, nextStudentUrl, progress } = defineProps<{
@@ -84,15 +83,6 @@ const navigationTitles = ref({
     button-id="two-panel-exchange-button"
     title="Exchange the panel positions"
     optional-spanid="two-panel-exchange-btn"
-  />
-
-  <NavigationButton
-    :on-click="showSettings"
-    visible-icon="fa-wrench"
-    button-id="grading-setting-btn"
-    title="Show Grading Settings"
-    optional-spanid="grading-setting-btn"
-    optional-test-id="grading-setting-btn"
   />
   <TaGradingKeyMap
     :full-access="fullAccess"

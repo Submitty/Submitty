@@ -1840,11 +1840,6 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate('grading/electronic/MarkConflictPopup.twig');
     }
 
-    public function popupSettings() {
-        return $this->core->getOutput()->renderTwigTemplate("grading/SettingsForm.twig");
-    }
-
-
     public function renderNotebookPanel(array $notebook, array $testcase_messages, array $image_data, string $gradeable_id, int $highest_version, array $old_files, string $student_id, bool $is_timed, int $allowed_minutes): string {
         return $this->core->getOutput()->renderTwigTemplate(
             "grading/electronic/NotebookPanel.twig",
