@@ -278,6 +278,7 @@ export function updatePanelOptions() {
         '.grade-panel .panel-position-cont option',
     );
     panelOptions.each((idx) => {
+        console.log('panelOptions', panelOptions[idx], panelOptions[idx].value);
         if (panelOptions[idx].value === 'leftTop') {
             if (
                 taLayoutDet.numOfPanelsEnabled === 2
