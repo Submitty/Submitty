@@ -70,8 +70,6 @@ const onChangeNavTab = (tab: number): void => {
 };
 
 const handleVersionChange = (version: number) => {
-    // Handle version change logic here
-    console.log('Version changed to:', version);
     // add gradeable_version to the current URL
     const url = new URL(window.location.href);
     url.searchParams.set('gradeable_version', version.toString());
