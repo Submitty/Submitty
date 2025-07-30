@@ -35,6 +35,16 @@ def execute_notebook(notebook_path, output_path, timeout=600):
         # Load the notebook and do not convert it to a specific version
         nb = nbformat.read(f, as_version=nbformat.NO_CONVERT)
 
+    # Validate submitty_id if present. Alphanumeric characters, hyphens, and underscores are allowed
+    for cell_idx, cell in enumerate(nb.cells):
+        submitty_id = cell.metadata.get('submitty_id')
+        if submitty_id:
+            if re.fullmatch(r'^[A-Za-z0-9-_]+$', submitty_id) is None:
+                raise ValueError(
+                    f"Invalid characters in submitty_id '{submitty_id}' for cell {cell_idx}. "
+                    "Only alphanumeric characters, hyphens, and underscores are allowed."
+                )
+
     # Clear output of notebook
     cop = ClearOutputPreprocessor()
     nb, _ = cop.preprocess(nb, {})
@@ -108,12 +118,6 @@ def save_output(cell_idx, cell):
     submitty_id = cell.metadata.get('submitty_id')
     if submitty_id:
         file_name = f"{submitty_id}"
-        # Alphanumeric characters, hyphens, and underscores are allowed
-        if re.fullmatch(r'^[A-Za-z0-9-_]+$', file_name) is None:
-            raise ValueError(
-                f"Invalid characters in submitty_id '{submitty_id}' for cell {cell_idx}. "
-                "Only alphanumeric characters, hyphens, and underscores are allowed."
-            )
     else:
         file_name = f"cell{cell_idx}"
 
