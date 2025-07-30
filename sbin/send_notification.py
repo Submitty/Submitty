@@ -252,7 +252,7 @@ def send_notifications(course, course_db, master_db, lists, notification_type):
                         SET eg_release_notifications_sent = TRUE
                         WHERE g_id = :g_id;
                         """), updates
-                )
+                    )
             else:
                 course_db.execute(text(
                     """
