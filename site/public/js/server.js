@@ -469,8 +469,16 @@ function newEditCourseMaterialsForm(tag) {
 function editFilePathRecommendations() {
     const fileNameInput = $('#edit-title');
     const fileName = fileNameInput.val();
-
     const options = document.getElementById('new-file-name').options;
+    // Update the input display to show just the filename
+    if (fileName.trim().length > 0) {
+        const lastSlash = fileName.lastIndexOf('/');
+        const extractedFileName = lastSlash !== -1 ? fileName.substring(lastSlash + 1) : fileName;
+        fileNameInput.val(extractedFileName);
+    }
+    else {
+        return;
+    }
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
@@ -1690,7 +1698,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
 function popOutSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
-    if (url_file.includes('submissions')) {
+    if (url_file.includes('submissions_processed')) {
+        directory = 'submissions_processed';
+    }
+    else if (url_file.includes('submissions')) {
         directory = 'submissions';
     }
     else if (url_file.includes('results_public')) {
