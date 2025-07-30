@@ -26,6 +26,8 @@ class TokenManager {
     /** @var string */
     private static $issuer;
 
+    const WEBSOCKET_EXPIRATION = "5 minutes";
+
     public static function initialize(string $secret, string $issuer): void {
         if (mb_strlen($secret) < 64) {
             throw new \LengthException('Invalid secret length, expect at least 64 characters, got ' . mb_strlen($secret) . ' characters');
@@ -88,7 +90,7 @@ class TokenManager {
         string $page,
         ?array $existing_authorized_pages = []
     ): Token {
-        $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(SessionManager::WEBSOCKET_EXPIRATION))->getTimestamp();
+        $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(self::WEBSOCKET_EXPIRATION))->getTimestamp();
 
         // Persist existing non-expired authorized pages
         $authorized_pages = [];
@@ -150,12 +152,12 @@ class TokenManager {
             || !$token->claims()->has('expire_time')
             || !is_int($token->claims()->get('expire_time'))
         ) {
-            throw new \InvalidArgumentException('Missing or invalid claims in websocket token');
+            throw new \InvalidArgumentException('Missing or invalid claims in WebSocket token');
         }
 
         $expire_time = $token->claims()->get('expire_time');
         if (time() > $expire_time) {
-            throw new \InvalidArgumentException('Websocket token has expired');
+            throw new \InvalidArgumentException('WebSocket token has expired');
         }
 
         return $token;

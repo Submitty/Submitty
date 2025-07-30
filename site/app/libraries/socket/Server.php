@@ -135,7 +135,7 @@ class Server implements MessageComponentInterface {
                 return false;
             }
 
-            if ($page === 'discussion_forum' || $page === 'office_hours_queue' || ($page === 'chatroom' && !isset($query_params['chatroom_id']))) {
+            if ($page === 'discussion_forum' || $page === 'office_hours_queue' || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))) {
                 // These pages are not stored in authorized_pages to avoid redundancy
                 $key = 'defaults';
             }
@@ -233,7 +233,7 @@ class Server implements MessageComponentInterface {
     public function onOpen(ConnectionInterface $conn): void {
         try {
             if (!$this->checkAuth($conn)) {
-                $conn->close();
+                $this->closeWithError($conn, 'Authentication failed');
             }
         }
         catch (DatabaseException $de) {
@@ -245,12 +245,12 @@ class Server implements MessageComponentInterface {
             catch (\Exception $e) {
                 $this->logError($de, $conn);
                 $this->logError($e, $conn);
-                $this->closeWithError($conn);
+                $this->closeWithError($conn, 'Database connection failed');
             }
         }
         catch (\Throwable $t) {
             $this->logError($t, $conn);
-            $this->closeWithError($conn);
+            $this->closeWithError($conn, 'Unexpected error');
         }
     }
 
@@ -304,8 +304,8 @@ class Server implements MessageComponentInterface {
         }
     }
 
-    public function closeWithError(ConnectionInterface $conn): void {
-        $msg = ['error' => 'Server error'];
+    public function closeWithError(ConnectionInterface $conn, ?string $error_message = null): void {
+        $msg = ['error' => $error_message ?? 'Server error'];
         $conn->send(json_encode($msg));
         $conn->close();
     }

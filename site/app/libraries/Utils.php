@@ -445,9 +445,9 @@ class Utils {
                 return $prefix . $page;
             case 'chatrooms':
                 if (isset($query_params['chatroom_id'])) {
-                    $prefix .= $page . '-' . $query_params['chatroom_id'];
+                    return $prefix . $page . '-' . $query_params['chatroom_id'];
                 }
-                return $prefix;
+                return $prefix . $page;
             case 'polls':
                 if (!isset($query_params['poll_id']) || !isset($query_params['instructor'])) {
                     return null;

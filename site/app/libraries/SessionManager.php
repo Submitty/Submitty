@@ -17,7 +17,6 @@ use DateTime;
  */
 class SessionManager {
     const SESSION_EXPIRATION = "2 weeks";
-    const WEBSOCKET_EXPIRATION = "30 minutes";
 
     /**
      * @var Core
@@ -83,7 +82,7 @@ class SessionManager {
                 Utils::generateRandomString(),
                 $user_id,
                 Utils::generateRandomString(),
-                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString(self::SESSION_EXPIRATION)),
+                $this->core->getDateTimeNow()->add(\DateInterval::createFromDateString(SessionManager::SESSION_EXPIRATION)),
                 $this->core->getDateTimeNow(),
                 $user_agent
             );

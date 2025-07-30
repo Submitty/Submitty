@@ -41,7 +41,7 @@ class WebSocketClient {
         my_url.port = window.websocketPort;
         my_url.pathname = '/ws';
         this.url = my_url.href;
-        this.serverError = false;
+        this.serverError = null;
     }
 
     open(page, args = {}) {
@@ -67,8 +67,8 @@ class WebSocketClient {
 
         this.client.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            if (Object.keys(data).includes('error') && data['error'] === 'Server error') {
-                this.serverError = true;
+            if (Object.keys(data).includes('error')) {
+                this.serverError = data['error'];
                 return;
             }
             this.number++;
@@ -88,6 +88,7 @@ class WebSocketClient {
                 case 1000:
                     console.log('WebSocket: Closed');
                     if (this.serverError) {
+                        console.error(`WebSocket Server Error: ${this.serverError}`);
                         sys_message.show();
                     }
                     break;
@@ -99,6 +100,7 @@ class WebSocketClient {
         };
 
         this.client.onerror = (error) => {
+            console.log(error);
             const sys_message = $('#socket-server-system-message');
             switch (error.code) {
                 case 'ECONNREFUSED':

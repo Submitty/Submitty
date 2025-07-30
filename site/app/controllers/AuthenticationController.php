@@ -204,35 +204,6 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
-     * @return JsonResponse
-     */
-    #[Route("/api/websocket_token", methods: ["GET"])]
-    public function getWebSocketToken(): JsonResponse {
-        $cookie_key = 'submitty_websocket_token';
-        $existing_token = $_COOKIE[$cookie_key] ?? null;
-
-        if ($existing_token === null) {
-            return JsonResponse::getFailResponse("No existing WebSocket token found");
-        }
-
-        try {
-            $claims = TokenManager::parseWebsocketToken($existing_token)->claims();
-            $token = [
-                'iat' => $claims->get('iat')->getTimestamp(),
-                'sub' => $claims->get('sub'),
-                'iss' => $claims->get('iss'),
-                'authorized_pages' => $claims->get('authorized_pages'),
-                'expire_time' => $claims->get('expire_time'),
-            ];
-
-            return JsonResponse::getSuccessResponse(['token' => $token]);
-        }
-        catch (\Exception $e) {
-            return JsonResponse::getFailResponse("Invalid WebSocket token: " . $e->getMessage());
-        }
-    }
-
-    /**
      * Handle stateless authentication for the VCS endpoints.
      *
      * This endpoint is unique from the other authentication methods in

@@ -1923,11 +1923,6 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
 
-        $this->core->authorizeWebSocketToken('grade_inquiry', [
-            'gradeable_id' => $gradeable_id,
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-        ]);
-
         $show_verify_all = false;
         //check if verify all button should be shown or not
         foreach ($gradeable->getComponents() as $component) {
@@ -1943,6 +1938,13 @@ class ElectronicGraderController extends AbstractController {
         $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
         $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
         $show_verify_all = $show_verify_all && $can_verify;
+
+        if ($can_inquiry) {
+            $this->core->authorizeWebSocketToken('grade_inquiry', [
+                'gradeable_id' => $gradeable_id,
+                'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            ]);
+        }
 
         $show_silent_edit = $this->core->getAccess()->canI("grading.electronic.silent_edit");
 
