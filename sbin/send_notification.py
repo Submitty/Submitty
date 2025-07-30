@@ -117,7 +117,7 @@ def connect_db(db_name):
 
 def format_timestamp(timestamp):
     """Format a timestamp into a readable string."""
-    return timestamp.strftime("%B %d, %Y at %I:%M %p")
+    return timestamp.strftime("%Y-%m-%d @ %I:%M %p")
 
 
 def format_late_days(late_days):
@@ -160,16 +160,16 @@ def construct_notifications(term, course, pending, notification_type):
         if notification_type == "gradeable_release":
             email_subject = f"Submissions Open: {gradeable['title']}"
             notification_content = (
-                f"{email_subject} (Due {format_timestamp(gradeable['submission_due_date'])} - "
-                f"{format_late_days(gradeable['remaining_late_days'])} remaining, "
-                f"{format_late_days(gradeable['max_late_days'])} allowed)"
+                f"{email_subject} | Due: {format_timestamp(gradeable['submission_due_date'])} | "
+                f"{format_late_days(gradeable['remaining_late_days'])} remaining "
+                f"({gradeable['max_late_days']} allowed)"
             )
             email_body = (
                 f"Submissions are now being accepted for \"{gradeable['title']}\" in course "
                 f"{get_full_course_name(term, course)}.\n\n"
                 f"Deadline: {format_timestamp(gradeable['submission_due_date'])}\n"
-                f"Late Days: {format_late_days(gradeable['remaining_late_days'])} remaining, "
-                f"{format_late_days(gradeable['max_late_days'])} allowed"
+                f"Late Days: {gradeable['remaining_late_days']} remaining, "
+                f"{gradeable['max_late_days']} allowed"
             )
         else:
             email_subject = notification_content = f"Grade Released: {gradeable['title']}"
@@ -307,7 +307,7 @@ def send_pending_notifications():
                     AND g.g_grade_released_date <= NOW()
                 INNER JOIN electronic_gradeable_version AS egv
                     ON g.g_id = egv.g_id
-                    AND egv.active_version != '0'
+                    AND egv.active_version != 0
                     AND egv.g_notification_sent IS FALSE
                 INNER JOIN gradeable_component AS gc
                     ON g.g_id = gc.g_id
@@ -395,6 +395,37 @@ def send_pending_notifications():
                 AND eg.eg_release_notifications_sent IS FALSE
                 AND eg.eg_submission_open_date <= NOW()
                 AND eg.eg_submission_due_date >= NOW()
+                AND (
+                    eg.eg_depends_on IS NULL
+                    OR (
+                        SELECT
+                            egd.autograding_non_hidden_non_extra_credit +
+                            egd.autograding_non_hidden_extra_credit +
+                            egd.autograding_hidden_non_extra_credit +
+                            egd.autograding_hidden_extra_credit
+                        FROM electronic_gradeable_data egd
+                        LEFT JOIN gradeable_teams AS gt
+                            ON egd.g_id = gt.g_id
+                            AND egd.team_id = gt.team_id
+                        LEFT JOIN teams AS t
+                            ON gt.team_id = t.team_id
+                            AND t.user_id = u.user_id
+                        WHERE egd.g_id = eg.eg_depends_on
+                            AND egd.autograding_complete IS TRUE
+                            AND u.user_id = COALESCE(egd.user_id, t.user_id)
+                            AND egd.g_version = (
+                                SELECT active_version
+                                FROM electronic_gradeable_version egv
+                                WHERE egv.g_id = eg.eg_depends_on
+                                AND egv.active_version != 0
+                                AND (
+                                    (egd.user_id IS NOT NULL AND egv.user_id = egd.user_id)
+                                    OR
+                                    (egd.user_id IS NULL AND egv.team_id = egd.team_id)
+                                )
+                            )
+                    ) >= eg.eg_depends_on_points
+                )
             GROUP BY g.g_id, g.g_title, eg.eg_submission_due_date, u.user_id, u.user_email,
                 ns.all_gradeable_releases, ns.all_gradeable_releases_email, eg.eg_late_days,
                 ldc.late_days_remaining
