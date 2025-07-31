@@ -170,6 +170,7 @@
     });
     </script>
 {% endblock %}
+{% block close_click_action %}closePopup('{{ block('popup_id') }}'); window.location.reload();{% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
     <input class="btn btn-primary" id="submit-edit" type="submit" value="Submit" onclick = "submitEdit();"/>
