@@ -203,7 +203,7 @@ describe('Test cases revolving around polls functionality', () => {
         // click cancel, verify url and make sure the poll wasn't created
         cy.contains('Cancel').click();
         cy.url().should('include', 'sample/polls');
-        cy.should('not.contain', 'TEST');
+        cy.get('TEST').should('not.exist');
 
         // make a poll
         cy.contains('New Poll').click();
@@ -292,9 +292,9 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(2)').contains('Answer 3');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('be.disabled');
         // verify the optional display buttons and histogram don't exist for student
-        cy.should('not.contain', '#toggle-histogram-button');
-        cy.should('not.contain', '#toggle-info-button');
-        cy.should('not.contain', '#poll-histogram');
+        cy.get('#toggle-histogram-button').should('not.exist');
+        cy.get('#toggle-info-button').should('not.exist');
+        cy.get('#poll-histogram').should('not.exist');
 
         // log into instructor and open the poll
         cy.logout();
@@ -413,10 +413,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(2)').contains('Answer 2');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('not.be.checked');
         // verify we can't see histogram or answer
-        cy.should('not.contain', '#toggle-info-button');
-        cy.should('not.contain', '#toggle-histogram-button');
-        cy.should('not.contain', '#poll-histogram');
-        cy.should('not.contain', '.correct-tag');
+        cy.get('#toggle-info-button').should('not.exist');
+        cy.get('#toggle-histogram-button').should('not.exist');
+        cy.get('#poll-histogram').should('not.exist');
+        cy.get('.correct-tag').should('not.exist');
 
         // log into instructor, enable histogram release when poll ends
         cy.logout();
@@ -435,10 +435,10 @@ describe('Test cases revolving around polls functionality', () => {
         cy.login('student');
         cy.visit(['sample', 'polls']);
         visitPoll('Poll Cypress Test', 'Edit Answer');
-        cy.should('not.contain', '#toggle-info-button');
-        cy.should('not.contain', '#toggle-histogram-button');
-        cy.should('not.contain', '#poll-histogram');
-        cy.should('not.contain', '.correct-tag');
+        cy.get('#toggle-info-button').should('not.exist');
+        cy.get('#toggle-histogram-button').should('not.exist');
+        cy.get('#poll-histogram').should('not.exist');
+        cy.get('.correct-tag').should('not.exist');
 
         // log into instructor, close the poll
         cy.logout();
@@ -464,7 +464,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
-        cy.should('not.contain', '.correct-tag');
+        cy.get('.correct-tag').should('not.exist');
 
         // log into instructor, enable answer release when poll ends
         cy.logout();
