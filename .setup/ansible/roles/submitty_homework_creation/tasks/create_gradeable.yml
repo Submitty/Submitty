@@ -3,7 +3,7 @@
     url: "{{ submitty_homework_creation_api_url }}"
     method: POST
     body_format: json
-    body: "{{ lookup('file', var_json_file) }}"
+    body: "{{ lookup('file', submitty_homework_creation_var_json_file) }}"
     return_content: yes
     headers:
       Authorization: "{{ submitty_homework_creation_api_key }}"

@@ -9,5 +9,5 @@
   loop_control:
     loop_var: submitty_homework_api_json_file
   vars:
-    var_json_file: "{{ submitty_homework_api_json_file }}"
-    api_key: "{{ passed_api_key }}"
+    submitty_homework_creation_var_json_file: "{{ submitty_homework_api_json_file }}"
+    submitty_homework_creation_api_key: "{{ passed_api_key }}"
