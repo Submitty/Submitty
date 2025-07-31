@@ -12,10 +12,9 @@ const visitPoll = (title, text) => {
     return cy.window().then((win) => {
         if (win.histogram) {
             // WebSocket histogram object is only initialized for active polls when first loading the page
-            cy.url().should('match', /\/polls\/\d+$/).then(() => {
-                verifyWebSocketStatus();
-            });
+            return cy.url().should('match', /\/polls\/\d+$/).then(() => verifyWebSocketStatus());
         }
+        return cy.wrap(null);
     });
 };
 
