@@ -209,7 +209,7 @@
                 Plotly.relayout(container, update);
             });
 
-            {% if user_admin %}
+            {% if user_admin and poll.isOpen() %}
             window.histogram = {
                 data: data,
                 layout: layout,

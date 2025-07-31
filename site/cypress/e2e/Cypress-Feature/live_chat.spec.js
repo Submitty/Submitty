@@ -210,14 +210,17 @@ const leaveChat = (title) => {
 };
 
 const enterChat = (title, anonymous = false) => {
+    let urlMatch = '';
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();
+        urlMatch = /\/chat\/\d+\/anonymous$/;
     }
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
+        urlMatch = /\/chat\/\d+$/;
     }
 
-    cy.url().should('match', /\/chat\/\d+$/).then(() => {
+    cy.url().should('match', urlMatch).then(() => {
         cy.get('[data-testid="chat-title"]').should('contain.text', title);
         verifyWebSocketStatus();
     });
