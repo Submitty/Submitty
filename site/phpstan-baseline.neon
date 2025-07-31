@@ -85,6 +85,12 @@ parameters:
 			path: app/authentication/SamlAuthentication.php
 
 		-
+			message: '#^Method app\\authentication\\SamlAuthentication\:\:setValidUsernames\(\) has parameter \$usernames with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/authentication/SamlAuthentication.php
+
+		-
 			message: '#^Property app\\authentication\\SamlAuthentication\:\:\$auth has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -172,6 +178,12 @@ parameters:
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 3
+			path: app/controllers/AutogradingStatusController.php
+
+		-
+			message: '#^Method app\\controllers\\AutogradingStatusController\:\:getAutogradingInfo\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
 			path: app/controllers/AutogradingStatusController.php
 
 		-
@@ -766,6 +778,12 @@ parameters:
 			path: app/controllers/OfficeHoursQueueController.php
 
 		-
+			message: '#^Method app\\controllers\\OfficeHoursQueueController\:\:sendSocketMessage\(\) has parameter \$msg_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
 			message: '#^Method app\\controllers\\OfficeHoursQueueController\:\:showNewAnnouncement\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1057,6 +1075,24 @@ parameters:
 			path: app/controllers/admin/AdminGradeableController.php
 
 		-
+			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:getValidPathsToConfigDirectories\(\) has parameter \$dir_queue with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:getValidPathsToConfigDirectories\(\) has parameter \$error_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:getValidPathsToConfigDirectories\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
 			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:importComponents\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1185,6 +1221,12 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:shiftDates\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\AdminGradeableController\:\:shiftDates\(\) has parameter \$dates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/admin/AdminGradeableController.php
 
@@ -1363,16 +1405,16 @@ parameters:
 			path: app/controllers/admin/ConfigurationController.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
+			message: '#^Method app\\controllers\\admin\\ConfigurationController\:\:getGradeableSeatingOptions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/controllers/admin/GradeOverrideController.php
+			path: app/controllers/admin/ConfigurationController.php
 
 		-
-			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
-			identifier: equal.notAllowed
-			count: 2
-			path: app/controllers/admin/GradeOverrideController.php
+			message: '#^Method app\\controllers\\admin\\EmailRoomSeatingController\:\:replacePlaceholders\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/EmailRoomSeatingController.php
 
 		-
 			message: '#^Method app\\controllers\\admin\\GradeOverrideController\:\:deleteOverriddenGrades\(\) has no return type specified\.$#'
@@ -1444,6 +1486,24 @@ parameters:
 			path: app/controllers/admin/LateController.php
 
 		-
+			message: '#^Method app\\controllers\\admin\\LateController\:\:parseAndValidateCsv\(\) has @param\-out PHPDoc tag for parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\LateController\:\:parseAndValidateCsv\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\LateController\:\:parseAndValidateCsv\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 1
@@ -1464,6 +1524,18 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\admin\\NotebookBuilderController\:\:builder\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/admin/NotebookBuilderController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\NotebookBuilderController\:\:checkPermissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/NotebookBuilderController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\NotebookBuilderController\:\:getFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/admin/NotebookBuilderController.php
 
@@ -1510,6 +1582,48 @@ parameters:
 			path: app/controllers/admin/PlagiarismController.php
 
 		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getIgnoreSubmissionType\(\) has parameter \$usernames with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getIgnoreSubmissionType\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getJsonForConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getOtherOtherGradeables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getOtherSemesterCourses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getOverallRankings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:getRankingsForUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
 			message: '#^Method app\\controllers\\admin\\PlagiarismController\:\:toggleNightlyRerun\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1543,6 +1657,12 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:cacheTeamGradedGradeables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
 			message: '#^Method app\\controllers\\admin\\ReportController\:\:displayGradebook\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1561,8 +1681,8 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
-			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateCustomization\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateCSVRow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/admin/ReportController.php
 
@@ -1573,8 +1693,38 @@ parameters:
 			path: app/controllers/admin/ReportController.php
 
 		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateGradeSummary\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:generateReportInternal\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
 			message: '#^Method app\\controllers\\admin\\ReportController\:\:getGradeSummariesLastRun\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:getSplitGradeables\(\) has parameter \$sort_keys with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:getSplitGradeables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\ReportController\:\:mergeGradedGradeables\(\) has parameter \$team_graded_gradeables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/admin/ReportController.php
 
@@ -1701,6 +1851,12 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\admin\\UsersController\:\:ajaxGetUserDetails\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/controllers/admin/UsersController.php
+
+		-
+			message: '#^Method app\\controllers\\admin\\UsersController\:\:getUserDataFromUpload\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/admin/UsersController.php
 
@@ -1837,6 +1993,12 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:addDirs\(\) has parameter \$dirs_to_make with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:deleteCourseMaterial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1873,8 +2035,26 @@ parameters:
 			path: app/controllers/course/CourseMaterialsController.php
 
 		-
+			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:recursiveEditFolder\(\) has parameter \$course_materials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:resolveClashingMaterials\(\) has parameter \$file_names with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
 			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:setFileTimeStamp\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/course/CourseMaterialsController.php
+
+		-
+			message: '#^Method app\\controllers\\course\\CourseMaterialsController\:\:setFileTimeStamp\(\) has parameter \$courseMaterials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/course/CourseMaterialsController.php
 
@@ -2295,7 +2475,7 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
-			count: 19
+			count: 18
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
@@ -2731,6 +2911,12 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:generateHistogramData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:getGradeableRubric\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2749,8 +2935,26 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:getItempoolMapForSubmitter\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:getMarkStats\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:getSolutionTaNotesForGradeable\(\) has parameter \$submitter_itempool_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:getSolutionTaNotesForGradeable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -2809,8 +3013,20 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveComponentOrder\(\) has parameter \$orders with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveComponentPages\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveComponentPages\(\) has parameter \$pages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -2827,6 +3043,12 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveGradedComponent\(\) has parameter \$mark_ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveMark\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2839,8 +3061,38 @@ parameters:
 			path: app/controllers/grading/ElectronicGraderController.php
 
 		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveMarkOrder\(\) has parameter \$orders with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
 			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:saveOverallComment\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:setAllGradAllGrading\(\) has parameter \$student_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:setAllGradAllGrading\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:setRandomizedGraders\(\) has parameter \$student_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: '#^Method app\\controllers\\grading\\ElectronicGraderController\:\:setRandomizedGraders\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/grading/ElectronicGraderController.php
 
@@ -3169,6 +3421,12 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
+			message: '#^Method app\\controllers\\student\\SubmissionController\:\:ajaxRegrade\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
 			message: '#^Method app\\controllers\\student\\SubmissionController\:\:ajaxUploadSplitItem\(\) has parameter \$clobber with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3201,6 +3459,12 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\student\\SubmissionController\:\:ajaxUploadSubmission\(\) has parameter \$merge with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: '#^Method app\\controllers\\student\\SubmissionController\:\:ajaxUploadSubmission\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3267,6 +3531,12 @@ parameters:
 		-
 			message: '#^Method app\\controllers\\student\\SubmissionController\:\:showHomeworkPage\(\) has parameter \$gradeable_version with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: '#^Method app\\controllers\\student\\SubmissionController\:\:showHomeworkPage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controllers/student/SubmissionController.php
 
@@ -3526,16 +3796,202 @@ parameters:
 			path: app/entities/Session.php
 
 		-
+			message: '#^Property app\\entities\\UserEntity\:\:\$posts with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/UserEntity.php
+
+		-
+			message: '#^Property app\\entities\\UserEntity\:\:\$threads with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/UserEntity.php
+
+		-
+			message: '#^Property app\\entities\\UserEntity\:\:\$upducks with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/UserEntity.php
+
+		-
+			message: '#^Method app\\entities\\chat\\Chatroom\:\:getMessages\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/chat/Chatroom.php
+
+		-
+			message: '#^Property app\\entities\\chat\\Chatroom\:\:\$messages with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/chat/Chatroom.php
+
+		-
+			message: '#^Method app\\entities\\course\\CourseMaterial\:\:getSections\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/course/CourseMaterial.php
+
+		-
+			message: '#^Property app\\entities\\course\\CourseMaterial\:\:\$accesses with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/course/CourseMaterial.php
+
+		-
+			message: '#^Property app\\entities\\course\\CourseMaterial\:\:\$sections with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/course/CourseMaterial.php
+
+		-
 			message: '#^Property app\\entities\\course\\CourseMaterialAccess\:\:\$course_material type mapping mismatch\: database can contain app\\entities\\course\\CourseMaterial\|null but property expects app\\entities\\course\\CourseMaterial\.$#'
 			identifier: doctrine.associationType
 			count: 1
 			path: app/entities/course/CourseMaterialAccess.php
 
 		-
+			message: '#^Method app\\entities\\db\\Table\:\:getColumns\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/db/Table.php
+
+		-
+			message: '#^Property app\\entities\\db\\Table\:\:\$columns with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/db/Table.php
+
+		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
 			path: app/entities/email/EmailEntity.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Category\:\:getThreads\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Category.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Category\:\:\$threads with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Category.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Post\:\:getAttachments\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Post\:\:getChildren\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Post\:\:getHistory\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Post\:\:getUpduckers\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Post\:\:\$attachments with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Post\:\:\$children with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Post\:\:\$history with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Post\:\:\$merged_threads with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Post\:\:\$upduckers with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Post.php
+
+		-
+			message: '#^Method app\\entities\\forum\\PostHistory\:\:getAttachments\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/PostHistory.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Thread\:\:getCategories\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Thread\:\:getNewPosts\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Thread\:\:getPosts\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Method app\\entities\\forum\\Thread\:\:setCategories\(\) has parameter \$categories with generic interface Doctrine\\Common\\Collections\\Collection but does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Thread\:\:\$categories with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Thread\:\:\$favorers with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Thread\:\:\$merged_on_this with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Thread\:\:\$posts with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
+
+		-
+			message: '#^Property app\\entities\\forum\\Thread\:\:\$viewers with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/forum/Thread.php
 
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
@@ -3550,14 +4006,116 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:__construct\(\) has parameter \$ignored_submissions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:__construct\(\) has parameter \$other_gradeable_paths with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:__construct\(\) has parameter \$other_gradeables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:__construct\(\) has parameter \$regex with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:getIgnoredSubmissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:getOtherGradeablePaths\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:getOtherGradeables\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:getRegexArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:setIgnoredSubmissions\(\) has parameter \$ignored_submissions with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:setOtherGradeablePaths\(\) has parameter \$paths with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:setOtherGradeables\(\) has parameter \$other_gradeables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Method app\\entities\\plagiarism\\PlagiarismConfig\:\:setRegexArray\(\) has parameter \$regex with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$access_times with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$ignore_submissions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
 			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$ignore_submissions type mapping mismatch\: property can contain array but database expects array\<string\>\.$#'
 			identifier: doctrine.columnType
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
 		-
+			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$other_gradeable_paths type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
 			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$other_gradeable_paths type mapping mismatch\: property can contain array but database expects array\<string\>\.$#'
 			identifier: doctrine.columnType
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$other_gradeables type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/plagiarism/PlagiarismConfig.php
+
+		-
+			message: '#^Property app\\entities\\plagiarism\\PlagiarismConfig\:\:\$regex type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/entities/plagiarism/PlagiarismConfig.php
 
@@ -3574,8 +4132,38 @@ parameters:
 			path: app/entities/plagiarism/PlagiarismRunAccess.php
 
 		-
+			message: '#^Method app\\entities\\poll\\Option\:\:getUserResponses\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
+			message: '#^Property app\\entities\\poll\\Option\:\:\$user_responses with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/poll/Option.php
+
+		-
 			message: '#^Method app\\entities\\poll\\Poll\:\:addResponse\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Method app\\entities\\poll\\Poll\:\:getOptions\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Method app\\entities\\poll\\Poll\:\:getSelectedOptionIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Method app\\entities\\poll\\Poll\:\:getUserResponses\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3594,6 +4182,12 @@ parameters:
 		-
 			message: '#^Property app\\entities\\poll\\Poll\:\:\$name has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Property app\\entities\\poll\\Poll\:\:\$options with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/entities/poll/Poll.php
 
@@ -3620,6 +4214,18 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Property app\\entities\\poll\\Poll\:\:\$responses with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/entities/poll/Poll.php
+
+		-
+			message: '#^Method app\\exceptions\\BaseException\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/exceptions/BaseException.php
 
 		-
 			message: '#^Method app\\exceptions\\BaseException\:\:displayMessage\(\) has no return type specified\.$#'
@@ -3724,8 +4330,32 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
+			message: '#^Method app\\libraries\\Access\:\:canI\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: '#^Method app\\libraries\\Access\:\:canUser\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: '#^Method app\\libraries\\Access\:\:canUserAccessPath\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Access.php
+
+		-
 			message: '#^Method app\\libraries\\Access\:\:loadDirectories\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: '#^Method app\\libraries\\Access\:\:requireArg\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/Access.php
 
@@ -3736,10 +4366,28 @@ parameters:
 			path: app/libraries/Access.php
 
 		-
+			message: '#^Property app\\libraries\\Access\:\:\$directories type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Access.php
+
+		-
+			message: '#^Class app\\libraries\\CascadingIterator implements generic interface Iterator but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
 			message: '#^Method app\\libraries\\CascadingIterator\:\:seek\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/libraries/CascadingIterator.php
+
+		-
+			message: '#^Method app\\libraries\\CodeMirrorUtils\:\:getLanguages\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/CodeMirrorUtils.php
 
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
@@ -3790,14 +4438,44 @@ parameters:
 			path: app/libraries/Core.php
 
 		-
+			message: '#^Method app\\libraries\\Core\:\:buildCourseUrl\(\) has parameter \$parts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: '#^Method app\\libraries\\Core\:\:buildUrl\(\) has parameter \$parts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Core.php
+
+		-
 			message: '#^Method app\\libraries\\Core\:\:disableRedirects\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/libraries/Core.php
 
 		-
+			message: '#^Method app\\libraries\\Core\:\:getControllerTypes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: '#^Method app\\libraries\\Core\:\:getCourseQueries\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Core.php
+
+		-
 			message: '#^Method app\\libraries\\Core\:\:getFullSemester\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: '#^Method app\\libraries\\Core\:\:getSubmittyQueries\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/Core.php
 
@@ -3822,6 +4500,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\Core\:\:loadMasterConfig\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: '#^Method app\\libraries\\Core\:\:loadModel\(\) has parameter \$args with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/Core.php
 
@@ -3898,6 +4582,24 @@ parameters:
 			path: app/libraries/DateUtils.php
 
 		-
+			message: '#^Method app\\libraries\\DateUtils\:\:getAvailableTimeZones\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
+			message: '#^Method app\\libraries\\DateUtils\:\:getOrderedTZWithUTCOffset\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
+			message: '#^Method app\\libraries\\DateUtils\:\:getServerTimeJson\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
 			message: '#^Unsafe access to private property app\\libraries\\DateUtils\:\:\$timezone through static\:\:\.$#'
 			identifier: staticClassAccess.privateProperty
 			count: 3
@@ -3934,14 +4636,38 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: '#^Method app\\libraries\\DiffViewer\:\:compressRange\(\) has parameter \$range with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: '#^Method app\\libraries\\DiffViewer\:\:compressRange\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			message: '#^Method app\\libraries\\DiffViewer\:\:correctMbDiff\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: '#^Method app\\libraries\\DiffViewer\:\:correctMbDiff\(\) has parameter \$diffs with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			message: '#^Method app\\libraries\\DiffViewer\:\:destroyViewer\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: '#^Method app\\libraries\\DiffViewer\:\:getDisplay\(\) has parameter \$lines with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/DiffViewer.php
 
@@ -4000,6 +4726,12 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$actual type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			message: '#^Property app\\libraries\\DiffViewer\:\:\$actual_file_image has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -4012,14 +4744,32 @@ parameters:
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$add type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			message: '#^Property app\\libraries\\DiffViewer\:\:\$built has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/libraries/DiffViewer.php
 
 		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$diff type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
 			message: '#^Property app\\libraries\\DiffViewer\:\:\$difference_file_image has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$expected type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/DiffViewer.php
 
@@ -4038,6 +4788,18 @@ parameters:
 		-
 			message: '#^Property app\\libraries\\DiffViewer\:\:\$has_difference is never read, only written\.$#'
 			identifier: property.onlyWritten
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$link type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: '#^Property app\\libraries\\DiffViewer\:\:\$white_spaces type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/DiffViewer.php
 
@@ -4114,6 +4876,18 @@ parameters:
 			path: app/libraries/FileUtils.php
 
 		-
+			message: '#^Method app\\libraries\\FileUtils\:\:areWordsInFile\(\) has parameter \$words with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:checkForPermissionErrors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
 			message: '#^Method app\\libraries\\FileUtils\:\:emptyDir\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4128,6 +4902,60 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\FileUtils\:\:encodeJson\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getAllDirs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getAllFiles\(\) has parameter \$skip_files with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getAllFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getAllFilesTrimSearchPath\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getDirContents\(\) has parameter \$results with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:getTopEmptyDir\(\) has parameter \$results with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:readJsonFile\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:validateUploadedFiles\(\) has parameter \$files with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: '#^Method app\\libraries\\FileUtils\:\:validateUploadedFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/FileUtils.php
 
@@ -4252,8 +5080,50 @@ parameters:
 			path: app/libraries/GradingQueue.php
 
 		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:getAutogradingInfo\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
 			message: '#^Method app\\libraries\\GradingQueue\:\:reloadQueue\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) has parameter \$capability_queue_counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) has parameter \$course_info with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) has parameter \$detailed_queue_counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) has parameter \$machine_grading_counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) has parameter \$open_autograding_workers_json with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/GradingQueue.php
+
+		-
+			message: '#^Method app\\libraries\\GradingQueue\:\:updateDetailedQueueCount\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/GradingQueue.php
 
@@ -4348,6 +5218,12 @@ parameters:
 			path: app/libraries/Logger.php
 
 		-
+			message: '#^Method app\\libraries\\Logger\:\:logTAGrading\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
 			message: '#^Method app\\libraries\\Logger\:\:setLogPath\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4402,8 +5278,98 @@ parameters:
 			path: app/libraries/NotificationFactory.php
 
 		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createEmailsArray\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createEmailsArray\(\) has parameter \$recipients with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createEmailsArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createNotificationsArray\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createNotificationsArray\(\) has parameter \$recipients with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:createNotificationsArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onNewAnnouncement\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onNewPost\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onNewThread\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onPostModified\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onTeamEvent\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:onTeamEvent\(\) has parameter \$recipients with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:sendEmails\(\) has parameter \$emails with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
+			message: '#^Method app\\libraries\\NotificationFactory\:\:sendNotifications\(\) has parameter \$notifications with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/NotificationFactory.php
+
+		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
+			count: 1
+			path: app/libraries/NumberUtils.php
+
+		-
+			message: '#^Method app\\libraries\\NumberUtils\:\:getRandomIndices\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/NumberUtils.php
 
@@ -4558,6 +5524,30 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: '#^Method app\\libraries\\Output\:\:getBreadcrumbs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:getCss\(\) return type with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:getJs\(\) return type with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:getModuleJs\(\) return type with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: '#^Method app\\libraries\\Output\:\:getOutput\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4624,6 +5614,30 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: '#^Method app\\libraries\\Output\:\:renderJsonError\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderJsonFail\(\) has parameter \$extra with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderJsonFail\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderJsonSuccess\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: '#^Method app\\libraries\\Output\:\:renderOutput\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4638,6 +5652,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\Output\:\:renderOutput\(\) has parameter \$view with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderResultMessage\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/Output.php
 
@@ -4662,6 +5682,18 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\Output\:\:renderTemplate\(\) has parameter \$view with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderTwigOutput\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Method app\\libraries\\Output\:\:renderTwigTemplate\(\) has parameter \$context with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/Output.php
 
@@ -4732,8 +5764,26 @@ parameters:
 			path: app/libraries/Output.php
 
 		-
+			message: '#^Property app\\libraries\\Output\:\:\$css with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Property app\\libraries\\Output\:\:\$js with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/Output.php
+
+		-
 			message: '#^Property app\\libraries\\Output\:\:\$loaded_views has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: '#^Property app\\libraries\\Output\:\:\$module_js with generic class Ds\\Set does not specify its types\: TValue$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/libraries/Output.php
 
@@ -4784,6 +5834,36 @@ parameters:
 			identifier: equal.notAllowed
 			count: 3
 			path: app/libraries/PollUtils.php
+
+		-
+			message: '#^Method app\\libraries\\PollUtils\:\:getPollExportData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/PollUtils.php
+
+		-
+			message: '#^Method app\\libraries\\PollUtils\:\:getPollTypes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/PollUtils.php
+
+		-
+			message: '#^Method app\\libraries\\PollUtils\:\:getReleaseAnswerSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/PollUtils.php
+
+		-
+			message: '#^Method app\\libraries\\PollUtils\:\:getReleaseHistogramSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/PollUtils.php
+
+		-
+			message: '#^Method app\\libraries\\SamlSettings\:\:getSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/SamlSettings.php
 
 		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
@@ -4840,6 +5920,24 @@ parameters:
 			path: app/libraries/Utils.php
 
 		-
+			message: '#^Method app\\libraries\\Utils\:\:getFirstArrayElement\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: '#^Method app\\libraries\\Utils\:\:getLastArrayElement\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: '#^Method app\\libraries\\Utils\:\:setCookie\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
 			message: '#^Strict comparison using \=\=\= between null and null will always evaluate to true\.$#'
 			identifier: identical.alwaysTrue
 			count: 1
@@ -4858,6 +5956,12 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:__construct\(\) has parameter \$connection_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
 			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:connect\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4866,6 +5970,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:disconnect\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:fromDatabaseToPHPArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
 
@@ -4882,8 +5992,44 @@ parameters:
 			path: app/libraries/database/AbstractDatabase.php
 
 		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:getQueries\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:query\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:queryIterator\(\) has parameter \$parameters with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:row\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\AbstractDatabase\:\:rows\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
 			message: '#^Property app\\libraries\\database\\AbstractDatabase\:\:\$password has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Property app\\libraries\\database\\AbstractDatabase\:\:\$results type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
 
@@ -4898,6 +6044,12 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseFactory\:\:getDatabase\(\) has parameter \$connection_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseFactory.php
 
 		-
 			message: '#^Property app\\libraries\\database\\DatabaseFactory\:\:\$driver has no type specified\.$#'
@@ -5164,6 +6316,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:countActiveUsersByGroup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:createComponent\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5376,6 +6534,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:deleteComponents\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:deleteComponents\(\) has parameter \$components with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5608,8 +6772,44 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:generateOrderByClause\(\) has parameter \$key_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getActiveUserIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllAnonIds\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllAnonIdsByGradeable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllAnonIdsByGradeableWithUserIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllCoursesForUserId\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllElectronicGradeablesIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5656,6 +6856,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllRotatingSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllSectionsForGradeable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5686,14 +6892,56 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllTeamAnonIdsByGradeable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllTeamViewedTimesForGradeable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllTerms\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllThreadAuthors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllUsersIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAllUsersWithPreference\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAnonId\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAnonId\(\) has parameter \$user_ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAttendanceInfo\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5742,6 +6990,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getAverageGraderScores\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getCountNullUsersRotatingSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5818,6 +7072,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeInquiryDiscussions\(\) has parameter \$grade_inquiries with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeInquiryPost\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5844,6 +7104,18 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeInquiryStatus\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeableAccessTeam\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeableAccessUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -5886,6 +7158,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeablesRotatingGraderHistory\(\) has parameter \$gradeable_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getGradeablesRotatingGraderHistory\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6028,6 +7306,18 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getInstructorLevelAccessCourse\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getInstructorLevelUnarchivedCourses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLastLateDayUpdatesForUsers\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6042,6 +7332,24 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLastTimeInQueue\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLateDayCache\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLateDayCacheForUser\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLateDayCacheForUserGradeable\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6076,8 +7384,38 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLeaderboard\(\) has parameter \$valid_testcases with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getLeaderboard\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getListOfCourseUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getMaxRotatingSection\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getMetrics\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getNewGraders\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6160,6 +7498,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getNumUsersWhoViewedTeamAssignmentBySection\(\) has parameter \$sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getNumberAheadInQueueThisWeek\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6216,6 +7560,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getNumberRotatingSections\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getOtherCoursesWithSameGroup\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6364,6 +7714,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getProxyMappedUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getQueueDataByQueue\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6454,8 +7810,20 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRawUsersWithOverriddenGrades\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRegisteredUsersWithNoRotatingSection\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRegistrationSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6484,6 +7852,18 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRotatingSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRotatingSectionsByGrader\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRotatingSectionsForGradeableAndUser\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6498,6 +7878,24 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRotatingSectionsForGradeableAndUser\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getRotatingSectionsGradeableIDS\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getSAMLAuthorizedUserIDs\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getSamlMappedUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6528,6 +7926,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getSeekMessageByUserId\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getSimilarNumericIdMatches\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6642,6 +8046,18 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTeamViewedTime\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTeamsByGradeableAndRegistrationSections\(\) has parameter \$sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getTeamsByGradeableAndRotatingSections\(\) has parameter \$sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6790,6 +8206,36 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUserGroups\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsers\(\) has parameter \$user_id_list with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersByIds\(\) has parameter \$user_id_list with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersByIds\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersByRotatingSections\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6804,6 +8250,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersByRotatingSections\(\) has parameter \$sections with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersCountByRotatingSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6826,6 +8278,18 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersNotFullyGraded\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersNotificationSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersOnTeamsForGradeable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6834,6 +8298,24 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersOrTeamsById\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersOrTeamsById\(\) has parameter \$ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersSeekingTeamByGradeableId\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:getUsersWithLateDays\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6910,8 +8392,20 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertEmails\(\) has parameter \$flattened_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertGradeableAnonId\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertGradeableAnonId\(\) has parameter \$user_ids with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -6972,6 +8466,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertNotifications\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseQueries\:\:insertNotifications\(\) has parameter \$flattened_notifications with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/DatabaseQueries.php
 
@@ -7576,6 +9076,12 @@ parameters:
 			path: app/libraries/database/DatabaseQueries.php
 
 		-
+			message: '#^Class app\\libraries\\database\\DatabaseRowIterator implements generic interface Iterator but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/database/DatabaseRowIterator.php
+
+		-
 			message: '#^Method app\\libraries\\database\\DatabaseRowIterator\:\:close\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7598,6 +9104,12 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/libraries/database/DatabaseRowIterator.php
+
+		-
+			message: '#^Method app\\libraries\\database\\DatabaseUtils\:\:formatQuery\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/DatabaseUtils.php
 
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
@@ -7630,6 +9142,24 @@ parameters:
 			path: app/libraries/database/PostgresqlDatabase.php
 
 		-
+			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:__construct\(\) has parameter \$connection_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:fromDatabaseToPHPArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:fromPHPToDatabaseArray\(\) has parameter \$array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
 			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:parsePGArrayValue\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7638,6 +9168,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:parsePGArrayValue\(\) has parameter \$parse_bools with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\PostgresqlDatabase\:\:parsePGArrayValue\(\) has parameter \$return with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/database/PostgresqlDatabase.php
 
@@ -7678,6 +9214,18 @@ parameters:
 			path: app/libraries/database/QueryIdentifier.php
 
 		-
+			message: '#^Method app\\libraries\\database\\SqliteDatabase\:\:__construct\(\) has parameter \$connection_params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/SqliteDatabase.php
+
+		-
+			message: '#^Method app\\libraries\\database\\SqliteDatabase\:\:fromDatabaseToPHPArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/database/SqliteDatabase.php
+
+		-
 			message: '#^Method app\\libraries\\database\\SqliteDatabase\:\:fromPHPToDatabaseArray\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7702,6 +9250,24 @@ parameters:
 			path: app/libraries/database/SqliteDatabase.php
 
 		-
+			message: '#^Method app\\libraries\\plagiarism\\Interval\:\:getMatchingPositions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/plagiarism/Interval.php
+
+		-
+			message: '#^Method app\\libraries\\plagiarism\\Interval\:\:getOthers\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/plagiarism/Interval.php
+
+		-
+			message: '#^Property app\\libraries\\plagiarism\\Interval\:\:\$others type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/plagiarism/Interval.php
+
+		-
 			message: '#^PHPDoc tag @var for constant app\\libraries\\plagiarism\\PlagiarismUtils\:\:SUPPORTED_LANGUAGES with type int is incompatible with value array\{plaintext\: array\{hash_size\: 14\}, python\: array\{hash_size\: 14\}, java\: array\{hash_size\: 14\}, cpp\: array\{hash_size\: 14\}, mips\: array\{hash_size\: 5\}\}\.$#'
 			identifier: classConstant.phpDocType
 			count: 1
@@ -7722,6 +9288,12 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in \|\|, string\|null given on the left side\.$#'
 			identifier: booleanOr.leftNotBoolean
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: '#^Property app\\libraries\\response\\JsonResponse\:\:\$json type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/libraries/response/JsonResponse.php
 
@@ -7750,6 +9322,24 @@ parameters:
 			path: app/libraries/response/MultiResponse.php
 
 		-
+			message: '#^Method app\\libraries\\response\\WebResponse\:\:__construct\(\) has parameter \$view_class with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: '#^Property app\\libraries\\response\\WebResponse\:\:\$parameters type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: '#^Property app\\libraries\\response\\WebResponse\:\:\$view_class type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 2
@@ -7764,6 +9354,12 @@ parameters:
 		-
 			message: '#^Method app\\libraries\\routers\\AnnotatedRouteLoader\:\:configureRoute\(\) has parameter \$annot with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/libraries/routers/AnnotatedRouteLoader.php
+
+		-
+			message: '#^Method app\\libraries\\routers\\AnnotatedRouteLoader\:\:configureRoute\(\) has parameter \$class with generic class ReflectionClass but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: app/libraries/routers/AnnotatedRouteLoader.php
 
@@ -7816,6 +9412,12 @@ parameters:
 			path: app/libraries/routers/WebRouter.php
 
 		-
+			message: '#^Method app\\libraries\\routers\\WebRouter\:\:getCompiledRoutes\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
 			message: '#^Method app\\libraries\\routers\\WebRouter\:\:loadCourse\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7837,6 +9439,12 @@ parameters:
 			message: '#^Only booleans are allowed in an if condition, string\|null given\.$#'
 			identifier: if.condNotBoolean
 			count: 3
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: '#^Property app\\libraries\\routers\\WebRouter\:\:\$parameters type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
 			path: app/libraries/routers/WebRouter.php
 
 		-
@@ -7870,6 +9478,24 @@ parameters:
 			path: app/libraries/socket/Server.php
 
 		-
+			message: '#^Property app\\libraries\\socket\\Server\:\:\$clients with generic class SplObjectStorage does not specify its types\: TObject, TData$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
+			message: '#^Property app\\libraries\\socket\\Server\:\:\$pages type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
+			message: '#^Property app\\libraries\\socket\\Server\:\:\$sessions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/libraries/socket/Server.php
+
+		-
 			message: '#^Call to function is_subclass_of\(\) with object and ''app\\\\Models…'' will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -7884,6 +9510,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\AbstractModel\:\:setupProperties\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: '#^Method app\\models\\AbstractModel\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/AbstractModel.php
 
@@ -7936,8 +9568,56 @@ parameters:
 			path: app/models/Button.php
 
 		-
+			message: '#^Method app\\models\\Button\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Button.php
+
+		-
 			message: '#^Implicit array creation is not allowed \- variable \$curr_section might not exist\.$#'
 			identifier: variable.implicitArray
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:getColors\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:getItemsByDate\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:getItemsByDateInCourses\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:getItemsBySections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:loadGradeableCalendarInfo\(\) has parameter \$calendar_items with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:loadGradeableCalendarInfo\(\) has parameter \$courses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
+			message: '#^Method app\\models\\CalendarInfo\:\:loadGradeableCalendarInfo\(\) has parameter \$gradeables_of_user with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/CalendarInfo.php
 
@@ -7948,8 +9628,74 @@ parameters:
 			path: app/models/CalendarInfo.php
 
 		-
+			message: '#^Property app\\models\\CalendarInfo\:\:\$items_by_sections type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/CalendarInfo.php
+
+		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getAcceptedEmails\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getCourseDatabaseParams\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getCourseJson\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getHiddenDetails\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getLdapOptions\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getSamlOptions\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getSubmittyDatabaseParams\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method getUserIdRequirements\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method setLdapOptions\(\) parameter \#1 \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Class app\\models\\Config has PHPDoc tag @method for method setSamlOptions\(\) parameter \#1 \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/Config.php
 
@@ -8062,6 +9808,48 @@ parameters:
 			path: app/models/Config.php
 
 		-
+			message: '#^Property app\\models\\Config\:\:\$course_database_params type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$course_json type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$feature_flags type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$hidden_details type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$ldap_options type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$saml_options type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: '#^Property app\\models\\Config\:\:\$submitty_database_params type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
 			message: '#^Property app\\models\\Config\:\:\$timezone \(app\\models\\DateTimeZone\) does not accept DateTimeZone\.$#'
 			identifier: assign.propertyType
 			count: 2
@@ -8074,10 +9862,22 @@ parameters:
 			path: app/models/Config.php
 
 		-
+			message: '#^Property app\\models\\Config\:\:\$wrapper_files type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Config.php
+
+		-
 			message: '#^Variable property access on \$this\(app\\models\\Config\)\.$#'
 			identifier: property.dynamicName
 			count: 10
 			path: app/models/Config.php
+
+		-
+			message: '#^Method app\\models\\Course\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Course.php
 
 		-
 			message: '#^Method app\\models\\Course\:\:getCapitalizedTitle\(\) has no return type specified\.$#'
@@ -8122,10 +9922,58 @@ parameters:
 			path: app/models/DisplayImage.php
 
 		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getCapabilities\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getCapabilityToColorMapping\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getDockerImages\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getErrorLogs\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getFailImages\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
+			message: '#^Class app\\models\\DockerUI has PHPDoc tag @method for method getWorkerMachines\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/DockerUI.php
+
+		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 1
 			path: app/models/Email.php
+
+		-
+			message: '#^Method app\\models\\Email\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Email.php
+
+		-
+			message: '#^Class app\\models\\GradeableAutocheck has PHPDoc tag @method for method getMessages\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/GradeableAutocheck.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
@@ -8134,9 +9982,21 @@ parameters:
 			path: app/models/GradeableAutocheck.php
 
 		-
+			message: '#^Method app\\models\\GradeableAutocheck\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
 			message: '#^Property app\\models\\GradeableAutocheck\:\:\$index \(string\) does not accept int\.$#'
 			identifier: assign.propertyType
 			count: 2
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: '#^Property app\\models\\GradeableAutocheck\:\:\$messages type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
 			path: app/models/GradeableAutocheck.php
 
 		-
@@ -8194,6 +10054,12 @@ parameters:
 			path: app/models/GradingSection.php
 
 		-
+			message: '#^Method app\\models\\NavButton\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/NavButton.php
+
+		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 2
@@ -8208,6 +10074,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\Notification\:\:createNotification\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: '#^Method app\\models\\Notification\:\:createNotification\(\) has parameter \$event with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/Notification.php
 
@@ -8392,6 +10264,12 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
+			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getHelperName\(\) has parameter \$query_row with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/OfficeHoursQueueModel.php
+
+		-
 			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getIndexFromCode\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8494,6 +10372,12 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
+			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getQueueOccupancy\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/OfficeHoursQueueModel.php
+
+		-
 			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getQueueSocketMessage\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8502,6 +10386,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getQueueSocketMessageSentTime\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/OfficeHoursQueueModel.php
+
+		-
+			message: '#^Method app\\models\\OfficeHoursQueueModel\:\:getRemoverName\(\) has parameter \$query_row with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/OfficeHoursQueueModel.php
 
@@ -8692,8 +10582,32 @@ parameters:
 			path: app/models/OfficeHoursQueueModel.php
 
 		-
+			message: '#^Class app\\models\\QueueItem has PHPDoc tag @method for method getGradingQueueObj\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
+			message: '#^Class app\\models\\QueueItem has PHPDoc tag @method for method getQueueObj\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
+			message: '#^Property app\\models\\QueueItem\:\:\$grading_queue_obj type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/QueueItem.php
+
+		-
+			message: '#^Property app\\models\\QueueItem\:\:\$queue_obj type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/QueueItem.php
 
@@ -8716,6 +10630,12 @@ parameters:
 			path: app/models/SimpleGradeOverriddenUser.php
 
 		-
+			message: '#^Method app\\models\\SimpleGradeOverriddenUser\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
 			message: '#^Call to method format\(\) on an unknown class app\\models\\date\.$#'
 			identifier: class.notFound
 			count: 1
@@ -8724,6 +10644,12 @@ parameters:
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: '#^Method app\\models\\SimpleLateUser\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/SimpleLateUser.php
 
@@ -8752,6 +10678,18 @@ parameters:
 			path: app/models/SimpleStat.php
 
 		-
+			message: '#^Property app\\models\\SimpleStat\:\:\$grader_info type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: '#^Method app\\models\\SuperuserEmail\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/SuperuserEmail.php
+
+		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 3
@@ -8764,8 +10702,26 @@ parameters:
 			path: app/models/Team.php
 
 		-
+			message: '#^Method app\\models\\Team\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: '#^Method app\\models\\Team\:\:getAssignmentSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/Team.php
+
+		-
 			message: '#^Method app\\models\\Team\:\:getRegistrationSection\(\) should return int but returns string\.$#'
 			identifier: return.type
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: '#^Property app\\models\\Team\:\:\$assignment_settings type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/Team.php
 
@@ -8782,6 +10738,12 @@ parameters:
 			path: app/models/User.php
 
 		-
+			message: '#^Class app\\models\\User has PHPDoc tag @method for method getGradingRegistrationSections\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/User.php
+
+		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 5
@@ -8794,14 +10756,8 @@ parameters:
 			path: app/models/User.php
 
 		-
-			message: '#^Method app\\models\\User\:\:constructNotificationSettings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/models/User.php
-
-		-
-			message: '#^Method app\\models\\User\:\:constructNotificationSettings\(\) has parameter \$details with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method app\\models\\User\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/User.php
 
@@ -8974,10 +10930,40 @@ parameters:
 			path: app/models/User.php
 
 		-
+			message: '#^Property app\\models\\User\:\:\$anon_id_by_gradeable type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: '#^Property app\\models\\User\:\:\$grading_registration_sections type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: '#^Property app\\models\\User\:\:\$notification_settings type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/User.php
+
+		-
 			message: '#^Variable \$random on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
 			path: app/models/User.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedGradeable\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedGradeable\:\:getMetrics_Sum\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedGradeable\:\:setActiveVersion\(\) has no return type specified\.$#'
@@ -8992,10 +10978,22 @@ parameters:
 			path: app/models/gradeable/AutoGradedGradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedGradeable\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
 			message: '#^Strict comparison using \=\=\= between app\\models\\gradeable\\GradedGradeable and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedTestcase\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
 
 		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedTestcase\:\:__construct\(\) has parameter \$results_path with no type specified\.$#'
@@ -9070,14 +11068,56 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getHiddenPoints\(\) should return int but returns float\.$#'
 			identifier: return.type
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getMetaFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getMetrics_Sum\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getNonHiddenPoints\(\) should return int but returns float\.$#'
 			identifier: return.type
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getPartFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getResultsFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:getResultsPublicFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
 
@@ -9178,6 +11218,12 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:setPointsInternal\(\) has parameter \$points with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:setSubmissionTime\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9214,6 +11260,30 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersion.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersion\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutoGradedVersion\:\:\$files type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutoGradedVersion\:\:\$results_files type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutoGradedVersion\:\:\$results_public_files type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
 			message: '#^Strict comparison using \=\=\= between app\\models\\gradeable\\GradedGradeable and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
@@ -9224,6 +11294,12 @@ parameters:
 			identifier: property.dynamicName
 			count: 1
 			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutoGradedVersionHistory\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
 
 		-
 			message: '#^Method app\\models\\gradeable\\AutoGradedVersionHistory\:\:setBatchRegrade\(\) has no return type specified\.$#'
@@ -9316,6 +11392,18 @@ parameters:
 			path: app/models/gradeable/AutoGradedVersionHistory.php
 
 		-
+			message: '#^Class app\\models\\gradeable\\AutogradingConfig has PHPDoc tag @method for method getNotebookConfig\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:anyVisibleTestcases\(\) has parameter \$submitter with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -9328,8 +11416,26 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:getTestcasesWithTag\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:hasLoadGradeableMessageEnabled\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:parseTestCases\(\) has parameter \$testcases with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:parseTestCases\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
@@ -9418,8 +11524,26 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\AutogradingConfig\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutogradingConfig\:\:\$base_testcases type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\AutogradingConfig\:\:\$max_submission_size \(int\) does not accept float\.$#'
 			identifier: assign.propertyType
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutogradingConfig\:\:\$notebook_config type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php
 
@@ -9432,6 +11556,12 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\AutogradingTestcase\:\:__construct\(\) has parameter \$testcase with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/AutogradingTestcase.php
 
@@ -9484,6 +11614,18 @@ parameters:
 			path: app/models/gradeable/AutogradingTestcase.php
 
 		-
+			message: '#^Property app\\models\\gradeable\\AutogradingTestcase\:\:\$dispatcher_actions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\AutogradingTestcase\:\:\$graphics_actions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\AutogradingTestcase\:\:\$index \(string\) does not accept int\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -9496,8 +11638,20 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Component\:\:assertPoints\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:assertPoints\(\) has parameter \$points with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -9510,6 +11664,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\Component\:\:deleteMarkInner\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:export\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -9550,8 +11710,32 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:import\(\) has parameter \$arr with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:importMark\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Component\:\:isCountUp\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:parsePoints\(\) has parameter \$points with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:parsePoints\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -9622,6 +11806,12 @@ parameters:
 			path: app/models/gradeable/Component.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:setMarksFromDatabase\(\) has parameter \$marks with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Component\:\:setMaxValue\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9642,6 +11832,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\Component\:\:setPoints\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Component\:\:setPoints\(\) has parameter \$points with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Component.php
 
@@ -9672,6 +11868,12 @@ parameters:
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
+			count: 1
+			path: app/models/gradeable/GradeInquiry.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradeInquiry\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/GradeInquiry.php
 
@@ -9724,8 +11926,26 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:assertDates\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:checkValidPerms\(\) has parameter \$group_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:checkValidPerms\(\) has parameter \$user_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9748,8 +11968,20 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:exportComponents\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:forceDeleteComponent\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:getDefaultConfigPaths\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9778,8 +12010,32 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:getRotatingGraderSections\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:getSplitPdfFiles\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:getStringThreadIds\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:importComponent\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:parseDates\(\) has parameter \$dates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9792,6 +12048,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setActiveGradeInquiriesCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setAllowedMinutesOverrides\(\) has parameter \$overrides with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9822,6 +12084,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setDates\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setDates\(\) has parameter \$dates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -9964,6 +12232,12 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setRotatingGraderSections\(\) has parameter \$rotating_grader_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\Gradeable\:\:setSubmissionDueDate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10072,6 +12346,12 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Gradeable\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Only booleans are allowed in &&, int\<0, 1\> given on the right side\.$#'
 			identifier: booleanAnd.rightNotBoolean
 			count: 1
@@ -10138,6 +12418,12 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$allowed_minutes_overrides type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$instructor_blind \(bool\) does not accept default value of type int\.$#'
 			identifier: property.defaultValue
 			count: 1
@@ -10162,6 +12448,12 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$peer_grading_pairs type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$rotating_grader_sections \(array\<array\<string\>\>\) does not accept array\<list\<int\<1, max\>\>\>\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -10170,6 +12462,12 @@ parameters:
 		-
 			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$rotating_grader_sections_modified has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\Gradeable\:\:\$split_pdf_files type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/Gradeable.php
 
@@ -10216,6 +12514,36 @@ parameters:
 			path: app/models/gradeable/GradeableList.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\GradeableUtils\:\:getAllGradeableListFromUserId\(\) has parameter \$calendar_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradeableUtils.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradeableUtils\:\:getAllGradeableListFromUserId\(\) has parameter \$courses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradeableUtils.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradeableUtils\:\:getGradeablesFromCourse\(\) has parameter \$calendar_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradeableUtils.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradeableUtils\:\:getGradeablesFromUserAndCourse\(\) has parameter \$calendar_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradeableUtils.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradeableUtils\:\:getGradeablesFromUserAndCourse\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradeableUtils.php
+
+		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 2
@@ -10224,6 +12552,12 @@ parameters:
 		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradedComponent\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/GradedComponent.php
 
@@ -10294,6 +12628,12 @@ parameters:
 			path: app/models/gradeable/GradedComponent.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\GradedComponent\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
 			message: '#^Property app\\models\\gradeable\\GradedComponent\:\:\$grade_time \(DateTime\) does not accept null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -10330,6 +12670,12 @@ parameters:
 			path: app/models/gradeable/GradedComponentContainer.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\GradedComponentContainer\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedComponentContainer.php
+
+		-
 			message: '#^Parameter \#1 \$dividend of static method app\\libraries\\Utils\:\:safeCalcPercent\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10348,6 +12694,18 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+			message: '#^Class app\\models\\gradeable\\GradedGradeable has PHPDoc tag @method for method getGradeInquiries\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: '#^Class app\\models\\gradeable\\GradedGradeable has PHPDoc tag @method for method getLateDayExceptions\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
 			count: 1
@@ -10357,6 +12715,12 @@ parameters:
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 5
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\GradedGradeable\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
@@ -10396,6 +12760,12 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\GradedGradeable\:\:setGradeInquiries\(\) has parameter \$grade_inquiries with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\GradedGradeable\:\:setGradeableId\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10422,6 +12792,18 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\GradedGradeable\:\:setTaGradedGradeable\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\GradedGradeable\:\:\$grade_inquiries type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\GradedGradeable\:\:\$late_day_exceptions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
@@ -10462,14 +12844,56 @@ parameters:
 			path: app/models/gradeable/LateDayInfo.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\LateDayInfo\:\:__construct\(\) has parameter \$event_info with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LateDayInfo\:\:fromSubmitter\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LateDayInfo\:\:generateEventInfo\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LateDayInfo\:\:getSimpleMessageFromSatus\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LateDayInfo\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
 			message: '#^Call to function array_search\(\) requires parameter \#3 to be set\.$#'
 			identifier: function.strict
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
 		-
+			message: '#^Class app\\models\\gradeable\\LateDays has PHPDoc tag @method for method getLateDaysUpdates\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LateDays\:\:__construct\(\) has parameter \$late_day_updates with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/LateDays.php
 
@@ -10486,10 +12910,34 @@ parameters:
 			path: app/models/gradeable/LateDays.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\LateDays\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
 			message: '#^PHPDoc tag @return has invalid value \(int''\)\: Unexpected token "''", expected TOKEN_HORIZONTAL_WS at offset 96 on line 3$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: app/models/gradeable/LateDays.php
+
+		-
+			message: '#^Property app\\models\\gradeable\\LateDays\:\:\$late_days_updates type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\LeaderboardConfig\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/LeaderboardConfig.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\Mark\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Mark.php
 
 		-
 			message: '#^Method app\\models\\gradeable\\Mark\:\:setComponent\(\) has no return type specified\.$#'
@@ -10540,6 +12988,12 @@ parameters:
 			path: app/models/gradeable/Submitter.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\Submitter\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/Submitter.php
+
+		-
 			message: '#^Call to method SplFileInfo\:\:getPathname\(\) with incorrect case\: getPathName$#'
 			identifier: method.nameCase
 			count: 1
@@ -10558,6 +13012,12 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:clearDeletedGradedComponents\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10566,6 +13026,12 @@ parameters:
 		-
 			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:deleteGradedComponent\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:getAttachments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
 
@@ -10618,6 +13084,12 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:setGradedComponentContainers\(\) has parameter \$graded_component_containers with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
 			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:setGradedComponentContainersFromDatabase\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10654,6 +13126,12 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
+			message: '#^Method app\\models\\gradeable\\TaGradedGradeable\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
 			message: '#^Parameter \#1 \$dividend of static method app\\libraries\\Utils\:\:safeCalcPercent\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 2
@@ -10666,10 +13144,22 @@ parameters:
 			path: app/models/gradeable/TaGradedGradeable.php
 
 		-
+			message: '#^Property app\\models\\gradeable\\TaGradedGradeable\:\:\$attachments type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
 			message: '#^Strict comparison using \=\=\= between app\\models\\gradeable\\GradedGradeable and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: '#^Method app\\models\\notebook\\AbstractNotebookInput\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/AbstractNotebookInput.php
 
 		-
 			message: '#^Call to function in_array\(\) requires parameter \#3 to be set\.$#'
@@ -10678,9 +13168,45 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
+			message: '#^Class app\\models\\notebook\\Notebook has PHPDoc tag @method for method getFileSubmissions\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\Notebook has PHPDoc tag @method for method getImagePaths\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\Notebook has PHPDoc tag @method for method getInputs\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\Notebook has PHPDoc tag @method for method getItemPool\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\Notebook has PHPDoc tag @method for method getNotebook\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
 			identifier: equal.notAllowed
 			count: 7
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\Notebook\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
 			path: app/models/notebook/Notebook.php
 
 		-
@@ -10696,10 +13222,76 @@ parameters:
 			path: app/models/notebook/Notebook.php
 
 		-
+			message: '#^Method app\\models\\notebook\\Notebook\:\:getMostRecentNotebookSubmissions\(\) has parameter \$new_notebook with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\Notebook\:\:getMostRecentNotebookSubmissions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
 			message: '#^Method app\\models\\notebook\\Notebook\:\:getNotebookImagePaths\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\Notebook\:\:getTestCases\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\Notebook\:\:parseNotebook\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\Notebook\:\:\$file_submissions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\Notebook\:\:\$image_paths type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\Notebook\:\:\$inputs type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\Notebook\:\:\$item_pool type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\Notebook\:\:\$notebook type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/Notebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\SubmissionCodeBox\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/SubmissionCodeBox.php
+
+		-
+			message: '#^Class app\\models\\notebook\\SubmissionMultipleChoice has PHPDoc tag @method for method getChoices\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/SubmissionMultipleChoice.php
 
 		-
 			message: '#^Loose comparison via "\=\=" is not allowed\.$#'
@@ -10708,16 +13300,172 @@ parameters:
 			path: app/models/notebook/SubmissionMultipleChoice.php
 
 		-
+			message: '#^Method app\\models\\notebook\\SubmissionMultipleChoice\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/SubmissionMultipleChoice.php
+
+		-
+			message: '#^Property app\\models\\notebook\\SubmissionMultipleChoice\:\:\$choices type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/SubmissionMultipleChoice.php
+
+		-
+			message: '#^Class app\\models\\notebook\\UserSpecificNotebook has PHPDoc tag @method for method getHashes\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\UserSpecificNotebook has PHPDoc tag @method for method getSelectedQuestions\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Class app\\models\\notebook\\UserSpecificNotebook has PHPDoc tag @method for method getTestCases\(\) return type with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:__construct\(\) has parameter \$details with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:getItemFromPool\(\) has parameter \$item with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:getTestCases\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:replaceNotebookItemsWithQuestions\(\) has parameter \$raw_notebook with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:replaceNotebookItemsWithQuestions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Method app\\models\\notebook\\UserSpecificNotebook\:\:searchForItemPool\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$hashes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$item_pool type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$notebook_config type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$selected_questions type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
+			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$test_cases type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/models/notebook/UserSpecificNotebook.php
+
+		-
 			message: '#^Property app\\models\\notebook\\UserSpecificNotebook\:\:\$user_id has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: app/models/notebook/UserSpecificNotebook.php
 
 		-
+			message: '#^Class app\\repositories\\SessionRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/SessionRepository.php
+
+		-
 			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
 			identifier: empty.notAllowed
 			count: 1
 			path: app/repositories/SessionRepository.php
+
+		-
+			message: '#^Class app\\repositories\\VcsAuthTokenRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/VcsAuthTokenRepository.php
+
+		-
+			message: '#^Class app\\repositories\\course\\CourseMaterialRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/course/CourseMaterialRepository.php
+
+		-
+			message: '#^Class app\\repositories\\email\\EmailRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/email/EmailRepository.php
+
+		-
+			message: '#^Class app\\repositories\\forum\\CategoryRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/forum/CategoryRepository.php
+
+		-
+			message: '#^Class app\\repositories\\forum\\PostRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/forum/PostRepository.php
+
+		-
+			message: '#^Class app\\repositories\\forum\\ThreadRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/forum/ThreadRepository.php
+
+		-
+			message: '#^Class app\\repositories\\poll\\OptionRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/poll/OptionRepository.php
+
+		-
+			message: '#^Method app\\repositories\\poll\\OptionRepository\:\:findByPollWithResponseCounts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/repositories/poll/OptionRepository.php
+
+		-
+			message: '#^Class app\\repositories\\poll\\PollRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/repositories/poll/PollRepository.php
 
 		-
 			message: '#^Method app\\views\\AuthTokenView\:\:showAuthTokenPage\(\) has no return type specified\.$#'
@@ -10744,6 +13492,12 @@ parameters:
 			path: app/views/AuthTokenView.php
 
 		-
+			message: '#^Method app\\views\\AuthTokenView\:\:showAuthTokenPage\(\) has parameter \$tokens with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/AuthTokenView.php
+
+		-
 			message: '#^Method app\\views\\AuthenticationView\:\:loginForm\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10764,6 +13518,12 @@ parameters:
 		-
 			message: '#^Method app\\views\\AuthenticationView\:\:userSelection\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/AuthenticationView.php
+
+		-
+			message: '#^Method app\\views\\AuthenticationView\:\:userSelection\(\) has parameter \$users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/AuthenticationView.php
 
@@ -10798,8 +13558,26 @@ parameters:
 			path: app/views/AutoGradingView.php
 
 		-
+			message: '#^Method app\\views\\AutoGradingView\:\:showPeerResults\(\) has parameter \$uploaded_files with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: '#^Method app\\views\\AutoGradingView\:\:showTAResults\(\) has parameter \$uploaded_files with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
 			message: '#^Method app\\views\\AutogradingStatusView\:\:displayPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/AutogradingStatusView.php
+
+		-
+			message: '#^Method app\\views\\AutogradingStatusView\:\:displayPage\(\) has parameter \$progress with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/AutogradingStatusView.php
 
@@ -10842,6 +13620,12 @@ parameters:
 		-
 			message: '#^Method app\\views\\ErrorView\:\:genericError\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/ErrorView.php
+
+		-
+			message: '#^Method app\\views\\ErrorView\:\:genericError\(\) has parameter \$error_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/ErrorView.php
 
@@ -10972,6 +13756,12 @@ parameters:
 			path: app/views/HomePageView.php
 
 		-
+			message: '#^Method app\\views\\HomePageView\:\:showCourseCreationPage\(\) has parameter \$courses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/HomePageView.php
+
+		-
 			message: '#^Method app\\views\\HomePageView\:\:showCourseCreationPage\(\) has parameter \$faculty with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -10996,6 +13786,18 @@ parameters:
 			path: app/views/HomePageView.php
 
 		-
+			message: '#^Method app\\views\\HomePageView\:\:showHomePage\(\) has parameter \$archived_courses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/HomePageView.php
+
+		-
+			message: '#^Method app\\views\\HomePageView\:\:showHomePage\(\) has parameter \$unarchived_courses with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/HomePageView.php
+
+		-
 			message: '#^Method app\\views\\LateDaysTableView\:\:showLateTable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11008,6 +13810,18 @@ parameters:
 			path: app/views/LateDaysTableView.php
 
 		-
+			message: '#^Method app\\views\\LeaderboardView\:\:showLeaderboardPage\(\) has parameter \$leaderboards with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/LeaderboardView.php
+
+		-
+			message: '#^Method app\\views\\LeaderboardView\:\:showLeaderboardTable\(\) has parameter \$leaderboard_data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/LeaderboardView.php
+
+		-
 			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdown\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11015,18 +13829,6 @@ parameters:
 
 		-
 			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdown\(\) has parameter \$content with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
-			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdownArea\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/views/MarkdownView.php
-
-		-
-			message: '#^Method app\\views\\MarkdownView\:\:renderMarkdownArea\(\) has parameter \$data with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/views/MarkdownView.php
@@ -11128,6 +13930,24 @@ parameters:
 			path: app/views/NavigationView.php
 
 		-
+			message: '#^Method app\\views\\NavigationView\:\:getAllDeleteButtons\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: '#^Method app\\views\\NavigationView\:\:getAllEditButtons\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: '#^Method app\\views\\NavigationView\:\:getButtons\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
 			message: '#^Method app\\views\\NavigationView\:\:getDeleteButton\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
@@ -11166,6 +13986,12 @@ parameters:
 		-
 			message: '#^Method app\\views\\NavigationView\:\:showGradeables\(\) has parameter \$sections_to_list with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/views/NavigationView.php
+
+		-
+			message: '#^Method app\\views\\NavigationView\:\:showGradeables\(\) has parameter \$submit_everyone with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/NavigationView.php
 
@@ -11212,6 +14038,18 @@ parameters:
 			path: app/views/NotificationView.php
 
 		-
+			message: '#^Method app\\views\\PDFView\:\:downloadPDFEmbedded\(\) has parameter \$annotation_jsons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: '#^Method app\\views\\PDFView\:\:showPDFEmbedded\(\) has parameter \$annotation_jsons with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/PDFView.php
+
+		-
 			message: '#^Method app\\views\\PollView\:\:pollForm\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11224,8 +14062,26 @@ parameters:
 			path: app/views/PollView.php
 
 		-
+			message: '#^Method app\\views\\PollView\:\:showPoll\(\) has parameter \$response_counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/PollView.php
+
+		-
 			message: '#^Method app\\views\\PollView\:\:showPollsInstructor\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/PollView.php
+
+		-
+			message: '#^Method app\\views\\PollView\:\:showPollsInstructor\(\) has parameter \$dropdown_states with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/PollView.php
+
+		-
+			message: '#^Method app\\views\\PollView\:\:showPollsInstructor\(\) has parameter \$response_counts with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/PollView.php
 
@@ -11242,8 +14098,20 @@ parameters:
 			path: app/views/admin/ConfigurationView.php
 
 		-
+			message: '#^Method app\\views\\admin\\ConfigurationView\:\:viewConfig\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/ConfigurationView.php
+
+		-
 			message: '#^Method app\\views\\admin\\ConfigurationView\:\:viewConfig\(\) has parameter \$gradeable_seating_options with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/views/admin/ConfigurationView.php
+
+		-
+			message: '#^Method app\\views\\admin\\ConfigurationView\:\:viewConfig\(\) has parameter \$submitty_admin_user with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/admin/ConfigurationView.php
 
@@ -11292,6 +14160,18 @@ parameters:
 		-
 			message: '#^Method app\\views\\admin\\GradeOverrideView\:\:displayOverriddenGrades\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/admin/GradeOverrideView.php
+
+		-
+			message: '#^Method app\\views\\admin\\GradeOverrideView\:\:displayOverriddenGrades\(\) has parameter \$gradeables with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/GradeOverrideView.php
+
+		-
+			message: '#^Method app\\views\\admin\\GradeOverrideView\:\:displayOverriddenGrades\(\) has parameter \$students with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/admin/GradeOverrideView.php
 
@@ -11374,6 +14254,30 @@ parameters:
 			path: app/views/admin/LateDayView.php
 
 		-
+			message: '#^Method app\\views\\admin\\PlagiarismView\:\:configurePlagiarismForm\(\) has parameter \$config with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/PlagiarismView.php
+
+		-
+			message: '#^Method app\\views\\admin\\PlagiarismView\:\:configurePlagiarismForm\(\) has parameter \$gradeables_with_plag_configs with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/PlagiarismView.php
+
+		-
+			message: '#^Method app\\views\\admin\\PlagiarismView\:\:plagiarismMainPage\(\) has parameter \$plagiarism_result_info with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/PlagiarismView.php
+
+		-
+			message: '#^Method app\\views\\admin\\PlagiarismView\:\:showPlagiarismResult\(\) has parameter \$rankings with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/PlagiarismView.php
+
+		-
 			message: '#^Method app\\views\\admin\\ReportView\:\:showFullGradebook\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11422,6 +14326,60 @@ parameters:
 			path: app/views/admin/StudentActivityDashboardView.php
 
 		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listGraders\(\) has parameter \$download_info with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listGraders\(\) has parameter \$graders_sorted with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listGraders\(\) has parameter \$reg_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listGraders\(\) has parameter \$rot_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listStudents\(\) has parameter \$download_info with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listStudents\(\) has parameter \$formatted_tzs with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listStudents\(\) has parameter \$reg_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listStudents\(\) has parameter \$rot_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:listStudents\(\) has parameter \$sorted_students with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
 			message: '#^Method app\\views\\admin\\UsersView\:\:sectionsForm\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11458,6 +14416,18 @@ parameters:
 			path: app/views/admin/UsersView.php
 
 		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:userForm\(\) has parameter \$reg_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
+			message: '#^Method app\\views\\admin\\UsersView\:\:userForm\(\) has parameter \$rot_sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/admin/UsersView.php
+
+		-
 			message: '#^Method app\\views\\admin\\WrapperView\:\:displayPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11476,12 +14446,6 @@ parameters:
 			path: app/views/calendar/CalendarView.php
 
 		-
-			message: '#^Construct empty\(\) is not allowed\. Use more strict comparison\.$#'
-			identifier: empty.notAllowed
-			count: 1
-			path: app/views/course/CourseMaterialsView.php
-
-		-
 			message: '#^Loose comparison via "\!\=" is not allowed\.$#'
 			identifier: notEqual.notAllowed
 			count: 1
@@ -11490,6 +14454,54 @@ parameters:
 		-
 			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:listCourseMaterials\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:listCourseMaterials\(\) has parameter \$course_materials_db with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:removeEmptyFolders\(\) has parameter \$course_materials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setFolderVisibilities\(\) has parameter \$course_materials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setFolderVisibilities\(\) has parameter \$folder_visibilities with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setFolderVisibilitiesR\(\) has parameter \$course_materials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setFolderVisibilitiesR\(\) has parameter \$folder_visibilities with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setSeen\(\) has parameter \$course_materials with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/course/CourseMaterialsView.php
+
+		-
+			message: '#^Method app\\views\\course\\CourseMaterialsView\:\:setSeen\(\) has parameter \$seen with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/course/CourseMaterialsView.php
 
@@ -11520,6 +14532,12 @@ parameters:
 		-
 			message: '#^Method app\\views\\email\\EmailStatusView\:\:renderStatusPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: app/views/email/EmailStatusView.php
+
+		-
+			message: '#^Method app\\views\\email\\EmailStatusView\:\:renderStatusPage\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/email/EmailStatusView.php
 
@@ -11782,6 +14800,12 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:detailsPage\(\) has parameter \$graders with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:hwGradingPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11812,8 +14836,20 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:hwGradingPage\(\) has parameter \$solution_ta_notes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:hwGradingPage\(\) has parameter \$sort with no type specified\.$#'
 			identifier: missingType.parameter
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:hwGradingPage\(\) has parameter \$submitter_itempool_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -11896,6 +14932,42 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderNotebookPanel\(\) has parameter \$image_data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderNotebookPanel\(\) has parameter \$notebook with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderNotebookPanel\(\) has parameter \$old_files with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderNotebookPanel\(\) has parameter \$testcase_messages with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderSolutionTaNotesPanel\(\) has parameter \$solution_array with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:renderSolutionTaNotesPanel\(\) has parameter \$submitter_itempool_map with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:statPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11920,6 +14992,12 @@ parameters:
 			path: app/views/grading/ElectronicGraderView.php
 
 		-
+			message: '#^Method app\\views\\grading\\ElectronicGraderView\:\:statusPage\(\) has parameter \$sections with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
 			message: '#^Offset string on array\{\} in isset\(\) does not exist\.$#'
 			identifier: isset.offset
 			count: 1
@@ -11928,6 +15006,12 @@ parameters:
 		-
 			message: '#^Only booleans are allowed in a negated boolean, app\\models\\User given\.$#'
 			identifier: booleanNot.exprNotBoolean
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$working_dir has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/views/grading/ElectronicGraderView.php
 
@@ -11980,6 +15064,12 @@ parameters:
 			path: app/views/grading/SimpleGraderView.php
 
 		-
+			message: '#^Method app\\views\\grading\\SimpleGraderView\:\:simpleDisplay\(\) has parameter \$graders with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/grading/SimpleGraderView.php
+
+		-
 			message: '#^Method app\\views\\grading\\SimpleGraderView\:\:simpleDisplay\(\) has parameter \$sort with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -12028,6 +15118,12 @@ parameters:
 			path: app/views/submission/HomeworkView.php
 
 		-
+			message: '#^Method app\\views\\submission\\HomeworkView\:\:renderSingleGradeInquiryPost\(\) has parameter \$post with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
 			message: '#^Method app\\views\\submission\\HomeworkView\:\:renderSubmissionsClosedBox\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -12050,6 +15146,18 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/views/superuser/GradeablesView.php
+
+		-
+			message: '#^Method app\\views\\superuser\\SamlManagerView\:\:renderPage\(\) has parameter \$invalid_users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/superuser/SamlManagerView.php
+
+		-
+			message: '#^Method app\\views\\superuser\\SamlManagerView\:\:renderPage\(\) has parameter \$proxy_mapped_users with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/views/superuser/SamlManagerView.php
 
 		-
 			message: '#^Method app\\views\\superuser\\SuperuserEmailView\:\:showEmailPage\(\) has no return type specified\.$#'

@@ -229,6 +229,7 @@ class ChatroomController extends AbstractController {
         return JsonResponse::getSuccessResponse($formattedMessages);
     }
 
+    #[Route("/api/courses/{_semester}/{_course}/chat/{chatroom_id}/send/{anonymous_route_segment?}", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     #[Route("/courses/{_semester}/{_course}/chat/{chatroom_id}/send/{anonymous_route_segment?}", methods: ["POST"], requirements: ["chatroom_id" => "\d+", "anonymous_route_segment" => "anonymous"])]
     public function addMessage(string $chatroom_id, ?string $anonymous_route_segment = null,): JsonResponse {
         $isAnonymous = ($anonymous_route_segment === 'anonymous');
@@ -264,10 +265,11 @@ class ChatroomController extends AbstractController {
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
         $msg_array['socket'] = "chatroom_$chatroom_id";
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
-        $this->sendSocketMessage($msg_array);
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);
         $em->flush();
+        $msg_array['id'] = $message->getId();
+        $this->sendSocketMessage($msg_array);
         return JsonResponse::getSuccessResponse($message);
     }
 }

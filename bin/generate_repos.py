@@ -18,7 +18,7 @@ import shutil
 import tempfile
 import subprocess
 import re
-from sqlalchemy import create_engine, MetaData, Table, bindparam
+from sqlalchemy import create_engine, MetaData, Table, bindparam, select
 
 from submitty_utils import db_utils
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config')
@@ -145,11 +145,11 @@ conn_string = db_utils.generate_connect_string(
 
 engine = create_engine(conn_string)
 connection = engine.connect()
-metadata = MetaData(bind=engine)
+metadata = MetaData()
 
-courses_table = Table('courses', metadata, autoload=True)
-select = courses_table.select().where(courses_table.c.term == bindparam('term')).where(courses_table.c.course == bindparam('course'))
-course = connection.execute(select, term=args.semester, course=args.course).fetchone()
+courses_table = Table('courses', metadata, autoload_with=engine)
+select_query = select(courses_table).where(courses_table.c.term == bindparam('term')).where(courses_table.c.course == bindparam('course'))
+course = connection.execute(select_query, { "term": args.semester, "course": args.course }).fetchone()
 
 if course is None:
     raise SystemExit("Semester '{}' and Course '{}' not found".format(args.semester, args.course))
@@ -185,11 +185,11 @@ course_conn_string = db_utils.generate_connect_string(
 
 course_engine = create_engine(course_conn_string)
 course_connection = course_engine.connect()
-course_metadata = MetaData(bind=course_engine)
+course_metadata = MetaData()
 
-eg_table = Table('electronic_gradeable', course_metadata, autoload=True)
-select = eg_table.select().where(eg_table.c.g_id == bindparam('gradeable_id'))
-eg = course_connection.execute(select, gradeable_id=args.repo_name).fetchone()
+eg_table = Table('electronic_gradeable', course_metadata, autoload_with=course_engine)
+select_query = select(eg_table).where(eg_table.c.g_id == bindparam('gradeable_id'))
+eg = course_connection.execute(select_query, { "gradeable_id": args.repo_name }).fetchone()
 
 is_team = False
 if eg is not None:
@@ -203,7 +203,7 @@ if eg is not None:
 elif not args.non_interactive:
     print (("Warning: Semester '{}' and Course '{}' does not contain gradeable_id '{}'.").format(args.semester, args.course, args.repo_name))
     # if the repo_name matches any repo_name in the different gradeables, we should ask the user if they want to continue
-    gradeables = course_connection.execute(eg_table.select()).fetchall()
+    gradeables = course_connection.execute(select(eg_table)).fetchall()
     is_repo_name_in_gradeables = False
     for gradeable in gradeables:
         # the eg_vcs_partial_path has pattern like `gradeable_id/user_id`, so we need to use regex to match the gradeable_id
@@ -241,17 +241,17 @@ if not os.path.isdir(os.path.join(vcs_course, args.repo_name)):
     shutil.chown(os.path.join(vcs_course, args.repo_name), user=CGI_USER, group=DAEMONPHPCGI_GROUP)
 
 if is_team:
-    teams_table = Table('gradeable_teams', course_metadata, autoload=True)
-    select = teams_table.select().where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
-    teams = course_connection.execute(select, gradeable_id=args.repo_name)
+    teams_table = Table('gradeable_teams', course_metadata, autoload_with=course_engine)
+    select_query = select(teams_table).where(teams_table.c.g_id == bindparam('gradeable_id')).order_by(teams_table.c.team_id)
+    teams = course_connection.execute(select_query, { "gradeable_id": args.repo_name })
 
     for team in teams:
         create_or_update_repo(os.path.join(vcs_course, args.repo_name, team.team_id), subdirectory, course_git_autograding_branch)
 
 else:
-    users_table = Table('courses_users', metadata, autoload=True)
-    select = users_table.select().where(users_table.c.term == bindparam('term')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
-    users = connection.execute(select, term=args.semester, course=args.course)
+    users_table = Table('courses_users', metadata, autoload_with=engine)
+    select_query = select(users_table).where(users_table.c.term == bindparam('term')).where(users_table.c.course == bindparam('course')).order_by(users_table.c.user_id)
+    users = connection.execute(select_query, { "term": args.semester, "course": args.course })
 
     for user in users:
         create_or_update_repo(os.path.join(vcs_course, args.repo_name, user.user_id), subdirectory, course_git_autograding_branch)
