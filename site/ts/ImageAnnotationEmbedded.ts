@@ -1,13 +1,12 @@
 // Import utility functions
 import { buildCourseUrl } from './utils/server';
-import type { AnnotationState } from '@markerjs/markerjs3';
-import type { AnnotationEditor, AnnotationEditorSettings } from '@markerjs/markerjs-ui';
+import type { AnnotationState, MarkerView } from '@markerjs/markerjs3';
+import type { AnnotationEditor } from '@markerjs/markerjs-ui';
 
 // Type declarations for external libraries
 const markerjs3 = window.markerjs3;
 const markerjsUI = window.markerjsUI;
 const $ = window.$;
-const csrfToken = window.csrfToken;
 declare global {
     interface Window {
         initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void;
@@ -74,14 +73,9 @@ class AnnotationManager {
         this.filePath = '';
         this.csrfToken = '';
         this.isStudent = false;
+        this.globalAnnotationEditor = null;
     }
 }
-
-const emptyAnnotations: AnnotationState = {
-    width: 600,
-    height: 800,
-    markers: [],
-};
 
 // Single instance to manage the current image annotation state
 const annotationManager: AnnotationManager = new AnnotationManager();
@@ -93,120 +87,150 @@ function addAnnotations(): void {
         return;
     }
 
-    if (annotationManager.originalImg && annotationManager.originalImg.complete) {
-        try {
-            // Check if markerjsUI is available
-            if (typeof markerjsUI === 'undefined' || !markerjsUI.AnnotationEditor) {
-                console.error('markerjsUI AnnotationEditor is not loaded');
-                $('#annotation-status').text('Error: MarkerJS-UI library not loaded').css('color', 'red');
-                return;
-            }
+    if (!annotationManager.originalImg.complete) {
+        console.warn('Image not yet loaded, cannot add annotations');
+        $('#annotation-status').text('Error: Image not loaded yet').css('color', 'red');
+        return;
+    }
 
-            // Check if we already have an annotation editor wrapper
-            let editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
-
-            if (editorWrapper) {
-                // Editor already exists, just show it and update the target image
-                editorWrapper.style.display = 'flex';
-
-                if (annotationManager.globalAnnotationEditor) {
-                    annotationManager.globalAnnotationEditor.targetImage = annotationManager.originalImg;
-
-                    // Load existing annotations if available
-                    if (annotationManager.currentAnnotations) {
-                        annotationManager.globalAnnotationEditor.restoreState(annotationManager.currentAnnotations);
-                    }
-                    else {
-                        // Clear previous annotations if no current ones
-                        emptyAnnotations.width = annotationManager.originalImg.naturalWidth || 600;
-                        emptyAnnotations.height = annotationManager.originalImg.naturalHeight || 800;
-                        annotationManager.globalAnnotationEditor.restoreState(emptyAnnotations);
-                    }
-                }
-
-                $('#annotation-status').text('Annotation editor opened').css('color', 'blue');
-                return;
-            }
-
-            // Create new annotation editor since none exists
-            annotationManager.globalAnnotationEditor = new markerjsUI.AnnotationEditor();
-            annotationManager.globalAnnotationEditor.targetImage = annotationManager.originalImg;
-
-            // Set up event handlers for the annotation editor
-            annotationManager.globalAnnotationEditor.addEventListener('editorsave', (event: any) => {
-                annotationManager.currentAnnotations = event.detail.state;
-                annotationManager.annotatedImageDataUrl = event.detail.dataUrl;
-                $('#annotation-status').text('Annotations modified (not saved)').css('color', 'orange');
-
-                // Hide the annotation editor instead of removing it
-                const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
-                if (editorWrapper) {
-                    editorWrapper.style.display = 'none';
-                }
-
-                // Render the annotations on the image
-                renderAnnotationsOnImage();
-            });
-
-            annotationManager.globalAnnotationEditor.addEventListener('editorclose', (event: any) => {
-                // Hide the annotation editor instead of removing it
-                const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
-                if (editorWrapper) {
-                    editorWrapper.style.display = 'none';
-                }
-                $('#annotation-status').text('Annotation editor closed').css('color', 'blue');
-
-                // Render the annotations on the image if any exist
-                if (annotationManager.currentAnnotations) {
-                    renderAnnotationsOnImage();
-                }
-            });
-
-            // Load existing annotations if available
-            if (annotationManager.currentAnnotations) {
-                annotationManager.globalAnnotationEditor.restoreState(annotationManager.currentAnnotations);
-            }
-
-            // Configure editor settings
-            annotationManager.globalAnnotationEditor.settings.renderOnSave = true;
-            annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = false;
-            annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = 'image/png';
-            annotationManager.globalAnnotationEditor.settings.rendererSettings.imageQuality = 1;
-            annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
-
-            // Add the annotation editor to the page
-            editorWrapper = document.createElement('div');
-            editorWrapper.id = 'global-annotation-editor-wrapper';
-            editorWrapper.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 10000;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            `;
-
-            annotationManager.globalAnnotationEditor.style.cssText = `
-                width: 90vw;
-                height: 90vh;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            `;
-
-            editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
-            document.body.appendChild(editorWrapper);
-
-            $('#annotation-status').text('Annotation editor opened').css('color', 'blue');
+    try {
+        // Check if markerjsUI is available
+        if (typeof markerjsUI === 'undefined' || !markerjsUI.AnnotationEditor) {
+            console.error('markerjsUI AnnotationEditor is not loaded');
+            $('#annotation-status').text('Error: MarkerJS-UI library not loaded').css('color', 'red');
+            return;
         }
-        catch (error) {
-            console.error('Error opening annotation editor:', error);
-            $('#annotation-status').text(`Error opening annotation editor: ${(error as Error).message}`).css('color', 'red');
+
+        // Always cleanup and reset everything
+        cleanupAnnotationEditor();
+
+        // Remove existing editor wrapper completely
+        const existingWrapper = document.getElementById('global-annotation-editor-wrapper');
+        if (existingWrapper) {
+            existingWrapper.remove();
         }
+
+        // Create fresh annotation editor
+        annotationManager.globalAnnotationEditor = new markerjsUI.AnnotationEditor();
+
+        // Set up event listeners
+        setupAnnotationEditor();
+
+        // Configure editor for current image
+        configureEditorForImage();
+
+        // Create and show wrapper
+        const editorWrapper = createEditorWrapper();
+        editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
+        document.body.appendChild(editorWrapper);
+        editorWrapper.style.display = 'flex';
+
+        $('#annotation-status').text('Annotation editor opened').css('color', 'blue');
+    }
+    catch (error) {
+        console.error('Error opening annotation editor:', error);
+        $('#annotation-status').text(`Error opening annotation editor: ${(error as Error).message}`).css('color', 'red');
+    }
+}
+
+function setupAnnotationEditor(): void {
+    if (!annotationManager.globalAnnotationEditor) {
+        console.error('setupAnnotationEditor: globalAnnotationEditor is null');
+        return;
+    }
+
+    // Set up event handlers for the annotation editor
+    annotationManager.globalAnnotationEditor.addEventListener('editorsave', (event) => {
+        console.log('editorsave event triggered');
+        const detail = event.detail;
+        if (detail.state && detail.dataUrl) {
+            annotationManager.currentAnnotations = detail.state;
+            annotationManager.annotatedImageDataUrl = detail.dataUrl;
+            $('#annotation-status').text('Annotations modified (not saved)').css('color', 'orange');
+        }
+
+        // Hide the annotation editor
+        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+        if (editorWrapper) {
+            editorWrapper.style.display = 'none';
+        }
+
+        // Render the annotations on the image
+        renderAnnotationsOnImage();
+    });
+
+    annotationManager.globalAnnotationEditor.addEventListener('editorclose', () => {
+        console.log('editorclose event triggered');
+        // Hide the annotation editor
+        const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
+        if (editorWrapper) {
+            editorWrapper.style.display = 'none';
+        }
+        $('#annotation-status').text('Annotation editor closed').css('color', 'blue');
+
+        // Render the annotations on the image if any exist
+        if (annotationManager.currentAnnotations) {
+            renderAnnotationsOnImage();
+        }
+    });
+
+    // Configure editor settings
+    annotationManager.globalAnnotationEditor.settings.renderOnSave = true;
+    annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = false;
+    annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = 'image/png';
+    annotationManager.globalAnnotationEditor.settings.rendererSettings.imageQuality = 1;
+    annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
+
+    console.log('Annotation editor setup complete');
+}
+
+function createEditorWrapper(): HTMLElement {
+    const editorWrapper = document.createElement('div');
+    editorWrapper.id = 'global-annotation-editor-wrapper';
+    editorWrapper.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+
+    if (annotationManager.globalAnnotationEditor) {
+        annotationManager.globalAnnotationEditor.style.cssText = `
+            width: 90vw;
+            height: 90vh;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        `;
+    }
+
+    return editorWrapper;
+}
+
+function configureEditorForImage(): void {
+    if (!annotationManager.globalAnnotationEditor || !annotationManager.originalImg) {
+        return;
+    }
+
+    // Clear editor state first
+    const emptyState: AnnotationState = {
+        width: annotationManager.originalImg.naturalWidth || 600,
+        height: annotationManager.originalImg.naturalHeight || 800,
+        markers: [],
+    };
+    annotationManager.globalAnnotationEditor.restoreState(emptyState);
+
+    annotationManager.globalAnnotationEditor.targetImage = annotationManager.originalImg;
+
+    // Load existing annotations if available
+    if (annotationManager.currentAnnotations) {
+        annotationManager.globalAnnotationEditor.restoreState(annotationManager.currentAnnotations);
     }
 }
 
@@ -233,7 +257,7 @@ function saveAnnotations(): void {
                 $('#annotation-status').text(`Error saving annotations: ${response.message || 'Unknown error'}`).css('color', 'red');
             }
         },
-        error: function (xhr: any, status: string, error: string) {
+        error: function (xhr: unknown, status: string, error: string) {
             $('#annotation-status').text(`Error saving annotations: ${error}`).css('color', 'red');
         },
     });
@@ -251,8 +275,8 @@ function clearAnnotations(): void {
         }
 
         // Restore original image if it was replaced with MarkerView
-        const markerView: any = document.getElementById('annotation-marker-view');
-        if (markerView && markerView.targetImage) {
+        const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
+        if (markerView && 'targetImage' in markerView && markerView.targetImage) {
             const originalImgElement: HTMLImageElement = markerView.targetImage;
 
             // Restore original properties
@@ -322,15 +346,20 @@ function downloadImage(): void {
 }
 
 function cleanupAnnotationEditor(): void {
-    // Hide the global annotation editor when switching to a different image
+    // Clear the global annotation editor reference
+    annotationManager.globalAnnotationEditor = null;
+
+    // Hide and remove any existing annotation editor wrapper
     const editorWrapper: HTMLElement | null = document.getElementById('global-annotation-editor-wrapper');
     if (editorWrapper) {
         editorWrapper.style.display = 'none';
+        // Remove it completely to ensure fresh start
+        editorWrapper.remove();
     }
 
     // Restore original image if it was replaced with MarkerView
-    const markerView: any = document.getElementById('annotation-marker-view');
-    if (markerView && markerView.targetImage) {
+    const markerView = document.getElementById('annotation-marker-view') as MarkerView | null;
+    if (markerView && 'targetImage' in markerView && markerView.targetImage) {
         const originalImgElement: HTMLImageElement = markerView.targetImage;
 
         // Restore original properties
@@ -384,9 +413,8 @@ function renderAnnotationsOnImage(): void {
             annotationManager.originalImg.dataset.originalWidth = annotationManager.originalImg.style.width || '';
             annotationManager.originalImg.dataset.originalHeight = annotationManager.originalImg.style.height || '';
         }
-
         // Create MarkerView instance
-        const markerView: any = new markerjs3.MarkerView();
+        const markerView = new markerjs3.MarkerView();
         markerView.id = 'annotation-marker-view';
         markerView.className = annotationManager.originalImg.className; // Copy original classes
         markerView.targetImage = annotationManager.originalImg;
@@ -438,7 +466,7 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
 
     try {
         // Create a Renderer instance to generate the annotated image
-        const renderer: any = new markerjs3.Renderer();
+        const renderer = new markerjs3.Renderer();
         renderer.targetImage = annotationManager.originalImg;
 
         // Generate the annotated image dataURL using the current annotations
@@ -446,7 +474,6 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
 
         // Store the annotated image data URL
         annotationManager.annotatedImageDataUrl = dataUrl;
-        console.log('Annotated image dataURL generated');
     }
     catch (error) {
         console.error('Error generating annotated image dataURL:', error);
@@ -454,12 +481,7 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
 }
 
 function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void {
-    // Clean up any existing annotation editor before initializing a new image
-    cleanupAnnotationEditor();
-
-    // Reset the annotation manager for the new image
     annotationManager.reset();
-
     // Set variables from parameters
     annotationManager.gradeableId = gId;
     annotationManager.userId = uId;
@@ -472,7 +494,6 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
     // Wait for DOM to be ready
     $(document).ready(() => {
         // Get the original image element
-        console.log(existingAnnotations);
         annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
 
         // Handle image load errors
@@ -489,28 +510,23 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
         }
 
         // Wait for image to load before rendering annotations
-        if (annotationManager.originalImg && (annotationManager.originalImg.complete && annotationManager.originalImg.naturalHeight !== 0)) {
+        if (annotationManager.originalImg && (annotationManager.originalImg.complete && annotationManager.originalImg.naturalHeight !== 0) && existingAnnotations) {
             // Image is already loaded
             renderAnnotationsOnImage();
             // Generate annotated image dataURL if annotations exist
             if (annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
-                generateAnnotatedImageDataURL().catch(console.error);
+                void generateAnnotatedImageDataURL().catch(console.error);
             }
         }
-        else if (annotationManager.originalImg) {
+        else if (annotationManager.originalImg && existingAnnotations) {
             // Wait for image to load
-            const imageLoadHandler = async function () {
+            const imageLoadHandler = function () {
                 if (annotationManager.originalImg) {
                     annotationManager.originalImg.removeEventListener('load', imageLoadHandler);
                     renderAnnotationsOnImage();
                     // Generate annotated image dataURL if annotations exist
                     if (annotationManager.currentAnnotations && annotationManager.currentAnnotations.markers && annotationManager.currentAnnotations.markers.length > 0) {
-                        try {
-                            await generateAnnotatedImageDataURL();
-                        }
-                        catch (error) {
-                            console.error('Error generating annotated image on load:', error);
-                        }
+                        void generateAnnotatedImageDataURL().catch(console.error);
                     }
                 }
             };

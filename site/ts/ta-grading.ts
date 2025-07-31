@@ -731,7 +731,11 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                     csrf_token: window.csrfToken,
                 },
                 success: function (data: string) {
-                    console.log(data);
+                    // Clean up annotation editor and reset manager before loading new content
+                    if (typeof window.cleanupAnnotationEditor === 'function') {
+                        window.cleanupAnnotationEditor();
+                    }
+
                     // Clear previous image content before appending new content
                     $(fileFullPanelOptions[panel]['fileContent']).empty();
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
