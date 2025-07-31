@@ -107,10 +107,12 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
 
     public function testCreateWebsocketToken() {
         $current_time = time();
-        // Ensure the issued time is now is within 5 seconds to account for clock skew
+
+        // Ensure the issued time is within 5 seconds from now to account for clock skew
         $min_issued_time = $current_time - 5;
         $max_issued_time = $current_time + 5;
-        // Ensure the expiration time is 5 minutes from now +/- 5 seconds to account for clock skew
+
+        // Ensure the expiration time is 5 minutes +/- 5 seconds from now to account for clock skew
         $min_expired_time = $current_time + 5 * 60 - 5;
         $max_expired_time = $current_time + 5 * 60 + 5;
 
@@ -147,11 +149,14 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals('test_user', $parsed_token->claims()->get('sub'));
         $this->assertEquals('https://submitty.org', $parsed_token->claims()->get('iss'));
         $this->assertCount(3, $parsed_token->claims()->get('authorized_pages'));
+
         // Expired pages should be removed
         $this->assertArrayNotHasKey('f25-sample-chatrooms-2', $parsed_token->claims()->get('authorized_pages'));
+
         // Old pages should persist with the same expiration time
         $this->assertEquals($future_time, $parsed_token->claims()->get('authorized_pages')['f25-sample-defaults']);
         $this->assertEquals($future_time, $parsed_token->claims()->get('authorized_pages')['f25-sample-chatrooms-1']);
+
         // New authorized page should have a future expiration time
         $this->assertGreaterThanOrEqual($future_time, $parsed_token->claims()->get('authorized_pages')['f25-tutorial-defaults']);
     }
@@ -165,10 +170,10 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
 
     public function testWebsocketTokenInvalidClaims() {
         $failures = [
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.E1dhq57eiDuqBmdPFNg6Gl2Ii3u0nXRezvU2NIPCL2Y', // Missing authorized_pages
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9fQ.cxcYDXkV6Wi12ZKd5SpERXJa_YIF04xWjBd0_G6RBrA', // Missing expire_time
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N30sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.twa4Zr5pRnqcL04PI0fICRxAbAAWJsaKHAn4FbTLiLI', // Missing sub,
-            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6W119.iq4Ux46GgkNofYXQsuWo2nnH3rP8TJqB7exttcQmbkA' // Invalid expire_time
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.E1dhq57eiDuqBmdPFNg6Gl2Ii3u0nXRezvU2NIPCL2Y', // Missing 'authorized_pages'
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9fQ.cxcYDXkV6Wi12ZKd5SpERXJa_YIF04xWjBd0_G6RBrA', // Missing 'expire_time'
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N30sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.twa4Zr5pRnqcL04PI0fICRxAbAAWJsaKHAn4FbTLiLI', // Missing 'sub'
+            'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6W119.iq4Ux46GgkNofYXQsuWo2nnH3rP8TJqB7exttcQmbkA' // 'expire_time' is not an int
         ];
 
         foreach ($failures as $token) {
@@ -177,10 +182,10 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
             TokenManager::parseWebSocketToken($token);
         }
 
-        // Invalid authorized_pages format (non-string key, non-int value)
+        // Invalid 'authorized_pages' format (non-string key, non-int value)
         $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOmZhbHNlLCJmMjUtc2FtcGxlLWNoYXRyb29tcy0xIjoxNzUzODAwOTU3LCJmMjUtc2FtcGxlLXBvbGxzLTMtaW5zdHJ1Y3RvciI6MTc1MzgwMDkxMn0sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.-L8vI8DC7xz7m4B1SzpHCVzef9FJ1rqRGo2nlWYvgJM';
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('\'authorized_pages\' must be array in form key: string, value: int');
+        $this->expectExceptionMessage('\'authorized_pages\' must be an array in form key: string, value: int');
         TokenManager::parseWebSocketToken($token);
     }
 

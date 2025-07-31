@@ -81,7 +81,7 @@ class Server implements MessageComponentInterface {
 
     /**
      * This function checks if a given connection object is authenticated and authorized to access the requested page
-     * using the websocket token provided in the query parameters, which is authorized by the web server.
+     * using the WebSocket authorization token provided in the cookie, which is authorized by the web server.
      *
      * @param ConnectionInterface $conn
      * @return bool
@@ -108,24 +108,24 @@ class Server implements MessageComponentInterface {
         }
         $websocket_token = $cookies['submitty_websocket_token'];
 
-        // Parse query parameters for the WebSocket page identifier
-        $query_params = [];
-        $query = $request->getUri()->getQuery();
-        parse_str($query, $query_params);
-
-        // If required parameters are not provided, close the connection
-        if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
-            return false;
-        }
-
-        // Get the specific page from the query parameters
-        $page = $query_params['page'];
-
-        // Parse and validate the websocket token
+        // Parse and validate the WebSocket authorization token
         try {
             $token = TokenManager::parseWebSocketToken($websocket_token);
             $user_id = $token->claims()->get('sub');
             $authorized_pages = $token->claims()->get('authorized_pages');
+
+            // Parse the query parameters for the page identifier
+            $query_params = [];
+            $query = $request->getUri()->getQuery();
+            parse_str($query, $query_params);
+
+            // If the required parameters are not provided, close the connection
+            if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
+                return false;
+            }
+
+            // Get the specific page from the query parameters
+            $page = $query_params['page'];
 
             if (
                 $page === 'discussion_forum'
@@ -140,18 +140,18 @@ class Server implements MessageComponentInterface {
             }
 
             // Build the page identifier for authorization checks
-            $authorizedPage = Utils::buildWebSocketPageIdentifier($key, $query_params);
+            $authorized_page = Utils::buildWebSocketPageIdentifier($key, $query_params);
 
-            if ($authorizedPage === null) {
+            if ($authorized_page === null) {
                 $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
             }
-            elseif (!array_key_exists($authorizedPage, $authorized_pages) || time() > intval($authorized_pages[$authorizedPage])) {
-                $this->log("Unauthorized page '{$authorizedPage}' for connection {$conn->resourceId}");
+            elseif (!array_key_exists($authorized_page, $authorized_pages) || time() > intval($authorized_pages[$authorized_page])) {
+                $this->log("Unauthorized page '{$authorized_page}' for connection {$conn->resourceId}");
                 return false;
             }
 
-            // Create the full page identifier for the page connection
+            // Create the full page identifier for the true page connection
             $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
 
             // Set up the connection

@@ -217,9 +217,10 @@ const enterChat = (title, anonymous = false) => {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
     }
 
-    cy.url().should('match', /\/chat\/\d+$/);
-    cy.get('[data-testid="chat-title"]').should('contain.text', title);
-    verifyWebSocketStatus();
+    cy.url().should('match', /\/chat\/\d+$/).then(() => {
+        cy.get('[data-testid="chat-title"]').should('contain.text', title);
+        verifyWebSocketStatus();
+    });
 };
 
 const visitLiveChat = (user) => {

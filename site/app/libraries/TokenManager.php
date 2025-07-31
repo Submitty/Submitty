@@ -75,14 +75,6 @@ class TokenManager {
             );
     }
 
-    /**
-     * Generate a WebSocket token containing authorized pages for the given user
-     *
-     * @param string $user_id User ID
-     * @param string $page Full page identifier the user should have access to
-     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to, where the key is the unique page identifier and the value is the expiration time
-     * @return Token WebSocket authorization token
-     */
     public static function generateWebSocketToken(
         string $user_id,
         string $page,
@@ -133,13 +125,6 @@ class TokenManager {
         return $token;
     }
 
-    /**
-     * Parse and validate a WebSocket token
-     *
-     * @param string $token JWT token string
-     * @return Token Parsed token with WebSocket authorization claims
-     * @throws \InvalidArgumentException If token is invalid or missing required claims or has expired
-     */
     public static function parseWebSocketToken(string $token): Token {
         $token = self::parseToken($token);
         if (
@@ -161,7 +146,7 @@ class TokenManager {
         $authorized_pages = $token->claims()->get('authorized_pages');
         foreach ($authorized_pages as $key => $value) {
             if (!is_string($key) || !is_int($value)) {
-                throw new \InvalidArgumentException('\'authorized_pages\' must be array in form key: string, value: int');
+                throw new \InvalidArgumentException('\'authorized_pages\' must be an array in form key: string, value: int');
             }
         }
 

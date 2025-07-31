@@ -81,8 +81,8 @@ class WebSocketClient {
                 case 1000:
                     console.log('WebSocket: Closed');
                     if (this.serverError) {
-                        console.error(`WebSocket Server Error: ${this.serverError}`);
                         sys_message.show();
+                        console.error(`WebSocket Server Error: ${this.serverError}`);
                     }
                     break;
                 default:

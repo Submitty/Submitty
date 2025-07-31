@@ -973,7 +973,7 @@ class Core {
                 $token_authorized_pages = $token->claims()->get('authorized_pages');
 
                 if (!array_key_exists($page, $token_authorized_pages)) {
-                    // Add the new page to the authorized pages
+                    // We need to refresh the token to add the new page to the authorized pages
                     $refresh = true;
                 }
 
