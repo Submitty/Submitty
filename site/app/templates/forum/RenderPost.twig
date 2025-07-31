@@ -2,7 +2,9 @@
     {% include "Vue.twig" with {
         type: "component",
         name: "Markdown",
-        args: { content: post_content }
+        args: {
+            content: post_content
+        }
     } only %}
 {% else %}
     {{- post_content -}}
