@@ -76,6 +76,16 @@ const handleVersionChange = (version: number) => {
     window.location.href = url.toString();
 };
 
+function checkTaVersionChange(e: Event) {
+    const message = 'You are overriding the student\'s chosen submission. Are you sure you want to continue?';
+
+    if (!confirm(message)) {
+        e.preventDefault();
+        return false;
+    }
+    return true;
+}
+
 onMounted(() => {
     // Initialize first tab as active
     onChangeNavTab(1);
@@ -118,6 +128,7 @@ onMounted(() => {
               style="display: inline;"
               method="post"
               :action="updateVersionUrl"
+              @submit="checkTaVersionChange"
             >
               <input
                 type="hidden"
