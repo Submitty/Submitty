@@ -79,14 +79,12 @@ class TokenManager {
      * Generate a websocket token containing authorized pages for a user
      *
      * @param string $user_id User ID
-     * @param string $session_id Session ID
      * @param string $page Full page identifier the user should have access to
      * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
      * @return Token
      */
     public static function generateWebSocketToken(
         string $user_id,
-        string $session_id,
         string $page,
         ?array $existing_authorized_pages = []
     ): Token {
@@ -107,7 +105,6 @@ class TokenManager {
             ->issuedAt(new \DateTimeImmutable())
             ->issuedBy(self::$issuer)
             ->relatedTo($user_id)
-            ->withClaim('session_id', $session_id)
             ->withClaim('authorized_pages', $authorized_pages)
             ->withClaim('expire_time', $token_expire_time)
             ->getToken(
@@ -147,7 +144,6 @@ class TokenManager {
         $token = self::parseToken($token);
         if (
             !$token->claims()->has('sub')
-            || !$token->claims()->has('session_id')
             || !$token->claims()->has('authorized_pages')
             || !$token->claims()->has('expire_time')
             || !is_int($token->claims()->get('expire_time'))

@@ -1,3 +1,5 @@
+import { verifyWebSocketStatus } from '../../support/utils';
+
 function accurateSectionHeaders(sectionType, sectionLimit) {
     let sectionNumber = 1;
     cy.get('[data-testid="gradeable-sections"]').each(($element) => {
@@ -62,6 +64,7 @@ describe('Test cases revolving around simple grading test', () => {
     ['ta', 'instructor'].forEach((user) => {
         beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'grading_test', 'grading']);
+            verifyWebSocketStatus();
         });
 
         it(`${user} should have grader submission options`, () => {

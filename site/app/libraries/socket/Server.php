@@ -126,14 +126,7 @@ class Server implements MessageComponentInterface {
         try {
             $token = TokenManager::parseWebsocketToken($websocket_token);
             $user_id = $token->claims()->get('sub');
-            $session_id = $token->claims()->get('session_id');
             $authorized_pages = $token->claims()->get('authorized_pages');
-
-            // Ensure the user is still logged in
-            $logged_in = $this->core->getSession($session_id, $user_id);
-            if (!$logged_in) {
-                return false;
-            }
 
             if ($page === 'discussion_forum' || $page === 'office_hours_queue' || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))) {
                 // These pages are not stored in authorized_pages to avoid redundancy

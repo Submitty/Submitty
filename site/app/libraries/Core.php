@@ -845,6 +845,7 @@ class Core {
     public function isWebLoggedIn(): bool {
         $logged_in = false;
         $cookie_key = 'submitty_session';
+        $websocket_cookie_key = 'submitty_websocket_token';
         if (isset($_COOKIE[$cookie_key])) {
             try {
                 $token = TokenManager::parseSessionToken(
@@ -856,6 +857,7 @@ class Core {
                 if (!$logged_in) {
                     // delete cookie that's stale
                     Utils::setCookie($cookie_key, "", time() - 3600);
+                    Utils::setCookie($websocket_cookie_key, "", time() - 3600);
                 }
                 else {
                     // If more than a day has passed since we last updated the cookie, update it with the new timestamp
@@ -952,7 +954,6 @@ class Core {
         }
 
         $user_id = $this->user->getId();
-        $session_id = $this->getCurrentSessionId();
 
         // Append the term and course to the query params for the full page identifier
         $query_params['term'] = $this->config->getTerm();
@@ -996,7 +997,7 @@ class Core {
         }
 
         try {
-            $token = TokenManager::generateWebSocketToken($user_id, $session_id, $page, $existing_authorized_pages);
+            $token = TokenManager::generateWebSocketToken($user_id, $page, $existing_authorized_pages);
             $expire_time = $token->claims()->get('expire_time');
             Utils::setCookie($cookie_key, $token->toString(), $expire_time);
 

@@ -35,11 +35,12 @@ class WebSocketClient {
 
         if (my_url.hostname === 'localhost') {
             // Force IPv4 (macOS issue)
+            // TODO: remove this
             my_url.hostname = '127.0.0.1';
         }
 
         my_url.port = window.websocketPort;
-        my_url.pathname = '/ws';
+        my_url.pathname = 'ws';
         this.url = my_url.href;
         this.serverError = null;
     }

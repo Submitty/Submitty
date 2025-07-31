@@ -1,4 +1,4 @@
-import { getApiKey, getCurrentSemester } from '../../support/utils';
+import { getApiKey, getCurrentSemester, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Test Chatroom Title';
 const title2 = 'Non Anon Test Chatroom Title';
@@ -212,6 +212,8 @@ const leaveChat = (title) => {
 const enterChat = (title, anonymous = false) => {
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();
+        cy.get('[data-testid="chat-title"]').should('contain.text', title);
+        verifyWebSocketStatus();
     }
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
@@ -256,6 +258,7 @@ describe('Tests for creating, editing and using tests', () => {
         cy.login('instructor');
         toggleLiveChat(true).then(() => {
             cy.visit(['sample', 'chat']);
+            verifyWebSocketStatus();
             deleteChatroom(title1);
             deleteChatroom(title2);
         });

@@ -147,3 +147,17 @@ export function verifyWebSocketFunctionality(
         });
     });
 }
+
+/**
+ * Verifies that the WebSocket server is connected and the system message is hidden,
+ * where the message is displayed for authentication, database, and/or connection errors.
+ */
+export function verifyWebSocketStatus() {
+    cy.get('#socket-server-system-message').should('be.hidden');
+    cy.window().then((window) => {
+        const socketClient = window.socketClient;
+        expect(socketClient).to.not.be.undefined;
+        expect(socketClient.client).not.to.be.undefined;
+        expect(socketClient.client.readyState).to.equal(WebSocket.OPEN);
+    });
+}

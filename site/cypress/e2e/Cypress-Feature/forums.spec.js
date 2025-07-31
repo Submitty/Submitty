@@ -1,4 +1,4 @@
-import { buildUrl, getApiKey, verifyWebSocketFunctionality } from '../../support/utils';
+import { buildUrl, getApiKey, verifyWebSocketFunctionality, verifyWebSocketStatus } from '../../support/utils';
 
 const title1 = 'Cypress Title 1 Cypress';
 const title2 = 'Cypress Title 2 Cypress';
@@ -131,6 +131,7 @@ describe('Forum Thread Lock Date Functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
+        verifyWebSocketStatus();
     });
 
     it('Should prevent students from replying when lock date is in the past and allow replying when lock date is cleared', () => {
@@ -344,7 +345,7 @@ describe('Should test WebSocket functionality', () => {
         cy.login('instructor');
         cy.visit(['sample', 'forum']);
         cy.get('#nav-sidebar-collapse-sidebar').click();
-        cy.get('#socket-server-system-message').should('be.hidden');
+        verifyWebSocketStatus();
         removeThread(title5);
     });
 

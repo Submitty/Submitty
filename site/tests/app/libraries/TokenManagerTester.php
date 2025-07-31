@@ -117,13 +117,11 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $authorized_page = 'f25-sample-defaults';
         $token = TokenManager::generateWebsocketToken(
             'test_user',
-            'session_id',
             $authorized_page
         );
 
         $this->assertEquals('test_user', $token->claims()->get('sub'));
         $this->assertEquals('https://submitty.org', $token->claims()->get('iss'));
-        $this->assertEquals('session_id', $token->claims()->get('session_id'));
         $this->assertCount(1, $token->claims()->get('authorized_pages'));
         $this->assertEquals($authorized_page, array_keys($token->claims()->get('authorized_pages'))[0]);
 
@@ -150,7 +148,6 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
 
         $token = TokenManager::generateWebsocketToken(
             'test_user',
-            'session_id',
             $authorized_page,
             $existing_authorized_pages
         );
@@ -158,7 +155,6 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $parsed_token = TokenManager::parseWebsocketToken($token->toString());
         $this->assertEquals('test_user', $parsed_token->claims()->get('sub'));
         $this->assertEquals('https://submitty.org', $parsed_token->claims()->get('iss'));
-        $this->assertEquals('session_id', $parsed_token->claims()->get('session_id'));
         $this->assertCount(3, $parsed_token->claims()->get('authorized_pages'));
         // Expired pages should be removed
         $this->assertArrayNotHasKey('f25-sample-chatrooms-2', $parsed_token->claims()->get('authorized_pages'));
@@ -180,7 +176,6 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $failures = [
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.E1dhq57eiDuqBmdPFNg6Gl2Ii3u0nXRezvU2NIPCL2Y', // Missing authorized_pages
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9fQ.cxcYDXkV6Wi12ZKd5SpERXJa_YIF04xWjBd0_G6RBrA', // Missing expire_time
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9LCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.3WtN0gt6Ho1eRQy9zaBTwbmpPw9RWONX9ArSgDfpjxo', // Missing session_id
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInNlc3Npb25faWQiOiJjNWM2YjRlODFjMmUxM2UzM2M4MjhlYjhiODFkNjZkMiIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1MzgwMDk1N30sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.twa4Zr5pRnqcL04PI0fICRxAbAAWJsaKHAn4FbTLiLI', // Missing sub,
             'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6W119.iq4Ux46GgkNofYXQsuWo2nnH3rP8TJqB7exttcQmbkA' // Invalid expire_time
         ];
