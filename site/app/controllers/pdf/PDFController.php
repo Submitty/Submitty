@@ -256,8 +256,6 @@ class PDFController extends AbstractController {
 
     #[Route(path: "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/img", methods: ["POST"])]
     public function showGraderImageEmbedded(string $gradeable_id): void {
-        // Add debugging
-        $this->core->addNoticeMessage("showGraderImageEmbedded called for gradeable: " . $gradeable_id);
         
         // User can be a team
         $id = $_POST['user_id'] ?? null;

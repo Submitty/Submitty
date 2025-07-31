@@ -36,11 +36,6 @@ class ImageView extends AbstractView {
         if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
-
-        // MarkerJS scripts are now loaded globally in the main page, not per instance
-        // Add image annotation JavaScript
-
-        $this->core->addNoticeMessage("About to render twig template"); 
         
         try {
             
