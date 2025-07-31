@@ -102,8 +102,7 @@ onMounted(() => {
       <span class="grading_label">Student Information</span>
       <div class="inner-container">
         <h5
-          class="label"
-          style="float:right; padding-right:15px;"
+          class="label browse-submissions-label"
         >
           Browse Student Submissions:
         </h5>
@@ -111,7 +110,7 @@ onMounted(() => {
           class="rubric-title"
           data-testid="rubric-title"
         >
-          <div style="float:right;">
+          <div class="version-controls">
             <VersionChoice
               :formatting="'font-size: 13px;'"
               :active-version="activeVersion"
@@ -125,7 +124,7 @@ onMounted(() => {
             <form
               v-if="displayVersion > 0"
               id="student-info-ta-version-form"
-              style="display: inline;"
+              class="ta-version-form"
               method="post"
               :action="updateVersionUrl"
               @submit="checkTaVersionChange"
@@ -137,8 +136,7 @@ onMounted(() => {
               />
               <input
                 type="submit"
-                class="btn btn-default btn-xs"
-                style="float:right; margin: 0 10px;"
+                class="btn btn-default btn-xs version-submit-btn"
                 :value="displayVersion === activeVersion ? 'Cancel Student Submission' : 'Grade This Version'"
               />
             </form>
@@ -146,7 +144,7 @@ onMounted(() => {
             <br v-if="displayVersion > 0" />
           </div>
 
-          <div style="padding-left:10px;">
+          <div class="student-details">
             <b>
               <template v-if="teamAssignment">
                 Team Name: {{ submitter.team?.name || 'Not Set' }}<br />
@@ -154,8 +152,9 @@ onMounted(() => {
                 <div
                   v-for="teamMember in submitter.team?.members"
                   :key="teamMember.id"
+                  class="team-member"
                 >
-                  &emsp;{{ teamMember.displayedGivenName }} {{ teamMember.displayedFamilyName }} ({{ teamMember.id }})<br />
+                  {{ teamMember.displayedGivenName }} {{ teamMember.displayedFamilyName }} ({{ teamMember.id }})<br />
                 </div>
               </template>
               <template v-else>
@@ -199,7 +198,7 @@ onMounted(() => {
                 :id="`page_${index + 1}_content`"
                 :key="index"
                 class="page-content"
-                :style="{ display: activeTab === index + 1 ? 'block' : 'none' }"
+                :class="{ 'active-content': activeTab === index + 1 }"
                 v-html="table"
               />
             </div>
@@ -213,3 +212,39 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.browse-submissions-label {
+  float: right;
+  padding-right: 15px;
+}
+
+.version-controls {
+  float: right;
+}
+
+.ta-version-form {
+  display: inline;
+}
+
+.version-submit-btn {
+  float: right;
+  margin: 0 10px;
+}
+
+.student-details {
+  padding-left: 10px;
+}
+
+.team-member {
+  margin-left: 1em;
+}
+
+.page-content {
+  display: none;
+}
+
+.page-content.active-content {
+  display: block;
+}
+</style>
