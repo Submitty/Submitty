@@ -119,8 +119,8 @@ function initChatroomSocketClient(chatroomId) {
 }
 
 function initChatroomListSocketClient() {
-    window.chatroomListSocketClient = new WebSocketClient();
-    window.chatroomListSocketClient.onmessage = (msg) => {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
         console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_open':
@@ -137,7 +137,7 @@ function initChatroomListSocketClient() {
                 console.error(msg);
         }
     };
-    window.chatroomListSocketClient.open('chatrooms');
+    window.socketClient.open('chatrooms');
 }
 
 function newChatroomForm() {

@@ -109,11 +109,11 @@ describe('Test cases revolving around polls functionality', () => {
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
         cy.contains('Poll 1').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        visitPoll('Poll 1', 'View Poll');
+        cy.contains('Poll 1').siblings(':nth-child(3)').contains('View Poll');
 
         cy.get('#older-table').contains('Poll 2');
         cy.contains('Poll 2').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        visitPoll('Poll 2', 'View Poll');
+        cy.contains('Poll 2').siblings(':nth-child(3)').contains('View Poll');
 
         cy.contains('Poll 3').siblings(':nth-child(2)').contains('No Response');
     });

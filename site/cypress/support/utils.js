@@ -153,13 +153,16 @@ export function verifyWebSocketFunctionality(
  * where the message is displayed for authentication, connection, or internal server errors.
  */
 export function verifyWebSocketStatus(timeout = 5000, interval = 100) {
-    cy.wait(1000);
     const start = Date.now();
 
     const pollSocket = () => {
         return cy.window().then((win) => {
-            const client = (win.socketClient || win.chatroomListSocketClient)?.client;
-            expect(client).to.exist;
+            const client = win.socketClient?.client;
+
+            if (!client) {
+                // Retry for the initialization of the socket client
+                return Cypress.Promise.delay(interval).then(pollSocket);
+            }
 
             const readyState = client.readyState;
 
@@ -172,7 +175,7 @@ export function verifyWebSocketStatus(timeout = 5000, interval = 100) {
                 throw new Error(`WebSocket did not open within ${timeout}ms (state: ${readyState})`);
             }
 
-            // Retry after a short wait
+            // Retry after a short wait in case we are attempting to establish a stable connection
             return Cypress.Promise.delay(interval).then(pollSocket);
         });
     };
