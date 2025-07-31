@@ -7,10 +7,10 @@
     return_content: yes
     headers:
       Authorization: "{{ submitty_homework_creation_api_key }}"
-  register: api_response
+  register: submitty_homework_creation_api_response
 
 - name: Fail when status is error
   ansible.builtin.fail:
-    msg: "{{ (api_response.content | from_json).message }}"
+    msg: "{{ (submitty_homework_creation_api_response.content | from_json).message }}"
   when:
-    - (api_response.content | from_json).status != 'success'
+    - (submitty_homework_creation_api_response.content | from_json).status != 'success'
