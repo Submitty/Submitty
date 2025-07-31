@@ -953,13 +953,12 @@ class Core {
             return null;
         }
 
-        $user_id = $this->user->getId();
-
         // Append the term and course to the query params for the full page identifier
         $query_params['term'] = $this->config->getTerm();
         $query_params['course'] = $this->config->getCourse();
         $page = Utils::buildWebSocketPageIdentifier($page ?? 'defaults', $query_params);
 
+        $user_id = $this->user->getId();
         $existing_authorized_pages = [];
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;

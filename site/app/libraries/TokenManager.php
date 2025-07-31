@@ -75,6 +75,14 @@ class TokenManager {
             );
     }
 
+    /**
+     * Generate a WebSocket authorization token
+     *
+     * @param string $user_id User ID
+     * @param string $page Full page identifier the user should have access to
+     * @param array<string, int> $existing_authorized_pages Array of existing authorized pages the user has access to, where the key is the unique page identifier and the value is the expiration time
+     * @return Token WebSocket authorization token
+     */
     public static function generateWebSocketToken(
         string $user_id,
         string $page,
@@ -85,7 +93,7 @@ class TokenManager {
         // Persist existing non-expired authorized pages
         $authorized_pages = [];
         foreach ($existing_authorized_pages as $page_identifier => $expire_time) {
-            if ($expire_time !== null && $expire_time > time() && $page_identifier !== $page) {
+            if ($expire_time > time() && $page_identifier !== $page) {
                 $authorized_pages[$page_identifier] = $expire_time;
             }
         }
@@ -125,6 +133,13 @@ class TokenManager {
         return $token;
     }
 
+    /**
+     * Parse and validate a WebSocket authorization token
+     *
+     * @param string $token Existing WebSocket authorization token string
+     * @return Token Parsed WebSocket authorization token
+     * @throws \InvalidArgumentException If the token has invalid/missing required claims or has expired
+     */
     public static function parseWebSocketToken(string $token): Token {
         $token = self::parseToken($token);
         if (

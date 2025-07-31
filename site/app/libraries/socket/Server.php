@@ -81,7 +81,8 @@ class Server implements MessageComponentInterface {
 
     /**
      * This function checks if a given connection object is authenticated and authorized to access the requested page
-     * using the WebSocket authorization token provided in the cookie, which is authorized by the web server.
+     * using the WebSocket authorization token provided in the cookie, which is managed by the web server, accounting
+     * for current login status and authorized pages.
      *
      * @param ConnectionInterface $conn
      * @return bool
@@ -132,22 +133,20 @@ class Server implements MessageComponentInterface {
                 || $page === 'office_hours_queue'
                 || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))
             ) {
-                // These pages are not stored as unique authorized pages to avoid redundancy
+                // These pages are not stored as unique authorized pages as they're available to all users in the course
                 $key = 'defaults';
             }
             else {
                 $key = $page;
             }
 
-            // Build the page identifier for authorization checks
+            // Create the page identifier for authorization checks
             $authorized_page = Utils::buildWebSocketPageIdentifier($key, $query_params);
 
             if ($authorized_page === null) {
-                $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
             }
             elseif (!array_key_exists($authorized_page, $authorized_pages) || time() > intval($authorized_pages[$authorized_page])) {
-                $this->log("Unauthorized page '{$authorized_page}' for connection {$conn->resourceId}");
                 return false;
             }
 
@@ -228,7 +227,7 @@ class Server implements MessageComponentInterface {
         }
         catch (\Throwable $t) {
             $this->logError($t, $conn);
-            $this->closeWithError($conn, 'Unexpected error');
+            $this->closeWithError($conn);
         }
     }
 

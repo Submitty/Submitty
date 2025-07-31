@@ -153,11 +153,12 @@ export function verifyWebSocketFunctionality(
  * where the message is displayed for authentication, connection, or internal server errors.
  */
 export function verifyWebSocketStatus() {
+    cy.wait(1500);
     cy.get('#socket-server-system-message').should('be.hidden');
+
     cy.window().then((window) => {
-        const socketClient = window.socketClient;
-        expect(socketClient).to.not.be.undefined;
-        expect(socketClient.client).not.to.be.undefined;
-        expect(socketClient.client.readyState).to.equal(WebSocket.OPEN);
+        const client = (window.socketClient || window.chatroomListSocketClient)?.client;
+        expect(client).to.exist;
+        cy.wrap(client).should('have.property', 'readyState', WebSocket.OPEN);
     });
 }
