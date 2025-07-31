@@ -671,12 +671,12 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
     const panel = panelStr as FileFullPanelOptions;
     // Store the file name of the last opened file for scrolling when switching between students
     localStorage.setItem('ta-grading-files-full-view-last-opened', name);
-    
+
     // Clean up any open annotation editor when loading a new file
     if (typeof window.cleanupAnnotationEditor === 'function') {
         window.cleanupAnnotationEditor();
     }
-    
+
     const extension = name.split('.').pop();
     if (fileFullPanelOptions[panel]['pdf'] && extension === 'pdf') {
         const gradeable_id = document.getElementById(
@@ -719,7 +719,7 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                 fileFullPanelOptions[panel]['panel'].substring(1),
             )!.dataset.anonSubmitterId;
             $(fileFullPanelOptions[panel]['saveStatus']).show();
-            
+
             return $.ajax({
                 type: 'POST',
                 url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'img']),
@@ -737,7 +737,8 @@ function loadPDF(name: string, path: string, page_num: number, panelStr: string 
                     $(fileFullPanelOptions[panel]['fileContent']).append(data);
                 },
             });
-        } else {
+        }
+        else {
             $(fileFullPanelOptions[panel]['saveStatus']).hide();
             // For other file types, use the original iframe approach
             $(fileFullPanelOptions[panel]['fileContent']).append(
@@ -775,12 +776,12 @@ window.collapseFile = function (rawPanel: string = 'submission') {
     $(`#file_viewer_${fileFullPanelOptions[panel]['fullPanel']}`).remove();
     // Also remove image annotation containers
     $(`${fileFullPanelOptions[panel]['fileContent']}`).empty();
-    
+
     // Clean up any open annotation editor when collapsing files
     if (typeof window.cleanupAnnotationEditor === 'function') {
         window.cleanupAnnotationEditor();
     }
-    
+
     if (fileFullPanelOptions[panel]['pdf']) {
         $('#content-wrapper').remove();
         if ($('#pdf_annotation_bar').is(':visible')) {
