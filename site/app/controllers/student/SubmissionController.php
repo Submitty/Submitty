@@ -187,10 +187,12 @@ class SubmissionController extends AbstractController {
                 $show_hidden = (!$gradeable->isTaGrading() || $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false)) && $gradeable->isTaGradeReleased();
                 // can this user access grade inquiries for this graded_gradeable
                 $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
-                $this->core->authorizeWebSocketToken('grade_inquiry', [
-                    'gradeable_id' => $gradeable->getId(),
-                    'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-                ]);
+                if ($can_inquiry) {
+                    $this->core->authorizeWebSocketToken('grade_inquiry', [
+                        'gradeable_id' => $gradeable->getId(),
+                        'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+                    ]);
+                }
             }
 
             // If we get here, then we can safely construct the old model w/o checks

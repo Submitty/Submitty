@@ -22,6 +22,7 @@ describe('Test cases revolving around simple grading lab', () => {
             cy.visit(['sample', 'gradeable', 'grading_lab', 'grading']);
             accurateSectionHeaders('Students Enrolled in Registration Section', 10);
             cy.get('#cell-1-0-0').invoke('attr', 'data-score').then((initialValue) => {
+                verifyWebSocketStatus();
                 cy.get('#cell-1-0-0').click();
                 if (initialValue === '0') {
                     cy.get('#cell-1-0-0').should('have.attr', 'data-score', '1');
@@ -64,7 +65,6 @@ describe('Test cases revolving around simple grading test', () => {
     ['ta', 'instructor'].forEach((user) => {
         beforeEach(() => {
             cy.visit(['sample', 'gradeable', 'grading_test', 'grading']);
-            verifyWebSocketStatus();
         });
 
         it(`${user} should have grader submission options`, () => {
@@ -80,6 +80,7 @@ describe('Test cases revolving around simple grading test', () => {
             });
 
             // Test different people can grade the same cell
+            verifyWebSocketStatus();
             cy.get('#cell-1-0-0').clear();
             cy.get('#cell-1-0-0').type('3.4');
             cy.get('#cell-1-0-1').clear();

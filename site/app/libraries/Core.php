@@ -877,6 +877,7 @@ class Core {
             catch (\InvalidArgumentException $exc) {
                 // Invalid cookie data, delete it
                 Utils::setCookie($cookie_key, "", time() - 3600);
+                Utils::setCookie($websocket_cookie_key, "", time() - 3600);
             }
         }
         return $logged_in;
@@ -941,12 +942,11 @@ class Core {
     }
 
     /**
-     * Authorize a websocket token, which assumes the authorization checks have already been performed
-     * to avoid redundant database queries or file system checks.
+     * Authorize a WebSocket token, which assumes the authorization checks have already been performed.
      *
      * @param string|null $page Optional page identifier, defaulting to a course-specific default page, such as f25-sample-defaults
-     * @param array<string, mixed> $query_params Optional query parameters to augment the full page identifier.
-     * @return string|null JWT WebSocket authorization token string or null if generation fails.
+     * @param array<string, mixed> $query_params Optional query parameters to format the full page identifier.
+     * @return string|null WebSocket authorization token string or null if generation fails.
      */
     public function authorizeWebSocketToken(?string $page = null, ?array $query_params = []): ?string {
         if (!$this->config->isCourseLoaded() || !$this->userLoaded()) {
@@ -964,11 +964,10 @@ class Core {
         $cookie_key = 'submitty_websocket_token';
         $existing_token = $_COOKIE[$cookie_key] ?? null;
 
-
         if ($existing_token !== null) {
             try {
                 $refresh = false;
-                $token = TokenManager::parseWebsocketToken($existing_token);
+                $token = TokenManager::parseWebSocketToken($existing_token);
 
                 $token_user_id = $token->claims()->get('sub');
                 $token_authorized_pages = $token->claims()->get('authorized_pages');
@@ -980,7 +979,7 @@ class Core {
 
                 if ($token_user_id === $user_id) {
                     if (!$refresh) {
-                        // No refresh needed, return the existing token
+                        // No refresh required for non-expired token containing the authorized page
                         return $existing_token;
                     }
                     else {
@@ -990,9 +989,9 @@ class Core {
                 }
             }
             catch (\Exception $exc) {
-                // Clear invalid or expired tokens
+                // Invalid cookie data, delete it
                 Utils::setCookie($cookie_key, "", time() - 3600);
-                Logger::error("Failed to parse websocket token: " . $exc->getMessage());
+                Logger::error("Failed to parse WebSocket token: " . $exc->getMessage());
             }
         }
 
@@ -1000,11 +999,10 @@ class Core {
             $token = TokenManager::generateWebSocketToken($user_id, $page, $existing_authorized_pages);
             $expire_time = $token->claims()->get('expire_time');
             Utils::setCookie($cookie_key, $token->toString(), $expire_time);
-
             return $token->toString();
         }
         catch (\Exception $e) {
-            Logger::error("Failed to generate websocket token: " . $e->getMessage());
+            Logger::error("Failed to generate WebSocket token: " . $e->getMessage());
             return null;
         }
     }

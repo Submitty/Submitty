@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace app\libraries\socket;
 
-use app\exceptions\DatabaseException;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use Ratchet\MessageComponentInterface;
@@ -101,35 +100,39 @@ class Server implements MessageComponentInterface {
             return true;
         }
 
-        // Parse query parameters
+        // Parse the authorization token from the cookie
+        $cookieString = $request->getHeader("cookie")[0] ?? '';
+        parse_str(strtr($cookieString, ['&' => '%26', '+' => '%2B', ';' => '&']), $cookies);
+        if (empty($cookies['submitty_websocket_token'])) {
+            return false;
+        }
+        $websocket_token = $cookies['submitty_websocket_token'];
+
+        // Parse query parameters for the WebSocket page identifier
         $query_params = [];
         $query = $request->getUri()->getQuery();
         parse_str($query, $query_params);
-
-        // Parse the authorization token from the query parameters
-        $websocket_token = $query_params['ws_token'] ?? null;
-
-        // If no token is provided, close the connection
-        if ($websocket_token === null) {
-            return false;
-        }
 
         // If required parameters are not provided, close the connection
         if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
             return false;
         }
 
-        // Get the page from the query parameters
+        // Get the specific page from the query parameters
         $page = $query_params['page'];
 
         // Parse and validate the websocket token
         try {
-            $token = TokenManager::parseWebsocketToken($websocket_token);
+            $token = TokenManager::parseWebSocketToken($websocket_token);
             $user_id = $token->claims()->get('sub');
             $authorized_pages = $token->claims()->get('authorized_pages');
 
-            if ($page === 'discussion_forum' || $page === 'office_hours_queue' || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))) {
-                // These pages are not stored in authorized_pages to avoid redundancy
+            if (
+                $page === 'discussion_forum'
+                || $page === 'office_hours_queue'
+                || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))
+            ) {
+                // These pages are not stored as unique authorized pages to avoid redundancy
                 $key = 'defaults';
             }
             else {
@@ -137,18 +140,18 @@ class Server implements MessageComponentInterface {
             }
 
             // Build the page identifier for authorization checks
-            $authorized_page = Utils::buildWebSocketPageIdentifier($key, $query_params);
+            $authorizedPage = Utils::buildWebSocketPageIdentifier($key, $query_params);
 
-            if ($authorized_page === null) {
+            if ($authorizedPage === null) {
                 $this->log("Invalid page type '{$page}' for connection {$conn->resourceId}");
                 return false;
             }
-            elseif (!array_key_exists($authorized_page, $authorized_pages) || time() > intval($authorized_pages[$authorized_page])) {
-                $this->log("Unauthorized page '{$authorized_page}' for connection {$conn->resourceId}");
+            elseif (!array_key_exists($authorizedPage, $authorized_pages) || time() > intval($authorized_pages[$authorizedPage])) {
+                $this->log("Unauthorized page '{$authorizedPage}' for connection {$conn->resourceId}");
                 return false;
             }
 
-            // Create the full page identifier for the connection
+            // Create the full page identifier for the page connection
             $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
 
             // Set up the connection
@@ -162,13 +165,7 @@ class Server implements MessageComponentInterface {
             $this->log("New connection {$conn->resourceId} --> user_id: '" . $user_id . "' - page: '" . $page_identifier . "'");
             return true;
         }
-        catch (\InvalidArgumentException $exc) {
-            $this->log("Token validation failed for connection {$conn->resourceId}: " . $exc->getMessage());
-            $this->logError($exc, $conn);
-            return false;
-        }
         catch (\Exception $exc) {
-            $this->log("Unexpected error during auth for connection {$conn->resourceId}: " . $exc->getMessage());
             $this->logError($exc, $conn);
             return false;
         }
@@ -227,18 +224,6 @@ class Server implements MessageComponentInterface {
         try {
             if (!$this->checkAuth($conn)) {
                 $this->closeWithError($conn, 'Authentication failed');
-            }
-        }
-        catch (DatabaseException $de) {
-            try {
-                $this->core->loadMasterDatabase();
-                $this->logError($de, $conn);
-                $this->onOpen($conn);
-            }
-            catch (\Exception $e) {
-                $this->logError($de, $conn);
-                $this->logError($e, $conn);
-                $this->closeWithError($conn, 'Database connection failed');
             }
         }
         catch (\Throwable $t) {

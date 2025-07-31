@@ -32,13 +32,6 @@ class WebSocketClient {
         this.onmessage = null;
         // We do string replacement here so that http -> ws, https -> wss.
         const my_url = new URL(document.body.dataset.baseUrl.replace('http', 'ws'));
-
-        if (my_url.hostname === 'localhost') {
-            // Force IPv4 (macOS issue)
-            // TODO: remove this
-            my_url.hostname = '127.0.0.1';
-        }
-
         my_url.port = window.websocketPort;
         my_url.pathname = 'ws';
         this.url = my_url.href;
@@ -52,7 +45,6 @@ class WebSocketClient {
         urlWithParams.searchParams.append('page', page);
         urlWithParams.searchParams.append('course', course);
         urlWithParams.searchParams.append('term', term);
-        urlWithParams.searchParams.append('ws_token', window.websocketToken);
 
         for (const key in args) {
             urlWithParams.searchParams.append(key, args[key]);
@@ -101,7 +93,6 @@ class WebSocketClient {
         };
 
         this.client.onerror = (error) => {
-            console.log(error);
             const sys_message = $('#socket-server-system-message');
             switch (error.code) {
                 case 'ECONNREFUSED':

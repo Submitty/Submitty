@@ -110,26 +110,21 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         // Ensure the issued time is now is within 5 seconds to account for clock skew
         $min_issued_time = $current_time - 5;
         $max_issued_time = $current_time + 5;
-        // Ensure the expiration time is 5 minutes from now +/- 30 seconds to account for clock skew
-        $min_expired_time = $current_time + 5 * 60 - 10;
-        $max_expired_time = $current_time + 5 * 60 + 10;
+        // Ensure the expiration time is 5 minutes from now +/- 5 seconds to account for clock skew
+        $min_expired_time = $current_time + 5 * 60 - 5;
+        $max_expired_time = $current_time + 5 * 60 + 5;
 
         $authorized_page = 'f25-sample-defaults';
-        $token = TokenManager::generateWebsocketToken(
-            'test_user',
-            $authorized_page
-        );
+        $token = TokenManager::generateWebSocketToken('test_user', $authorized_page);
 
         $this->assertEquals('test_user', $token->claims()->get('sub'));
         $this->assertEquals('https://submitty.org', $token->claims()->get('iss'));
         $this->assertCount(1, $token->claims()->get('authorized_pages'));
         $this->assertEquals($authorized_page, array_keys($token->claims()->get('authorized_pages'))[0]);
 
+        $this->assertTrue($token->claims()->has('iat'));
         $this->assertGreaterThanOrEqual($min_issued_time, $token->claims()->get('iat')->getTimestamp());
         $this->assertLessThanOrEqual($max_issued_time, $token->claims()->get('iat')->getTimestamp());
-
-        $this->assertGreaterThanOrEqual($min_expired_time, $token->claims()->get('authorized_pages')[$authorized_page]);
-        $this->assertLessThanOrEqual($max_expired_time, $token->claims()->get('authorized_pages')[$authorized_page]);
 
         $this->assertTrue($token->claims()->has('expire_time'));
         $this->assertGreaterThanOrEqual($min_expired_time, $token->claims()->get('expire_time'));
@@ -139,20 +134,16 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     public function testParseWebsocketToken() {
         $future_time = time() + 5 * 60;
         $expired_time = time() - 5 * 60;
+
+        $authorized_page = 'f25-tutorial-defaults';
         $existing_authorized_pages = [
             'f25-sample-defaults' => $future_time,
             'f25-sample-chatrooms-1' => $future_time,
             'f25-sample-chatrooms-2' => $expired_time
         ];
-        $authorized_page = 'f25-tutorial-defaults';
+        $token = TokenManager::generateWebSocketToken('test_user', $authorized_page, $existing_authorized_pages);
+        $parsed_token = TokenManager::parseWebSocketToken($token->toString());
 
-        $token = TokenManager::generateWebsocketToken(
-            'test_user',
-            $authorized_page,
-            $existing_authorized_pages
-        );
-
-        $parsed_token = TokenManager::parseWebsocketToken($token->toString());
         $this->assertEquals('test_user', $parsed_token->claims()->get('sub'));
         $this->assertEquals('https://submitty.org', $parsed_token->claims()->get('iss'));
         $this->assertCount(3, $parsed_token->claims()->get('authorized_pages'));
@@ -169,10 +160,10 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjE1MTEvIiwic3ViIjoiaW5zdHJ1Y3RvciIsInNlc3Npb25faWQiOiI4ZTZmZjdiNWViNzBiMGMwNGYzNDQ0NjRmMjQ2ODlhZCIsImF1dGhvcml6ZWRfcGFnZXMiOnsiZjI1LXNhbXBsZS1kZWZhdWx0cyI6MTc1Mzg5MDQxMH0sImV4cGlyZV90aW1lIjoxNzUzODkwNDEwfQ.Ppgpiz68NcaGtof7IHBAuuHdPBl5sfGTp6Fgv_bWGKw';
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid signature for token');
-        TokenManager::parseWebsocketToken($token);
+        TokenManager::parseWebSocketToken($token);
     }
 
-    public function testWebsocketTokenMissingClaims() {
+    public function testWebsocketTokenInvalidClaims() {
         $failures = [
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJleHBpcmVfdGltZSI6MTc1MzgwMDk1N30.E1dhq57eiDuqBmdPFNg6Gl2Ii3u0nXRezvU2NIPCL2Y', // Missing authorized_pages
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3NTM4MDA5NTd9fQ.cxcYDXkV6Wi12ZKd5SpERXJa_YIF04xWjBd0_G6RBrA', // Missing expire_time
@@ -183,8 +174,14 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         foreach ($failures as $token) {
             $this->expectException(\InvalidArgumentException::class);
             $this->expectExceptionMessage("Missing or invalid claims in WebSocket token");
-            TokenManager::parseWebsocketToken($token);
+            TokenManager::parseWebSocketToken($token);
         }
+
+        // Invalid authorized_pages format (non-string key, non-int value)
+        $token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTM3OTczNTcuNTA0NjMxLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiYzVjNmI0ZTgxYzJlMTNlMzNjODI4ZWI4YjgxZDY2ZDIiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOmZhbHNlLCJmMjUtc2FtcGxlLWNoYXRyb29tcy0xIjoxNzUzODAwOTU3LCJmMjUtc2FtcGxlLXBvbGxzLTMtaW5zdHJ1Y3RvciI6MTc1MzgwMDkxMn0sImV4cGlyZV90aW1lIjoxNzUzODAwOTU3fQ.-L8vI8DC7xz7m4B1SzpHCVzef9FJ1rqRGo2nlWYvgJM';
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('\'authorized_pages\' must be array in form key: string, value: int');
+        TokenManager::parseWebSocketToken($token);
     }
 
 
@@ -192,6 +189,6 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
         $token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NTM4ODg2MTAuMjM3MjcyLCJpc3MiOiJodHRwczovL3N1Ym1pdHR5Lm9yZyIsInN1YiI6Imluc3RydWN0b3IiLCJzZXNzaW9uX2lkIjoiOGU2ZmY3YjVlYjcwYjBjMDRmMzQ0NDY0ZjI0Njg5YWQiLCJhdXRob3JpemVkX3BhZ2VzIjp7ImYyNS1zYW1wbGUtZGVmYXVsdHMiOjE3MjM4OTA0MTB9LCJleHBpcmVfdGltZSI6MTcyMzg5MDQxMH0.c4lggfl9sTMnHy3I1_ZRLMDy2idfgZBGTzjtGFDZahw';
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('WebSocket token has expired');
-        TokenManager::parseWebsocketToken($token);
+        TokenManager::parseWebSocketToken($token);
     }
 }

@@ -212,12 +212,14 @@ const leaveChat = (title) => {
 const enterChat = (title, anonymous = false) => {
     if (anonymous) {
         getChatroom(title).find('[data-testid="anon-chat-join-btn"]').click();
-        cy.get('[data-testid="chat-title"]').should('contain.text', title);
-        verifyWebSocketStatus();
     }
     else {
         getChatroom(title).find('[data-testid="chat-join-btn"]').click();
     }
+
+    cy.url().should('match', /\/chat\/\d+$/);
+    cy.get('[data-testid="chat-title"]').should('contain.text', title);
+    verifyWebSocketStatus();
 };
 
 const visitLiveChat = (user) => {

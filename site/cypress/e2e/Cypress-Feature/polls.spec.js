@@ -7,6 +7,13 @@
 
 import { verifyWebSocketStatus } from '../../support/utils';
 
+const visitPoll = (title, text) => {
+    cy.contains(title).siblings(':nth-child(3)').contains(text).click();
+    cy.url().should('match', /\/polls\/\d+$/).then(() => {
+        verifyWebSocketStatus();
+    });
+};
+
 describe('Test cases revolving around polls functionality', () => {
     it('Should verify the default settings and functionality of the dropdown bars', () => {
         // log in from instructor account
@@ -97,11 +104,11 @@ describe('Test cases revolving around polls functionality', () => {
         // verify that existing polls exist and are in the expected state
         cy.get('#older-table').contains('Poll 1');
         cy.contains('Poll 1').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        cy.contains('Poll 1').siblings(':nth-child(3)').contains('View Poll');
+        visitPoll('Poll 1', 'View Poll');
 
         cy.get('#older-table').contains('Poll 2');
         cy.contains('Poll 2').siblings(':nth-child(3)').children().children().should('have.class', 'btn-primary');
-        cy.contains('Poll 2').siblings(':nth-child(3)').contains('View Poll');
+        visitPoll('Poll 2', 'View Poll');
 
         cy.contains('Poll 3').siblings(':nth-child(2)').contains('No Response');
     });
@@ -262,9 +269,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'View Poll');
         cy.get('h1').contains('Poll Cypress Test');
         cy.get('img').should('be.visible');
         cy.get('h2').contains('Possible responses:');
@@ -323,9 +328,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'Answer');
         cy.get('[data-testid="timer"]').should('be.visible');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('not.be.disabled');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('be.checked');
@@ -342,9 +345,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.contains('Poll Cypress Test').siblings(':nth-child(2)').contains('Answer 2');
 
         // try switching the answer and verify it got saved
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'Answer');
         cy.get('.poll-content > tbody > tr:nth-child(3) > td:nth-child(1) > input').should('be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').should('not.be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(4) > td:nth-child(1) > input').check(); // Answer 3
@@ -397,9 +398,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'Answer');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(2)').contains('No response');
         cy.get('.poll-content > tbody > tr:nth-child(1) > td:nth-child(1) > input').should('not.be.checked');
         cy.get('.poll-content > tbody > tr:nth-child(2) > td:nth-child(2)').contains('Answer 0');
@@ -430,7 +429,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('Edit Answer').click();
+        visitPoll('Poll Cypress Test', 'Edit Answer');
         cy.should('not.contain', '#toggle-info-button');
         cy.should('not.contain', '#toggle-histogram-button');
         cy.should('not.contain', '#poll-histogram');
@@ -455,9 +454,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'View Poll');
         cy.get('[data-testid="timer"]').should('contain', 'Poll Ended');
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
@@ -480,9 +477,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'View Poll');
         cy.get('#toggle-info-button').should('be.visible');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
@@ -497,9 +492,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Poll Cypress Test').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Poll Cypress Test', 'View Poll');
         cy.get('#toggle-histogram-button').should('be.visible').click();
         cy.get('#poll-histogram').should('be.visible');
         cy.get('.correct-tag').should('be.visible');
@@ -653,10 +646,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.logout();
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
-
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Custom Poll Today', 'Answer');
         cy.get('[data-testid="custom-response-text"]').type('Student Custom Response');
         cy.get('[data-testid="custom-response-submit"]').should('not.be.disabled').click();
 
@@ -666,9 +656,7 @@ describe('Test cases revolving around polls functionality', () => {
         cy.get('[data-testid="answer-1"]').should('not.exist');
 
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Custom Poll Today', 'Answer');
 
         // Create new option for other students to select
         cy.get('[data-testid="custom-response-text"]').type('Second Custom Response');
@@ -678,9 +666,7 @@ describe('Test cases revolving around polls functionality', () => {
         // Login as other student
         cy.login('adamsg');
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Answer').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Custom Poll Today', 'Answer');
 
         // Ensure response is present with no delete option for other student
         cy.contains('p', 'Second Custom Response').should('be.visible');
@@ -694,10 +680,7 @@ describe('Test cases revolving around polls functionality', () => {
         // Login as original poster, but removal of custom option is not possible as other student has chosen it
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('Edit Answer').click();
-
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Custom Poll Today', 'Edit Answer');
         cy.get('[data-testid="custom-response-delete"]').should('be.visible').click();
         cy.contains('Cannot delete response option that has already been submitted as an answer by another individual').should('exist');
         cy.contains('p', 'Second Custom Response').should('be.visible');
@@ -727,9 +710,7 @@ describe('Test cases revolving around polls functionality', () => {
 
         cy.login('student');
         cy.visit(['sample', 'polls']);
-        cy.contains('Custom Poll Today').siblings(':nth-child(3)').contains('View Poll').click();
-        cy.url().should('match', /\/polls\/\d+$/);
-        verifyWebSocketStatus();
+        visitPoll('Custom Poll Today', 'View Poll');
         cy.get('[data-testid="custom-response-text"]').should('not.exist');
         cy.get('[data-testid="custom-response-delete"]').should('exist').click();
         cy.contains('Poll is closed').should('be.visible');

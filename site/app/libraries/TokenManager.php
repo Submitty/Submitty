@@ -25,8 +25,8 @@ class TokenManager {
     private static $configuration;
     /** @var string */
     private static $issuer;
-
-    const WEBSOCKET_EXPIRATION = "5 minutes";
+    /** @var string */
+    private const WEBSOCKET_TOKEN_EXPIRATION = "5 minutes";
 
     public static function initialize(string $secret, string $issuer): void {
         if (mb_strlen($secret) < 64) {
@@ -76,19 +76,19 @@ class TokenManager {
     }
 
     /**
-     * Generate a websocket token containing authorized pages for a user
+     * Generate a WebSocket token containing authorized pages for the given user
      *
      * @param string $user_id User ID
      * @param string $page Full page identifier the user should have access to
-     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to
-     * @return Token
+     * @param array<string, int|null> $existing_authorized_pages Array of existing authorized pages the user has access to, where the key is the unique page identifier and the value is the expiration time
+     * @return Token WebSocket authorization token
      */
     public static function generateWebSocketToken(
         string $user_id,
         string $page,
         ?array $existing_authorized_pages = []
     ): Token {
-        $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(self::WEBSOCKET_EXPIRATION))->getTimestamp();
+        $token_expire_time = (new \DateTime())->add(\DateInterval::createFromDateString(self::WEBSOCKET_TOKEN_EXPIRATION))->getTimestamp();
 
         // Persist existing non-expired authorized pages
         $authorized_pages = [];
@@ -134,13 +134,13 @@ class TokenManager {
     }
 
     /**
-     * Parse and validate a websocket token
+     * Parse and validate a WebSocket token
      *
      * @param string $token JWT token string
-     * @return Token Parsed token with websocket claims
+     * @return Token Parsed token with WebSocket authorization claims
      * @throws \InvalidArgumentException If token is invalid or missing required claims or has expired
      */
-    public static function parseWebsocketToken(string $token): Token {
+    public static function parseWebSocketToken(string $token): Token {
         $token = self::parseToken($token);
         if (
             !$token->claims()->has('sub')
@@ -151,9 +151,18 @@ class TokenManager {
             throw new \InvalidArgumentException('Missing or invalid claims in WebSocket token');
         }
 
+        // Verify the token expiration time is in the future
         $expire_time = $token->claims()->get('expire_time');
         if (time() > $expire_time) {
             throw new \InvalidArgumentException('WebSocket token has expired');
+        }
+
+        // Verify the authorized pages are in the correct format
+        $authorized_pages = $token->claims()->get('authorized_pages');
+        foreach ($authorized_pages as $key => $value) {
+            if (!is_string($key) || !is_int($value)) {
+                throw new \InvalidArgumentException('\'authorized_pages\' must be array in form key: string, value: int');
+            }
         }
 
         return $token;

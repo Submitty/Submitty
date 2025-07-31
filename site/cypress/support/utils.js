@@ -150,7 +150,7 @@ export function verifyWebSocketFunctionality(
 
 /**
  * Verifies that the WebSocket server is connected and the system message is hidden,
- * where the message is displayed for authentication, database, and/or connection errors.
+ * where the message is displayed for authentication, connection, or internal server errors.
  */
 export function verifyWebSocketStatus() {
     cy.get('#socket-server-system-message').should('be.hidden');
