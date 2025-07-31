@@ -464,7 +464,7 @@ class SubmissionController extends AbstractController {
                     "qr_suffix" => $qr_suffix,
                     "filename"  => $uploaded_file["name"][$i],
                     "is_qr"     => true,
-                    "use_ocr"   => $use_ocr,
+                    "use_ocr"   => $use_ocr
                 ];
 
                 $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
@@ -491,7 +491,7 @@ class SubmissionController extends AbstractController {
                     "timestamp" => $current_time,
                     "filename"  => $uploaded_file["name"][$i],
                     "num"       => $num_pages,
-                    "is_qr"     => false,
+                    "is_qr"     => false
                 ];
 
                 $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
