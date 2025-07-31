@@ -114,7 +114,7 @@ class HomePageController extends AbstractController {
         $results = [];
         $original_config = clone $this->core->getConfig();
 
-        // Loop through all courses and add info to rows
+        // Loop through all courses
         foreach ($courses as $course) {
             $semester = $course->getTerm();
             $course_name = $course->getTitle();
@@ -123,6 +123,7 @@ class HomePageController extends AbstractController {
             $course_db = $this->core->getCourseDB();
             $course_notifications = $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db);
 
+            // Loop through s course's notifications and add attributes.
             foreach ($course_notifications as $notification) {
                 $notify_time = $notification->getNotifyTime();
                 $base_url = '';

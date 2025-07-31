@@ -1,19 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-
-interface Notification {
-    id: number;
-    component: string;
-    metadata: string;
-    content: string;
-    seen: boolean;
-    elapsed_time: number;
-    created_at: string;
-    notify_time: string;
-    semester: string;
-    course: string;
-    notification_url: string;
-}
+import type { Notification } from '@/types/Notification';
 
 const props = defineProps<{
     notifications: Notification[];

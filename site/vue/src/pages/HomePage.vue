@@ -2,20 +2,7 @@
 import { defineProps } from 'vue';
 import { buildUrl } from '../../../ts/utils/server';
 import AllNotificationsDisplay from '@/components/AllNotificationsDisplay.vue';
-
-interface Notification {
-    id: number;
-    component: string;
-    metadata: string;
-    content: string;
-    seen: boolean;
-    elapsed_time: number;
-    created_at: string;
-    notify_time: string;
-    semester: string;
-    course: string;
-    notification_url: string;
-}
+import type { Notification } from '@/types/Notification';
 
 type Status = 'unarchived_courses' | 'dropped_courses' | 'self_registration_courses' | 'archived_courses';
 type Rank = {
