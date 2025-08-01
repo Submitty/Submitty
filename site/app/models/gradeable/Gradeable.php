@@ -69,6 +69,10 @@ class Gradeable extends AbstractModel {
     private $db_components = [];
 
     /** @prop
+     * @var Redaction[] An array of all redactions for this gradeable */
+    protected $redactions = [];
+
+    /** @prop
      * @var int If any submitters have active grade inquiries */
     protected $active_grade_inquiries_count = 0;
 
@@ -1358,6 +1362,15 @@ class Gradeable extends AbstractModel {
     public function setComponentsFromDatabase(array $components) {
         $this->setComponents($components);
         $this->db_components = $this->components;
+    }
+
+    /**
+     * Sets the array of redactions, only called from the database
+     * @param Redaction[] $redactions
+     * @internal
+     */
+    public function setRedactionsFromDatabase(array $redactions): void {
+        $this->redactions = $redactions;
     }
 
     /**
@@ -2928,5 +2941,13 @@ class Gradeable extends AbstractModel {
 
     public function getNotificationsSent(): int {
         return $this->notifications_sent;
+    }
+
+    /**
+     * Gets the redactions for this gradeable
+     * @return array<Redaction>
+     */
+    public function getRedactions(): array {
+        return $this->redactions;
     }
 }

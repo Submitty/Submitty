@@ -17,6 +17,7 @@ use app\libraries\response\DownloadResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\gradeable\Redaction;
 
 /**
  * Class AdminGradeableController
@@ -2006,6 +2007,73 @@ class AdminGradeableController extends AbstractController {
             return;
         }
         $this->core->getOutput()->renderJsonError("Unknown gradeable");
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["GET"])]
+    public function getRedactions(string $gradeable_id): JsonResponse {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            // tryGetGradeable will have already rendered an error message
+            return JsonResponse::getFailResponse("Unknown gradeable");
+        }
+
+        return JsonResponse::getSuccessResponse(
+            array_map(fn($r) => $r->jsonSerialize(), $gradeable->getRedactions())
+        );
+    }
+
+    #[Route("/courses/{_semester}/{_course}/gradeable/{gradeable_id}/redactions", methods: ["POST"])]
+    public function updateRedactions(string $gradeable_id): void {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable === false) {
+            // tryGetGradeable will have already rendered an error message
+            return;
+        }
+
+        if (!isset($_POST['redactions'])) {
+            $this->core->getOutput()->renderJsonFail('No redactions provided');
+            return;
+        }
+
+        $redactions = [];
+
+        if (is_array($_POST['redactions']) && array_is_list($_POST['redactions'])) {
+            for ($i = 0; $i < count($_POST['redactions']); $i++) {
+                $redaction = $_POST['redactions'][$i];
+                foreach (["page", "x1", "y1", "x2", "y2"] as $key) {
+                    if (!isset($redaction[$key]) || !is_numeric($redaction[$key]) || ($key !== "page" && ($redaction[$key] < 0 || $redaction[$key] > 1))) {
+                        $issue = !isset($redaction[$key]) ? "missing" : (!is_numeric($redaction[$key]) ? "non-numeric" : "out of bounds (0-1)");
+                        $this->core->getOutput()->renderJsonFail("Invalid redaction data at index {$i}: {$issue} for key '{$key}'");
+                        return;
+                    }
+                }
+
+                $redactions[] = new Redaction($this->core, $redaction['page'], $redaction['x1'], $redaction['y1'], $redaction['x2'], $redaction['y2']);
+            }
+        }
+        elseif ($_POST['redactions'] !== "none") {
+            $this->core->getOutput()->renderJsonFail('Invalid redactions format. Expected an array of redactions.');
+            return;
+        }
+
+        $this->core->getQueries()->updateRedactions($gradeable, $redactions);
+
+        $semester = $this->core->getConfig()->getTerm();
+        $course = $this->core->getConfig()->getCourse();
+        $daemon_job_queue_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "daemon_job_queue");
+        $job_path = FileUtils::joinPaths($daemon_job_queue_path, "regenerate_bulk_images__{$semester}__{$course}__{$gradeable_id}.json");
+        $job_data = [
+            "job" => "RegenerateBulkImages",
+            "pdf_file_path" => FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id),
+            "redactions" =>  array_map(fn($r) => $r->jsonSerialize(), $redactions),
+        ];
+
+        if (!FileUtils::writeJsonFile($job_path, $job_data)) {
+            $this->core->getOutput()->renderJsonFail('Failed to write job file');
+            return;
+        }
+
+        $this->core->getOutput()->renderJsonSuccess(array_map(fn($r) => $r->jsonSerialize(), $redactions));
     }
 
     /**
