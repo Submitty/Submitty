@@ -188,9 +188,6 @@ class AutogradingConfigController extends AbstractController {
         );
     }
 
-    /**
-     * @return Response
-     */
     #[Route("/courses/{_semester}/{_course}/autograding_config/download_zip", methods: ["POST"])]
     public function downloadConfigZip(): Response {
         $config_dir = $_POST['curr_config_name'] ?? null;
@@ -227,7 +224,6 @@ class AutogradingConfigController extends AbstractController {
         header('Content-Length: ' . filesize($zip_path));
         readfile($zip_path);
         unlink($zip_path);
-        exit;
     }
 
     /**

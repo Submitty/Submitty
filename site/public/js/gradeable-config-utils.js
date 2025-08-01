@@ -1,3 +1,5 @@
+/* global buildCourseUrl, csrfToken */
+
 // This file contains utility functions that both UploadConfigForm.twig and AdminGradeableAuto.twig use.
 
 function downloadConfig(file_path) {
