@@ -189,7 +189,7 @@ class AutogradingConfigController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/autograding_config/download_zip", methods: ["POST"])]
-    public function downloadConfigZip(): Response {
+    public function downloadConfigZip(): void {
         $config_dir = $_POST['curr_config_name'] ?? null;
 
         if ($config_dir === null) {
