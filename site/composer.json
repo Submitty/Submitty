@@ -26,7 +26,7 @@
     "doctrine/orm": "2.19.6",
     "egulias/email-validator": "4.0.4",
     "lcobucci/jwt": "5.3.0",
-    "league/commonmark": "2.7.0",
+    "league/commonmark": "2.7.1",
     "maennchen/zipstream-php": "3.1.1",
     "onelogin/php-saml": "4.3.0",
     "php-ds/php-ds": "1.7.0",
