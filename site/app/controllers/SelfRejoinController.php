@@ -100,8 +100,17 @@ class SelfRejoinController extends AbstractController {
         // --------------------------------
         // Reasons why you can't rejoin:
 
+        // findOneBy returns either the CourseUser entity if it was found givin the parameters, or null if one doesn't match
+        $course_user = $this->core->getSubmittyEntityManager()
+            ->getRepository(CourseUser::class);
+            ->findOneBy([
+                'user_id' => $user_id,
+                'term' => $term,
+                'course' => $course
+        ]);
+
         // Can't rejoin courses you were never in.
-        if (!$this->core->getQueries()->wasStudentEverInCourse($user_id, $course, $term)) {
+        if ($course_user === null) {
             return false;
         }
 
