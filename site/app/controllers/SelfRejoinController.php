@@ -138,7 +138,7 @@ class SelfRejoinController extends AbstractController {
         }
 
         $term_start_date = $this->core->getSubmittyEntityManager()
-            ->find(Term::class, $term_id)
+            ->find(Term::class, $term)
             ->getStartDate();
         // If today is within first two weeks of term, can re-add self.
         if (abs(DateUtils::calculateDayDiff($term_start_date)) <= 14) {

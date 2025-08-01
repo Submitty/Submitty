@@ -3,7 +3,6 @@
 namespace tests\app\controllers;
 
 use app\controllers\HomePageController;
-use app\controllers\TermController;
 use app\libraries\Core;
 use app\models\Course;
 use app\models\User;
@@ -39,7 +38,7 @@ class HomePageControllerTester extends BaseUnitTest {
         );
         $em->persist($term);
         $em->flush();
-        // Set start day to today for dropped 
+        // Set start day to today for dropped
         $em->method('find')
             ->with(Term::Class, 'f24')
             ->willReturn($term);

@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace tests\app\Controllers;
+namespace tests\app\entities;
 
 use app\libraries\Core;
-use app\controllers\TermController;
 use app\entities\Term;
 use app\models\User;
 use tests\BaseUnitTest;
@@ -14,8 +13,7 @@ class TermTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
         $core->getSubmittyEntityManager();
-        $entity_manager
-            ->expects($this->once())
+        $entity_manager->expects($this->once())
             ->method('persist')
             ->with(
                 $this->callback(function ($term): bool {
@@ -27,8 +25,7 @@ class TermTester extends BaseUnitTest {
                     return true;
                 })
             );
-        $entity_manager
-            ->expects($this->once())
+        $entity_manager->expects($this->once())
             ->method('flush');
         // Testing create terms
         $term = new Term(
