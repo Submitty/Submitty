@@ -337,6 +337,9 @@ class CourseMaterialsController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/edit", methods: ["POST"])]
     public function ajaxEditCourseMaterialsFiles(bool $flush = true): JsonResponse {
+        $calendar_display = $_POST['calendar_display'] !== 'none';
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
+        $associated_gradeable = $_POST['associated_gradeable'] != 'none' ? $_POST['associated_gradeable'] : null;
         $id = $_POST['id'] ?? '';
         if ($id === '') {
             return JsonResponse::getErrorResponse("Id cannot be empty");
@@ -347,6 +350,9 @@ class CourseMaterialsController extends AbstractController {
         if ($course_material === null) {
             return JsonResponse::getErrorResponse("Course material not found");
         }
+        $course_material->setCalendarDate($associated_date);
+        $course_material->setGradeable($associated_gradeable);
+        $course_material->setOnCalendar($calendar_display);
 
         if ($course_material->isDir()) {
             if (isset($_POST['sort_priority'])) {
@@ -444,6 +450,9 @@ class CourseMaterialsController extends AbstractController {
                                     $course_material->getPriority(),
                                     null,
                                     null,
+                                    false,
+                                    false,
+                                    null,
                                     $course_material->getUploadedBy(),
                                     $course_material->getUploadedDate(),
                                     null,
@@ -493,6 +502,11 @@ class CourseMaterialsController extends AbstractController {
             $course_material->setUrl($_POST['link_url']);
         }
 
+        if (isset($_POST['release_time']) && $_POST['release_time'] !== '') {
+            $date_time = DateUtils::parseDateTime($_POST['release_time'], $this->core->getDateTimeNow()->getTimezone());
+            $course_material->setReleaseDate($date_time);
+        }
+
         if ($flush) {
             $this->core->getCourseEntityManager()->flush();
         }
@@ -503,6 +517,11 @@ class CourseMaterialsController extends AbstractController {
     #[AccessControl(role: "INSTRUCTOR")]
     #[Route("/courses/{_semester}/{_course}/course_materials/upload", methods: ["POST"])]
     public function ajaxUploadCourseMaterialsFiles(): JsonResponse {
+        /* SET UPLOAD OF COURSE MATERIALS TO INCLUDE VALUES */
+        $calendar_display = $_POST['calendar_display'] !== 'none';
+        $associated_date = $_POST['associated_date'];
+        $associated_gradeable = $_POST['associated_gradeable'];
+        $associated_date = Utils::convertToSQLDateTime($_POST['associated_date']);
         $details = [];
         $expand_zip = "";
         if (isset($_POST['expand_zip'])) {
@@ -757,7 +776,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        if ($dirs_to_make != null) {
+        if ($dirs_to_make !== null) {
             $i = -1;
             $new_paths = [];
             foreach ($dirs_to_make as $dir) {
@@ -782,6 +801,9 @@ class CourseMaterialsController extends AbstractController {
                 self::DEFAULT_PRIORITY,
                 $value === CourseMaterial::LINK ? $url_url : null,
                 $value === CourseMaterial::LINK ? $title_name : null,
+                $calendar_display,
+                $associated_gradeable,
+                $associated_date,
                 uploaded_by: $this->core->getUser()->getId(),
                 uploaded_date: DateUtils::parseDateTime($this->core->getDateTimeNow(), $this->core->getDateTimeNow()->getTimezone()),
                 last_edit_by: null,

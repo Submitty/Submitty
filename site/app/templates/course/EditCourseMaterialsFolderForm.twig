@@ -68,8 +68,33 @@
         </script>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
+    <hr>
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-folder-cal-menu',
+        "div_id": '2',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+        "beginning_of_time_date" : beginning_of_time_date
+    } only %}
     <script>
         function submitFolderEdit(fullUpdate){ // Submit button
+            let container = document.getElementById('2');
+            let calendarMenu = {
+                calendar_display: 'none',
+                associated_date: 'none',
+                gradeable_chosen: 'none'
+            };
+            if (container) {
+                let showMenu = container.querySelector('#show-menu');
+                if (showMenu) {
+                    calendarMenu.calendar_display = showMenu.value;
+                    if (showMenu.value === 'date') {
+                        calendarMenu.associated_date = container.querySelector('#associated-date')?.value || 'none';
+                    } else if (showMenu.value === 'gradeable') {
+                        calendarMenu.gradeable_chosen = container.querySelector('#gradeable-select')?.value || 'none';
+                    }
+                }
+            }
             let sectionsEdit = [];
             let partialSections = [];
             let cmTime = document.getElementById("edit-folder-picker").value;
@@ -103,7 +128,7 @@
                 sectionsEdit = null;
                 partialSections = null;
             }
-            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null);
+            handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, id, sectionsEdit, partialSections, cmTime, sort, sections_lock, fullUpdate, null, null, null, null, calendarMenu);
         };
 
         function enableFullUpdate() {

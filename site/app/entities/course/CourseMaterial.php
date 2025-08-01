@@ -42,6 +42,15 @@ class CourseMaterial {
     #[ORM\Column(type: Types::FLOAT)]
     protected float $priority;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    protected bool $on_calendar;
+
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    protected ?string $gradeable = null;
+
+    #[ORM\Column(type: Types::DATETIMETZ_MUTABLE, nullable: true)]
+    protected ?DateTime $calendar_date = null;
+
     /**
      * @var Collection<CourseMaterialAccess>
      */
@@ -99,7 +108,7 @@ class CourseMaterial {
      * @param ?string $last_edit_by The user ID of the last person who edited the course material.
      * @param ?\DateTime $last_edit_date The date and time when the course material was last edited.
      */
-    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
+    public function __construct(int $type, string $path, \DateTime $release_date, bool $hidden_from_students, float $priority, ?string $url, ?string $title, ?bool $onCalendar, ?string $gradeableName, ?Datetime $calendarTime, ?string $uploaded_by, ?\DateTime $uploaded_date, ?string $last_edit_by, ?\DateTime $last_edit_date) {
         $this->setType($type);
         $this->setPath($path);
         $this->setReleaseDate($release_date);
@@ -108,6 +117,9 @@ class CourseMaterial {
         $this->sections = new ArrayCollection();
         $this->url = $url;
         $this->title = $title;
+        $this->setOnCalendar($onCalendar);
+        $this->setGradeable($gradeableName);
+        $this->setCalendarDate($calendarTime);
         $this->uploaded_by = $uploaded_by;
         $this->uploaded_date = $uploaded_date;
         $this->last_edit_by = $last_edit_by;
@@ -182,6 +194,30 @@ class CourseMaterial {
         return false;
     }
 
+    public function isOnCalendar(): bool {
+        return $this->on_calendar;
+    }
+
+    public function setOnCalendar(bool $val): void {
+        if (!$val) {
+            $this->gradeable = null;
+            $this->calendar_date = null;
+        }
+        $this->on_calendar = $val;
+    }
+
+    public function setCalendarDate(?\DateTime $calendar_date): void {
+        $this->calendar_date = $calendar_date;
+    }
+
+    public function getCalendarDate(): ?\DateTime {
+        return $this->calendar_date;
+    }
+
+    public function getGradeable(): ?string {
+        return $this->gradeable;
+    }
+
     public function setReleaseDate(\DateTime $release_date): void {
         $this->release_date = $release_date;
     }
@@ -243,7 +279,13 @@ class CourseMaterial {
     public function setTitle(string $title): void {
         $this->title = $title;
     }
+    public function setIsOnCalendar(bool $value): void {
+        $this->on_calendar = $value;
+    }
 
+    public function setGradeable(?string $gradeableString): void {
+        $this->gradeable = $gradeableString;
+    }
     public function setUploadedBy(string $uploaded_by): void {
         $this->uploaded_by = $uploaded_by;
     }

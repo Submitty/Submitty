@@ -117,13 +117,38 @@
           </span>
         </div>
     </div>
-    <script>
-        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+    <hr>
+    {% include "course/CourseMaterialsCalendarMenu.twig" with {
+        "div_class": 'edit-cm-file-cal-menu',
+        "div_id": '3',
+        "gradeables" : gradeables,
+        "current_gradeable" : current_gradeable,
+        "beginning_of_time_date" : beginning_of_time_date
+    } only %}
+
+    <script>    
+        function makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
-
+                let container = document.getElementById('3');
+                let calendarMenu = {
+                    calendar_display: 'none',
+                    associated_date: 'none',
+                    gradeable_chosen: 'none'
+                };
+                if (container) {
+                    let showMenu = container.querySelector('#show-menu');
+                    if (showMenu) {
+                        calendarMenu.calendar_display = showMenu.value;
+                        if (showMenu.value === 'date') {
+                            calendarMenu.associated_date = container.querySelector('#associated-date')?.value || 'none';
+                        } else if (showMenu.value === 'gradeable') {
+                            calendarMenu.gradeable_chosen = container.querySelector('#gradeable-select')?.value || 'none';
+                        }
+                    }
+                }
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var sort = document.getElementById("upload_sort").value;
@@ -154,7 +179,7 @@
                     const sections_lock = document.getElementById('all_Sections_Showing_yes').checked === true;
                     const overwrite_input = document.body.querySelector('input[name=overwrite-all]');
                     overwrite_all = overwrite_input ? (document.body.querySelector('input[name=overwrite-all]').value === 'true') : null;
-                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all);
+                    makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath, cmTime, sort, sections, sections_lock, overwrite_all, calendarMenu);
                 }
                 else {
                     alert("Select at least one section");
