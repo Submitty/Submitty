@@ -245,7 +245,7 @@ class AdminGradeableController extends AbstractController {
      *     grade_inquiries?: boolean,
      *     grade_inquiries_per_component?: boolean,
      *     discussion_based?: boolean,
-     *     discussion_thread_id?: boolean,
+     *     discussion_thread_id?: int[],
      *     vcs?: array{
      *         repository_type?: string|mixed,
      *         vcs_path?: string|mixed,
@@ -606,7 +606,7 @@ class AdminGradeableController extends AbstractController {
             'peer' => $gradeable->hasPeerComponent(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId()),
             'notebook_builder_url' => $this->core->buildCourseUrl(['notebook_builder', $gradeable->getId()]),
-            'hidden_files' => $gradeable->getHiddenFiles(),
+            'hidden_files' => $gradeable->getStringHiddenFiles() ?? "",
             'template_list' => $template_list,
             'gradeable_max_points' =>  $gradeable_max_points,
             'allow_custom_marks' => $gradeable->getAllowCustomMarks(),
@@ -1280,7 +1280,7 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-            $jsonThreads = json_encode('{}');
+            $jsonThreads = [];
             $discussion_clicked = Utils::getBooleanValue($details['discussion_based'] ?? false);
 
             //Validate user input for discussion threads
@@ -1291,7 +1291,6 @@ class AdminGradeableController extends AbstractController {
                         throw new \InvalidArgumentException('Invalid thread id specified.');
                     }
                 }
-                $jsonThreads = json_encode($jsonThreads);
             }
 
             $grade_inquiry_allowed = Utils::getBooleanValue($details['grade_inquiry_allowed'] ?? false);
@@ -1484,6 +1483,12 @@ class AdminGradeableController extends AbstractController {
             'depends_on_points',
             'notifications_sent'
         ];
+
+        $array_properties = [
+            'hidden_files',
+            'discussion_thread_id'
+        ];
+
         // Date properties all need to be set at once
         $dates = $gradeable->getDates();
 
@@ -1529,6 +1534,10 @@ class AdminGradeableController extends AbstractController {
                 continue;
             }
 
+            if (in_array($prop, $array_properties, true)) {
+                $post_val = explode(',', $post_val);
+            }
+
             if ($prop === "depends_on") {
                 try {
                     $temp_gradeable = $this->tryGetGradeable($post_val, false);
@@ -1557,17 +1566,14 @@ class AdminGradeableController extends AbstractController {
             }
             // Converts string array sep by ',' to json
             if ($prop === $discussion_ids) {
-                $post_val = array_map('intval', explode(',', $post_val));
+                $post_val = array_map('intval', $post_val);
                 foreach ($post_val as $thread) {
                     if (!$this->core->getQueries()->existsThread($thread)) {
                         $errors[$prop] = 'Invalid thread id specified.';
                         break;
                     }
                 }
-                if (count($errors) == 0) {
-                    $post_val = json_encode($post_val);
-                }
-                else {
+                if (count($errors) !== 0) {
                     continue;
                 }
             }
