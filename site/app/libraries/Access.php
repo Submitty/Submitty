@@ -7,6 +7,7 @@ use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\GradingSection;
 use app\models\User;
+use app\entities\poll\Poll;
 use InvalidArgumentException;
 
 class Access {
@@ -87,6 +88,8 @@ class Access {
     const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
     const CHECK_PEER_AUTOGRADING         = 1 << 30;
     const CHECK_PEER_SOLUTIONS           = 1 << 31;
+    const REQUIRE_ARG_POLL               = 1 << 32;
+    const POLL_CHECK_HISTOGRAM           = 1 << 33;
 
 
     // Broader user group access cases since generally actions are "minimum this group"
@@ -139,6 +142,8 @@ class Access {
         $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.save_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.load_config"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
+        $this->permissions["grading.electronic.save_config"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.add_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.delete_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_graded_component"] = self::CHECK_CSRF | self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::CHECK_HAS_SUBMISSION | self::CHECK_COMPONENT_PEER_STUDENT;
@@ -203,6 +208,7 @@ class Access {
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["path.write.uploads"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
         $this->permissions["path.write.site"] = self::ALLOW_MIN_INSTRUCTOR | self::CHECK_CSRF;
+        $this->permissions["path.write.submissions_processed"] = self::DENY_ALL;
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
@@ -219,6 +225,9 @@ class Access {
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT;
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
+
+        $this->permissions["poll.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARG_POLL;
+        $this->permissions["poll.view.histogram"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARG_POLL | self::POLL_CHECK_HISTOGRAM;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
     }
@@ -292,6 +301,14 @@ class Access {
             "permissions" => [
                 "path.read" => "path.read.submission_versions",
                 "path.write" => "path.write.submission_versions"
+            ]
+        ];
+        $this->directories["submissions_processed"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/submissions_processed",
+            "subparts" => ["gradeable", "submitter", "version"],
+            "permissions" => [
+                "path.read" => "path.read.submissions",
+                "path.write" => "path.write.submissions_processed"
             ]
         ];
         $this->directories["results"] = [
@@ -615,6 +632,20 @@ class Access {
                     // no one can view courses with status greater than 2
                     return false;
                 }
+            }
+        }
+
+        if (self::checkBits($checks, self::REQUIRE_ARG_POLL)) {
+            $poll = $this->requireArg($args, "poll");
+            if (!$poll instanceof Poll) {
+                throw new InvalidArgumentException("Argument 'poll' must be an instance of Poll");
+            }
+            if (!$poll->isVisible() && $group !== User::GROUP_INSTRUCTOR) {
+                // Polls are not visible to students or graders
+                return false;
+            }
+            if (self::checkBits($checks, self::POLL_CHECK_HISTOGRAM) && !$poll->isHistogramAvailable() && $group !== User::GROUP_INSTRUCTOR) {
+                return false;
             }
         }
 

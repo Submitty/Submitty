@@ -10,7 +10,7 @@
    newOverwriteCourseMaterialForm newDeleteCourseMaterialForm displayCloseSubmissionsWarning newDeleteGradeableForm
    markAllViewed closePopup */
 /* global csrfToken my_window:writable file_path:writable updateBulkProgress icon:writable detectColorScheme
-   createArray readPrevious disableFullUpdate registerSelect2Widget */
+   createArray readPrevious disableFullUpdate registerSelect2Widget, displayErrorMessage, displaySuccessMessage, displayWarningMessage */
 /// /////////Begin: Removed redundant link in breadcrumbs////////////////////////
 // See this pr for why we might want to remove this code at some point
 // https://github.com/Submitty/Submitty/pull/5071
@@ -77,19 +77,19 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Visualize whitespace characters') {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-default');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-primary');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Display whitespace/non-printing characters as escape sequences');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Display whitespace/non-printing characters as escape sequences');
         list_white_spaces['newline'] = '&#9166;';
         option = 'unicode';
     }
     else if ($(`#show_char_${index}_${autocheck_cnt}`).text() === 'Display whitespace/non-printing characters as escape sequences') {
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Original View');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Original View');
         list_white_spaces['newline'] = '\\n';
         option = 'escape';
     }
     else {
         $(`#show_char_${index}_${autocheck_cnt}`).removeClass('btn-primary');
         $(`#show_char_${index}_${autocheck_cnt}`).addClass('btn-default');
-        $(`#show_char_${index}_${autocheck_cnt}`).html('Visualize whitespace characters');
+        $(`#show_char_${index}_${autocheck_cnt}`).text('Visualize whitespace characters');
         option = 'original';
     }
     // Insert actual and expected one at a time
@@ -118,6 +118,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                 list_white_spaces[property] = response.data.whitespaces[property];
             }
             $(expected_div).empty();
+            // eslint-disable-next-line no-restricted-syntax
             $(expected_div).html(response.data.html);
             url = `${buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove'])
             }?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
@@ -134,6 +135,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
                         $(`#${helper_id}`).append(`<span style="outline:1px blue solid;">${list_white_spaces[property]}</span> = ${property} `);
                     }
                     $(actual_div).empty();
+                    // eslint-disable-next-line no-restricted-syntax
                     $(actual_div).html(response.data.html);
                 },
                 error: function () {
@@ -150,7 +152,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#delete-gradeable-form');
-    $('[id="delete-gradeable-message"]', form).html('');
+    $('[id="delete-gradeable-message"]', form).text('');
     $('[id="delete-gradeable-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="delete-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -160,7 +162,7 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
 function displayCloseSubmissionsWarning(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     const form = $('#close-submissions-form');
-    $('[id="close-submissions-message"]', form).html('');
+    $('[id="close-submissions-message"]', form).text('');
     $('[id="close-submissions-message"]', form).append(`<b>${gradeable_name}</b>`);
     $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css('display', 'block');
@@ -215,7 +217,7 @@ function newDeleteCourseMaterialForm(id, file_name, str_id = null) {
         const num_links_txt = (num_of_links === 0) ? '</em>)' : ` and <b>${num_of_links}</b> link${link_s}</em>)`;
 
         const emElement = document.createElement('em');
-        emElement.innerHTML = ` (<b>contains ${num_of_files}</b> file${file_s}${num_links_txt}`;
+        emElement.innerHTML = ` (<b>contains ${escapeSpecialChars(num_of_files.toString())}</b> file${escapeSpecialChars(file_s.toString())}${escapeSpecialChars(num_links_txt.toString())}`;
 
         cm_message.appendChild(emElement);
     }
@@ -291,7 +293,7 @@ function newUploadCourseMaterialsForm() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-course-materials-form');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
     $('[name="existing-file-list"]', form).append(`<b>${JSON.stringify(files)}</b>`);
 
     showPopup('#upload-course-materials-form');
@@ -307,7 +309,7 @@ function newUploadBanner() {
     $('.popup-form').css('display', 'none');
     const form = $('#upload-banner');
 
-    $('[name="existing-file-list"]', form).html('');
+    $('[name="existing-file-list"]', form).text('');
 
     const stringifiedFiles = $('<b></b>').text(JSON.stringify(files));
     $('[name="existing-file-list"]', form).append(stringifiedFiles);
@@ -467,8 +469,16 @@ function newEditCourseMaterialsForm(tag) {
 function editFilePathRecommendations() {
     const fileNameInput = $('#edit-title');
     const fileName = fileNameInput.val();
-
     const options = document.getElementById('new-file-name').options;
+    // Update the input display to show just the filename
+    if (fileName.trim().length > 0) {
+        const lastSlash = fileName.lastIndexOf('/');
+        const extractedFileName = lastSlash !== -1 ? fileName.substring(lastSlash + 1) : fileName;
+        fileNameInput.val(extractedFileName);
+    }
+    else {
+        return;
+    }
     for (let i = 0; i < options.length; i++) {
         const optionString = options[i].value;
         const lastSlash = optionString.lastIndexOf('/');
@@ -483,7 +493,7 @@ function editFilePathRecommendations() {
         }
 
         options[i].value = newOption;
-        options[i].innerHTML = newOption;
+        options[i].textContent = newOption;
     }
     registerSelect2Widget('new-file-name', 'material-edit-form');
 }
@@ -766,17 +776,6 @@ function validateHtml() {
     d.outerHTML = '';
 }
 
-/**
- * Remove an alert message from display. This works for successes, warnings, or errors to the
- * user
- * @param elem
- */
-function removeMessagePopup(elem) {
-    $(`#${elem}`).fadeOut('slow', () => {
-        $(`#${elem}`).remove();
-    });
-}
-
 function gradeableChange(url, sel) {
     url = url + sel.value;
     window.location.href = url;
@@ -1007,7 +1006,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'black';
             new_element.style.fontStyle = 'normal';
         }
-        new_element.innerHTML = visible_username;
+        new_element.textContent = visible_username;
         icon.className = 'fas fa-eye';
         icon.title = 'Show full user information';
     }
@@ -1016,7 +1015,7 @@ function changeName(element, user, visible_username, anon) {
             new_element.style.color = 'grey';
             new_element.style.fontStyle = 'italic';
         }
-        new_element.innerHTML = user;
+        new_element.textContent = user;
         icon.className = 'fas fa-eye-slash';
         icon.title = 'Hide full user information';
     }
@@ -1184,12 +1183,6 @@ $(() => {
             $('html, body').animate({ scrollTop: ($(window.location.hash).offset().top - minus) }, 800);
         }
     }
-
-    for (const elem of document.getElementsByClassName('alert-success')) {
-        setTimeout(() => {
-            $(elem).fadeOut();
-        }, 5000);
-    }
 });
 
 function getFileExtension(filename) {
@@ -1201,44 +1194,10 @@ function openPopUp(css, title, count, testcase_num, side) {
     let elem_html = `<link rel="stylesheet" type="text/css" href="${css}" />`;
     elem_html += title + document.getElementById(element_id).innerHTML;
     my_window = window.open('', '_blank', 'status=1,width=750,height=500');
+    // eslint-disable-next-line no-unsanitized/method
     my_window.document.write(elem_html);
     my_window.document.close();
     my_window.focus();
-}
-
-let messages = 0;
-
-function displayErrorMessage(message) {
-    displayMessage(message, 'error');
-}
-
-function displaySuccessMessage(message) {
-    displayMessage(message, 'success');
-}
-
-function displayWarningMessage(message) {
-    displayMessage(message, 'warning');
-}
-
-/**
- * Display a toast message after an action.
- *
- * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
- *
- * @param {string} message
- * @param {string} type either 'error', 'success', or 'warning'
- */
-function displayMessage(message, type) {
-    const id = `${type}-js-${messages}`;
-    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i style="margin-right:3px;" class="fas fa${type === 'error' ? '-times' : (type === 'success' ? '-check' : '')}-circle${type === 'warning' ? '-exclamation' : ''}"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
-    $('#messages').append(message);
-    $('#messages').fadeIn('slow');
-    if (type === 'success' || type === 'warning') {
-        setTimeout(() => {
-            $(`#${id}`).fadeOut();
-        }, 5000);
-    }
-    messages++;
 }
 
 /**
@@ -1308,6 +1267,10 @@ function updateGradeOverride() {
                 displayErrorMessage(json['message']);
                 return;
             }
+            if (json['data'] && json['data']['is_team']) {
+                overridePopup(json);
+                return;
+            }
             refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
@@ -1357,16 +1320,25 @@ function refreshOnResponseOverriddenGrades(json) {
     }
     else {
         json['data']['users'].forEach((elem) => {
-            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
-            const bits = [`<tr><td class="align-left">${elem['user_id']}`, elem['user_givenname'], elem['user_familyname'], elem['marks'], elem['comment'], `${delete_button}</td></tr>`];
-            $('#grade-override-table').append(bits.join('</td><td class="align-left">'));
+            const delete_button = `<a onclick="deleteOverriddenGrades('${elem['user_id']}', '${json['data']['gradeable_id']}', 'single');" data-testid="grade-override-delete"><i class='fas fa-trash'></i></a>`;
+            const row = `
+                <tr data-testid="grade-row-${elem['user_id']}">
+                    <td class="align-left" data-testid="student-id">${elem['user_id']}</td>
+                    <td class="align-left" data-testid="given-name">${elem['user_givenname']}</td>
+                    <td class="align-left" data-testid="family-name">${elem['user_familyname']}</td>
+                    <td class="align-left" data-testid="marks">${elem['marks']}</td>
+                    <td class="align-left" data-testid="comment">${elem['comment']}</td>
+                    <td class="align-left">${delete_button}</td>
+                </tr>
+            `;
+            $('#grade-override-table').append(row);
         });
         $('#load-overridden-grades').removeClass('d-none');
         $('#empty-table').addClass('d-none');
     }
 }
 
-function deleteOverriddenGrades(user_id, g_id) {
+function deleteOverriddenGrades(user_id, g_id, option) {
     const url = buildCourseUrl(['grade_override', g_id, 'delete']);
     const confirm = window.confirm('Are you sure you would like to delete this entry?');
     if (confirm) {
@@ -1376,11 +1348,17 @@ function deleteOverriddenGrades(user_id, g_id) {
             data: {
                 csrf_token: csrfToken,
                 user_id: user_id,
+                option: option,
             },
             success: function (data) {
                 const json = JSON.parse(data);
                 if (json['status'] === 'fail') {
                     displayErrorMessage(json['message']);
+                    return;
+                }
+                if (json['data'] && json['data']['is_team']) {
+                    $('#user_id').val(user_id);
+                    overridePopup(json);
                     return;
                 }
                 displaySuccessMessage('Overridden Grades deleted.');
@@ -1392,6 +1370,38 @@ function deleteOverriddenGrades(user_id, g_id) {
         });
     }
     return false;
+}
+
+function confirmOverride(option, isDelete) {
+    $('.popup-form').hide();
+    if (isDelete) {
+        deleteOverriddenGrades($('#user_id').val(), $('#g_id').val(), option);
+        $('#user_id').val('');
+    }
+    else {
+        $('input[name="option"]').val(option);
+        updateGradeOverride();
+        $('input[name="option"]').val('');
+    }
+}
+
+function overridePopup(json) {
+    $('.popup-form').hide();
+    $('#override_team_popup').remove();
+
+    // Generate a unique mount ID for the dynamic Vue app until we implement a uniform Vue framework to manage mounting.
+    // This is necessary to ensure the app can mount to a fresh DOM element each time.
+    const mount_id = `vue-${Math.floor(Math.random() * 1e9)}`;
+    const mount_el = document.createElement('div');
+    mount_el.id = mount_id;
+    document.body.appendChild(mount_el);
+
+    window.submitty.render(
+        `#${mount_id}`,
+        'component',
+        json.data.component,
+        json.data.args,
+    );
 }
 
 /**
@@ -1688,7 +1698,10 @@ function peerFeedbackUpload(grader_id, user_id, g_id, feedback) {
 function popOutSubmittedFile(html_file, url_file) {
     let directory = '';
     const display_file_url = buildCourseUrl(['display_file']);
-    if (url_file.includes('submissions')) {
+    if (url_file.includes('submissions_processed')) {
+        directory = 'submissions_processed';
+    }
+    else if (url_file.includes('submissions')) {
         directory = 'submissions';
     }
     else if (url_file.includes('results_public')) {
@@ -1778,6 +1791,8 @@ function flagUserImage(user_id, flag) {
                 // Change icon
                 const a = image_container.querySelector('a');
                 a.href = data.href;
+                // safe html
+                // eslint-disable-next-line no-unsanitized/property
                 a.innerHTML = data.icon_html;
 
                 displaySuccessMessage(success_message);
@@ -1859,8 +1874,6 @@ function previewMarkdown(mode) {
         markdown_preview.show();
         markdown_preview_load_spinner.show();
         markdown_toolbar.hide();
-        $('.markdown-write-mode').removeClass('active');
-        $('.markdown-preview-mode').addClass('active');
         $.ajax({
             url: buildUrl(['markdown']),
             type: 'POST',
@@ -1914,71 +1927,6 @@ function renderMarkdown(markdownContainer, url, content) {
             displayErrorMessage('Something went wrong while trying to preview markdown. Please try again.');
         },
     });
-}
-
-/**
- * Function to toggle markdown rendering preview
- *
- * @param {string} type string representing what type of markdown preset to insert.
- *                      * `'code'`
- *                      * `'link'`
- *                      * `'bold'`
- *                      * `'italic'`
- *                      * `'blockquote'`
- */
-function addMarkdownCode(type) {
-    const markdown_area = $(this).closest('.markdown-area');
-    const markdown_header = markdown_area.find('.markdown-area-header');
-
-    // Don't allow markdown insertion if we are in preview mode
-    if (markdown_header.attr('data-mode') === 'preview') {
-        return;
-    }
-
-    const start = $(this).prop('selectionStart');
-    const end = $(this).prop('selectionEnd');
-    const text = $(this).val();
-    let insert = '';
-    const selectedText = text.substring(start, end);
-
-    switch (type) {
-        case 'code':
-            insert = selectedText ? `\`\`\`\n${selectedText}\n\`\`\`\n` : '```\n\n```';
-            break;
-        case 'link':
-            insert = `[${selectedText}](url)`;
-            break;
-        case 'bold':
-            insert = selectedText ? `__${selectedText}__` : '____';
-            break;
-        case 'italic':
-            insert = selectedText ? `_${selectedText}_` : '__';
-            break;
-        case 'blockquote':
-            insert = `> ${selectedText}\n\n`;
-            break;
-    }
-
-    if (!selectedText) {
-        // Insert the markdown with the cursor in between the symbols
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        if (type === 'bold') {
-            $(this)[0].setSelectionRange(start + 2, start + 2);
-        }
-        else if (type === 'code') {
-            $(this)[0].setSelectionRange(start + 4, start + 4);
-        }
-        else {
-            $(this)[0].setSelectionRange(start + 1, start + 1);
-        }
-    }
-    else {
-        // Insert the markdown with the selected text wrapped
-        $(this).val(text.substring(0, start) + insert + text.substring(end));
-        $(this).focus();
-        $(this)[0].setSelectionRange(start + insert.length, start + insert.length);
-    }
 }
 
 /**

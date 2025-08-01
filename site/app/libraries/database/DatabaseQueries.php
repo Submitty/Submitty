@@ -10,6 +10,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
 use app\models\gradeable\Component;
+use app\models\gradeable\Redaction;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
@@ -4487,21 +4488,41 @@ SQL;
     public function updateGradeOverride($user_id, $g_id, $marks, $comment) {
         $this->course_db->query(
             "
-          UPDATE grade_override
-          SET marks=?, comment=?
-          WHERE user_id=?
-            AND g_id=?;",
-            [$marks, $comment, $user_id, $g_id]
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+            ",
+            [$user_id, $g_id, $marks, $comment]
         );
-        if ($this->course_db->getRowCount() === 0) {
-            $this->course_db->query(
-                "
-            INSERT INTO grade_override
-            (user_id, g_id, marks, comment)
-            VALUES(?,?,?,?)",
-                [$user_id, $g_id, $marks, $comment]
-            );
+    }
+
+    /**
+     * @param string[] $user_ids
+     * @param string $g_id
+     * @param int $marks
+     * @param string $comment
+     */
+    public function updateGradeOverrideBatch(array $user_ids, string $g_id, int $marks, string $comment): void {
+        $values = [];
+        $params = [];
+
+        foreach ($user_ids as $user_id) {
+            $values[] = '(?, ?, ?, ?)';
+            $params[] = $user_id;
+            $params[] = $g_id;
+            $params[] = $marks;
+            $params[] = $comment;
         }
+
+        $query = "
+            INSERT INTO grade_override (user_id, g_id, marks, comment)
+            VALUES " . implode(', ', $values) . "
+            ON CONFLICT (user_id, g_id)
+            DO UPDATE SET marks = EXCLUDED.marks, comment = EXCLUDED.comment
+        ";
+
+        $this->course_db->query($query, $params);
     }
 
     /**
@@ -5176,6 +5197,7 @@ AND gc_id IN (
             'team_joined_email',
             'team_member_submission',
             'self_notification',
+            'all_released_grades',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -5186,6 +5208,7 @@ AND gc_id IN (
             'team_member_submission_email',
             'self_registration_email',
             'self_notification_email',
+            'all_released_grades_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -5315,6 +5338,17 @@ AND gc_id IN (
             VALUES " . $value_param_string,
             $flattened_params
         );
+    }
+
+    /**
+     * Returns whether or not there is an unsent email in the system for a given email address
+     */
+    public function hasQueuedEmail(string $email): bool {
+        $this->submitty_db->query(
+            "SELECT * FROM emails WHERE email_address = ? AND sent IS NULL and error is null",
+            [$email]
+        );
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
@@ -5714,6 +5748,99 @@ AND gc_id IN (
         ", [$gradeable->getId()]);
     }
 
+    /**
+     * Get pending gradeable notifications for a given gradeable id
+     *
+     * @param string $g_id the gradeable id to get notifications for
+     * @return int
+     */
+    public function getPendingGradeableNotifications($g_id): int {
+        /*
+        TODO: This query is a variation of a similar query found within `/sbin/send_notification.py`.
+        ElectronicGraderController.showStatus() and ElectronicGraderView.statusPage() should be refactored
+        to ensure the gradeable status data is accessible to other application components, such as
+        AdminGradeableController for modularity.
+        */
+        $this->course_db->query(
+            "
+            WITH gradeables AS (
+                SELECT DISTINCT
+                    g.g_id AS g_id,
+                    g.g_title AS g_title,
+                    t.team_id AS team_id,
+                    COALESCE(egv.user_id, t.user_id) AS user_id,
+                    eg.eg_use_ta_grading AS eg_use_ta_grading,
+                    egd.autograding_complete AS autograding_complete,
+                    gc.gc_id AS component,
+                    CONCAT(gcd.gd_id, '-', gcd.gc_id, '-', gcd.gcd_grader_id)
+                        AS graded_component
+                FROM gradeable AS g
+                INNER JOIN electronic_gradeable AS eg
+                    ON g.g_id = eg.g_id
+                    AND eg.eg_student_view IS TRUE
+                    AND g.g_grade_released_date <= NOW()
+                INNER JOIN electronic_gradeable_version AS egv
+                    ON g.g_id = egv.g_id
+                    AND egv.active_version != '0'
+                    AND egv.g_notification_sent IS FALSE
+                INNER JOIN gradeable_component AS gc
+                    ON g.g_id = gc.g_id
+                INNER JOIN gradeable_data AS gd
+                    ON g.g_id = gd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                LEFT JOIN gradeable_teams AS gt
+                    ON gd.g_id = gt.g_id
+                    AND gd.gd_team_id = gt.team_id
+                LEFT JOIN teams AS t
+                    ON gt.team_id = t.team_id
+                LEFT JOIN electronic_gradeable_data AS egd
+                    ON g.g_id = egd.g_id
+                    AND COALESCE(egv.user_id, egv.team_id)
+                        = COALESCE(gd.gd_user_id, gd.gd_team_id)
+                    AND egv.active_version = egd.g_version
+                LEFT JOIN gradeable_component_data AS gcd
+                    ON gd.gd_id = gcd.gd_id
+                    AND gc.gc_id = gcd.gc_id
+                    AND gcd.gcd_grader_id IS NOT NULL
+                    AND egv.active_version = gcd.gcd_graded_version
+            )
+            SELECT DISTINCT
+                g_id,
+                g_title,
+                team_id,
+                u.user_id AS user_id,
+                u.user_email AS user_email,
+                COALESCE(ns.all_released_grades, TRUE) AS site_enabled,
+                COALESCE(ns.all_released_grades_email, TRUE) AS email_enabled
+            FROM gradeables AS g
+            INNER JOIN users AS u
+                ON g.user_id = u.user_id
+            LEFT JOIN notification_settings AS ns
+                ON u.user_id = ns.user_id
+            WHERE g.g_id = ?
+            GROUP BY g_id, g_title, u.user_id, u.user_email, team_id,
+                ns.all_released_grades, ns.all_released_grades_email,
+                eg_use_ta_grading,autograding_complete
+            HAVING (
+                eg_use_ta_grading IS FALSE AND autograding_complete IS TRUE
+                OR
+                COUNT(component) = COUNT(graded_component)
+            );",
+            [$g_id]
+        );
+
+        return count($this->course_db->rows());
+    }
+
+    public function resetGradeableNotifications(Gradeable $gradeable): void {
+        $this->course_db->query("
+            UPDATE electronic_gradeable_version
+            SET g_notification_sent = FALSE
+            WHERE g_id = ?;
+        ", [$gradeable->getId()]);
+    }
+
     public function getGradeInquiryDiscussions(array $grade_inquiries) {
         if (count($grade_inquiries) == 0) {
             return [];
@@ -5833,9 +5960,31 @@ AND gc_id IN (
               gamo.*,
               gc.*,
               pgp.*,
+              r.*,
               (SELECT COUNT(*) AS cnt FROM grade_inquiries WHERE g_id=g.g_id AND status = -1) AS active_grade_inquiries_count,
-              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades
+              (SELECT EXISTS (SELECT 1 FROM gradeable_data WHERE g_id=g.g_id)) AS any_manual_grades,
+              (
+                SELECT COUNT(*)
+                FROM (
+                    SELECT 1
+                    FROM electronic_gradeable_version
+                    WHERE g_id = g.g_id AND g_notification_sent IS TRUE
+                    GROUP BY user_id, team_id
+                ) AS distinct_submissions
+            ) AS notifications_sent
             FROM gradeable g
+              LEFT JOIN (
+                SELECT
+                  g_id,
+                  json_agg(redaction_id) as redaction_id,
+                  json_agg(page) AS redaction_page,
+                  json_agg(x1) AS redaction_x1,
+                  json_agg(y1) AS redaction_y1,
+                  json_agg(x2) AS redaction_x2,
+                  json_agg(y2) AS redaction_y2
+                FROM gradeable_redaction
+                GROUP BY g_id
+              ) AS r ON g.g_id=r.g_id
               LEFT JOIN (
                 SELECT
                   g_id AS eg_g_id,
@@ -6042,6 +6191,39 @@ AND gc_id IN (
 
             // Set the components
             $gradeable->setComponentsFromDatabase($components);
+
+            if (isset($row["redaction_id"])) {
+                // Create the redaction data
+                $redaction_properties = [
+                    'id',
+                    'page',
+                    'x1',
+                    'y1',
+                    'x2',
+                    'y2'
+                ];
+                $unpacked_redaction_data = [];
+                foreach ($redaction_properties as $property) {
+                    $unpacked_redaction_data[$property] = json_decode($row['redaction_' . $property]) ?? [];
+                }
+
+                // Create the redactions
+                $redactions = [];
+                for ($i = 0; $i < count($unpacked_redaction_data['id']); ++$i) {
+                    // Transpose a single redaction at a time
+                    $redaction_data = [];
+                    foreach ($redaction_properties as $property) {
+                        $redaction_data[$property] = $unpacked_redaction_data[$property][$i];
+                    }
+
+                    // Create the redaction instance
+                    $redactions[] = new Redaction($this->core, $redaction_data['page'], $redaction_data['x1'], $redaction_data['y1'], $redaction_data['x2'], $redaction_data['y2']);
+                }
+
+                // Set the redactions
+                $gradeable->setRedactionsFromDatabase($redactions);
+            }
+
 
             return $gradeable;
         };
@@ -7300,6 +7482,38 @@ AND gc_id IN (
         $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
         return $this->course_db->rows();
+    }
+
+    /**
+     * Check whether a user id or email is used in the database.
+     */
+    public function getUserIdEmailExists(string $email, string $user_id): bool {
+        $this->submitty_db->query('SELECT user_id, user_email FROM users where user_email=? or user_id=?', [$email, $user_id]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the sent timestamp for an email and clears the error message
+     *
+     * @param string $subject
+     * @return bool
+     */
+    public function updateEmailSent(string $subject): bool {
+        $time = $this->core->getDateTimeNow()->format('Y-m-d H:i:s');
+        $this->submitty_db->query('UPDATE emails SET sent = ? WHERE subject = ?', [$time, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Updates the error message for an email, where an empty string implies no error
+     *
+     * @param string $subject
+     * @param string $error
+     * @return bool
+     */
+    public function updateEmailError(string $subject, string $error): bool {
+        $this->submitty_db->query('UPDATE emails SET error = ? WHERE subject = ?', [$error, $subject]);
+        return $this->submitty_db->getRowCount() > 0;
     }
 
     /**
@@ -8764,12 +8978,13 @@ WHERE current_state IN
                  ns.all_new_posts, ns.all_modifications_forum,
                  ns.reply_in_post_thread,ns.team_invite,
                  ns.team_member_submission, ns.team_joined,
-                 ns.self_notification,
+                 ns.self_notification, ns.all_released_grades,
                  ns.merge_threads_email, ns.self_registration_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
                  ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
-                 ns.self_notification_email,sr.grading_registration_sections
+                 ns.self_notification_email, ns.all_released_grades_email,
+                 sr.grading_registration_sections
 
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
@@ -9319,10 +9534,11 @@ ORDER BY
      */
     public function getDockerImageOwner(string $image): string|false {
         $this->submitty_db->query("SELECT image_name, user_id FROM docker_images WHERE image_name = ?", [$image]);
-        if ($this->submitty_db->row() === []) {
+        $row = $this->submitty_db->row();
+        if ($row === []) {
             return false;
         }
-        return $this->submitty_db->row()['user_id'] ?? '';
+        return $row['user_id'] ?? '';
     }
 
     /**
@@ -9366,5 +9582,93 @@ ORDER BY
             $this->submitty_db->query("DELETE FROM docker_images WHERE image_name=? AND user_id=?", [$image, $user->getId()]);
         }
         return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @return array<string>
+     */
+    public function getInstructorQueries($user_id): array {
+        $this->submitty_db->query("SELECT * FROM instructor_sql_queries WHERE user_id = ?", [$user_id]);
+        return $this->submitty_db->rows();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_name the query name save it as
+     * @param string $query the query to save
+     * @return int the last inserted id
+     */
+    public function saveInstructorQueries($user_id, $query_name, $query): int {
+        $this->submitty_db->query(
+            "INSERT INTO instructor_sql_queries (user_id, query_name, query) VALUES (?, ?, ?)",
+            [$user_id, $query_name, $query]
+        );
+        return $this->submitty_db->getLastInsertId();
+    }
+
+    /**
+     * @param string $user_id the userid of the user
+     * @param string $query_id the query id to delete
+     * @return bool true if the query was deleted, false otherwise
+     */
+    public function deleteInstructorQueries($user_id, $query_id): bool {
+        $this->submitty_db->query(
+            "DELETE FROM instructor_sql_queries WHERE user_id = ? AND id = ?",
+            [$user_id, $query_id]
+        );
+        return $this->submitty_db->getRowCount() > 0;
+    }
+
+    /**
+     * Gets the active graders for a given gradeable.
+     * @return array<array{
+     *      gc_id: number,
+     *      gc_title: string,
+     *      grader_id: string,
+     *      ag_user_id: ?string,
+     *      ag_team_id: ?string,
+     * }>
+     */
+    public function getActiveGradersForGradeable(string $gradeable_id): array {
+        $this->course_db->query(
+            "SELECT ag.*, gc.gc_title FROM active_graders AS ag
+             JOIN gradeable_component AS gc ON ag.gc_id = gc.gc_id
+             WHERE gc.g_id = ?",
+            [$gradeable_id]
+        );
+        return $this->course_db->rows();
+    }
+
+    /**
+     * @param Gradeable $gradeable
+     * @param array<Redaction> $redactions
+     */
+    public function updateRedactions(Gradeable $gradeable, array $redactions): void {
+        $this->course_db->beginTransaction();
+        $this->course_db->query("DELETE FROM gradeable_redaction WHERE g_id=?", [$gradeable->getId()]);
+
+        if (count($redactions) === 0) {
+            $this->course_db->commit();
+            return;
+        }
+        $param_text = implode(',', array_fill(0, count($redactions), '(?, ?, ?, ?, ?, ?)'));
+        $params = [];
+
+        foreach ($redactions as $redaction) {
+            $params[] = $gradeable->getId();
+            $params[] = $redaction->getPageNumber();
+            $params[] = $redaction->getX1();
+            $params[] = $redaction->getY1();
+            $params[] = $redaction->getX2();
+            $params[] = $redaction->getY2();
+        }
+
+        $this->course_db->query(
+            "INSERT INTO gradeable_redaction (g_id, page, x1, y1, x2, y2) VALUES " . $param_text,
+            $params
+        );
+
+        $this->course_db->commit();
     }
 }

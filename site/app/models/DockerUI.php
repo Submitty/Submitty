@@ -22,10 +22,13 @@ use app\data_objects\DockerImage;
  * @method array getErrorLogs()
  * @method array getDockerImages()
  * @method array getFailImages()
+ * @method bool isUpdateNeeded()
  */
 class DockerUI extends AbstractModel {
     /** @var array<mixed> Json data passed in from controller */
     private array $json_data;
+    /** @var bool Whether the docker UI needs to be updated */
+    protected bool $update_needed = true;
     /** @var array<WorkerMachine> List of worker machine names */
     protected array $worker_machines;
     /** @var array<string> List of capability tags */
@@ -79,6 +82,29 @@ class DockerUI extends AbstractModel {
 
         $this->sysinfo_filepath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "sysinfo");
         $this->docker_logpath = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "logs", "docker");
+
+        $containers_config_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyInstallPath(),
+            "config",
+            "autograding_containers.json"
+        );
+
+        // Use the most recent docker log file as the reference for the last update time.
+        $docker_log_files = file_exists($this->docker_logpath) ? scandir($this->docker_logpath) : false;
+        if ($docker_log_files !== false && count($docker_log_files) > 2) {
+            $most_recent_log = max($docker_log_files);
+            $last_update_logpath = FileUtils::joinPaths($this->docker_logpath, $most_recent_log);
+
+            if (file_exists($containers_config_path)) {
+                $containers_mtime = filemtime($containers_config_path);
+                $last_update_mtime = filemtime($last_update_logpath);
+
+                // If the containers config is older than or the same age as the last log, it's up to date.
+                if ($containers_mtime <= $last_update_mtime) {
+                    $this->update_needed = false;
+                }
+            }
+        }
 
         $this->json_data = $json;
 
@@ -258,21 +284,27 @@ class DockerUI extends AbstractModel {
         // Read next three lines for additional details
         $image = $this->readImageDetails();
 
-        //take the first name in the list of name:tags and use that as the primary
+        // take the first name in the list of name:tags and use that as the primary
         $image->primary_name = array_shift($image_array);
         $image->aliases = $image_array;
+
+        // Duplicate images from workers are not added to the list again
+        if (isset($this->docker_images[$image->primary_name])) {
+            return;
+        }
+
         if (array_key_exists($image->primary_name, $this->image_to_capability_mapping)) {
             $image->capabilities = $this->image_to_capability_mapping[$image->primary_name];
         }
 
-        $this->docker_images[] = $image;
+        $this->docker_images[$image->primary_name] = $image;
     }
 
     /** Collect the details of an image and return them in a map, in the future a class should represent the return */
     private function readImageDetails(): DockerImage {
         $log_lines = [];
 
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 4; $i++) {
             $line = strtok("\n");
             if ($line === false) {
                 throw new DockerLogParseException("Unexpected end of log while reading image details.");

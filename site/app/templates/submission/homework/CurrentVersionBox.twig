@@ -10,8 +10,16 @@
         {% if can_see_all_versions == true %}
             <div id="version-cont">
                 <h3 class='label' id="submission_header">Select Submission Version:</h3>
-                {% include 'grading/VersionChoice.twig' with({
-                    'on_change': "versionChange('" ~ view_version_url ~ "', this)"
+                {% include 'Vue.twig' with({
+                    'type': 'component',
+                    'name': 'VersionChoice',
+                    'args': {
+                        'viewVersionUrl': view_version_url,
+                        'versions': versions,
+                        'activeVersion': active_version,
+                        'displayVersion': display_version,
+                        'totalPoints': total_points,
+                    }
                 }) %}
 
                 {# If viewing the active version, show cancel button, otherwise so button to switch active #}
@@ -26,7 +34,7 @@
                               onsubmit='return checkVersionChange({{ display_version_days_late }},{{ allowed_late_days }})'
                               action="{{ change_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
-                            <input type="submit" id="version_change" class="btn btn-primary" value="Grade This Version">
+                            <input type="submit" data-testid="version-change-btn" id="version_change" class="btn btn-primary" value="Grade This Version">
                         </form>
                     {% endif %}
                 {% endif %}
