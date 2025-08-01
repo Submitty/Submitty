@@ -105,6 +105,65 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * Returns recent notifications for a user
+     * @return array<int, array<string, mixed>>
+     */
+    private function getAllRecentNotifications() {
+        $user_id = $this->core->getUser()->getId();
+        $courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $results = [];
+        $original_config = clone $this->core->getConfig();
+
+        // Loop through all courses
+        foreach ($courses as $course) {
+            $semester = $course->getTerm();
+            $course_name = $course->getTitle();
+            $this->core->loadCourseConfig($semester, $course_name);
+            $this->core->loadCourseDatabase();
+            $course_db = $this->core->getCourseDB();
+            $course_notifications = $this->core->getQueries()->getRecentUserNotifications($user_id, $semester, $course_name, $course_db);
+
+            // Loop through s course's notifications and add attributes.
+            foreach ($course_notifications as $notification) {
+                $notify_time = $notification->getNotifyTime();
+                $base_url = '';
+                if ($notification->getNotifyMetadata() !== null) {
+                    $base_url = $this->core->buildCourseUrl(['notifications', $notification->getId()]);
+                }
+                else {
+                    $base_url = $this->core->buildUrl(['home']);
+                }
+                $notification_url = $base_url . '?seen=' . ($notification->isSeen() ? '1' : '0');
+
+                // Convert to string for Vue
+                $results[] = [
+                    'id' => $notification->getId(),
+                    'component' => $notification->getComponent(),
+                    'metadata' => $notification->getNotifyMetadata(),
+                    'content' => $notification->getNotifyContent(),
+                    'seen' => $notification->isSeen(),
+                    'elapsed_time' => $notification->getElapsedTime(),
+                    'created_at' => $notification->getCreatedAt(),
+                    'notify_time' => $notify_time,
+                    'semester' => $semester,
+                    'course' => $course_name,
+                    'notification_url' => $notification_url
+                ];
+            }
+        }
+
+        // Sort by recency
+        usort($results, function ($a, $b) {
+            return $a['elapsed_time'] <=> $b['elapsed_time'];
+        });
+
+        // Reset to original config where no courses are selected
+        $this->core->setConfig($original_config);
+        $this->core->loadCourseDatabase();
+        return $results;
+    }
+
+    /**
      * Display the HomePageView to the student.
      *
      * @return MultiResponse
@@ -112,7 +171,7 @@ class HomePageController extends AbstractController {
     #[Route("/home")]
     public function showHomepage() {
         $courses = $this->getCourses()->json_response->json;
-
+        $notifications = $this->getAllRecentNotifications();
         return new MultiResponse(
             null,
             new WebResponse(
@@ -122,7 +181,8 @@ class HomePageController extends AbstractController {
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["dropped_courses"],
                 $courses["data"]["archived_courses"],
-                $courses["data"]["self_registration_courses"]
+                $courses["data"]["self_registration_courses"],
+                $notifications
             )
         );
     }
