@@ -1,23 +1,32 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
 import Popup from '@/components/Popup.vue';
 import TaGradingGeneralSettings from '@/components/ta_grading/TaGradingGeneralSettings.vue';
-import { generateHotkeysList } from '../../../../ts/ta-grading-keymap';
 import { getDefaultSettingsData, loadTAGradingSettingData, optionsCallback, type SettingsData } from '@/ts/ta-grading-general-settings';
+import TaGradingHotkeySettings from './TaGradingHotkeySettings.vue';
+import { remapGetLS, type KeymapEntry } from '@/ts/ta-grading-keymap';
 
-const { fullAccess } = defineProps<{
+const { fullAccess, visible } = defineProps<{
     fullAccess: boolean;
+    visible: boolean;
 }>();
 
 const emit = defineEmits<{
     changeNavigationTitles: [titles: [string, string]];
+    changeSettingsVisibility: [visible: boolean];
 }>();
 
-const visible = ref(false);
+const keymap = inject<KeymapEntry<unknown>[]>('keymap', []);
 
 const togglePopup = () => {
-    visible.value = !visible.value;
-    generateHotkeysList();
+    emit('changeSettingsVisibility', !visible);
+    keymap.forEach((hotkey) => {
+        const storedCode = remapGetLS(hotkey.name);
+        if (storedCode) {
+            hotkey.code = storedCode;
+        }
+        hotkey.originalCode ||= hotkey.code || 'Unassigned';
+    });
 };
 
 function handleChangeNavigationTitles(titles: [string, string]) {
@@ -69,7 +78,9 @@ onMounted(() => {
         @change-navigation-titles="handleChangeNavigationTitles"
       />
 
-      <div id="hotkeys-list" />
+      <TaGradingHotkeySettings
+        :visible="visible"
+      />
     </template>
   </Popup>
 </template>
