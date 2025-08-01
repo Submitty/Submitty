@@ -24,8 +24,12 @@
             {% if cell.type == "markdown" %}
 
                 {# Render markdown #}
-                {% include "misc/Markdown.twig" with {
-                    "content" : cell.markdown_data
+                {% include "Vue.twig" with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        "content" : cell.markdown_data
+                    }
                 } only %}
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
 
@@ -65,8 +69,12 @@
                     {% set content_label = "Write your " ~ write_your ~ " below:" %}
                 {% endif %}
 
-                {% include "misc/Markdown.twig" with {
-                    "content" : content_label
+                {% include "Vue.twig" with {
+                    type: "component",
+                    name: "Markdown",
+                    args: {
+                        "content" : content_label
+                    }
                 } only %}
 
                 {{ _self.render_testcase_messages(cell, testcase_messages) }}
@@ -157,8 +165,12 @@
                     {% if cell.allow_multiple == true %}
                         <legend>
                             {% if cell.label %}
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.label
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.label
+                                    }
                                 } only %}
                             {% else %}
                                 You may select many:
@@ -184,8 +196,12 @@
                     {% else %}
                         <legend class="markdown">
                             {% if cell.label is defined %}
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.label
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.label
+                                    }
                                 } only %}
                             {% else %}
                                 Select one:
@@ -202,8 +218,12 @@
                                        value="{{ cell.choices[idx].value }}"
                                        onclick="handle_input_keypress({{ viewing_inactive_version or is_grader_view }});"
                                 />
-                                {% include "misc/Markdown.twig" with {
-                                    "content" : cell.choices[idx].description
+                                {% include 'Vue.twig' with {
+                                    type: "component",
+                                    name: "Markdown",
+                                    args: {
+                                        content: cell.choices[idx].description
+                                    }
                                 } only %}
                             </label>
                         {% endfor %}

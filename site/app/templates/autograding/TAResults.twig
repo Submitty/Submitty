@@ -53,8 +53,12 @@ $( document ).ready(function() {
                     {% if grader_info[user].comment is not empty %}
                     <p class="overall-comment">
                         <span class='gradeable_comment'>
-                            {% include 'misc/Markdown.twig' with {
-                                content: grader_info[user].comment
+                            {% include 'Vue.twig' with {
+                                type: "component",
+                                name: "Markdown",
+                                args: {
+                                    content: grader_info[user].comment
+                                }
                             } only %}
                         </span>
                     </p>

@@ -210,6 +210,7 @@ HTML;
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
         $this->addInternalCss('markdown.css');
+        $this->addVendorCss(FileUtils::joinPaths('katex', 'katex.min.css'));
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));

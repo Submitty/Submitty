@@ -1,7 +1,11 @@
 <div class="content gradeable_message markdown">
-    {% include "misc/Markdown.twig" with {
-        "content" : load_gradeable_message,
-        "test_id": "load-gradeable-message"
+    {% include 'Vue.twig' with {
+        type: "component",
+        name: "Markdown",
+        args: {
+            content: load_gradeable_message,
+            testId: "load-gradeable-message"
+        }
     } only %}
     <div class="content">
     <a data-testid="load-message-accept" id="continue" href="{{ button_forward }}" class="btn btn-primary btn-lg" style="float: right">Accept, Continue to<br>'{{ gradeable_name }}'</a>
