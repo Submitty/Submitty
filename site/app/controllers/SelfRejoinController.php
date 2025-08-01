@@ -6,8 +6,6 @@ use app\controllers\AbstractController;
 use app\libraries\DateUtils;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\response\RedirectResponse;
-use app\libraries\TermManager;
-use app\libraries\CourseUserManager;
 use app\models\Email;
 use app\models\User;
 
