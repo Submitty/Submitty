@@ -1,6 +1,6 @@
 // Import utility functions
 import { buildCourseUrl } from './utils/server';
-import type { AnnotationState, MarkerView } from '@markerjs/markerjs3';
+import type { AnnotationState, MarkerView, Renderer} from '@markerjs/markerjs3';
 import type { AnnotationEditor } from '@markerjs/markerjs-ui';
 
 // Type declarations for external libraries
@@ -9,7 +9,7 @@ const markerjsUI = window.markerjsUI;
 const $ = window.$;
 declare global {
     interface Window {
-        initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void;
+        initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, AnnotationState | string>): void;
         addAnnotations(): void;
         saveAnnotations(): void;
         clearAnnotations(): void;
@@ -80,6 +80,12 @@ class AnnotationManager {
 // Single instance to manage the current image annotation state
 const annotationManager: AnnotationManager = new AnnotationManager();
 
+const emptyState: AnnotationState = {
+    width: annotationManager.originalImg?.naturalWidth || 600,
+    height: annotationManager.originalImg?.naturalHeight || 800,
+    markers: [],
+};
+
 function addAnnotations(): void {
     if (!annotationManager.originalImg) {
         console.error('No target image provided to addAnnotations');
@@ -141,7 +147,6 @@ function setupAnnotationEditor(): void {
 
     // Set up event handlers for the annotation editor
     annotationManager.globalAnnotationEditor.addEventListener('editorsave', (event) => {
-        console.log('editorsave event triggered');
         const detail = event.detail;
         if (detail.state && detail.dataUrl) {
             annotationManager.currentAnnotations = detail.state;
@@ -160,7 +165,6 @@ function setupAnnotationEditor(): void {
     });
 
     annotationManager.globalAnnotationEditor.addEventListener('editorclose', () => {
-        console.log('editorclose event triggered');
         // Hide the annotation editor
         const editorWrapper = document.getElementById('global-annotation-editor-wrapper');
         if (editorWrapper) {
@@ -176,12 +180,10 @@ function setupAnnotationEditor(): void {
 
     // Configure editor settings
     annotationManager.globalAnnotationEditor.settings.renderOnSave = true;
-    annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = false;
+    annotationManager.globalAnnotationEditor.settings.rendererSettings.naturalSize = true;
     annotationManager.globalAnnotationEditor.settings.rendererSettings.imageType = 'image/png';
     annotationManager.globalAnnotationEditor.settings.rendererSettings.imageQuality = 1;
     annotationManager.globalAnnotationEditor.settings.rendererSettings.markersOnly = false;
-
-    console.log('Annotation editor setup complete');
 }
 
 function createEditorWrapper(): HTMLElement {
@@ -219,11 +221,6 @@ function configureEditorForImage(): void {
     }
 
     // Clear editor state first
-    const emptyState: AnnotationState = {
-        width: annotationManager.originalImg.naturalWidth || 600,
-        height: annotationManager.originalImg.naturalHeight || 800,
-        markers: [],
-    };
     annotationManager.globalAnnotationEditor.restoreState(emptyState);
 
     annotationManager.globalAnnotationEditor.targetImage = annotationManager.originalImg;
@@ -480,8 +477,54 @@ async function generateAnnotatedImageDataURL(): Promise<void> {
     }
 }
 
-function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, existingAnnotations?: AnnotationState): void {
-    annotationManager.reset();
+/*
+When we want to render multiple annotations on top of each other we can use renderer to create an uneditable image with all of the annotations.
+Implement this when we add options to show other grader's annotations.
+
+function parseAnnotationState(rawData: AnnotationState | string, key?: string): AnnotationState | null {
+    if (typeof rawData === 'string') {
+        try {
+            return JSON.parse(rawData) as AnnotationState;
+        } catch (error) {
+            console.warn(`Failed to parse annotations${key ? ` for key ${key}` : ''}:`, error);
+            return null;
+        }
+    }
+    return rawData;
+}
+
+// Possible refactor would be to renderAnnotationsOnImage using markerjs3 renderer, and combine the two functions.
+async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<string, AnnotationState | string>): Promise<HTMLImageElement>{
+    const renderer = new markerjs3.Renderer();
+    const img = document.getElementById('annotatable-image') as HTMLImageElement;
+    renderer.naturalSize = true;
+    renderer.targetImage = img;
+    let combinedAnnotations = Object.create(emptyState);
+    combinedAnnotations.height = renderer.height; // These end up as 0 or undefined no matter what I try, revisit next time we try to implement this.
+    combinedAnnotations.width = renderer.width;
+    
+    for (const key of Object.keys(allAnnotations)) {
+        if (key === uId) {
+            continue;
+        }
+        
+        const annotationState = parseAnnotationState(allAnnotations[key], key);
+        // Check if annotationState and markers exist
+        if (annotationState && annotationState.markers && Array.isArray(annotationState.markers)) {
+            combinedAnnotations.markers = combinedAnnotations.markers.concat(annotationState.markers);
+        } else {
+            console.warn(`No valid markers found for key ${key}:`, annotationState);
+        }
+    }
+    console.log(combinedAnnotations);
+    const dataUrl = await renderer.rasterize(combinedAnnotations);
+    img.src = dataUrl;
+    document.getElementById('annotatable-image')?.replaceWith(img);
+    return img;
+}
+*/
+
+function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, AnnotationState>) {
     // Set variables from parameters
     annotationManager.gradeableId = gId;
     annotationManager.userId = uId;
@@ -494,7 +537,19 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
     // Wait for DOM to be ready
     $(document).ready(() => {
         // Get the original image element
-        annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
+
+        const existingAnnotations = allAnnotations ? allAnnotations[uId] : emptyState;
+        /*
+        Replace our image with our combined image/other user annotations.
+        //const existingAnnotations = allAnnotations ? parseAnnotationState(allAnnotations[uId], uId) || emptyState : emptyState;
+        if (allAnnotations && Object.keys(allAnnotations).length > 0) {
+            rasterizeAnnotatedImage(uId, allAnnotations).then((src) => {
+                annotationManager.originalImg = src;
+            });
+        } else {
+            annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
+        }*/
+       annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
 
         // Handle image load errors
         if (annotationManager.originalImg) {

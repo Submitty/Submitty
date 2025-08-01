@@ -34,25 +34,12 @@
                 
                 <span id="annotation-status"></span>
             </div>
-            
-            <!-- Hidden data elements -->
-            <div id="annotation-data" style="display: none;">
-                <input type="hidden" id="gradeable-id" value="{{ gradeable_id }}" />
-                <input type="hidden" id="user-id" value="{{ user_id }}" />
-                <input type="hidden" id="grader-id" value="{{ grader_id }}" />
-                <input type="hidden" id="filename" value="{{ filename }}" />
-                <input type="hidden" id="file-path" value="{{ file_path }}" />
-                <input type="hidden" id="csrf-token" value="{{ csrfToken }}" />
-                <input type="hidden" id="existing-annotations" value="{{ annotation_jsons[grader_id] | default('[]') }}" />
-                <input type="hidden" id="all-annotations" value="{{ annotation_jsons | json_encode }}" />
-                <input type="hidden" id="is-student" value="{{ student_popup ? 'true' : 'false' }}" />
-            </div>
         </div>
     </div>
 </div>
 
 <script defer>
     $(()=>{
-        window.initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons[grader_id] | default('[]') | raw }});
+        window.initImageAnnotation("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", "{{ filename | e('js') }}", "{{ file_path | e('js') }}", "{{ csrfToken }}", {{ student_popup ? 'true' : 'false' }}, {{ annotation_jsons | json_encode | raw }});
     })
 </script>
