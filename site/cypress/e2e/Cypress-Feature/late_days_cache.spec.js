@@ -76,17 +76,17 @@ all_late_users['moscie'] = 3;
 all_user_ids.push('moscie');
 // Submission is 3 days late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Bad (too many late days used this term)
-// Or After given 2 extentions => Bad (too many late days used this term)
+// Or After given 2 extensions => Bad (too many late days used this term)
 all_late_users['barteh'] = 2;
 all_user_ids.push('barteh');
 // Submission is 2 days late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Bad (too many late days used on this assignment) because only 1 late day is allowed
-// Or After given 2 extentions => Good
+// Or After given 2 extensions => Good
 all_late_users['harbel'] = 1;
 all_user_ids.push('harbel');
 // Submission is 1 day late and 0 late days => Bad (too many late days used this term)
 // After given 2 late days => Late (valid submission)
-// Or After given 2 extentions => Good
+// Or After given 2 extensions => Good
 
 describe('Test cases involving late day cache updates', () => {
     // Ignore uncaught js exceptions
@@ -191,7 +191,7 @@ describe('Test cases involving late day cache updates', () => {
     });
 
     describe('Test changes to late day extensions', () => {
-        it('should give extentions and check new status', () => {
+        it('should give extensions and check new status', () => {
             cy.login('instructor');
             cy.visit(['sample', 'extensions']);
             cy.get('#gradeable-select').select('Late Allowed Homework');

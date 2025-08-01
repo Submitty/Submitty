@@ -27,7 +27,7 @@ describe('Test revolving around the student side and whether or not they should 
 
         // change submission version
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
-        cy.get('#submission-version-select').select('2');
+        cy.get('#submission-version-select').select('3');
         cy.get('#version_change').click();
 
         cy.visit(['sample', 'gradeable', 'grades_released_homework_onlytaEC']);
