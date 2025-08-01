@@ -350,9 +350,9 @@ class HomePageController extends AbstractController {
             $term_names = $em->createQueryBuilder()
                 ->select('term.name')
                 ->from(Term::class, 'term')
-                ->where('term.id = ?')
+                ->where('term.id = :name')
                 ->orderBy('term.name', 'ASC')
-                ->setParameter($term_id)
+                ->setParameter('name', $term_id)
                 ->getQuery()
                 ->getSingleColumnResult();
 

@@ -12,7 +12,7 @@ use tests\BaseUnitTest;
 class TermTester extends BaseUnitTest {
     public function testTerms() {
         $core = $this->createMockCore(Core::class);
-        $core->getSubmittyEntityManager();
+        $entity_manager = $core->getSubmittyEntityManager();
         $entity_manager->expects($this->once())
             ->method('persist')
             ->with(
@@ -36,26 +36,5 @@ class TermTester extends BaseUnitTest {
         );
         $em->persist($term);
         $em->flush();
-        // Testing getTermStartDate
-        $detail = [
-            'user_id' => "aphacker",
-            'anon_id' => "anon_id",
-            'user_numeric_id' => '987654321',
-            'user_password' => "aphacker",
-            'user_givenname' => "Alyss",
-            'user_preferred_givenname' => "Allison",
-            'user_familyname' => "Hacker",
-            'user_preferred_familyname' => "Hacks",
-            'user_pronouns' => '',
-            'display_pronouns' => false,
-            'user_email' => "aphacker@example.com",
-            'user_email_secondary' => "aphacker@exampletwo.com",
-            'user_email_secondary_notify' => false,
-            'user_group' => User::GROUP_STUDENT,
-            'registration_section' => 1,
-            'rotating_section' => null,
-            'manual_registration' => false,
-            'grading_registration_sections' => [1, 2]
-        ];
     }
 }

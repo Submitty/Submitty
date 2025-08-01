@@ -33,8 +33,8 @@ class HomePageControllerTester extends BaseUnitTest {
         $term = new Term(
             'f24',
             'Fall 2024',
-            date('Y-m-d H:i:s'),
-            date('Y-m-d H:i:s')
+            DateTime::createFromFormat('Y-m-d H:i:s', 'now'),
+            DateTime::createFromFormat('Y-m-d H:i:s', 'now')
         );
         $em->persist($term);
         $em->flush();
