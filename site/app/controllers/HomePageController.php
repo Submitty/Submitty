@@ -347,16 +347,9 @@ class HomePageController extends AbstractController {
             $start_date = $_POST['start_date'];
             $end_date = $_POST['end_date'];
             $em = $this->core->getSubmittyEntityManager();
-            $term_names = $em->createQueryBuilder()
-                ->select('term.name')
-                ->from(Term::class, 'term')
-                ->where('term.id = :name')
-                ->orderBy('term.name', 'ASC')
-                ->setParameter('name', $term_id)
-                ->getQuery()
-                ->getSingleColumnResult();
+            $term = $em->find(Term::class, $term_id);
 
-            if (in_array($term_id, $term_names)) {
+            if ($term !== null) {
                 $this->core->addErrorMessage("Term id already exists.");
             }
             elseif ($end_date < $start_date) {
