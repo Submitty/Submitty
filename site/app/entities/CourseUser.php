@@ -69,5 +69,4 @@ class CourseUser {
     public function setPreviousRegistrationSection(string $previous_registration_section) {
         $this->orevious_registration_section = $previous_registration_section;
     }
-
 }

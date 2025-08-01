@@ -78,14 +78,41 @@ class CourseRegistrationController extends AbstractController {
             return;
         }
         $default_section = $this->core->getQueries()->getDefaultRegistrationSection($term, $course);
-        if (CourseUserManager::wasStudentEverInCourse($this->core, $user_id, $course, $term)) {
-            $this->core->getUser()->setRegistrationSection($default_section);
-            CourseUserManager::updateCourseUser($this->core, $user, $term, $course);
+        $em = $this->core->getSubmittyEntityManager();
+        $course_user = $em->getRepository(CourseUser::class)
+            ->findOneBy([
+                'user_id' => $user_id,
+                'term' => $term,
+                'course' => $course
+        ]);
+        // Course user exists
+        if ($course_user !== null) {
+            $user->setRegistrationSection($default_section);
+
+            $course_user->setRegistrationSection($user->getRegistrationSection());
+            $course_user->setUserGroup($user->getGroup());
+            $course_user->setManualRegistration($user->isManualRegistration());
+            $course_user->setRegistrationType($user->getRegistrationType());
+
+            $em->persist($course_user);
+            $em->flush();
             $this->core->getQueries()->updateUser($user, $term, $course);
         }
         else {
             $this->core->getUser()->setRegistrationSection($default_section);
-            CourseUserManager::addCourseUser($this->core, $user, $term, $course);
+            $course_user = new CourseUser(
+                $term,
+                $course,
+                $user->getId(),
+                $user->getGroup(),
+                $user->getRegistrationSection(),
+                $user->getRegistrationType(),
+                $user->isManualRegistration(),
+                ""
+            );
+            $em->persist($course_user);
+            $em->flush();
+            $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
         }
 
         $instructor_ids = $this->core->getQueries()->getActiveUserIds(true, false, false, false, false, $term, $course);

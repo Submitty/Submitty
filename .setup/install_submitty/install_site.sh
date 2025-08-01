@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-################################################################################################
 ### SITE INSTALLER
 #
 # This script is used to install the submitty site code from ${SUBMITTY_REPOSITORY}/site to
@@ -13,7 +11,9 @@
 #   - if composer.json or composer.lock was modified, run composer
 #   - only set permissions for modified files
 #
-################################################################################################
+# This script has two command-line arguments:
+#   Required argument: config=<config dir>.
+#   Optional argument: browscap
 
 set_permissions () {
     local fullpath=$1
@@ -63,13 +63,31 @@ PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
 PHP_GROUP=${PHP_USER}
 CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
 CGI_GROUP=${CGI_USER}
+VAGRANT=0
 
-for arg in "$@"
+if [ -d "${THIS_DIR}/../../.vagrant" ]; then
+    VAGRANT=1
+fi
+
+# Get arguments
+for cli_arg in "$@"
 do
-    if [ "$arg" == "browscap" ]; then
+    if [[ $cli_arg =~ ^config=.* ]]; then
+        SUBMITTY_CONFIG_DIR="$(readlink -f "$(echo "$cli_arg" | cut -f2 -d=)")"
+    elif [ "$cli_arg" == "browscap" ]; then
         BROWSCAP=true
     fi
 done
+
+if [ -z "${SUBMITTY_CONFIG_DIR}" ]; then
+    echo "ERROR: This script requires a config dir argument"
+    echo "Usage: ${BASH_SOURCE[0]} config=<config dir> [browscap]"
+    exit 1
+fi
+
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${SUBMITTY_CONFIG_DIR:?}/submitty.json)
+source ${SUBMITTY_REPOSITORY:?}/.setup/install_submitty/get_globals.sh "config=${SUBMITTY_CONFIG_DIR:?}"
+source ${SUBMITTY_REPOSITORY:?}/.setup/bin/versions.sh
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 
@@ -111,6 +129,13 @@ fi
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
 result=$(rsync -rtz -i --exclude-from ${SUBMITTY_REPOSITORY}/site/.rsyncignore ${SUBMITTY_REPOSITORY}/site ${SUBMITTY_INSTALL_DIR})
+if [ ${VAGRANT} == 1 ]; then
+    rsync -rtz -i ${SUBMITTY_REPOSITORY}/site/tests ${SUBMITTY_REPOSITORY}/site/phpunit.xml ${SUBMITTY_INSTALL_DIR}/site > /dev/null
+    chown -R ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/tests
+    chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/tests
+    chown ${PHP_USER}:${PHP_GROUP} ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
+    chmod 740 ${SUBMITTY_INSTALL_DIR}/site/phpunit.xml
+fi
 
 # check for either of the dependency folders, and if they do not exist, pretend like
 # their respective json file was edited. Composer needs the folder to exist to even
@@ -215,10 +240,18 @@ done
 
 if echo "${result}" | grep -E -q "composer\.(json|lock)"; then
     # install composer dependencies and generate classmap
-    su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
+    if [ ${VAGRANT} == 1 ]; then
+        su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --dev --prefer-dist --optimize-autoloader"
+    else
+        su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --prefer-dist --optimize-autoloader"
+    fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor
 else
-    su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
+    if [ ${VAGRANT} == 1 ]; then
+        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize"
+    else
+        su - ${PHP_USER} -c "composer dump-autoload -d \"${SUBMITTY_INSTALL_DIR}/site\" --optimize --no-dev"
+    fi
     chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site/vendor/composer
 fi
 
@@ -332,10 +365,9 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     cp ${NODE_FOLDER}/luxon/build/global/luxon.min.js ${VENDOR_FOLDER}/luxon
     # pdfjs
     mkdir ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
-    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+    cp -R ${NODE_FOLDER}/pdfjs-dist/build/* ${VENDOR_FOLDER}/pdfjs
+    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.mjs ${VENDOR_FOLDER}/pdfjs
+    cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs
     cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
     # plotly
     mkdir ${VENDOR_FOLDER}/plotly
@@ -343,8 +375,6 @@ if echo "{$result}" | grep -E -q "package(-lock)?.json"; then
     # mermaid
     mkdir ${VENDOR_FOLDER}/mermaid
     cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
-    # pdf-annotate.js
-    cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
     # twig.js
     mkdir ${VENDOR_FOLDER}/twigjs
     cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
@@ -377,12 +407,16 @@ chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
 chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
+mkdir -p "${NODE_FOLDER}/.vue-global-types"
+chgrp "${PHP_USER}" "${NODE_FOLDER}/.vue-global-types"
 mkdir -p "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chgrp "${PHP_USER}" "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 echo "Running esbuild"
 chmod a+x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a+x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a+x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
+chmod -R g+w ${NODE_FOLDER}/.vue-global-types
 chmod a+x ${NODE_FOLDER}/vite/bin/vite.js
 chmod g+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod -R u+w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
@@ -391,8 +425,10 @@ su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm run build"
 chmod -w "${SUBMITTY_INSTALL_DIR}/site/vue"
 chmod a-x ${NODE_FOLDER}/esbuild/bin/esbuild
 chmod a-x ${NODE_FOLDER}/typescript/bin/tsc
+chmod a-x ${NODE_FOLDER}/vue-tsc/bin/vue-tsc.js
 chmod g-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 chmod a-x ${NODE_FOLDER}/vite/bin/vite.js
+chmod -R g-w ${NODE_FOLDER}/.vue-global-types
 chmod -R u-w "${SUBMITTY_INSTALL_DIR}/site/incremental_build"
 
 chmod 551 ${SUBMITTY_INSTALL_DIR}/site/public/mjs

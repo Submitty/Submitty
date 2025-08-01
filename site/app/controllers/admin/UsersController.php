@@ -417,13 +417,39 @@ class UsersController extends AbstractController {
                     $this->core->getQueries()->insertSamlMapping($_POST['user_id'], $_POST['user_id']);
                 }
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                $em = $this->core->getSubmittyEntityManager();
+                $course_user = new CourseUser(
+                    $semester,
+                    $course,
+                    $user->getId(),
+                    $user->getGroup(),
+                    $user->getRegistrationSection(),
+                    $user->getRegistrationType(),
+                    $user->isManualRegistration(),
+                    ""
+                );
+                $em->persist($course_user);
+                $em->flush();
+                $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $user->setEmailBoth($submitty_user->getEmailBoth());
                 $this->core->getQueries()->updateUser($user);
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getTerm(), $this->core->getConfig()->getCourse());
+                $em = $this->core->getSubmittyEntityManager();
+                $course_user = new CourseUser(
+                    $semester,
+                    $course,
+                    $user->getId(),
+                    $user->getGroup(),
+                    $user->getRegistrationSection(),
+                    $user->getRegistrationType(),
+                    $user->isManualRegistration(),
+                    ""
+                );
+                $em->persist($course_user);
+                $em->flush();
+                $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 
@@ -902,7 +928,20 @@ class UsersController extends AbstractController {
                                 $this->core->getQueries()->insertSamlMapping($user->getId(), $user->getId());
                             }
                         }
-                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        $em = $this->core->getSubmittyEntityManager();
+                        $course_user = new CourseUser(
+                            $semester,
+                            $course,
+                            $user->getId(),
+                            $user->getGroup(),
+                            $user->getRegistrationSection(),
+                            $user->getRegistrationType(),
+                            $user->isManualRegistration(),
+                            ""
+                        );
+                        $em->persist($course_user);
+                        $em->flush();
+                        $this->core->getQueries()->updateUserInCourse($user, $semester, $course);
                         break;
                     case 'update':
                         $this->core->getQueries()->updateUser($user, $semester, $course);
