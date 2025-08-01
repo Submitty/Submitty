@@ -93,38 +93,38 @@ export const settingsData: SettingsData = [
     },
 ];
 
-window.onkeyup = function (e) {
-    if (remapping.active) {
-        remapFinish(remapping.index, eventToKeyCode(e));
-        e.preventDefault();
-        return;
-    }
-};
+// window.onkeyup = function (e) {
+//     if (remapping.active) {
+//         remapFinish(remapping.index, eventToKeyCode(e));
+//         e.preventDefault();
+//         return;
+//     }
+// };
 
-window.onkeydown = function (e) {
-    if (remapping.active) {
-        e.preventDefault();
-        return;
-    }
+// window.onkeydown = function (e) {
+//     if (remapping.active) {
+//         e.preventDefault();
+//         return;
+//     }
 
-    // Disable hotkeys in the menu so we don't accidentally press anything
-    if (isSettingsVisible()) {
-        return;
-    }
+//     // Disable hotkeys in the menu so we don't accidentally press anything
+//     if (isSettingsVisible()) {
+//         return;
+//     }
 
-    const target = e.target as HTMLElement;
-    if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && (target as HTMLInputElement).type !== 'checkbox') || target.tagName === 'SELECT') {
-        return;
-    } // disable keyboard event when typing to textarea/input
+//     const target = e.target as HTMLElement;
+//     if (target.tagName === 'TEXTAREA' || (target.tagName === 'INPUT' && (target as HTMLInputElement).type !== 'checkbox') || target.tagName === 'SELECT') {
+//         return;
+//     } // disable keyboard event when typing to textarea/input
 
-    const codeName = eventToKeyCode(e);
+//     const codeName = eventToKeyCode(e);
 
-    for (let i = 0; i < keymap.length; i++) {
-        if (keymap[i].code === codeName) {
-            keymap[i].fn?.(e, keymap[i].options);
-        }
-    }
-};
+//     for (let i = 0; i < keymap.length; i++) {
+//         if (keymap[i].code === codeName) {
+//             keymap[i].fn?.(e, keymap[i].options);
+//         }
+//     }
+// };
 
 /**
  * Register a function to be called when a key is pressed.
