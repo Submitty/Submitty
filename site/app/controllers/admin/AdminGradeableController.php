@@ -543,6 +543,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric-conflict.js');
             $this->core->getOutput()->addInternalModuleJs('ta-grading-rubric.js');
             $this->core->getOutput()->addInternalJs('gradeable.js');
+            $this->core->getOutput()->addInternalJs('gradeable-config-utils.js');
             $this->core->getOutput()->addInternalCss('electronic.css');
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
