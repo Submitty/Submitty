@@ -189,6 +189,48 @@ class AutogradingConfigController extends AbstractController {
     }
 
     /**
+     * @return Response
+     */
+    #[Route("/courses/{_semester}/{_course}/autograding_config/download_zip", methods: ["POST"])]
+    public function downloadConfigZip(): Response {
+        $config_dir = $_POST['curr_config_name'] ?? null;
+
+        if ($config_dir === null) {
+            $this->core->addErrorMessage("No configuration directory provided.");
+        }
+
+        $course = $this->core->getConfig()->getCourse();
+        $config_name = basename($config_dir);
+        $zip_filename = "{$course}_{$config_name}.zip";
+        $zip_path = FileUtils::joinPaths(sys_get_temp_dir(), $zip_filename);
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zip_path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            $this->core->addErrorMessage("Failed to create ZIP archive.");
+        }
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($config_dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($files as $file) {
+            $file_path = $file->getRealPath();
+            $relative_path = substr($file_path, strlen($config_dir) + 1);
+            $zip->addFile($file_path, $relative_path);
+        }
+
+        $zip->close();
+
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zip_filename . '"');
+        header('Content-Length: ' . filesize($zip_path));
+        readfile($zip_path);
+        unlink($zip_path);
+        exit;
+    }
+
+    /**
      * @param string $g_id gradeable Id
      * @return MultiResponse
      */

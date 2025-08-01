@@ -133,6 +133,7 @@
                 <div>
                     <div class="config-folder-view">
                         <div class="main-folder">
+                            <a class="fas fa-download key_to_click file-action-add" tabindex="0" onclick="downloadConfig('{{ selected_autograding_configuration_path }}')"></a>
                             <i class="fas fa-folder-plus file-action-add" onClick="addRootFolder('{{ gradeable.getId() }}')"></i>
                             <i class="fas fa-plus file-action-add config-file-icon" onClick="addFile('{{ gradeable.getId() }}', null)"></i>
                             {% set parts = selected_autograding_configuration_path|split('/') %}
