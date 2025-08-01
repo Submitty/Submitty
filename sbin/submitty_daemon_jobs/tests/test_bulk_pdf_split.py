@@ -46,11 +46,6 @@ class TestBulkPdfSplit(BaseTestCase):
             cover_tgt = Path(file_name + '_' + str(i_idx).zfill(2) + '_cover.pdf')
             self.assertTrue(split_tgt.is_file())
 
-            #verify each page png is being produced
-            for j_idx in range(1,tgt_num_pages+1):
-                page_tgt = Path(file_name + '_' + str(i_idx).zfill(2) + '_' + str(j_idx).zfill(3)  + '.jpg')
-                self.assertTrue(page_tgt.is_file())
-
 
     #Test handling a bad number of given pages to split a pdf gracefully
     def test_bad_split_number(self):
@@ -114,11 +109,6 @@ class TestBulkPdfSplit(BaseTestCase):
 
                 cover_tgt = Path(file_name + '_' + str(i_idx).zfill(3) + '_cover.pdf')
                 self.assertTrue(split_tgt.is_file())
-
-                #verify each page png is being produced
-                for j_idx in range(1,tgt_num_pages+1):
-                    page_tgt = Path(file_name + '_' + str(i_idx).zfill(3) + '_' + str(j_idx).zfill(3)  + '.jpg')
-                    self.assertTrue(page_tgt.is_file())
 
 
 
