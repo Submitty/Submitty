@@ -96,6 +96,12 @@ function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, ful
     });
 };
 
+/**
+ * Constructs the file path for the submission files based on the course, gradeable name, and file path.
+ * @param {string} gradeable the name of the gradeable
+ * @param {string} filePath the path to the file within the gradeable
+ * @returns {string} the full path to the file
+ */
 const constructFileName = (gradeable, filePath) => {
     const course = Cypress.env('course');
     if (course === 'development') {
@@ -104,6 +110,11 @@ const constructFileName = (gradeable, filePath) => {
     return `copy_of_tutorial/examples/${gradeable}/submissions/${filePath}`;
 };
 
+/**
+ * Submits multiple submissions for a gradeable.
+ * @param {string} gradeable the name of the gradeable
+ * @param {JSON} submissions a job mapping submission bucket to a list of files
+ */
 export function submitSubmissions(gradeable, submissions) {
     return switchOrFindVersion(gradeable, null).then((startingVersion) => {
         cy.wrap(startingVersion).as(`${gradeable}_starting_version`);
@@ -113,9 +124,10 @@ export function submitSubmissions(gradeable, submissions) {
 
             // Loop through each bucket and submit the files
             Object.entries(submission.submissionFiles).forEach(([bucket, files]) => {
-                files.forEach((file) => {
+                files.forEach((file, idx) => {
                     const filePath = constructFileName(gradeable, file);
-                    submitFiles(filePath, Number(bucket), true);
+                    // first file should be true, all other files are false
+                    submitFiles(filePath, Number(bucket), idx === 0);
                 });
             });
 
@@ -126,6 +138,11 @@ export function submitSubmissions(gradeable, submissions) {
     });
 }
 
+/**
+ * Checks the submissions for a gradeable.
+ * @param {string} gradeable the name of the gradeable
+ * @param {JSON} submissions a job mapping submission bucket to expected and full scores
+ */
 export function checkSubmissions(gradeable, submissions) {
     cy.get(`@${gradeable}_starting_version`).then((start) => {
         cy.wrap(submissions).each((submission, index) => {
