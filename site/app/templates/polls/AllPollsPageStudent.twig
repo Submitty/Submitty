@@ -26,8 +26,12 @@
                         <td style="text-align: left"> {{ poll.getName() }} </td>
                         <td style="text-align: left">
                             {% set response_label = poll.getUserResponses()|length == 0  ? "No Response" : poll.getUserResponses() | map(r => r.getOption().getResponse()) | join(', ') %}
-                            {% include "misc/Markdown.twig" with {
-                                content: response_label
+                            {% include 'Vue.twig' with {
+                                type: "component",
+                                name: "Markdown",
+                                args: {
+                                    content: response_label
+                                }
                             } only %}
                         </td>
                         <td>
@@ -79,8 +83,12 @@
                         <td style="text-align: left"> {{ poll.getName() }} </td>
                         {% set response_label = poll.getUserResponses()|length == 0  ? "No Response" : poll.getUserResponses() | map(r => r.getOption().getResponse()) | join(', ') %}
                         <td style="text-align: left">
-                            {% include "misc/Markdown.twig" with {
-                                content: response_label
+                            {% include 'Vue.twig' with {
+                                type: "component",
+                                name: "Markdown",
+                                args: {
+                                    content: response_label
+                                }
                             } only %}
                         </td>
                         <td>

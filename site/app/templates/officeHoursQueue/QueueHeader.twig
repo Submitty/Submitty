@@ -1,8 +1,12 @@
 {% if viewer.getQueueMessage() | length > 0 %}
-  {% include "misc/Markdown.twig" with {
-    "content" : viewer.getQueueMessage(),
-    "class" : "content gradeable_message"
-  } only %}
+    {% include 'Vue.twig' with {
+        type: "component",
+        name: "Markdown",
+        args: {
+            content: viewer.getQueueMessage()
+        },
+        class: "content gradeable_message",
+    } only %}
 {% endif %}
 
 <div class="content">
