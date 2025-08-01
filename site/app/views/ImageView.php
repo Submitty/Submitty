@@ -67,6 +67,9 @@ class ImageView extends AbstractView {
         if (str_contains($file_path, 'user_assignment_settings.json')) {
             return 'submission_versions';
         }
+        elseif (str_contains($file_path, 'submissions_processed')) {
+            return 'submissions_processed';
+        }
         elseif (str_contains($file_path, 'submissions')) {
             return 'submissions';
         }
