@@ -1623,22 +1623,24 @@ HTML;
 
         $this->core->getOutput()->addInternalCss('latedaystableplugin.css');
 
-        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
-            "gradeable_id" => $gradeable->getId(),
-            "submission_time" => $submission_time,
-            "submitter_id" => $submitter_id,
-            "submitter" => $graded_gradeable->getSubmitter(),
-            "team_assignment" => $gradeable->isTeamAssignment(),
-            "display_version" => $display_version,
-            "highest_version" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-            "active_version" => $active_version,
-            "on_change" => $onChange,
-            "tables" => $tables,
-            "versions" => $version_data,
-            'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
-            "csrf_token" => $this->core->getCsrfToken(),
-            "update_version_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $new_version])
-                . '?' . http_build_query(['ta' => 'true', 'who' => $submitter_id])
+        return $this->core->getOutput()->renderTwigTemplate("Vue.twig", [
+            "type" => "component",
+            "name" => "StudentInformationPanel",
+            "args" => [
+                "submissionTime" => $submission_time,
+                "submitter" => $graded_gradeable->getSubmitter(),
+                "teamAssignment" => $gradeable->isTeamAssignment(),
+                "displayVersion" => $display_version,
+                "highestVersion" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
+                "activeVersion" => $active_version,
+                "onChange" => $onChange,
+                "tables" => $tables,
+                "versions" => $version_data,
+                'totalPoints' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
+                "csrfToken" => $this->core->getCsrfToken(),
+                "updateVersionUrl" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $new_version])
+                    . '?' . http_build_query(['ta' => 'true', 'who' => $submitter_id])
+            ]
         ]);
     }
 
