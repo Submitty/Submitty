@@ -1,4 +1,4 @@
-import { submitSubmissions, checkSubmissions } from '../../support/electronic_gradeable_utils';
+import { runTests } from '../../support/electronic_gradeable_utils';
 
 describe('Test the tutorial course gradeables', { env: { course: 'tutorial' } }, () => {
     it('Should test the docker network gradeable with full and buggy submissions', () => {
@@ -16,7 +16,10 @@ describe('Test the tutorial course gradeables', { env: { course: 'tutorial' } },
             { submissionFiles: { 1: ['udp_correct/server.py'] }, expected: [5, 5, '?', 5], full: fullScore },
         ];
 
-        submitSubmissions(docker_network, submissions)
-            .then(() => checkSubmissions(docker_network, submissions));
+        const gradeables = [
+            { name: docker_network, submissions: submissions },
+        ];
+
+        runTests(gradeables);
     });
 });

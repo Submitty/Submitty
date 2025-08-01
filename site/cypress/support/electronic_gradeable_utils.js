@@ -113,9 +113,9 @@ const constructFileName = (gradeable, filePath) => {
 /**
  * Submits multiple submissions for a gradeable.
  * @param {string} gradeable the name of the gradeable
- * @param {JSON} submissions a job mapping submission bucket to a list of files
+ * @param {Array} submissions an array of JSON objects that contains submissionFiles and expected scores
  */
-export function submitSubmissions(gradeable, submissions) {
+function submitSubmissions(gradeable, submissions) {
     return switchOrFindVersion(gradeable, null).then((startingVersion) => {
         cy.wrap(startingVersion).as(`${gradeable}_starting_version`);
 
@@ -141,13 +141,29 @@ export function submitSubmissions(gradeable, submissions) {
 /**
  * Checks the submissions for a gradeable.
  * @param {string} gradeable the name of the gradeable
- * @param {JSON} submissions a job mapping submission bucket to expected and full scores
+ * @param {Array} submissions an array of JSON objects that contains submissionFiles and expected scores
  */
-export function checkSubmissions(gradeable, submissions) {
+function checkSubmissions(gradeable, submissions) {
     cy.get(`@${gradeable}_starting_version`).then((start) => {
         cy.wrap(submissions).each((submission, index) => {
             const version = start + index + 1;
             checkNonHiddenResults(gradeable, version, submission.expected, submission.full);
         });
+    });
+}
+
+/** * Runs the tests for a list of gradeables.
+ * @param {Array} gradeables an array of gradeable objects with name and submissions
+ */
+function runTests(gradeables) {
+    gradeables.forEach((gradeable, index) => {
+        submitSubmissions(gradeable.name, gradeable.submissions);
+
+        // if at end then loop of submitting submissions then through each gradeables and check the results
+        if (index === gradeables.length - 1) {
+            gradeables.forEach((gradeable) => {
+                checkSubmissions(gradeable.name, gradeable.submissions);
+            });
+        }
     });
 }
