@@ -740,6 +740,77 @@ ALTER SEQUENCE public.categories_list_category_id_seq OWNED BY public.categories
 
 
 --
+-- Name: chatroom_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatroom_messages (
+    id integer NOT NULL,
+    chatroom_id integer NOT NULL,
+    user_id character varying NOT NULL,
+    display_name character varying,
+    role character varying,
+    content text NOT NULL,
+    "timestamp" timestamp(0) with time zone NOT NULL
+);
+
+
+--
+-- Name: chatroom_messages_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chatroom_messages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chatroom_messages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chatroom_messages_id_seq OWNED BY public.chatroom_messages.id;
+
+
+--
+-- Name: chatrooms; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chatrooms (
+    id integer NOT NULL,
+    host_id character varying NOT NULL,
+    title text NOT NULL,
+    description text,
+    is_active boolean DEFAULT false NOT NULL,
+    allow_anon boolean DEFAULT true NOT NULL,
+    session_started_at timestamp with time zone,
+    is_deleted boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: chatrooms_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.chatrooms_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: chatrooms_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.chatrooms_id_seq OWNED BY public.chatrooms.id;
+
+
+--
 -- Name: course_materials; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -921,6 +992,7 @@ CREATE TABLE public.electronic_gradeable_version (
     team_id character varying(255),
     active_version integer,
     anonymous_leaderboard boolean DEFAULT true NOT NULL,
+    g_notification_sent boolean DEFAULT false NOT NULL,
     CONSTRAINT egv_user_team_id_check CHECK (((user_id IS NOT NULL) OR (team_id IS NOT NULL)))
 );
 
@@ -1317,6 +1389,45 @@ ALTER SEQUENCE public.gradeable_data_overall_comment_goc_id_seq OWNED BY public.
 
 
 --
+-- Name: gradeable_redaction; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gradeable_redaction (
+    redaction_id integer NOT NULL,
+    g_id character varying(255) NOT NULL,
+    page integer NOT NULL,
+    x1 double precision NOT NULL,
+    x2 double precision NOT NULL,
+    y1 double precision NOT NULL,
+    y2 double precision NOT NULL,
+    CONSTRAINT x1_positive CHECK (((x1 >= (0)::double precision) AND (x1 <= x2))),
+    CONSTRAINT x2_positive CHECK (((x2 >= (0)::double precision) AND (x2 <= (1)::double precision))),
+    CONSTRAINT y1_positive CHECK (((y1 >= (0)::double precision) AND (y1 <= y2))),
+    CONSTRAINT y2_positive CHECK (((y2 >= (0)::double precision) AND (y2 <= (1)::double precision)))
+);
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.gradeable_redaction_redaction_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: gradeable_redaction_redaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.gradeable_redaction_redaction_id_seq OWNED BY public.gradeable_redaction.redaction_id;
+
+
+--
 -- Name: gradeable_teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1488,7 +1599,9 @@ CREATE TABLE public.notification_settings (
     team_joined_email boolean DEFAULT true NOT NULL,
     team_member_submission_email boolean DEFAULT true NOT NULL,
     self_notification_email boolean DEFAULT false NOT NULL,
-    self_registration_email boolean DEFAULT true NOT NULL
+    self_registration_email boolean DEFAULT true NOT NULL,
+    all_released_grades boolean DEFAULT true NOT NULL,
+    all_released_grades_email boolean DEFAULT true NOT NULL
 );
 
 
@@ -2002,6 +2115,20 @@ ALTER TABLE ONLY public.categories_list ALTER COLUMN category_id SET DEFAULT nex
 
 
 --
+-- Name: chatroom_messages id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages ALTER COLUMN id SET DEFAULT nextval('public.chatroom_messages_id_seq'::regclass);
+
+
+--
+-- Name: chatrooms id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms ALTER COLUMN id SET DEFAULT nextval('public.chatrooms_id_seq'::regclass);
+
+
+--
 -- Name: course_materials id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -2076,6 +2203,13 @@ ALTER TABLE ONLY public.gradeable_data ALTER COLUMN gd_id SET DEFAULT nextval('p
 --
 
 ALTER TABLE ONLY public.gradeable_data_overall_comment ALTER COLUMN goc_id SET DEFAULT nextval('public.gradeable_data_overall_comment_goc_id_seq'::regclass);
+
+
+--
+-- Name: gradeable_redaction redaction_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction ALTER COLUMN redaction_id SET DEFAULT nextval('public.gradeable_redaction_redaction_id_seq'::regclass);
 
 
 --
@@ -2209,6 +2343,22 @@ ALTER TABLE ONLY public.categories_list
 
 ALTER TABLE ONLY public.categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
+
+
+--
+-- Name: chatroom_messages chatroom_messages_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: chatrooms chatrooms_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms
+    ADD CONSTRAINT chatrooms_pkey PRIMARY KEY (id);
 
 
 --
@@ -2393,6 +2543,14 @@ ALTER TABLE ONLY public.gradeable_data
 
 ALTER TABLE ONLY public.gradeable
     ADD CONSTRAINT gradeable_pkey PRIMARY KEY (g_id);
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_pkey PRIMARY KEY (redaction_id);
 
 
 --
@@ -2855,6 +3013,30 @@ ALTER TABLE ONLY public.active_graders
 
 
 --
+-- Name: chatroom_messages chatroom_messages_chatroom_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_chatroom_id_fkey FOREIGN KEY (chatroom_id) REFERENCES public.chatrooms(id) ON DELETE CASCADE;
+
+
+--
+-- Name: chatroom_messages chatroom_messages_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatroom_messages
+    ADD CONSTRAINT chatroom_messages_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: chatrooms chatrooms_host_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.chatrooms
+    ADD CONSTRAINT chatrooms_host_id_fkey FOREIGN KEY (host_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
 -- Name: course_materials course_materials_last_edit_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3268,6 +3450,14 @@ ALTER TABLE ONLY public.gradeable_data_overall_comment
 
 ALTER TABLE ONLY public.gradeable_data_overall_comment
     ADD CONSTRAINT gradeable_data_overall_comment_goc_user_id_fkey FOREIGN KEY (goc_user_id) REFERENCES public.users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: gradeable_redaction gradeable_redaction_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gradeable_redaction
+    ADD CONSTRAINT gradeable_redaction_g_id_fkey FOREIGN KEY (g_id) REFERENCES public.gradeable(g_id) ON DELETE CASCADE;
 
 
 --

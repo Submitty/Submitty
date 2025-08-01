@@ -1,11 +1,12 @@
 <script setup lang="ts">
 defineProps<{
-    component: string;
+    type: string;
+    name: string;
 }>();
 </script>
 
 <template>
-  <h1>Unknown component "{{ component }}"</h1>
+  <h1>Unknown {{ type }} "{{ name }}"</h1>
 </template>
 
 <style scoped>

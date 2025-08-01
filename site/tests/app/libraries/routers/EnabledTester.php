@@ -9,19 +9,13 @@ use InvalidArgumentException;
 
 class EnabledTester extends \PHPUnit\Framework\TestCase {
     public function testFeatureFlag() {
-        $enabled = new Enabled(['value' => 'forum']);
+        $enabled = new Enabled('forum');
         $this->assertSame('forum', $enabled->getFeature());
     }
 
     public function testEmptyValue() {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Must have non-empty string "value" for Enabled annotation');
-        new Enabled([]);
-    }
-
-    public function testNonStringValue() {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Must have non-empty string "value" for Enabled annotation');
-        new Enabled(['value' => 1]);
+        $this->expectExceptionMessage('Must have non-empty string "feature" for Enabled attribute');
+        new Enabled();
     }
 }

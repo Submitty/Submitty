@@ -1,0 +1,119 @@
+<div class="content">
+    <h1> Live Chat </h1>
+    {% if user_admin %} <!--only instructors can create chat rooms-->
+        <a href='javascript:newChatroomForm()' data-testid="new-chatroom-btn" class="btn btn-primary">New Chatroom</a>
+    {% endif %}
+    <hr>
+    <div class="chatrooms-table-wrapper table-responsive">
+        <h2> Chatrooms </h2>
+        <table id="chatrooms-table" class="table table-striped">
+            {% if user_admin %} <!--instructor's view-->
+                <col style="width: 2.5%">
+                <col style="width: 5%">
+                <col style="width: 20%">
+                <col style="width: 35%">
+                <col style="width: 12.5%">
+                <col style="width: 15%">
+                <thead>
+                    <tr>
+                        <th scope="col" style="text-align: left"></th>
+                        <th scope="col" style="text-align: left"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col"></th>
+                        <th scope="col" style="text-align: right"></th>
+                    </tr>
+                </thead>
+                <tbody data-testid="chatroom-list-item">
+                    {% for chatroom in chatrooms %}
+                        <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
+                            <td>
+                                <a href='javascript:editChatroomForm("{{ chatroom.getId() }}", "{{ base_url }}", "{{ chatroom.getTitle() }}", "{{ chatroom.getDescription() }}", {{ chatroom.isAllowAnon() }});' class="fas fa-pencil-alt black-btn" data-testid="edit-chatroom"></a>
+                            </td>
+                            <td>
+                                {% if not chatroom.isActive() %}
+                                    <a href='javascript:deleteChatroomForm("{{ chatroom.getId() }}", "{{ chatroom.getTitle() }}", "{{ base_url }}");' class="fas fa-trash-alt black-btn" data-testid="delete-chatroom"></a>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
+                                    {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
+                                </span>
+                            </td>
+                            <td>
+                                <span title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
+                                    {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
+                                </span>
+                            </td>
+                            <td>
+                                <form id="chatroom_toggle_form_{{ chatroom.getId() }}" action="{{ base_url }}/{{ chatroom.getId() }}/toggleActiveStatus" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                                </form>
+                                {% if not chatroom.isActive() %}
+                                    <button class="btn btn-primary" onclick="toggle_chatroom({{ chatroom.getId() }}, false)" data-testid="enable-chatroom">
+                                        Start Session
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-danger" onclick="toggle_chatroom({{ chatroom.getId() }}, true)" data-testid="disable-chatroom">
+                                        <i class="fas fa-pause"></i>
+                                        End Session
+                                    </button>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary" data-testid="chat-join-btn">Join</a>
+                                {% if chatroom.isAllowAnon() %}
+                                    <i> or </i>
+                                    <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            {% else %} <!--student's view-->
+                <col style="width: 25%">
+                <col style="width: 25%">
+                <col style="width: 25%">
+                <col style="width: 25%">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Description</th>
+                        <th scope="col" style="text-align: left"></th>
+                    </tr>
+                </thead>
+                <tbody data-testid="chatroom-list-item">
+                    {% for chatroom in chatrooms %}
+                        {% if chatroom.isActive() %} <!--students only have access to active chat rooms-->
+                            <tr data-testid="chatroom-item" id="{{ chatroom.getId() }}">
+                                <td>
+                                    <span class="display-short" title="{{ chatroom.getTitle() }}" data-testid="chatroom-title">
+                                        {{ chatroom.getTitle() | length > 30 ? chatroom.getTitle() | slice(0, 30) ~ '...' : chatroom.getTitle() }}
+                                    </span>
+                                </td>
+                                <td data-testid="chatroom-host">
+                                    {{ chatroom.getHostName() }}
+                                </td>
+                                <td>
+                                    <span class="display-short" title="{{ chatroom.getDescription() }}" data-testid="chatroom-description">
+                                        {{ chatroom.getDescription() | length > 45 ? chatroom.getDescription() | slice(0, 45) ~ '...' : chatroom.getDescription() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ base_url }}/{{ chatroom.getId() }}" class="btn btn-primary"  data-testid="chat-join-btn">Join</a>
+                                    {% if chatroom.isAllowAnon() %}
+                                        <i> or </i>
+                                        <a href="{{ base_url }}/{{ chatroom.getId() }}/anonymous" class="btn btn-default" data-testid="anon-chat-join-btn">Join As Anon.</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% include('chat/CreateChatroomForm.twig') %}
+{% include('chat/EditChatroomForm.twig') %}

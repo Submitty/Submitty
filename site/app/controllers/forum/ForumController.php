@@ -27,9 +27,8 @@ use DateTime;
  *
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
- *
- * @Enabled("forum")
  */
+#[Enabled(feature: "forum")]
 class ForumController extends AbstractController {
     /**
      * ForumHomeController constructor.
@@ -212,9 +211,7 @@ class ForumController extends AbstractController {
         return false;
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/new", methods: ["POST"])]
     public function addNewCategory($category = []) {
         $result = [];
@@ -254,9 +251,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/delete", methods: ["POST"])]
     public function deleteCategory() {
         if (!empty($_POST["deleteCategory"])) {
@@ -281,9 +276,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/edit", methods: ["POST"])]
     public function editCategory() {
         $category_id = $_POST["category_id"];
@@ -323,9 +316,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_category")
-     */
+    #[AccessControl(permission: "forum.modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories/reorder", methods: ["POST"])]
     public function reorderCategories() {
         $repo = $this->core->getCourseEntityManager()->getRepository(Category::class);
@@ -351,9 +342,7 @@ class ForumController extends AbstractController {
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
-    /**
-     * @AccessControl(permission="forum.publish")
-     */
+    #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/threads/new", methods: ["POST"])]
     public function publishThread() {
         $markdown = !empty($_POST['markdown_status']);
@@ -394,12 +383,10 @@ class ForumController extends AbstractController {
             $categories_ids[] = (int) $category_id;
         }
         if (strlen($thread_title) === 0 || strlen($thread_post_content) === 0) {
-            $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("One of the fields was empty or bad. Please re-submit your thread.");
         }
         elseif (!$this->isValidCategories($categories_ids)) {
-            $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("You must select valid categories. Please re-submit your thread.");
         }
         else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
@@ -462,15 +449,13 @@ class ForumController extends AbstractController {
                 }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
-                 $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
+                $this->sendSocketMessage(['type' => 'new_thread', 'thread_id' => $thread_id]);
             }
         }
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_announcement")
-     */
+    #[AccessControl(permission: "forum.modify_announcement")]
     #[Route("/courses/{_semester}/{_course}/forum/make_announcement", methods: ["POST"])]
     public function makeAnnouncement(): JsonResponse {
         if (!isset($_POST['id'])) {
@@ -513,9 +498,7 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
-    /**
-     * @AccessControl(permission="forum.publish")
-     */
+    #[AccessControl(permission: "forum.publish")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/new", methods: ["POST"])]
     public function publishPost() {
         $current_user_id = $this->core->getUser()->getId();
@@ -666,9 +649,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(permission="forum.modify_announcement")
-     */
+    #[AccessControl(permission: "forum.modify_announcement")]
     #[Route("/courses/{_semester}/{_course}/forum/announcements", methods: ["POST"])]
     public function alterAnnouncement(bool $type) {
         $thread_id = $_POST["thread_id"];
@@ -884,9 +865,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/threads/merge", methods: ["POST"])]
     public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
@@ -932,9 +911,7 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/split", methods: ["POST"])]
     public function splitThread() {
         $title = $_POST["split_post_input"];
@@ -1267,17 +1244,13 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
-    /**
-     * @AccessControl(permission="forum.view_modify_category")
-     */
+    #[AccessControl(permission: "forum.view_modify_category")]
     #[Route("/courses/{_semester}/{_course}/forum/categories", methods: ["GET"])]
     public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
     }
 
-    /**
-     * @AccessControl(permission="forum.merge_thread")
-     */
+    #[AccessControl(permission: "forum.merge_thread")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/splitinfo", methods: ["POST"])]
     public function getSplitPostInfo() {
         $post_id = $_POST["post_id"];
@@ -1302,9 +1275,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    /**
-     * @AccessControl(role="LIMITED_ACCESS_GRADER")
-     */
+    #[AccessControl(role: "LIMITED_ACCESS_GRADER")]
     #[Route("/courses/{_semester}/{_course}/forum/posts/history", methods: ["POST"])]
     public function getHistory() {
         $repo = $this->core->getCourseEntityManager()->getRepository(Post::class);
@@ -1474,6 +1445,7 @@ class ForumController extends AbstractController {
     }
 
     #[Route("/courses/{_semester}/{_course}/posts/likes", methods: ["POST"])]
+    #[Route("/api/courses/{_semester}/{_course}/posts/likes", methods: ["POST"])]
     public function toggleLike(): JsonResponse {
         $requiredKeys = ['post_id', 'current_user'];
         foreach ($requiredKeys as $key) {
