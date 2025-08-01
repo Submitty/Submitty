@@ -50,10 +50,10 @@ class NotebookUtils {
         // Process each cell in the notebook
         foreach ($filedata['cells'] as $cell) {
             // Skip empty cells
-            if (!isset($cell['source']) || count($cell['source']) === 0) {   
+            if (!isset($cell['source']) || count($cell['source']) === 0) {
                 continue;
             }
-    
+
             switch ($cell['cell_type']) {
                 case 'markdown':
                     $result = self::parseMarkdownCell($cell);
@@ -163,7 +163,7 @@ class NotebookUtils {
                 // Print output text if it is a stream
                 case 'stream':
                     $text = $output['text'] ?? '';
-                    $text = is_array($text) ? implode($text) : (string)$text;
+                    $text = is_array($text) ? implode($text) : (string) $text;
                     $truncation_result = self::truncateText($text);
                     $output_text = $truncation_result['text'];
                     $skipped_output_count += $truncation_result['was_truncated'];
@@ -185,7 +185,7 @@ class NotebookUtils {
                     }
 
                     $text = $output['data']['text/plain'] ?? '';
-                    $text = is_array($text) ? implode($text) : (string)$text;
+                    $text = is_array($text) ? implode($text) : (string) $text;
                     $truncation_result = self::truncateText($text);
                     $text = $truncation_result['text'];
                     $skipped_output_count += $truncation_result['was_truncated'];
