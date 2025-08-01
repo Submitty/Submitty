@@ -6,6 +6,7 @@ use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
+use app\entities\Term;
 use app\libraries\response\MultiResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -355,7 +356,7 @@ class HomePageController extends AbstractController {
                 ->getQuery()
                 ->getSingleColumnResult();
 
-            if (in_array($term_id, $terms)) {
+            if (in_array($term_id, $term_names)) {
                 $this->core->addErrorMessage("Term id already exists.");
             }
             elseif ($end_date < $start_date) {
