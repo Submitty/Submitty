@@ -1846,7 +1846,7 @@ ORDER BY {$orderby}",
     /**
      * Gets the number of bad (late) user submissions associated with this gradeable.
      *
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
@@ -2219,7 +2219,7 @@ ORDER BY merged_data.{$section_key}
     /**
      * Gets the number of bad (late) graded components associated with this gradeable.
      *
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @param  boolean $is_team true if the gradeable is a team assignment
@@ -4096,7 +4096,7 @@ ORDER BY {$section_key}",
 
     /**
      * Gets the number of bad (late) team submissions associated with this gradeable.
-     * @param  int $g_id gradeable id we are looking up
+     * @param  string $g_id gradeable id we are looking up
      * @param  array<int> $sections an array holding sections of the given gradeable
      * @param  string $section_key key we are basing grading sections off of
      * @return array<int,int> with a key representing a section and value representing the number of bad submissions
@@ -6791,9 +6791,9 @@ AND gc_id IN (
                 DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                 $gradeable->isGradeInquiryAllowed(),
                 $gradeable->isGradeInquiryPerComponentAllowed(),
-                $gradeable->getDiscussionThreadId(),
+                json_encode($gradeable->getDiscussionThreadId()),
                 $gradeable->isDiscussionBased(),
-                $gradeable->getHiddenFiles(),
+                $gradeable->getStringHiddenFiles(),
                 $gradeable->getDependsOn(),
                 $gradeable->getDependsOnPoints()
             ];
@@ -6978,9 +6978,9 @@ AND gc_id IN (
                     DateUtils::dateTimeToString($gradeable->getGradeInquiryDueDate()),
                     $gradeable->isGradeInquiryAllowed(),
                     $gradeable->isGradeInquiryPerComponentAllowed(),
-                    $gradeable->getDiscussionThreadId(),
+                    json_encode($gradeable->getDiscussionThreadId()),
                     $gradeable->isDiscussionBased(),
-                    $gradeable->getHiddenFiles(),
+                    $gradeable->getStringHiddenFiles(),
                     $gradeable->getDependsOn(),
                     $gradeable->getDependsOnPoints(),
                     $gradeable->getId()
