@@ -49,6 +49,11 @@ class NotebookUtils {
         $skipped_output_count = 0;
         // Process each cell in the notebook
         foreach ($filedata['cells'] as $cell) {
+            // Skip empty cells
+            if (!isset($cell['source']) || count($cell['source']) === 0) {   
+                continue;
+            }
+    
             switch ($cell['cell_type']) {
                 case 'markdown':
                     $result = self::parseMarkdownCell($cell);
@@ -157,7 +162,9 @@ class NotebookUtils {
             switch ($output['output_type'] ?? '') {
                 // Print output text if it is a stream
                 case 'stream':
-                    $truncation_result = self::truncateText($output['text'] ?? '');
+                    $text = $output['text'] ?? '';
+                    $text = is_array($text) ? implode($text) : (string)$text;
+                    $truncation_result = self::truncateText($text);
                     $output_text = $truncation_result['text'];
                     $skipped_output_count += $truncation_result['was_truncated'];
                     $code_cell[] = [
@@ -178,6 +185,7 @@ class NotebookUtils {
                     }
 
                     $text = $output['data']['text/plain'] ?? '';
+                    $text = is_array($text) ? implode($text) : (string)$text;
                     $truncation_result = self::truncateText($text);
                     $text = $truncation_result['text'];
                     $skipped_output_count += $truncation_result['was_truncated'];
@@ -224,19 +232,18 @@ class NotebookUtils {
     /**
      * Truncate text to the defined limit and append a message if truncated.
      *
-     * @param string|string[] $text
+     * @param string $text
      * @return array{
      *     text: string,
      *     was_truncated: int
      * }
      */
-    private static function truncateText(string|array $text): array {
-        $output_text = is_array($text) ? implode($text) : $text;
+    private static function truncateText(string $text): array {
         // Standardize line endings
-        $normalized_text = str_replace(["\r\n", "\r"], "\n", $output_text);
+        $normalized_text = str_replace(["\r\n", "\r"], "\n", $text);
 
-        $output_text_length = strlen($output_text);
-        $line_limit_pos = $output_text_length;
+        $text_length = strlen($text);
+        $line_limit_pos = $text_length;
         $pos = -1;
         // Find the position of the last newline within the text limit
         for ($i = 0; $i < self::LINE_LIMIT; $i++) {
@@ -252,10 +259,10 @@ class NotebookUtils {
 
         // Determine the position to truncate based on the line limit and text limit
         $truncate_pos = min($line_limit_pos, self::TEXT_LIMIT);
-        $was_truncated = $truncate_pos < $output_text_length;
+        $was_truncated = $truncate_pos < $text_length;
 
         // If truncation occurred, append the warning message
-        $truncated_text = $was_truncated ? substr($output_text, 0, $truncate_pos) . PHP_EOL . '...' . PHP_EOL . '[Output truncated: exceeds size or line limit. Download the notebook to view the full output.]' : $output_text;
+        $truncated_text = $was_truncated ? substr($text, 0, $truncate_pos) . PHP_EOL . '...' . PHP_EOL . '[Output truncated: exceeds size or line limit. Download the notebook to view the full output.]' : $text;
 
         return ['text' => $truncated_text, 'was_truncated' => $was_truncated ? 1 : 0];
     }
