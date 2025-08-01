@@ -6,8 +6,6 @@ use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
-use JsonException;
-use Exception;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\User;
 
@@ -256,7 +254,7 @@ class PDFController extends AbstractController {
 
     #[Route(path: "/courses/{_semester}/{_course}/gradeable/{gradeable_id}/grading/img", methods: ["POST"])]
     public function showGraderImageEmbedded(string $gradeable_id): void {
-        
+
         // User can be a team
         $id = $_POST['user_id'] ?? null;
         $filename = $_POST['filename'] ?? null;
@@ -373,36 +371,11 @@ class PDFController extends AbstractController {
 
         $annotation_json = json_encode($annotation_body);
         $annotation_file_path = FileUtils::joinPaths($annotation_version_path, md5($file_path) . "_" . $grader_id . '.json');
-        
+
         if (file_put_contents($annotation_file_path, $annotation_json) === false) {
             return JsonResponse::getErrorResponse('Failed to save annotation file');
         }
 
         return JsonResponse::getSuccessResponse('Image annotation saved successfully!');
-    }
-
-    /**
-     * Helper method to extract directory type from file path
-     */
-    private function getDirectoryFromPath(string $file_path): string {
-        if (str_contains($file_path, 'user_assignment_settings.json')) {
-            return 'submission_versions';
-        }
-        elseif (str_contains($file_path, 'submissions')) {
-            return 'submissions';
-        }
-        elseif (str_contains($file_path, 'results_public')) {
-            return 'results_public';
-        }
-        elseif (str_contains($file_path, 'results')) {
-            return 'results';
-        }
-        elseif (str_contains($file_path, 'checkout')) {
-            return 'checkout';
-        }
-        elseif (str_contains($file_path, 'attachments')) {
-            return 'attachments';
-        }
-        return 'submissions'; // default
     }
 }

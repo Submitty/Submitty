@@ -3,7 +3,6 @@
 namespace app\views;
 
 use app\libraries\FileUtils;
-use app\libraries\response\JsonResponse;
 
 class ImageView extends AbstractView {
     /**
@@ -21,13 +20,11 @@ class ImageView extends AbstractView {
         bool $jquery = false,
         bool $is_peer_grader = false
     ): void {
-        // Add debugging
-        
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        
+
         $display_file_url = $this->core->buildCourseUrl(['display_file']);
-        
+
         $localcss = [];
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('image', 'image_annotation.css'), 'css');
 
@@ -36,16 +33,15 @@ class ImageView extends AbstractView {
         if ($jquery) {
             $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         }
-        
+
         try {
-            
             $this->core->getOutput()->renderTwigOutput('grading/electronic/ImageAnnotationEmbedded.twig', [
                 'gradeable_id' => $gradeable_id,
                 'user_id' => $user_id,
                 'grader_id' => $this->core->getUser()->getId(),
                 'filename' => $file_name,
                 'file_path' => $file_path,
-                'annotation_jsons' => $annotation_jsons, // Keep as array, not JSON-encoded
+                'annotation_jsons' => $annotation_jsons,
                 'student_popup' => $is_student,
                 'can_download' => !$is_peer_grader,
                 'display_file_url' => $display_file_url,
@@ -56,7 +52,8 @@ class ImageView extends AbstractView {
                 'anon_path' => $anon_path,
                 'download_path' => $download_path
             ]);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->addErrorMessage("Error rendering twig template: " . $e->getMessage());
             $this->core->addErrorMessage("Stack trace: " . $e->getTraceAsString());
             $this->core->getOutput()->renderJsonError($e->getMessage());
