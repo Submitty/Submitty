@@ -17,10 +17,10 @@ const inlineLatex: (TokenizerExtension) = {
     name: 'inlineLatex',
     level: 'inline',
     start(src: string) {
-        return src.match(/\$(?!\$)/)?.index || -1;
+        return src.match(/\$|\\\(/)?.index ?? -1;
     },
     tokenizer(src: string) {
-        const codeSpan = /^(?:\$(.+?)\$|\\\((.+?)\\\))/.exec(src);
+        const codeSpan = /^(?:\$([^$]+?)\$|\\\(([^)]+?)\\\))/.exec(src);
         if (!codeSpan) {
             return;
         }
