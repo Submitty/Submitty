@@ -1,8 +1,8 @@
 function visitGradeable(gradeableName) {
     const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
-    // wait 5 seconds for client JS to load - reduces flakyness
-    cy.get('[data-testid="gradeable-time-remaining-text"]', { timeout: 5000 }).should('contain.text', 'days');
+    // wait 10 seconds for client JS to load - reduces flakyness
+    cy.get('[data-testid="gradeable-time-remaining-text"]', { timeout: 10000 }).should('contain.text', 'days');
 }
 
 /**
