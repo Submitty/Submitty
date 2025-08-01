@@ -45,7 +45,7 @@
     "phpstan/phpstan": "2.1.17",
     "phpstan/phpstan-deprecation-rules": "2.0.3",
     "phpstan/phpstan-doctrine": "2.0.3",
-    "phpstan/phpstan-strict-rules": "2.0.4",
+    "phpstan/phpstan-strict-rules": "2.0.6",
     "phpunit/phpunit": "10.5.46",
     "submitty/php-codesniffer": "3.0.1",
     "symfony/finder": "^6.4",
