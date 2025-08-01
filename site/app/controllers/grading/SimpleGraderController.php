@@ -123,6 +123,10 @@ class SimpleGraderController extends AbstractController {
             return new RedirectResponse($this->core->buildCourseUrl());
         }
 
+        $this->core->authorizeWebSocketToken('grading', [
+            'gradeable_id' => $gradeable_id,
+        ]);
+
         // sort makes sorting remain when clicking print lab or view all
         if ($sort === "id") {
             $sort_key = "u.user_id";
@@ -444,7 +448,7 @@ class SimpleGraderController extends AbstractController {
      */
     private function sendSocketMessage(array $msg_array): void {
         $msg_array['user_id'] = $this->core->getUser()->getId();
-        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-' . $msg_array['g_id'];
+        $msg_array['page'] = $this->core->getConfig()->getTerm() . '-' . $this->core->getConfig()->getCourse() . '-grading-' . $msg_array['g_id'];
 
         try {
             $client = new Client($this->core);

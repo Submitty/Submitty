@@ -117,6 +117,11 @@ class ChatroomController extends AbstractController {
                 $this->core->buildCourseUrl(['chat'])
             );
         }
+
+        $this->core->authorizeWebSocketToken('chatrooms', [
+            'chatroom_id' => $chatroom->getId(),
+        ]);
+
         return new WebResponse(
             'Chatroom',
             'showChatroom',
@@ -198,7 +203,7 @@ class ChatroomController extends AbstractController {
             // indiv_msg_array sends to kick people out of closing chatrooms, msg_array sends to remove/add the chatroom to the chat list
             $indiv_msg_array = [];
             $indiv_msg_array['type'] = 'chat_close';
-            $indiv_msg_array['socket'] = "chatroom_$chatroom_id";
+            $indiv_msg_array['socket'] = "chatrooms-" . $chatroom_id;
             $this->sendSocketMessage($indiv_msg_array);
         }
         $this->sendSocketMessage($msg_array);
@@ -263,7 +268,7 @@ class ChatroomController extends AbstractController {
         }
         $msg_array['display_name'] = $display_name;
         $msg_array['role'] = ($user->accessAdmin() && !$isAnonymous) ? 'instructor' : 'student';
-        $msg_array['socket'] = "chatroom_$chatroom_id";
+        $msg_array['socket'] = "chatrooms-" . $chatroom_id;
         $msg_array['timestamp'] = date("Y-m-d H:i:s");
         $message = new Message($user->getId(), $msg_array['display_name'], $msg_array['role'], $msg_array['content'], $chatroom);
         $em->persist($message);

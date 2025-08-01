@@ -113,19 +113,21 @@ function initChatroomSocketClient(chatroomId) {
                 console.error(msg);
         }
     };
-    window.socketClient.open(`chatroom_${chatroomId}`);
+    window.socketClient.open('chatrooms', {
+        chatroom_id: chatroomId,
+    });
 }
 
 function initChatroomListSocketClient() {
-    window.chatroomListSocketClient = new WebSocketClient();
-    window.chatroomListSocketClient.onmessage = (msg) => {
+    window.socketClient = new WebSocketClient();
+    window.socketClient.onmessage = (msg) => {
         console.log('Received message from chatroom socket:', msg.type, msg);
         switch (msg.type) {
             case 'chat_open':
                 handleChatOpen(msg);
                 break;
             case 'chat_close': {
-                const row = document.getElementById(`chatroom-row-${msg.id}`);
+                const row = document.getElementById(`${msg.id}`);
                 if (row) {
                     row.remove();
                 }
@@ -135,7 +137,7 @@ function initChatroomListSocketClient() {
                 console.error(msg);
         }
     };
-    window.chatroomListSocketClient.open('chatrooms');
+    window.socketClient.open('chatrooms');
 }
 
 function newChatroomForm() {
@@ -212,11 +214,11 @@ function handleChatOpen(msg) {
     if (!tableBody) {
         return;
     }
-    if (document.getElementById(`chatroom-row-${msg.id}`)) {
+    if (document.getElementById(`${msg.id}`)) {
         return;
     }
     const tr = document.createElement('tr');
-    tr.id = `chatroom-row-${msg.id}`;
+    tr.id = `${msg.id}`;
 
     const tdTitle = document.createElement('td');
     const spanTitle = document.createElement('span');

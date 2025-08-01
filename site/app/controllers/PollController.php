@@ -144,6 +144,11 @@ class PollController extends AbstractController {
             $response_counts = [];
         }
 
+        $this->core->authorizeWebSocketToken('polls', [
+            'poll_id' => $poll_id,
+            'instructor' => $this->core->getUser()->accessAdmin(),
+        ]);
+
         return new WebResponse(
             PollView::class,
             'showPoll',
@@ -752,6 +757,12 @@ class PollController extends AbstractController {
             $this->core->addErrorMessage("Invalid Poll ID");
             return new RedirectResponse($this->core->buildCourseUrl(['polls']));
         }
+
+        $this->core->authorizeWebSocketToken('polls', [
+            'poll_id' => $poll_id,
+            'instructor' => true,
+        ]);
+
         return new WebResponse(
             PollView::class,
             'viewResults',
