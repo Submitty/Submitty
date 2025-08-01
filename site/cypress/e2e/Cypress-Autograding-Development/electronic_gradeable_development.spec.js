@@ -2,7 +2,7 @@ import { submitSubmissions, checkSubmissions } from '../../support/electronic_gr
 
 describe('Test the development course gradeables', { env: { course: 'development' } }, () => {
     it('Should test the development gradeables with full and buggy submissions', () => {
-        cy.login('student');
+        cy.login('instructor');
 
         const rust = [
             { submissionFiles: { 1: ['correct.rs'] }, expected: [5, 5], full: [5, 5] },
