@@ -207,6 +207,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_member_submission_email' => true,
                 'all_released_grades' => true,
                 'all_released_grades_email' => true,
+                'all_gradeable_releases' => true,
+                'all_gradeable_releases_email' => false,
                 'self_notification' => false,
                 'self_notification_email' => false,
                 'self_registration_email' => true,
