@@ -148,7 +148,7 @@ describe('tests navigation buttons for each level of access', () => {
             [blue, blue, null, null],
         );
         checkButtons('closed_homework',
-            [null, 'LATE SUBMIT', null, null],
+            [null, 'LATE RESUBMIT', null, null],
             [null, red, white, null],
         );
         checkButtons('closed_team_homework',
