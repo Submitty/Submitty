@@ -2,7 +2,7 @@ import { runTests } from '../../support/electronic_gradeable_utils';
 
 describe('Test the tutorial course gradeables', { env: { course: 'tutorial' } }, () => {
     it('Should test the docker network gradeable with full and buggy submissions', () => {
-        cy.login('student');
+        cy.login('instructor');
 
         const docker_network = '16_docker_network_python';
         const fullScore = [5, 5, '?', 5];
