@@ -147,6 +147,7 @@ class Core {
         }
     }
 
+
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
