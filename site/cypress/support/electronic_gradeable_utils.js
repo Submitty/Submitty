@@ -152,10 +152,11 @@ function checkSubmissions(gradeable, submissions) {
     });
 }
 
-/** * Runs the tests for a list of gradeables.
+/**
+ * Runs the tests for a list of gradeables.
  * @param {Array} gradeables an array of gradeable objects with name and submissions
  */
-function runTests(gradeables) {
+export function runTests(gradeables) {
     gradeables.forEach((gradeable, index) => {
         submitSubmissions(gradeable.name, gradeable.submissions);
 
