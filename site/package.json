@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.27.8",
-    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.1",
     "@cypress/skip-test": "^2.6.1",
     "@stylistic/eslint-plugin": "^5.2.2",
