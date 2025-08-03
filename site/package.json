@@ -89,7 +89,7 @@
     "typescript-eslint": "^8.36.0",
     "vite": "^7.0.6",
     "vnu-jar": "^24.10.17",
-    "vue-tsc": "^3.0.4"
+    "vue-tsc": "^3.0.5"
   },
   "scripts": {
     "prettier": "prettier --check \"public/css/**/*.css\"",
