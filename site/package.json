@@ -60,7 +60,7 @@
     "@types/jqueryui": "^1.12.24",
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.7.1",
-    "@types/node": "^24.0.10",
+    "@types/node": "^24.1.0",
     "@types/node-fetch": "^2.6.12",
     "@types/twig": "^1.12.17",
     "@typescript-eslint/parser": "^8.36.0",
