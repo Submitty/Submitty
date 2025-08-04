@@ -39,7 +39,6 @@ use app\libraries\DateUtils;
  * @method string   getType()
  * @method string|null getSemester()
  * @method string|null getCourse()
- * 
  */
 class Notification extends AbstractModel implements \JsonSerializable {
     /** @prop
