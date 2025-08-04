@@ -1,23 +1,16 @@
 // @ts-check
 
-import eslint from '@eslint/js';
-import stylistic from '@stylistic/eslint-plugin';
-import jest from 'eslint-plugin-jest';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
+const eslint = require('@eslint/js');
+const stylistic = require('@stylistic/eslint-plugin');
+const jest = require('eslint-plugin-jest');
+const globals = require('globals');
+const tseslint = require('typescript-eslint');
 // eslint-pluging-cypress/flat doesnt have ts definitions yet
-import cypress from 'eslint-plugin-cypress/flat';
-import vuelint from 'eslint-plugin-vue';
-import noUnsanitized from 'eslint-plugin-no-unsanitized';
-import vueParser from 'vue-eslint-parser';
-import { fileURLToPath } from 'url';
-import path from 'path';
+const cypress = require('eslint-plugin-cypress/flat');
+const vuelint = require('eslint-plugin-vue');
+const noUnsanitized = require('eslint-plugin-no-unsanitized');
 
-// ES modules don't have __dirname, so we need to create it
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export default tseslint.config(
+module.exports = tseslint.config(
     {
         name: 'Files to include',
         files: ['**/*.{js,ts,mts}'],
@@ -125,7 +118,7 @@ export default tseslint.config(
         // vuelint doesnt have ts types yet
         extends: [...(vuelint.configs['flat/recommended']), ...tseslint.configs.recommendedTypeChecked],
         languageOptions: {
-            parser: vueParser,
+            parser: require('vue-eslint-parser'),
             globals: globals.browser,
             parserOptions: {
                 parser: '@typescript-eslint/parser',
