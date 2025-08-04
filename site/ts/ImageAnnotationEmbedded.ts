@@ -1,6 +1,6 @@
 // Import utility functions
 import { buildCourseUrl } from './utils/server';
-import type { AnnotationState, MarkerView, Renderer} from '@markerjs/markerjs3';
+import type { AnnotationState, MarkerView } from '@markerjs/markerjs3';
 import type { AnnotationEditor } from '@markerjs/markerjs-ui';
 
 // Type declarations for external libraries
@@ -130,8 +130,6 @@ function addAnnotations(): void {
         editorWrapper.appendChild(annotationManager.globalAnnotationEditor);
         document.body.appendChild(editorWrapper);
         editorWrapper.style.display = 'flex';
-
-        
     }
     catch (error) {
         console.error('Error opening annotation editor:', error);
@@ -499,12 +497,12 @@ async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<strin
     let combinedAnnotations = Object.create(emptyState);
     combinedAnnotations.height = renderer.height; // These end up as 0 or undefined no matter what I try, revisit next time we try to implement this.
     combinedAnnotations.width = renderer.width;
-    
+
     for (const key of Object.keys(allAnnotations)) {
         if (key === uId) {
             continue;
         }
-        
+
         const annotationState = parseAnnotationState(allAnnotations[key], key);
         // Check if annotationState and markers exist
         if (annotationState && annotationState.markers && Array.isArray(annotationState.markers)) {
@@ -544,8 +542,9 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
             });
         } else {
             annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
-        }*/
-       annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
+        }
+        */
+        annotationManager.originalImg = document.getElementById('annotatable-image') as HTMLImageElement;
 
         // Handle image load errors
         if (annotationManager.originalImg) {
