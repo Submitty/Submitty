@@ -160,7 +160,7 @@ export function verifyWebSocketStatus(timeout = 5000, interval = 100) {
             const client = win.socketClient?.client;
 
             if (Date.now() - start > timeout) {
-                throw new Error(`WebSocket did not open within ${timeout}ms (state: ${readyState})`);
+                throw new Error(`WebSocket did not open within ${timeout}ms`);
             }
 
             if (!client) {
@@ -168,9 +168,7 @@ export function verifyWebSocketStatus(timeout = 5000, interval = 100) {
                 return Cypress.Promise.delay(interval).then(pollSocket);
             }
 
-            const readyState = client.readyState;
-
-            if (readyState === WebSocket.OPEN) {
+            if (client.readyState === WebSocket.OPEN) {
                 // Double check that the system message is hidden
                 return cy.get('#socket-server-system-message').should('be.hidden');
             }
