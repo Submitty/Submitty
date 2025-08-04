@@ -1,0 +1,22 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  dispatch-update:
+    name: Dispatch Update
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Submitty/peter-evans-repository-dispatch@v23.07.00
+        if: ${{ github.repository_owner == 'Submitty' }}
+        with:
+          event-type: repo-release
+          token: ${{ secrets.SUBMITTYBOT_DEPENDENCY_TOKEN }}
+          repository: ${{ github.repository_owner }}/Submitty
+          client-payload: '{
+              "repo_name": ${{ toJSON(github.event.repository.name) }},
+              "repo": ${{ toJSON(github.event.repository.full_name) }},
+              "tag": ${{ toJSON(github.event.release.tag_name) }}
+            }'

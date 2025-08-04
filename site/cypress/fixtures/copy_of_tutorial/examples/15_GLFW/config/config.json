@@ -1,0 +1,215 @@
+{
+    "max_submission_size" : 1000000,
+    // By default, show students a list of the actions taken for each testcase.
+    "publish_actions" : true,
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+             //Note the two step compilation.
+            "command" : ["cmake .", "make"],
+            "executable_name" : "a.out",
+            "points" : 1
+        },
+        // *************** TEST CASES *****************
+        {
+            "title" : "Graphics program 1",
+            "command" : "./a.out -input sierpinski_triangle.txt -size 400 -iters 0 -cubes",
+            //*************** Actions *********************
+            //Actions allow you to interface GUI programs 
+            //via submitty. Note that in order to run such 
+            //applications, it is required that you have 
+            //set up a "Submitty with a screen;" a machine 
+            //running submitty with a monitor. This machine 
+            //must also run only one grading thread at a 
+            //time. For more information, please visit the
+            //submitty wiki. 
+            "actions" : [
+                       //It is recommended that the first action be a delay to allow student
+                       //programs additional time to initialize. Actions are taken beginning
+                       //at window load time. Note that all actions are padded with a .1 sec
+                       //delay.
+                       {
+                            "action" : "delay",
+                            "seconds" : 1
+                       },
+                        //The click and drag delta command moves a specific distance from the
+                        //current mouse position. For additional information about actions 
+                        //and their syntax, please view the submitty wiki.
+                        {
+                            "action" : "click and drag delta",
+                            "end_x" : 100
+                        },
+                        //This program uses many unecessarily delays. Experiment by removing
+                        //them.
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_x" : -100
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_y" : 100
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_y" : -100
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_x" : 1000
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_x" : -1000
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_y" : 160
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_y" : -160
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag delta",
+                            "end_x" : 300,
+                            "end_y" : 300
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        //moves the mouse to 0,0 (upper left) on the window.
+                        {
+                            "action" : "origin"
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        //Centers the mouse on the screen
+                        {
+                            "action" : "center"
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "move mouse",
+                            "end_x" : 10,
+                            "end_y" : 200
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag",
+                            "start_x" : 10,
+                            "start_y" : 10,
+                            "end_x" : 150,
+                            "end_y" : 150
+                        },
+                        {
+                            "action" : "delay",
+                            "seconds" : 1
+                        },
+                        {
+                            "action" : "click and drag",
+                            "end_x" : 160,
+                            "end_y" : 160
+                        },
+                        //takes a screenshot, labeled sequentially starting from 0.
+                        {
+                            "action" : "screenshot"
+                        },
+                        //In the provided application, q indicates a program quit.
+                        {
+                            "action" : "key",
+                            "key_combination" : "q"
+                        }
+                    ],
+            "points" : 1,
+            "validation": [
+                {
+                    //In this validation example, we merely check that the screenshot
+                    //taken above exists.
+                    "actual_file": "0.png",
+                    "description": "screenshot a",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+            ]
+        },
+        {
+            "title" : "Graphics program 1",
+            "command" : "./a.out -input sierpinski_triangle.txt -size 400 -iters 0 -cubes",
+            // For this testcase, do not show students a list of actions
+            "publish_actions" : false,
+            "actions" : [
+                            {
+                                "action" : "click and drag delta",
+                                "end_x" : 50,
+                                "end_y" : -125
+                            },
+                            {
+                              "action" : "delay",
+                              "seconds" : 1
+                            },
+                            {
+                                "action" : "screenshot"
+                            },
+                            {
+                                "action" : "key",
+                                "key_combination" : "q"
+                            }
+                        ],
+            "points" : 1,
+            "validation": [
+                {
+                    "actual_file": "0.png",
+                    "description": "screenshot a",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                }
+            ]
+       }
+    ]
+}

@@ -1,0 +1,13 @@
+part1:
+  - part1.py
+  - part1_syntax_error1.py
+  - part1_syntax_error2.py
+  - part1_wrong_output.py
+part2:
+  - part2.py
+  - part2_syntax_error1.py
+  - part2_wrong_output.py
+part3:
+  - part3.py
+  - part3_syntax_error1.py
+  - part3_wrong_output.py

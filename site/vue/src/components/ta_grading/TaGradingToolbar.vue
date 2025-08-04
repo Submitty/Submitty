@@ -114,6 +114,8 @@ onMounted(() => {
         visible-icon="fa-wrench"
         button-id="grading-setting-btn"
         title="Show Grading Settings"
+        optional-spanid="grading-setting-btn"
+        optional-test-id="grading-setting-btn"
       />
     </template>
   </TaGradingSettings>

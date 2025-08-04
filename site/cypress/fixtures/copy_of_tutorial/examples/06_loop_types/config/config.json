@@ -1,0 +1,32 @@
+{
+  "testcases" : [
+    {
+      "title" : "Python - Distinguish for and while Loops",
+      "command" : [ "submitty_count -l python node for *.py",
+                    "submitty_count -l python token While *.py" ],
+      "points" : 2,
+      "validation" : [
+        {
+          "method" : "intComparison",
+          "actual_file" : "STDOUT_0.txt",
+          "description" : "Number of for loops",
+          "comparison" : "eq",
+          "term" : 0,
+          "failure_message" : "Must not use for loops",
+          "show_message" : "on_failure",
+          "show_actual" : "never"
+        },
+        {
+          "method" : "intComparison",
+          "actual_file" : "STDOUT_1.txt",
+          "description" : "Number of while loops",
+          "comparison" : "ge",
+          "term" : 1,
+          "failure_message" : "Must use a while loop",
+          "show_message" : "on_failure",
+          "show_actual" : "never"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "autograding" : {
+    "work_to_details": [ "**/*.csv" ]
+  },
+  "resource_limits" : {
+    "RLIMIT_CPU" : 60,
+    "RLIMIT_NPROC" : 100,
+    "RLIMIT_AS" : "RLIM_INFINITY"
+  },
+
+  "testcases" : [
+    // Furthermore, instructors can request students to write their own JUnit 
+    // test cases, and test coverage can be measured and graded using JaCoCo, a 
+    // free Java code coverage tool. This can be done alongside normal 
+    // instructor-provided JUnit test-based grading.
+    {
+      "type" : "Compilation",
+      "title" : "Class Compilation",
+      "command" : "javac -cp submitty_junit.jar hw0/Factorial.java",
+      "executable_name" : "hw0/Factorial.class",
+      "points" : 2
+    },
+    {
+      "type" : "Compilation",
+      "title" : "Student and Instructor JUnit Test Compilation",
+      "command" : "javac -cp submitty_junit.jar:. hw0/test/*Test.java",
+      "executable_name" : "hw0/test/FactorialTest.class",
+      "points" : 2
+    },
+
+
+    // -----------------------------------------------------------------------
+    // COVERAGE USING JACOCO
+    // JaCoCo can do on-demand instrumentation
+    {
+      "title" : "JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests",
+      "command" : ["java -noverify -javaagent:submitty_jacocoagent.jar=destfile=coverage.exec -cp submitty_junit.jar:submitty_hamcrest.jar:submitty_junit/:. TestRunner hw0",
+                   "java -jar submitty_jacococli.jar report coverage.exec --classfiles hw0 --csv jacoco_report.csv"
+      ],
+      "points" : 10,
+      "validation" : [
+        { 
+            
+          "method" : "MultipleJUnitTestGrader",
+          "actual_file" : "STDOUT_0.txt",
+          "deduction" : 0.5
+        },
+        {
+          "method" : "errorIfEmpty",
+          "actual_file" : "STDOUT_1.txt",
+          "description" : "JaCoCo report generation output",
+          "deduction" : 0.0
+        },
+        {
+          "method" : "JaCoCoCoverageReportGrader",
+          "actual_file" : "jacoco_report.csv",
+          "description" : "JaCoCo coverage report",
+          // specify the package & class to check (can omit to check all)
+          "package" : "hw0",
+          //"class" : "Factorial",
+          // which threshold(s) to apply
+          "instruction_coverage_threshold" : 90,
+          //"branch_coverage_threshold" : 90,
+          //"line_coverage_threshold" : 70,
+          //"complexity_coverage_threshold" : 80,
+          //"method_coverage_threshold" : 80,
+          "deduction" : 0.5
+        }
+      ]
+    },
+    {
+      "title" : "JaCoCo - Instructor JUnit Tests",
+      "command" : "java -noverify -cp submitty_junit.jar:submitty_hamcrest.jar:. org.junit.runner.JUnitCore hw0.test.FactorialTest",
+      "points" : 6,
+      "validation" : [
+        {
+          "method" : "JUnitTestGrader",
+          "actual_file" : "STDOUT.txt",
+          "num_tests" : 4
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+Hello world. This was compiled using cmake.
+Hello! I am a simple object which was created using a .h and .cpp.
+These were included in the cmakelists.txt file. My name is Submitty

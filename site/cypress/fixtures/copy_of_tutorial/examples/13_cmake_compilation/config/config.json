@@ -1,0 +1,35 @@
+{
+    "autograding" : {
+        "submission_to_compilation" : ["CMakeLists.txt", "*.cpp", "*.h"]
+    },
+    "max_submission_size" : 1000000,
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            //Note the multistep compilation which first 
+	    //calls cmake and then make. 
+            "command" : ["cmake .", "make"],
+            "executable_name" : "a.out",
+            "points" : 4
+        },
+
+        // *************** TEST CASES *****************
+        {
+            "title" : "Test Output",
+            "command" : "./a.out",
+            "points" : 6,
+            "validation" : 
+            [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "output.txt"
+                }
+            ]
+        }
+    ]
+}

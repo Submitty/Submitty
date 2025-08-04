@@ -1,0 +1,30 @@
+{
+  "testcases" : [
+    {
+      // Student-visible testcase name.
+      "title" : "Python - Simple Grading", 
+
+      // Commands to run (in order). These are not shell commands, although 
+      // they support some common shell wildcards. This can either be a 
+      // list or a single string.
+      "command" : [ "python3 *.py" ],
+
+      // Point value of this testcase.
+      "points" : 10, 
+
+      "validation" : [
+          {
+              // Grade by "diffing" the student output with an
+              // instructor-provided file.
+              "method" : "diff",
+              // The student's output. 
+              "actual_file" : "STDOUT.txt",
+              // The title seen by students.
+              "description" : "Program Output",
+              // The instructor-provided file (the correct answer).
+              "expected_file" : "output.txt"
+          }
+      ]
+    }
+  ]
+}
