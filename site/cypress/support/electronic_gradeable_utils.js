@@ -1,3 +1,7 @@
+/**
+ * Visits a gradeable and wait for JS to load so we can see if the clear all files button is enabled.
+ * @param {string} gradeableName the name of the gradeable we are visiting
+ */
 function visitGradeable(gradeableName) {
     const course = Cypress.env('course');
     cy.visit([course, 'gradeable', gradeableName]);
@@ -6,10 +10,9 @@ function visitGradeable(gradeableName) {
 }
 
 /**
- * A number versionNumber means that we are switching to a specific version
- * A null versionNumber means that we are returning the current version
+ * Switches to the specified version of a gradeable, or finds the current version if versionNumber is null.
  * @param {string} gradeableName the name of the gradeable we are switching to
- * @param {number|null} versionNumber
+ * @param {number|null} versionNumber the version number we are switching to, or null to find the current version
  */
 function switchOrFindVersion(gradeableName, versionNumber) {
     visitGradeable(gradeableName);
@@ -43,8 +46,7 @@ function newSubmission(gradeableName) {
 };
 
 /**
- * Uploads a file and compares the results with expected scores.
- * Requires newSubmission to be called first
+ * Requires newSubmission to be called first; uploads files to the specified bucket.
  * @param {string} fileUploadName the fixture to upload
  * @param {number} bucket the bucket to submit to. Default gradeables has buckets starting from 1
  * @param {boolean} firstFile checks the bucket for no files if it is the first file being uploaded
@@ -57,8 +59,7 @@ function submitFiles(fileUploadName, bucket, firstFile = false) {
 };
 
 /**
- * Hits the gradeable submit button
- * Requires newSubmission to be called first
+ * Requires newSubmission to be called first; clicks the gradeable submit button and checks the version
  * @param {number} versionNumber the version number we are on
  */
 function submitGradeable(versionNumber) {
@@ -68,6 +69,7 @@ function submitGradeable(versionNumber) {
 };
 
 /**
+ * Checks non hidden test results
  * @param {string} gradeableName the name of the gradeable we are checking
  * @param {number} versionNumber version number that we should check the grades against
  * @param {(number|'?')[]} expectedScores the expected score for the submission
@@ -90,6 +92,7 @@ function checkNonHiddenResults(gradeableName, versionNumber, expectedScores, ful
 
     cy.get('[data-testid="results-box"]').each(($el, index) => {
         if (expectedScores[index] === '?' || fullScores[index] === '?') {
+            cy.wrap($el).find('[data-testid="score-pill-badge"]').invoke('text').should('match', /\d+ \/ [1-9]\d*/);
             return;
         }
         cy.wrap($el).find('[data-testid="score-pill-badge"]').should('contain.text', `${expectedScores[index]} / ${fullScores[index]}`);
@@ -159,12 +162,8 @@ function checkSubmissions(gradeable, submissions) {
 export function runTests(gradeables) {
     gradeables.forEach((gradeable, index) => {
         submitSubmissions(gradeable.name, gradeable.submissions);
-
-        // if at end then loop of submitting submissions then through each gradeables and check the results
-        if (index === gradeables.length - 1) {
-            gradeables.forEach((gradeable) => {
-                checkSubmissions(gradeable.name, gradeable.submissions);
-            });
-        }
+    });
+    gradeables.forEach((gradeable) => {
+        checkSubmissions(gradeable.name, gradeable.submissions);
     });
 }
