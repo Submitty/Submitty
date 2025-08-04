@@ -108,13 +108,13 @@ class TokenManagerTester extends \PHPUnit\Framework\TestCase {
     public function testCreateWebsocketToken() {
         $current_time = time();
 
-        // Ensure the issued time is within 5 seconds from now to account for clock skew
-        $min_issued_time = $current_time - 5;
-        $max_issued_time = $current_time + 5;
+        // Ensure the issued time is within 1 second from now to account for clock skew
+        $min_issued_time = $current_time - 1;
+        $max_issued_time = $current_time + 1;
 
-        // Ensure the expiration time is 5 minutes +/- 5 seconds from now to account for clock skew
-        $min_expired_time = $current_time + 5 * 60 - 5;
-        $max_expired_time = $current_time + 5 * 60 + 5;
+        // Ensure the expiration time is 5 minutes +/- 1 second from now to account for clock skew
+        $min_expired_time = $current_time + 5 * 60 - 1;
+        $max_expired_time = $current_time + 5 * 60 + 1;
 
         $authorized_page = 'f25-sample-defaults';
         $token = TokenManager::generateWebSocketToken('test_user', $authorized_page);

@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\entities\poll\Option;
 use app\entities\poll\Poll;
 use app\entities\poll\Response;
+use app\models\User;
 use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -146,7 +147,7 @@ class PollController extends AbstractController {
 
         $this->core->authorizeWebSocketToken('polls', [
             'poll_id' => $poll_id,
-            'instructor' => $this->core->getUser()->accessAdmin(),
+            'instructor' => $this->core->getUser()->getGroup() === User::GROUP_INSTRUCTOR,
         ]);
 
         return new WebResponse(

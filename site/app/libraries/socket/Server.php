@@ -116,32 +116,31 @@ class Server implements MessageComponentInterface {
             $authorized_pages = $token->claims()->get('authorized_pages');
 
             // Parse the query parameters for the page identifier
-            $query_params = [];
+            $params = [];
             $query = $request->getUri()->getQuery();
-            parse_str($query, $query_params);
+            parse_str($query, $params);
 
             // If the required parameters are not provided, close the connection
-            if (!isset($query_params['page']) || !isset($query_params['course']) || !isset($query_params['term'])) {
+            if (!isset($params['page']) || !isset($params['course']) || !isset($params['term'])) {
                 return false;
             }
 
-            // Get the specific page from the query parameters
-            $page = $query_params['page'];
+            // Create the full page identifier for authorization checks
+            $page = $params['page'];
 
             if (
                 $page === 'discussion_forum'
                 || $page === 'office_hours_queue'
-                || ($page === 'chatrooms' && !isset($query_params['chatroom_id']))
+                || ($page === 'chatrooms' && !isset($params['chatroom_id']))
             ) {
-                // These pages are not stored as unique authorized pages as they're available to all users in the course
+                // These pages are not stored as unique authorized pages as they're available to all authenticated users
                 $key = 'defaults';
             }
             else {
                 $key = $page;
             }
 
-            // Create the page identifier for authorization checks
-            $authorized_page = Utils::buildWebSocketPageIdentifier($key, $query_params);
+            $authorized_page = Utils::buildWebSocketPageIdentifier($key, $params);
 
             if ($authorized_page === null) {
                 return false;
@@ -151,7 +150,7 @@ class Server implements MessageComponentInterface {
             }
 
             // Create the full page identifier for the true page connection
-            $page_identifier = Utils::buildWebSocketPageIdentifier($page, $query_params);
+            $page_identifier = Utils::buildWebSocketPageIdentifier($page, $params);
 
             // Set up the connection
             $this->setSocketClient($user_id, $conn);
@@ -165,7 +164,6 @@ class Server implements MessageComponentInterface {
             return true;
         }
         catch (\Exception $exc) {
-            $this->logError($exc, $conn);
             return false;
         }
     }

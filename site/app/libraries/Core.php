@@ -944,19 +944,19 @@ class Core {
     /**
      * Authorize a WebSocket token, which assumes the authorization checks have already been performed.
      *
-     * @param string|null $page Optional page identifier, defaulting to a course-specific default page, such as f25-sample-defaults
-     * @param array<string, mixed> $query_params Optional query parameters to format the full page identifier.
+     * @param string|null $page Optional page identifier, defaulting to a course-specific default page, such as 'f25-sample-defaults'
+     * @param array<string, mixed> $params Optional parameters to format the full page identifier.
      * @return string|null WebSocket authorization token string or null if generation fails.
      */
-    public function authorizeWebSocketToken(?string $page = null, ?array $query_params = []): ?string {
+    public function authorizeWebSocketToken(?string $page = null, ?array $params = []): ?string {
         if (!$this->config->isCourseLoaded() || !$this->userLoaded()) {
             return null;
         }
 
         // Append the term and course to the query params for the full page identifier
-        $query_params['term'] = $this->config->getTerm();
-        $query_params['course'] = $this->config->getCourse();
-        $page = Utils::buildWebSocketPageIdentifier($page ?? 'defaults', $query_params);
+        $params['term'] = $this->config->getTerm();
+        $params['course'] = $this->config->getCourse();
+        $page = Utils::buildWebSocketPageIdentifier($page ?? 'defaults', $params);
 
         $user_id = $this->user->getId();
         $existing_authorized_pages = [];
@@ -971,8 +971,8 @@ class Core {
                 $token_user_id = $token->claims()->get('sub');
                 $token_authorized_pages = $token->claims()->get('authorized_pages');
 
-                if (!array_key_exists($page, $token_authorized_pages)) {
-                    // We need to refresh the token to add the new page to the authorized pages
+                if (!array_key_exists($page, $token_authorized_pages) || time() > intval($token_authorized_pages[$page])) {
+                    // Refresh for missing or expired pages
                     $refresh = true;
                 }
 
@@ -987,10 +987,9 @@ class Core {
                     }
                 }
             }
-            catch (\Exception $exc) {
+            catch (\Exception $e) {
                 // Invalid cookie data, delete it
                 Utils::setCookie($cookie_key, "", time() - 3600);
-                Logger::error("Failed to parse WebSocket token: " . $exc->getMessage());
             }
         }
 
@@ -1001,7 +1000,6 @@ class Core {
             return $token->toString();
         }
         catch (\Exception $e) {
-            Logger::error("Failed to generate WebSocket token: " . $e->getMessage());
             return null;
         }
     }
