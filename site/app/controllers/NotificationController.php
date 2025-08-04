@@ -160,7 +160,7 @@ class NotificationController extends AbstractController {
     }
 
     /**
-     * @return MultiResponse
+     * @return JsonResponse
      */
     #[Route("/courses/{_semester}/{_course}/notifications/settings/sync", methods: ["POST"])]
     public function updateNotificationSync() {
@@ -179,10 +179,8 @@ class NotificationController extends AbstractController {
             // Fetch all active courses for the user
             $courses = $this->core->getQueries()->getCourseForUserId($user_id);
 
-            if (empty($courses)) {
-                return MultiResponse::JsonOnlyResponse(
-                    JsonResponse::getFailResponse('You need to be enrolled in active courses to sync notification settings.')
-                );
+            if (count($courses) === 0) {
+                return JsonResponse::getFailResponse('You need to be enrolled in active courses to sync notification settings.');
             }
 
             // Sync settings to all active courses
@@ -223,7 +221,8 @@ class NotificationController extends AbstractController {
         if ($defaults === 'null' || $defaults === '') {
             $defaults = null;
             $message = 'Default notification settings have been cleared.';
-        } else {
+        }
+        else {
             $current_term = $this->core->getConfig()->getTerm();
             $current_course = $this->core->getConfig()->getCourse();
             $defaults = $current_term . '-' . $current_course;
@@ -236,7 +235,7 @@ class NotificationController extends AbstractController {
 
     /**
      * Automatically sync notification settings to other courses if user has sync enabled
-     * @param array $new_settings The updated notification settings
+     * @param array<string, bool> $new_settings The updated notification settings
      * @return void
      */
     private function autoSyncIfEnabled(array $new_settings): void {

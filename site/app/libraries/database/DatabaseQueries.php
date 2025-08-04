@@ -751,11 +751,9 @@ SQL;
      * @return void
      */
     public function updateNotificationSync(string $user_id, bool $synced, ?string $timestamp): void {
-        $this->submitty_db->query("
-            UPDATE users
-            SET notifications_synced = ?, notifications_synced_update = ?
-            WHERE user_id = ?
-            ", [$synced, $timestamp, $user_id]
+        $this->submitty_db->query(
+            "UPDATE users SET notifications_synced = ?, notifications_synced_update = ? WHERE user_id = ?",
+            [$synced, $timestamp, $user_id]
         );
     }
 
@@ -768,10 +766,11 @@ SQL;
      */
     public function updateNotificationDefaults(string $user_id, ?string $defaults): void {
         $this->submitty_db->query(
-            "UPDATE users
-            SET notification_defaults = ?
-            WHERE user_id = ?
-            ", [$defaults, $user_id]
+            "UPDATE users SET notification_defaults = ? WHERE user_id = ?",
+            [
+                $defaults,
+                $user_id
+            ]
         );
     }
 
@@ -779,7 +778,7 @@ SQL;
      * Sync notification settings from reference course to target course
      *
      * @param string $user_id
-     * @param array $settings
+     * @param array<string, bool> $settings
      * @param string $target_term
      * @param string $target_course
      * @return void
@@ -818,7 +817,7 @@ SQL;
      * @param string $user_id
      * @param string $reference_term
      * @param string $reference_course
-     * @return array|null
+     * @return array<string, bool>|null
      */
     public function getNotificationSettingsFromCourse(string $user_id, string $reference_term, string $reference_course): ?array {
         // Connect to reference course database
