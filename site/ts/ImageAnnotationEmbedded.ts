@@ -131,7 +131,7 @@ function addAnnotations(): void {
         document.body.appendChild(editorWrapper);
         editorWrapper.style.display = 'flex';
 
-        $('#annotation-status').text('Annotation editor opened').css('color', 'blue');
+        
     }
     catch (error) {
         console.error('Error opening annotation editor:', error);
@@ -151,7 +151,6 @@ function setupAnnotationEditor(): void {
         if (detail.state && detail.dataUrl) {
             annotationManager.currentAnnotations = detail.state;
             annotationManager.annotatedImageDataUrl = detail.dataUrl;
-            $('#annotation-status').text('Annotations modified (not saved)').css('color', 'orange');
         }
 
         // Hide the annotation editor
@@ -159,7 +158,7 @@ function setupAnnotationEditor(): void {
         if (editorWrapper) {
             editorWrapper.style.display = 'none';
         }
-
+        $('#annotation-status').text('Annotations modified (not saved)').css('color', 'green');
         // Render the annotations on the image
         renderAnnotationsOnImage();
     });
@@ -390,7 +389,7 @@ function renderAnnotationsOnImage(): void {
         return;
     }
 
-    if (!annotationManager.currentAnnotations) {
+    if (!annotationManager.currentAnnotations || annotationManager.currentAnnotations.markers.length === 0) {
         return;
     }
 
@@ -447,8 +446,6 @@ function renderAnnotationsOnImage(): void {
 
         // Show the annotations
         markerView.show(annotationManager.currentAnnotations);
-
-        $('#annotation-status').text('Annotations rendered').css('color', 'green');
     }
     catch (error) {
         console.error('Error in renderAnnotationsOnImage:', error);

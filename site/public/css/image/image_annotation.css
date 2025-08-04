@@ -38,9 +38,11 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    max-width: 90%;
     width: 100%;
-    justify-content: center;
+    justify-content: left;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .annotation-toolbar .btn {
@@ -78,6 +80,7 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    margin-top: 75px;
 }
 
 #annotation-status {
@@ -98,11 +101,10 @@
     margin-bottom: 10px;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .annotation-toolbar {
         flex-direction: column;
-        align-items: stretch;
+        align-items: normal;
     }
 
     .annotation-toolbar .btn {

@@ -11,29 +11,28 @@
         <div id="image-error-message" style="display: none; color: red; font-weight: bold; padding: 10px; text-align: center;"></div>
         
         <div class="image-annotation-container">
-            <img id="annotatable-image" 
-                 src="{{ display_file_url }}?dir={{ directory }}&file={{ filename | url_encode }}&path={{ file_path | url_encode }}&ta_grading=true&gradeable_id={{ gradeable_id }}" 
-                 alt="{{ filename }}" />
-            
             <div class="annotation-toolbar">
                 <button id="add-annotations-btn" class="btn btn-primary" onclick="if (typeof addAnnotations === 'function') addAnnotations();">
-                    <i class="fas fa-edit"></i> Edit Annotations
+                    <i class="fas fa-edit"></i>
                 </button>
                 <button id="save-annotations-btn" class="btn btn-success" onclick="if (typeof saveAnnotations === 'function') saveAnnotations();">
-                    <i class="fas fa-save"></i> Save Annotations
+                    <i class="fas fa-save"></i>
                 </button>
                 <button id="clear-annotations-btn" class="btn btn-warning" onclick="if (typeof clearAnnotations === 'function') clearAnnotations();">
-                    <i class="fas fa-eraser"></i> Clear Annotations
+                    <i class="fas fa-eraser"></i>
                 </button>
                 
                 {% if can_download %}
                     <button id="download-image-btn" class="btn btn-secondary" onclick="if (typeof downloadImage === 'function') downloadImage();">
-                        <i class="fas fa-download"></i> Download Image
+                        <i class="fas fa-download"></i>
                     </button>
                 {% endif %}
                 
                 <span id="annotation-status"></span>
             </div>
+            <img id="annotatable-image" 
+                 src="{{ display_file_url }}?dir={{ directory }}&file={{ filename | url_encode }}&path={{ file_path | url_encode }}&ta_grading=true&gradeable_id={{ gradeable_id }}" 
+                 alt="{{ filename }}" />
         </div>
     </div>
 </div>
