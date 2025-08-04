@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Doctrine entity for Terms, not much used but used for other queries.
+ * Doctrine entity for Terms
  * @package app\entities
  */
 #[ORM\Entity]
@@ -21,14 +21,11 @@ class Term {
     #[ORM\Column(type: Types::STRING)]
     protected string $name;
 
-    // In the database it's a Date, but in Php it's type String
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected \DateTime $start_date;
 
-    // In the database it's a Date, but in Php it's type String
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     protected \DateTime $end_date;
-
 
     public function __construct(string $term_id, string $name, \DateTime $start_date, \DateTime $end_date) {
         $this->term_id = $term_id;
