@@ -1,3 +1,0 @@
-Forwarding delta:beta:charlie:alpha:beta:delta:charlie:alpha:FINISHED! to charlie
-Forwarding delta:charlie:alpha:FINISHED! to beta
-Finished!
