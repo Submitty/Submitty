@@ -45,6 +45,8 @@ repair_autograding() {
         log_service_restart "autograding" \
             "Failure detected within the Autograding Shipper" \
             "${restart_output}\n\n${last_status}"
+    else
+        echo -e "${timestamp}: autograding restart not needed" | sudo tee -a "${log_file}"
     fi
 }
 
@@ -62,6 +64,7 @@ repair_systemctl_service() {
 }
 
 repair_services() {
+    echo -e "${timestamp}: repair services begin" | sudo tee -a "${log_file}"
     for service in "${!services[@]}"; do
         case "${service}" in
             "autograding")
@@ -72,6 +75,20 @@ repair_services() {
                 ;;
         esac
     done
+    echo -e "${timestamp}: repair services finished" | sudo tee -a "${log_file}"
 }
+
+service="$1"
+message="$2"
+last_status="$3"
+
+today=$(date +%Y%m%d)
+    
+timestamp=$(date "+%Y-%m-%d:%H:%M:%S")
+log_file="/var/local/submitty/logs/services/${today}.txt"
+
+    
+#echo -e "x${timestamp}"
+#echo -e "x${log_file}"
 
 repair_services

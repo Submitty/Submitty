@@ -123,6 +123,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/docker"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/daemon_job_queue"
     mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/sysinfo"
+    mkdir -p "${SUBMITTY_DATA_DIR:?}/logs/services"
 fi
 # ------------------------------------------------------------------------
 
@@ -163,6 +164,7 @@ if [ "${IS_WORKER:?}" == 0 ]; then
     chown  -R "${PHP_USER:?}":"${COURSE_BUILDERS_GROUP:?}"    "${SUBMITTY_DATA_DIR:?}/logs/ta_grading"
     chown  -R "${DAEMON_USER:?}":"${COURSE_BUILDERS_GROUP:?}" "${SUBMITTY_DATA_DIR:?}/logs/vcs_generation"
     chown  -R postgres:"${DAEMON_GROUP:?}"                    "${SUBMITTY_DATA_DIR:?}/logs/psql"
+    chown  -R "${DAEMON_USER:?}":"${DAEMON_GROUP:?}"          "${SUBMITTY_DATA_DIR:?}/logs/services"
 
     # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
     chmod  g+w                                                "${SUBMITTY_DATA_DIR:?}/logs/psql"

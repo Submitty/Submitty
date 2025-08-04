@@ -4,6 +4,10 @@
     "container_options": {
         "container_image": "submitty/python:latest"
     },
+
+    "resource_limits" : {
+        "RLIMIT_CPU" : 600
+    },
     
     "testcases" : [
         {
