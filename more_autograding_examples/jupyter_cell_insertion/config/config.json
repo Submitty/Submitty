@@ -75,14 +75,8 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "checkpoint1.txt",
+          "actual_file": "checkpoint1_stdout.txt",
           "expected_file" : "add_two_numbers.txt"
-        },
-        {
-          "method" : "warnIfEmpty",
-		      "actual_file" : "checkpoint1_source.txt",
-		      "show_actual" : "always",
-          "deduction" : 0.0
         },
         {
           "method" : "errorIfNotEmpty",
@@ -105,15 +99,10 @@
       "points": 1,
       "validation": [
         {
-          "method": "diff",
-          "actual_file": "checkpoint2.txt",
-          "show_actual" : "always"
-        },
-        {
           "method" : "errorIfNotEmpty",
 		      "actual_file" : "checkpoint2.err",
 		      "show_actual" : "always",
-          "deduction" : 0.0
+          "deduction" : 1.0
         }
       ]
     },
@@ -131,7 +120,7 @@
       "validation": [
         {
           "method": "diff",
-          "actual_file": "checkpoint3_initialization.txt",
+          "actual_file": "checkpoint3_initialization_stdout.txt",
           "description" : "Initialization of Bank Account",
           "expected_file": "account_initialization.txt",
           "show_actual" : "always"
@@ -144,7 +133,7 @@
         },
         {
           "method": "diff",
-          "actual_file": "checkpoint3_deposit.txt",
+          "actual_file": "checkpoint3_deposit_stdout.txt",
           "description" : "Deposit of Bank Account",
           "expected_file": "account_deposit.txt",
           "show_actual" : "always"
@@ -157,7 +146,7 @@
         },
         {
           "method": "diff",
-          "actual_file": "checkpoint3_withdrawal.txt",
+          "actual_file": "checkpoint3_withdrawal_stdout.txt",
           "description" : "Withdrawal of Bank Account",
           "expected_file": "account_withdrawal.txt",
           "show_actual" : "always"
