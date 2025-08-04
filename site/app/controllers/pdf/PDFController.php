@@ -128,7 +128,7 @@ class PDFController extends AbstractController {
             }
         }
 
-        $rerender_annotated_pdf = (file_exists($annotation_path) && $latest_timestamp <= filemtime($annotation_path)) !== true;
+        $rerender_annotated_pdf = !((file_exists($annotation_path) && $latest_timestamp <= filemtime($annotation_path)));
 
         $pdf_array[] = 'PDF';
         $this->core->getOutput()->renderOutput($pdf_array, 'downloadPDFEmbedded', $gradeable_id, $id, $filename, $real_path, $annotation_jsons, $rerender_annotated_pdf, true, 1, true);
@@ -199,10 +199,10 @@ class PDFController extends AbstractController {
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = $is_anon ? "" : $file_path;
-        $anon_path = $is_anon ? $file_path : "";
+        $real_path = (bool) $is_anon ? "" : $file_path;
+        $anon_path = (bool) $is_anon ? $file_path : "";
 
-        if ($is_anon) {
+        if ((bool) $is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
             $real_path = $this->getPath($file_path, $id, true);
             if (!file_exists($real_path)) {
@@ -261,10 +261,10 @@ class PDFController extends AbstractController {
         $is_anon = $_POST['is_anon'] ?? false;
         $filename = html_entity_decode($filename);
         $file_path = urldecode($_POST['file_path']);
-        $real_path = $is_anon ? "" : $file_path;
-        $anon_path = $is_anon ? $file_path : "";
+        $real_path = (bool) $is_anon ? "" : $file_path;
+        $anon_path = (bool) $is_anon ? $file_path : "";
 
-        if ($is_anon) {
+        if ((bool) $is_anon) {
             $id = $this->core->getQueries()->getSubmitterIdFromAnonId($id, $gradeable_id);
             $real_path = $this->getPath($file_path, $id, true);
             if (!file_exists($real_path)) {
@@ -324,7 +324,7 @@ class PDFController extends AbstractController {
         $file_path = $_POST['file_path'] ?? null;
         $annotations = $_POST['annotations'] ?? '[]';
 
-        if (!$user_id || !$filename || !$file_path) {
+        if ($user_id === null || $filename === null || $file_path === null) {
             return JsonResponse::getErrorResponse('Missing required parameters');
         }
 
@@ -366,7 +366,7 @@ class PDFController extends AbstractController {
         $annotation_body = [
             'file_path' => $file_path,
             'grader_id' => $grader_id,
-            'annotations' => json_decode($annotations, true) ?: []
+            'annotations' => json_decode($annotations, true) !== null ? json_decode($annotations, true) : []
         ];
 
         $annotation_json = json_encode($annotation_body);

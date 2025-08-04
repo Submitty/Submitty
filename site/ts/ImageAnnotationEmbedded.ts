@@ -521,7 +521,7 @@ async function rasterizeAnnotatedImage(uId: string, allAnnotations: Record<strin
 }
 */
 
-function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, AnnotationState>) {
+function initImageAnnotation(gId: string, uId: string, grId: string, fname: string, fPath: string, token: string, isStud: boolean, allAnnotations?: Record<string, string>) {
     // Set variables from parameters
     annotationManager.gradeableId = gId;
     annotationManager.userId = uId;
@@ -534,8 +534,7 @@ function initImageAnnotation(gId: string, uId: string, grId: string, fname: stri
     // Wait for DOM to be ready
     $(document).ready(() => {
         // Get the original image element
-
-        const existingAnnotations = allAnnotations ? allAnnotations[uId] : emptyState;
+        const existingAnnotations = JSON.parse(allAnnotations?.[grId] || JSON.stringify(emptyState)) as AnnotationState;
         /*
         Replace our image with our combined image/other user annotations.
         //const existingAnnotations = allAnnotations ? parseAnnotationState(allAnnotations[uId], uId) || emptyState : emptyState;

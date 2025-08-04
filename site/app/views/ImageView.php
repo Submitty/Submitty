@@ -7,6 +7,8 @@ use app\libraries\FileUtils;
 class ImageView extends AbstractView {
     /**
      * adds to our buffer a twig output of image annotation interface.
+     *
+     * @param array<string, string> $annotation_jsons
      */
     public function showImageEmbedded(
         string $gradeable_id,
