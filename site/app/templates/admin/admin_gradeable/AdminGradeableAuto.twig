@@ -143,6 +143,14 @@
                     </div>
                 </div>
                 <div id="gradeable-config-edit-bar">
+                    <div class="customize-editor-container">
+                        <button type="button" class="customize-editor-button" id="toggle-line-nums" onClick="toggleLineNums()">
+                            <i class="fas fa-list-ol customize-editor-button-icon"></i>
+                        </button>
+                        <button type="button" class="customize-editor-button" onClick="toggleTabLength()">
+                            <i class="fas fa-2 customize-editor-button-icon" id="toggle-tab-length"></i>
+                        </button>
+                    </div>
                     <textarea id="gradeable-config-edit" data-edited="false" aria-label="Edit Gradeable Configuration" spellcheck="false"></textarea>
                     <a class="btn btn-primary" onclick="saveGradeableConfigEdit('{{ gradeable.getId() }}')">Save Changes</a>
                     <a class="btn btn-default" onclick="cancelGradeableConfigEdit()">Cancel</a>

@@ -45,11 +45,12 @@ runs:
           sudo cp -R SUBMITTY_CPY/. ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/Submitty
           sudo chmod -R a+rwx  ${SUBMITTY_INSTALL_DIR}
           sudo chmod -R a+rwx /tmp/
+          echo "This file is used to check if Submitty is being run in the Github Actions CI." > ${SUBMITTY_REPOSITORY}/.github_actions_ci_flag
       shell: bash
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
-    - uses: shivammathur/setup-php@2.34.1
+    - uses: shivammathur/setup-php@2.35.2
       with:
         php-version: ${{ env.PHP_VER }}
         extensions: imagick, ldap

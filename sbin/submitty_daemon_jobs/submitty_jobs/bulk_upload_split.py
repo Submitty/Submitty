@@ -7,7 +7,6 @@ import PyPDF2
 import traceback
 from PyPDF2 import PdfWriter
 from . import write_to_log as logger
-from . import generate_pdf_images
 
 try:
     from pdf2image import convert_from_bytes
@@ -62,7 +61,6 @@ def main(args):
                     i += 1
                 with open(output_filename, 'wb') as out:
                     pdf_writer.write(out)
-                generate_pdf_images.main(output_filename, [])
 
                 with open(cover_filename, 'wb') as out:
                     cover_writer.write(out)
