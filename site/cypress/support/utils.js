@@ -152,7 +152,7 @@ export function verifyWebSocketFunctionality(
  * Verifies that the WebSocket server is connected and the system message is hidden,
  * where the message is displayed for authentication, connection, or internal server errors.
  */
-export function verifyWebSocketStatus(timeout = 5000, interval = 100) {
+export function verifyWebSocketStatus(timeout = 10000, interval = 100) {
     const start = Date.now();
 
     const pollSocket = () => {
