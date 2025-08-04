@@ -10,6 +10,11 @@ run_php_stan() {
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script static-analysis "${@:2}" 2>/dev/null
 }
 
+run_regenerate_baseline() {
+    COMPOSER_ALLOW_SUPERUSER=1 composer install
+    COMPOSER_ALLOW_SUPERUSER=1 composer run-script static-analysis -- --generate-baseline --memory-limit 2G
+}
+
 run_php_cs() {
     COMPOSER_ALLOW_SUPERUSER=1 composer install
     COMPOSER_ALLOW_SUPERUSER=1 composer run-script lint 2>/dev/null
@@ -32,12 +37,13 @@ run_php_unit() {
 
 if [ -z "$1" ] || [ "$1" == "help" ]; then
     echo "
-          phpstan : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
-          phpcs   : php CodeSniffer
-          php-lint: phpcs & phpstan
-          php-unit: run php unit tests
-          js-lint : eslint
-          css-lint: css-stylelint
+          phpstan             : php static analysis [option: --memory-limit 4G, --generate-baseline ...]
+          regenerate-baseline  : shortcut to regenerate phpstan baseline file
+          phpcs                : php CodeSniffer
+          php-lint             : phpcs & phpstan
+          php-unit             : run php unit tests
+          js-lint              : eslint
+          css-lint             : css-stylelint
           "
 elif [ "$1" == "phpstan" ]; then
     run_php_stan "$@"
@@ -52,6 +58,8 @@ elif [ "$1" == "js-lint" ]; then
     run_js_es
 elif [ "$1" == "css-lint" ]; then
     run_css_style
+elif [ "$1" == "regenerate-baseline" ]; then
+    run_regenerate_baseline
 else
     echo "Unknown test type: $1
         use phpstan, phpcs, php-lint, php-unit, js-lint, css-lint
